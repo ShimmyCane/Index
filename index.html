@@ -6,39 +6,9 @@
     <title>ShimmyCane</title>
     <style>
         :root {
-            --bg: #fff8f1;
-            --surface: #ffffff;
-            --text: #1f1d3a;
+            --ink: #1f1d3a;
             --muted: #6c6891;
-            --border: #ece6f7;
-            --shadow: 0 2px 4px rgba(60, 40, 120, 0.06), 0 10px 24px rgba(60, 40, 120, 0.08);
-
-            --coral: #ff6b6b;
-            --sun: #ffb02e;
-            --mint: #2ec4a0;
-            --sky: #3d8bff;
-            --grape: #8b5cf6;
-            --pink: #ff4fa3;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root:not([data-theme="light"]) {
-                --bg: #14122a;
-                --surface: #1e1b3a;
-                --text: #f4f1ff;
-                --muted: #a9a3d1;
-                --border: #2f2a55;
-                --shadow: 0 2px 4px rgba(0, 0, 0, 0.35), 0 10px 24px rgba(0, 0, 0, 0.3);
-            }
-        }
-
-        :root[data-theme="dark"] {
-            --bg: #14122a;
-            --surface: #1e1b3a;
-            --text: #f4f1ff;
-            --muted: #a9a3d1;
-            --border: #2f2a55;
-            --shadow: 0 2px 4px rgba(0, 0, 0, 0.35), 0 10px 24px rgba(0, 0, 0, 0.3);
+            --line: #ece6f7;
         }
 
         * { box-sizing: border-box; }
@@ -46,51 +16,21 @@
         body {
             margin: 0;
             min-height: 100vh;
-            background:
-                radial-gradient(circle at 10% 10%, rgba(255, 107, 107, 0.18), transparent 40%),
-                radial-gradient(circle at 90% 20%, rgba(61, 139, 255, 0.16), transparent 42%),
-                radial-gradient(circle at 50% 100%, rgba(46, 196, 160, 0.16), transparent 45%),
-                var(--bg);
-            color: var(--text);
+            background: #fffdfa;
+            color: var(--ink);
             font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            line-height: 1.5;
-            overflow-x: hidden;
+            line-height: 1.4;
         }
-
-        /* Decorative geometry floating behind the content */
-        .shape {
-            position: fixed;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.55;
-        }
-
-        .shape.circle { border-radius: 50%; }
-        .shape.square { border-radius: 14px; transform: rotate(18deg); }
-        .shape.triangle { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
-        .shape.ring { border-radius: 50%; background: none !important; border: 14px solid; }
-        .shape.blob { border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%; }
-
-        .s1 { width: 120px; height: 120px; background: var(--sun); top: 6%; left: 4%; }
-        .s2 { width: 70px; height: 70px; background: var(--pink); top: 18%; right: 8%; }
-        .s3 { width: 90px; height: 90px; background: var(--mint); top: 46%; left: -28px; }
-        .s4 { width: 110px; height: 110px; background: var(--sky); bottom: 10%; right: 4%; }
-        .s5 { width: 80px; height: 80px; background: var(--grape); bottom: -20px; left: 12%; }
-        .s6 { width: 60px; height: 60px; background: var(--coral); top: 60%; right: 14%; }
-        .s7 { width: 100px; height: 100px; color: var(--sun); top: 30%; left: 46%; }
-        .s8 { width: 90px; height: 90px; background: var(--mint); top: 2%; left: 42%; }
 
         .wrap {
-            position: relative;
-            z-index: 1;
-            max-width: 960px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 56px 16px 72px;
         }
 
         header {
             text-align: center;
-            margin-bottom: 48px;
+            margin-bottom: 40px;
         }
 
         h1 {
@@ -99,25 +39,16 @@
             font-size: clamp(2.4rem, 7vw, 3.8rem);
             font-weight: 800;
             letter-spacing: -0.02em;
-            background: linear-gradient(100deg, var(--coral), var(--sun) 35%, var(--mint) 65%, var(--sky));
+            background: linear-gradient(100deg, #ff6b6b, #ffb02e 35%, #2ec4a0 65%, #3d8bff);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
 
-        header p {
-            margin: 10px 0 0;
-            color: var(--muted);
-            font-size: 1.05rem;
-        }
-
         section + section { margin-top: 44px; }
 
         h2 {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 0 0 16px;
+            margin: 0 0 14px;
             font-size: 0.85rem;
             font-weight: 800;
             letter-spacing: 0.14em;
@@ -125,167 +56,373 @@
             color: var(--muted);
         }
 
-        h2 .badge {
-            width: 14px;
-            height: 14px;
-            border-radius: 4px;
-            transform: rotate(45deg);
-            background: var(--accent);
-        }
-
-        h2::after {
-            content: "";
-            flex: 1;
-            height: 3px;
-            border-radius: 3px;
-            background: linear-gradient(90deg, var(--accent), transparent);
-            opacity: 0.5;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 16px;
+        .wall {
+            list-style: none;
             margin: 0;
             padding: 0;
-            list-style: none;
         }
 
-        .grid a {
-            position: relative;
+        /* Shared tile look. Each style below changes the layout and shapes. */
+        .wall a {
             display: flex;
             align-items: center;
-            gap: 14px;
+            justify-content: center;
             height: 100%;
-            padding: 16px 18px;
-            background: var(--surface);
-            border: 2px solid var(--border);
-            border-radius: 18px;
-            box-shadow: var(--shadow);
-            color: var(--text);
+            padding: 10px;
+            background: var(--c);
+            color: var(--ink);
+            font-weight: 800;
+            text-align: center;
             text-decoration: none;
-            font-weight: 700;
-            overflow: hidden;
-            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+            transition: transform 0.2s ease, filter 0.2s ease;
         }
 
-        /* Colored geometric tile for each card */
-        .grid a::before {
-            content: "";
-            flex: 0 0 38px;
-            height: 38px;
-            border-radius: 12px;
-            background: var(--accent);
-            box-shadow: 0 6px 14px -4px var(--accent);
-            transition: transform 0.25s ease;
-        }
-
-        .grid a.tri::before { border-radius: 4px; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
-        .grid a.circ::before { border-radius: 50%; }
-        .grid a.dia::before { border-radius: 6px; transform: rotate(45deg) scale(0.8); }
-
-        /* Corner accent that peeks in on hover */
-        .grid a::after {
-            content: "";
-            position: absolute;
-            top: -18px;
-            right: -18px;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: var(--accent);
-            opacity: 0.12;
-            transition: transform 0.25s ease, opacity 0.25s ease;
-        }
-
-        .grid a:hover,
-        .grid a:focus-visible {
-            transform: translateY(-4px);
-            border-color: var(--accent);
-            box-shadow: 0 14px 28px -10px var(--accent);
+        .wall a:hover,
+        .wall a:focus-visible {
+            transform: scale(1.03);
+            filter: brightness(1.05);
             outline: none;
         }
 
-        .grid a:hover::before,
-        .grid a:focus-visible::before { transform: rotate(-8deg) scale(1.08); }
-
-        .grid a:hover::after,
-        .grid a:focus-visible::after { transform: scale(2.2); opacity: 0.18; }
-
-        /* Each section gets its own color family */
-        .games    { --accent: var(--coral); }
-        .learning { --accent: var(--sky); }
-        .family   { --accent: var(--mint); }
-
-        footer {
-            margin-top: 60px;
-            text-align: center;
-            color: var(--muted);
-            font-size: 0.9rem;
+        /* ---------- Settings ---------- */
+        .gear {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 10;
+            display: grid;
+            place-items: center;
+            width: 48px;
+            height: 48px;
+            border: none;
+            border-radius: 50%;
+            background: #fff;
+            color: var(--ink);
+            font-size: 1.5rem;
+            box-shadow: 0 4px 14px rgba(60, 40, 120, 0.2);
+            cursor: pointer;
         }
 
-        @media (max-width: 480px) {
-            .wrap { padding-top: 40px; }
-            .grid { grid-template-columns: 1fr 1fr; gap: 12px; }
-            .grid a { padding: 14px; gap: 10px; font-size: 0.95rem; }
-            .grid a::before { flex-basis: 30px; height: 30px; }
-            .s7, .s8 { display: none; }
+        .panel {
+            position: fixed;
+            top: 76px;
+            right: 16px;
+            z-index: 10;
+            display: grid;
+            gap: 8px;
+            width: min(280px, calc(100vw - 32px));
+            padding: 14px;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 12px 32px rgba(60, 40, 120, 0.2);
+        }
+
+        .panel[hidden] { display: none; }
+
+        .panel h3 {
+            margin: 4px 6px 6px;
+            font-size: 0.8rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .panel button {
+            padding: 10px 12px;
+            border: 2px solid var(--line);
+            border-radius: 12px;
+            background: #fff;
+            color: var(--ink);
+            font: inherit;
+            font-weight: 700;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .panel button[aria-pressed="true"] {
+            border-color: var(--ink);
+            background: #f3f0ff;
+        }
+
+        /* ---------- 1. Polygon Wall (default): masonry of cut polygons ---------- */
+        [data-style="masonry"] .wall {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: 84px;
+            grid-auto-flow: dense;
+            gap: 12px; /* the mortar */
+        }
+
+        [data-style="masonry"] .wall a {
+            clip-path: var(--poly, polygon(0 0, 100% 0, 100% 100%, 0 100%));
+            font-size: 1.05rem;
+        }
+
+        [data-style="masonry"] .w2 { grid-column: span 2; }
+        [data-style="masonry"] .h2 { grid-row: span 2; }
+        [data-style="masonry"] .h3 { grid-row: span 3; }
+
+        [data-style="masonry"] a.tri   { --poly: polygon(50% 0, 100% 100%, 0 100%); }
+        [data-style="masonry"] a.hex   { --poly: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); }
+        [data-style="masonry"] a.pent  { --poly: polygon(50% 0, 100% 38%, 82% 100%, 18% 100%, 0 38%); }
+        [data-style="masonry"] a.para  { --poly: polygon(15% 0, 100% 0, 85% 100%, 0 100%); }
+        [data-style="masonry"] a.chev  { --poly: polygon(0 0, 82% 0, 100% 50%, 82% 100%, 0 100%, 18% 50%); }
+        [data-style="masonry"] a.dia   { --poly: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+        [data-style="masonry"] a.notch { --poly: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%); }
+
+        @media (max-width: 560px) {
+            [data-style="masonry"] .wall {
+                grid-template-columns: repeat(2, 1fr);
+                grid-auto-rows: 72px;
+            }
+            [data-style="masonry"] .wall a { font-size: 0.95rem; }
+        }
+
+        /* ---------- 2. Paper Stickers ---------- */
+        body[data-style="sticker"] {
+            background: #fff4e6 radial-gradient(#f1d9bd 1.2px, transparent 1.2px) 0 0 / 18px 18px;
+        }
+
+        [data-style="sticker"] .wall {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 26px 28px;
+        }
+
+        [data-style="sticker"] .wall a {
+            padding: 16px 22px;
+            background: #fff;
+            border: 3px solid var(--c);
+            border-radius: 18px;
+            box-shadow: 6px 6px 0 var(--c);
+            transform: rotate(var(--r, 0deg));
+        }
+
+        [data-style="sticker"] .wall li:nth-child(odd) a  { --r: -3deg; }
+        [data-style="sticker"] .wall li:nth-child(even) a { --r: 2.5deg; }
+
+        [data-style="sticker"] .wall a:hover,
+        [data-style="sticker"] .wall a:focus-visible {
+            transform: rotate(0) scale(1.06);
+        }
+
+        /* ---------- 3. Bauhaus Blocks ---------- */
+        body[data-style="bauhaus"] { background: #f5f0e6; }
+
+        [data-style="bauhaus"] h1 {
+            background: none;
+            color: #111;
+            -webkit-text-fill-color: #111;
+            text-transform: uppercase;
+            font-weight: 900;
+        }
+
+        [data-style="bauhaus"] h2 {
+            color: #111;
+            font-size: 1.4rem;
+            font-weight: 900;
+            letter-spacing: 0;
+        }
+
+        [data-style="bauhaus"] .wall {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            padding: 6px;
+            background: #111;
+        }
+
+        [data-style="bauhaus"] .wall a {
+            min-height: 150px;
+            color: #111;
+            font-size: 1.15rem;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        [data-style="bauhaus"] .wall li:nth-child(3n + 2) a { border-radius: 50%; }
+        [data-style="bauhaus"] .wall li:nth-child(3n) a     { border-radius: 999px 999px 0 0; }
+
+        /* ---------- 4. Stained Glass ---------- */
+        body[data-style="stained"] { background: #fdf8ee; }
+
+        [data-style="stained"] .wall {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 6px; /* the lead lines */
+            padding: 6px;
+            border-radius: 16px;
+            background: #2d2a26;
+        }
+
+        [data-style="stained"] .wall a {
+            min-height: 130px;
+            border-radius: 10px;
+            background:
+                radial-gradient(circle at 28% 22%, rgba(255, 255, 255, 0.8), transparent 50%),
+                var(--c);
+            box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35);
+        }
+
+        /* ---------- 5. Candy Blobs ---------- */
+        body[data-style="candy"] { background: linear-gradient(160deg, #ffe6f3, #e4f3ff); }
+
+        [data-style="candy"] .wall {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 22px;
+        }
+
+        [data-style="candy"] .wall a {
+            width: 180px;
+            height: 130px;
+            border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%;
+            box-shadow: inset 0 -10px 0 rgba(0, 0, 0, 0.1), 0 8px 18px rgba(60, 40, 120, 0.15);
+            animation: blob 7s ease-in-out infinite alternate;
+        }
+
+        [data-style="candy"] .wall li:nth-child(2n) a { animation-delay: -3s; }
+
+        [data-style="candy"] .wall a:hover,
+        [data-style="candy"] .wall a:focus-visible {
+            transform: scale(1.08) rotate(-2deg);
+        }
+
+        @keyframes blob {
+            from { border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%; }
+            to   { border-radius: 40% 60% 45% 55% / 60% 40% 55% 45%; }
+        }
+
+        /* ---------- 6. Origami Folds ---------- */
+        body[data-style="origami"] { background: #f1f4fb; }
+
+        [data-style="origami"] .wall {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        [data-style="origami"] .wall li { position: relative; }
+
+        /* The folded flap sits in the corner that the clip-path removes. */
+        [data-style="origami"] .wall li::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.16);
+            clip-path: polygon(0 0, 100% 0, 100% 100%);
+        }
+
+        [data-style="origami"] .wall a {
+            min-height: 150px;
+            clip-path: polygon(0 0, calc(100% - 40px) 0, 100% 40px, 100% 100%, 0 100%);
+        }
+
+        [data-style="origami"] .wall a:hover,
+        [data-style="origami"] .wall a:focus-visible {
+            transform: none;
+            filter: brightness(1.05);
         }
 
         @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { transition: none !important; }
+            [data-style="candy"] .wall a { animation: none; }
+            .wall a { transition: none; }
+        }
+
+        @media (max-width: 560px) {
+            .wrap { padding-top: 40px; }
+            [data-style="bauhaus"] .wall,
+            [data-style="origami"] .wall { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
-<body>
-    <div class="shape circle s1" aria-hidden="true"></div>
-    <div class="shape square s2" aria-hidden="true"></div>
-    <div class="shape circle s3" aria-hidden="true"></div>
-    <div class="shape triangle s4" aria-hidden="true"></div>
-    <div class="shape square s5" aria-hidden="true"></div>
-    <div class="shape circle s6" aria-hidden="true"></div>
-    <div class="shape ring s7" aria-hidden="true"></div>
-    <div class="shape triangle s8" aria-hidden="true"></div>
+<body data-style="masonry">
+    <button class="gear" id="gear" aria-label="Settings" aria-expanded="false" aria-controls="panel">&#9881;</button>
+
+    <div class="panel" id="panel" hidden>
+        <h3>Style</h3>
+        <button type="button" data-style="masonry" aria-pressed="true">Polygon Wall</button>
+        <button type="button" data-style="sticker" aria-pressed="false">Paper Stickers</button>
+        <button type="button" data-style="bauhaus" aria-pressed="false">Bauhaus Blocks</button>
+        <button type="button" data-style="stained" aria-pressed="false">Stained Glass</button>
+        <button type="button" data-style="candy" aria-pressed="false">Candy Blobs</button>
+        <button type="button" data-style="origami" aria-pressed="false">Origami Folds</button>
+    </div>
 
     <main class="wrap">
         <header>
             <h1>ShimmyCane</h1>
-            <p>Projects, games and tools in one place</p>
         </header>
 
-        <section class="games">
-            <h2><span class="badge"></span>Games</h2>
-            <ul class="grid">
-                <li><a class="tri" href="https://shimmycane.github.io/Snake-Cube/">Snake Cube</a></li>
-                <li><a class="circ" href="https://shimmycane.github.io/Felix-Checkers/">Felix Checkers</a></li>
-                <li><a class="dia" href="https://shimmycane.github.io/Moment/">Moment</a></li>
+        <section>
+            <h2>Games</h2>
+            <ul class="wall">
+                <li class="w2 h2"><a class="tri" style="--c:#ff6b6b" href="https://shimmycane.github.io/Snake-Cube/">Snake Cube</a></li>
+                <li class="w2"><a class="hex" style="--c:#ffb02e" href="https://shimmycane.github.io/Felix-Checkers/">Felix Checkers</a></li>
+                <li class="w2"><a class="chev" style="--c:#ff4fa3" href="https://shimmycane.github.io/Moment/">Moment</a></li>
             </ul>
         </section>
 
-        <section class="learning">
-            <h2><span class="badge"></span>Learning</h2>
-            <ul class="grid">
-                <li><a class="tri" href="https://shimmycane.github.io/Test-Bank/">Test Bank</a></li>
-                <li><a class="circ" href="https://shimmycane.github.io/Multiply/">Multiply</a></li>
-                <li><a class="dia" href="https://shimmycane.github.io/Primes/">Primes</a></li>
-                <li><a class="tri" href="https://shimmycane.github.io/Exponents/">Exponents</a></li>
-                <li><a class="circ" href="https://shimmycane.github.io/Coins/">Coins</a></li>
-                <li><a class="dia" href="https://shimmycane.github.io/Row-Boat/">Row Boat</a></li>
+        <section>
+            <h2>Learning</h2>
+            <ul class="wall">
+                <li class="w2"><a class="para" style="--c:#3d8bff" href="https://shimmycane.github.io/Test-Bank/">Test Bank</a></li>
+                <li><a class="hex" style="--c:#2ec4a0" href="https://shimmycane.github.io/Multiply/">Multiply</a></li>
+                <li class="h3"><a class="dia" style="--c:#b6e34a" href="https://shimmycane.github.io/Primes/">Primes</a></li>
+                <li class="w2"><a class="chev" style="--c:#ffb02e" href="https://shimmycane.github.io/Exponents/">Exponents</a></li>
+                <li class="h2"><a class="tri" style="--c:#ff4fa3" href="https://shimmycane.github.io/Coins/">Coins</a></li>
+                <li class="w2"><a class="notch" style="--c:#ff6b6b" href="https://shimmycane.github.io/Row-Boat/">Row Boat</a></li>
             </ul>
         </section>
 
-        <section class="family">
-            <h2><span class="badge"></span>Family</h2>
-            <ul class="grid">
-                <li><a class="tri" href="https://shimmycane.github.io/Family-Habits/">Family Habits</a></li>
-                <li><a class="circ" href="https://shimmycane.github.io/Allowances/">Allowances</a></li>
-                <li><a class="dia" href="https://shimmycane.github.io/How-Far-Is-It/">How Far Is It?</a></li>
+        <section>
+            <h2>Family</h2>
+            <ul class="wall">
+                <li class="w2 h2"><a class="pent" style="--c:#2ec4a0" href="https://shimmycane.github.io/Family-Habits/">Family Habits</a></li>
+                <li class="w2"><a class="para" style="--c:#3d8bff" href="https://shimmycane.github.io/Allowances/">Allowances</a></li>
+                <li class="w2"><a class="notch" style="--c:#ffb02e" href="https://shimmycane.github.io/How-Far-Is-It/">How Far Is It?</a></li>
             </ul>
         </section>
-
-        <footer>
-            &copy; ShimmyCane
-        </footer>
     </main>
+
+    <script>
+        (function () {
+            var body = document.body;
+            var gear = document.getElementById('gear');
+            var panel = document.getElementById('panel');
+            var options = panel.querySelectorAll('button[data-style]');
+            var KEY = 'index-style';
+
+            function setStyle(name) {
+                body.setAttribute('data-style', name);
+                options.forEach(function (b) {
+                    b.setAttribute('aria-pressed', String(b.getAttribute('data-style') === name));
+                });
+                try { localStorage.setItem(KEY, name); } catch (e) { /* storage blocked */ }
+            }
+
+            function togglePanel(open) {
+                panel.hidden = !open;
+                gear.setAttribute('aria-expanded', String(open));
+            }
+
+            var saved = null;
+            try { saved = localStorage.getItem(KEY); } catch (e) { /* storage blocked */ }
+            setStyle(saved && panel.querySelector('[data-style="' + saved + '"]') ? saved : 'masonry');
+
+            gear.addEventListener('click', function () { togglePanel(panel.hidden); });
+            options.forEach(function (b) {
+                b.addEventListener('click', function () { setStyle(b.getAttribute('data-style')); });
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') togglePanel(false);
+            });
+        })();
+    </script>
 </body>
 </html>
