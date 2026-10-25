@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ShimmyCane</title>
+    <script>document.documentElement.classList.add('js');</script>
     <style>
         :root {
             --ink: #1f1d3a;
@@ -330,9 +331,33 @@
             filter: brightness(1.05);
         }
 
+        /* Walls build upward: each tile rises from below as its wall scrolls into view. */
+        .js .wall > li {
+            opacity: 0;
+            transform-origin: bottom center;
+        }
+
+        .js .wall > li.in {
+            animation: rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+            animation-delay: var(--d, 0ms);
+        }
+
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(70px) scaleY(0.7);
+            }
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             [data-style="candy"] .wall a { animation: none; }
             .wall a { transition: none; }
+            .js .wall > li { opacity: 1; }
+            .js .wall > li.in { animation: none; }
         }
 
         @media (max-width: 560px) {
@@ -432,6 +457,28 @@
             document.addEventListener('keydown', function (e) {
                 if (e.key === 'Escape') togglePanel(false);
             });
+
+            // Stagger each wall's tiles, then rise them in as the wall scrolls into view.
+            document.querySelectorAll('.wall').forEach(function (wall) {
+                Array.prototype.forEach.call(wall.children, function (li, i) {
+                    li.style.setProperty('--d', (i * 90) + 'ms');
+                });
+            });
+
+            var tiles = document.querySelectorAll('.wall > li');
+            if ('IntersectionObserver' in window) {
+                var observer = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('in');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.15 });
+                tiles.forEach(function (li) { observer.observe(li); });
+            } else {
+                tiles.forEach(function (li) { li.classList.add('in'); });
+            }
         })();
     </script>
 </body>
