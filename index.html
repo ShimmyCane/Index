@@ -369,9 +369,15 @@
             --stone: polygon(0 6%, 46% 0, 100% 12%, 93% 68%, 100% 100%, 54% 86%, 7% 100%, 2% 44%);
         }
 
+        /* Phones keep the six-column course; names wrap onto two lines to stay dense. */
         @media (max-width: 560px) {
-            [data-style="polygonal"] .wall { grid-template-columns: 1fr; }
-            [data-style="polygonal"] .wall li { grid-column: 1 / -1; }
+            [data-style="polygonal"] .wall { grid-auto-rows: 46px; gap: 2px; }
+            [data-style="polygonal"] .wall a {
+                padding: 4px;
+                font-size: 0.68rem;
+                line-height: 1.15;
+                letter-spacing: 0.02em;
+            }
         }
 
         @media (prefers-reduced-motion: reduce) {
