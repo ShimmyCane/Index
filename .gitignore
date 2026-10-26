@@ -1,0 +1,3 @@
+# Private material never goes in this public nursery.
+# Put real or personal data in a folder named private/ inside a project.
+**/private/
