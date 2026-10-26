@@ -6,6 +6,7 @@ Layout:
 - lessons_pool.md — consolidated lessons learned across seed projects, grouped by topic. Read first.
 - patterns.md — reusable patterns and template candidates.
 - Personal Preferences/jimmy_preferences.md — design and workflow preferences. Auto-loaded through the root `CLAUDE.md`.
+- Supabase/ — conventions for Supabase projects: `brief.md` (rules and state), `lessons.md` (generic lessons), `supabase_registry_template.sql` (app-table registry). Skill: `/supabase-project`.
 - Tools/artifacts.md — limits of the claude.ai Artifact host.
 - Tools/windows_local.md — tool quirks on a local Windows PC.
 - <Project>/brief.md — current state: goal, architecture, verified vs. unverified, next steps.

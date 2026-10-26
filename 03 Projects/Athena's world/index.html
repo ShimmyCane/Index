@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Athena's world</title>
+  <style>
+    :root {
+      --paper: #FFF9EE;
+      --ink: #3b3a4a;
+      --sage: #7CA992;
+      --peach: #F9C8A8;
+      --mint: #CDEFE0;
+      --coral: #F08A7E;
+      --line: 3px solid var(--ink);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --paper: #2a2836;
+        --ink: #FFF9EE;
+      }
+    }
+    :root[data-theme="dark"] {
+      --paper: #2a2836;
+      --ink: #FFF9EE;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      min-height: 100vh;
+    }
+    main {
+      width: min(92vw, 560px);
+      text-align: center;
+      background: var(--mint);
+      border: var(--line);
+      border-radius: 28px 36px 30px 40px;
+      box-shadow: 0 6px 0 var(--ink);
+      padding: 32px 24px;
+    }
+    .sun { font-size: 64px; line-height: 1; margin-bottom: 8px; }
+    h1 { font-size: clamp(28px, 7vw, 40px); margin: 8px 0 12px; }
+    p { font-size: clamp(17px, 4.5vw, 20px); line-height: 1.5; margin: 10px 0; }
+    .badge {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 12px 22px;
+      min-height: 48px;
+      background: var(--peach);
+      border: var(--line);
+      border-radius: 999px;
+      box-shadow: 0 4px 0 var(--ink);
+      font-weight: 700;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="sun" aria-hidden="true">🌈</div>
+    <h1>Athena's world</h1>
+    <p>This is Athena's imagined game.</p>
+    <p>It is under construction.</p>
+    <span class="badge">Coming soon</span>
+  </main>
+</body>
+</html>

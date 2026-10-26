@@ -80,6 +80,8 @@ Companion files: `patterns.md` (reusable patterns and template candidates), `Per
 
 ## 6. Supabase (any static app with a database)
 
+Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/supabase-project` when starting one.
+
 1. **Read the live schema, not the repo's schema file.** Repo files drift. Query the tables and policies, then diff. _(Allowances, Speech Therapy)_
 2. **Empty results with no error usually mean row-level security.** Make sure the user's row in the access table exists. _(Allowances)_
 3. **Create tables with RLS enabled in the same step.** If a later step fails, the table stays locked. _(Supabase Registry)_
