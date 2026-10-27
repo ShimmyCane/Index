@@ -14,6 +14,7 @@ Layout:
 
 Projects with notes:
 - Athena's world/ — new seed, awaiting answers in `03 Projects/Athena's world/convo/`.
+- Adventure/ — family story game. `brief.md`, `lessons.md`.
 
 Notes:
 - Lessons in this folder come from the private ShimmyAI repo's `04 AI/`. Only generic lessons were carried over. Family and personal details were not.
