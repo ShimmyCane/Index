@@ -62,6 +62,12 @@
       <div id="errors" class="errors hidden"></div>
       <div id="drawer" class="drawer card hidden">
         <h3>Settings</h3>
+        <nav class="pages">
+          <a class="btn small" href="index.html">📖 Story</a>
+          <a class="btn small" href="world.html">🗺️ World</a>
+          <a class="btn small" href="hood.html">🔧 Under the hood</a>
+          <a class="btn small" href="../../index.html">🏠 All projects</a>
+        </nav>
         <div id="gear-slot"></div>
         <label><input type="checkbox" id="showErrors"> Show errors</label>
         <div class="row">
@@ -81,6 +87,8 @@
           <div id="loginMsg" class="muted"></div>
         </form>
       </div>`);
+    const here = location.pathname.split('/').pop() || 'index.html';
+    document.querySelectorAll('.pages a').forEach(a => a.classList.toggle('sun', a.getAttribute('href') === here));
     const extra = document.getElementById('gear-extra');
     if (extra) document.getElementById('gear-slot').appendChild(extra);
 
@@ -100,7 +108,7 @@
   async function dbCheck() {
     const out = document.getElementById('dbResult');
     out.textContent = 'Checking…';
-    const tables = ['adv_roles', 'adv_entries', 'adv_chapters', 'adv_turns', 'adv_runs', 'adv_history'];
+    const tables = ['adv_roles', 'adv_entries', 'adv_chapters', 'adv_turns', 'adv_runs', 'adv_places', 'adv_notes', 'adv_history'];
     const lines = [];
     for (const t of tables) {
       try {

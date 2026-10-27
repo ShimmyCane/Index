@@ -18,7 +18,12 @@ Keep the id. If anything below fails, finish the run as `failed` with a short no
 select kind, title, body from public.adv_entries order by kind, sort, title;
 select key, name, blurb, voice from public.adv_roles where active order by sort;
 select book, number, title, text_short, whispers, prompt, created_at
-  from public.adv_chapters order by created_at desc limit 3;
+  from public.adv_chapters where status = 'published' order by created_at desc limit 3;
+select id, book, number, title, plan
+  from public.adv_chapters where status = 'planned' order by book, number;
+select id, parent_id, kind, name, summary from public.adv_places order by sort, name;
+select subject_type, subject_id, body, created_at
+  from public.adv_notes order by created_at desc limit 60;
 select id, created_at, beats from public.adv_turns where status = 'waiting' order by created_at;
 ```
 
@@ -33,7 +38,8 @@ Read the `rule` entries first and follow them. Notes of kind `note` are Jimmy's 
 ## 4. Write the chapter
 
 - Use every beat from every waiting scene, **in the order they were said** (`at`). Scenes are ordered by `created_at`. What one character says, the others can react to. The `storyteller` role is Jimmy speaking as dungeon master: treat it as a strong direction.
-- Respect the `plan` entry for where the book is heading, but follow the family's ideas when they are good.
+- The **plot** is the list of planned chapters. Write the lowest-numbered planned chapter, guided by its `plan`, but follow the family's ideas when they are good. If there is no planned chapter, use the `plan` entry.
+- Use the places and the journal notes so details stay consistent (Bristle already knows the old woods; the crypt is dusty).
 - Answers to a puzzle: generous. More than one right answer. A clever, kind or brave answer sends the story its own way. A wrong answer gets a gentle hint, never a dead end.
 - Write it **three times**, at the lengths in the `setting` entry:
   - `text_tiny`: 2 sentences
@@ -44,15 +50,27 @@ Read the `rule` entries first and follow them. Notes of kind `note` are Jimmy's 
 - `prompt`: the question the chapter ends on, with 2 or 3 options.
 - Bring each book to a real ending at about 7–10 chapters. After the last chapter, start Book 2 at chapter 1 and add a new `plan` entry for it.
 
-Insert it, quoting text safely with dollar quotes:
+Fill the planned chapter (or insert a new one if none is planned), quoting text safely with dollar quotes:
 
 ```sql
+update public.adv_chapters
+   set title = $t$...$t$, text_tiny = $t$...$t$, text_short = $t$...$t$, text_long = $t$...$t$,
+       whispers = $j${...}$j$::jsonb, prompt = $t$...$t$, status = 'published', created_at = now()
+ where id = '<planned chapter id>';
+
+-- or, with nothing planned:
 insert into public.adv_chapters (book, number, title, text_tiny, text_short, text_long, whispers, prompt)
 values (1, <next number>, $t$...$t$, $t$...$t$, $t$...$t$, $t$...$t$, $j${...}$j$::jsonb, $t$...$t$)
 returning id;
 ```
 
+`created_at = now()` matters: the player page sizes the catch-up from it.
+
 ## 5. Keep the world up to date
+
+- **Journal:** for each character and place that did something new in this chapter, append one short note to `adv_notes` (`subject_type` 'role', 'place' or 'entry', `subject_id`, `body`, `chapter_id` = the chapter just written). Never edit or delete old notes.
+- **Places:** a new place goes in `adv_places` under the place it sits in (`parent_id`), with a rough box on the parent's map (`x`, `y`, `w`, `h` in percent, not overlapping its siblings).
+- **Plot:** if the story turned, adjust the `plan` of the remaining planned chapters, or add planned ones.
 
 Change `adv_entries` when the story changes the world: add a `history` entry for what just happened, update the `plan` if the book took a turn, add new places, characters or objects under `world` or `character`. New characters the family could play go in `adv_roles`. Every change is logged in `adv_history` with the actor `claude`, so Jimmy can roll it back.
 

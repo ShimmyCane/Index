@@ -29,7 +29,7 @@ Rules:
 
 ## Current state
 
-- Adventure is the first nursery app with a database. It uses the existing **Family** project (shared with the family apps, one family login), tables `adv_*`, registered as app `adventure`. SQL in `03 Projects/Adventure/supabase/`. Not yet applied as of 2026-10-27.
+- Adventure is the first nursery app with a database. It uses the existing **Family** project (shared with the family apps, one family login), tables `adv_*` (roles, entries, chapters, turns, runs, places, notes, history), registered as app `adventure` in the same migration. SQL in `03 Projects/Adventure/supabase/`. Not yet applied as of 2026-10-27.
 - Athena's world has no database need yet.
 - Private family projects live in ShimmyAI. Their project references and table state are not recorded here.
 

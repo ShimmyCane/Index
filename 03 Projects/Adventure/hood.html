@@ -12,6 +12,7 @@
 <body>
   <header class="top">
     <h1>🔧 Under the hood</h1>
+    <a class="btn small" href="world.html">🗺️ World</a>
     <a class="btn small" href="index.html">📖 Story</a>
     <span id="pill" class="pill">Waking up…</span>
   </header>
@@ -44,6 +45,19 @@
       <div class="panel-body hidden"><div class="list" data-table="adv_chapters"></div></div>
     </section>
 
+    <section class="panel card" data-panel="adv_places">
+      <button class="panel-head"><h2>Places</h2><span class="pm">+</span></button>
+      <div class="panel-body hidden">
+        <p class="muted">Raw list. The map on the World page is the friendlier way to edit these.</p>
+        <div class="list" data-table="adv_places"></div>
+      </div>
+    </section>
+
+    <section class="panel card" data-panel="adv_notes">
+      <button class="panel-head"><h2>Journal notes</h2><span class="pm">+</span></button>
+      <div class="panel-body hidden"><div class="list" data-table="adv_notes"></div></div>
+    </section>
+
     <section class="panel card" data-panel="adv_turns">
       <button class="panel-head"><h2>Scenes sent</h2><span class="pm">+</span></button>
       <div class="panel-body hidden"><div class="list" data-table="adv_turns"></div></div>
@@ -62,6 +76,8 @@
           <button class="chip" data-t="adv_entries">Notes</button>
           <button class="chip" data-t="adv_roles">Characters</button>
           <button class="chip" data-t="adv_chapters">Chapters</button>
+          <button class="chip" data-t="adv_places">Places</button>
+          <button class="chip" data-t="adv_notes">Journal</button>
           <button class="chip" data-t="adv_turns">Scenes</button>
         </div>
         <div id="history" class="list"></div>

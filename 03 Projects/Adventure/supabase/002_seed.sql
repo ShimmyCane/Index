@@ -82,3 +82,42 @@ Or maybe she has a different idea altogether.',
  '{"bristle": "You smell something no one else can: fresh flowers, deep under the dust, coming from the far corner of the room.", "old_lady": "Far away in the village, you wake up from a nap with a start. You know that feeling. Someone has found the crypt."}'::jsonb,
  'Open the chest carefully, look around the room first, or ask Bristle what he knows?')
 on conflict (book, number) do nothing;
+
+-- ---------------------------------------------------------------------------
+-- After 003_world.sql: places, a first journal note, and the planned plot.
+-- ---------------------------------------------------------------------------
+insert into public.adv_places (kind, name, emoji, color, summary, x, y, w, h, sort)
+select 'world', 'The Land', '🗺️', '#FFF1C9', 'Everything in Book 1 happens here.', 0, 0, 100, 100, 0
+where not exists (select 1 from public.adv_places);
+
+insert into public.adv_places (parent_id, kind, name, emoji, color, summary, x, y, w, h, sort)
+select p.id, v.kind, v.name, v.emoji, v.color, v.summary, v.x, v.y, v.w, v.h, v.sort
+from public.adv_places p,
+(values
+ ('town',     'The Village',   '🏘️', '#F9C8A8', 'Stone houses with strange symbols over the doors. Something sad happened here long ago.', 12::real, 30::real, 30::real, 26::real, 1),
+ ('building', 'The Crypt',     '🪦', '#E8DAF7', 'Old stone crypt beyond the village. Dusty air, echoing walls, a wind from nowhere.',     58::real, 18::real, 26::real, 22::real, 2),
+ ('wild',     'The Old Woods', '🌲', '#CDEFE0', 'Between the village and the crypt. Bristle knows every trail.',                      40::real, 62::real, 34::real, 24::real, 3)
+) as v(kind, name, emoji, color, summary, x, y, w, h, sort)
+where p.kind = 'world' and p.parent_id is null
+  and not exists (select 1 from public.adv_places where name = v.name);
+
+insert into public.adv_places (parent_id, kind, name, emoji, color, summary, x, y, w, h, sort)
+select p.id, 'room', 'Heart of the crypt', '🧰', '#FFE9A8', 'A round room. The old chest stands in the middle.', 34, 34, 32, 30, 1
+from public.adv_places p
+where p.name = 'The Crypt'
+  and not exists (select 1 from public.adv_places where name = 'Heart of the crypt');
+
+insert into public.adv_notes (subject_type, subject_id, body, chapter_id)
+select 'role', r.id, 'Followed Athena into the crypt without a sound. Growled at something in the shadows.', c.id
+from public.adv_roles r, public.adv_chapters c
+where r.key = 'bristle' and c.book = 1 and c.number = 1
+  and not exists (select 1 from public.adv_notes);
+
+insert into public.adv_chapters (book, number, title, status, plan) values
+(1, 2, 'The Carved Stone',         'planned', 'A hidden passage behind a carved stone.'),
+(1, 3, 'The Old Lady''s Riddle',   'planned', 'The Old Lady''s riddle about the sun and the moon.'),
+(1, 4, 'The Trail',                'planned', 'Bristle finds a trail no one else can.'),
+(1, 5, 'The Sad Secret',           'planned', 'The village''s sad secret.'),
+(1, 6, 'Keep It or Give It Back',  'planned', 'A choice: keep the treasure or give it back.'),
+(1, 7, 'The Village Remembers',    'planned', 'The ending: the village remembers how to smile.')
+on conflict (book, number) do nothing;

@@ -1,0 +1,50 @@
+/* Adventure — World page: map, characters & places, plot */
+.map-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.crumbs { flex: 1; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-weight: 700; }
+.crumbs button { border: 0; background: none; font-weight: 700; text-decoration: underline; min-height: 44px; padding: 0 4px; }
+.map {
+  position: relative; width: 100%; aspect-ratio: 4 / 3; border: var(--line); border-radius: 18px;
+  background-color: #FFF6DC;
+  background-image: radial-gradient(rgba(47,45,61,.12) 1.5px, transparent 1.5px);
+  background-size: 22px 22px; overflow: hidden; touch-action: none;
+}
+.map:empty::after { content: 'Nothing here yet. Add a place.'; position: absolute; inset: 0; display: grid; place-items: center; opacity: .6; }
+.spot {
+  position: absolute; border: var(--line); border-radius: 38% 24% 42% 28% / 30% 40% 26% 44%;
+  box-shadow: 3px 3px 0 var(--ink); display: grid; place-items: center; align-content: center;
+  text-align: center; font-weight: 700; padding: 4px; user-select: none; -webkit-user-select: none;
+  touch-action: none; cursor: grab; overflow: hidden;
+}
+.spot .e { font-size: clamp(22px, 4vw, 40px); line-height: 1; }
+.spot .n { font-size: 14px; line-height: 1.1; }
+.spot .k { font-size: 11px; opacity: .6; text-transform: uppercase; }
+.spot.sel { outline: 4px dashed var(--ink); outline-offset: 3px; }
+.spot .grip {
+  position: absolute; right: 2px; bottom: 2px; width: 24px; height: 24px; border-radius: 6px;
+  background: var(--ink); opacity: .35; cursor: nwse-resize;
+}
+.place-edit { display: grid; gap: 10px; }
+.place-edit .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.place-edit label { display: grid; gap: 4px; font-weight: 600; font-size: 14px; }
+
+.codex { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.cx {
+  border: var(--line); border-radius: var(--radius); box-shadow: 3px 3px 0 var(--ink);
+  padding: 10px; text-align: left; display: grid; gap: 2px; min-height: 96px;
+}
+.cx .e { font-size: 30px; }
+.cx .when { font-size: 12px; opacity: .65; font-weight: 500; }
+.cx.on { outline: 4px dashed var(--ink); outline-offset: 3px; }
+.cx-detail { grid-column: 1 / -1; background: #fff; border: var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 10px; }
+.journal { display: grid; gap: 8px; }
+.journal div { background: var(--paper); border-radius: 10px; padding: 8px 12px; white-space: pre-wrap; }
+.journal small { display: block; opacity: .6; }
+.appears { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.book { display: grid; gap: 8px; margin-bottom: 16px; }
+.book h3 { font-size: 16px; }
+.plot-row { display: grid; grid-template-columns: 54px 1fr; gap: 10px; align-items: start; border: var(--line); border-radius: 14px 4px 14px 4px; padding: 10px; background: var(--paper); }
+.plot-row.published { background: var(--mint); }
+.plot-row .num { font-family: 'Orbitron', sans-serif; font-size: 22px; text-align: center; }
+.plot-row .body { display: grid; gap: 6px; }
+.plot-row input, .plot-row textarea { width: 100%; }

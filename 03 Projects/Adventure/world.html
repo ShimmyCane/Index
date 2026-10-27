@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Adventure — World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Patrick+Hand&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="hood.css">
+  <link rel="stylesheet" href="world.css">
+</head>
+<body>
+  <header class="top">
+    <h1>🗺️ World</h1>
+    <a class="btn small" href="hood.html">🔧 Hood</a>
+    <span id="pill" class="pill">Waking up…</span>
+  </header>
+
+  <main class="hood" id="panels">
+    <section class="panel card" data-panel="map">
+      <button class="panel-head"><h2>Map</h2><span class="pm">−</span></button>
+      <div class="panel-body">
+        <div class="map-bar">
+          <nav id="crumbs" class="crumbs"></nav>
+          <button class="btn sun small" id="addPlace">➕ Place here</button>
+        </div>
+        <div id="map" class="map"></div>
+        <p class="muted">Drag a place to move it, drag its corner to resize. Tap it to edit, or open its own map.</p>
+        <div id="placeEdit" class="card place-edit hidden"></div>
+      </div>
+    </section>
+
+    <section class="panel card" data-panel="codex">
+      <button class="panel-head"><h2>Characters &amp; places</h2><span class="pm">−</span></button>
+      <div class="panel-body">
+        <div class="chips" id="cxFilter">
+          <button class="chip on" data-f="">Everyone &amp; everywhere</button>
+          <button class="chip" data-f="char">Characters</button>
+          <button class="chip" data-f="place">Places</button>
+        </div>
+        <p class="muted">Most recent in the story first. Open one to add to its journal.</p>
+        <div id="codex" class="codex"></div>
+      </div>
+    </section>
+
+    <section class="panel card" data-panel="plot">
+      <button class="panel-head"><h2>Plot</h2><span class="pm">−</span></button>
+      <div class="panel-body">
+        <p class="muted">The overarching story, chapter by chapter. Planned chapters guide the storyteller; written ones are what the family has heard.</p>
+        <div id="plot"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/world.js"></script>
+</body>
+</html>

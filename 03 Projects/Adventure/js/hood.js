@@ -29,19 +29,40 @@
     adv_chapters: {
       order: [['book', false], ['number', false]],
       label: r => 'Book ' + r.book + ' · Chapter ' + r.number + ': ' + r.title,
+      tag: r => r.status,
       fields: [
         { k: 'book', type: 'int' }, { k: 'number', type: 'int' }, { k: 'title' },
         { k: 'text_tiny', type: 'long', hint: 'a couple of sentences' },
         { k: 'text_short', type: 'long', hint: 'about a minute' },
         { k: 'text_long', type: 'long', hint: 'about five minutes aloud' },
         { k: 'whispers', type: 'json', hint: '{ "role_key": "only this role hears this" }' },
-        { k: 'prompt', type: 'long', hint: 'the question the chapter ends on' }
+        { k: 'prompt', type: 'long', hint: 'the question the chapter ends on' },
+        { k: 'status', type: 'select', options: ['published', 'planned'] },
+        { k: 'plan', type: 'long', hint: 'what this chapter should do (for planned chapters)' }
       ],
       fresh: rows => {
         const last = rows[0];
         return { book: last ? last.book : 1, number: last ? last.number + 1 : 1, title: 'New chapter',
-          text_tiny: '', text_short: '', text_long: '', whispers: {}, prompt: '' };
+          text_tiny: '', text_short: '', text_long: '', whispers: {}, prompt: '', status: 'planned', plan: '' };
       }
+    },
+    adv_places: {
+      order: [['sort'], ['name']],
+      label: r => r.emoji + ' ' + r.name,
+      tag: r => r.kind,
+      fields: [
+        { k: 'name' }, { k: 'kind', type: 'select', options: ['world', 'region', 'town', 'building', 'room', 'wild', 'other'] },
+        { k: 'emoji' }, { k: 'color' }, { k: 'summary', type: 'long' },
+        { k: 'parent_id', hint: 'id of the place this sits inside; easier on the World page' },
+        { k: 'x', type: 'int' }, { k: 'y', type: 'int' }, { k: 'w', type: 'int' }, { k: 'h', type: 'int' }, { k: 'sort', type: 'int' }
+      ],
+      fresh: () => ({ name: 'New place', kind: 'region', emoji: '📍', color: '#CDEFE0', summary: '', parent_id: '', x: 10, y: 10, w: 26, h: 20, sort: 0 })
+    },
+    adv_notes: {
+      order: [['created_at', false]],
+      label: r => r.body.slice(0, 80),
+      tag: r => r.subject_type,
+      fields: [{ k: 'body', type: 'long' }]
     },
     adv_turns: {
       order: [['created_at', false]],
@@ -109,6 +130,7 @@
         try { out[f.k] = JSON.parse(el.value || 'null'); }
         catch (e) { throw new Error(f.k + ' is not valid JSON: ' + e.message); }
       } else out[f.k] = el.value;
+      if (f.k.endsWith('_id') && out[f.k] === '') out[f.k] = null;
     }
     return out;
   }
@@ -236,7 +258,7 @@
       return;
     }
     btn.classList.remove('confirm');
-    const tables = ['adv_roles', 'adv_entries', 'adv_chapters'];
+    const tables = ['adv_roles', 'adv_entries', 'adv_chapters', 'adv_places', 'adv_notes'];
     if (document.getElementById('rbTurns').checked) tables.push('adv_turns');
     try {
       const n = await q(Adv.sb.rpc('adv_restore_to', { p_at: new Date(at).toISOString(), p_tables: tables }));

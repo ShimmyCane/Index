@@ -53,7 +53,7 @@ button { cursor: pointer; }
   background: #fff; box-shadow: 0 4px 0 var(--ink); font-weight: 700; font-size: 18px;
   transition: transform .06s;
 }
-a.btn { display: inline-flex; align-items: center; text-decoration: none; justify-self: start; }
+a.btn { color: var(--ink); display: inline-flex; align-items: center; text-decoration: none; justify-self: start; }
 .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
 .btn.sun { background: var(--sun); }
 .btn.mint { background: var(--mint); }
@@ -80,6 +80,7 @@ a.btn { display: inline-flex; align-items: center; text-decoration: none; justif
   display: grid; gap: 12px;
 }
 .drawer label { display: flex; align-items: center; gap: 10px; font-weight: 600; min-height: 44px; }
+.pages { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .drawer .row { display: flex; gap: 8px; flex-wrap: wrap; }
 .errors {
   position: fixed; left: 16px; right: 96px; bottom: 16px; z-index: 20;

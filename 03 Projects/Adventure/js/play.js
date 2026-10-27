@@ -23,7 +23,7 @@
     try {
       const [roles, chapters, waiting, runs] = await Promise.all([
         q(Adv.sb.from('adv_roles').select('*').eq('active', true).order('sort')),
-        q(Adv.sb.from('adv_chapters').select('*').order('created_at', { ascending: false }).limit(12)),
+        q(Adv.sb.from('adv_chapters').select('*').eq('status', 'published').order('created_at', { ascending: false }).limit(12)),
         q(Adv.sb.from('adv_turns').select('created_at').eq('status', 'waiting').order('created_at', { ascending: false })),
         q(Adv.sb.from('adv_runs').select('*').order('started_at', { ascending: false }).limit(1))
       ]);

@@ -1,8 +1,8 @@
 # Adventure — Schematic
 
-**Status:** MVP built, not yet tried on the iPad. Database tables waiting to be applied (see `04 AI/Adventure/brief.md`).
+**Status:** MVP + world tools built, not yet tried on the iPad. Database tables waiting to be applied (see `04 AI/Adventure/brief.md`).
 **Owner:** Jimmy
-**Conversation:** `convo/convo v0.1.md` (design), `convo/convo v0.2.md` (answers)
+**Conversation:** `convo/convo v0.1.md` (design), `convo/convo v0.2.md` (answers), `convo/convo v0.3.md` (world tools)
 **To-do:** `todo.md`
 
 ## Purpose
@@ -28,7 +28,10 @@ It grows out of the car-ride adventures Jimmy told with Athena using ChatGPT (th
 |---|---|---|
 | **Storyteller** (Claude, following `storyteller.md`) | Nightly (scheduled task, to set up) or on request | Reads all story notes, roles, recent chapters and waiting scenes. Writes the next chapter in three lengths with whispers and a closing question. Updates world, history and plan. Logs the run. |
 | **Jimmy, under the hood** (`hood.html`) | Any time | Edits everything as text: story notes, characters, chapters, scenes. Sees every change with who made it, and rolls back one change or everything after a time. |
+| **Jimmy, world builder** (`world.html`) | Any time | Map of places with nested maps, a journal for every character and place sorted by the latest story, and the plot as planned chapters. |
 | **Rules engine** | Later | Daytime mechanics without AI. See `todo.md`. |
+
+Every page has the same ⚙️ menu: Story, World, Under the hood, All projects.
 
 ## Files
 
@@ -36,10 +39,12 @@ It grows out of the car-ride adventures Jimmy told with Athena using ChatGPT (th
 |---|---|
 | `index.html`, `play.css`, `js/play.js` | Player page |
 | `hood.html`, `hood.css`, `js/hood.js` | Under the hood |
+| `world.html`, `world.css`, `js/world.js` | World: map, characters & places, plot |
 | `style.css`, `js/common.js`, `js/config.js` | Shared look, Supabase client, sign-in, gear, errors |
 | `data/fallback.json` | Bundled copy of chapter 1 for offline |
 | `supabase/001_adventure.sql` | Tables, change log, rollback functions, registry |
-| `supabase/002_seed.sql` | Book 1 starting roles, world notes and chapter 1 |
+| `supabase/003_world.sql` | Places, journal, planned chapters (run after 001) |
+| `supabase/002_seed.sql` | Book 1 roles, world notes, chapter 1, places, planned plot (run last) |
 | `storyteller.md` | Instructions for the storyteller run |
 | `todo.md` | Next steps, later ideas, things to research |
 
@@ -49,10 +54,12 @@ It grows out of the car-ride adventures Jimmy told with Athena using ChatGPT (th
 |---|---|
 | `adv_roles` | Characters: key, name, emoji, color, blurb, voice, active |
 | `adv_entries` | Everything else as text, by kind: world, character, history, plan, theme, rule, note, setting |
-| `adv_chapters` | Book, number, title, `text_tiny` / `text_short` / `text_long`, `whispers` (role → text), `prompt` |
+| `adv_chapters` | Book, number, title, `text_tiny` / `text_short` / `text_long`, `whispers` (role → text), `prompt`, `status` (planned / published), `plan` |
+| `adv_places` | A tree of places; each child has a box (`x`, `y`, `w`, `h` %) on its parent's map |
+| `adv_notes` | Append-only journal about a role, place or story note, optionally tied to a chapter |
 | `adv_turns` | A sent scene: ordered `beats` `[{role, text, at}]`, status waiting/used |
 | `adv_runs` | Storyteller runs: status running/done/failed, note |
-| `adv_history` | Every insert, update and delete on the four tables above, with before/after and actor (`family` or `claude`) |
+| `adv_history` | Every insert, update and delete on roles, entries, chapters, turns, places and notes, with before/after and actor (`family` or `claude`) |
 
 Functions: `adv_restore(history_id)` puts one row back as it was before that change; `adv_restore_to(time, tables)` undoes everything after a time. Signed-in family account only; anon has no access.
 
@@ -64,4 +71,4 @@ Functions: `adv_restore(history_id)` puts one row back as it was before that cha
 
 ## Later
 
-Story-creation page, rules engine, map, recordings, an early-wake ping. See `todo.md`.
+Story-creation page, rules engine, recordings, an early-wake ping. See `todo.md`.
