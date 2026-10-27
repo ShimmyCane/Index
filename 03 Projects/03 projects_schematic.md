@@ -13,7 +13,9 @@ idea → MVP → device-tested → in use → graduated (copied to its own repo)
 
 Schematic:
 - Athena's world/ — status: idea. Started with `/start-project`. Awaiting answers in `convo/convo v0.1.md`. (`schematic.md`, `CLAUDE.md`, `convo/`)
+- Adventure/ — status: MVP (not yet device-tested). A family story game played like correspondence chess, with a nightly AI storyteller. Player page `index.html`, world tools `world.html`, under-the-hood `hood.html`, storyteller `storyteller.md`, SQL in `supabase/`, `todo.md`. (`schematic.md`, `CLAUDE.md`, `convo/`)
 
 Notes:
+- The root `index.html` lists nursery projects in its Nursery section. Add a tile when a project gets a page.
 - This repo is public. Keep private data out of every project. See `CLAUDE.md`.
 - When new projects are added, add an entry here describing their intent and location.

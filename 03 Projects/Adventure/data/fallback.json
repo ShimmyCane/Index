@@ -1,0 +1,18 @@
+{
+  "note": "Bundled copy used only when the database and the local cache are both unavailable. Matches supabase/002_seed.sql.",
+  "roles": [
+    {"key": "athena", "name": "Athena", "emoji": "🧭", "color": "#F9C8A8", "blurb": "A brave explorer with the key from the Sun and Moon Chest.", "sort": 1},
+    {"key": "bristle", "name": "Bristle", "emoji": "🐕", "color": "#CDEFE0", "blurb": "A wild dog who follows Athena without a sound.", "sort": 2},
+    {"key": "old_lady", "name": "The Old Lady", "emoji": "👵", "color": "#E8DAF7", "blurb": "Lives at the edge of the village and remembers the old days.", "sort": 3},
+    {"key": "storyteller", "name": "Storyteller", "emoji": "📜", "color": "#FFE9A8", "blurb": "The dungeon master. Moves the world and its weather, sounds and surprises.", "sort": 4}
+  ],
+  "chapters": [
+    {"id": null, "book": 1, "number": 1, "title": "The Chest in the Crypt",
+     "text_tiny": "Athena stands in the heart of the crypt with the humming key in her hand. An old chest waits in front of her, and Bristle growls softly behind her.",
+     "text_short": "Athena steps into the crypt. The air smells of ancient dust and earth. In her hand, the key from the Sun and Moon Chest almost hums. Behind her comes a soft pat-pat-pat: Bristle followed her after all. In the middle of the room stands an old wooden chest covered in the same symbols as the village doors. Its lid is open just a crack. A wind blows from nowhere, and Bristle gives a low growl. What will Athena do?",
+     "text_long": "",
+     "whispers": {},
+     "prompt": "Open the chest carefully, look around the room first, or ask Bristle what he knows?",
+     "created_at": "2026-10-27T00:00:00Z"}
+  ]
+}
