@@ -13,7 +13,7 @@ idea → MVP → device-tested → in use → graduated (copied to its own repo)
 
 Schematic:
 - Athena's world/ — status: idea. Started with `/start-project`. Awaiting answers in `convo/convo v0.1.md`. (`schematic.md`, `CLAUDE.md`, `convo/`)
-- Adventure/ — status: idea. A family story game played like correspondence chess, with a nightly AI storyteller. Awaiting answers in `convo/convo v0.1.md`. (`schematic.md`, `CLAUDE.md`, `convo/`)
+- Adventure/ — status: MVP (not yet device-tested). A family story game played like correspondence chess, with a nightly AI storyteller. Player page `index.html`, under-the-hood `hood.html`, storyteller `storyteller.md`, SQL in `supabase/`, `todo.md`. (`schematic.md`, `CLAUDE.md`, `convo/`)
 
 Notes:
 - This repo is public. Keep private data out of every project. See `CLAUDE.md`.

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Adventure — Under the hood</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Patrick+Hand&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="hood.css">
+</head>
+<body>
+  <header class="top">
+    <h1>🔧 Under the hood</h1>
+    <a class="btn small" href="index.html">📖 Story</a>
+    <span id="pill" class="pill">Waking up…</span>
+  </header>
+
+  <main class="hood" id="panels">
+    <section class="panel card" data-panel="status">
+      <button class="panel-head"><h2>Storyteller</h2><span class="pm">−</span></button>
+      <div class="panel-body">
+        <div id="statusBox"></div>
+        <p class="muted">To run the story now, open Claude Code on the Index repo and say:
+          <b>"Run the Adventure storyteller"</b>. It follows <code>03 Projects/Adventure/storyteller.md</code>.</p>
+      </div>
+    </section>
+
+    <section class="panel card" data-panel="adv_entries">
+      <button class="panel-head"><h2>Story notes</h2><span class="pm">−</span></button>
+      <div class="panel-body">
+        <p class="muted">World, history, plan, themes, rules, notes for tonight. The storyteller reads all of it, and may change it too.</p>
+        <div class="list" data-table="adv_entries"></div>
+      </div>
+    </section>
+
+    <section class="panel card" data-panel="adv_roles">
+      <button class="panel-head"><h2>Characters</h2><span class="pm">+</span></button>
+      <div class="panel-body hidden"><div class="list" data-table="adv_roles"></div></div>
+    </section>
+
+    <section class="panel card" data-panel="adv_chapters">
+      <button class="panel-head"><h2>Chapters</h2><span class="pm">+</span></button>
+      <div class="panel-body hidden"><div class="list" data-table="adv_chapters"></div></div>
+    </section>
+
+    <section class="panel card" data-panel="adv_turns">
+      <button class="panel-head"><h2>Scenes sent</h2><span class="pm">+</span></button>
+      <div class="panel-body hidden"><div class="list" data-table="adv_turns"></div></div>
+    </section>
+
+    <section class="panel card" data-panel="history">
+      <button class="panel-head"><h2>History &amp; rollback</h2><span class="pm">+</span></button>
+      <div class="panel-body hidden">
+        <div class="rollback">
+          <label>Roll back to <input type="datetime-local" id="rbAt" class="field"></label>
+          <label><input type="checkbox" id="rbTurns"> also undo scenes the family sent</label>
+          <button class="btn coral small" id="rbBtn">↩︎ Roll back</button>
+        </div>
+        <div class="chips" id="hFilter">
+          <button class="chip on" data-t="">Everything</button>
+          <button class="chip" data-t="adv_entries">Notes</button>
+          <button class="chip" data-t="adv_roles">Characters</button>
+          <button class="chip" data-t="adv_chapters">Chapters</button>
+          <button class="chip" data-t="adv_turns">Scenes</button>
+        </div>
+        <div id="history" class="list"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/hood.js"></script>
+</body>
+</html>

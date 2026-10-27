@@ -1,0 +1,64 @@
+/* Adventure — player page */
+.play {
+  display: grid; grid-template-columns: 1.25fr 1fr; gap: 18px;
+  height: calc(100vh - 62px); height: calc(100dvh - 62px); padding: 16px;
+}
+.col { overflow: auto; padding: 4px 6px 120px 4px; display: flex; flex-direction: column; gap: 14px; }
+@media (max-width: 820px), (max-height: 520px) {
+  .play { display: block; height: auto; }
+  .col { overflow: visible; padding-bottom: 20px; }
+  .cast { position: static; }
+  .scene-col { padding-bottom: 120px; }
+}
+
+.sleep { background: var(--lilac); font-size: 18px; font-weight: 600; }
+.story { display: flex; flex-direction: column; gap: 12px; }
+.story-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.story-head h2 { font-size: 22px; margin-top: 2px; }
+.read { min-width: 110px; }
+.story-text { font-size: var(--story-size); line-height: 1.6; }
+.story-text p { margin: 0 0 .8em; }
+.recap { font-size: 16px; display: grid; gap: 6px; }
+.recap:empty { display: none; }
+.recap div { background: var(--paper); border-radius: 10px; padding: 8px 12px; }
+.prompt {
+  margin: 0; padding: 12px 14px; border: var(--line); border-radius: 14px 4px 14px 4px;
+  background: var(--sun); font-weight: 700; font-size: 18px;
+}
+.prompt:empty { display: none; }
+
+.label { font-size: 15px; text-transform: uppercase; margin-bottom: 8px; }
+.cast { position: sticky; top: -4px; z-index: 2; background: var(--paper); padding: 4px 0 10px; }
+.roles { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 12px; }
+.role {
+  border: var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 10px 6px; display: grid; justify-items: center; gap: 4px; font-weight: 700;
+  min-height: 120px;
+}
+.role .face { font-size: 46px; }
+.role.on { outline: 4px dashed var(--ink); outline-offset: 3px; }
+.face { display: inline-grid; place-items: center; }
+
+.speak { display: grid; gap: 10px; }
+.speak-head { display: flex; align-items: center; gap: 10px; }
+.speak-head .face { font-size: 38px; }
+.speak-head h3 { flex: 1; }
+.whisper { margin: 0; background: var(--lilac); border-radius: 12px; padding: 10px 12px; font-family: 'Patrick Hand', cursive; font-size: 20px; }
+.mic { min-height: 68px; font-size: 22px; }
+.mic.listening { background: var(--mint); animation: pulse 1s infinite alternate; }
+@keyframes pulse { to { transform: scale(1.03); } }
+.heard { margin: 0; min-height: 1.4em; font-style: italic; opacity: .7; }
+.type-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: end; }
+.type-row .field { min-height: 70px; }
+
+.beats { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.beats:empty::before { content: 'Tap a character to start the scene.'; opacity: .6; }
+.beat {
+  border: var(--line); border-radius: 18px 18px 18px 4px; padding: 8px 12px;
+  box-shadow: 0 3px 0 var(--ink);
+}
+.beat .who { font-weight: 700; font-size: 14px; }
+.beat .who time { font-weight: 500; opacity: .6; margin-left: 6px; }
+.beat .said { font-family: 'Patrick Hand', cursive; font-size: 21px; }
+.send { min-height: 64px; font-size: 20px; }
+.send.confirm { background: var(--coral); }

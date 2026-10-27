@@ -1,0 +1,36 @@
+/* Adventure — under the hood */
+.hood { max-width: 960px; margin: 0 auto; padding: 16px 16px 140px; display: grid; gap: 16px; }
+.panel { padding: 0; overflow: hidden; }
+.panel-head {
+  width: 100%; display: flex; justify-content: space-between; align-items: center;
+  min-height: 60px; padding: 10px 16px; border: 0; background: var(--sun); text-align: left;
+}
+.panel-head h2 { font-size: 18px; }
+.pm { font-size: 28px; font-weight: 700; width: 40px; text-align: center; }
+.panel-body { padding: 14px 16px; display: grid; gap: 12px; }
+.list { display: grid; gap: 10px; }
+.row-item { border: var(--line); border-radius: 14px 4px 14px 4px; background: var(--paper); }
+.row-item > summary {
+  list-style: none; cursor: pointer; padding: 12px 14px; min-height: 48px; font-weight: 700;
+  display: flex; gap: 10px; align-items: center;
+}
+.row-item > summary::-webkit-details-marker { display: none; }
+.row-item > summary .tag {
+  font-size: 12px; text-transform: uppercase; border: 2px solid var(--ink); border-radius: 999px;
+  padding: 1px 8px; background: #fff;
+}
+.row-item > summary .when { margin-left: auto; font-weight: 500; font-size: 13px; opacity: .65; }
+.row-form { padding: 0 14px 14px; display: grid; gap: 10px; }
+.row-form label { display: grid; gap: 4px; font-weight: 600; font-size: 14px; }
+.row-form textarea.long { min-height: 180px; }
+.row-form textarea.json { font-family: ui-monospace, monospace; font-size: 14px; min-height: 120px; }
+.row-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.add { justify-self: start; }
+.rollback { display: grid; gap: 8px; padding: 12px; border: 2px dashed var(--ink); border-radius: 12px; }
+.rollback label { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-weight: 600; }
+.rollback .field { width: auto; }
+.diff { font-size: 14px; display: grid; gap: 6px; padding: 0 14px 14px; }
+.diff div { background: #fff; border-radius: 8px; padding: 6px 10px; white-space: pre-wrap; word-break: break-word; }
+.actor { border-radius: 999px; padding: 1px 8px; font-size: 12px; border: 2px solid var(--ink); }
+.actor.claude { background: var(--lilac); }
+.actor.family { background: var(--mint); }

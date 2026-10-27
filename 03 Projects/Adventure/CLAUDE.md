@@ -11,4 +11,8 @@ Rules:
 - The family's moves and answers stay in Supabase, never in this repo.
 - No secret keys in browser code.
 
-How to run: not set yet. Add it here once the MVP exists.
+- Storyteller run: follow `storyteller.md` ("Run the Adventure storyteller").
+- To-do: `todo.md`
+
+How to run: open `index.html` (player) or `hood.html` (under the hood) from GitHub Pages or a local web server, and sign in with the family account. Microphone and reading aloud need a real browser; the iPad is the target.
+Database: Supabase project "Family", tables `adv_*`, SQL in `supabase/`.

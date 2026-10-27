@@ -1,78 +1,67 @@
 # Adventure — Schematic
 
-**Status:** idea (design outlined, awaiting answers in `convo/convo v0.1.md`)
+**Status:** MVP built, not yet tried on the iPad. Database tables waiting to be applied (see `04 AI/Adventure/brief.md`).
 **Owner:** Jimmy
-**Conversation:** `convo/convo v0.1.md`
+**Conversation:** `convo/convo v0.1.md` (design), `convo/convo v0.2.md` (answers)
+**To-do:** `todo.md`
 
 ## Purpose
 
-A family story game played like correspondence chess. The family takes roles in a shared world. Each person checks in when they can, hears their own part of the story, and answers. Overnight, an AI storyteller reads everyone's moves and writes the next page. Jimmy can step under the hood as dungeon master to shape the larger story.
+A family story game played like correspondence chess. The family takes roles in a shared world. Each person checks in when they can, catches up on the story, and adds to a scene. Overnight, an AI storyteller reads the scenes and writes the next chapter. Jimmy can step under the hood as dungeon master and change anything.
 
-It grows out of the car-ride adventures Jimmy told with Athena using ChatGPT (the crypt, the Sun and Moon Chest, Bristle the dog). The new game is for the whole family.
+It grows out of the car-ride adventures Jimmy told with Athena using ChatGPT (the crypt, the Sun and Moon Chest, Bristle the dog).
 
 ## How it plays
 
-1. **Roles, not players.** The database keeps a list of roles (for example the explorer, Bristle the dog). Anyone in the family picks a role, and roles can be swapped at any time. The game never tracks who is playing.
-2. **Each role has its own view.** A chapter is written once per role: the same events, seen from where that role stands. Some secrets reach only one role, so the family compares notes.
-3. **Check in, listen, answer.** A player opens their role, hears the page read aloud (or reads it), and picks one of the offered options or answers in their own words.
-4. **The story never stalls.** If a role doesn't answer by the nightly run, the story carries on without them, and that role's character acts on their own in a sensible way.
-5. **Puzzles and values.** Some chapters end in a riddle or a choice about kindness, honesty or courage. More than one answer can be right. Different kinds of answers (clever, kind, brave) send the story different ways. Wrong answers bring a hint the next night, never a dead end.
-6. **Short books.** Stories come in books of about 7–10 chapters, each with a real ending. A new book starts in the same world.
+1. **Catch up.** The page opens on the newest chapter, sized to how long it has been on this device: after 12+ hours the whole page (about five minutes aloud), after an hour a minute's worth, after a few minutes a peek of two sentences. Chips switch length. 🔊 reads it aloud. Chapters missed in between show as one line each.
+2. **Roles, not players.** A row of character pictures. Anyone taps any character; the game never tracks who is playing.
+3. **Talk.** Tapping a character opens its microphone. Speech is transcribed by the browser and appended. Typing (or the keyboard's own 🎤) works too. Words are added, never edited or removed. A character may have a 🤫 whisper from the chapter that only they hear.
+4. **Build a scene.** Tap another character to have them answer. Beats keep their order and time: the dog, then the old lady, then the storyteller, then the dog again. The scene is saved on the device until sent.
+5. **Send.** 📮 sends the whole scene as one package (second tap to confirm).
+6. **Sleep.** Until the storyteller has run, the page says it is asleep and the scenes are tucked in. Then a new chapter appears.
+7. **The story never stalls.** With no scenes for a day, the storyteller writes a short chapter anyway.
+8. **Puzzles and values.** More than one right answer; clever, kind and brave answers branch differently; wrong answers bring hints. Books of about 7–10 chapters, each with a real ending.
 
-## The dungeon master, in three parts
+## The dungeon master
 
 | Part | When | Does |
 |---|---|---|
-| **Nightly storyteller** (a scheduled Claude task) | Once a night | Reads new moves, the world bible and the current facts. Writes the next chapter for each role, updates the facts, offers options. Saves the chapter as a draft or publishes it. |
-| **Jimmy, under the hood** | Any time | Edits the world bible and the book outline, plants secrets or events, leaves notes for the next run, reviews or edits drafts. Can ask Claude to run the story right away. |
-| **Rules engine** (later, plain code, no AI) | During the day | Handles small mechanics instantly: moving between known places, items and keys, riddles with known answers, hints. Serves small scenes the nightly run prepared. Anything outside its rules waits for the storyteller. |
+| **Storyteller** (Claude, following `storyteller.md`) | Nightly (scheduled task, to set up) or on request | Reads all story notes, roles, recent chapters and waiting scenes. Writes the next chapter in three lengths with whispers and a closing question. Updates world, history and plan. Logs the run. |
+| **Jimmy, under the hood** (`hood.html`) | Any time | Edits everything as text: story notes, characters, chapters, scenes. Sees every change with who made it, and rolls back one change or everything after a time. |
+| **Rules engine** | Later | Daytime mechanics without AI. See `todo.md`. |
 
-## The nightly loop
+## Files
 
-1. Read moves since the last run, the facts, the world bible, the book outline and Jimmy's notes.
-2. Decide what happens. Treat roles that didn't answer as acting on their own.
-3. Write one page per role, plus the options for each.
-4. Update the facts (places, items, who knows what, hidden traits like kindness to Bristle).
-5. Save it as a draft or as published, depending on the setting. Mark the run done, or record the error so the page can say "the story is resting tonight".
+| File | What |
+|---|---|
+| `index.html`, `play.css`, `js/play.js` | Player page |
+| `hood.html`, `hood.css`, `js/hood.js` | Under the hood |
+| `style.css`, `js/common.js`, `js/config.js` | Shared look, Supabase client, sign-in, gear, errors |
+| `data/fallback.json` | Bundled copy of chapter 1 for offline |
+| `supabase/001_adventure.sql` | Tables, change log, rollback functions, registry |
+| `supabase/002_seed.sql` | Book 1 starting roles, world notes and chapter 1 |
+| `storyteller.md` | Instructions for the storyteller run |
+| `todo.md` | Next steps, later ideas, things to research |
 
-## Surfaces
-
-- **Player page** (small, iPad-friendly): pick a role, play the newest page aloud with the browser's speech, choose an option or type an answer. The game is mostly listening, so the page stays minimal.
-- **Under the hood** (Jimmy's console): world bible, book outline, roles, drafts to approve, notes for tonight, run log.
-- **No page at all** also works: Jimmy can read a chapter aloud at bedtime and type the family's answers to Claude.
-
-## Data (Supabase, draft)
-
-Tables use the `adv_` prefix and are registered per `04 AI/Supabase/brief.md`.
+## Data (Supabase **Family** project, prefix `adv_`)
 
 | Table | Holds |
 |---|---|
-| `adv_books` | Each book: title, outline, status, current chapter |
-| `adv_roles` | The list of roles: name, description, voice, active |
-| `adv_chapters` | One row per chapter per role: text, options, status (draft or published) |
-| `adv_moves` | A role's answer to a chapter: picked option or free text, time |
-| `adv_world` | World bible entries: places, characters, objects, rules, history |
-| `adv_facts` | Current state: location, items, flags, hidden traits |
-| `adv_dm_notes` | Jimmy's notes for the next run |
-| `adv_runs` | Log of nightly runs: time, result, error |
+| `adv_roles` | Characters: key, name, emoji, color, blurb, voice, active |
+| `adv_entries` | Everything else as text, by kind: world, character, history, plan, theme, rule, note, setting |
+| `adv_chapters` | Book, number, title, `text_tiny` / `text_short` / `text_long`, `whispers` (role → text), `prompt` |
+| `adv_turns` | A sent scene: ordered `beats` `[{role, text, at}]`, status waiting/used |
+| `adv_runs` | Storyteller runs: status running/done/failed, note |
+| `adv_history` | Every insert, update and delete on the four tables above, with before/after and actor (`family` or `claude`) |
+
+Functions: `adv_restore(history_id)` puts one row back as it was before that change; `adv_restore_to(time, tables)` undoes everything after a time. Signed-in family account only; anon has no access.
 
 ## Privacy (public repo)
 
-- Moves the family types live in Supabase only, never in this repo.
-- The world bible can live in the repo only if it is made up. Anything personal goes in `private/`.
-- No school, place or personal details in repo files or convo files.
-- No secret keys in the browser. The nightly run uses Claude's own Supabase connection.
+- The family's scenes live in Supabase only, never in this repo.
+- Seed content is made up. Saved ChatGPT chats go in `private/` (git-ignored).
+- The page holds only the publishable key; the tables open only to the signed-in family account.
 
-## MVP (proposed)
+## Later
 
-1. Supabase tables above, with row-level security.
-2. A world bible and an outline for Book 1, seeded from the crypt story.
-3. A nightly scheduled Claude task that writes the next chapter for each role.
-4. The player page: pick a role, listen, answer.
-5. A simple under-the-hood page: edit notes and the outline, approve drafts.
-
-**Later:** the rules engine and prepared scenes, a map of places, spoken answers, recordings of bedtime readings.
-
-## Open
-
-See `convo/convo v0.1.md`.
+Story-creation page, rules engine, map, recordings, an early-wake ping. See `todo.md`.
