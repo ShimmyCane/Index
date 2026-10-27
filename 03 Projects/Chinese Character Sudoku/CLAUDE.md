@@ -1,10 +1,16 @@
 # Chinese Character Sudoku — Claude Code pointer
 
-Purpose: a kids' iPad game based on a Chinese-character word-grid card. Fill the blank cells from a character bank so every row and column reads as a real word. Uses characters from recent lessons.
+Purpose: a kids' iPad game based on a Chinese-character word-grid card. Drag characters from a bank into the blanks so rows and columns make real words. Uses characters from recent lessons.
 
 - Design: `schematic.md`
 - Q&A history: `convo/` (in Chinese; never compact; start a new version instead)
-- AI notes: `04 AI/Chinese Character Sudoku/` (brief and lessons, created once work begins)
+- AI notes: `04 AI/Chinese Character Sudoku/brief.md` and `lessons.md`
 - Shared conventions: root `CLAUDE.md` (public repo, privacy rules) and `02 Refs/Skills/ipad_website.md`
 
-How to run: not set yet. Planned as a plain `index.html` (no build step, GitHub Pages).
+How to run: serve the folder (`python3 -m http.server`) and open `index.html`; GitHub Pages works as is. Opening the file directly can't load the JSON, so it falls back to a small built-in list.
+Test the engine: `node tools/test_engine.js`.
+
+Project rules:
+- Words live in `assets/phrases.json` (two-character words only). Jimmy adds words there by hand; keep the one-entry-per-line layout (`tools/build_data.py` rewrites it).
+- Keep word content kid-appropriate. No names or school details (public repo).
+- Bump `APP_VERSION` and add a `CHANGELOG` line in `js/app.js` for each user-visible change.

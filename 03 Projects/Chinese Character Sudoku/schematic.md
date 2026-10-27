@@ -1,33 +1,49 @@
 # Chinese Character Sudoku — Schematic
 
-**Status:** idea. Waiting for answers in `convo/convo v0.1.md`.
+**Status:** MVP (browser-tested in headless Chromium; not yet tested on an iPad)
 **Owner:** Jimmy
 **Platform:** iPad web app (plain HTML/CSS/JS, no build step, GitHub Pages)
-**Conversation:** `convo/convo v0.1.md`
+**Conversation:** `convo/convo v0.1.md` (questions), `convo/convo v0.2.md` (answers + open checks)
 
 ## Purpose
 
-A digital version of a printed Chinese word-grid card ("汉字数独"). Some cells hold a printed character and the rest are blank. The child fills each blank from a character bank so that every row and every column reads as a meaningful word. The characters come from what the child is learning in class, so the game matches the child's level.
+A digital version of a printed Chinese word-grid card (汉字数独). Some cells hold a character. The child drags characters from a bank on the right into the blanks so the rows (left→right) and columns (top→bottom) make real words. It uses the characters the children (5 and 7) are learning, so the game matches their level.
 
-## Known so far
+## How it plays
 
-- Reference card A (2×2): left column 爸 / 妈, right column blank. One answer: 爸爸 / 妈妈, which also makes 爸妈 down both columns.
-- Reference card B (3×3, "2级"): 阳 · _ · _ / 白 · 雪 · _ / 蝴 · _ · 飞.
-- 2×2 is the easiest level. 3×3 and up are harder.
-- Each cell can be tapped and filled from a character bank.
-- Difficulty is set from the ⚙️ button in the lower-right corner.
-- Character set: the family's recent lesson characters.
-- Kids' iPad style: pastel colors, large buttons, Undo, errors hidden behind a toggle in ⚙️.
+- **Board** on the left, 2×2 to 4×4, drawn like 田字格 writing paper. Givens are printed; blanks are dashed.
+- **Bank** on the right: about 3× as many characters as blanks (2× on the smaller setting). Each character is used once. Drag a tile to a cell, drag it back or tap it to return it. Tap a tile, then a cell, also works.
+- **Easy (简单):** each character must make a word with at least one neighbour. A placed tile turns green as soon as it does. The board is won when every blank is green.
+- **Challenge (挑战):** every character must make a word in its row and in its column. Nothing changes colour until ✅ 检查. Wrong cells shake red and their lines are tinted; 💡 答案 then appears.
+- Any valid board counts, not only the generated one. A character may appear only once per puzzle.
+- **Undo** (↩️), **New** (🔄), and a celebration with confetti and a Web Audio tune (Twinkle Twinkle) on a win. ⭐ counts finished puzzles.
+- **Words made** panel lists the words on the board with pinyin (live in easy mode; at the end in challenge mode). Lesson words show in yellow.
 
-## Open (see `convo/convo v0.1.md`)
+## Settings (⚙️, lower right)
 
-- Exact rule: whole rows/columns as words, or every adjacent pair as a word?
-- How the game checks answers: built-in word list, parent check, or both.
-- Who makes puzzles: auto-generated from a word list, hand-entered, or both.
-- How lesson characters and words get into the app.
-- Pinyin, audio, rewards, saving progress.
+Size · mode · number of givens · bank size · pinyin · simplified/traditional · sound · add words (stored on this device; can be marked as lesson words) · word-bank stats · finished count · show errors · version and change log.
 
-## Planned files
+## Files
 
-- `index.html` — the game (to be built after the MVP questions are answered).
-- `words.js` or `words.json` — the lesson word list (synthetic or lesson-only content; no personal data).
+- `index.html`, `css/style.css`, `js/app.js` — page, theme, UI (drag, settings, audio, saving).
+- `js/engine.js` — word index, puzzle generator, decoys, easy/challenge checks. No DOM; runs under Node.
+- `assets/phrases.json` — **edit this to add words.** `lesson` = recent lesson words (puzzles favour them); `phrases` = two-character words.
+- `assets/characters.json` — 575 characters by category, with `[pinyin, traditional]` per character and per-word overrides (还书 huán, 头发 頭髮).
+- `tools/build_data.py` — optional: fills pinyin/traditional for new characters and tidies the JSON (needs `pypinyin`, `opencc-python-reimplemented`).
+- `tools/test_engine.js` — `node tools/test_engine.js` generates puzzles at every size and checks them.
+
+## Generator
+
+- A solution is a grid of distinct characters where the required neighbour pairs are words from `phrases.json`.
+- 3×3 challenge: all ~780 valid grids are listed once (about a second) and sampled. Other sizes use a randomized backtracking search.
+- Lesson words are planted on the bottom row or right column, and puzzles with lesson words score higher.
+- Decoys are characters that make a word with one neighbour of a blank but are not in the solution (the 黑白 / 白马 idea), topped up with lesson characters.
+- The last 40 solutions are avoided.
+
+## Saved on the device (localStorage)
+
+Settings, current puzzle, ⭐ count, recent solutions, words added in ⚙️, and a cached copy of the JSON (used if the files can't load).
+
+## Open
+
+See the questions at the end of `convo/convo v0.2.md`. Later: read-aloud with a better voice.

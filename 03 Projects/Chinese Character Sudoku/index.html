@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>汉字数独</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div class="title">汉字数独</div>
+      <div class="chip" id="levelTag">3×3 · 简单</div>
+      <div class="chip stars">⭐ <span id="stars">0</span></div>
+    </header>
+
+    <main class="cols">
+      <!-- Left: the board and the main buttons -->
+      <section class="play">
+        <div class="boardWrap"><div id="board" class="board"></div></div>
+        <div class="rule" id="ruleText"></div>
+        <div class="actions">
+          <button class="btn" id="undoBtn">↩️ 撤销</button>
+          <button class="btn" id="newBtn">🔄 新题</button>
+          <button class="btn go" id="checkBtn">✅ 检查</button>
+          <button class="btn" id="answerBtn" hidden>💡 答案</button>
+        </div>
+        <div class="message" id="message"></div>
+      </section>
+
+      <!-- Right: the character bank and the words made so far -->
+      <section class="side">
+        <div class="panel">
+          <h2>字库 <small>拖一个字到格子里</small></h2>
+          <div id="bank" class="bank"></div>
+        </div>
+        <div class="panel" id="wordsPanel">
+          <h2>组成的词</h2>
+          <div id="madeWords" class="madeWords"></div>
+        </div>
+      </section>
+    </main>
+
+    <section class="errors" id="errorsPanel" hidden>
+      <h2>错误记录 <button class="mini" id="clearErrors">清空</button></h2>
+      <ol id="errorList"></ol>
+    </section>
+  </div>
+
+  <button class="gear" id="gear" aria-label="设置">⚙️</button>
+
+  <aside class="drawer" id="drawer" hidden>
+    <div class="drawerHead">
+      <h2>设置</h2>
+      <button class="mini" id="closeDrawer">✖</button>
+    </div>
+
+    <div class="setting"><label>大小</label>
+      <div class="seg" data-key="n"><button data-v="2">2×2</button><button data-v="3">3×3</button><button data-v="4">4×4</button></div></div>
+    <div class="setting"><label>玩法</label>
+      <div class="seg" data-key="easy"><button data-v="1">简单<small>放对马上变绿</small></button><button data-v="0">挑战<small>最后才检查</small></button></div></div>
+    <div class="setting"><label>提示字</label>
+      <div class="seg" data-key="givensMany"><button data-v="1">多</button><button data-v="0">少</button></div></div>
+    <div class="setting"><label>字库里的字</label>
+      <div class="seg" data-key="decoysMany"><button data-v="0">少<small>空格×2</small></button><button data-v="1">多<small>空格×3</small></button></div></div>
+    <div class="setting"><label>拼音</label>
+      <div class="seg" data-key="pinyin"><button data-v="1">开</button><button data-v="0">关</button></div></div>
+    <div class="setting"><label>字体</label>
+      <div class="seg" data-key="trad"><button data-v="0">简体</button><button data-v="1">繁体</button></div></div>
+    <div class="setting"><label>声音</label>
+      <div class="seg" data-key="sound"><button data-v="1">开</button><button data-v="0">关</button></div></div>
+
+    <div class="setting col"><label>加新词 <small>两个字一个词，用空格分开</small></label>
+      <textarea id="newWords" rows="3" placeholder="例如：春天 花朵 大树"></textarea>
+      <label class="check"><input type="checkbox" id="newIsLesson" checked> 这是最近学的（多出这些字）</label>
+      <div class="row"><button class="btn small" id="saveWords">保存</button><button class="btn small" id="clearWords">清空我加的词</button></div>
+      <div class="note" id="extraInfo"></div>
+    </div>
+
+    <div class="setting col"><label>词库</label><div class="note" id="dataInfo"></div></div>
+
+    <div class="setting"><label>完成了</label>
+      <div class="row"><span id="doneCount">0</span>&nbsp;题 <button class="mini" id="resetStars">清零</button></div></div>
+
+    <div class="setting"><label>显示错误</label>
+      <div class="seg" data-key="showErrors"><button data-v="1">开</button><button data-v="0">关</button></div></div>
+
+    <div class="setting col"><label>版本 <span id="version"></span></label>
+      <ul class="changelog" id="changelog"></ul></div>
+  </aside>
+
+  <div class="celebrate" id="celebrate" hidden>
+    <div class="confetti" id="confetti"></div>
+    <div class="cheer">
+      <div class="big">太棒了！⭐</div>
+      <div class="cheerWords" id="cheerWords"></div>
+      <button class="btn go" id="nextBtn">下一题 ▶</button>
+    </div>
+  </div>
+
+  <script src="js/engine.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
