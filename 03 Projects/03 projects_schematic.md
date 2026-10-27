@@ -13,6 +13,7 @@ idea → MVP → device-tested → in use → graduated (copied to its own repo)
 
 Schematic:
 - Athena's world/ — status: idea. Started with `/start-project`. Awaiting answers in `convo/convo v0.1.md`. (`schematic.md`, `CLAUDE.md`, `convo/`)
+- Chinese Character Sudoku/ — status: MVP (not yet device-tested). A kids' iPad word-grid game: drag characters from a bank so rows and columns make words, using recent lesson words. Game `index.html` + `js/` + `css/`, word data in `assets/` (`phrases.json` is where words are added), helpers in `tools/`. Open checks in `convo/convo v0.2.md` (Chinese). (`schematic.md`, `CLAUDE.md`, `convo/`)
 - Adventure/ — status: MVP (not yet device-tested). A family story game played like correspondence chess, with a nightly AI storyteller. Player page `index.html`, world tools `world.html`, under-the-hood `hood.html`, storyteller `storyteller.md`, SQL in `supabase/`, `todo.md`. (`schematic.md`, `CLAUDE.md`, `convo/`)
 
 Notes:
