@@ -16,6 +16,7 @@ Projects with notes:
 - Athena's world/ — new seed, awaiting answers in `03 Projects/Athena's world/convo/`.
 - Chinese Character Sudoku/ — word-grid game MVP. `brief.md`, `lessons.md`.
 - Adventure/ — family story game. `brief.md`, `lessons.md`.
+- Felix Maze/ — printable maze worksheets MVP. `brief.md`, `lessons.md`.
 
 Notes:
 - Lessons in this folder come from the private ShimmyAI repo's `04 AI/`. Only generic lessons were carried over. Family and personal details were not.

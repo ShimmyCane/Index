@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Felix Maze Research</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="research.css">
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <h1 class="title">Felix Maze · Research <small>What we were thinking, and where to wander next</small></h1>
+    <span class="chip sun">Round 1 · Oct 2026</span>
+    <span class="chip">100 maze types</span>
+  </header>
+
+  <main class="cols">
+    <!-- ======== play side: the maze lab ======== -->
+    <section class="play" aria-label="Maze lab">
+      <div class="boardWrap"><svg id="board" role="img" aria-label="A generated maze"></svg></div>
+      <div class="stats" id="stats"></div>
+      <div class="controls">
+        <div class="row algo" id="algos"></div>
+        <div class="row">
+          <label class="slider">Size <input id="size" type="range" min="5" max="30" value="12"> <span id="sizeVal">12</span></label>
+          <label class="slider">Loops <input id="loops" type="range" min="0" max="100" value="0"> <span id="loopsVal">0%</span></label>
+        </div>
+        <div class="row">
+          <button class="btn big" id="again">🎲 New</button>
+          <button class="btn" id="showPath">Path</button>
+          <button class="btn" id="showDead">Dead ends</button>
+          <button class="btn" id="hand">✍️ Hand</button>
+        </div>
+      </div>
+      <p class="note" id="howto" style="width:calc(var(--board) + 30px)"></p>
+    </section>
+
+    <!-- ======== reference side: stacked panels ======== -->
+    <section class="side" aria-label="Research notes">
+
+      <details class="panel p-think" open>
+        <summary>💭 What I was thinking (round 1)</summary>
+        <div class="body">
+          <p>Felix's own mazes are free and flowing. The danger with printed mazes is that they all look like the same square grid, and he learns that <i>that</i> is what a maze is. So the plan starts from <b>variety</b>: 100 kinds of maze from art, nature, systems, music and famous places, each tagged by its shape, its line work and its tricks.</p>
+          <p>Three ideas shaped the plan:</p>
+          <ol>
+            <li><b>The algorithm is the brush.</b> Try the buttons on the left: the same grid feels completely different depending on how it was grown. The <i>Wanderer</i> looks most like a person drew it, so it's the starting point for Felix. The <i>Mix</i> setting is one knob that turns easy into hard.</li>
+            <li><b>Not everything should be a grid.</b> Researchers have grown mazes like meandering rivers (Pedersen and Singh) and made them swirl along a picture (Xu and Kaplan). That's the road to a real Starry Night maze, and closest to how Felix draws.</li>
+            <li><b>A good maze is a picture and a puzzle at once.</b> Wide paths, a real goal (mouse → cheese), a few tempting wrong turns at both ends, and room to color it in afterwards.</li>
+          </ol>
+          <p>Black-and-white printing turns colors into patterns: dots, stripes, crosshatch.</p>
+          <p class="note">Still open: the questions in <a href="../convo/convo%20v0.1.md">convo v0.1</a>. The full notes are in <a href="../maze_research.md">maze_research.md</a>, the list in <a href="../inspirations.md">inspirations.md</a>, the knobs in <a href="../variations.md">variations.md</a>.</p>
+        </div>
+      </details>
+
+      <details class="panel">
+        <summary>📖 Maze words</summary>
+        <div class="body">
+          <table>
+            <tr><th>Word</th><th>In plain words</th></tr>
+            <tr><td>Labyrinth</td><td>One path, no choices. You can't get lost; you just walk it.</td></tr>
+            <tr><td>Maze</td><td>The path splits. You choose, and you can go the wrong way.</td></tr>
+            <tr><td>Perfect maze</td><td>Exactly one way between any two spots. No loops.</td></tr>
+            <tr><td>Braid maze</td><td>Has loops. You get lost going around in circles, not by hitting walls. (Slide “Loops” up.)</td></tr>
+            <tr><td>Dead end</td><td>A branch that stops at a wall.</td></tr>
+            <tr><td>Decoy</td><td>A wrong branch that looks right for a long time.</td></tr>
+            <tr><td>River</td><td>How long the halls run before they split. Wanderer: high river. Spreader: low river.</td></tr>
+            <tr><td>Weave</td><td>Paths that go over and under each other, on bridges.</td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="panel">
+        <summary>🧭 Seven ways to describe a maze</summary>
+        <div class="body">
+          <p>From Walter Pullen's <i>Think Labyrinth</i>, the biggest catalog of maze styles. Each maze picks one answer on every line.</p>
+          <table>
+            <tr><th>Axis</th><th>The question</th><th>Examples</th></tr>
+            <tr><td>Dimension</td><td>Flat, bridges, or floors?</td><td>Hedge maze · Longleat bridges · castle stairs</td></tr>
+            <tr><td>Hyperdimension</td><td>Are you a dot or something bigger?</td><td>Not needed for us</td></tr>
+            <tr><td>Topology</td><td>Does the edge wrap around?</td><td>Normal sheet · a maze on a ball</td></tr>
+            <tr><td>Tessellation</td><td>What shape are the rooms?</td><td>Squares · honeycomb · rings · free curves</td></tr>
+            <tr><td>Routing</td><td>One way, loops, or no choices?</td><td>Perfect · braid · labyrinth</td></tr>
+            <tr><td>Texture</td><td>How do the halls feel?</td><td>Winding · spiky · leaning one way</td></tr>
+            <tr><td>Focus</td><td>Do you draw walls or paths?</td><td>Hedges · a road or river</td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="panel">
+        <summary>🌀 Mazes without a grid</summary>
+        <div class="body">
+          <div class="cards">
+            <div class="card"><b>Growing curves</b>A line that wiggles, grows and pushes away from itself, like a river or brain coral. (Pedersen &amp; Singh, 2006)</div>
+            <div class="card"><b>Picture-guided</b>Each part of a picture gets its own texture: swirls in the sky, straight streets in the town. (Xu &amp; Kaplan, 2007)</div>
+            <div class="card"><b>Maze in a shape</b>Cut the grid to a silhouette: a snail, a rocket, the letter F, or Felix's doodle.</div>
+            <div class="card"><b>Tiles</b>Each tile holds a bit of path. Turn tiles to make new mazes. (Truchet, 1704)</div>
+            <div class="card"><b>Space-filling curves</b>One line that fills a square (Hilbert, dragon curve). Cut it to make choices.</div>
+            <div class="card"><b>Hand feel</b>Wobble the walls and vary their thickness. Press ✍️ on the left to see it.</div>
+          </div>
+        </div>
+      </details>
+
+      <details class="panel">
+        <summary>🧀 What makes a maze fun</summary>
+        <div class="body">
+          <ol>
+            <li><b>A picture and a puzzle.</b> If the picture wins it isn't a maze; if the puzzle wins it's dull.</li>
+            <li><b>Tempting branches at both ends</b>, so starting from the cheese isn't a shortcut.</li>
+            <li><b>Fair:</b> makes him think, never makes him quit.</li>
+            <li><b>A real goal:</b> mouse to cheese beats arrow to dot.</li>
+            <li><b>One world per sheet:</b> walls, start, goal and decorations all belong together.</li>
+            <li><b>Something to find:</b> a bridge, a creature, a hidden picture, a fact at the bottom.</li>
+          </ol>
+          <h3>For a young solver</h3>
+          <ul>
+            <li>Wide paths first, about ½ inch. Narrow paths tire small hands.</li>
+            <li>Only 1–2 dead ends to start. Make it harder by making it bigger.</li>
+            <li>A sheet protector and a dry-erase marker make mistakes free.</li>
+          </ul>
+          <p class="note">On 11×17 the drawing area is about 10 × 14 inches. A ½-inch path is roughly a 13 × 18 grid; a ⅜-inch path roughly 20 × 28. These numbers come from one teacher site, so we'll test them with a real sheet.</p>
+        </div>
+      </details>
+
+      <details class="panel">
+        <summary>🎨 Where the 100 come from</summary>
+        <div class="body">
+          <table>
+            <tr><th>Family</th><th>Count</th><th>A few examples</th></tr>
+            <tr><td>Classical and historical</td><td>10</td><td>Cretan labyrinth · Chartres · Man in the Maze · Chakravyuha</td></tr>
+            <tr><td>Famous real mazes</td><td>11</td><td>Hampton Court · Longleat · Peace Maze · corn mazes</td></tr>
+            <tr><td>Art and artists</td><td>26</td><td>Starry Night · Great Wave · Keith Haring style · Escher · Celtic knots</td></tr>
+            <tr><td>Nature</td><td>26</td><td>Honeycomb · ant tunnels · spider web · brain coral · lava tubes</td></tr>
+            <tr><td>Systems and maps</td><td>12</td><td>Subway map · Venice canals · circuit board · castle plan</td></tr>
+            <tr><td>Math and patterns</td><td>8</td><td>Hilbert curve · Truchet tiles · Penrose tiles · knight's tour</td></tr>
+            <tr><td>Music and sound</td><td>5</td><td>Record groove · Chladni patterns · sound waves</td></tr>
+            <tr><td>Story worlds</td><td>2</td><td>Mouse and cheese · goblin caves</td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="panel">
+        <summary>🌿 Why getting lost feels good</summary>
+        <div class="body">
+          <p>Jimmy's note: every kid has a soft spot for mazes. It's fun to get lost. Like a coloring book for grown-ups, a maze quiets the mind.</p>
+          <p>That idea is old. Walking labyrinths, like the one on the floor of Chartres Cathedral, have long been used for slow, quiet walking, a kind of moving meditation. A labyrinth has no wrong turns, so the mind can rest. A maze asks you to choose, so the mind wakes up. A good series can give Felix both: some sheets to wander, some to solve.</p>
+        </div>
+      </details>
+
+      <details class="panel p-explore" open>
+        <summary>🔭 Explore next (for Jimmy)</summary>
+        <div class="body">
+          <h3>Read</h3>
+          <div class="cards">
+            <div class="card"><b>Think Labyrinth</b>Walter Pullen's huge maze site: every algorithm and style. <a href="https://www.astrolog.org/labyrnth.htm">astrolog.org</a></div>
+            <div class="card"><b>Mazes for Programmers</b>Jamis Buck's book: build each algorithm yourself, with pictures. <a href="https://www.oreilly.com/library/view/-/9781680501315/">O'Reilly</a></div>
+            <div class="card"><b>Organic labyrinths</b>Pedersen &amp; Singh's paper on mazes that grow like rivers. <a href="https://dgp.toronto.edu/%7Ekaran/pdf/mazes.pdf">PDF</a></div>
+            <div class="card"><b>Image-guided mazes</b>Xu &amp; Kaplan's paper on mazes that follow a picture. <a href="https://cgl.uwaterloo.ca/jiexu/paper/xu_siggraph07.pdf">PDF</a></div>
+            <div class="card"><b>Maths and beauty in mazes</b>Craig Kaplan's talk. <a href="https://csclub.uwaterloo.ca/events/2010/fall/Mathematics-and-aesthetics-in-maze-design/">uwaterloo</a></div>
+            <div class="card"><b><i>Maze</i> (1985)</b>Christopher Manson's picture book of 45 rooms. Each picture is a room with doors. <span class="tag todo">find a copy</span></div>
+          </div>
+          <h3>Try with Felix</h3>
+          <div class="cards">
+            <div class="card"><b>Draw a Cretan labyrinth</b>Draw a cross, four corner L's and four dots, then join the ends in order. A real labyrinth in two minutes.</div>
+            <div class="card"><b>Corn maze</b>It's October: most corn mazes are open now. See one from above on the map first.</div>
+            <div class="card"><b>Tape maze</b>Masking tape on the floor, a toy car as the explorer.</div>
+            <div class="card"><b>Swap roles</b>He draws a maze, you solve it, out loud. Ask him where the tricky part is.</div>
+          </div>
+          <h3>Visit (some day)</h3>
+          <div class="cards">
+            <div class="card"><b>Hampton Court</b>England's oldest surviving hedge maze, about 1690.</div>
+            <div class="card"><b>Longleat</b>A huge hedge maze with wooden bridges.</div>
+            <div class="card"><b>Chartres</b>The 1200s floor labyrinth you can walk.</div>
+            <div class="card"><b>A labyrinth nearby</b>The Labyrinth Society keeps a locator. <a href="https://labyrinthsociety.org/">labyrinthsociety.org</a></div>
+          </div>
+          <h3>Build later</h3>
+          <ul>
+            <li>Weave mazes (bridges) on a grid, then on Celtic tiles.</li>
+            <li>A swirl field from a picture, to steer a maze like Starry Night.</li>
+            <li>Mazes in a silhouette: start with Felix's own doodle.</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="panel">
+        <summary>📚 Sources</summary>
+        <div class="body">
+          <p>Saved copies of papers and pages go in <code>research/private/</code>, which isn't committed: this repo is public and these are other people's work. The links below are the originals.</p>
+          <table>
+            <tr><th>Source</th><th>Used for</th></tr>
+            <tr><td><a href="https://cgl.uwaterloo.ca/jiexu/paper/xu_siggraph07.pdf">Xu &amp; Kaplan, Image-guided maze construction (2007)</a> · <a href="https://cgl.uwaterloo.ca/poster/jie_GI06.pdf">poster</a></td><td>Picture-guided mazes; cites Pullen's catalog</td></tr>
+            <tr><td><a href="https://dgp.toronto.edu/%7Ekaran/pdf/mazes.pdf">Pedersen &amp; Singh, Organic labyrinths and mazes (2006)</a> · <a href="https://isohedral.ca/teaching/cs-791-spring-2015/assignment-2/">course notes</a></td><td>Growing curves</td></tr>
+            <tr><td><a href="https://csclub.uwaterloo.ca/events/2010/fall/Mathematics-and-aesthetics-in-maze-design/">Kaplan, Mathematics and aesthetics in maze design</a></td><td>Picture and puzzle in balance</td></tr>
+            <tr><td><a href="https://www.oreilly.com/library/view/-/9781680501315/">Buck, Mazes for Programmers (2015)</a></td><td>Algorithms and how they feel</td></tr>
+            <tr><td><a href="https://journals.rta.lv/index.php/HET/article/view/3508">Boldovs et al. (2016)</a> · <a href="https://www.scitepress.org/PublishedPapers/2025/143608">Li (2025)</a></td><td>Algorithm comparisons</td></tr>
+            <tr><td><a href="https://labyrinthsociety.org/?p=211">Labyrinth Society, Labyrinth Typology</a></td><td>Labyrinth vs. maze</td></tr>
+            <tr><td><a href="https://statmodeling.stat.columbia.edu/?p=11809">Solve mazes by starting at the exit</a></td><td>Decoys at both ends</td></tr>
+            <tr><td><a href="https://clickmazes.com/mazes/mdesign.htm">Clickmazes, structured maze design</a></td><td>Templates and plugs</td></tr>
+            <tr><td><a href="https://univers.studio/maze/">Kids' maze generator</a> · <a href="https://kidsacademy.mobi/printable-worksheets/age-4-5/logic-and-early-math/mazes">Kids Academy</a> · <a href="https://www.twinkl.com/resource/preschool-pencil-control-maze-fun-za-kps-1739781087">Twinkl</a></td><td>Young solvers</td></tr>
+          </table>
+        </div>
+      </details>
+    </section>
+  </main>
+</div>
+
+<button class="gear" id="gear" aria-label="Settings">⚙️</button>
+<div class="drawer" id="drawer" hidden>
+  <h2>Settings</h2>
+  <label><input type="checkbox" id="openAll"> Open all panels</label>
+  <label><input type="checkbox" id="showErrors"> Show errors</label>
+  <ul>
+    <li><a href="../index.html">🏠 Felix Maze home</a></li>
+    <li><a href="../library.html">📚 Library</a></li>
+    <li><a href="../inspirations.md">Inspirations (100)</a></li>
+    <li><a href="../maze_research.md">Research notes</a></li>
+    <li><a href="../variations.md">Variations</a></li>
+  </ul>
+</div>
+<pre class="errors" id="errors" hidden></pre>
+
+<script src="research.js"></script>
+</body>
+</html>

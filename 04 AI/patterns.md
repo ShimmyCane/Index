@@ -36,6 +36,7 @@ Reusable lessons distilled from the seed projects, so a new project can start fr
 ## Content and data projects
 
 - **Content-driven apps:** keep content in JSON next to a generic engine, so new content doesn't need new code. Seen in Test Bank banks, Moment's game catalog, Row Boat's `scenario.json` and Family Habits' `affirmations.json`. _(Test Bank, Moment, Row Boat, Family Habits)_
+- **Seeded generators: store the recipe, not the output.** One small record (style, seed, settings) rebuilds the picture, answer key, thumbnail and animation; fingerprint published recipes so code changes can't silently change them. _(Felix Maze)_
 - Keep question content separate from the knowledge map, linked by stable IDs in both directions. _(Test Bank A/B)_
 - Content QA is its own discipline: validate JSON, unique IDs, answer keys, and source quality. _(Test Bank C, Reader Level Test)_
 - Store evidence at import time (e.g. statement balances) rather than reconstructing it later. _(Family Accounting)_

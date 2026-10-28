@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Felix Maze</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="top">
+  <h1 class="title">Felix Maze <small>Mazes of every kind, to print and solve</small></h1>
+  <span class="chip sun" id="count">…</span>
+</header>
+<main class="wrap">
+  <div class="tiles">
+    <a class="tile" href="library.html" style="background:var(--mint)"><span class="big">📚</span><b>Library</b><span>Every maze. Find one, print it.</span></a>
+    <a class="tile" href="make.html" style="background:var(--peach)"><span class="big">✏️</span><b>Make a maze</b><span>Draw a few lines. Pick a sprout. Bake it.</span></a>
+    <a class="tile" href="answer.html" style="background:var(--lavender)"><span class="big">🎬</span><b>Answers</b><span>Type a maze number, watch the way through.</span></a>
+    <a class="tile" href="print.html" style="background:var(--sky)"><span class="big">🖨️</span><b>Print all</b><span>Every published maze, one per page.</span></a>
+  </div>
+  <h2 class="step">Newest</h2>
+  <a class="paper" id="newest" style="display:block;max-width:760px" href="library.html"></a>
+</main>
+<script src="js/engine.js"></script>
+<script src="js/art.js"></script>
+<script src="js/sheet.js"></script>
+<script src="js/doodle.js"></script>
+<script src="data/catalog.js"></script>
+<script src="js/common.js"></script>
+<script>
+  (function () {
+    const app = FMZ.app;
+    app.init();
+    try {
+      const all = app.bank();
+      document.getElementById("count").textContent = all.length + " mazes";
+      const last = all[all.length - 1];
+      if (last) {
+        const a = document.getElementById("newest");
+        a.href = app.sheetUrl(last);
+        a.innerHTML = FMZ.sheet.svg(last, { fluid: true }).svg;
+      }
+    } catch (e) { app.logError("home: " + e.message); }
+  })();
+</script>
+</body>
+</html>

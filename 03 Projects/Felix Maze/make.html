@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Felix Maze Make</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="top">
+  <h1 class="title"><a href="index.html">Felix Maze</a> <small>Make a maze</small></h1>
+</header>
+<main class="wrap">
+  <h2 class="step">1 · Draw a few lines 🌰</h2>
+  <div class="paper pad" style="max-width:900px"><canvas id="pad" width="1100" height="850"></canvas></div>
+  <div class="row" style="margin-top:12px">
+    <button class="btn" id="undo">↩️ Undo</button>
+    <button class="btn" id="clear">🧽 Clear</button>
+    <span class="row" id="levels"></span>
+    <button class="btn go" id="grow">🌱 Grow 5 sprouts</button>
+  </div>
+
+  <section id="springBox" hidden>
+    <h2 class="step">2 · Pick one or two sprouts 🌱</h2>
+    <div class="sprouts" id="sprouts"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="regrow">🔄 New sprouts</button>
+      <button class="btn go" id="bake" disabled>🌞 Bake</button>
+    </div>
+  </section>
+
+  <section id="summerBox" hidden>
+    <h2 class="step">3 · Summer mazes 🌞</h2>
+    <div id="summer"></div>
+  </section>
+</main>
+<script src="js/engine.js"></script>
+<script src="js/art.js"></script>
+<script src="js/sheet.js"></script>
+<script src="js/doodle.js"></script>
+<script src="data/catalog.js"></script>
+<script src="js/common.js"></script>
+<script>
+  (function () {
+    const app = FMZ.app, S = FMZ.sheet, D = FMZ.doodle, E = FMZ.engine;
+    app.init(`<p>Felix's lines are kept on this device until a maze is saved. Saved mazes join the library with a <b>1</b> in the middle of their number (grown from a doodle).</p>`);
+    const DRAFT = "fmz.draft";
+
+    // ---------- 1. drawing (finger or Apple Pencil) ----------
+    const cv = document.getElementById("pad"), cx = cv.getContext("2d");
+    let strokes = app.store.get(DRAFT, []), cur = null;
+    const B = D.BOX;
+    function paint() {
+      cx.fillStyle = "#fff"; cx.fillRect(0, 0, cv.width, cv.height);
+      cx.setLineDash([12, 12]); cx.strokeStyle = "#d8cfb8"; cx.lineWidth = 3;
+      cx.strokeRect(B.x, B.y, B.w, B.h); cx.setLineDash([]);
+      cx.strokeStyle = "#3b3248"; cx.lineWidth = 10; cx.lineCap = cx.lineJoin = "round";
+      for (const s of strokes.concat(cur ? [cur] : [])) {
+        cx.beginPath();
+        s.forEach(([x, y], i) => (i ? cx.lineTo(x, y) : cx.moveTo(x, y)));
+        if (s.length === 1) cx.lineTo(s[0][0] + 0.1, s[0][1]);
+        cx.stroke();
+      }
+    }
+    const at = e => { const r = cv.getBoundingClientRect(); return [Math.round((e.clientX - r.left) * cv.width / r.width), Math.round((e.clientY - r.top) * cv.height / r.height)]; };
+    cv.addEventListener("pointerdown", e => { e.preventDefault(); cv.setPointerCapture(e.pointerId); cur = [at(e)]; paint(); });
+    cv.addEventListener("pointermove", e => {
+      if (!cur) return;
+      const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+      for (const ev of evs) {
+        const p = at(ev), q = cur[cur.length - 1];
+        if (Math.hypot(p[0] - q[0], p[1] - q[1]) >= 8) cur.push(p);
+      }
+      paint();
+    });
+    const end = () => { if (cur) { if (cur.length > 1) strokes.push(cur); cur = null; app.store.set(DRAFT, strokes); paint(); } };
+    cv.addEventListener("pointerup", end); cv.addEventListener("pointercancel", end);
+    document.getElementById("undo").addEventListener("click", () => { strokes.pop(); app.store.set(DRAFT, strokes); paint(); });
+    document.getElementById("clear").addEventListener("click", () => { strokes = []; app.store.set(DRAFT, strokes); paint(); });
+    paint();
+
+    // time to solve
+    let level = 2;
+    const lv = document.getElementById("levels");
+    [[1, "⏱ 2"], [2, "⏱ 5"], [3, "⏱ 10"], [4, "⏱ 20"]].forEach(([n, t]) => {
+      const b = document.createElement("button");
+      b.className = "btn" + (n === level ? " on" : ""); b.textContent = t + " min"; b.dataset.level = n;
+      b.addEventListener("click", () => { level = n; lv.querySelectorAll(".btn").forEach(x => x.classList.toggle("on", +x.dataset.level === n)); });
+      lv.append(b);
+    });
+
+    // ---------- 2. spring: five sprouts, each reads the lines a different way ----------
+    let sprouts = [], picked = new Set();
+    const modeKeys = Object.keys(D.MODES), themeKeys = Object.keys(D.THEMES);
+    function recipeFor(mode, theme, seed, growth) {
+      return { n: 0, family: D.THEMES[theme].family, level, source: 1, style: "doodle", seed, growth,
+        doodle: { mode, theme, strokes: strokes.map(s => s.map(([x, y]) => [x, y])) } };
+    }
+    function grow() {
+      if (!strokes.length) { alert("Draw a line first!"); return; }
+      const r = E.rng(Date.now() & 0xffffff);
+      const themes = E.shuffle(themeKeys.slice(), r);
+      sprouts = modeKeys.map((m, i) => recipeFor(m, themes[i], 1 + r.int(1e6), 0.35));
+      picked.clear();
+      const box = document.getElementById("sprouts");
+      box.innerHTML = "";
+      sprouts.forEach((rc, i) => {
+        const b = document.createElement("button");
+        b.className = "sprout";
+        try { b.innerHTML = S.svg(rc, { bare: true, fluid: true }).svg; }
+        catch (e) { app.logError("sprout " + rc.doodle.mode + ": " + e.message); }
+        b.insertAdjacentHTML("beforeend", `<b>${D.MODES[rc.doodle.mode].icon} ${D.MODES[rc.doodle.mode].label}</b><small>${D.THEMES[rc.doodle.theme].label}</small>`);
+        b.addEventListener("click", () => {
+          if (picked.has(i)) picked.delete(i);
+          else { if (picked.size >= 2) picked.delete(picked.values().next().value); picked.add(i); }
+          box.querySelectorAll(".sprout").forEach((x, k) => x.classList.toggle("on", picked.has(k)));
+          document.getElementById("bake").disabled = !picked.size;
+        });
+        box.append(b);
+      });
+      document.getElementById("bake").disabled = true;
+      document.getElementById("springBox").hidden = false;
+      document.getElementById("springBox").scrollIntoView({ behavior: "smooth" });
+    }
+    document.getElementById("grow").addEventListener("click", grow);
+    document.getElementById("regrow").addEventListener("click", grow);
+
+    // ---------- 3. summer: bake the picked sprouts into full mazes, try options, save ----------
+    document.getElementById("bake").addEventListener("click", () => {
+      const box = document.getElementById("summer");
+      box.innerHTML = "";
+      [...picked].forEach(i => box.append(summerCard(Object.assign({}, sprouts[i], { growth: 1 }))));
+      document.getElementById("summerBox").hidden = false;
+      document.getElementById("summerBox").scrollIntoView({ behavior: "smooth" });
+    });
+
+    function summerCard(rc) {
+      const div = document.createElement("div");
+      div.style.marginBottom = "26px";
+      div.innerHTML = `<div class="paper" style="max-width:900px"></div>
+        <div class="row" style="margin-top:12px">
+          <button class="btn" data-a="seed">🎲 Another try</button>
+          <button class="btn" data-a="theme">🎨 Another look</button>
+          <button class="btn" data-a="answer">👀 Answer</button>
+          <input class="field" placeholder="Name it (for the footer)" value="Felix's Doodle">
+          <button class="btn go" data-a="save">✅ Save to library</button>
+        </div><p class="note" hidden></p>`;
+      let showAnswer = false;
+      const draw = () => {
+        try {
+          const out = S.svg(Object.assign({}, rc, { n: rc.savedAs || app.nextNumber(), title: div.querySelector("input").value, inspired: "Grown from Felix's doodle", fun: D.MODES[rc.doodle.mode].label + "." }), { answer: showAnswer });
+          div.querySelector(".paper").innerHTML = out.svg;
+          if (!out.model.sol) app.logError("This sprout has no way through. Try another.");
+        } catch (e) { app.logError("bake: " + e.message); }
+      };
+      div.addEventListener("click", e => {
+        const a = e.target.closest("[data-a]"); if (!a) return;
+        if (a.dataset.a === "seed" || a.dataset.a === "theme") { rc.savedAs = null; div.querySelector("[data-a=save]").disabled = false; div.querySelector(".note").hidden = true; }
+        if (a.dataset.a === "seed") { rc.seed = 1 + Math.floor(Math.random() * 1e6); draw(); }
+        if (a.dataset.a === "theme") { const k = themeKeys[(themeKeys.indexOf(rc.doodle.theme) + 1) % themeKeys.length]; rc.doodle.theme = k; rc.family = D.THEMES[k].family; draw(); }
+        if (a.dataset.a === "answer") { showAnswer = !showAnswer; a.classList.toggle("on", showAnswer); draw(); }
+        if (a.dataset.a === "save") {
+          const full = Object.assign({}, rc, {
+            n: app.nextNumber(), title: div.querySelector("input").value.trim() || "Felix's Doodle",
+            inspired: "Grown from Felix's doodle", fun: D.MODES[rc.doodle.mode].label + ".",
+            tags: ["Felix's doodle", D.MODES[rc.doodle.mode].label, D.THEMES[rc.doodle.theme].label], made: new Date().toISOString().slice(0, 10)
+          });
+          const ok = app.saveRecipe(full);
+          const note = div.querySelector(".note");
+          note.hidden = false;
+          if (ok) {
+            const codeTxt = S.code(full);
+            note.innerHTML = `Saved as <b>Felix Maze #${codeTxt}</b> on this device. <a href="sheet.html?code=${codeTxt}">Open the sheet</a> · <a href="answer.html?code=${codeTxt}">Watch the answer</a>`;
+            a.disabled = true;
+            rc.savedAs = full.n; draw();
+          } else note.textContent = "Could not save on this device.";
+        }
+      });
+      div.querySelector("input").addEventListener("change", draw);
+      draw();
+      return div;
+    }
+  })();
+</script>
+</body>
+</html>

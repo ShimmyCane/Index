@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Felix Maze Print</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+<style>
+  .stack { display: grid; gap: 18px; max-width: 900px; }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1 class="title"><a href="index.html">Felix Maze</a> <small id="sub"></small></h1>
+  <button class="btn go noprint" id="print">🖨️ Print</button>
+</header>
+<main class="wrap">
+  <p class="note noprint">Letter paper, landscape, no margins (“None” or “Minimum”), scale 100%. One maze per page. Answers don't print.</p>
+  <div class="stack" id="stack"></div>
+</main>
+<script src="js/engine.js"></script>
+<script src="js/art.js"></script>
+<script src="js/sheet.js"></script>
+<script src="js/doodle.js"></script>
+<script src="data/catalog.js"></script>
+<script src="js/common.js"></script>
+<script>
+  (function () {
+    const app = FMZ.app, S = FMZ.sheet;
+    app.init();
+    const codes = (app.param("codes") || "").split(",").filter(Boolean);
+    const list = codes.length ? codes.map(c => app.find(c)).filter(Boolean) : app.bank().filter(r => r.published);
+    document.getElementById("sub").textContent = list.length + " sheets";
+    const stack = document.getElementById("stack");
+    list.forEach(r => {
+      try {
+        const d = document.createElement("div");
+        d.className = "paper print-sheet";
+        d.innerHTML = S.svg(r).svg;
+        stack.append(d);
+      } catch (e) { app.logError("sheet " + r.code + ": " + e.message); }
+    });
+    document.getElementById("print").addEventListener("click", () => window.print());
+  })();
+</script>
+</body>
+</html>
