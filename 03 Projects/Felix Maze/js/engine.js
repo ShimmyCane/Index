@@ -214,6 +214,58 @@
     return { links, seen };
   }
 
+  /* Carve a perfect maze inside a set of cells only (used for the rooms of a divided maze). */
+  function growRegion(g, r, cells, mix, links) {
+    const list = [...cells], seen = new Set(), active = [];
+    const first = list[r.int(list.length)];
+    seen.add(first); active.push(first);
+    while (active.length) {
+      const i = r() < mix ? r.int(active.length) : active.length - 1, c = active[i];
+      const opts = [];
+      for (const ei of g.adj[c]) { const e = g.edges[ei]; if (e.b === null) continue; const o = other(e, c); if (cells.has(o) && !seen.has(o)) opts.push([ei, o]); }
+      if (!opts.length) { active.splice(i, 1); continue; }
+      const [ei, o] = opts[r.int(opts.length)];
+      links.add(ei); seen.add(o); active.push(o);
+    }
+  }
+
+  /* Recursive division (Mondrian style): split the box with a wall and one door, again and again, down to rooms;
+     then a small maze inside each room. Walls made by the first few splits are marked heavy (drawn thick).
+     Needs a full square grid (no mask). */
+  function divide(g, r, { minSide = 2, maxArea = 14, heavyDepth = 1, mix = 0.1 } = {}) {
+    const key = (a, b) => (a < b ? a + "," + b : b + "," + a);
+    const eix = new Map();
+    g.edges.forEach((e, i) => { if (e.b !== null) eix.set(key(e.a, e.b), i); });
+    const links = new Set(), heavy = new Set(), rooms = [];
+    const cellAt = (i, j) => g.at.get(i + "," + j);
+    (function split(i0, j0, w, h, depth) {
+      const canV = w >= 2 * minSide, canH = h >= 2 * minSide;
+      if ((!canV && !canH) || (depth >= 1 && w * h <= maxArea) || (depth >= 2 && r() < 0.16 * depth)) { rooms.push([i0, j0, w, h]); return; }
+      const vertical = canV && (!canH || (w / h > 1.15 ? true : w / h < 0.87 ? false : r() < 0.5));
+      if (vertical) {
+        const pos = minSide + r.int(w - 2 * minSide + 1), door = j0 + r.int(h);
+        for (let j = j0; j < j0 + h; j++) {
+          const ei = eix.get(key(cellAt(i0 + pos - 1, j), cellAt(i0 + pos, j)));
+          if (j === door) links.add(ei); else if (depth <= heavyDepth) heavy.add(ei);
+        }
+        split(i0, j0, pos, h, depth + 1); split(i0 + pos, j0, w - pos, h, depth + 1);
+      } else {
+        const pos = minSide + r.int(h - 2 * minSide + 1), door = i0 + r.int(w);
+        for (let i = i0; i < i0 + w; i++) {
+          const ei = eix.get(key(cellAt(i, j0 + pos - 1), cellAt(i, j0 + pos)));
+          if (i === door) links.add(ei); else if (depth <= heavyDepth) heavy.add(ei);
+        }
+        split(i0, j0, w, pos, depth + 1); split(i0, j0 + pos, w, h - pos, depth + 1);
+      }
+    })(0, 0, g.cols, g.rows, 0);
+    for (const [i0, j0, w, h] of rooms) {
+      const cells = new Set();
+      for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) cells.add(cellAt(i0 + i, j0 + j));
+      growRegion(g, r, cells, mix, links);
+    }
+    return { links, heavy, rooms, seen: new Uint8Array(g.cells.length).fill(1) };
+  }
+
   const degree = (g, links, c) => g.adj[c].reduce((n, ei) => n + (links.has(ei) ? 1 : 0), 0);
 
   // Open some dead ends into loops (kinder, and adds "going around in circles").
@@ -307,6 +359,16 @@
   function pickEnd(g, spec, box) {
     if (spec.center && g.kind === "polar") return { cell: 0, edge: -1 };
     if (spec.cell !== undefined) return { cell: spec.cell, edge: -1 };
+    if (spec.nearEdge) {                      // the outside doorway closest to a point, from any direction
+      let best = null, bd = Infinity;
+      g.edges.forEach((e, i) => {
+        if (e.b !== null) return;
+        if (spec.ok && !spec.ok(e, g.cells[e.a])) return;
+        const [mx, my] = edgeMid(e.geo), d = Math.hypot(mx - spec.nearEdge[0], my - spec.nearEdge[1]);
+        if (d < bd) { bd = d; best = { cell: e.a, edge: i }; }
+      });
+      if (best) return best;
+    }
     if (spec.near) {
       let best = 0, bd = Infinity;
       g.cells.forEach((c, i) => { const d = Math.hypot(c.cx - spec.near[0], c.cy - spec.near[1]); if (d < bd) { bd = d; best = i; } });
@@ -386,5 +448,5 @@
   }
 
   root.FMZ = root.FMZ || {};
-  root.FMZ.engine = { rng, shuffle, buildGrid, buildHex, buildPolar, keepLargest, grow, braid, weave, solve, distances, pickEnd, pathPoints, edgeMid, degree, other, inPoly, segDist, segCross };
+  root.FMZ.engine = { rng, shuffle, buildGrid, buildHex, buildPolar, keepLargest, grow, growRegion, divide, braid, weave, solve, distances, pickEnd, pathPoints, edgeMid, degree, other, inPoly, segDist, segCross };
 })(typeof window !== "undefined" ? window : globalThis);

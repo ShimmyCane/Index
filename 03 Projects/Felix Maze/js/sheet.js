@@ -6,6 +6,7 @@
   const E = root.FMZ.engine, A = root.FMZ.art;
   const W = 1100, H = 850;
   const INK = "#222";
+  const ZC = [550, 420];                                  // the middle of the maze area on the page
 
   // Difficulty 1–5, each with a rough time to solve. size = cell size (1/100 inch).
   // Calibrated on Jimmy's judgement that a 0.54 in maze (the old 330-00A, effort ≈ 2.2) is level 2.
@@ -91,7 +92,7 @@
     if (look.mode !== "walls") model.drawn.walls = []; // ribbons: only the extra lines matter
     const bucket = 40, grid = new Map();
     // lines to keep clear of: the maze walls, plus anything drawn on top (Felix's wall lines, a river)
-    const lines = model.drawn.walls.map(w => [w, (look.wall || 6) / 2]);
+    const lines = model.drawn.walls.map(w => [w, w.half || (look.wall || 6) / 2]);
     const extra = model.spec.extraWalls ? model.spec.extraWalls(model) : [];
     for (const [pts, h] of extra) lines.push([pts, h]);
     for (const [w, half] of lines) {
@@ -130,10 +131,11 @@
   }
 
   // Swirls (Starry Night): rotate points around vortex centers, more near the middle.
-  function makeWarp(vortices) {
-    if (!vortices || !vortices.length) return null;
+  function makeWarp(vortices, sine) {
+    if ((!vortices || !vortices.length) && !sine) return null;
     return ([x, y]) => {
-      for (const v of vortices) {
+      if (sine) y += sine.a * Math.sin((x - (sine.x0 || 0)) * sine.k + (sine.ph || 0)); // a rolling wave
+      for (const v of vortices || []) {
         const dx = x - v.x, dy = y - v.y, d = Math.hypot(dx, dy);
         const th = v.s * Math.exp(-(d * d) / (v.r * v.r));
         const c = Math.cos(th), s = Math.sin(th);
@@ -147,16 +149,22 @@
   function buildModel(recipe) {
     const st = STYLES[recipe.style] || STYLES.mouse;
     const lv = Object.assign({ level: recipe.level }, LEVELS[recipe.level] || LEVELS[2]);
+    if (recipe.cell) lv.size = recipe.cell;                 // the generator may nudge the cell size to hit a level
     const r = E.rng(recipe.seed >>> 0);
     const spec = st.spec(recipe, lv);
     spec.geometry = spec.geometry || st.geometry;
+    if (recipe.chars) spec.chars = recipe.chars;           // a variant's own start and finish
+    if (recipe.treat !== undefined) spec.treat = recipe.treat || null;
+    if (recipe.mix !== undefined) spec.mix = recipe.mix;     // 0 = long winding halls, 1 = spiky with many short branches
     let g;
     if (spec.geometry === "hex") g = E.buildHex(Object.assign({}, spec.box, { size: spec.size, mask: spec.mask }));
     else if (spec.geometry === "polar") g = E.buildPolar(spec.polar);
     else g = E.buildGrid(Object.assign({}, spec.box, { size: spec.size, mask: spec.mask }));
     if (spec.mask) g = E.keepLargest(g);
     const prep = spec.prepare ? spec.prepare(g, r) : {};
-    const grown = E.grow(g, r, Object.assign({ mix: spec.mix !== undefined ? spec.mix : lv.mix, growth: recipe.growth || 1 }, prep));
+    const grown = spec.generate
+      ? spec.generate(g, r, lv, prep)                       // e.g. recursive division: returns { links, seen, heavy }
+      : E.grow(g, r, Object.assign({ mix: spec.mix !== undefined ? spec.mix : lv.mix, growth: recipe.growth || 1 }, prep));
     const links = grown.links;
     let bridges = [];
     if ((recipe.growth || 1) >= 1) {
@@ -179,12 +187,13 @@
       end = spec.finish.far ? farFrom(start.cell, spec.finish.side) : prep.finish || E.pickEnd(g, spec.finish, spec.box || {});
     }
     const sol = (recipe.growth || 1) >= 1 ? E.solve(g, links, start.cell, end.cell) : null;
-    const model = { recipe, spec, g, links, seen: grown.seen, bridges, start, end, sol };
+    const model = { recipe, spec, g, links, seen: grown.seen, heavy: grown.heavy || null, bridges, start, end, sol };
     if (spec.after) spec.after(model);
     model.treats = sol && spec.treat ? placeTreats(model) : [];
     model.path = sol ? E.pathPoints(g, sol, start, end) : null;
-    model.warp = makeWarp(spec.look.vortices);
-    if (model.warp && model.path) model.path = model.path.map(model.warp);
+    model.warp = makeWarp(spec.look.vortices, spec.look.sine);
+    // bent mazes: sample the answer line finely before bending it, so it follows the bent corridors
+    if (model.warp && model.path) model.path = densify(model.path, 8).map(model.warp);
     model.deadEnds = 0;
     g.cells.forEach((c, i) => { if (E.degree(g, links, i) === 1 && i !== start.cell && i !== end.cell) model.deadEnds++; });
     return model;
@@ -233,7 +242,7 @@
     const warp = model.warp;
     const growing = (model.recipe.growth || 1) < 1;
     const drawn = model.drawn = { walls: [] };
-    const ptsOf = geo => { let p = samplesOf(geo, look.chords, warp ? 10 : 40); if (warp) p = p.map(warp); p = wobbly(p, look.wobble || 0, r); drawn.walls.push(p); return p; };
+    const ptsOf = (geo, half) => { let p = samplesOf(geo, look.chords, warp ? 10 : 40); if (warp) p = p.map(warp); p = wobbly(p, look.wobble || 0, r); if (half) p.half = half; drawn.walls.push(p); return p; };
     const out = [];
     let coverUnder = null;
     const entrance = new Set([model.start.edge, model.end.edge]);
@@ -243,14 +252,17 @@
     if (look.bg) out.push(look.bg(uid, model));
 
     if (look.mode === "walls") {
-      const d = [], bd = [];
+      const d = [], bd = [], hv = [];
       g.edges.forEach((e, i) => {
         if (e.under) return;
         if (growing && !(seen[e.a] || (e.b !== null && seen[e.b]))) return;
         if (e.b === null) { if (!entrance.has(i)) bd.push(smooth(ptsOf(e.geo))); }
-        else if (!links.has(i)) d.push(smooth(ptsOf(e.geo)));
+        else if (!links.has(i)) {
+          if (model.heavy && model.heavy.has(i)) hv.push(smooth(ptsOf(e.geo, look.wall * (look.heavyScale || 1.9) / 2))); // the big walls of a Mondrian maze
+          else d.push(smooth(ptsOf(e.geo)));
+        }
       });
-      const all = d.concat(bd).join("");
+      const all = d.concat(bd, hv).join("");
       const w = look.wall, ow = look.outline || w;
       if (look.hedge && opts.verify) {
         out.push(`<path d="${all}" fill="none" stroke="${INK}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`);
@@ -261,8 +273,11 @@
         out.push(`<path d="${all}" fill="none" stroke="${INK}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`);
         out.push(`<path d="${all}" fill="none" stroke="#fff" stroke-width="${look.double}" stroke-linecap="round" stroke-linejoin="round"/>`);
       } else {
-        out.push(`<path d="${d.join("")}" fill="none" stroke="${INK}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`);
+        // dots: the walls are rows of stones (round dots with gaps) instead of lines
+        const dash = look.dots ? ` stroke-dasharray="0 ${look.dots.gap}"` : "";
+        out.push(`<path d="${d.join("")}" fill="none" stroke="${INK}" stroke-width="${look.dots ? look.dots.size : w}" stroke-linecap="round" stroke-linejoin="round"${opts.verify ? "" : dash}/>`);
         out.push(`<path d="${bd.join("")}" fill="none" stroke="${INK}" stroke-width="${ow}" stroke-linecap="round" stroke-linejoin="round"/>`);
+        if (hv.length) out.push(`<path d="${hv.join("")}" fill="none" stroke="${INK}" stroke-width="${w * (look.heavyScale || 1.9)}" stroke-linecap="square" stroke-linejoin="miter"/>`);
       }
     } else {
       // Paths drawn as ribbons, tunnels or subway lines.
@@ -287,7 +302,7 @@
         out.push(`<path d="${D}" fill="none" stroke="${INK}" stroke-width="${look.wall}" stroke-linecap="round" stroke-linejoin="round"/>`);
         g.cells.forEach((c, i) => {
           const deg = E.degree(g, links, i);
-          if (deg >= 3 || deg === 1) { const [x, y] = center(i); out.push(`<circle cx="${f1(x)}" cy="${f1(y)}" r="${look.wall * 0.95}" fill="#fff" stroke="${INK}" stroke-width="5"/>`); }
+          if (deg >= 3 || deg === 1) { const [x, y] = center(i); out.push(`<circle cx="${f1(x)}" cy="${f1(y)}" r="${look.pad || look.wall * 0.95}" fill="#fff" stroke="${INK}" stroke-width="5"/>`); }
         });
       } else {
         const ow = look.wall + 2 * look.edge;
@@ -344,22 +359,26 @@
     const parts = [];
     parts.push(defs(uid));
     parts.push(`<rect width="${W}" height="${H}" fill="#fff"/>`);
+    const inner = [];
     const art = !opts.verify; // verify: only the maze itself, so a pixel check sees nothing but walls and the answer
-    if (st.under && art) parts.push(st.under(model, uid));
-    parts.push(`<g class="fmz-maze">${renderMaze(model, uid, opts)}</g>`);
-    if (st.over && (art || recipe.style === "doodle")) parts.push(st.over(model, uid));
+    if (st.under && art) inner.push(st.under(model, uid));
+    inner.push(`<g class="fmz-maze">${renderMaze(model, uid, opts)}</g>`);
+    if (st.over && (art || recipe.style === "doodle")) inner.push(st.over(model, uid));
     const sp = model.spec;
     for (const c of art ? model.treats || [] : []) {
       const cell = model.g.cells[c], p = model.warp ? model.warp([cell.cx, cell.cy]) : [cell.cx, cell.cy];
-      parts.push(`<g class="fmz-treat">${A.draw(sp.treat, p[0], p[1], Math.max(26, (model.g.s || sp.size || 60) * 0.42))}</g>`);
+      inner.push(`<g class="fmz-treat">${A.draw(sp.treat, p[0], p[1], Math.max(26, (model.g.s || sp.size || 60) * 0.42))}</g>`);
     }
     if (art && sp.chars && model.sol !== undefined) {
       const sz = sp.charSize || 84;
       const inside = end => end.edge >= 0 ? sz : model.g.kind === "polar" && end.cell === 0 ? model.g.r0 * 1.5 : Math.min(sz, (model.g.s || sp.size || 60) * 0.9);
       const a = standAt(model, model.start), b = standAt(model, model.end);
-      parts.push(`<g class="fmz-start">${A.draw(sp.chars[0], a[0], a[1], inside(model.start))}</g>`);
-      parts.push(`<g class="fmz-finish">${A.draw(sp.chars[1], b[0], b[1], inside(model.end))}</g>`);
+      inner.push(`<g class="fmz-start">${A.draw(sp.chars[0], a[0], a[1], inside(model.start))}</g>`);
+      inner.push(`<g class="fmz-finish">${A.draw(sp.chars[1], b[0], b[1], inside(model.end))}</g>`);
     }
+    // zoom: a bigger maze on the page (the harder levels), drawn by scaling everything about the page's maze center
+    const zr = recipe.zoom || 1;
+    parts.push(zr !== 1 ? `<g class="fmz-zoom" transform="translate(${ZC[0]} ${ZC[1]}) scale(${zr}) translate(${-ZC[0]} ${-ZC[1]})">${inner.join("")}</g>` : inner.join(""));
     if (!opts.bare && art) {
       parts.push(`<text x="40" y="70" ${font} font-size="44" fill="${INK}">Felix Maze <tspan font-size="30">#${id}</tspan></text>`);
       const foot = [`Felix Maze #${id}`, recipe.title, recipe.inspired, recipe.fun].filter(Boolean).join("  ·  ");
@@ -375,6 +394,13 @@
      look.mode: walls | ribbon | subway. under/over draw extra pictures before/after the maze. */
   const capsule = (segs, rad) => (x, y) => segs.some(([a, b, c, d, t]) => E.segDist(x, y, a, b, c, d) <= (t || rad));
 
+  // where the swirls sit, one arrangement per Starry Night variant
+  const STARRY_SKIES = [
+    [{ x: 450, y: 350, r: 190, s: 1.3 }, { x: 690, y: 560, r: 140, s: -1.05 }, { x: 320, y: 590, r: 100, s: 0.85 }],
+    [{ x: 380, y: 480, r: 180, s: -1.3 }, { x: 640, y: 330, r: 150, s: 1.15 }, { x: 700, y: 580, r: 100, s: -0.9 }],
+    [{ x: 520, y: 300, r: 200, s: 1.4 }, { x: 330, y: 560, r: 130, s: -1.1 }, { x: 720, y: 520, r: 110, s: 0.9 }],
+    [{ x: 600, y: 420, r: 190, s: -1.35 }, { x: 360, y: 330, r: 140, s: 1.1 }, { x: 430, y: 600, r: 120, s: -0.8 }]
+  ];
   const STYLES = {
     mouse: {
       label: "Mouse and cheese", geometry: "grid",
@@ -385,7 +411,7 @@
       label: "Starry Night swirls", geometry: "grid",
       spec: (rc, lv) => ({ box: { x: 190, y: 160, w: 660, h: 540 }, size: lv.size, start: { side: "W", at: 0.85 }, finish: { side: "N", at: 0.9 },
         chars: ["cat", "moon"], treat: "star",
-        look: { mode: "walls", wall: 6.5, wobble: 1.2, vortices: [{ x: 450, y: 350, r: 190, s: 1.3 }, { x: 690, y: 560, r: 140, s: -1.05 }, { x: 320, y: 590, r: 100, s: 0.85 }] } }),
+        look: { mode: "walls", wall: 6.5, wobble: 1.2, vortices: STARRY_SKIES[((rc.p || {}).v || 0) % STARRY_SKIES.length] } }),
       over: () => {
         // a cypress tree like the flame-shaped one in the painting, and stars around the edge
         let s = `<path d="M965 720 C935 620 970 550 958 470 C950 410 980 350 972 260 C990 340 1008 410 1000 480 C994 550 1024 630 998 720 Z" fill="#fff" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/>`;

@@ -9,7 +9,7 @@ const root = path.join(__dirname, "..");
 const ctx = { console, Math };
 ctx.window = ctx; ctx.globalThis = ctx;
 vm.createContext(ctx);
-for (const f of ["js/engine.js", "js/art.js", "js/sheet.js", "js/doodle.js", "js/score.js", "data/catalog.js"]) {
+for (const f of ["js/engine.js", "js/art.js", "js/sheet.js", "js/doodle.js", "js/score.js", "js/shapes.js", "js/designs.js", "data/catalog.js"]) {
   vm.runInContext(fs.readFileSync(path.join(root, f), "utf8"), ctx, { filename: f });
 }
 const S = ctx.FMZ.sheet;

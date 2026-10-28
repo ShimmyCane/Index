@@ -96,6 +96,62 @@
     crumb: () => `<path d="M-30 18 L-30 -10 L26 -30 L30 18 Z" ${F()}/><circle cx="-8" cy="2" r="6" fill="none" ${K}/><circle cx="12" cy="-10" r="4" fill="none" ${K}/>`,
     drop: () => `<path d="M0 -40 C18 -12 30 4 30 16 A30 30 0 0 1 -30 16 C-30 4 -18 -12 0 -40 Z" ${F()}/><path d="M-14 14 Q-14 26 -2 30" fill="none" ${K}/>`,
     leaf: () => `<path d="M-34 30 C-34 -20 10 -38 36 -34 C38 -6 20 34 -34 30 Z" ${F()}/><path d="M-34 30 Q2 0 30 -28" fill="none" ${K}/>`,
+    boat: () => `
+      <path d="M-40 10 L40 10 L28 34 L-28 34 Z" ${F()}/>
+      <path d="M0 10 L0 -40" fill="none" ${K}/>
+      <path d="M4 -38 L34 4 L4 4 Z" ${F()}/><path d="M-4 -26 L-26 4 L-4 4 Z" ${F()}/>
+      <path d="M-46 42 q8 -8 16 0 t16 0 t16 0 t16 0 t16 0" fill="none" ${K}/>`,
+    fish: () => `
+      <path d="M-40 0 C-22 -28 20 -28 32 0 C20 28 -22 28 -40 0 Z" ${F()}/>
+      <path d="M30 0 L50 -20 L50 20 Z" ${F()}/>
+      <path d="M-6 -18 Q4 -34 14 -20" fill="none" ${K}/>
+      <circle cx="-22" cy="-4" r="4" fill="#222"/><path d="M-30 6 Q-26 10 -22 8" fill="none" ${K}/>`,
+    rabbit: () => `
+      <ellipse cx="-11" cy="-30" rx="7" ry="22" ${F()}/><ellipse cx="11" cy="-30" rx="7" ry="22" ${F()}/>
+      <ellipse cx="0" cy="32" rx="26" ry="20" ${F()}/>
+      <circle cx="28" cy="38" r="7" ${F()}/>
+      <circle cx="0" cy="-2" r="19" ${F()}/>
+      <circle cx="-7" cy="-5" r="3" fill="#222"/><circle cx="7" cy="-5" r="3" fill="#222"/>
+      <path d="M-3 3 L3 3 L0 7 Z" fill="#222" ${K}/><path d="M0 7 Q-5 12 -9 8 M0 7 Q5 12 9 8" fill="none" ${K}/>`,
+    carrot: () => `
+      <path d="M-15 -26 L15 -26 L0 44 Z" ${F()}/>
+      <path d="M-8 -12 L6 -12 M-5 4 L5 4 M-3 20 L3 20" fill="none" ${K}/>
+      <path d="M0 -26 Q-10 -46 -20 -42 M0 -26 Q0 -52 0 -50 M0 -26 Q10 -46 20 -42" fill="none" ${K}/>`,
+    sun: () => `
+      ${Array.from({ length: 12 }, (_, k) => `<path d="M0 -32 L0 -46" transform="rotate(${k * 30})" fill="none" ${K}/>`).join("")}
+      <circle cx="0" cy="0" r="24" ${F()}/>
+      <circle cx="-8" cy="-4" r="3" fill="#222"/><circle cx="8" cy="-4" r="3" fill="#222"/><path d="M-10 8 Q0 16 10 8" fill="none" ${K}/>`,
+    note: () => `
+      <ellipse cx="-12" cy="30" rx="16" ry="11" transform="rotate(-20 -12 30)" fill="#222" ${K}/>
+      <path d="M3 26 L3 -40 Q8 -34 26 -28 Q22 -10 8 -12" fill="none" ${K}/>`,
+    pumpkin: () => `
+      <path d="M-6 -26 Q-4 -40 8 -42 L12 -36 Q4 -34 4 -26 Z" ${F()}/>
+      <ellipse cx="0" cy="8" rx="40" ry="32" ${F()}/>
+      <path d="M-14 -22 Q-26 8 -14 38 M14 -22 Q26 8 14 38 M0 -24 Q0 8 0 40" fill="none" ${K}/>`,
+    rocket: () => `
+      <path d="M-14 20 L-32 42 L-14 34 Z" ${F()}/><path d="M14 20 L32 42 L14 34 Z" ${F()}/>
+      <path d="M0 -46 C18 -28 20 6 15 34 L-15 34 C-20 6 -18 -28 0 -46 Z" ${F()}/>
+      <circle cx="0" cy="-8" r="8" ${F()}/>
+      <path d="M-9 34 L0 52 L9 34" fill="none" ${K}/>`,
+    bird: () => `
+      <path d="M-34 0 L-48 -14 M-34 6 L-50 6" fill="none" ${K}/>
+      <ellipse cx="-4" cy="6" rx="32" ry="20" ${F()}/>
+      <circle cx="26" cy="-8" r="14" ${F()}/>
+      <path d="M38 -10 L52 -6 L38 -2 Z" ${F()}/>
+      <circle cx="29" cy="-11" r="3" fill="#222"/>
+      <path d="M-18 4 Q0 -14 16 6" fill="none" ${K}/>
+      <path d="M-6 24 L-6 38 M6 24 L6 38" fill="none" ${K}/>`,
+    butterfly: () => `
+      <path d="M0 -4 C-10 -40 -44 -40 -40 -8 C-38 6 -14 4 0 -4 Z" ${F()}/>
+      <path d="M0 -4 C10 -40 44 -40 40 -8 C38 6 14 4 0 -4 Z" ${F()}/>
+      <path d="M0 2 C-10 8 -34 12 -28 34 C-22 44 -6 30 0 2 Z" ${F()}/>
+      <path d="M0 2 C10 8 34 12 28 34 C22 44 6 30 0 2 Z" ${F()}/>
+      <ellipse cx="0" cy="2" rx="4" ry="22" fill="#222"/>
+      <path d="M-2 -20 Q-10 -36 -18 -34 M2 -20 Q10 -36 18 -34" fill="none" ${K}/>`,
+    mountain: () => `
+      <path d="M-46 36 L-4 -36 L46 36 Z" ${F()}/>
+      <path d="M-4 -36 L-14 -18 L-6 -22 L0 -14 L6 -22 L12 -16 Z" ${F()}/>
+      <path d="M-4 -36 L-4 -52 L12 -46 L-4 -42" fill="none" ${K}/>`,
     figure: () => `
       <circle cx="0" cy="-36" r="12" ${F()}/>
       <path d="M0 -24 L0 12 M0 -16 L-22 -34 M0 -16 L24 -30 M0 12 L-18 40 M0 12 L18 40" fill="none" stroke="#222" stroke-width="9" stroke-linecap="round"/>`
