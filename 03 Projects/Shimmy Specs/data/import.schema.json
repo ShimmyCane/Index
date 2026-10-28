@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shimmy-project-0",
+  "title": "Shimmy Specs project file (placeholder format, format shimmy-project/0)",
+  "description": "Every property is optional. Unknown properties are allowed and kept under extra. Values are refined through conversation; the real file will come from another repository later.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "format": { "const": "shimmy-project/0" },
+    "kind": { "enum": ["sketch", "own"], "description": "Office projects never go here." },
+    "name": { "type": "string" },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "scope": { "type": "array", "items": { "enum": ["new", "addition", "alteration", "repair", "restoration", "historic"] } },
+        "use": { "enum": ["A", "B", "E", "I", "M", "R-1", "R-2", "S"] },
+        "stories": { "type": "integer", "minimum": 1 },
+        "occupied": { "type": "boolean" },
+        "notes": { "type": "string" }
+      }
+    },
+    "code": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "edition": { "type": "string" },
+        "construction_type": { "enum": ["IA", "IB", "IIA", "IIB", "IIIA", "IIIB", "IV", "VA", "VB"] },
+        "sprinklered": { "type": "boolean" },
+        "ratings": { "type": "array", "items": { "type": "string" } },
+        "energy_code": { "type": "string" },
+        "climate_zone": { "type": "string" }
+      }
+    },
+    "contract": {
+      "type": "object",
+      "properties": {
+        "family": { "enum": ["AIA", "other"] },
+        "agreement": { "enum": ["A101", "A102", "A104", "A105", "A141", "CM", "not-sure"] },
+        "general_conditions": { "type": "string" },
+        "delivery": { "enum": ["DBB", "CMAR", "DB"] }
+      }
+    },
+    "repair_types": {
+      "type": "array",
+      "items": { "enum": ["masonry", "roofing", "windows", "concrete", "waterproofing", "sealants", "coatings", "doors", "interiors"] }
+    },
+    "keynotes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key"],
+        "properties": {
+          "key": { "type": "string", "pattern": "^\\d{2} \\d{2} \\d{2}(\\.[A-Za-z0-9]+)?$" },
+          "text": { "type": "string" }
+        }
+      }
+    },
+    "text_dump": { "type": "string" },
+    "extra": { "type": "object" }
+  }
+}

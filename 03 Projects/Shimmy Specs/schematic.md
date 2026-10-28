@@ -1,6 +1,6 @@
 # Shimmy Specs — Schematic
 
-**Status:** idea → MVP planned. See `mvp schematic.md` (it supersedes this file where they differ: desktop-first professional look, static MVP, Architecture Supabase, bracket options, flag levels).
+**Status:** MVP built (framework; not yet device- or publish-tested). Haiku build from `mvp tasks.md`. See `mvp schematic.md` (it supersedes this file where they differ: desktop-first professional look, static MVP, Architecture Supabase, bracket options, flag levels).
 **Started:** 2026-10-28 with `/start-project`
 
 ## 1. Intent

@@ -1,8 +1,6 @@
-# Specs 501 — The decision system
+# Chapter 408 — The decision system
 
-**Level:** mastery, and the reasoning model this app is built on.
-
-A good specifier does not just edit a master. They work through **why** each paragraph is there, **what else** could have been there, and **what it touches**. This file describes that reasoning so the app can teach it.
+Written in our own words. Points marked verify still need checking against a current CSI publication.
 
 ## 1. Drivers
 
@@ -77,3 +75,5 @@ Decisions ripple. Typical kinds:
 ## 6. Learning loop
 
 After each project: what changed in CA (RFIs, substitutions, change orders) points to a spec gap. Write it as a lesson, attach it to the section library entry, and the next project starts better.
+
+This chapter describes the reasoning the app is built on: a good specifier does not just edit a master. They work through **why** each paragraph is there, **what else** could have been there, and **what it touches**.

@@ -1,0 +1,65 @@
+{
+  "number": "00 00 00",
+  "title": "Demo section (not a real spec)",
+  "demo": true,
+  "uniformat": ["B3010"],
+  "perspectives": {
+    "master-guide": "Demo: where a master guide would give its editor's note.",
+    "manufacturer": "Demo: where a manufacturer's guide spec would push its own product.",
+    "performance": "Demo: where a performance spec would state the result to prove.",
+    "contractor": "Demo: where the contractor's method would be described."
+  },
+  "questions": [
+    {
+      "id": "thk", "part": 2, "ask": "Membrane thickness (demo)", "level": "decision",
+      "options": [
+        { "id": "045", "label": "Option A (demo 0.045)", "explain": "Demo explanation for option A. Not a real product or standard." },
+        { "id": "060", "label": "Option B (demo 0.060)", "explain": "Demo explanation for option B.", "default": true },
+        { "id": "080", "label": "Option C (demo 0.080)", "explain": "Demo explanation for option C. Sets the long-life driver.", "sets": ["long-life"] }
+      ],
+      "impacts": [{ "section": "07 01 50", "level": "review", "note": "Demo impact: the tear-off depth follows the membrane choice." }]
+    },
+    {
+      "id": "attach", "part": 2, "ask": "Attachment method (demo)",
+      "options": [
+        { "id": "adhered", "label": "Fully adhered (demo)", "explain": "Demo: the membrane is bonded across its full area.", "sets": ["fully-adhered", "attach-adhered"] },
+        { "id": "mech", "label": "Mechanically attached (demo)", "explain": "Demo: fasteners and plates hold the membrane.", "sets": ["attach-mechanical"] }
+      ]
+    },
+    {
+      "id": "fastener", "part": 2, "ask": "Fastener type (demo, only when mechanically attached)", "when": { "all": ["attach-mechanical"] },
+      "options": [
+        { "id": "f1", "label": "Fastener 1 (demo)", "explain": "Demo: a standard fastener." },
+        { "id": "f2", "label": "Fastener 2 (demo)", "explain": "Demo: a heavier fastener.", "impacts": [{ "section": "07 01 50", "level": "review", "note": "Demo: the deck must be checked for pull-out strength." }] }
+      ]
+    },
+    {
+      "id": "seam", "part": 3, "ask": "Seam method (demo, only when fully adhered)", "when": { "all": ["fully-adhered"] },
+      "options": [
+        { "id": "hot", "label": "Hot air (demo)", "explain": "Demo: heat-welded seams." },
+        { "id": "solv", "label": "Solvent (demo)", "explain": "Demo: solvent-welded seams.", "impacts": [{ "section": "09 91 13", "level": "review", "note": "Demo: a coating may be needed over solvent seams." }] }
+      ]
+    }
+  ],
+  "parts": [
+    { "part": 1, "articles": [
+      { "title": "SUMMARY", "paragraphs": [
+        { "text": "Demo: this section demonstrates the framework. Membrane thickness: [[thk]]." }
+      ]}
+    ]},
+    { "part": 2, "articles": [
+      { "title": "MATERIALS", "paragraphs": [
+        { "text": "Membrane: [[thk]] thick, reinforced.", "outline": true },
+        { "text": "Attachment: [[attach]].", "outline": true },
+        { "text": "Fastener: [[fastener]].", "when": { "all": ["attach-mechanical"] } },
+        { "text": "Seams: [[seam]].", "when": { "all": ["fully-adhered"] } },
+        { "text": "Long-life note (demo): extended warranty term.", "when": { "all": ["long-life"] }, "level": 2 }
+      ]}
+    ]},
+    { "part": 3, "articles": [
+      { "title": "EXAMINATION", "paragraphs": [
+        { "text": "Demo: check the substrate before work starts.", "outline": true }
+      ]}
+    ]}
+  ]
+}
