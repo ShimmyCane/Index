@@ -70,3 +70,13 @@ Answer inline under each number. Leave a question blank if you don't know yet.
 ---
 
 _Answers go in this file inline. Next round: `convo/convo v0.2.md`._
+
+## Follow-up from Jimmy (same round)
+
+- Save the research in a `research/` folder: copies of the pages (PDFs) to look at, and an HTML explainer in the same graphic style, to be linked later from the maze page's ⚙️ settings. It should show what Claude was thinking at the time and what else to explore, to help Jimmy branch out.
+- Jimmy's thought: every kid has a soft spot for mazes. It's fun to get lost. Like a coloring book for grown-ups, it quiets the mind.
+
+Done: `research/index.html` (explainer with a live maze lab, stacked panels, "Explore next", sources).
+
+26. Saved copies of the papers and pages are other people's work, and this repo is public, so I planned to keep them in `research/private/` (not committed). Is that OK, or do you want them somewhere else (for example Google Drive)?
+27. The cloud session's network blocked `cgl.uwaterloo.ca` and `dgp.toronto.edu`, so no copies were saved yet. Add those hosts to the environment's allowed domains, or download the two PDFs yourself?

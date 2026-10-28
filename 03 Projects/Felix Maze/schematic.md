@@ -17,6 +17,7 @@ Felix loves drawing his own free-flowing mazes. Felix Maze makes mazes for him i
 | `maze_research.md` | What makes a good maze: terms, Pullen's seven axes, algorithms and how they feel, non-grid mazes, young solvers, printing |
 | `variations.md` | The knobs: geometry, routing, stroke, walls vs. paths, tone, paper mechanisms, characters, composition, worksheet extras, made with Felix |
 | `todo.md` | Now, next, later, and the interactive back pocket |
+| `research/index.html` | Explainer page: what we were thinking this round, a live maze lab (algorithms, loops, hand-drawn walls), "Explore next", sources. To be linked from the generator's ⚙️. Saved copies of sources go in `research/private/` (not committed). |
 
 ## MVP: the first 10 sheets
 

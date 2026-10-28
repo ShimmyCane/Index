@@ -12,7 +12,8 @@ Printed maze worksheets for Felix (11×17, black and white, numbered "Felix Maze
 - `inspirations.md`: 100 types tagged by family, geometry, line, density, mechanic; sorted views; proposed first 10.
 - `maze_research.md`: terms, Pullen's axes, algorithm textures, organic and image-guided mazes, young-solver guidance, printing. Sources listed.
 - `variations.md`, `todo.md`, `schematic.md`, `CLAUDE.md`.
-- No code yet.
+- `research/index.html` + `research.css` + `research.js`: explainer with a live maze lab (growing tree 0/0.5/1, Kruskal, binary tree, recursive division; braiding; BFS solution; dead-end count; hand-wobbled walls). Verified in headless Chromium at 1180×820 and 390×844: no page errors, no horizontal scroll.
+- Source copies not saved: the network policy denied `cgl.uwaterloo.ca` and `dgp.toronto.edu` (convo v0.1 Q26–27).
 
 ## Verified vs. unverified
 
@@ -22,5 +23,5 @@ Printed maze worksheets for Felix (11×17, black and white, numbered "Felix Maze
 ## Next steps
 
 1. Jimmy answers convo v0.1.
-2. Build the generator page (grid engine with growing tree + braiding, SVG at 11×17, recipe JSON) and sheet #001.
+2. Build the generator page (reuse the lab's engine from `research/research.js`) (grid engine with growing tree + braiding, SVG at 11×17, recipe JSON) and sheet #001.
 3. Print, test with Felix, tune, then #002–#010.
