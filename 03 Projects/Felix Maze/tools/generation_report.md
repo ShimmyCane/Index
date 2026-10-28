@@ -33,3 +33,16 @@ One section per batch: how many seeds were tried, how many were rejected and why
 - Words to look at: mouse v4: footer is 184 characters (150 max) | starry v4: footer is 174 characters (150 max) | haring v4: footer is 169 characters (150 max) | hampton v4: footer is 180 characters (150 max) | ants v4: footer is 153 characters (150 max) | celtic v4: footer is 166 characters (150 max) | subway v4: footer is 153 characters (150 max) | chartres v4: footer is 185 characters (150 max) | pyramid v4: footer is 151 characters (150 max) | matisse v4: footer is 162 characters (150 max) | kusama v4: footer is 154 characters (150 max) | balloon v4: footer is 156 characters (150 max)
 - For `/fix-puzzles`: starry (90 scored too low to publish) | hampton (level 5 not reached in 85 (last guess 3); 5 scored too low to publish) | honeycomb (level 4 not reached in 9 (last guess 5); 81 scored too low to publish)
 
+## Batch 5 (2026-10-28)
+
+- Slots: 50 (0 already in the catalog). Made: 48. Sent to rework: 2.
+- Seeds tried: 636. Rejected: no way through 0, **answer touched a wall 0** (0.0% of tries), wrong level 45, scored too low 206, pictures hit the words 0, pixel check 1.
+- Levels in this batch: L1: 10, L2: 17, L3: 15, L4: 6, L5: 0 (plan: L1: 10, L2: 18, L3: 15, L4: 7, L5: 0). Mean level 2.35.
+- For `/fix-puzzles`: opart (level 4 not reached in 4 (last guess 3); 85 scored too low to publish; 1 failed the pixel check) | greekkey (90 scored too low to publish)
+
+## Batch 6 (repairs: new counters for mazes whose pictures ran into the words) (2026-10-28)
+
+- Slots: 4 (0 already in the catalog). Made: 4. Sent to rework: 0.
+- Seeds tried: 32. Rejected: no way through 0, **answer touched a wall 0** (0.0% of tries), wrong level 0, scored too low 0, pictures hit the words 0, pixel check 0.
+- Levels in this batch: L1: 4, L2: 4, L3: 1, L4: 1, L5: 0 (plan: L1: 0, L2: 0, L3: 0, L4: 0, L5: 0). Mean level 1.90.
+

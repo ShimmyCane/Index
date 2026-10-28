@@ -35,6 +35,8 @@ Each batch: generate → answer-line check first (failures to `data/rework.js`) 
 - [x] **Batch 2** — #033–#064
 - [x] **Batch 3** — #065–#096
 - [x] **Batch 4** — #097–#0C8
+- [x] **Batch 5** — #0C9–#0FA: 50 new designs from `inspirations.md` (animals, vehicles, plants, music, shapes with a hole, patchwork, carpet, Greek key band). 48 made, 2 to rework (opart, greekkey).
+- [x] **Repairs** — 10 mazes whose start/finish pictures ran into the title or footer were replaced under new counters (#0FB+); old ones retired. Layout check added (`tools/check_layout.js`).
 - [ ] After all four: rework list (8 designs, see `data/rework.js`) reviewed with `fix_puzzles`. Result: 192 puzzles, levels 1–5 = 40/70/55/21/6, mean 2.39 (plan 2.5), 0.03% of tries touched a wall. Long footers now wrap to two lines.
 
 ## Now
