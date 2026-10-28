@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Felix Maze Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="top">
+  <h1 class="title"><a href="index.html">Felix Maze</a> <small>Library</small></h1>
+  <a class="btn go noprint" id="printSome" href="print.html">🖨️ Print these</a>
+</header>
+<main class="wrap">
+  <input class="search" id="search" type="search" placeholder="Search names, places, painters, animals…" autocomplete="off">
+  <div class="filters" id="filters"></div>
+  <div class="count" id="count"></div>
+  <div class="cards" id="cards"></div>
+</main>
+<script src="js/engine.js"></script>
+<script src="js/art.js"></script>
+<script src="js/sheet.js"></script>
+<script src="js/doodle.js"></script>
+<script src="data/catalog.js"></script>
+<script src="js/common.js"></script>
+<script>
+  /* Same idea as the Detail Library: search + tag buttons + a card grid with pictures.
+     Changes here: tags come in groups (time, theme, made by, things in it); within a group a card
+     needs any of the picked tags, across groups it needs all of them; pictures are drawn on the fly. */
+  (function () {
+    const app = FMZ.app, S = FMZ.sheet;
+    app.init(`<label><input type="checkbox" id="mine"> Only mazes made on this device</label>`);
+    const all = app.bank();
+    const groups = [
+      ["Time", r => [S.LEVELS[r.level] ? S.LEVELS[r.level].name : "?"]],
+      ["Theme", r => [S.FAMILIES[r.family] || "Other"]],
+      ["Made", r => [S.SOURCES[r.source || 0]]],
+      ["In it", r => r.tags || []]
+    ];
+    const picked = groups.map(() => new Set());
+    let q = "", onlyMine = false;
+
+    const box = document.getElementById("filters");
+    groups.forEach(([name, get], gi) => {
+      let values = [...new Set(all.flatMap(get))];
+      if (gi === 0) values = Object.values(S.LEVELS).map(l => l.name).filter(v => values.includes(v)); // shortest first
+      const div = document.createElement("div");
+      div.className = "group";
+      div.innerHTML = `<b>${name}</b>`;
+      values.forEach(v => {
+        const b = document.createElement("button");
+        b.className = "tag"; b.textContent = v;
+        b.addEventListener("click", () => { picked[gi].has(v) ? picked[gi].delete(v) : picked[gi].add(v); b.classList.toggle("on"); render(); });
+        div.append(b);
+      });
+      box.append(div);
+    });
+    document.getElementById("search").addEventListener("input", e => { q = e.target.value.trim().toLowerCase(); render(); });
+    document.getElementById("mine").addEventListener("change", e => { onlyMine = e.target.checked; render(); });
+
+    const pics = new Map();
+    function picture(rc, img) {
+      if (pics.has(rc.code)) { img.src = pics.get(rc.code); return; }
+      try {
+        app.toJpeg(S.svg(rc).svg, 480).then(url => { pics.set(rc.code, url); img.src = url; }).catch(e => app.logError("picture " + rc.code + ": " + e.message));
+      } catch (e) { app.logError("picture " + rc.code + ": " + e.message); }
+    }
+
+    function render() {
+      const list = all.filter(r => {
+        if (onlyMine && r.published) return false;
+        if (!groups.every(([, get], gi) => !picked[gi].size || get(r).some(v => picked[gi].has(v)))) return false;
+        if (!q) return true;
+        const text = [r.code, r.title, r.inspired, r.fun, (r.tags || []).join(" ")].join(" ").toLowerCase();
+        return text.includes(q);
+      });
+      document.getElementById("count").textContent = list.length + (list.length === 1 ? " maze" : " mazes");
+      document.getElementById("printSome").href = "print.html?codes=" + list.map(r => r.code).join(",");
+      const cards = document.getElementById("cards");
+      cards.innerHTML = "";
+      list.forEach(r => {
+        const a = document.createElement("a");
+        a.className = "card"; a.href = app.sheetUrl(r);
+        a.innerHTML = `<img alt="Maze ${app.esc(r.code)}"><b>${app.esc(r.title)}</b>
+          <div class="meta"><span>#${app.esc(r.code)}</span><span class="t">⏱ ${app.esc((S.LEVELS[r.level] || {}).name || "")}</span>${r.published ? "" : '<span class="s">✏️ this device</span>'}</div>
+          <small>${app.esc(r.inspired || "")}</small>`;
+        cards.append(a);
+        picture(r, a.querySelector("img"));
+      });
+    }
+    render();
+  })();
+</script>
+</body>
+</html>

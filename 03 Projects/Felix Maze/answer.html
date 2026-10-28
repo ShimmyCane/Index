@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Felix Maze Answers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="top">
+  <h1 class="title"><a href="index.html">Felix Maze</a> <small>Answers</small></h1>
+</header>
+<main class="wrap">
+  <form class="row" id="form" autocomplete="off">
+    <input class="codeIn" id="code" inputmode="text" placeholder="001" aria-label="Maze number">
+    <button class="btn go" type="submit">🎬 Show the way</button>
+    <button class="btn" type="button" id="again" disabled>↻ Again</button>
+    <button class="btn" type="button" id="slow">🐢 Slow</button>
+  </form>
+  <p class="note" id="msg">Type the number from the top of the sheet, like <b>810-001</b>, or just the last part, like <b>001</b>.</p>
+  <div class="paper fit" id="sheet"></div>
+</main>
+<script src="js/engine.js"></script>
+<script src="js/art.js"></script>
+<script src="js/sheet.js"></script>
+<script src="js/doodle.js"></script>
+<script src="data/catalog.js"></script>
+<script src="js/common.js"></script>
+<script>
+  (function () {
+    const app = FMZ.app, S = FMZ.sheet;
+    app.init();
+    let slow = false, timer = 0;
+    const input = document.getElementById("code"), msg = document.getElementById("msg");
+
+    function show(q) {
+      const rc = app.find(q);
+      if (!rc) { msg.innerHTML = "No maze with the number <b>" + app.esc(q) + "</b> yet."; document.getElementById("sheet").innerHTML = ""; return; }
+      input.value = rc.code;
+      msg.innerHTML = "<b>#" + app.esc(rc.code) + "</b> · " + app.esc(rc.title) + " · " + app.esc((S.LEVELS[rc.level] || {}).name);
+      history.replaceState(null, "", "?code=" + encodeURIComponent(rc.code));
+      const out = S.svg(rc, { answer: true, answerColor: "#e0604a" });
+      document.getElementById("sheet").innerHTML = out.svg;
+      document.getElementById("again").disabled = false;
+      play();
+    }
+
+    // Draw the path bit by bit, and walk the starting character along it.
+    function play() {
+      cancelAnimationFrame(timer);
+      const svg = document.querySelector("#sheet svg");
+      const path = svg && svg.querySelector(".fmz-answer");
+      if (!path) return;
+      const L = path.getTotalLength();
+      const walker = svg.querySelector(".fmz-start > g");
+      const base = walker ? walker.getAttribute("transform") : "";
+      const scale = base ? (base.match(/scale\(([^)]+)\)/) || [])[1] : 1;
+      path.style.strokeDasharray = L + " " + L;
+      path.style.strokeDashoffset = L;
+      const ms = Math.max(2500, L * (slow ? 14 : 5));
+      const t0 = performance.now();
+      const step = now => {
+        const t = Math.min(1, (now - t0) / ms);
+        const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        path.style.strokeDashoffset = L * (1 - e);
+        if (walker) {
+          const p = path.getPointAtLength(L * e);
+          walker.setAttribute("transform", `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) scale(${scale})`);
+        }
+        if (t < 1) timer = requestAnimationFrame(step);
+      };
+      timer = requestAnimationFrame(step);
+    }
+
+    document.getElementById("form").addEventListener("submit", e => { e.preventDefault(); show(input.value); });
+    document.getElementById("again").addEventListener("click", play);
+    document.getElementById("slow").addEventListener("click", e => { slow = !slow; e.currentTarget.classList.toggle("on", slow); play(); });
+    const first = app.param("code");
+    if (first) show(first);
+  })();
+</script>
+</body>
+</html>

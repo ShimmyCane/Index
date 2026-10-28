@@ -80,7 +80,7 @@ Collected from the sources below.
 Rules of thumb from teacher and kids' maze sources. One source gave exact numbers; they vary between sources, so treat them as starting points and test with Felix.
 
 - **Path width matters more than length.** Narrow paths make a young child grip the pencil hard and tire quickly. Start around ½ inch (about 12 mm) and go down to about ⅜ inch (10 mm) as he gets better.
-- **Few dead ends at first:** a suggested 1–2 for age 4–5, and up to about 8 turns on the right path. Raise it as he improves.
+- **Few dead ends at first:** a suggested 1–2 for the youngest solvers, and up to about 8 turns on the right path. Raise it as skill grows.
 - **Grow difficulty by size**, not by giving more easy pages. One generator found an 8×8 easy maze took a 4-year-old 1–3 minutes.
 - **Mistakes should be cheap:** a sheet protector or dry-erase pouch with a washable marker lets him try again.
 - **Other forms for fun:** masking-tape mazes on the floor, play-dough mazes with a marble.

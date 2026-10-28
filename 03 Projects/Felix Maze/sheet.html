@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Felix Maze Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="top">
+  <h1 class="title"><a href="index.html">Felix Maze</a> <small id="sub"></small></h1>
+  <div class="row noprint">
+    <a class="btn" id="prev">◀</a>
+    <a class="btn" id="next">▶</a>
+    <button class="btn go" id="print">🖨️ Print</button>
+  </div>
+</header>
+<main class="wrap">
+  <div class="paper print-sheet fit" id="sheet"></div>
+  <p class="note noprint" id="missing" hidden>No maze with that number. <a href="library.html">Open the library</a>.</p>
+</main>
+<script src="js/engine.js"></script>
+<script src="js/art.js"></script>
+<script src="js/sheet.js"></script>
+<script src="js/doodle.js"></script>
+<script src="data/catalog.js"></script>
+<script src="js/common.js"></script>
+<script>
+  (function () {
+    const app = FMZ.app, S = FMZ.sheet;
+    app.init(`<h3>Answer key</h3><div id="key"><small>Making the picture…</small></div>
+      <p><a id="animLink" href="answer.html">🎬 Watch the answer</a></p>`);
+    const all = app.bank();
+    const rc = app.find(app.param("code") || "") || all[0];
+    if (!rc) { document.getElementById("missing").hidden = false; return; }
+    document.title = "Felix Maze #" + rc.code;
+    document.getElementById("sub").textContent = "#" + rc.code + " · " + rc.title + " · " + (S.LEVELS[rc.level] || {}).name;
+    const out = S.svg(rc);
+    document.getElementById("sheet").innerHTML = out.svg;
+    const i = all.indexOf(rc);
+    document.getElementById("prev").href = app.sheetUrl(all[(i - 1 + all.length) % all.length]);
+    document.getElementById("next").href = app.sheetUrl(all[(i + 1) % all.length]);
+    document.getElementById("animLink").href = "answer.html?code=" + encodeURIComponent(rc.code);
+    document.getElementById("print").addEventListener("click", () => window.print());
+    // the answer key shows only in ⚙️, small, as a JPEG; it never prints
+    let made = false;
+    app.onDrawer = () => {
+      if (made) return; made = true;
+      const key = S.svg(rc, { answer: true, model: out.model }).svg;
+      app.toJpeg(key, 520).then(url => {
+        document.getElementById("key").innerHTML = `<a href="${url}" download="felix-maze-${rc.code}-answer.jpg"><img src="${url}" alt="Answer key for maze ${rc.code}"></a>`;
+      }).catch(e => { app.logError("answer key: " + e.message); document.getElementById("key").innerHTML = key; });
+    };
+  })();
+</script>
+</body>
+</html>
