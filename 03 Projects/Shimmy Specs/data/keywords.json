@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "note": "Classical text-dump rules (no AI). Each hit shows the matched words and can be accepted or rejected.",
+  "rules": [
+    { "label": "Type IIB", "pattern": "type\\s*ii-?b", "sets": ["construction-type-IIB"] },
+    { "label": "Type IIIB", "pattern": "type\\s*iii-?b", "sets": ["construction-type-IIIB"] },
+    { "label": "Sprinklered", "pattern": "sprinkler(ed)?", "sets": ["sprinklered"] },
+    { "label": "Occupied", "pattern": "occupied|tenants? in place", "sets": ["occupied"] },
+    { "label": "Masonry", "pattern": "cmu|concrete masonry|brick|repoint|mortar", "sets": ["repair-masonry"] },
+    { "label": "Roofing", "pattern": "re-?roof|roof(ing)? replacement|\\btpo\\b|membrane", "sets": ["repair-roofing"] },
+    { "label": "Windows", "pattern": "window (replacement|repair)|storefront", "sets": ["repair-windows"] },
+    { "label": "Sealants", "pattern": "sealant|caulk", "sets": ["repair-sealants"] },
+    { "label": "Historic", "pattern": "historic|landmark|preservation", "sets": ["scope-historic"] },
+    { "label": "Apartments", "pattern": "apartment|residential|r-2", "sets": ["use-R-2"] }
+  ]
+}

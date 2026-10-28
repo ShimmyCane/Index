@@ -1,0 +1,16 @@
+{
+  "format": "shimmy-project/0",
+  "kind": "sketch",
+  "name": "Sketch: six-story masonry walk-up (synthetic)",
+  "summary": { "scope": ["repair", "alteration"], "use": "R-2", "stories": 6, "occupied": true, "notes": "Synthetic sample. No real place or client." },
+  "code": { "code": "IBC", "edition": "", "construction_type": "IIB", "sprinklered": true, "ratings": [], "energy_code": "", "climate_zone": "" },
+  "contract": { "family": "AIA", "agreement": "A101", "general_conditions": "A201", "delivery": "DBB" },
+  "repair_types": ["masonry", "roofing"],
+  "keynotes": [
+    { "key": "07 54 23.A1", "text": "TPO membrane, fully adhered" },
+    { "key": "04 01 20.A1", "text": "Repoint brick, full depth" },
+    { "key": "07 92 00.A1", "text": "Control joint sealant" }
+  ],
+  "text_dump": "Synthetic sketch: a six-story apartment walk-up, Type IIB, sprinklered, occupied. Repoint the brick façade and replace the roof membrane.",
+  "extra": { "sketch_note": "Unknown keys go here so nothing is lost." }
+}

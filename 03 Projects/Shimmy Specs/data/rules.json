@@ -1,0 +1,540 @@
+{
+  "version": 1,
+  "note": "Recommendation rules. when: all / any / not over driver ids or question=option. Levels: required, likely, consider, unlikely. The why text is ours, in our own words.",
+  "rules": [
+    {
+      "section": "01 10 00",
+      "when": {
+        "all": []
+      },
+      "level": "required",
+      "why": "Every project needs a summary of work."
+    },
+    {
+      "section": "01 25 00",
+      "when": {
+        "all": []
+      },
+      "level": "required",
+      "why": "Division 01 general rule for every project (chapter 205)."
+    },
+    {
+      "section": "01 29 00",
+      "when": {
+        "all": []
+      },
+      "level": "required",
+      "why": "Division 01 general rule for every project (chapter 205)."
+    },
+    {
+      "section": "01 33 00",
+      "when": {
+        "all": []
+      },
+      "level": "required",
+      "why": "Division 01 general rule for every project (chapter 205)."
+    },
+    {
+      "section": "01 40 00",
+      "when": {
+        "all": []
+      },
+      "level": "required",
+      "why": "Division 01 general rule for every project (chapter 205)."
+    },
+    {
+      "section": "01 42 00",
+      "when": {
+        "all": []
+      },
+      "level": "required",
+      "why": "Division 01 general rule for every project (chapter 205)."
+    },
+    {
+      "section": "01 45 00",
+      "when": {
+        "all": []
+      },
+      "level": "required",
+      "why": "Division 01 general rule for every project (chapter 205)."
+    },
+    {
+      "section": "01 60 00",
+      "when": {
+        "all": []
+      },
+      "level": "required",
+      "why": "Division 01 general rule for every project (chapter 205)."
+    },
+    {
+      "section": "01 73 00",
+      "when": {
+        "all": []
+      },
+      "level": "required",
+      "why": "Division 01 general rule for every project (chapter 205)."
+    },
+    {
+      "section": "01 77 00",
+      "when": {
+        "all": []
+      },
+      "level": "required",
+      "why": "Division 01 general rule for every project (chapter 205)."
+    },
+    {
+      "section": "01 78 23",
+      "when": {
+        "all": []
+      },
+      "level": "likely",
+      "why": "Most projects need maintenance data at closeout."
+    },
+    {
+      "section": "01 35 16",
+      "when": {
+        "any": [
+          "scope-alteration",
+          "scope-repair",
+          "scope-restoration",
+          "scope-addition"
+        ]
+      },
+      "level": "likely",
+      "why": "Work in an existing building (chapter 406)."
+    },
+    {
+      "section": "01 35 91",
+      "when": {
+        "any": [
+          "scope-historic",
+          "scope-restoration"
+        ]
+      },
+      "level": "likely",
+      "why": "Historic treatment must follow preservation standards (chapter 406)."
+    },
+    {
+      "section": "01 22 00",
+      "when": {
+        "any": [
+          "repair-masonry",
+          "repair-concrete",
+          "repair-waterproofing"
+        ]
+      },
+      "level": "likely",
+      "why": "Repair quantities are unknown until the work is opened up (chapter 404)."
+    },
+    {
+      "section": "01 43 39",
+      "when": {
+        "any": [
+          "repair-masonry",
+          "scope-historic",
+          "repair-coatings"
+        ]
+      },
+      "level": "consider",
+      "why": "A mockup sets the standard for repair work (chapter 405)."
+    },
+    {
+      "section": "01 50 00",
+      "when": {
+        "any": [
+          "occupied"
+        ]
+      },
+      "level": "likely",
+      "why": "Occupied building: protection, access and phasing apply."
+    },
+    {
+      "section": "02 41 19",
+      "when": {
+        "any": [
+          "scope-alteration",
+          "scope-repair",
+          "scope-restoration"
+        ]
+      },
+      "level": "likely",
+      "why": "Existing work is removed or altered."
+    },
+    {
+      "section": "03 01 30",
+      "when": {
+        "any": [
+          "repair-concrete"
+        ]
+      },
+      "level": "likely",
+      "why": "Concrete repair is maintenance of existing work."
+    },
+    {
+      "section": "04 01 20",
+      "when": {
+        "any": [
+          "repair-masonry"
+        ]
+      },
+      "level": "likely",
+      "why": "Repointing and unit replacement in existing masonry (chapter 406)."
+    },
+    {
+      "section": "04 05 19",
+      "when": {
+        "any": [
+          "repair-masonry"
+        ]
+      },
+      "level": "consider",
+      "why": "Helical ties and anchors are often part of masonry repair."
+    },
+    {
+      "section": "04 20 00",
+      "when": {
+        "any": [
+          "scope-new",
+          "scope-addition"
+        ]
+      },
+      "level": "likely",
+      "why": "New unit masonry."
+    },
+    {
+      "section": "04 22 00",
+      "when": {
+        "any": [
+          "scope-new"
+        ]
+      },
+      "level": "consider",
+      "why": "New concrete unit masonry walls."
+    },
+    {
+      "section": "05 50 00",
+      "when": {
+        "any": [
+          "repair-masonry"
+        ]
+      },
+      "level": "consider",
+      "why": "Lintels and shelf angles are often replaced with masonry repair."
+    },
+    {
+      "section": "05 51 33",
+      "when": {
+        "any": [
+          "repair-roofing"
+        ]
+      },
+      "level": "consider",
+      "why": "Roof access and fall protection (demo of the ladder scope; confirm with Jimmy)."
+    },
+    {
+      "section": "06 10 53",
+      "when": {
+        "any": [
+          "construction-type-IIIA",
+          "construction-type-IIIB",
+          "construction-type-IV",
+          "construction-type-VA",
+          "construction-type-VB"
+        ]
+      },
+      "level": "likely",
+      "why": "Combustible framing allowed; blocking and nailers are common."
+    },
+    {
+      "section": "06 10 53",
+      "when": {
+        "any": [
+          "construction-type-IA",
+          "construction-type-IB",
+          "construction-type-IIA",
+          "construction-type-IIB"
+        ]
+      },
+      "level": "consider",
+      "why": "Noncombustible type: keep only where blocking or nailers are in scope (fire-retardant-treated where required)."
+    },
+    {
+      "section": "06 10 00",
+      "when": {
+        "any": [
+          "construction-type-IIIA",
+          "construction-type-IIIB",
+          "construction-type-VA",
+          "construction-type-VB"
+        ]
+      },
+      "level": "consider",
+      "why": "Wood framing allowed by the construction type."
+    },
+    {
+      "section": "06 20 00",
+      "when": {
+        "any": [
+          "scope-new",
+          "scope-alteration"
+        ]
+      },
+      "level": "consider",
+      "why": "Interior trim, if wood trim is in scope."
+    },
+    {
+      "section": "07 01 50",
+      "when": {
+        "any": [
+          "repair-roofing"
+        ]
+      },
+      "level": "likely",
+      "why": "Re-roofing preparation: tear-off, deck check, and substrate."
+    },
+    {
+      "section": "07 19 00",
+      "when": {
+        "any": [
+          "repair-masonry"
+        ]
+      },
+      "level": "consider",
+      "why": "Water repellents on masonry; test before specifying."
+    },
+    {
+      "section": "07 21 00",
+      "when": {
+        "any": [
+          "scope-new",
+          "scope-addition"
+        ]
+      },
+      "level": "likely",
+      "why": "Energy code insulation for new envelope."
+    },
+    {
+      "section": "07 27 00",
+      "when": {
+        "any": [
+          "scope-new",
+          "scope-addition",
+          "repair-windows"
+        ]
+      },
+      "level": "consider",
+      "why": "Air barrier continuity at new or replaced envelope; testing."
+    },
+    {
+      "section": "07 52 00",
+      "when": {
+        "any": [
+          "scope-new",
+          "repair-roofing"
+        ]
+      },
+      "level": "consider",
+      "why": "Modified bitumen is one roofing system; choose with the TPO option."
+    },
+    {
+      "section": "07 54 23",
+      "when": {
+        "any": [
+          "scope-new",
+          "repair-roofing"
+        ]
+      },
+      "level": "consider",
+      "why": "TPO is one roofing system; choose with the modified bitumen option."
+    },
+    {
+      "section": "07 62 00",
+      "when": {
+        "any": [
+          "repair-roofing",
+          "repair-masonry",
+          "repair-windows",
+          "scope-new"
+        ]
+      },
+      "level": "likely",
+      "why": "Flashing, copings and through-wall flashing."
+    },
+    {
+      "section": "07 72 00",
+      "when": {
+        "any": [
+          "repair-roofing"
+        ]
+      },
+      "level": "consider",
+      "why": "Curbs, hatches and roof accessories."
+    },
+    {
+      "section": "07 81 00",
+      "when": {
+        "any": [
+          "construction-type-IA",
+          "construction-type-IB"
+        ]
+      },
+      "level": "likely",
+      "why": "Rated structural steel in Types I–II."
+    },
+    {
+      "section": "07 84 00",
+      "when": {
+        "any": [
+          "scope-new",
+          "scope-addition",
+          "scope-alteration"
+        ]
+      },
+      "level": "likely",
+      "why": "Penetrations in rated assemblies."
+    },
+    {
+      "section": "07 92 00",
+      "when": {
+        "any": [
+          "repair-sealants",
+          "repair-masonry",
+          "scope-new"
+        ]
+      },
+      "level": "likely",
+      "why": "Joints in masonry, envelope and new construction."
+    },
+    {
+      "section": "08 11 13",
+      "when": {
+        "any": [
+          "repair-doors"
+        ]
+      },
+      "level": "consider",
+      "why": "Hollow metal doors and frames in repair scope."
+    },
+    {
+      "section": "08 14 16",
+      "when": {
+        "any": [
+          "construction-type-IIIA",
+          "construction-type-IIIB",
+          "construction-type-IV",
+          "construction-type-VA",
+          "construction-type-VB"
+        ]
+      },
+      "level": "consider",
+      "why": "Wood doors allowed by the construction type."
+    },
+    {
+      "section": "08 51 13",
+      "when": {
+        "any": [
+          "repair-windows"
+        ]
+      },
+      "level": "likely",
+      "why": "Window replacement."
+    },
+    {
+      "section": "08 71 00",
+      "when": {
+        "any": [
+          "repair-doors",
+          "scope-new"
+        ]
+      },
+      "level": "likely",
+      "why": "Egress, accessibility and security hardware."
+    },
+    {
+      "section": "08 80 00",
+      "when": {
+        "any": [
+          "repair-windows",
+          "scope-new"
+        ]
+      },
+      "level": "likely",
+      "why": "Glazing for windows and storefronts."
+    },
+    {
+      "section": "09 01 90",
+      "when": {
+        "any": [
+          "repair-coatings"
+        ]
+      },
+      "level": "likely",
+      "why": "Preparing and recoating existing coatings."
+    },
+    {
+      "section": "09 51 00",
+      "when": {
+        "any": [
+          "scope-new",
+          "repair-interiors"
+        ]
+      },
+      "level": "consider",
+      "why": "Ceiling repairs and new ceilings."
+    },
+    {
+      "section": "09 65 00",
+      "when": {
+        "any": [
+          "repair-interiors"
+        ]
+      },
+      "level": "consider",
+      "why": "Resilient flooring in interior repair."
+    },
+    {
+      "section": "09 65 00",
+      "when": {
+        "all": [
+          "scope-repair"
+        ],
+        "not": [
+          "repair-interiors"
+        ]
+      },
+      "level": "unlikely",
+      "why": "Exterior-only repair: no interior flooring in scope."
+    },
+    {
+      "section": "09 91 13",
+      "when": {
+        "any": [
+          "repair-coatings",
+          "repair-masonry"
+        ]
+      },
+      "level": "consider",
+      "why": "Exterior painting of repaired or exposed surfaces."
+    },
+    {
+      "section": "09 96 00",
+      "when": {
+        "any": [
+          "repair-coatings"
+        ]
+      },
+      "level": "consider",
+      "why": "High-performance coatings where exposure is harsh."
+    },
+    {
+      "section": "10 14 00",
+      "when": {
+        "any": [
+          "scope-new"
+        ]
+      },
+      "level": "consider",
+      "why": "Accessibility signage in new work."
+    }
+  ]
+}

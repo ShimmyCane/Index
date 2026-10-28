@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "note": "UniFormat elements used by the PPD. Titles to verify against the current UniFormat edition.",
+  "elements": [
+    { "code": "A1010", "title": "Standard foundations", "group": "A" },
+    { "code": "A1030", "title": "Slab on grade", "group": "A" },
+    { "code": "B1010", "title": "Floor construction", "group": "B" },
+    { "code": "B1020", "title": "Roof construction", "group": "B" },
+    { "code": "B2010", "title": "Exterior walls", "group": "B" },
+    { "code": "B2020", "title": "Exterior windows", "group": "B" },
+    { "code": "B2030", "title": "Exterior doors", "group": "B" },
+    { "code": "B3010", "title": "Roof coverings", "group": "B" },
+    { "code": "B3020", "title": "Roof openings", "group": "B" },
+    { "code": "C1010", "title": "Partitions", "group": "C" },
+    { "code": "C1020", "title": "Interior doors", "group": "C" },
+    { "code": "C2010", "title": "Stair construction", "group": "C" },
+    { "code": "C3010", "title": "Wall finishes", "group": "C" },
+    { "code": "C3020", "title": "Floor finishes", "group": "C" },
+    { "code": "C3030", "title": "Ceiling finishes", "group": "C" },
+    { "code": "D3050", "title": "Terminal and package units", "group": "D" },
+    { "code": "G2010", "title": "Roadways", "group": "G" },
+    { "code": "G2020", "title": "Parking lots", "group": "G" }
+  ]
+}

@@ -17,6 +17,7 @@ Projects with notes:
 - Chinese Character Sudoku/ — word-grid game MVP. `brief.md`, `lessons.md`.
 - Adventure/ — family story game. `brief.md`, `lessons.md`.
 - Felix Maze/ — printable maze worksheets MVP. `brief.md`, `lessons.md`.
+- Shimmy Specs/ — spec-writing process app; MVP planned (`mvp schematic.md`, `mvp tasks.md`). `brief.md`, `lessons.md`.
 
 Notes:
 - Lessons in this folder come from the private ShimmyAI repo's `04 AI/`. Only generic lessons were carried over. Family and personal details were not.
