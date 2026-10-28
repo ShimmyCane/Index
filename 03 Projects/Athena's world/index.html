@@ -8,66 +8,448 @@
     :root {
       --paper: #FFF9EE;
       --ink: #3b3a4a;
-      --sage: #7CA992;
       --peach: #F9C8A8;
       --mint: #CDEFE0;
       --coral: #F08A7E;
+      --butter: #FBE9A6;
       --line: 3px solid var(--ink);
     }
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) {
-        --paper: #2a2836;
-        --ink: #FFF9EE;
-      }
-    }
-    :root[data-theme="dark"] {
-      --paper: #2a2836;
-      --ink: #FFF9EE;
-    }
     * { box-sizing: border-box; }
-    html, body { margin: 0; min-height: 100%; }
+    [hidden] { display: none !important; }
+    html, body { margin: 0; height: 100%; }
     body {
       background: var(--paper);
       color: var(--ink);
       font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+
+    /* Landscape: room on the left, side buttons on the right */
+    .app {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 18px;
+      height: 100vh;
+      height: 100dvh;
+      padding: 18px;
+    }
+    .play {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0;
+    }
+    h1 { margin: 0; font-size: clamp(26px, 4vw, 36px); text-align: center; }
+    .hint { margin: 6px 0 12px; text-align: center; font-size: 18px; min-height: 1.4em; }
+
+    /* The white room: walls above the line, floor below */
+    .room {
+      position: relative;
+      width: 100%;
+      max-width: calc((100dvh - 170px) * 4 / 3);
+      aspect-ratio: 4 / 3;
+      margin: 0 auto;
+      background: #fff;
+      border: var(--line);
+      border-radius: 26px 32px 28px 34px;
+      box-shadow: 0 6px 0 var(--ink);
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .wall {
+      position: absolute;
+      left: 0; right: 0; top: 0;
+      height: 42%;
+      border-bottom: var(--line);
+    }
+    .floor {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 58%;
+    }
+
+    .item {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      padding: 4px;
+      background: none;
+      border: 0;
+      border-radius: 18px;
+      font-size: clamp(46px, 8vw, 76px);
+      line-height: 1;
+      cursor: pointer;
+      filter: drop-shadow(0 4px 0 rgba(59, 58, 74, 0.25));
+      transition: left 0.4s ease, top 0.4s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .item.held {
+      animation: bob 1s ease-in-out infinite;
+      outline: 3px dashed var(--coral);
+      outline-offset: 6px;
+    }
+    @keyframes bob {
+      0%, 100% { transform: translate(-50%, -50%); }
+      50% { transform: translate(-50%, -62%); }
+    }
+
+    /* Side buttons */
+    .side {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      min-height: 0;
+      padding: 4px 6px 100px 0;
+    }
+    .side h2 { margin: 8px 0 0; font-size: 18px; }
+    .stack { display: grid; gap: 10px; }
+    .btn {
+      min-height: 68px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 16px;
+      font: 700 19px system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--mint);
+      border: var(--line);
+      border-radius: 22px 26px 24px 28px;
+      box-shadow: 0 4px 0 var(--ink);
+      cursor: pointer;
+      text-align: left;
+    }
+    .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+    .btn[aria-pressed="true"] { background: var(--butter); }
+    .btn:disabled { opacity: 0.5; cursor: default; transform: none; box-shadow: 0 4px 0 var(--ink); }
+    .btn.ghost { background: var(--paper); }
+
+    /* Settings gear, lower right */
+    .gear {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      width: 68px;
+      height: 68px;
+      display: grid;
+      place-items: center;
+      font-size: 30px;
+      background: var(--peach);
+      border: var(--line);
+      border-radius: 50%;
+      box-shadow: 0 4px 0 var(--ink);
+      cursor: pointer;
+      z-index: 5;
+    }
+    .drawer {
+      position: fixed;
+      right: 18px;
+      bottom: 100px;
+      width: min(280px, calc(100vw - 36px));
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      background: var(--paper);
+      border: var(--line);
+      border-radius: 24px;
+      box-shadow: 0 6px 0 var(--ink);
+      z-index: 5;
+    }
+
+    /* Finished-house card */
+    .modal {
+      position: fixed;
+      inset: 0;
       display: grid;
       place-items: center;
       padding: 16px;
-      min-height: 100vh;
+      background: rgba(59, 58, 74, 0.25);
+      z-index: 10;
     }
-    main {
-      width: min(92vw, 560px);
+    .card {
+      width: min(420px, 100%);
+      display: grid;
+      gap: 12px;
+      padding: 26px;
       text-align: center;
       background: var(--mint);
       border: var(--line);
-      border-radius: 28px 36px 30px 40px;
+      border-radius: 30px;
       box-shadow: 0 6px 0 var(--ink);
-      padding: 32px 24px;
     }
-    .sun { font-size: 64px; line-height: 1; margin-bottom: 8px; }
-    h1 { font-size: clamp(28px, 7vw, 40px); margin: 8px 0 12px; }
-    p { font-size: clamp(17px, 4.5vw, 20px); line-height: 1.5; margin: 10px 0; }
-    .badge {
-      display: inline-block;
-      margin-top: 16px;
-      padding: 12px 22px;
-      min-height: 48px;
-      background: var(--peach);
-      border: var(--line);
-      border-radius: 999px;
-      box-shadow: 0 4px 0 var(--ink);
-      font-weight: 700;
-      font-size: 18px;
+    .cheer { font-size: 60px; line-height: 1; }
+    .card h2 { margin: 0; font-size: 30px; }
+    .card p { margin: 0; font-size: 18px; }
+
+    /* Portrait or narrow: stack the room above the buttons */
+    @media (max-aspect-ratio: 4/5), (max-width: 700px) {
+      body { overflow: auto; }
+      .app { grid-template-columns: 1fr; height: auto; min-height: 100dvh; }
+      .room { max-width: 100%; }
+      .side { overflow: visible; padding-bottom: 110px; }
     }
   </style>
 </head>
 <body>
-  <main>
-    <div class="sun" aria-hidden="true">🌈</div>
-    <h1>Athena's world</h1>
-    <p>This is Athena's imagined game.</p>
-    <p>It is under construction.</p>
-    <span class="badge">Coming soon</span>
-  </main>
+  <div class="app">
+    <section class="play">
+      <h1 id="title"></h1>
+      <p class="hint" id="hint"></p>
+      <div class="room" id="room" aria-label="Room">
+        <div class="wall"></div>
+        <div class="floor"></div>
+      </div>
+    </section>
+
+    <aside class="side">
+      <h2>Who is it for?</h2>
+      <div class="stack" id="houses"></div>
+      <h2>Decorate</h2>
+      <div class="stack" id="items"></div>
+      <button class="btn ghost" id="undo" type="button">↩️ Undo</button>
+    </aside>
+  </div>
+
+  <button class="gear" id="gear" type="button" aria-label="Settings">⚙️</button>
+
+  <div class="drawer" id="drawer" hidden>
+    <button class="btn" id="sound" type="button"></button>
+    <button class="btn" id="clear" type="button">🧹 Empty this house</button>
+    <button class="btn ghost" id="close" type="button">Close</button>
+  </div>
+
+  <div class="modal" id="done" hidden>
+    <div class="card">
+      <div class="cheer" aria-hidden="true">🎉</div>
+      <h2>Lovely home!</h2>
+      <p id="donetext"></p>
+      <button class="btn" id="next" type="button"></button>
+      <button class="btn ghost" id="stay" type="button">Keep decorating</button>
+    </div>
+  </div>
+
+  <script>
+    // ---- Houses and things. Edit these lists to change the game. ----
+    const HOUSES = [
+      { name: "Athena's house", needs: ['bed', 'window', 'picture'] },
+      { name: 'Cosy house', needs: ['bed', 'sofa', 'window'] },
+      { name: 'Workplace: the shop', needs: ['window', 'picture', 'plant'] }
+    ];
+    const ITEMS = {
+      bed:     { emoji: '🛏️', label: 'bed',     zone: 'floor' },
+      sofa:    { emoji: '🛋️', label: 'sofa',    zone: 'floor' },
+      plant:   { emoji: '🪴', label: 'plant',   zone: 'floor' },
+      window:  { emoji: '🪟', label: 'window',  zone: 'wall' },
+      picture: { emoji: '🖼️', label: 'picture', zone: 'wall' }
+    };
+    // Where items may sit, as % of the room (top to bottom)
+    const ZONES = { wall: { top: 12, bottom: 34 }, floor: { top: 52, bottom: 92 } };
+    const LEFT_RIGHT = { min: 8, max: 92 };
+    const TRAY = { x: 50, y: 14 }; // a new item appears up here first
+
+    // ---- Small helpers ----
+    const $ = id => document.getElementById(id);
+    const roomEl = $('room');
+    const itemEls = {};
+    const store = {
+      get(key, fallback) {
+        try { const v = localStorage.getItem(key); return v === null ? fallback : JSON.parse(v); }
+        catch (e) { return fallback; }
+      },
+      set(key, value) {
+        try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* private window: fine */ }
+      }
+    };
+    const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+    const cap = s => s[0].toUpperCase() + s.slice(1);
+
+    // ---- State ----
+    let unlocked = store.get('athena.unlocked', 1);   // how many houses can be chosen
+    let sound = store.get('athena.sound', true);
+    let current = 0;
+    let held = null;                                   // the item waiting for a tap
+    const rooms = HOUSES.map(() => ({ pos: {}, history: [], done: false }));
+    const room = () => rooms[current];
+
+    // ---- Sound (Web Audio, no files) ----
+    let audio = null;
+    function blip(freq, dur = 0.12, type = 'sine') {
+      if (!sound) return;
+      try {
+        audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+        const o = audio.createOscillator();
+        const g = audio.createGain();
+        o.type = type;
+        o.frequency.value = freq;
+        g.gain.setValueAtTime(0.0001, audio.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.25, audio.currentTime + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + dur);
+        o.connect(g).connect(audio.destination);
+        o.start();
+        o.stop(audio.currentTime + dur + 0.02);
+      } catch (e) { /* no audio here: fine */ }
+    }
+    function fanfare() {
+      [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => blip(f, 0.25, 'triangle'), i * 140));
+    }
+
+    // ---- Rules ----
+    const isPlaced = (R, t) => !!R.pos[t] && R.pos[t].placed && held !== t;
+    const isComplete = R => HOUSES[current].needs.every(t => isPlaced(R, t));
+    const placedCopy = R => {
+      const copy = {};
+      for (const t in R.pos) if (R.pos[t].placed) copy[t] = { ...R.pos[t] };
+      return copy;
+    };
+    // Drop a new item that was never put down, so it doesn't stay in the tray
+    function discardUnplacedHeld() {
+      const R = room();
+      if (held && R.pos[held] && !R.pos[held].placed) delete R.pos[held];
+      held = null;
+    }
+
+    function pressItem(t) {
+      const R = room();
+      if (held === t) {
+        // Tapping the held item again puts it down where it is
+        if (R.pos[t].placed) { held = null; blip(440, 0.08); }
+        render();
+        return;
+      }
+      discardUnplacedHeld();
+      if (!R.pos[t]) R.pos[t] = { x: TRAY.x, y: TRAY.y, placed: false }; // new item appears up here
+      held = t;
+      blip(520, 0.08);
+      render();
+    }
+
+    roomEl.addEventListener('click', e => {
+      if (!held) return;
+      const r = roomEl.getBoundingClientRect();
+      const zone = ZONES[ITEMS[held].zone];
+      const x = clamp((e.clientX - r.left) / r.width * 100, LEFT_RIGHT.min, LEFT_RIGHT.max);
+      const y = clamp((e.clientY - r.top) / r.height * 100, zone.top, zone.bottom);
+      const R = room();
+      const wasDone = R.done;
+      R.history.push(placedCopy(R));
+      R.pos[held] = { x, y, placed: true };
+      held = null;
+      blip(880, 0.12);
+      R.done = isComplete(R);
+      if (R.done && !wasDone) finishHouse();
+      render();
+    });
+
+    $('undo').onclick = () => {
+      const R = room();
+      if (!R.history.length) return;
+      R.pos = R.history.pop();
+      held = null;
+      R.done = isComplete(R);
+      render();
+    };
+
+    function finishHouse() {
+      unlocked = Math.max(unlocked, Math.min(current + 2, HOUSES.length));
+      store.set('athena.unlocked', unlocked);
+      $('donetext').textContent = `${HOUSES[current].name} is all decorated.`;
+      $('next').textContent = current + 1 < HOUSES.length ? 'Next house ➜' : 'Yay! 🌟';
+      $('done').hidden = false;
+      fanfare();
+    }
+
+    function selectHouse(i) {
+      if (i >= unlocked) return;
+      discardUnplacedHeld();
+      current = i;
+      for (const t in itemEls) { itemEls[t].remove(); delete itemEls[t]; }
+      render();
+    }
+
+    // ---- Drawing ----
+    function render() {
+      const R = room();
+
+      // Items in the room (kept as elements so they glide when moved)
+      for (const t in itemEls) if (!R.pos[t]) { itemEls[t].remove(); delete itemEls[t]; }
+      for (const t in R.pos) {
+        let el = itemEls[t];
+        if (!el) {
+          el = document.createElement('button');
+          el.type = 'button';
+          el.className = 'item';
+          el.textContent = ITEMS[t].emoji;
+          el.setAttribute('aria-label', ITEMS[t].label);
+          el.addEventListener('click', e => { e.stopPropagation(); pressItem(t); });
+          roomEl.appendChild(el);
+          itemEls[t] = el;
+        }
+        el.style.left = R.pos[t].x + '%';
+        el.style.top = R.pos[t].y + '%';
+        el.classList.toggle('held', held === t);
+      }
+
+      // Side buttons
+      $('houses').replaceChildren(...HOUSES.map((h, i) => {
+        const locked = i >= unlocked;
+        const b = button((locked ? '🔒 ' : rooms[i].done ? '⭐ ' : '') + h.name);
+        b.disabled = locked;
+        b.setAttribute('aria-pressed', i === current);
+        b.onclick = () => selectHouse(i);
+        return b;
+      }));
+      $('items').replaceChildren(...HOUSES[current].needs.map(t => {
+        const b = button(`${ITEMS[t].emoji} ${cap(ITEMS[t].label)}${isPlaced(R, t) ? ' ✓' : ''}`);
+        b.setAttribute('aria-pressed', held === t);
+        b.onclick = () => pressItem(t);
+        return b;
+      }));
+      $('undo').disabled = !R.history.length;
+
+      // Words above the room
+      $('title').textContent = HOUSES[current].name;
+      $('hint').textContent = held
+        ? `Tap the room to put the ${ITEMS[held].label} there.`
+        : Object.keys(R.pos).length ? 'Tap something in the room to move it.' : 'Tap something on the right to start.';
+
+      $('sound').textContent = sound ? '🔊 Sound: on' : '🔇 Sound: off';
+    }
+
+    function button(text) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn';
+      b.textContent = text;
+      return b;
+    }
+
+    // ---- Panels ----
+    $('gear').onclick = () => { $('drawer').hidden = !$('drawer').hidden; };
+    $('close').onclick = () => { $('drawer').hidden = true; };
+    $('sound').onclick = () => {
+      sound = !sound;
+      store.set('athena.sound', sound);
+      render();
+    };
+    $('clear').onclick = () => {
+      const R = room();
+      if (!Object.keys(R.pos).length) return;
+      R.history.push(placedCopy(R));
+      R.pos = {};
+      held = null;
+      R.done = false;
+      $('drawer').hidden = true;
+      render();
+    };
+    $('next').onclick = () => {
+      $('done').hidden = true;
+      if (current + 1 < HOUSES.length) selectHouse(current + 1);
+      else render();
+    };
+    $('stay').onclick = () => { $('done').hidden = true; };
+
+    render();
+  </script>
 </body>
 </html>
