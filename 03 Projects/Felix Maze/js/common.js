@@ -176,7 +176,7 @@
   // ---------- ⚙️ drawer ----------
   function init(extra = "") {
     const here = location.pathname.split("/").pop() || "index.html";
-    const links = [["index.html", "🏠 Home"], ["library.html", "📚 Library"], ["pack.html", "🖨️ Print a pack"], ["make.html", "✏️ Make a maze"], ["answer.html", "🎬 Answers"], ["rework.html", "🔧 To rework"], ["research/index.html", "🔭 Research"]];
+    const links = [["index.html", "🏠 Home"], ["library.html", "📚 Library"], ["pack.html", "🖨️ Print a pack"], ["make.html", "✏️ Make a maze"], ["answer.html", "🎬 Answers"], ["play.html", "🚗 Drive a maze"], ["prototypes.html", "🧪 Prototypes"], ["about.html", "📖 About"], ["rework.html", "🔧 To rework"], ["research/index.html", "🔭 Research"]];
     document.body.insertAdjacentHTML("beforeend", `
       <button class="gear noprint" id="gear" aria-label="Settings">⚙️</button>
       <div class="drawer noprint" id="drawer" hidden>
@@ -333,10 +333,45 @@
     return pack;
   }
 
+  /* 🚩 flag UI for one puzzle, shared by the sheet and the drive page. Needs these ids in the page:
+     flag (button), flagBox, reasons, flagNote, flagSave, flagCancel, flagged. Flagged puzzles are never picked
+     (puzzle of the day, top five, packs) until the fix_puzzles skill, or you, close the flag. */
+  function mountFlag(rc) {
+    const $ = id => document.getElementById(id);
+    const box = $("flagBox"), note = $("flagged"), reasons = $("reasons");
+    let reason = null;
+    REASONS.forEach(([key, text]) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "tag"; b.textContent = text; b.dataset.key = key;
+      b.addEventListener("click", () => { reason = key; reasons.querySelectorAll(".tag").forEach(x => x.classList.toggle("on", x === b)); });
+      reasons.append(b);
+    });
+    const show = () => {
+      const f = openFlags().find(x => x.n === rc.n);
+      $("flag").classList.toggle("on", !!f);
+      $("flag").textContent = f ? "🚩 Flagged" : "🚩 Flag";
+      note.hidden = !f;
+      if (f) {
+        const why = (REASONS.find(r => r[0] === f.reason) || [, f.reason])[1];
+        note.innerHTML = `🚩 Flagged: ${esc(why)}${f.note ? " · " + esc(f.note) : ""}. It won't be picked for the puzzle of the day, the top five or a pack until it's fixed. <button class="btn" id="unflag" type="button" style="min-height:40px">Unflag</button> <a href="rework.html">See all to rework</a>`;
+        $("unflag").addEventListener("click", () => { resolveFlag(rc.n, "kept", "Unflagged from the page"); show(); });
+      }
+    };
+    $("flag").addEventListener("click", () => { if (!isFlagged(rc.n)) box.hidden = !box.hidden; else show(); });
+    $("flagCancel").addEventListener("click", () => { box.hidden = true; });
+    $("flagSave").addEventListener("click", () => {
+      if (!reason) { alert("Pick what's wrong first."); return; }
+      addFlag({ n: rc.n, code: rc.code, reason, note: $("flagNote").value.trim() });
+      box.hidden = true; show();
+    });
+    api.onFlags = show;
+    show();
+  }
+
   const api = {
     init, logError, store, param, esc,
     bank, find, nextNumber, saveRecipe, removeSaved, saved, sheetUrl,
-    REASONS, flags, openFlags, isFlagged, addFlag, resolveFlag, sync, connect, syncNow,
+    REASONS, mountFlag, flags, openFlags, isFlagged, addFlag, resolveFlag, sync, connect, syncNow,
     toJpeg, lazyThumb, log, addLog, sweetSpot, bestOf,
     eligible, potd, topFive, pickPack, printed, markPrinted, clearPrinted, dayKey,
     onDrawer: null, onFlags: null

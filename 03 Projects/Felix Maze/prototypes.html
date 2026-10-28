@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Felix Maze Prototypes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+<style>
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; }
+  .proto { text-align: left; font: inherit; color: inherit; background: #fff; border: var(--line); border-radius: 22px 22px 22px 8px; box-shadow: 0 5px 0 var(--ink); padding: 10px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; }
+  .proto:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--ink); }
+  .proto canvas { width: 100%; aspect-ratio: 16 / 10; border-radius: 14px; background: var(--paper); border: 2.5px solid var(--ink); display: block; }
+  .proto b { font: 26px/1.1 var(--hand); }
+  .proto small { opacity: .8; }
+  .stage { position: fixed; inset: 0; z-index: 30; background: var(--paper); display: flex; flex-direction: column; padding: 10px 14px 14px; gap: 8px; }
+  .stage canvas { flex: 1; min-height: 0; width: 100%; background: #fff; border: var(--line); border-radius: 22px; touch-action: none; box-shadow: 0 5px 0 var(--ink); }
+  .stage .bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .stage h2 { font: 32px var(--hand); margin: 0 auto 0 0; }
+  .stage .how { margin: 0; max-width: 900px; }
+  .stage .ctl { display: flex; gap: 10px; flex-wrap: wrap; }
+  .tagc { font: 700 13px var(--ui); background: var(--sun); border: 2px solid var(--ink); border-radius: 99px; padding: 1px 10px; width: fit-content; }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1 class="title"><a href="index.html">Felix Maze</a> <small>Prototypes: ideas that only work on a screen</small></h1>
+</header>
+<main class="wrap">
+  <p class="note">Ten experiments that cannot be printed: they turn, wrap around, shift and flood. Tap one to play with it. Nothing here is a finished puzzle; the notes under each one say what it is trying out. <a href="about.html#ideas">What to try next</a>.</p>
+  <div class="grid" id="grid"></div>
+</main>
+<section class="stage" id="stage" hidden>
+  <div class="bar"><h2 id="sTitle"></h2><span class="tagc" id="sTag"></span><button class="btn" id="sClose" type="button">✕ Close</button></div>
+  <canvas id="canvas"></canvas>
+  <div class="ctl" id="sCtl"></div>
+  <p class="note how" id="sHow"></p>
+</section>
+<script src="js/engine.js"></script>
+<script src="js/art.js"></script>
+<script src="js/sheet.js"></script>
+<script src="js/doodle.js"></script>
+<script src="js/score.js"></script>
+<script src="js/shapes.js"></script>
+<script src="js/designs.js"></script>
+<script src="data/catalog.js"></script>
+<script src="data/scores.js"></script>
+<script src="data/rework.js"></script>
+<script src="js/config.js"></script>
+<script src="js/common.js"></script>
+<script src="js/proto.js"></script>
+<script>
+  (function () {
+    const app = FMZ.app, list = FMZ.proto.list, $ = id => document.getElementById(id);
+    app.init(`<p><small>Prototypes are digital only and are not part of the printed bank.</small></p>`);
+    const sizeCanvas = c => { const r = c.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1); c.width = Math.max(2, Math.round(r.width * dpr)); c.height = Math.max(2, Math.round(r.height * dpr)); return { w: r.width, h: r.height, dpr }; };
+    const paint = (c, proto, st, t, dt) => { const s = sizeCanvas(c), ctx = c.getContext("2d"); ctx.setTransform(s.dpr, 0, 0, s.dpr, 0, 0); ctx.clearRect(0, 0, s.w, s.h); ctx.fillStyle = "#fff8e7"; ctx.fillRect(0, 0, s.w, s.h); proto.draw(ctx, s.w, s.h, t, dt, st); };
+
+    // gallery: one still picture each
+    list.forEach(proto => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "proto";
+      b.innerHTML = `<canvas></canvas><b>${app.esc(proto.title)}</b><span class="tagc">${app.esc(proto.tag)}</span><small>${app.esc(proto.blurb)}</small>`;
+      $("grid").append(b);
+      requestAnimationFrame(() => { try { paint(b.querySelector("canvas"), proto, proto.make(), 2.4, 0.016); } catch (e) { app.logError("preview " + proto.id + ": " + e.message); } });
+      b.addEventListener("click", () => open(proto));
+    });
+
+    // stage: one prototype, animated
+    let raf = 0, cur = null;
+    function open(proto) {
+      cur = proto; const st = proto.make(); st.keys = st.keys || {};
+      $("sTitle").textContent = proto.title; $("sTag").textContent = proto.tag; $("sHow").textContent = proto.blurb + " " + proto.how;
+      $("stage").hidden = false; document.body.style.overflow = "hidden";
+      const ctl = $("sCtl"); ctl.innerHTML = "";
+      (proto.buttons || []).forEach(bd => {
+        const bt = document.createElement("button"); bt.type = "button"; bt.className = "btn"; bt.textContent = bd.label; ctl.append(bt);
+        if (bd.hold) {
+          const set = on => { if (proto.holdKey) proto.holdKey(st, bd.hold, on); else st.keys[bd.hold] = on; };
+          bt.addEventListener("pointerdown", e => { e.preventDefault(); set(true); });
+          ["pointerup", "pointerleave", "pointercancel"].forEach(t => bt.addEventListener(t, () => set(false)));
+        } else if (bd.press) bt.addEventListener("click", () => proto.step(st, bd.press));
+        else if (bd.act) bt.addEventListener("click", () => bd.act.call(proto, st));
+      });
+      const c = $("canvas"); let t0 = performance.now(), last = t0, drag = null;
+      const onDown = e => { drag = { x: e.clientX, y: e.clientY }; st.dragging = true; try { c.setPointerCapture(e.pointerId); } catch (x) { /* ok */ } };
+      const onMove = e => {
+        if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag = { x: e.clientX, y: e.clientY };
+        if (proto.orbit) { st.yaw += dx * 0.008; st.pitch = Math.max(0.05, Math.min(1.45, st.pitch + dy * 0.006)); } else if (proto.move) proto.move(st, dx, dy);
+      };
+      const onUp = () => { drag = null; st.dragging = false; };
+      const onKey = (e, on) => { if (proto.key && proto.key(st, e, on)) e.preventDefault(); if (on && e.key === "Escape") close(); };
+      const kd = e => onKey(e, true), ku = e => onKey(e, false);
+      c.addEventListener("pointerdown", onDown); c.addEventListener("pointermove", onMove); c.addEventListener("pointerup", onUp); c.addEventListener("pointercancel", onUp);
+      document.addEventListener("keydown", kd); document.addEventListener("keyup", ku);
+      const frame = now => {
+        const dt = Math.min(0.1, (now - last) / 1000); last = now;
+        if (proto.orbit && !st.dragging && st.spin) st.yaw += st.spin * dt;
+        try { paint(c, proto, st, (now - t0) / 1000, dt); } catch (e) { app.logError(proto.id + ": " + e.message); cancelAnimationFrame(raf); return; }
+        raf = requestAnimationFrame(frame);
+      };
+      raf = requestAnimationFrame(frame);
+      close.cleanup = () => { c.removeEventListener("pointerdown", onDown); c.removeEventListener("pointermove", onMove); c.removeEventListener("pointerup", onUp); c.removeEventListener("pointercancel", onUp); document.removeEventListener("keydown", kd); document.removeEventListener("keyup", ku); };
+      window.FMZ_STAGE = { st, proto };
+    }
+    function close() { cancelAnimationFrame(raf); if (close.cleanup) close.cleanup(); $("stage").hidden = true; document.body.style.overflow = ""; cur = null; }
+    $("sClose").addEventListener("click", close);
+    const q = new URLSearchParams(location.search).get("open");
+    if (q) { const pr = list.find(p => p.id === q); if (pr) open(pr); }
+  })();
+</script>
+</body>
+</html>

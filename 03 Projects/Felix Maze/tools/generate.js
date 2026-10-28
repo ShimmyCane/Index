@@ -18,17 +18,18 @@ const opt = (k, d) => { const i = args.indexOf("--" + k); return i < 0 ? d : (ar
 const REDO = opt("redo", null);                    // --redo 11,15,19: make replacements (new counters) for these mazes; the old ones are retired
 const BATCH = REDO ? 6 : +opt("batch", 1), TRIES = +opt("tries", 90), DRY = !!opt("dry", false), ONLY = opt("only", null);
 
-const designs1 = require("./designs_data"), designs5 = require("./designs_data5");   // batch 5: 50 more designs, one puzzle each
-const designs = BATCH === 5 ? designs5 : designs1;
+const designs1 = require("./designs_data"), designs5 = require("./designs_data5"), designs7 = require("./designs_data7");   // batch 5: 50 more designs, one puzzle each
+const designs = (BATCH === 5 ? designs5 : BATCH === 7 ? designs7 : designs1);
 const { layoutProblems } = require("./check_layout");
 const ctx = load();
 const S = ctx.FMZ.sheet, Q = ctx.FMZ.score;
 const vr = require("./verify_raster");
 
 // Levels per batch of 50: 40 / 70 / 56 / 24 / 10 over the four batches (mean 2.5).
-const QUOTAS = { 1: [10, 18, 14, 6, 2], 2: [10, 17, 14, 6, 3], 3: [10, 18, 14, 6, 2], 4: [10, 17, 14, 6, 3], 5: [10, 18, 15, 7, 0] }[BATCH] || [0, 0, 0, 0, 0];
+const QUOTAS = { 1: [10, 18, 14, 6, 2], 2: [10, 17, 14, 6, 3], 3: [10, 18, 14, 6, 2], 4: [10, 17, 14, 6, 3], 5: [10, 18, 15, 7, 0], 7: [2, 3, 2, 1, 0] }[BATCH] || [0, 0, 0, 0, 0];
 if (!QUOTAS) { console.log("batch must be 1 to 5"); process.exit(1); }
 const vi = BATCH >= 5 ? 0 : BATCH - 1;
+const FIRST_NEW = BATCH >= 7 ? Math.max(...ctx.FMZ_CATALOG.map(r => r.n)) + 1 : 0;   // batch 7 and later: counters continue after the last one
 
 // ---------- the slots ----------
 const catalog = ctx.FMZ_CATALOG.slice();
@@ -43,8 +44,9 @@ if (REDO) {
     slots.push({ d, di: 0, v, n: next++, existing: null, replaces: n0, level: +opt("level", r.level), range: [+opt("level", r.level), +opt("level", r.level)], vi: r.batch >= 5 ? 0 : r.v - 1 });
   });
 } else designs.forEach((d, di) => {
+  if (d.living) return;                                    // never generate from a living artist
   const v = d.variants[vi];
-  const n = BATCH >= 5 ? 200 * (BATCH - 4) + di + 1 : 50 * vi + di + 1;
+  const n = BATCH >= 7 ? FIRST_NEW + di : BATCH === 5 ? 201 + di : 50 * vi + di + 1;
   slots.push({ d, di, v, n, existing: have.get(n) || null });
 });
 

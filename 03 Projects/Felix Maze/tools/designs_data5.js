@@ -121,3 +121,5 @@ module.exports = [
   D("chladni", 7, [2, 5], "rings", { look: "dots", chords: true, core: 1.8, R: 250 }, "Inspired by Ernst Chladni's sand patterns made by sound, 1787", ["dots", "sound", "rings"],
     V("Singing Sand", "Sand on a metal plate jumps into patterns when the plate is played with a violin bow.", ["cat", "note"])),
 ];
+// Policy: no living artists (see CLAUDE.md). Bridget Riley is alive, so her design stays here only as a record and is never generated.
+module.exports.forEach(d => { if (d.id === "opart") d.living = true; });

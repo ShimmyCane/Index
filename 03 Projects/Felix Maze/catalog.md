@@ -61,3 +61,6 @@ Codes changed on 2026-10-28 (twice, before anything was printed): levels moved f
 2. Add a recipe to `data/catalog.js` with the next counter.
 3. `node tools/pick_seeds.js <counter>` tries many seeds, rejects any where the answer touches a wall, and lists the best by level fit and joy score. Use the top seed, then look at it (`sheet.html?code=…`).
 4. `node tools/check_sheets.js --update`, then the by-eye check in `rubric.md` and `qc.md`.
+
+## Retired and why
+- `retired: true` keeps the counter. `retiredWhy: "living artist"` marks the four mazes inspired by a living artist (polka dots, 014, 046, 078, 0AA). Counters 0FB onward are replacements (`replaces`) or later batches (batch 7: historical artists, 109–110).

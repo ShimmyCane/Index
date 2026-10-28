@@ -8,6 +8,8 @@ Purpose: printable mazes for Felix in many styles (art, nature, systems, music, 
 - AI notes: `04 AI/Felix Maze/brief.md` and `lessons.md`
 - Shared conventions: root `CLAUDE.md` (public repo, privacy) and `02 Refs/Skills/ipad_website.md`
 
+Pages: `play.html` (🚗 drive a maze), `about.html` (theory, art, references, idea box), `prototypes.html` (10 digital-only 3D / moving ideas).
+
 How to run: open `index.html` (works from the file or GitHub Pages; no server needed). Sheets: `sheet.html?code=810-001`.
 New maze: `node tools/pick_seeds.js <counter>` (rejects seeds where the answer touches a wall, ranks by level fit and joy).
 Flagged or failed puzzles: `/fix-puzzles` (reads `fmz_flags` in the Family project and `data/rework.js`).
@@ -19,7 +21,7 @@ Project rules:
 - Make it a joy, not an exercise: white space around every maze, a story from start to goal, something to find on the way (`rubric.md`).
 - New characters go in `js/art.js` and `characters.md`. Run `qc.md` before publishing a maze.
 - Felix's first name only. No age, school or photos; scans of his drawings go in `private/`.
-- Art is "inspired by", never traced.
+- Art is "inspired by", never traced. Historical artists only (no one living): living-artist designs are marked `living: true` and never generated.
 - Research: update `research/index.html` (a new "What I was thinking" panel per round) alongside `maze_research.md`. Copies of others' papers or pages go in `research/private/` only.
 - A puzzle that fails the answer-line checks is never published: it goes to `data/rework.js`. Flagged puzzles are never picked (puzzle of the day, top five, packs, print all).
 - Retire, don't delete: a replaced puzzle gets `retired: true`; its counter is never reused. Counters 001–7FF are the bank; 800–FFF are doodle mazes made on a device.
