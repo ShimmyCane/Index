@@ -1,7 +1,8 @@
 // 汉字数独 — UI: board, drag-and-drop bank, settings, sounds, celebration.
-const APP_VERSION = '0.4.0';
+const APP_VERSION = '0.5.0';
 const CHANGELOG = [
   ['0.1.0', '2026-10-27', '第一版：2×2 到 4×4；从字库拖字；简单（放对马上变绿）和挑战（最后检查）；拼音、繁体、加新词、撤销、答案、完成音乐。'],
+  ['0.5.0', '2026-10-28', '新增 2.0 填词（每行一个词，从字库选字填空）和 3.0 描红（用手指或 Apple Pencil 写字，按笔顺打分，左下角看笔顺动画）；在 ⚙️ 里可以随时来回切换 1.0 / 2.0 / 3.0；字体换成楷体风格的霞鹜文楷。'],
   ['0.4.0', '2026-10-28', '最近学的字改成第4级总字表第29页最后60个字；题目优先用这些字；新增约60个带这些字的词。'],
   ['0.3.0', '2026-10-28', '超纲字（本册超纲字和「声」）一直显示拼音；最近学的词加入海报上的例词和「叫声」；写字表标明是一年级上册。'],
   ['0.2.0', '2026-10-28', '字库换成三张照片里的字（第3级新增60字、第4级240字、课本写字表100字，共266字）；词库只用这些字。'],
@@ -19,7 +20,14 @@ const FALLBACK = {
   pool: '',
 };
 
-const DEFAULTS = { n: 2, easy: true, givensMany: true, decoysMany: true, pinyin: false, trad: false, sound: true, showErrors: false };
+const DEFAULTS = { game: 'grid', lines: 3, traceGuide: true, n: 2, easy: true, givensMany: true, decoysMany: true, pinyin: false, trad: false, sound: true, showErrors: false };
+const GAME_OF = { '#v1': 'grid', '#v2': 'lines', '#v3': 'trace' };
+const GAME_NO = { grid: 1, lines: 2, trace: 3 };
+const GAME_NOTES = {
+  grid: '1.0 格子：格子里横着、竖着都要组成词。',
+  lines: '2.0 填词：每一行是一个词，从字库里选字填空，一行一行互不影响。',
+  trace: '3.0 描红：照着字一笔一笔写，最后按笔顺打分。左下角的按钮可以看笔顺动画。',
+};
 const GIVENS = { true: { 2: 2, 3: 5, 4: 9 }, false: { 2: 1, 3: 4, 4: 7 } };
 
 const S = {
@@ -79,15 +87,22 @@ function rebuildIndex() {
   S.lessonChars = new Set([...(S.data.lessonChars || ''), ...extraLesson.join('')]);
 }
 
+// 1.0 boards are n×n; 2.0 boards are n lines of 2 cells.
+const colsOf = p => p.cols || p.n;
+const rowsOf = p => p.rows || p.n;
+const isLines = () => S.puzzle && S.puzzle.kind === 'lines';
+
 // ---------- pinyin and traditional, using the word a cell makes when there is one ----------
 function wordAt(i) {
   // A word on the board that includes cell i and has its own reading (还书 huán, 头发 髮).
-  const { n } = S.puzzle, r = Math.floor(i / n), c = i % n, g = boardChars();
+  const p = S.puzzle, cols = colsOf(p), rows = rowsOf(p), r = Math.floor(i / cols), c = i % cols, g = boardChars();
   const pairs = [];
   if (c > 0) pairs.push([i - 1, i]);
-  if (c < n - 1) pairs.push([i, i + 1]);
-  if (r > 0) pairs.push([i - n, i]);
-  if (r < n - 1) pairs.push([i, i + n]);
+  if (c < cols - 1) pairs.push([i, i + 1]);
+  if (p.kind !== 'lines') {
+    if (r > 0) pairs.push([i - cols, i]);
+    if (r < rows - 1) pairs.push([i, i + cols]);
+  }
   for (const [a, b] of pairs) {
     const w = (g[a] || '') + (g[b] || '');
     if (S.data.words[w] && S.idx.W.has(w)) return { w, pos: a === i ? 0 : 1 };
@@ -127,28 +142,43 @@ const blanks = () => S.puzzle.given.map((g, i) => g ? -1 : i).filter(i => i >= 0
 const allFilled = () => blanks().every(i => S.place[i] != null);
 
 function newPuzzle() {
-  const st = S.settings, n = +st.n;
-  const recent = load('recent', []);
-  const p = Engine.generate(S.idx, {
-    n, easy: st.easy, givens: GIVENS[st.givensMany][n], bankMult: st.decoysMany ? 3 : 2,
-    lessonChars: S.lessonChars, avoid: new Set(recent),
-  });
+  const st = S.settings;
+  if (st.game === 'trace') return;
+  const lines = st.game === 'lines', recentKey = lines ? 'recentLines' : 'recent';
+  const recent = load(recentKey, []);
+  const bankMult = st.decoysMany ? 3 : 2;
+  const n = lines ? +st.lines : +st.n;
+  const p = lines
+    ? Engine.generateLines(S.idx, { lines: n, bankMult, lessonChars: S.lessonChars, avoid: new Set(recent) })
+    : Engine.generate(S.idx, { n, easy: st.easy, givens: GIVENS[st.givensMany][n], bankMult, lessonChars: S.lessonChars, avoid: new Set(recent) });
   if (!p) {
-    logError(`出不了 ${n}×${n} 的题，词库可能太小`);
-    setMessage('这个大小出不了题，换小一点试试 🙂');
+    logError(lines ? `出不了 ${n} 行的题，词库可能太小` : `出不了 ${n}×${n} 的题，词库可能太小`);
+    setMessage(lines ? '这个行数出不了题，换小一点试试 🙂' : '这个大小出不了题，换小一点试试 🙂');
     return;
   }
-  save('recent', [p.solution.join(''), ...recent].slice(0, 150));
+  save(recentKey, [lines ? p.key : p.solution.join(''), ...recent].slice(0, 150));
   S.puzzle = p;
-  S.place = Array(n * n).fill(null);
+  S.place = Array(p.solution.length).fill(null);
   S.undo = []; S.checked = null; S.done = false; S.revealed = false; S.selected = null;
   saveGame();
   setMessage('');
   render();
 }
 
+// Bring back the puzzle saved for this game, if it still matches the settings and the word list.
+function restoreOrNew() {
+  const st = S.settings, g = load('game_' + st.game, null);
+  const lines = st.game === 'lines';
+  const fits = g && g.puzzle && g.v === S.data.version && g.mode === st.easy && !g.done &&
+    (lines ? g.puzzle.kind === 'lines' && g.puzzle.n === +st.lines : g.puzzle.kind !== 'lines' && g.puzzle.n === +st.n);
+  if (!fits) { newPuzzle(); return; }
+  Object.assign(S, { puzzle: g.puzzle, place: g.place, done: g.done, revealed: g.revealed, undo: [], checked: null, selected: null });
+  setMessage('');
+  render();
+}
+
 function saveGame() {
-  save('game', { v: S.data.version, puzzle: S.puzzle, place: S.place, done: S.done, revealed: S.revealed, mode: S.settings.easy });
+  save('game_' + S.settings.game, { v: S.data.version, puzzle: S.puzzle, place: S.place, done: S.done, revealed: S.revealed, mode: S.settings.easy });
 }
 
 function changePlace(fn) {
@@ -173,6 +203,8 @@ function changePlace(fn) {
 
 function goodCells() {
   const g = boardChars(), n = S.puzzle.n;
+  // 2.0: a tile is right when its line, read left to right, is a word. 1.0: it joins a neighbour in a word.
+  if (isLines()) return new Set(blanks().filter(i => S.place[i] != null && S.idx.isWord(g[i & ~1], g[i | 1])));
   return new Set(blanks().filter(i => S.place[i] != null && Engine.easyCellOk(S.idx, g, n, i)));
 }
 
@@ -202,7 +234,7 @@ function undo() {
 
 function check() {
   if (S.done || !allFilled()) { setMessage('先把空格都填满哦'); return; }
-  const res = Engine.checkHard(S.idx, boardChars(), S.puzzle.n);
+  const res = isLines() ? Engine.checkLines(S.idx, boardChars(), S.puzzle.n) : Engine.checkHard(S.idx, boardChars(), S.puzzle.n);
   if (res.ok) { win(); return; }
   S.checked = res;
   render();
@@ -232,7 +264,7 @@ function win() {
   saveGame();
   render();
   setMessage('完成了！🎉');
-  const words = Engine.wordsOnBoard(S.idx, boardChars(), S.puzzle.n);
+  const words = isLines() ? Engine.linesWords(S.idx, boardChars(), S.puzzle.n) : Engine.wordsOnBoard(S.idx, boardChars(), S.puzzle.n);
   $('cheerWords').innerHTML = words.map(wordChip).join('');
   $('celebrate').hidden = false;
   confetti();
@@ -244,16 +276,18 @@ function setMessage(t) { $('message').textContent = t; }
 
 function render() {
   const st = S.settings, p = S.puzzle;
-  if (!p) return;
-  const n = p.n, g = boardChars();
+  if (!p || st.game === 'trace') return;
+  const lines = isLines(), n = p.n, cols = colsOf(p), rows = rowsOf(p), g = boardChars();
   const good = st.easy ? goodCells() : new Set();
   const bad = S.checked ? S.checked.badCells : new Set();
-  const badLine = i => S.checked && (S.checked.badRows.includes(Math.floor(i / n)) || S.checked.badCols.includes(i % n));
+  const badLine = i => S.checked && (S.checked.badRows.includes(Math.floor(i / cols)) || S.checked.badCols.includes(i % cols));
 
   const board = $('board');
+  board.classList.toggle('lines', lines);
   board.style.setProperty('--n', n);
+  board.style.setProperty('--rows', rows);
   board.innerHTML = p.solution.map((_, i) => {
-    const edge = (i % n === n - 1 ? ' lastCol' : '') + (i >= n * (n - 1) ? ' lastRow' : '');
+    const edge = (i % cols === cols - 1 ? ' lastCol' : '') + (i >= cols * (rows - 1) ? ' lastRow' : '');
     if (p.given[i]) return `<div class="cell given${edge}${badLine(i) ? ' lineBad' : ''}">${glyph(g[i], i)}</div>`;
     const t = S.place[i];
     const tile = t == null ? '' :
@@ -270,14 +304,16 @@ function render() {
   const showWords = st.easy || S.done;
   $('wordsPanel').hidden = !showWords;
   if (showWords) {
-    const ws = Engine.wordsOnBoard(S.idx, g, n);
+    const ws = lines ? Engine.linesWords(S.idx, g, n) : Engine.wordsOnBoard(S.idx, g, n);
     $('madeWords').innerHTML = ws.length ? ws.map(wordChip).join('') : '<span class="muted">还没有词</span>';
   }
 
-  $('levelTag').textContent = `${n}×${n} · ${st.easy ? '简单' : '挑战'}`;
-  $('ruleText').textContent = st.easy
-    ? '每个字要和旁边的字组成词（横着从左往右，竖着从上往下）'
-    : '每一行 → 和每一列 ↓ 里，每个字都要组成词';
+  $('levelTag').textContent = `${lines ? n + ' 行' : n + '×' + n} · ${st.easy ? '简单' : '挑战'}`;
+  $('ruleText').textContent = lines
+    ? (st.easy ? '每一行是一个词（从左往右读）：选一个字放进空格里' : '每一行都填好以后，按 ✅ 检查')
+    : st.easy
+      ? '每个字要和旁边的字组成词（横着从左往右，竖着从上往下）'
+      : '每一行 → 和每一列 ↓ 里，每个字都要组成词';
   $('checkBtn').hidden = st.easy;
   $('checkBtn').disabled = S.done;
   // The answer is offered only at the end: after a challenge check, or once an easy board is full.
@@ -391,8 +427,8 @@ const sfx = (() => {
   };
 })();
 
-function confetti() {
-  const box = $('confetti'), colors = ['#ffd8b8', '#c8f0e0', '#ff9e8a', '#e3d7ff', '#ffe58f', '#b8e0ff'];
+function confetti(id = 'confetti') {
+  const box = $(id), colors = ['#ffd8b8', '#c8f0e0', '#ff9e8a', '#e3d7ff', '#ffe58f', '#b8e0ff'];
   box.innerHTML = Array.from({ length: 70 }, () => {
     const left = Math.random() * 100, delay = Math.random() * 0.8, dur = 2.2 + Math.random() * 1.8;
     const c = colors[Math.floor(Math.random() * colors.length)];
@@ -406,6 +442,10 @@ function renderSettings() {
     const v = S.settings[seg.dataset.key];
     seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', String(b.dataset.v) === String(typeof v === 'boolean' ? +v : v)));
   });
+  const game = S.settings.game;
+  document.querySelectorAll('[data-games]').forEach(e => { e.hidden = !e.dataset.games.split(' ').includes(game); });
+  document.querySelectorAll('.gameLink').forEach(a => a.classList.toggle('on', a.dataset.game === game));
+  $('gameNote').textContent = GAME_NOTES[game];
   $('errorsPanel').hidden = !S.settings.showErrors;
   const extra = load('extraWords', []);
   $('extraInfo').textContent = extra.length ? `我加的词（${extra.length}）：${extra.join(' ')}` : '还没有加词。长期保存请加到 assets/phrases.json。';
@@ -416,13 +456,15 @@ function renderSettings() {
 }
 
 function setSetting(key, raw) {
-  const v = key === 'n' ? +raw : raw === '1';
+  const v = key === 'n' || key === 'lines' ? +raw : raw === '1';
   if (S.settings[key] === v) return;
   S.settings[key] = v;
   save('settings', S.settings);
   renderSettings();
   // Size, mode, givens and bank size need a new puzzle; the rest just redraw.
-  if (['n', 'easy', 'givensMany', 'decoysMany'].includes(key)) newPuzzle(); else render();
+  if (['n', 'lines', 'easy', 'givensMany', 'decoysMany'].includes(key)) newPuzzle();
+  else if (S.settings.game === 'trace') Trace.refresh(key);
+  else render();
 }
 
 function saveWords() {
@@ -436,6 +478,26 @@ function saveWords() {
   renderSettings();
   if (skipped.length) $('extraInfo').textContent += `（跳过了不是两个字的：${skipped.join(' ')}）`;
   newPuzzle();
+}
+
+// ---------- 1.0 / 2.0 / 3.0 ----------
+function setGame(g) {
+  if (!GAME_NO[g]) g = 'grid';
+  S.settings.game = g;
+  save('settings', S.settings);
+  document.body.dataset.game = g;
+  const title = g === 'trace' ? '汉字描红' : '汉字数独';
+  $('title').textContent = title;
+  document.title = title;
+  $('gameCols').hidden = g === 'trace';
+  $('traceStage').hidden = g !== 'trace';
+  $('animBtn').hidden = g !== 'trace';
+  $('celebrate').hidden = true;
+  $('drawer').hidden = true;
+  history.replaceState(null, '', '#v' + GAME_NO[g]);
+  renderSettings();
+  if (g === 'trace') Trace.show();
+  else { Trace.hide(); restoreOrNew(); }
 }
 
 // ---------- start ----------
@@ -459,21 +521,14 @@ function wire() {
   $('saveWords').onclick = saveWords;
   $('clearWords').onclick = () => { save('extraWords', []); save('extraLesson', []); rebuildIndex(); renderSettings(); };
   $('resetStars').onclick = () => { save('stars', 0); renderSettings(); render(); };
+  Trace.wire();
+  window.addEventListener('hashchange', () => { const g = GAME_OF[location.hash]; if (g && g !== S.settings.game) setGame(g); });
   $('clearErrors').onclick = () => { errors.length = 0; $('errorList').innerHTML = ''; };
 }
 
 async function start() {
   wire();
   await loadData();
-  renderSettings();
-  const g = load('game', null);
-  const st = S.settings;
-  // A saved puzzle from an older word list may use characters that are no longer in the bank.
-  if (g && g.puzzle && g.v === S.data.version && g.puzzle.n === +st.n && g.mode === st.easy && !g.done) {
-    Object.assign(S, { puzzle: g.puzzle, place: g.place, done: g.done, revealed: g.revealed });
-    render();
-  } else {
-    newPuzzle();
-  }
+  setGame(GAME_OF[location.hash] || S.settings.game);
 }
 start();

@@ -7,15 +7,16 @@
   <title>汉字数独</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body data-game="grid">
   <div class="app">
     <header class="top">
-      <div class="title">汉字数独</div>
+      <div class="title" id="title">汉字数独</div>
       <div class="chip" id="levelTag">3×3 · 简单</div>
       <div class="chip stars">⭐ <span id="stars">0</span></div>
     </header>
 
-    <main class="cols">
+    <!-- 1.0 grid and 2.0 lines share this layout -->
+    <main class="cols" id="gameCols">
       <!-- Left: the board and the main buttons -->
       <section class="play">
         <div class="boardWrap"><div id="board" class="board"></div></div>
@@ -42,6 +43,37 @@
       </section>
     </main>
 
+    <!-- 3.0 tracing -->
+    <main class="cols traceStage" id="traceStage" hidden>
+      <section class="play">
+        <div class="boardWrap"><div class="traceBoard" id="traceBoard"><div id="traceTarget"></div></div></div>
+        <div class="strokeDots" id="strokeDots"></div>
+        <div class="message" id="traceMessage"></div>
+      </section>
+
+      <section class="side">
+        <div class="panel traceCard">
+          <div class="traceRef">
+            <div class="traceBig" id="traceBig"></div>
+            <div class="traceInfo">
+              <div class="tracePy" id="tracePy"></div>
+              <div class="traceCount" id="traceCount"></div>
+            </div>
+          </div>
+          <div class="madeWords" id="traceWords"></div>
+          <div class="actions">
+            <button class="btn" id="traceHint">💡 提示</button>
+            <button class="btn" id="traceRedo">↩️ 重写</button>
+            <button class="btn go" id="traceNext">⏭ 下一个字</button>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>选一个字 <small>星星越多，写得越好</small></h2>
+          <div id="pickGrid" class="pickGrid"></div>
+        </div>
+      </section>
+    </main>
+
     <section class="errors" id="errorsPanel" hidden>
       <h2>错误记录 <button class="mini" id="clearErrors">清空</button></h2>
       <ol id="errorList"></ol>
@@ -49,6 +81,8 @@
   </div>
 
   <button class="gear" id="gear" aria-label="设置">⚙️</button>
+  <!-- Lower-left corner, mirroring the gear: watch the strokes being written -->
+  <button class="animBtn" id="animBtn" hidden>▶ 笔顺</button>
 
   <aside class="drawer" id="drawer" hidden>
     <div class="drawerHead">
@@ -56,22 +90,35 @@
       <button class="mini" id="closeDrawer">✖</button>
     </div>
 
-    <div class="setting"><label>大小</label>
+    <div class="setting col gameLinks"><label>玩法版本 <small>随时可以来回切换</small></label>
+      <div class="gameRow">
+        <a class="gameLink" href="#v1" data-game="grid"><b>1.0</b><span>格子</span></a>
+        <a class="gameLink" href="#v2" data-game="lines"><b>2.0</b><span>填词</span></a>
+        <a class="gameLink" href="#v3" data-game="trace"><b>3.0</b><span>描红</span></a>
+      </div>
+      <div class="note" id="gameNote"></div>
+    </div>
+
+    <div class="setting" data-games="grid"><label>大小</label>
       <div class="seg" data-key="n"><button data-v="2">2×2</button><button data-v="3">3×3</button><button data-v="4">4×4</button></div></div>
-    <div class="setting"><label>玩法</label>
+    <div class="setting" data-games="lines"><label>行数</label>
+      <div class="seg" data-key="lines"><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div></div>
+    <div class="setting" data-games="grid lines"><label>玩法</label>
       <div class="seg" data-key="easy"><button data-v="1">简单<small>放对马上变绿</small></button><button data-v="0">挑战<small>最后才检查</small></button></div></div>
-    <div class="setting"><label>提示字</label>
+    <div class="setting" data-games="grid"><label>提示字</label>
       <div class="seg" data-key="givensMany"><button data-v="1">多</button><button data-v="0">少</button></div></div>
-    <div class="setting"><label>字库里的字</label>
+    <div class="setting" data-games="grid lines"><label>字库里的字</label>
       <div class="seg" data-key="decoysMany"><button data-v="0">少<small>空格×2</small></button><button data-v="1">多<small>空格×3</small></button></div></div>
-    <div class="setting"><label>拼音 <small>超纲字一直显示</small></label>
+    <div class="setting" data-games="trace"><label>描红提示 <small>关：看不到淡淡的字</small></label>
+      <div class="seg" data-key="traceGuide"><button data-v="1">开</button><button data-v="0">关</button></div></div>
+    <div class="setting" data-games="grid lines trace"><label>拼音 <small>超纲字一直显示</small></label>
       <div class="seg" data-key="pinyin"><button data-v="1">开</button><button data-v="0">关</button></div></div>
-    <div class="setting"><label>字体</label>
+    <div class="setting" data-games="grid lines"><label>字体</label>
       <div class="seg" data-key="trad"><button data-v="0">简体</button><button data-v="1">繁体</button></div></div>
-    <div class="setting"><label>声音</label>
+    <div class="setting" data-games="grid lines trace"><label>声音</label>
       <div class="seg" data-key="sound"><button data-v="1">开</button><button data-v="0">关</button></div></div>
 
-    <div class="setting col"><label>加新词 <small>两个字一个词，用空格分开</small></label>
+    <div class="setting col" data-games="grid lines"><label>加新词 <small>两个字一个词，用空格分开</small></label>
       <textarea id="newWords" rows="3" placeholder="例如：春天 花朵 大树"></textarea>
       <label class="check"><input type="checkbox" id="newIsLesson" checked> 这是最近学的（多出这些字）</label>
       <div class="row"><button class="btn small" id="saveWords">保存</button><button class="btn small" id="clearWords">清空我加的词</button></div>
@@ -81,7 +128,7 @@
     <div class="setting col"><label>词库</label><div class="note" id="dataInfo"></div></div>
 
     <div class="setting"><label>完成了</label>
-      <div class="row"><span id="doneCount">0</span>&nbsp;题 <button class="mini" id="resetStars">清零</button></div></div>
+      <div class="row"><span id="doneCount">0</span>&nbsp;个 <button class="mini" id="resetStars">清零</button></div></div>
 
     <div class="setting"><label>显示错误</label>
       <div class="seg" data-key="showErrors"><button data-v="1">开</button><button data-v="0">关</button></div></div>
@@ -99,7 +146,24 @@
     </div>
   </div>
 
+  <!-- 3.0: the grade after a character is written -->
+  <div class="celebrate" id="traceDone" hidden>
+    <div class="confetti" id="traceConfetti"></div>
+    <div class="cheer">
+      <div class="big" id="traceTitle">写完了！</div>
+      <div class="gradeStars" id="gradeStars"></div>
+      <div class="gradeText" id="gradeText"></div>
+      <div class="strokeDots big" id="gradeDots"></div>
+      <div class="actions">
+        <button class="btn" id="traceAgain">↩️ 再写一次</button>
+        <button class="btn go" id="traceNext2">下一个字 ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/vendor/hanzi-writer.min.js"></script>
   <script src="js/engine.js"></script>
+  <script src="js/trace.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

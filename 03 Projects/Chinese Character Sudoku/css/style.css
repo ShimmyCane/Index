@@ -1,3 +1,10 @@
+/* Kai-style calligraphy font (LXGW WenKai, SIL OFL), subset to the characters used here. */
+@font-face {
+  font-family: "WenKai Sub";
+  src: url("../assets/fonts/wenkai-subset.woff2") format("woff2");
+  font-display: swap;
+}
+
 /* Pastel kids' theme: vanilla paper, mint, peach, coral, lavender, bold ink outlines. */
 :root {
   --paper: #fff8e7;
@@ -12,7 +19,7 @@
   --grid-line: rgba(214, 112, 92, 0.35);
   --line: 3px solid var(--ink);
   --pop: 0 4px 0 var(--ink);
-  --han: "Kaiti SC", "STKaiti", "KaiTi", "楷体", "PingFang SC", "Hiragino Sans GB", serif;
+  --han: "WenKai Sub", "Kaiti SC", "STKaiti", "KaiTi", "楷体", "PingFang SC", "Hiragino Sans GB", serif;
   --ui: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
   --board: min(56vw, calc(100dvh - 300px), 640px);
 }
@@ -60,6 +67,7 @@ body {
 }
 .board {
   --n: 3;
+  --cell: calc(var(--board) / var(--n));
   width: var(--board); height: var(--board);
   display: grid; grid-template-columns: repeat(var(--n), 1fr); grid-template-rows: repeat(var(--n), 1fr);
   border: 2.5px solid var(--coral); border-radius: 14px; overflow: hidden;
@@ -73,7 +81,7 @@ body {
     linear-gradient(to bottom, transparent calc(50% - 0.5px), var(--grid-line) calc(50% - 0.5px), var(--grid-line) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
     #fffdf7;
   font-family: var(--han);
-  font-size: calc(var(--board) / var(--n) * 0.52);
+  font-size: calc(var(--cell) * 0.52);
 }
 .cell.lastCol { border-right: none; }
 .cell.lastRow { border-bottom: none; }
@@ -210,4 +218,87 @@ textarea {
   .cols { grid-template-columns: minmax(0, 1fr); }
   .play, .side { overflow: visible; }
   .title { font-size: 28px; }
+}
+
+/* ---------- 2.0 lines: one word per row, two cells wide ---------- */
+.board.lines {
+  --rows: 3;
+  --cell: min(calc((100dvh - 330px) / var(--rows)), 30vw, 190px);
+  width: calc(var(--cell) * 2); height: calc(var(--cell) * var(--rows));
+  grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(var(--rows), 1fr);
+}
+.board.lines .cell.lastRow { border-bottom: none; }
+
+/* ---------- game switcher in ⚙️ ---------- */
+.gameRow { display: flex; gap: 8px; }
+.gameLink {
+  flex: 1; min-height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: #fff; border: var(--line); border-radius: 18px 22px 18px 24px; box-shadow: var(--pop);
+  color: var(--ink); text-decoration: none; font-family: var(--ui);
+}
+.gameLink b { font-size: 26px; line-height: 1; }
+.gameLink span { font-size: 16px; font-weight: 700; margin-top: 4px; }
+.gameLink.on { background: var(--mint); }
+.gameLink:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+
+/* ---------- 3.0 tracing ---------- */
+.traceStage { --tsize: min(56vw, calc(100dvh - 300px), 660px); }
+.traceBoard {
+  position: relative; width: var(--tsize); height: var(--tsize); border-radius: 14px; overflow: hidden;
+  border: 2.5px solid var(--coral); background-color: #fffdf7;
+  /* 米字格: cross and diagonals, like a practice book */
+  background-image:
+    linear-gradient(to right, transparent calc(50% - 1px), rgba(255, 158, 138, 0.45) calc(50% - 1px), rgba(255, 158, 138, 0.45) calc(50% + 1px), transparent calc(50% + 1px)),
+    linear-gradient(to bottom, transparent calc(50% - 1px), rgba(255, 158, 138, 0.45) calc(50% - 1px), rgba(255, 158, 138, 0.45) calc(50% + 1px), transparent calc(50% + 1px)),
+    linear-gradient(to top right, transparent calc(50% - 0.5px), rgba(255, 158, 138, 0.25) calc(50% - 0.5px), rgba(255, 158, 138, 0.25) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+    linear-gradient(to bottom right, transparent calc(50% - 0.5px), rgba(255, 158, 138, 0.25) calc(50% - 0.5px), rgba(255, 158, 138, 0.25) calc(50% + 0.5px), transparent calc(50% + 0.5px));
+  touch-action: none; -webkit-user-select: none; user-select: none;
+}
+.traceBoard svg { display: block; touch-action: none; }
+.strokeDots { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; min-height: 26px; }
+.strokeDots i {
+  width: 22px; height: 22px; border-radius: 50%; border: 2.5px solid var(--ink); background: #fff; display: block;
+  font: normal 700 12px/17px var(--ui); text-align: center;
+}
+.strokeDots i.ok { background: var(--mint); }
+.strokeDots i.slip { background: #ffd0c4; }
+.strokeDots i.next { background: var(--sun); animation: blink 1s infinite; }
+.strokeDots.big i { width: 30px; height: 30px; font-size: 14px; line-height: 24px; }
+@keyframes blink { 50% { transform: scale(1.25); } }
+
+.traceRef { display: flex; align-items: center; gap: 18px; margin-bottom: 12px; }
+.traceBig {
+  width: 132px; height: 132px; flex: none; display: flex; align-items: center; justify-content: center;
+  font-family: var(--han); font-size: 104px; line-height: 1; background: #fffdf7; border: var(--line); border-radius: 18px;
+}
+.tracePy { font-size: 40px; font-weight: 700; min-height: 48px; }
+.traceCount { font-size: 18px; color: #6b5d7b; }
+.traceCard .actions { margin-top: 12px; justify-content: flex-start; }
+
+.pickGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 10px; }
+.pick {
+  position: relative; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer;
+  background: var(--peach); border: var(--line); border-radius: 14px; box-shadow: var(--pop);
+  font-family: var(--han); font-size: 32px; color: var(--ink);
+}
+.pick.s1, .pick.s2 { background: var(--sun); }
+.pick.s3 { background: var(--mint); }
+.pick.cur { outline: 4px solid var(--lavender); outline-offset: 3px; }
+.pick small { position: absolute; right: 3px; bottom: 1px; font: 700 11px var(--ui); }
+
+/* lower-left corner, mirroring the gear */
+.animBtn {
+  position: fixed; left: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 30; min-height: 68px; padding: 0 24px;
+  font: 700 22px var(--ui); background: var(--sun); border: var(--line); border-radius: 34px; box-shadow: var(--pop); cursor: pointer; color: var(--ink);
+}
+.animBtn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+
+.gradeStars { font-size: 56px; letter-spacing: 6px; margin-bottom: 6px; }
+.gradeText { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+.cheer .strokeDots { margin-bottom: 16px; }
+.cheer .actions { justify-content: center; }
+
+@media (max-width: 860px), (orientation: portrait) {
+  .traceStage { --tsize: min(84vw, 520px); }
+  .board.lines { --cell: min(40vw, 180px); }
 }

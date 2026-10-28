@@ -30,3 +30,15 @@
 - **Some recent characters had no words at all** (为, 干, 呢) and several had one or two. Count words per target character before relying on a bias; add short everyday words for the thin ones.
 - **Preferring characters made the search 10× slower until restarts were capped.** A planted word that cannot fit burned 12 restarts × 3,000 steps; 4 restarts × 800 steps for planted attempts (free search keeps more) brought 4×4 from ~800 ms back to ~100 ms with the same recent-character share. Time the generator after changing its bias.
 - **Check the date.** I labelled a change log entry with tomorrow's date; read the current date from the session, not from habit.
+
+## 2026-10-28 — 2.0 lines and 3.0 tracing
+
+- **When a user dislikes a mechanic, keep it and add alternatives behind a switch.** 1.0 stayed; 2.0 and 3.0 are links in ⚙️ (`#v1/#v2/#v3`), so Jimmy can compare. Hash links also let a game be bookmarked.
+- **Reuse the board by changing its shape and rule, not the code.** A 2.0 puzzle is an n×2 board with a row rule; drag, undo, win and saving didn't change. Adding `kind`, `rows`, `cols` to the puzzle and generalizing four functions was enough.
+- **"Decoys" can teach order.** For a blank after 白, 明 is tempting (明白) but wrong (白明). Wrong-order decoys came free from the word index and suit a game about word order; also exclude any decoy that would be a second right answer.
+- **Don't write stroke-order logic from scratch.** Hanzi Writer (MIT) plus hanzi-writer-data (Arphic PL) gives outlines, stroke order, matching, hints and animation. Bundle both and a custom loader so it works offline; keep the licence texts and a credits file.
+- **Network allowlists differ per host.** jsDelivr was blocked but the npm registry worked, so `npm pack` fetched the library, the stroke data and the font. Try the registry before concluding a package is unreachable.
+- **Subsetting a calligraphy font to the characters used** (359 glyphs, 78 KB woff2) makes a Kai font work offline on every iPad, where system Kai fonts are uncertain. Check the licence (SIL OFL: keep the licence, don't claim a reserved name) and ship the build tool.
+- **Test touch input with real touch events** (`Input.dispatchTouchEvent` over CDP), not only the mouse, and check the page doesn't scroll while drawing.
+- **Draw test strokes from the data itself** (stroke medians mapped through the library's positioner maths) to drive a tracing game in a headless browser.
+- **Grading rule used:** ⭐⭐⭐ = no mistakes and no hints; ⭐⭐ = at most two combined; ⭐ otherwise; best stars per character stored. Probably needs tuning with real children.

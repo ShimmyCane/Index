@@ -257,7 +257,84 @@ const Engine = (() => {
     return out;
   }
 
-  return { buildIndex, generate, checkHard, easyCellOk, wordsOnBoard, makeRng };
+  // ---------- 2.0: lines, one two-character word on each ----------
+  // Each line shows one character of a word and leaves the other blank. A line is right when its two
+  // characters, read left to right, make a word. Lines don't affect each other.
+  const rowIsWord = (idx, g, r) => idx.isWord(g[2 * r], g[2 * r + 1]);
+
+  function checkLines(idx, g, n) {
+    const badRows = [], badCells = new Set();
+    for (let r = 0; r < n; r++) if (!rowIsWord(idx, g, r)) { badRows.push(r); badCells.add(2 * r); badCells.add(2 * r + 1); }
+    return { ok: !badRows.length, badRows, badCols: [], badCells };
+  }
+
+  function linesWords(idx, g, n) {
+    const out = [];
+    for (let r = 0; r < n; r++) if (rowIsWord(idx, g, r)) out.push(g[2 * r] + g[2 * r + 1]);
+    return out;
+  }
+
+  // Wrong characters worth tempting a child with: they make a word with the shown character, but in
+  // the other order (黑白 is a word, 白黑 is not). Never a character that would also be right.
+  function pickLineDecoys(idx, rows, count, rng, lessonChars, taken) {
+    const out = [];
+    const valid = (x, row) => (row.blank === 1 ? idx.isWord(row.shown, x) : idx.isWord(x, row.shown));
+    const add = ch => {
+      if (!ch || taken.has(ch) || out.length >= count || rows.some(row => valid(ch, row))) return;
+      taken.add(ch); out.push(ch);
+    };
+    const traps = [];
+    for (const row of rows) {
+      for (const x of idx.chars) if (row.blank === 1 ? idx.isWord(x, row.shown) : idx.isWord(row.shown, x)) traps.push(x);
+    }
+    shuffle(traps, rng).slice(0, Math.ceil(count / 2)).forEach(add);
+    shuffle([...lessonChars], rng).forEach(add);
+    shuffle([...idx.pool], rng).forEach(add);
+    return out;
+  }
+
+  // opts: { lines, bankMult, lessonChars:Set, avoid:Set (recent puzzles), seed }
+  function generateLines(idx, opts) {
+    const rng = makeRng(opts.seed), L = opts.lessonChars || new Set(), avoid = opts.avoid || new Set();
+    const n = opts.lines, words = [...idx.W];
+    // Words with recently learned characters are far more likely to be picked.
+    const weight = w => 1 + 8 * ((L.has(w[0]) ? 1 : 0) + (L.has(w[1]) ? 1 : 0));
+    const weights = words.map(weight);
+    const pickWord = used => {
+      let total = 0;
+      const ok = [];
+      words.forEach((w, i) => { if (!used.has(w[0]) && !used.has(w[1])) { ok.push(i); total += weights[i]; } });
+      if (!ok.length) return null;
+      let r = rng() * total;
+      for (const i of ok) { r -= weights[i]; if (r <= 0) return words[i]; }
+      return words[ok[ok.length - 1]];
+    };
+    for (let attempt = 0; attempt < 60; attempt++) {
+      const used = new Set(), picked = [];
+      while (picked.length < n) {
+        const w = pickWord(used);
+        if (!w) break;
+        picked.push(w); used.add(w[0]); used.add(w[1]);
+      }
+      if (picked.length < n) continue;
+      const key = picked.join('');
+      if (avoid.has(key)) continue;
+      // Blank the recently learned character when only one of the two is recent; otherwise a coin flip.
+      const rows = picked.map(w => {
+        const a = L.has(w[0]), b = L.has(w[1]);
+        const blank = a !== b ? (a ? 0 : 1) : (rng() < 0.5 ? 0 : 1);
+        return { word: w, blank, shown: w[1 - blank] };
+      });
+      const solution = picked.flatMap(w => [w[0], w[1]]);
+      const given = rows.flatMap(row => (row.blank === 0 ? [false, true] : [true, false]));
+      const answers = rows.map(row => row.word[row.blank]);
+      const decoys = pickLineDecoys(idx, rows, answers.length * (opts.bankMult - 1), rng, L, new Set(solution));
+      return { kind: 'lines', n, rows: n, cols: 2, key, solution, given, bank: shuffle([...answers, ...decoys], rng) };
+    }
+    return null;
+  }
+
+  return { buildIndex, generate, generateLines, checkLines, linesWords, checkHard, easyCellOk, wordsOnBoard, makeRng };
 })();
 
 if (typeof module !== 'undefined') module.exports = Engine;
