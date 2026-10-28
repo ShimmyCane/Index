@@ -9,3 +9,6 @@
 7. **Check both kinds of impact.** Impacts can sit on an option or on its question. Reading only one dropped flags silently; a test caught it. _(Haiku build)_
 8. **Hash routes carry percent-encoded spaces.** `#/section/07 54 23` arrives as `%20`; decode it in the router. _(Haiku build)_
 9. **Keep a fallback data bundle for file://.** `fetch` fails from `file://`; a generated script with the same data lets the app run from a double-click, and a validator fails if the bundle is stale. _(Haiku build)_
+10. **Custom accounts need the database to refuse everything but named functions.** Tables with RLS on and no policies, plus security-definer functions with a fixed search_path, mean the browser key cannot read a row directly. Test the refusals (wrong password, injection-shaped username, another user's project, expired session) in a rolled-back block. _(accounts round)_
+11. **Keep draft-review state in the header, not in re-drawn panels.** Re-drawing on each save would drop focus from text being typed; the status light is updated alone. _(accounts round)_
+12. **When a supabase tool asks a question mid-call, it can time out.** After a timeout, check what changed with a read-only call before retrying; here nothing had been applied. _(Haiku build, 2026-10-28)_

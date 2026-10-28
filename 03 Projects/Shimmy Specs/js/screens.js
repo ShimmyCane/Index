@@ -28,20 +28,54 @@
   }
 
   // ---- Start ----------------------------------------------------------------
-  function start() {
+  function accountCard(ui2) {
+    var c = SS.cloud;
+    var s = c.session();
+    var err = ui2.authError ? '<p class="error-text">' + ui.esc(ui2.authError) + '</p>' : '';
+    if (!c.configured()) {
+      return '<section class="card account"><h2>Account</h2>' +
+        '<p>Database not set up yet, so projects are saved on this device only. To turn on accounts, fill in <code>js/config.js</code> (see convo v0.3).</p></section>';
+    }
+    if (!s) {
+      return '<section class="card account"><h2>Account</h2>' +
+        '<p class="muted">Sign in to save projects to the database. A new username creates the account on first sign-in. The password can be blank for now.</p>' +
+        err +
+        '<div class="row">' +
+        '<label>Username <input id="authUser" type="text" autocomplete="username" maxlength="64" placeholder="any name or email" /></label>' +
+        '<label>Password <input id="authPass" type="password" autocomplete="current-password" maxlength="200" placeholder="optional for now" /></label>' +
+        '<button class="btn primary" data-act="sign-in">Sign in or create</button></div></section>';
+    }
+    var list = '';
+    if (ui2.cloudError) list += '<p class="error-text">' + ui.esc(ui2.cloudError) + '</p>';
+    if (ui2.cloudList === null) list += '<p class="muted">Loading your projects…</p>';
+    else if (!ui2.cloudList.length) list += '<p class="muted">No projects on the account yet. Save one from any project, or create one below.</p>';
+    else list += '<ul class="plain rows">' + ui2.cloudList.map(function (x) {
+      return '<li><button class="btn small" data-act="cloud-open" data-id="' + ui.esc(x.id) + '">Open</button> ' +
+        '<button class="btn small quiet" data-act="cloud-delete" data-id="' + ui.esc(x.id) + '">Delete</button> ' +
+        '<strong>' + ui.esc(x.name) + '</strong> <span class="muted">' + ui.esc(x.kind) + ' · ' + shortDate(x.updated_at) + '</span></li>';
+    }).join('') + '</ul>';
+    return '<section class="card account"><h2>Account</h2>' +
+      '<p>Signed in as <strong>' + ui.esc(s.username) + '</strong></p>' +
+      '<p><button class="btn small" data-act="sign-out">Sign out</button> ' +
+      (store.current ? '<button class="btn small" data-act="cloud-save-now">Save current project to account</button>' : '') + '</p>' +
+      '<h3>Your projects on the account</h3>' + list + '</section>';
+  }
+
+  function start(ui2) {
     var p = store.current;
     var saved = store.list();
-    return '<h1>Shimmy Specs</h1>' +
-      '<p class="lead">Work out which sections a project needs, answer the questions for each one, and keep a record of every decision. Everything stays in this browser until you export it.</p>' +
+    return '<div class="hero"><h1>Shimmy Specs</h1>' +
+      '<p class="lead">Work out which sections a project needs, answer the questions for each one, and keep a record of every decision.</p></div>' +
+      accountCard(ui2 || {}) +
       '<section class="card"><h2>New project</h2>' +
-      '<label>Name <input id="newName" type="text" placeholder="Sketch: name" /></label> ' +
+      '<div class="row"><label>Name <input id="newName" type="text" placeholder="Sketch: name" /></label> ' +
       '<label>Kind <select id="newKind"><option value="sketch">Sketch / test</option><option value="own">Own project</option></select></label> ' +
-      '<button class="btn primary" data-act="new-project">Create</button>' +
+      '<button class="btn primary" data-act="new-project">Create</button></div>' +
       '<p class="muted">Office project data never goes here. Use a sketch or your own project.</p></section>' +
       '<section class="card"><h2>Sample</h2><p>A synthetic six-story masonry walk-up, to try the framework.</p>' +
       '<button class="btn" data-act="load-sample">Load sample project</button></section>' +
-      '<section class="card"><h2>Open</h2>' + (saved.length ? '<ul class="plain rows">' + saved.map(function (x) {
-        return '<li><button class="btn" data-act="open-project" data-id="' + ui.esc(x.id) + '">Open</button> ' +
+      '<section class="card"><h2>On this device</h2>' + (saved.length ? '<ul class="plain rows">' + saved.map(function (x) {
+        return '<li><button class="btn small" data-act="open-project" data-id="' + ui.esc(x.id) + '">Open</button> ' +
           '<strong>' + ui.esc(x.name) + '</strong> <span class="muted">' + ui.esc(x.kind) + ' · ' + shortDate(x.updated) + '</span></li>';
       }).join('') + '</ul>' : '<p class="muted">No saved projects in this browser yet.</p>') + '</section>' +
       '<section class="card"><h2>Files</h2>' +
@@ -217,30 +251,41 @@
       }).join('');
     }).join('');
 
-    // Right panel: explanation of the focused question, perspectives, impacts, decisions.
+    // Right panel: explanation, perspectives and decisions, in the order the user chose.
     var fq = tpl.questions.find(function (q) { return q.id === focus; });
     var fopt = fq && SS.template.findOption(fq, (ctx.answers || {})[fq.id]);
-    var aside = '<details class="panel" open><summary>Explanation</summary>' +
-      (fq ? '<p><strong>' + ui.esc(fq.ask) + '</strong></p>' + (fopt ? '<p>' + ui.esc(fopt.explain) + '</p>' +
+    var explain = '<p><strong>' + ui.esc(fq ? fq.ask : '') + '</strong></p>' + (fq
+      ? (fopt ? '<p>' + ui.esc(fopt.explain) + '</p>' +
         (fopt.impacts && fopt.impacts.length ? '<p class="muted">Impacts: ' + fopt.impacts.map(function (i) { return ui.esc(i.section + ' (' + i.note + ')'); }).join('; ') + '</p>' : '')
         : '<p class="muted">Choose an option to see its explanation.</p>') +
-        '<p class="muted">Options: ' + fq.options.map(function (o) { return ui.esc(o.label); }).join(' · ') + '</p>' : '<p class="muted">No questions visible.</p>') + '</details>' +
-      '<details class="panel" open><summary>Perspectives</summary><ul class="plain">' +
-      Object.keys(tpl.perspectives || {}).map(function (k) {
-        return '<li><strong>' + ui.esc(k) + ':</strong> ' + ui.esc(tpl.perspectives[k] || '—') + '</li>';
-      }).join('') + '</ul></details>' +
-      '<details class="panel" open><summary>Decisions here</summary><ul class="plain">' +
-      (p.decisions || []).filter(function (d) { return d.section === num; }).slice(-8).reverse().map(function (d) {
-        return '<li><code>' + ui.esc(d.id) + '</code> ' + ui.esc(d.kind) + ': ' + ui.esc(d.chosen) + (d.reason ? ' — ' + ui.esc(d.reason) : '') + '</li>';
-      }).join('') + '</ul></details>';
+        '<p class="muted">Options: ' + fq.options.map(function (o) { return ui.esc(o.label); }).join(' · ') + '</p>'
+      : '<p class="muted">No questions visible.</p>');
+    var persp = '<ul class="plain">' + Object.keys(tpl.perspectives || {}).map(function (k) {
+      return '<li><strong>' + ui.esc(k) + ':</strong> ' + ui.esc(tpl.perspectives[k] || '—') + '</li>';
+    }).join('') + '</ul>';
+    var decs = '<ul class="plain">' + (p.decisions || []).filter(function (d) { return d.section === num; }).slice(-8).reverse().map(function (d) {
+      return '<li><code>' + ui.esc(d.id) + '</code> ' + ui.esc(d.kind) + ': ' + ui.esc(d.chosen) + (d.reason ? ' — ' + ui.esc(d.reason) : '') + '</li>';
+    }).join('') + '</ul>';
+    var bodies = { explain: explain, perspectives: persp, decisions: decs };
+    var titles = { explain: 'Explanation', perspectives: 'Perspectives', decisions: 'Decisions here' };
+    var layout = ui2.layout || SS.layoutDefaults;
+    var aside = layout.sideOrder.map(function (k, i) {
+      return '<details class="panel" open><summary>' + titles[k] +
+        '<span class="mv">' +
+        '<button class="btn small" data-act="side-move" data-key="' + k + '" data-dir="-1"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move ' + titles[k] + ' up">▲</button>' +
+        '<button class="btn small" data-act="side-move" data-key="' + k + '" data-dir="1"' + (i === layout.sideOrder.length - 1 ? ' disabled' : '') + ' aria-label="Move ' + titles[k] + ' down">▼</button>' +
+        '</span></summary>' + bodies[k] + '</details>';
+    }).join('');
 
     return '<div class="ws">' + head +
-      '<div class="ws-cols"><div class="ws-left">' +
+      '<div class="ws-cols' + (layout.sideHidden ? ' side-hidden' : '') + '"><div class="ws-left">' +
       '<h2>Questions</h2>' + questions +
       '<h2>Draft</h2>' + gutter +
       '<div class="draft">' + paras + '</div>' +
       '<details class="panel"><summary>Plain text</summary><pre>' + ui.esc(draft.plain) + '</pre></details>' +
-      '</div><aside class="side">' + aside + '</aside></div></div>';
+      '</div>' +
+      '<div class="splitter" data-splitter role="separator" aria-label="Drag to resize the notes panel" title="Drag to resize"></div>' +
+      '<aside class="side">' + aside + '</aside></div></div>';
   }
 
   // ---- Flags ----------------------------------------------------------------

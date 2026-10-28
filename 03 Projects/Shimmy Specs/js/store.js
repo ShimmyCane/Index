@@ -88,6 +88,7 @@
       if (!this.current) return;
       if (saveTimer) root.clearTimeout(saveTimer);
       saveTimer = root.setTimeout(function () { store.saveNow(); }, SAVE_DELAY);
+      if (SS.cloud) SS.cloud.schedule(this.current);
     },
 
     saveNow: function () {
@@ -117,6 +118,7 @@
     restoreState: function (obj) {
       if (!obj || obj.format !== 'shimmy-state/1' || !obj.id) throw new Error('Not a Shimmy Specs state file');
       obj.id = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      delete obj.cloudId;
       this.current = obj;
       this.saveNow();
       return obj;
