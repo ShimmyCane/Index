@@ -58,6 +58,11 @@
 * **All skills** live in `02 Refs/Skills/` (source) and run in Claude Code as `/name` (see root `CLAUDE.md`).
 
 
+## 4b. Art inspiration
+* **Historical artists only.** When a project borrows ideas from artists, use artists who are no longer alive, to stay away from AI encroaching on current art practices. Never imitate a living artist's style. (Felix Maze retired its Kusama mazes under this rule.)
+* **Digital-only experiments are welcome** as separate prototypes (3D, rotating, moving), kept apart from the printed bank.
+* **Let me flag what doesn't work.** A visible 🚩 to flag a puzzle or item that doesn't work for me, saved to the database.
+
 ## 5. Family Apps (added in consolidation)
 * **Reuse the Family Habits look** for any new family app: Quicksand, Orbitron and Patrick Hand; ink, paper and sun palette; offset shadows; asymmetric radii; polka dots.
 * **Visible failures on the page** for any app that talks to a database: an error panel, a header status pill and a database check in ⚙️. Don't rely on DevTools.

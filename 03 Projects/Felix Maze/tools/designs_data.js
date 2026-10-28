@@ -125,7 +125,7 @@ module.exports = [
     V("Scissor Painting", "Matisse said he was drawing with scissors.", ["cat", "heart"]),
     V("Blue Shapes", "Late in life he made art from his chair, with scissors and paper.", ["cat", "star"], { flip: true })
   ] },
-  { id: "kusama", family: 3, levels: [2, 4], style: "kusama", inspired: "Inspired by Yayoi Kusama's polka dots and pumpkins", tags: ["dots", "tunnels", "painting"], variants: [
+  { id: "kusama", living: true, family: 3, levels: [2, 4], style: "kusama", inspired: "Inspired by Yayoi Kusama's polka dots and pumpkins", tags: ["dots", "tunnels", "painting"], variants: [
     V("Polka Dot Path", "Kusama has covered whole rooms in dots.", ["cat", "pumpkin"]),
     V("Dot Garden", "Yayoi Kusama was born in Japan in 1929.", ["cat", "flower"]),
     V("Pumpkin Dots", "Her pumpkin sculptures are covered in dots.", ["cat", "pumpkin"]),

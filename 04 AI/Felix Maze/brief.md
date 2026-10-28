@@ -43,3 +43,5 @@ Printed maze worksheets for Felix (US Letter landscape, black and white, "Felix 
 - Bank: 192 puzzles (batches 1–4, `tools/generate.js --batch N`), levels 40/70/55/21/6, mean 2.39. 8 designs in `data/rework.js` for `/fix-puzzles`. Report: `tools/generation_report.md`.
 
 - Batch 5 (counters 0C9–0FA): 50 new designs from the inspirations log (`tools/designs_data5.js`, 36 new silhouettes). 10 earlier mazes whose pictures hit the title/footer were replaced under new counters (0FB+). Bank now 240 active puzzles. Sources: `tools/designs_sources.md`.
+
+- Round 6: policy = historical artists only (Kusama mazes retired, 8 historical-art mazes added as batch 7); new pages: `play.html` (drive), `about.html`, `prototypes.html` (10 digital-only ideas). Active bank 244.

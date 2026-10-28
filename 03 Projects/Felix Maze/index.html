@@ -27,6 +27,9 @@
     <a class="tile" href="library.html" style="background:var(--mint)"><span class="big">📚</span><b>Library</b><span>Every maze. Find one, print it.</span></a>
     <a class="tile" href="make.html" style="background:var(--peach)"><span class="big">✏️</span><b>Make a maze</b><span>Draw a few lines. Pick a sprout. Bake it.</span></a>
     <a class="tile" href="answer.html" style="background:var(--lavender)"><span class="big">🎬</span><b>Answers</b><span>Type a maze number, watch the way through.</span></a>
+    <a class="tile" id="driveTile" href="play.html" style="background:var(--sky)"><span class="big">🚗</span><b>Drive a maze</b><span>Draw your way through on screen. Green when you get there.</span></a>
+    <a class="tile" href="prototypes.html" style="background:var(--sun)"><span class="big">🧪</span><b>Prototypes</b><span>3D, spinning and shifting mazes, for screens only.</span></a>
+    <a class="tile" href="about.html" style="background:#fff"><span class="big">📖</span><b>About</b><span>How mazes work, the art behind them, and ideas to explore.</span></a>
   </div>
 
   <h2 class="step">⭐ Puzzle of the day</h2>
@@ -36,6 +39,7 @@
       <p class="note" id="potdInfo"></p>
       <div class="row">
         <a class="btn go" id="potdOpen" href="library.html">Open it</a>
+        <a class="btn mint" id="potdDrive" href="play.html">🚗 Drive it</a>
         <a class="btn" id="potdPrint" href="print.html">🖨️ Print just this one</a>
       </div>
       <p class="note">Picked fresh each day from puzzles that passed every check, near Felix's sweet spot. Flagged puzzles are never picked.</p>
@@ -77,6 +81,8 @@
           box.href = app.sheetUrl(p);
           box.innerHTML = S.svg(p, { fluid: true }).svg;
           document.getElementById("potdOpen").href = app.sheetUrl(p);
+          document.getElementById("potdDrive").href = "play.html?code=" + encodeURIComponent(p.code);
+          document.getElementById("driveTile").href = "play.html?code=" + encodeURIComponent(p.code);
           document.getElementById("potdPrint").href = "print.html?codes=" + encodeURIComponent(p.code);
           document.getElementById("potdInfo").innerHTML = `<b>#${app.esc(p.code)} · ${app.esc(p.title)}</b><br><span class="dots">${dots(p.level)}</span> ${app.esc((S.LEVELS[p.level] || {}).name || "")}<br><small>${app.esc(p.inspired || "")}</small>`;
         } else { box.innerHTML = "<p style='padding:20px'>No puzzle is available right now.</p>"; }

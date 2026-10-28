@@ -32,3 +32,9 @@
 - Small silhouettes cap at level 3 (corridors can't go below the pencil floor); only wide pages (rings, rectangles, waves) reach 4–5. Plan quotas from what shapes can reach.
 - Variety came cheaply from shapes (a list of yes/no functions) plus a look (bold, hedge, dots): 36 new silhouettes in `js/shapes.js` preview well on a canvas before any maze is built.
 - Replacing a published maze: retire it, give the replacement a new counter (`generate.js --redo n,n,...`, `--level` to change it).
+
+## Round 6 (drive mode, about, prototypes, living artists)
+- Drive mode needs no collision geometry: step through the cell graph (BFS toward the pointer, a few steps at most), so a finger can never cross a wall; keep the whole walk so the exploration and a replay come for free.
+- 3D without a library is small: yaw/pitch/perspective plus painter's sort covers walls, surfaces wrapped on a sphere/cylinder/torus (with a facing test per wall), cubes and stacked floors. A raycaster is ~40 lines.
+- Policy lines (like "no living artists") belong in the data too: `living: true` on a design stops the generator, so the rule can't be forgotten.
+- A page of theory is better with a live control (the dials lab uses the real engine).

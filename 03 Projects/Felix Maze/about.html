@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>About Felix Maze</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+<style>
+  .about { max-width: 940px; margin: 0 auto; }
+  .about h2 { font: 34px var(--hand); margin: 34px 0 6px; }
+  .about h3 { font: 700 19px var(--ui); margin: 18px 0 4px; }
+  .about p, .about li { line-height: 1.6; }
+  .toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 0; }
+  .card2 { background: #fff; border: var(--line); border-radius: 22px 22px 22px 8px; box-shadow: 0 5px 0 var(--ink); padding: 14px 18px; margin: 12px 0; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .lab { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  @media (max-width: 760px) { .lab { grid-template-columns: 1fr; } }
+  .lab canvas { width: 100%; aspect-ratio: 4 / 3; background: #fff; border: var(--line); border-radius: 18px; }
+  .lab label { display: block; font-weight: 700; margin: 8px 0 2px; }
+  .lab input[type=range] { width: 100%; min-height: 36px; }
+  .bars { display: grid; gap: 6px; }
+  .bar { display: grid; grid-template-columns: 90px 1fr 40px; gap: 8px; align-items: center; font-weight: 700; }
+  .bar i { display: block; height: 18px; border: 2.5px solid var(--ink); border-radius: 99px; background: var(--mint); }
+  .refs li { margin: 6px 0; }
+  .pill { display: inline-block; border: 2.5px solid var(--ink); border-radius: 99px; padding: 0 10px; background: var(--sun); font-weight: 700; font-size: 14px; }
+  .art li b { font-weight: 700; }
+  #ideas li { display: flex; gap: 10px; align-items: baseline; justify-content: space-between; border-bottom: 2px dotted var(--ink); padding: 6px 0; list-style: none; }
+  #ideas { padding: 0; }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1 class="title"><a href="index.html">Felix Maze</a> <small>About: how and why these mazes are made</small></h1>
+</header>
+<main class="wrap">
+<div class="about">
+
+  <div class="toc">
+    <a class="btn" href="#what">What it is</a><a class="btn" href="#theory">How mazes work</a><a class="btn" href="#lab">Try the dials</a><a class="btn" href="#level">Levels and joy</a>
+    <a class="btn" href="#art">Art</a><a class="btn" href="#play">Ways to play</a><a class="btn" href="#ideas">Keep exploring</a><a class="btn" href="#refs">References</a>
+  </div>
+
+  <h2 id="what">What this is</h2>
+  <p>Felix Maze makes black-and-white maze sheets to print, in many styles: paintings, animals, machines, music, famous mazes from history. Every sheet has a title, a start and a finish with a character to follow, and one fun line at the bottom about where the idea came from. The aim is joy, not a test: lots of white space, a little story from start to goal, and something to notice on the way.</p>
+  <p>Each maze is a small recipe (a style, a size and a number called a seed), so the computer can rebuild the same maze, its answer and its animation exactly. Nothing is stored as a picture.</p>
+
+  <h2 id="theory">How mazes work</h2>
+  <div class="two">
+    <div class="card2"><h3>Maze or labyrinth?</h3><p>A <b>labyrinth</b> has one winding path and no choices: you just walk it, like the floor of Chartres Cathedral. A <b>maze</b> has branches, so you choose, get things wrong and turn around. Most of ours are mazes; a few (the Cretan and Chartres rings, the turf maze) are labyrinths made to feel like mazes by adding branches.</p></div>
+    <div class="card2"><h3>A maze is a tree</h3><p>Think of every square as a dot and every open doorway as a line between two dots. A "perfect" maze connects all the dots with <b>exactly one</b> route between any two, which is what mathematicians call a spanning tree. Walls are simply the lines we did not draw.</p></div>
+    <div class="card2"><h3>Growing one</h3><p>Start in one square and keep carving into a neighbor not yet visited. Which square you extend next changes the feel: always the newest makes long winding halls with few branches; a random one makes many short, spiky branches. We call this slider <b>twistiness</b>.</p></div>
+    <div class="card2"><h3>Loops and bridges</h3><p>Removing a few dead ends adds <b>loops</b> (more than one way, "braiding"). Letting a passage go <b>over and under</b> another makes a bridge, like the Celtic knot maze, where the answer slips under a path and comes out the other side.</p></div>
+    <div class="card2"><h3>Other shapes</h3><p>Squares can be hexagons (six neighbors), rings and spokes (a spider web), or any silhouette: we only keep the squares inside a fish, a castle or a letter. Bent mazes (waves, spirals) are made flat and then pushed through a swirl.</p></div>
+    <div class="card2"><h3>Same seed, same maze</h3><p>The random numbers come from a seed, so the maze is fully reproducible. A small fingerprint of each published sheet is checked on every change, so a maze that was printed cannot quietly change afterwards.</p></div>
+  </div>
+
+  <h2 id="lab">Try the dials</h2>
+  <div class="card2 lab">
+    <canvas id="labCanvas" width="640" height="480"></canvas>
+    <div>
+      <p style="margin-top:0">Change a dial and a new maze grows. Turn the twistiness all the way down for long halls, all the way up for spiky branches.</p>
+      <div class="row" id="labGeo">
+        <button class="btn on" data-g="grid">Squares</button><button class="btn" data-g="hex">Hexagons</button><button class="btn" data-g="polar">Rings</button>
+      </div>
+      <label for="labMix">Twistiness <span class="pill" id="labMixV"></span></label><input id="labMix" type="range" min="0" max="100" value="20">
+      <label for="labLoops">Loops <span class="pill" id="labLoopsV"></span></label><input id="labLoops" type="range" min="0" max="50" value="0">
+      <label for="labSize">Size of a square <span class="pill" id="labSizeV"></span></label><input id="labSize" type="range" min="26" max="80" value="44">
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="labNew">🎲 New seed</button><label style="margin:0"><input type="checkbox" id="labPath"> show the way</label>
+      </div>
+      <p id="labInfo" class="note"></p>
+    </div>
+  </div>
+
+  <h2 id="level">Levels, joy and checks</h2>
+  <p><b>Level 1 to 5.</b> The computer measures how long the right way is, how many choices there are along it, how deep the dead ends are and how tempting they look, and turns that into a level (1 is a few minutes, 5 is a long, careful sit). The scale was set against a maze Jimmy knew was a level 2. The bank is a bell curve centered a little above 2:</p>
+  <div class="card2"><div class="bars" id="bars"></div><p class="note" id="barsNote" style="margin-bottom:0"></p></div>
+  <p><b>Joy.</b> A second score looks at three things: <i>Looking</i> (is it pretty, with room around it), <i>Doing</i> (do your hand and pencil have fun) and <i>Solving</i> (is the thinking satisfying, with wrong turns that are interesting rather than dull). Felix's faces (😴 😊 😣) after a try slowly move his "sweet spot" level.</p>
+  <p><b>Checks before anything is published.</b> The red answer line must never touch a wall (first it is checked against the geometry, then against the pixels of the drawn picture, so what you see is what was checked). Only about 1 in 3,000 tries failed this, and failures never get out: they go on a list to be repaired. A layout check keeps the start and finish pictures off the title and footer. A sheet you flag with 🚩 is taken out of every pick (puzzle of the day, top five, packs) until it is fixed.</p>
+
+  <h2 id="art">Art and inspirations</h2>
+  <p>Many mazes are "inspired by" a famous painting, building or pattern. We use <b>historical artists only</b>, people who are no longer alive, so the mazes stay about their work and never imitate the style of artists working today. Nothing is traced: each maze borrows an idea (swirling sky, grid of rooms, dots, a cut-paper shape) and builds its own picture. The footer of each sheet says where the idea came from.</p>
+  <div class="two art">
+    <div class="card2"><h3>Painters and printmakers</h3><ul>
+      <li><b>Vincent van Gogh</b>: swirling skies (Starry Night)</li><li><b>Katsushika Hokusai</b>: great waves and Mount Fuji</li><li><b>Gustav Klimt</b>: spirals and the Tree of Life</li>
+      <li><b>Georges Seurat</b>: pictures made of dots</li><li><b>Claude Monet</b>: water lilies</li><li><b>Henri Rousseau</b>: jungle leaves</li>
+      <li><b>Pieter Bruegel</b>: the Tower of Babel</li><li><b>Albrecht Dürer</b>: the rhinoceros print</li><li><b>Hilma af Klint</b>: spiral abstractions</li></ul></div>
+    <div class="card2"><h3>Modern masters (no longer living)</h3><ul>
+      <li><b>Piet Mondrian</b>: grids of rooms</li><li><b>Henri Matisse</b>: cut-paper shapes</li><li><b>Paul Klee</b>: patchwork squares</li>
+      <li><b>Wassily Kandinsky</b>: circles within circles</li><li><b>M. C. Escher</b>: lizards and tilings</li><li><b>Pablo Picasso</b>: one-line animals</li>
+      <li><b>Keith Haring</b>: dancing figures</li><li><b>Alexander Calder</b>: hanging mobiles</li><li><b>Antoni Gaudí</b>: tiled lizard</li></ul></div>
+    <div class="card2"><h3>Traditions and places</h3><ul>
+      <li>Celtic knotwork (Book of Kells)</li><li>Alhambra star tiles</li><li>Persian carpets</li><li>Greek key borders</li><li>Chinese scrolls and window lattices</li><li>Tibetan sand mandalas</li>
+      <li>Hampton Court, Villa Pisani, the Masone bamboo maze</li><li>Chartres Cathedral's floor labyrinth</li></ul></div>
+  </div>
+  <p class="note">We stopped making mazes from living artists (an earlier set inspired by Yayoi Kusama is retired). Past the 100 ideas in <code>inspirations.md</code>, new art ideas are welcome if the artist is no longer living.</p>
+
+  <h2 id="play">Ways to play</h2>
+  <ul>
+    <li><b>Print a pack</b>: ten puzzles, double-sided, black and white, one per page.</li>
+    <li><b>🚗 Drive a maze</b>: on a tablet or computer, drag along the path. Your line is one color and turns green when it connects to the finish. You can turn around in dead ends; afterwards it shows where you looked and replays your drive. It does not have to be the shortest way.</li>
+    <li><b>🎬 Answers</b>: type a maze number to watch the way through.</li>
+    <li><b>✏️ Make a maze</b>: draw a few lines, pick a sprout, bake it into a maze.</li>
+    <li><b>🚩 Flag</b>: on any sheet or drive page, flag a maze that does not work for you (wrong-looking answer, too hard, too easy, ugly, unsuitable). It is hidden from the picks until fixed.</li>
+    <li><b>🧪 <a href="prototypes.html">Prototypes</a></b>: ten ideas that only work on a screen: 3D tabletop, fly-through, globe, drum, donut, cube, shifting walls, spinning rings, tower, flood.</li>
+  </ul>
+
+  <h2 id="ideas">Keep exploring</h2>
+  <div class="two">
+    <div class="card2"><h3>Open questions</h3><ul>
+      <li>True organic mazes: curves that grow and push away from each other, not squares at all.</li>
+      <li>Mazes that depend on a rule (follow the color, count by fives, only one-way arrows).</li>
+      <li>Triangles, Truchet tiles, Hilbert curves as the maze's skeleton.</li>
+      <li>A maze you can only solve by turning the page, or in two halves (front and back).</li>
+      <li>Which prototype should become a real game? Which one made Felix laugh?</li>
+      <li>More historical art: Rembrandt's light, Gaudí's curves, Islamic geometry, Japanese woodblocks.</li></ul></div>
+    <div class="card2"><h3>Idea box</h3>
+      <p style="margin-top:0">Write an idea or a question here. It is saved on this device, and "Copy all" gives you a note to paste into the next conversation.</p>
+      <textarea class="field" id="ideaText" rows="2" style="width:100%" placeholder="What if a maze…"></textarea>
+      <div class="row" style="margin-top:8px"><button class="btn go" id="ideaAdd">Add</button><button class="btn" id="ideaCopy">Copy all</button></div>
+      <ul id="ideas"></ul>
+    </div>
+  </div>
+
+  <h2 id="refs">References</h2>
+  <ul class="refs">
+    <li>Walter D. Pullen, <i>Think Labyrinth</i>: the long-running reference on maze types and algorithms. <a href="https://www.astrolog.org/labyrnth.htm">astrolog.org/labyrnth.htm</a></li>
+    <li>Jamis Buck, <i>Mazes for Programmers</i> (Pragmatic Bookshelf, 2015) and his maze algorithm articles. <a href="https://www.oreilly.com/library/view/-/9781680501315/">oreilly.com</a></li>
+    <li>Hans Pedersen and Karan Singh, "Organic labyrinths and mazes", NPAR 2006. <a href="https://dgp.toronto.edu/~karan/pdf/mazes.pdf">dgp.toronto.edu/~karan/pdf/mazes.pdf</a></li>
+    <li>Jie Xu and Craig S. Kaplan, "Image-guided maze construction", SIGGRAPH 2007. <a href="https://cgl.uwaterloo.ca/jiexu/paper/xu_siggraph07.pdf">cgl.uwaterloo.ca</a></li>
+    <li>Craig Kaplan, "Mathematics and aesthetics in maze design" (talk). <a href="https://csclub.uwaterloo.ca/events/2010/fall/Mathematics-and-aesthetics-in-maze-design/">csclub.uwaterloo.ca</a></li>
+    <li>The Labyrinth Society, "Labyrinth Typology" (the maze and labyrinth split). <a href="https://labyrinthsociety.org/?p=211">labyrinthsociety.org</a></li>
+    <li>Overviews: <a href="https://en.wikipedia.org/wiki/Maze_generation_algorithm">Maze generation algorithm</a>, <a href="https://en.wikipedia.org/wiki/Labyrinth">Labyrinth</a>, <a href="https://en.wikipedia.org/wiki/Spanning_tree">Spanning tree</a> (Wikipedia).</li>
+    <li>Our own notes in this project: <a href="research/index.html">research</a>, <code>maze_research.md</code> (what makes a good maze), <code>inspirations.md</code> (100 ideas), <code>rubric.md</code> (the joy score), <code>variations.md</code>, <code>tools/designs_sources.md</code> (where each fun line comes from).</li>
+  </ul>
+  <p class="note">The Pedersen–Singh and Xu–Kaplan papers have so far been read only through their abstracts and descriptions; read them before building the organic generator.</p>
+</div>
+</main>
+<script src="js/engine.js"></script>
+<script src="js/art.js"></script>
+<script src="js/sheet.js"></script>
+<script src="js/doodle.js"></script>
+<script src="js/score.js"></script>
+<script src="js/shapes.js"></script>
+<script src="js/designs.js"></script>
+<script src="data/catalog.js"></script>
+<script src="data/scores.js"></script>
+<script src="data/rework.js"></script>
+<script src="js/config.js"></script>
+<script src="js/common.js"></script>
+<script>
+  (function () {
+    const app = FMZ.app, E = FMZ.engine, $ = id => document.getElementById(id);
+    app.init();
+
+    // the bank, by level
+    try {
+      const all = app.bank(), by = [0, 0, 0, 0, 0, 0]; all.forEach(r => by[r.level]++);
+      const mx = Math.max(...by);
+      $("bars").innerHTML = [1, 2, 3, 4, 5].map(l => `<div class="bar"><span>Level ${l}</span><i style="width:${Math.max(3, 100 * by[l] / mx)}%"></i><span>${by[l]}</span></div>`).join("");
+      const mean = all.reduce((s, r) => s + r.level, 0) / (all.length || 1);
+      $("barsNote").textContent = all.length + " mazes in the bank, average level " + mean.toFixed(2) + ".";
+    } catch (e) { app.logError("about bars: " + e.message); }
+
+    // the dials: grow a small maze with the real engine
+    const S = { geo: "grid", seed: 7 };
+    function lab() {
+      const cv = $("labCanvas"), ctx = cv.getContext("2d"), W = cv.width, H = cv.height;
+      const mix = $("labMix").value / 100, loops = $("labLoops").value / 100, size = +$("labSize").value;
+      $("labMixV").textContent = Math.round(mix * 100) + "%"; $("labLoopsV").textContent = Math.round(loops * 100) + "%"; $("labSizeV").textContent = size;
+      const r = E.rng(S.seed), pad = 18, box = { x: pad, y: pad, w: W - 2 * pad, h: H - 2 * pad };
+      const sz = size * 0.62;
+      let g;
+      if (S.geo === "hex") g = E.buildHex(Object.assign({}, box, { size: sz * 1.05 }));
+      else if (S.geo === "polar") g = E.buildPolar({ cx: W / 2, cy: H / 2, R: Math.min(W, H) / 2 - pad, rings: Math.max(3, Math.round((Math.min(W, H) / 2 - pad) / sz)), core: 1.4 });
+      else g = E.buildGrid(Object.assign({}, box, { size: sz }));
+      const grown = E.grow(g, r, { mix });
+      E.braid(g, grown.links, r, loops);
+      ctx.clearRect(0, 0, W, H); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = "#3b3248"; ctx.lineWidth = 3.5; ctx.lineCap = "round"; ctx.beginPath();
+      g.edges.forEach((e, i) => {
+        if (grown.links.has(i)) return;
+        const o = e.geo;
+        if (o.t === "line") { ctx.moveTo(o.x1, o.y1); ctx.lineTo(o.x2, o.y2); }
+        else { ctx.moveTo(o.cx + o.r * Math.cos(o.a0), o.cy + o.r * (o.squash || 1) * Math.sin(o.a0)); ctx.ellipse(o.cx, o.cy, o.r, o.r * (o.squash || 1), 0, o.a0, o.a1); }
+      });
+      ctx.stroke();
+      const a = 0, b = g.cells.length - 1, sol = E.solve(g, grown.links, a, b);
+      if ($("labPath").checked && sol) {
+        ctx.strokeStyle = "#e0604a"; ctx.lineWidth = 6; ctx.beginPath();
+        sol.cells.forEach((c, k) => { const q = g.cells[c]; k ? ctx.lineTo(q.cx, q.cy) : ctx.moveTo(q.cx, q.cy); }); ctx.stroke();
+      }
+      [[a, "🐱"], [b, "⭐"]].forEach(([c, ch]) => { ctx.font = Math.max(16, sz * 0.8) + "px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(ch, g.cells[c].cx, g.cells[c].cy); });
+      const dead = g.cells.filter((c, i) => E.degree(g, grown.links, i) === 1).length;
+      $("labInfo").textContent = g.cells.length + " squares · the right way is " + (sol ? sol.cells.length : 0) + " steps · " + dead + " dead ends.";
+    }
+    ["labMix", "labLoops", "labSize"].forEach(id => $(id).addEventListener("input", () => { S.seed++; lab(); }));
+    $("labPath").addEventListener("change", lab);
+    $("labNew").addEventListener("click", () => { S.seed += 17; lab(); });
+    $("labGeo").addEventListener("click", e => { const b = e.target.closest("[data-g]"); if (!b) return; S.geo = b.dataset.g; document.querySelectorAll("#labGeo .btn").forEach(x => x.classList.toggle("on", x === b)); lab(); });
+    lab();
+
+    // idea box: kept on this device
+    const KEY = "fmz.ideas", load = () => app.store.get(KEY, []);
+    function showIdeas() {
+      const list = load();
+      $("ideas").innerHTML = list.length ? list.map((x, i) => `<li><span>${app.esc(x.text)}</span><button class="btn" data-i="${i}" style="min-height:36px;padding:2px 10px" aria-label="Delete">✕</button></li>`).join("") : "<li><small>No ideas yet.</small></li>";
+    }
+    $("ideaAdd").addEventListener("click", () => { const t = $("ideaText").value.trim(); if (!t) return; const l = load(); l.push({ text: t, at: new Date().toISOString() }); app.store.set(KEY, l); $("ideaText").value = ""; showIdeas(); });
+    $("ideas").addEventListener("click", e => { const b = e.target.closest("[data-i]"); if (!b) return; const l = load(); l.splice(+b.dataset.i, 1); app.store.set(KEY, l); showIdeas(); });
+    $("ideaCopy").addEventListener("click", () => {
+      const txt = "Felix Maze ideas to explore:\n" + load().map(x => "- " + x.text).join("\n");
+      (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => { $("ideaCopy").textContent = "Copied ✓"; setTimeout(() => { $("ideaCopy").textContent = "Copy all"; }, 1500); }).catch(() => { prompt("Copy this:", txt); });
+    });
+    showIdeas();
+  })();
+</script>
+</body>
+</html>
