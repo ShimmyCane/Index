@@ -25,13 +25,23 @@
 <script src="js/art.js"></script>
 <script src="js/sheet.js"></script>
 <script src="js/doodle.js"></script>
+<script src="js/score.js"></script>
 <script src="data/catalog.js"></script>
 <script src="js/common.js"></script>
 <script>
   (function () {
     const app = FMZ.app, S = FMZ.sheet;
-    app.init(`<h3>Answer key</h3><div id="key"><small>Making the picture…</small></div>
-      <p><a id="animLink" href="answer.html">🎬 Watch the answer</a></p>`);
+    app.init(`<h3>How did Felix do?</h3>
+      <div class="row" id="moods">
+        <button class="btn" data-mood="easy">😴 Too easy</button>
+        <button class="btn" data-mood="right">😊 Just right</button>
+        <button class="btn" data-mood="hard">😣 Too hard</button>
+      </div>
+      <label>Minutes <input class="field" id="mins" type="number" min="0" max="120" style="width:90px;min-height:44px"></label>
+      <p id="moodNote"><small></small></p>
+      <h3>Answer key</h3><div id="key"><small>Making the picture…</small></div>
+      <p><a id="animLink" href="answer.html">🎬 Watch the answer</a></p>
+      <h3>Scores</h3><div id="scores"></div>`);
     const all = app.bank();
     const rc = app.find(app.param("code") || "") || all[0];
     if (!rc) { document.getElementById("missing").hidden = false; return; }
@@ -44,10 +54,30 @@
     document.getElementById("next").href = app.sheetUrl(all[(i + 1) % all.length]);
     document.getElementById("animLink").href = "answer.html?code=" + encodeURIComponent(rc.code);
     document.getElementById("print").addEventListener("click", () => window.print());
+    // Felix's reactions tune his sweet spot (see the library)
+    const moodNote = document.querySelector("#moodNote small");
+    const showSpot = () => { const sp = app.sweetSpot(); moodNote.textContent = sp.from ? "Sweet spot so far: level " + sp.level + " (from " + sp.from + " mazes)." : "Tap a face after he tries it."; };
+    document.getElementById("moods").addEventListener("click", e => {
+      const b = e.target.closest("[data-mood]"); if (!b) return;
+      const mins = +document.getElementById("mins").value || null;
+      app.addLog({ code: rc.code, level: rc.level, mood: b.dataset.mood, minutes: mins });
+      document.querySelectorAll("#moods .btn").forEach(x => x.classList.toggle("on", x === b));
+      showSpot();
+    });
+    showSpot();
+
     // the answer key shows only in ⚙️, small, as a JPEG; it never prints
     let made = false;
     app.onDrawer = () => {
       if (made) return; made = true;
+      try {
+        const sc = FMZ.score.score(out.model);
+        const dots = v => "●".repeat(Math.round(v)) + "○".repeat(5 - Math.round(v));
+        document.getElementById("scores").innerHTML = `
+          <p>${sc.lint.ok ? "✅ The answer stays clear of every wall." : "⚠️ The answer touches a wall here. Try another seed."}</p>
+          <p>👀 Looking ${dots(sc.looking)}<br>✏️ Doing ${dots(sc.doing)}<br>🎉 Solving ${dots(sc.solving)}</p>
+          <p><small>Level ${rc.level} on the sheet, the computer guesses ${sc.level}. Right path ${sc.L} squares, ${sc.choices} choices on the way, wrong turns ${sc.trapSum} squares (longest ${sc.trapMax}). See rubric.md.</small></p>`;
+      } catch (e) { app.logError("scores: " + e.message); }
       const key = S.svg(rc, { answer: true, model: out.model }).svg;
       app.toJpeg(key, 520).then(url => {
         document.getElementById("key").innerHTML = `<a href="${url}" download="felix-maze-${rc.code}-answer.jpg"><img src="${url}" alt="Answer key for maze ${rc.code}"></a>`;

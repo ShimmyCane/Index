@@ -7,12 +7,13 @@
   const W = 1100, H = 850;
   const INK = "#222";
 
-  // Difficulty by time to solve.
+  // Difficulty 1–5, each with a rough time to solve. size = cell size (1/100 inch).
   const LEVELS = {
-    1: { name: "About 2 minutes", size: 88, mix: 0, braid: 0 },
-    2: { name: "About 5 minutes", size: 64, mix: 0.1, braid: 0.04 },
-    3: { name: "About 10 minutes", size: 48, mix: 0.25, braid: 0.06 },
-    4: { name: "20 minutes or more", size: 36, mix: 0.35, braid: 0.08 }
+    1: { name: "Level 1 · about 1 minute", short: "1 min", size: 100, mix: 0, braid: 0 },
+    2: { name: "Level 2 · about 3 minutes", short: "3 min", size: 80, mix: 0.05, braid: 0 },
+    3: { name: "Level 3 · about 5 minutes", short: "5 min", size: 64, mix: 0.12, braid: 0.04 },
+    4: { name: "Level 4 · about 10 minutes", short: "10 min", size: 50, mix: 0.22, braid: 0.06 },
+    5: { name: "Level 5 · 20 minutes or more", short: "20+ min", size: 38, mix: 0.32, braid: 0.08 }
   };
   const FAMILIES = {
     1: "Classical", 2: "Famous mazes", 3: "Art", 4: "Nature", 5: "Systems and maps", 6: "Math and patterns", 7: "Music and sound", 8: "Story worlds"
@@ -53,6 +54,69 @@
     const l = pts[pts.length - 1];
     return d + "L" + f1(l[0]) + " " + f1(l[1]);
   }
+  // The points along a smooth() curve, for checking what is actually drawn.
+  function curve(pts, step = 4) {
+    if (pts.length < 3) return densify(pts, step);
+    const out = [pts[0]];
+    let from = pts[0];
+    for (let i = 1; i < pts.length - 1; i++) {
+      const c = pts[i], to = [(pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2];
+      const n = Math.max(2, Math.ceil((Math.hypot(c[0] - from[0], c[1] - from[1]) + Math.hypot(to[0] - c[0], to[1] - c[1])) / step));
+      for (let k = 1; k <= n; k++) {
+        const t = k / n, u = 1 - t;
+        out.push([u * u * from[0] + 2 * u * t * c[0] + t * t * to[0], u * u * from[1] + 2 * u * t * c[1] + t * t * to[1]]);
+      }
+      from = to;
+    }
+    return out.concat(densify([from, pts[pts.length - 1]], step).slice(1));
+  }
+  function densify(pts, step) {
+    const out = [pts[0]];
+    for (let i = 1; i < pts.length; i++) {
+      const [x1, y1] = pts[i - 1], [x2, y2] = pts[i], n = Math.max(1, Math.ceil(Math.hypot(x2 - x1, y2 - y1) / step));
+      for (let k = 1; k <= n; k++) out.push([x1 + (x2 - x1) * k / n, y1 + (y2 - y1) * k / n]);
+    }
+    return out;
+  }
+
+  /* Check the answer line against the walls as drawn. hits = points of the red line that sit on a wall's ink.
+     Ribbon and subway mazes draw the path itself, so the answer follows it by construction. */
+  function lint(model) {
+    const look = model.spec.look;
+    if (!model.path) return { ok: false, hits: 0, why: "no way through" };
+    if (look.mode !== "walls" && !model.spec.extraWalls) return { ok: true, hits: 0, clear: Infinity };
+    if (!model.drawn) renderMaze(model, "lint");
+    if (look.mode !== "walls") model.drawn.walls = []; // ribbons: only the extra lines matter
+    const bucket = 40, grid = new Map();
+    // lines to keep clear of: the maze walls, plus anything drawn on top (Felix's wall lines, a river)
+    const lines = model.drawn.walls.map(w => [w, (look.wall || 6) / 2]);
+    const extra = model.spec.extraWalls ? model.spec.extraWalls(model) : [];
+    for (const [pts, h] of extra) lines.push([pts, h]);
+    for (const [w, half] of lines) {
+      const c = curve(w, 8);
+      for (let i = 1; i < c.length; i++) {
+        const seg = [c[i - 1][0], c[i - 1][1], c[i][0], c[i][1], half];
+        const x0 = Math.min(seg[0], seg[2]) - half, x1 = Math.max(seg[0], seg[2]) + half, y0 = Math.min(seg[1], seg[3]) - half, y1 = Math.max(seg[1], seg[3]) + half;
+        for (let bx = Math.floor(x0 / bucket); bx <= Math.floor(x1 / bucket); bx++) for (let by = Math.floor(y0 / bucket); by <= Math.floor(y1 / bucket); by++) {
+          const k = bx + "," + by; if (!grid.has(k)) grid.set(k, []); grid.get(k).push(seg);
+        }
+      }
+    }
+    const path = curve(model.path, 3);
+    let hits = 0, clear = Infinity;
+    // skip the bits outside the maze, where the line walks in from the character
+    const inside = path.slice(4, path.length - 4);
+    for (const [x, y] of inside) {
+      let d = Infinity;
+      for (let bx = Math.floor(x / bucket) - 1; bx <= Math.floor(x / bucket) + 1; bx++) for (let by = Math.floor(y / bucket) - 1; by <= Math.floor(y / bucket) + 1; by++) {
+        for (const s of grid.get(bx + "," + by) || []) d = Math.min(d, E.segDist(x, y, s[0], s[1], s[2], s[3]) - s[4]);
+      }
+      clear = Math.min(clear, d);
+      if (d < 1.5) hits++;
+    }
+    return { ok: hits === 0, hits, clear: Math.round(clear * 10) / 10 };
+  }
+
   // Hand feel: a gentle bend in the middle of a stroke, ends stay put so walls still meet.
   function wobbly(pts, amt, r) {
     if (!amt || pts.length < 2) return pts;
@@ -80,7 +144,7 @@
   // ---------- the maze model ----------
   function buildModel(recipe) {
     const st = STYLES[recipe.style] || STYLES.mouse;
-    const lv = LEVELS[recipe.level] || LEVELS[2];
+    const lv = Object.assign({ level: recipe.level }, LEVELS[recipe.level] || LEVELS[2]);
     const r = E.rng(recipe.seed >>> 0);
     const spec = st.spec(recipe, lv);
     spec.geometry = spec.geometry || st.geometry;
@@ -114,12 +178,32 @@
     }
     const sol = (recipe.growth || 1) >= 1 ? E.solve(g, links, start.cell, end.cell) : null;
     const model = { recipe, spec, g, links, seen: grown.seen, bridges, start, end, sol };
+    if (spec.after) spec.after(model);
+    model.treats = sol && spec.treat ? placeTreats(model) : [];
     model.path = sol ? E.pathPoints(g, sol, start, end) : null;
     model.warp = makeWarp(spec.look.vortices);
     if (model.warp && model.path) model.path = model.path.map(model.warp);
     model.deadEnds = 0;
     g.cells.forEach((c, i) => { if (E.degree(g, links, i) === 1 && i !== start.cell && i !== end.cell) model.deadEnds++; });
     return model;
+  }
+  /* Treats: three along the right path and two at the ends of wrong turns, so exploring pays off too.
+     Only where the squares are big enough to hold one. */
+  function placeTreats(model) {
+    const { g, links, sol, start, end } = model;
+    const room = g.s || model.spec.size || 60;
+    if (room < 55 || sol.cells.length < 8) return [];
+    const out = [];
+    const used = new Set([start.cell, end.cell]);
+    [0.28, 0.52, 0.76].forEach(t => { const c = sol.cells[Math.round(t * (sol.cells.length - 1))]; if (!used.has(c)) { used.add(c); out.push(c); } });
+    const onPath = new Set(sol.cells);
+    const d = E.distances(g, links, start.cell);
+    const ends = g.cells.map((c, i) => i).filter(i => !onPath.has(i) && !used.has(i) && E.degree(g, links, i) === 1).sort((a, b) => d[b] - d[a]);
+    for (const c of ends) {
+      if (out.length >= 5) break;
+      if (out.every(o => Math.hypot(g.cells[o].cx - g.cells[c].cx, g.cells[o].cy - g.cells[c].cy) > room * 2.5)) out.push(c);
+    }
+    return out;
   }
   function sideOk(e, side) {
     const want = { W: [-1, 0], E: [1, 0], N: [0, -1], S: [0, 1] }[side];
@@ -146,7 +230,8 @@
     const r = E.rng((model.recipe.seed >>> 0) ^ 0x51ed27);
     const warp = model.warp;
     const growing = (model.recipe.growth || 1) < 1;
-    const ptsOf = geo => { let p = samplesOf(geo, look.chords, warp ? 10 : 40); if (warp) p = p.map(warp); return wobbly(p, look.wobble || 0, r); };
+    const drawn = model.drawn = { walls: [] };
+    const ptsOf = geo => { let p = samplesOf(geo, look.chords, warp ? 10 : 40); if (warp) p = p.map(warp); p = wobbly(p, look.wobble || 0, r); drawn.walls.push(p); return p; };
     const out = [];
     const entrance = new Set([model.start.edge, model.end.edge]);
     const center = c => { const p = [g.cells[c].cx, g.cells[c].cy]; return warp ? warp(p) : p; };
@@ -251,6 +336,10 @@
     parts.push(`<g class="fmz-maze">${renderMaze(model, uid, opts)}</g>`);
     if (st.over) parts.push(st.over(model, uid));
     const sp = model.spec;
+    for (const c of model.treats || []) {
+      const cell = model.g.cells[c], p = model.warp ? model.warp([cell.cx, cell.cy]) : [cell.cx, cell.cy];
+      parts.push(`<g class="fmz-treat">${A.draw(sp.treat, p[0], p[1], Math.max(26, (model.g.s || sp.size || 60) * 0.42))}</g>`);
+    }
     if (sp.chars && model.sol !== undefined) {
       const sz = sp.charSize || 84;
       const inside = end => end.edge >= 0 ? sz : model.g.kind === "polar" && end.cell === 0 ? model.g.r0 * 1.5 : Math.min(sz, (model.g.s || sp.size || 60) * 0.9);
@@ -276,19 +365,19 @@
   const STYLES = {
     mouse: {
       label: "Mouse and cheese", geometry: "grid",
-      spec: (rc, lv) => ({ box: { x: 160, y: 115, w: 780, h: 650 }, size: lv.size, start: { side: "W", at: 0.5 }, finish: { side: "E", at: 0.5 },
-        chars: ["mouse", "cheese"], look: { mode: "walls", wall: 9, wobble: 3 } })
+      spec: (rc, lv) => ({ box: { x: 210, y: 150, w: 680, h: 540 }, size: lv.size, start: { side: "W", at: 0.5 }, finish: { side: "E", at: 0.5 },
+        chars: ["mouse", "cheese"], treat: "crumb", look: { mode: "walls", wall: 9, wobble: 3 } })
     },
     starry: {
       label: "Starry Night swirls", geometry: "grid",
-      spec: (rc, lv) => ({ box: { x: 140, y: 125, w: 760, h: 630 }, size: lv.size, start: { side: "W", at: 0.85 }, finish: { side: "N", at: 0.9 },
-        chars: ["cat", "moon"],
-        look: { mode: "walls", wall: 6.5, wobble: 1.2, vortices: [{ x: 430, y: 330, r: 210, s: 1.35 }, { x: 700, y: 560, r: 160, s: -1.1 }, { x: 300, y: 600, r: 110, s: 0.9 }] } }),
+      spec: (rc, lv) => ({ box: { x: 190, y: 160, w: 660, h: 540 }, size: lv.size, start: { side: "W", at: 0.85 }, finish: { side: "N", at: 0.9 },
+        chars: ["cat", "moon"], treat: "star",
+        look: { mode: "walls", wall: 6.5, wobble: 1.2, vortices: [{ x: 450, y: 350, r: 190, s: 1.3 }, { x: 690, y: 560, r: 140, s: -1.05 }, { x: 320, y: 590, r: 100, s: 0.85 }] } }),
       over: () => {
         // a cypress tree like the flame-shaped one in the painting, and stars around the edge
-        let s = `<path d="M985 760 C950 640 990 560 975 470 C965 400 1000 330 990 230 C1010 320 1030 400 1022 480 C1015 560 1050 650 1020 760 Z" fill="#fff" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/>`;
-        s += `<path d="M990 300 q12 30 0 60 M1000 420 q14 34 -2 70 M996 560 q16 40 0 90" fill="none" stroke="${INK}" stroke-width="3"/>`;
-        [[60, 140], [95, 300], [55, 470], [1050, 150], [930, 110], [640, 100]].forEach(([x, y], i) => { s += A.draw("star", x, y, i % 2 ? 26 : 34); });
+        let s = `<path d="M965 720 C935 620 970 550 958 470 C950 410 980 350 972 260 C990 340 1008 410 1000 480 C994 550 1024 630 998 720 Z" fill="#fff" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/>`;
+        s += `<path d="M972 320 q10 28 0 56 M982 430 q12 30 -2 62 M978 560 q14 36 0 80" fill="none" stroke="${INK}" stroke-width="3"/>`;
+        [[90, 170], [110, 330], [80, 500], [1040, 170], [930, 130], [640, 120]].forEach(([x, y], i) => { s += A.draw("star", x, y, i % 2 ? 24 : 32); });
         return s;
       }
     },
@@ -304,8 +393,8 @@
         ];
         const head = (x, y) => Math.hypot(x - 550, y - 200) < 66;
         const body = capsule(limbs, 50);
-        return { box: { x: 260, y: 110, w: 580, h: 600 }, size: Math.min(lv.size, 40), mask: (x, y) => body(x, y) || head(x, y),
-          start: { side: "S", at: 0.26 }, finish: { side: "N", at: 0.88 }, chars: ["cat", "heart"], charSize: 70,
+        return { box: { x: 260, y: 110, w: 580, h: 600 }, size: Math.min(lv.size, lv.level <= 2 ? 46 : 40), mask: (x, y) => body(x, y) || head(x, y),
+          start: { side: "S", at: 0.26 }, finish: { side: "N", at: 0.88 }, chars: ["cat", "heart"], charSize: 70, treat: "heart",
           look: { mode: "walls", wall: 6, outline: 14, wobble: 1.5 } };
       },
       under: () => {
@@ -317,54 +406,54 @@
     hampton: {
       label: "Hampton Court hedge maze", geometry: "grid",
       spec: (rc, lv) => {
-        const poly = [[330, 115], [770, 115], [950, 730], [150, 730]];
-        return { box: { x: 150, y: 115, w: 800, h: 615 }, size: lv.size, mask: (x, y) => E.inPoly(x, y, poly),
-          start: { side: "S", at: 0.5 }, finish: { near: [550, 420] }, chars: ["cat", "tree"], charSize: 74,
+        const poly = [[370, 150], [730, 150], [890, 690], [210, 690]];
+        return { box: { x: 210, y: 150, w: 680, h: 540 }, size: lv.size, mask: (x, y) => E.inPoly(x, y, poly),
+          start: { side: "S", at: 0.5 }, finish: { near: [550, 430] }, chars: ["cat", "tree"], charSize: 74, treat: "leaf",
           look: { mode: "walls", wall: 17, hedge: true, wobble: 0.8 } };
       }
     },
     honeycomb: {
       label: "Honeycomb", geometry: "hex",
-      spec: (rc, lv) => ({ box: { x: 150, y: 110, w: 800, h: 650 }, size: lv.size * 1.05, start: { side: "W", at: 0.3 }, finish: { side: "E", at: 0.7 },
-        chars: ["bee", "flower"], look: { mode: "walls", wall: 7, wobble: 0 } })
+      spec: (rc, lv) => ({ box: { x: 210, y: 150, w: 680, h: 540 }, size: lv.size * 1.05, start: { side: "W", at: 0.3 }, finish: { side: "E", at: 0.7 },
+        chars: ["bee", "flower"], treat: "drop", look: { mode: "walls", wall: 7, wobble: 0 } })
     },
     spider: {
       label: "Spider web", geometry: "polar",
       spec: (rc, lv) => {
-        const R = 320, size = Math.max(44, lv.size * 0.85);
-        return { polar: { cx: 560, cy: 440, R, rings: Math.max(3, Math.round(R / size) - 1), core: 1.3 }, size,
-          start: { far: true }, finish: { center: true }, chars: ["spider", "star"], charSize: 80,
+        const R = 275, size = Math.max(44, lv.size * 0.85);
+        return { polar: { cx: 550, cy: 430, R, rings: Math.max(3, Math.round(R / size) - 1), core: 1.3 }, size,
+          start: { far: true }, finish: { center: true }, chars: ["spider", "star"], charSize: 80, treat: "drop",
           look: { mode: "walls", wall: 3.5, outline: 5, chords: true } };
       }
     },
     ants: {
       label: "Ant tunnels", geometry: "grid",
-      spec: (rc, lv) => ({ box: { x: 110, y: 185, w: 880, h: 570 }, size: lv.size, mix: 0, start: { side: "N", at: 0.15 }, finish: { near: [940, 720] },
-        chars: ["ant", "cookie"], charSize: 74, look: { mode: "ribbon", wall: lv.size * 0.52, edge: 4, chamber: 1.25, wobble: 5,
-          bg: uid => `<rect x="70" y="160" width="960" height="625" rx="30" fill="url(#earth${uid})" stroke="${INK}" stroke-width="5"/>` } }),
+      spec: (rc, lv) => ({ box: { x: 200, y: 235, w: 700, h: 440 }, size: lv.size, mix: 0, start: { side: "N", at: 0.15 }, finish: { near: [860, 650] },
+        chars: ["ant", "cookie"], charSize: 74, treat: "crumb", look: { mode: "ribbon", wall: lv.size * 0.52, edge: 4, chamber: 1.25, wobble: 5,
+          bg: uid => `<rect x="160" y="200" width="780" height="510" rx="30" fill="url(#earth${uid})" stroke="${INK}" stroke-width="5"/>` } }),
       under: () => {
         // ground line with grass tufts and a little anthill
-        let s = `<path d="M50 160 L1050 160" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>`;
-        for (let x = 300; x < 1040; x += 70) s += `<path d="M${x} 160 l-6 -18 M${x} 160 l2 -22 M${x} 160 l9 -16" stroke="${INK}" stroke-width="3" stroke-linecap="round" fill="none"/>`;
-        s += `<path d="M150 160 Q215 110 280 160" fill="#fff" stroke="${INK}" stroke-width="4"/>`;
+        let s = `<path d="M110 200 L990 200" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>`;
+        for (let x = 380; x < 980; x += 80) s += `<path d="M${x} 200 l-6 -18 M${x} 200 l2 -22 M${x} 200 l9 -16" stroke="${INK}" stroke-width="3" stroke-linecap="round" fill="none"/>`;
+        s += `<path d="M190 200 Q250 150 310 200" fill="#fff" stroke="${INK}" stroke-width="4"/>`;
         return s;
       }
     },
     celtic: {
       label: "Celtic knot", geometry: "grid",
-      spec: (rc, lv) => ({ box: { x: 170, y: 125, w: 760, h: 610 }, size: Math.max(lv.size, 54), weave: 0.55, braid: 0, start: { side: "W", at: 0.15 }, finish: { side: "E", at: 0.85 },
+      spec: (rc, lv) => ({ box: { x: 230, y: 170, w: 640, h: 500 }, size: Math.max(lv.size, 54), weave: 0.55, braid: 0, start: { side: "W", at: 0.15 }, finish: { side: "E", at: 0.85 },
         chars: ["cat", "yarn"], charSize: 76, look: { mode: "ribbon", wall: 22, edge: 4.5, wobble: 0 } }),
-      under: () => `<rect x="120" y="100" width="860" height="660" rx="40" fill="none" stroke="${INK}" stroke-width="5"/><rect x="132" y="112" width="836" height="636" rx="32" fill="none" stroke="${INK}" stroke-width="2.5"/>`
+      under: () => `<rect x="185" y="135" width="730" height="570" rx="40" fill="none" stroke="${INK}" stroke-width="5"/><rect x="197" y="147" width="706" height="546" rx="32" fill="none" stroke="${INK}" stroke-width="2.5"/>`
     },
     subway: {
       label: "Subway map", geometry: "grid",
-      spec: (rc, lv) => ({ box: { x: 170, y: 120, w: 760, h: 630 }, size: lv.size * 0.95, braid: 0.12, start: { side: "W", at: 0.25 }, finish: { side: "E", at: 0.75 },
+      spec: (rc, lv) => ({ box: { x: 230, y: 160, w: 640, h: 520 }, size: lv.size * 0.95, braid: 0.12, start: { side: "W", at: 0.25 }, finish: { side: "E", at: 0.75 },
         chars: ["train", "house"], charSize: 86, look: { mode: "subway", wall: 11, wobble: 0 } })
     },
     chartres: {
       label: "Chartres rings", geometry: "polar",
       spec: (rc, lv) => {
-        const R = 300, size = lv.size;
+        const R = 265, size = lv.size;
         return { polar: { cx: 550, cy: 425, R, rings: Math.max(4, Math.round(R / size) - 1), core: 1.6, rot: -Math.PI / 2 }, size,
           start: { far: true }, finish: { center: true }, chars: ["cat", "rosette"], charSize: 76,
           look: { mode: "walls", wall: 9, double: 3, wobble: 0 } };
@@ -379,10 +468,10 @@
     doodle: {
       label: "Felix's doodle", geometry: "grid",
       spec: (rc, lv) => root.FMZ.doodle.spec(rc, lv),
-      over: m => root.FMZ.doodle.overlay(m.recipe, (m.recipe.growth || 1) < 1)
+      over: m => root.FMZ.doodle.overlay(m.recipe, (m.recipe.growth || 1) < 1, m)
     }
   };
 
   root.FMZ = root.FMZ || {};
-  root.FMZ.sheet = { W, H, LEVELS, FAMILIES, SOURCES, STYLES, code, parseCode, buildModel, renderMaze, svg, smooth, standAt, makeWarp };
+  root.FMZ.sheet = { W, H, LEVELS, FAMILIES, SOURCES, STYLES, code, parseCode, buildModel, renderMaze, svg, smooth, curve, lint, standAt, makeWarp };
 })(typeof window !== "undefined" ? window : globalThis);

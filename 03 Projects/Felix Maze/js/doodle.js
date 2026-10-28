@@ -8,7 +8,7 @@
 (function (root) {
   "use strict";
   const E = root.FMZ.engine;
-  const BOX = { x: 120, y: 120, w: 860, h: 620 };
+  const BOX = { x: 180, y: 150, w: 740, h: 560 };
   const MODES = {
     walls: { label: "Your lines are walls", icon: "🧱" },
     path: { label: "Your line is the way through", icon: "👣" },
@@ -25,6 +25,14 @@
     thin: { label: "Fine lines", family: 6, chars: ["mouse", "star"], look: () => ({ mode: "walls", wall: 4.5, wobble: 0.5 }) }
   };
 
+  function densifyStroke(s, step = 6) {
+    const out = [s[0]];
+    for (let i = 1; i < s.length; i++) {
+      const [x1, y1] = s[i - 1], [x2, y2] = s[i], n = Math.max(1, Math.ceil(Math.hypot(x2 - x1, y2 - y1) / step));
+      for (let k = 1; k <= n; k++) out.push([x1 + (x2 - x1) * k / n, y1 + (y2 - y1) * k / n]);
+    }
+    return out;
+  }
   const segsOf = strokes => {
     const out = [];
     for (const s of strokes) for (let i = 1; i < s.length; i++) out.push([s[i - 1][0], s[i - 1][1], s[i][0], s[i][1]]);
@@ -40,26 +48,80 @@
     return n ? [x / n, y / n] : [BOX.x + BOX.w / 2, BOX.y + BOX.h / 2];
   }
 
+  // Keep only the parts of his lines inside the maze area (split where a line leaves it).
+  function clip(strokes, pad = 6) {
+    const inBox = ([x, y]) => x >= BOX.x + pad && x <= BOX.x + BOX.w - pad && y >= BOX.y + pad && y <= BOX.y + BOX.h - pad;
+    const out = [];
+    for (const s of strokes) {
+      let cur = [];
+      for (const p of s) { if (inBox(p)) cur.push(p); else { if (cur.length > 1) out.push(cur); cur = []; } }
+      if (cur.length > 1) out.push(cur);
+    }
+    return out;
+  }
+  // Cut gaps in his lines where the maze has to pass through them (a doorway in his wall).
+  function cut(strokes, holes) {
+    if (!holes.length) return strokes;
+    const out = [];
+    for (const s of strokes) {
+      let cur = [];
+      for (const p of s) {
+        const hit = holes.some(([x, y, r]) => Math.hypot(p[0] - x, p[1] - y) < r);
+        if (!hit) cur.push(p); else { if (cur.length > 1) out.push(cur); cur = []; }
+      }
+      if (cur.length > 1) out.push(cur);
+    }
+    return out;
+  }
+  const answerHalf = lv => Math.max(8, lv.size * 0.18) / 2;
+
   function spec(recipe, lv) {
     const d = recipe.doodle || {};
-    const strokes = (d.strokes || []).filter(s => s.length > 1);
+    const strokes = clip((d.strokes || []).filter(s => s.length > 1).map(s => densifyStroke(s)));
     const segs = segsOf(strokes);
     const theme = THEMES[d.theme] || THEMES.bold;
     const look = theme.look(lv);
     const size = lv.size;
     const sp = { box: BOX, size, start: { side: "W", at: 0.5 }, finish: { side: "E", at: 0.5 }, chars: theme.chars, charSize: 76, look };
-    if (d.theme === "swirl") { const [cx, cy] = centroid(strokes); look.vortices = [{ x: cx, y: cy, r: 220, s: 1.2 }]; }
+    // His lines stay exactly as he drew them, so no swirling when they are drawn on top of the maze.
+    if (d.theme === "swirl" && d.mode !== "walls" && d.mode !== "obstacle") { const [cx, cy] = centroid(strokes); look.vortices = [{ x: cx, y: cy, r: 220, s: 1.2 }]; }
+    sp.lines = strokes;
+    // Doorways (and the little walk in from outside) stay clear of his lines.
+    const doorOk = room => (e, c) => {
+      const [mx, my] = E.edgeMid(e.geo), ox = mx + (mx - c.cx) * 0.6, oy = my + (my - c.cy) * 0.6;
+      return !segs.some(([x1, y1, x2, y2]) => [[c.cx, c.cy], [mx, my], [ox, oy]].some(([x, y]) => E.segDist(x, y, x1, y1, x2, y2) < room) ||
+        E.segCross([c.cx, c.cy], [ox, oy], [x1, y1], [x2, y2]));
+    };
+    const keepDoorsClear = room => { sp.start.ok = doorOk(room); sp.finish.ok = doorOk(room); };
 
     if (d.mode === "walls") {
+      // A passage is closed if it would cross his line or come close enough for the answer to touch it.
+      const room = 5 + answerHalf(lv) + 4;
+      keepDoorsClear(room + 6);
+      let forbid;
       sp.prepare = g => {
-        const forbid = new Set();
+        forbid = new Set();
         g.edges.forEach((e, i) => {
           if (e.b === null) return;
-          const a = g.cells[e.a], b = g.cells[e.b];
-          if (segs.some(([x1, y1, x2, y2]) => E.segCross([a.cx, a.cy], [b.cx, b.cy], [x1, y1], [x2, y2]))) forbid.add(i);
+          const a = g.cells[e.a], b = g.cells[e.b], [mx, my] = E.edgeMid(e.geo);
+          const close = segs.some(([x1, y1, x2, y2]) =>
+            E.segCross([a.cx, a.cy], [b.cx, b.cy], [x1, y1], [x2, y2]) ||
+            E.segDist(mx, my, x1, y1, x2, y2) < room || E.segDist(a.cx, a.cy, x1, y1, x2, y2) < room || E.segDist(b.cx, b.cy, x1, y1, x2, y2) < room);
+          if (close) forbid.add(i);
         });
         return { forbid };
       };
+      // Where the maze still had to get through (to reach every square), open a gap in his line.
+      sp.after = m => {
+        const holes = [];
+        for (const ei of m.links) {
+          if (!forbid.has(ei)) continue;
+          const e = m.g.edges[ei], a = m.g.cells[e.a], b = m.g.cells[e.b], [mx, my] = E.edgeMid(e.geo);
+          holes.push([a.cx, a.cy, room + 6], [mx, my, room + 6], [b.cx, b.cy, room + 6]);
+        }
+        m.lines = cut(strokes, holes);
+      };
+      sp.extraWalls = m => (m.lines || strokes).map(s => [s, 5]);
     } else if (d.mode === "path") {
       sp.prepare = g => {
         // his line, square by square
@@ -110,6 +172,8 @@
       const rad = Math.max(40, size * 0.75);
       sp.mask = (x, y) => !near(segs, x, y, rad);
       sp.river = rad;
+      sp.extraWalls = () => strokes.map(s => [s, riverHalf(lv) + 4]);
+      keepDoorsClear(riverHalf(lv) + 4 + answerHalf(lv) + 6);
     } else if (d.mode === "guide") {
       sp.prepare = g => ({
         bias: (from, to) => {
@@ -131,16 +195,16 @@
   }
 
   // His lines drawn on top: bold for walls, a wavy river for obstacles, faint for the rest.
-  function overlay(recipe, spring) {
+  function overlay(recipe, spring, model) {
     const d = recipe.doodle || {};
-    const strokes = (d.strokes || []).filter(s => s.length > 1);
+    const strokes = (model && (model.lines || model.spec.lines)) || [];
     const S = root.FMZ.sheet;
     const dd = strokes.map(s => S.smooth(s)).join("");
     if (!dd) return "";
     const lv = S.LEVELS[recipe.level] || S.LEVELS[2];
     if (d.mode === "walls") return `<path d="${dd}" fill="none" stroke="#222" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>`;
     if (d.mode === "obstacle") {
-      const w = 2 * Math.max(40, lv.size * 0.75) - 24;
+      const w = 2 * riverHalf(lv);
       return `<path d="${dd}" fill="none" stroke="#222" stroke-width="${w + 8}" stroke-linecap="round" stroke-linejoin="round"/>` +
         `<path d="${dd}" fill="none" stroke="#fff" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>` +
         `<path d="${dd}" fill="none" stroke="#777" stroke-width="3" stroke-dasharray="14 10" stroke-linecap="round"/>`;
@@ -148,6 +212,9 @@
     if (spring) return `<path d="${dd}" fill="none" stroke="#e0604a" stroke-opacity="0.55" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>`;
     return d.mode === "guide" ? `<path d="${dd}" fill="none" stroke="#bbb" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round"/>` : "";
   }
+
+  // the river's half width: inside the cells taken out around his line, with room to spare
+  function riverHalf(lv) { return Math.max(14, Math.max(40, lv.size * 0.75) - lv.size * 0.5 - 6); }
 
   root.FMZ = root.FMZ || {};
   root.FMZ.doodle = { BOX, MODES, THEMES, spec, overlay };

@@ -3,7 +3,7 @@
 **Status:** MVP. Ten printable mazes, a library, an answer page and a doodle-to-maze page. Not yet printed or tried with Felix.
 **Owner:** Jimmy
 **Platform:** plain HTML/CSS/JS, no build, GitHub Pages. Sheets print on US Letter, landscape, black and white.
-**Conversation:** `convo/convo v0.1.md` (answered), `convo/convo v0.2.md` (open)
+**Conversation:** `convo/convo v0.1.md` (answered), `convo/convo v0.2.md` (open), `convo/convo v0.3.md` (this round)
 
 ## Purpose
 
@@ -30,18 +30,26 @@ Felix loves drawing his own free-flowing mazes. Felix Maze makes mazes for him i
 
 ## Numbering
 
-`family · level · source - counter`, in hex: **810-001** = story world, about 2 minutes, made by the computer, maze 1. Details in `catalog.md`.
+`family · level · source - counter`, in hex: **810-001** = story world, level 1, made by the computer, maze 1. Details in `catalog.md`.
 
-## Difficulty by time to solve
+## Difficulty 1–5
 
-| Level | Time | Cell size | Feel |
+| Level | Target time | Cell size | Feel |
 |---|---|---|---|
-| 1 | About 2 minutes | 0.88 in | Long winding halls, no loops |
-| 2 | About 5 minutes | 0.64 in | A few short branches |
-| 3 | About 10 minutes | 0.48 in | More branches and a few loops |
-| 4 | 20 minutes or more | 0.36 in | Busy, with loops |
+| 1 | About 1 minute | 1.0 in | Warm-up, long winding halls |
+| 2 | About 3 minutes | 0.8 in | A few real choices |
+| 3 | About 5 minutes | 0.64 in | Several forks, a loop or two |
+| 4 | About 10 minutes | 0.5 in | Long wrong turns, more loops |
+| 5 | 20 minutes or more | 0.38 in | A big one |
 
-The bank is a mixed bag, not easy to hard.
+The bank is a mixed bag, not easy to hard. The computer guesses each maze's level from the research measures (`rubric.md`); the sheet's level must match. Felix's faces (😴 😊 😣 in each sheet's ⚙️) set his sweet spot.
+
+## Joy and checks
+
+- `rubric.md`: Looking, Doing, Solving, the three moments of a maze. `js/score.js` gives the computer's guess for each, shown in a sheet's ⚙️.
+- The red answer line is checked against every wall as drawn. A maze that fails is never published: the catalog check fails, and baking a doodle keeps only clean versions.
+- White space: every maze sits well inside the page, about 7 × 5.5 inches at most.
+- Treats along the way (crumbs, drops, leaves, stars, hearts): three on the right path, two at the ends of wrong turns.
 
 ## Engine (`js/`)
 
@@ -51,7 +59,8 @@ The bank is a mixed bag, not easy to hard.
 | `sheet.js` | Levels, families, codes, the ten styles (geometry + look + start/finish + decorations), rendering (walls, hedges, double lines, ribbons and tunnels, subway lines, swirl warp, hand wobble), the worksheet layout |
 | `art.js` | The characters and props as simple line drawings (`characters.md`) |
 | `doodle.js` | Felix's lines read five ways, each with a theme |
-| `common.js` | ⚙️ drawer, error panel, the bank (catalog + this device), JPEG pictures |
+| `score.js` | Difficulty measures, level guess, joy scores (rubric.md) |
+| `common.js` | ⚙️ drawer, error panel, the bank (catalog + this device), JPEG pictures, Felix's log and sweet spot, best-of-several baking |
 | `data/catalog.js` | The published bank: one recipe per maze |
 
 A recipe always rebuilds the same maze, answer and animation, so the bank stores recipes, not pictures.
@@ -75,4 +84,4 @@ Supabase **Family** project, tables `fmz_mazes`, `fmz_doodles`, `fmz_characters`
 
 ## Planning files
 
-`inspirations.md` (100 maze types) · `maze_research.md` · `variations.md` · `todo.md` · `characters.md` · `catalog.md` · `qc.md`
+`inspirations.md` (100 maze types) · `maze_research.md` · `variations.md` · `todo.md` · `characters.md` · `catalog.md` · `qc.md` · `rubric.md`

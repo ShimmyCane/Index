@@ -115,3 +115,8 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 
 - Should convo files ever be private? Right now they are public in this repo.
 - When a project leaves the nursery, what goes with it: the lessons, the convo files, or only the code?
+
+## Generated puzzles (Felix Maze)
+
+1. **Validate generated output against what is drawn**, and reject or regrow failures automatically (best of several). Measure the failure rate over hundreds of seeds before trusting it. _(Felix Maze)_
+2. **Store seeds/recipes, fingerprint published ones**, so later code changes can't silently alter something already printed. _(Felix Maze)_

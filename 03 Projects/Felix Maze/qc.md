@@ -20,6 +20,7 @@ The maze lines are random, so look at each sheet as a picture, not just as a puz
 
 ## Puzzle
 
+- [ ] `node tools/check_sheets.js` passes: a way through, **the red answer line never touches a wall** (checked against the lines as drawn, including Felix's lines and rivers), and the level guess matches.
 - [ ] There is exactly one start and one finish, and the right path exists (the Answers page plays it).
 - [ ] Paths are wide enough for a pencil at that level, and no walls touch or blur when printed.
 - [ ] The start and finish characters don't cover walls.
@@ -32,3 +33,4 @@ Note each pass here (date, codes checked, what changed).
 | Date | Codes | Result |
 |---|---|---|
 | 2026-10-28 | 810-001 … 330-00A | Claude checked the first ten on screen for layout and content; nothing found. Jimmy's print check still to do. |
+| 2026-10-28 | 810-001 … 340-00A (new codes) | Answer-line check added. The ten pass. Doodle mazes: the wall and river readings could cross Felix's lines; fixed at the root, and baking now keeps only clean versions. |

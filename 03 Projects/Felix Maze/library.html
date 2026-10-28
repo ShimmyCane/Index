@@ -11,6 +11,7 @@
 <body>
 <header class="top">
   <h1 class="title"><a href="index.html">Felix Maze</a> <small>Library</small></h1>
+  <button class="btn mint noprint" id="spot">😊 Just right for Felix</button>
   <a class="btn go noprint" id="printSome" href="print.html">🖨️ Print these</a>
 </header>
 <main class="wrap">
@@ -23,6 +24,7 @@
 <script src="js/art.js"></script>
 <script src="js/sheet.js"></script>
 <script src="js/doodle.js"></script>
+<script src="js/score.js"></script>
 <script src="data/catalog.js"></script>
 <script src="js/common.js"></script>
 <script>
@@ -34,7 +36,7 @@
     app.init(`<label><input type="checkbox" id="mine"> Only mazes made on this device</label>`);
     const all = app.bank();
     const groups = [
-      ["Time", r => [S.LEVELS[r.level] ? S.LEVELS[r.level].name : "?"]],
+      ["Level", r => [S.LEVELS[r.level] ? S.LEVELS[r.level].name : "?"]],
       ["Theme", r => [S.FAMILIES[r.family] || "Other"]],
       ["Made", r => [S.SOURCES[r.source || 0]]],
       ["In it", r => r.tags || []]
@@ -58,6 +60,16 @@
       box.append(div);
     });
     document.getElementById("search").addEventListener("input", e => { q = e.target.value.trim().toLowerCase(); render(); });
+    // his sweet spot, from the faces tapped on each sheet's ⚙️
+    const spot = app.sweetSpot();
+    document.getElementById("spot").textContent = "😊 Just right for Felix (level " + spot.level + ")";
+    document.getElementById("spot").addEventListener("click", e => {
+      const name = S.LEVELS[spot.level].name, on = !picked[0].has(name);
+      picked[0].clear(); if (on) picked[0].add(name);
+      box.querySelectorAll(".group")[0].querySelectorAll(".tag").forEach(t => t.classList.toggle("on", picked[0].has(t.textContent)));
+      e.currentTarget.classList.toggle("on", on);
+      render();
+    });
     document.getElementById("mine").addEventListener("change", e => { onlyMine = e.target.checked; render(); });
 
     const pics = new Map();
@@ -84,7 +96,7 @@
         const a = document.createElement("a");
         a.className = "card"; a.href = app.sheetUrl(r);
         a.innerHTML = `<img alt="Maze ${app.esc(r.code)}"><b>${app.esc(r.title)}</b>
-          <div class="meta"><span>#${app.esc(r.code)}</span><span class="t">⏱ ${app.esc((S.LEVELS[r.level] || {}).name || "")}</span>${r.published ? "" : '<span class="s">✏️ this device</span>'}</div>
+          <div class="meta"><span>#${app.esc(r.code)}</span><span class="t">${"●".repeat(r.level)}${"○".repeat(5 - r.level)} ${app.esc((S.LEVELS[r.level] || {}).short || "")}</span>${r.published ? "" : '<span class="s">✏️ this device</span>'}</div>
           <small>${app.esc(r.inspired || "")}</small>`;
         cards.append(a);
         picture(r, a.querySelector("img"));

@@ -92,6 +92,10 @@
     tree: () => `
       <path d="M-8 44 L-6 8 L6 8 L8 44 Z" ${F()}/>
       <path d="M-34 6 C-50 -10 -30 -40 -12 -34 C-6 -50 22 -48 26 -30 C46 -28 46 4 28 8 C16 18 -20 18 -34 6 Z" ${F()}/>`,
+    // little treats to collect along the way
+    crumb: () => `<path d="M-30 18 L-30 -10 L26 -30 L30 18 Z" ${F()}/><circle cx="-8" cy="2" r="6" fill="none" ${K}/><circle cx="12" cy="-10" r="4" fill="none" ${K}/>`,
+    drop: () => `<path d="M0 -40 C18 -12 30 4 30 16 A30 30 0 0 1 -30 16 C-30 4 -18 -12 0 -40 Z" ${F()}/><path d="M-14 14 Q-14 26 -2 30" fill="none" ${K}/>`,
+    leaf: () => `<path d="M-34 30 C-34 -20 10 -38 36 -34 C38 -6 20 34 -34 30 Z" ${F()}/><path d="M-34 30 Q2 0 30 -28" fill="none" ${K}/>`,
     figure: () => `
       <circle cx="0" cy="-36" r="12" ${F()}/>
       <path d="M0 -24 L0 12 M0 -16 L-22 -34 M0 -16 L24 -30 M0 12 L-18 40 M0 12 L18 40" fill="none" stroke="#222" stroke-width="9" stroke-linecap="round"/>`

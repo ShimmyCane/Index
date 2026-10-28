@@ -9,6 +9,13 @@
 - [x] Numbering (`catalog.md`), characters (`characters.md`), quality check (`qc.md`)
 - [x] `tools/check_sheets.js` keeps published mazes from changing
 
+## Done this round
+
+- [x] Answer-line check (`FMZ.sheet.lint`): the red line must never touch a wall; doodle mazes fixed at the root; baking keeps the best clean version; catalog check fails on any touch
+- [x] Difficulty 1–5 with a computer level guess; joy scores (Looking, Doing, Solving) in `rubric.md` and each sheet's ⚙️
+- [x] More white space; treats along the way
+- [x] Felix's faces in ⚙️ → sweet spot → "Just right for Felix" in the library, and Make a maze starts there
+
 ## Now
 
 - [ ] Jimmy prints the ten on Letter landscape and tries them with Felix: path width, time per level, which styles he likes

@@ -6,7 +6,7 @@ Every maze has a code like **810-001**. It is printed at the top and in the foot
  8   1   0  -  001
  │   │   │      └── counter: 3 hex digits, one series for every maze (001 … FFF = 4,095 mazes)
  │   │   └── source: how it was made
- │   └── level: time to solve
+ │   └── level: difficulty 1–5
  └── family: theme
 ```
 
@@ -15,17 +15,17 @@ Typing only the counter (`001`, `00A`) also works, because the counter alone is 
 | Digit | Family (theme) | Level (time to solve) | Source (how it was made) |
 |---|---|---|---|
 | 0 | | | Made by the computer from the catalog |
-| 1 | Classical labyrinths and history | About 2 minutes | Grown from Felix's doodle |
-| 2 | Famous mazes and gardens | About 5 minutes | Picked and tuned by hand |
-| 3 | Art and artists | About 10 minutes | |
-| 4 | Nature | 20 minutes or more | |
-| 5 | Systems and maps | | |
+| 1 | Classical labyrinths and history | 1 · about 1 minute | Grown from Felix's doodle |
+| 2 | Famous mazes and gardens | 2 · about 3 minutes | Picked and tuned by hand |
+| 3 | Art and artists | 3 · about 5 minutes | |
+| 4 | Nature | 4 · about 10 minutes | |
+| 5 | Systems and maps | 5 · 20 minutes or more | |
 | 6 | Math and patterns | | |
 | 7 | Music and sound | | |
 | 8 | Story worlds | | |
 | 9–F | Free for later (seasons, holidays, Felix's own themes) | Free for harder levels | Free |
 
-The families follow `inspirations.md`. The levels follow `js/sheet.js` `LEVELS` (path width and branching grow with level).
+The families follow `inspirations.md`. The levels follow `js/sheet.js` `LEVELS` (path width and branching grow with level), and the computer's level guess must match (`rubric.md`). Codes changed on 2026-10-28 when levels went from 1–4 to 1–5, before anything was printed.
 
 ## Where mazes live
 
@@ -35,21 +35,22 @@ The families follow `inspirations.md`. The levels follow `js/sheet.js` `LEVELS` 
 
 ## The first ten (a test set, mixed difficulty)
 
-| Code | Maze | Time | Style |
+| Code | Maze | Level | Style |
 |---|---|---|---|
-| 810-001 | Mouse and Cheese | 2 min | Square grid, bold hand-drawn walls |
-| 330-002 | Starry Night | 10 min | Square grid bent into swirls, cypress tree |
-| 420-003 | Honeycomb | 5 min | Hexagons |
-| 140-004 | Chartres Rings | 20+ min | Rings and spokes, double lines |
-| 320-005 | Dancing Figure | 5 min | Maze inside a Keith Haring-style figure |
-| 510-006 | Subway Map | 2 min | Lines and stations, with loops |
-| 230-007 | Hampton Court Hedges | 10 min | Trapezoid hedge maze, goal in the middle |
-| 420-008 | Spider Web | 5 min | Rings with straight threads |
-| 420-009 | Ant Tunnels | 5 min | Tunnels in dotted earth, rooms at dead ends |
-| 330-00A | Celtic Knot | 10 min | Ribbons that cross over and under (bridges) |
+| 810-001 | Mouse and Cheese | 1 | Square grid, bold hand-drawn walls, crumbs to collect |
+| 340-002 | Starry Night | 4 | Square grid bent into swirls, cypress tree, stars |
+| 430-003 | Honeycomb | 3 | Hexagons |
+| 150-004 | Chartres Rings | 5 | Rings and spokes, double lines |
+| 330-005 | Dancing Figure | 3 | Maze inside a Keith Haring-style figure, hearts |
+| 520-006 | Subway Map | 2 | Lines and stations, with loops |
+| 240-007 | Hampton Court Hedges | 4 | Trapezoid hedge maze, goal in the middle |
+| 430-008 | Spider Web | 3 | Rings with straight threads |
+| 430-009 | Ant Tunnels | 3 | Tunnels in dotted earth, rooms at dead ends, crumbs |
+| 340-00A | Celtic Knot | 4 | Ribbons that cross over and under (bridges) |
 
 ## Adding a maze
 
 1. Pick a style in `js/sheet.js` `STYLES` (or add one), a family and a level.
-2. Add a recipe to `data/catalog.js` with the next counter and any seed. Open `sheet.html?code=…` and try seeds until the maze looks good.
-3. Run the quality check in `qc.md`.
+2. Add a recipe to `data/catalog.js` with the next counter.
+3. `node tools/pick_seeds.js <counter>` tries many seeds, rejects any where the answer touches a wall, and lists the best by level fit and joy score. Use the top seed, then look at it (`sheet.html?code=…`).
+4. `node tools/check_sheets.js --update`, then the by-eye check in `rubric.md` and `qc.md`.

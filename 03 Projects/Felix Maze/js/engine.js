@@ -316,6 +316,7 @@
     let best = null, bestScore = Infinity;
     for (const [e, i] of outs) {
       const c = g.cells[e.a];
+      if (spec.ok && !spec.ok(e, c)) continue; // e.g. keep doorways away from Felix's lines
       let score;
       if (g.kind === "polar") {
         const a = Math.atan2((c.cy - g.cy) / g.squash, c.cx - g.cx);

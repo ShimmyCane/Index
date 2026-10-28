@@ -88,10 +88,38 @@
     });
   }
 
+  // ---------- Felix's log: how each maze went, to find his sweet spot ----------
+  const LOG = "fmz.log";
+  const log = () => store.get(LOG, []);
+  function addLog(entry) { const l = log(); l.push(Object.assign({ at: new Date().toISOString() }, entry)); store.set(LOG, l); }
+  /* Sweet spot: start at level 2. "Just right" holds a level, "too easy" points one up, "too hard" one down.
+     The last five reactions count, newest most. */
+  function sweetSpot() {
+    const l = log().slice(-5);
+    if (!l.length) return { level: 2, from: 0 };
+    let sum = 0, wsum = 0;
+    l.forEach((e, i) => { const w = i + 1, v = e.level + (e.mood === "easy" ? 1 : e.mood === "hard" ? -1 : 0); sum += w * v; wsum += w; });
+    return { level: Math.max(1, Math.min(5, Math.round(sum / wsum))), from: l.length };
+  }
+
+  // Grow a few versions of a recipe and keep the best one that passes the check (the answer never touches a wall).
+  function bestOf(rc, tries = 8) {
+    const S2 = root.FMZ.sheet, Q = root.FMZ.score;
+    let best = null;
+    for (let k = 0; k < tries; k++) {
+      const r = Object.assign({}, rc, { seed: k === 0 ? rc.seed : 1 + Math.floor(Math.random() * 1e6) });
+      const model = S2.buildModel(r), sc = Q.score(model);
+      if (!sc.ok) continue;
+      const rank = sc.overall - Math.abs(sc.level - r.level) * 0.8;
+      if (!best || rank > best.rank) best = { rc: r, model, sc, rank };
+    }
+    return best;
+  }
+
   const param = k => new URLSearchParams(location.search).get(k);
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const sheetUrl = r => "sheet.html?code=" + encodeURIComponent(r.code || S.code(r));
 
-  const api = { init, logError, store, bank, find, nextNumber, saveRecipe, removeSaved, saved, toJpeg, param, esc, sheetUrl, onDrawer: null };
+  const api = { init, logError, store, bank, find, nextNumber, saveRecipe, removeSaved, saved, toJpeg, param, esc, sheetUrl, log, addLog, sweetSpot, bestOf, onDrawer: null };
   root.FMZ.app = api;
 })(window);

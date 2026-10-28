@@ -40,6 +40,7 @@
 <script src="js/art.js"></script>
 <script src="js/sheet.js"></script>
 <script src="js/doodle.js"></script>
+<script src="js/score.js"></script>
 <script src="data/catalog.js"></script>
 <script src="js/common.js"></script>
 <script>
@@ -84,9 +85,10 @@
     // time to solve
     let level = 2;
     const lv = document.getElementById("levels");
-    [[1, "⏱ 2"], [2, "⏱ 5"], [3, "⏱ 10"], [4, "⏱ 20"]].forEach(([n, t]) => {
+    level = app.sweetSpot().level; // start at Felix's sweet spot
+    [1, 2, 3, 4, 5].forEach(n => {
       const b = document.createElement("button");
-      b.className = "btn" + (n === level ? " on" : ""); b.textContent = t + " min"; b.dataset.level = n;
+      b.className = "btn" + (n === level ? " on" : ""); b.textContent = "Level " + n; b.dataset.level = n; b.title = S.LEVELS[n].name;
       b.addEventListener("click", () => { level = n; lv.querySelectorAll(".btn").forEach(x => x.classList.toggle("on", +x.dataset.level === n)); });
       lv.append(b);
     });
@@ -132,6 +134,7 @@
       const box = document.getElementById("summer");
       box.innerHTML = "";
       [...picked].forEach(i => box.append(summerCard(Object.assign({}, sprouts[i], { growth: 1 }))));
+      // (each summer card keeps the best of several tries that passes the check)
       document.getElementById("summerBox").hidden = false;
       document.getElementById("summerBox").scrollIntoView({ behavior: "smooth" });
     });
@@ -147,9 +150,15 @@
           <input class="field" placeholder="Name it (for the footer)" value="Felix's Doodle">
           <button class="btn go" data-a="save">✅ Save to library</button>
         </div><p class="note" hidden></p>`;
-      let showAnswer = false;
+      let showAnswer = false, checked = false;
       const draw = () => {
         try {
+          // bake: grow several versions, keep the best that passes the check (the answer never touches a wall)
+          if (!checked) {
+            const best = app.bestOf(rc, 10);
+            if (best) rc.seed = best.rc.seed; else app.logError("No clean maze from this sprout. Try another look or another sprout.");
+            checked = true;
+          }
           const out = S.svg(Object.assign({}, rc, { n: rc.savedAs || app.nextNumber(), title: div.querySelector("input").value, inspired: "Grown from Felix's doodle", fun: D.MODES[rc.doodle.mode].label + "." }), { answer: showAnswer });
           div.querySelector(".paper").innerHTML = out.svg;
           if (!out.model.sol) app.logError("This sprout has no way through. Try another.");
@@ -158,8 +167,8 @@
       div.addEventListener("click", e => {
         const a = e.target.closest("[data-a]"); if (!a) return;
         if (a.dataset.a === "seed" || a.dataset.a === "theme") { rc.savedAs = null; div.querySelector("[data-a=save]").disabled = false; div.querySelector(".note").hidden = true; }
-        if (a.dataset.a === "seed") { rc.seed = 1 + Math.floor(Math.random() * 1e6); draw(); }
-        if (a.dataset.a === "theme") { const k = themeKeys[(themeKeys.indexOf(rc.doodle.theme) + 1) % themeKeys.length]; rc.doodle.theme = k; rc.family = D.THEMES[k].family; draw(); }
+        if (a.dataset.a === "seed") { rc.seed = 1 + Math.floor(Math.random() * 1e6); checked = false; draw(); }
+        if (a.dataset.a === "theme") { const k = themeKeys[(themeKeys.indexOf(rc.doodle.theme) + 1) % themeKeys.length]; rc.doodle.theme = k; rc.family = D.THEMES[k].family; checked = false; draw(); }
         if (a.dataset.a === "answer") { showAnswer = !showAnswer; a.classList.toggle("on", showAnswer); draw(); }
         if (a.dataset.a === "save") {
           const full = Object.assign({}, rc, {
