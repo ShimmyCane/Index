@@ -381,9 +381,18 @@
     parts.push(zr !== 1 ? `<g class="fmz-zoom" transform="translate(${ZC[0]} ${ZC[1]}) scale(${zr}) translate(${-ZC[0]} ${-ZC[1]})">${inner.join("")}</g>` : inner.join(""));
     if (!opts.bare && art) {
       parts.push(`<text x="40" y="70" ${font} font-size="44" fill="${INK}">Felix Maze <tspan font-size="30">#${id}</tspan></text>`);
-      const foot = [`Felix Maze #${id}`, recipe.title, recipe.inspired, recipe.fun].filter(Boolean).join("  ·  ");
-      const fit = foot.length * 7.6 > 1020 ? ` textLength="1020" lengthAdjust="spacingAndGlyphs"` : "";
-      parts.push(`<text x="${W / 2}" y="806" text-anchor="middle" ${font} font-size="17" fill="#444"${fit}>${esc(foot)}</text>`);
+      const bits = [`Felix Maze #${id}`, recipe.title, recipe.inspired, recipe.fun].filter(Boolean);
+      const foot = bits.join("  ·  ");
+      if (foot.length <= 135) {
+        const fit = foot.length * 7.6 > 1020 ? ` textLength="1020" lengthAdjust="spacingAndGlyphs"` : "";
+        parts.push(`<text x="${W / 2}" y="806" text-anchor="middle" ${font} font-size="17" fill="#444"${fit}>${esc(foot)}</text>`);
+      } else {                                   // long footers wrap to two lines: what it is, then the fun line
+        const lines = [bits.slice(0, bits.length - 1).join("  ·  "), bits[bits.length - 1]];
+        lines.forEach((t, i) => {
+          const fit = t.length * 7.6 > 1020 ? ` textLength="1020" lengthAdjust="spacingAndGlyphs"` : "";
+          parts.push(`<text x="${W / 2}" y="${796 + i * 20}" text-anchor="middle" ${font} font-size="17" fill="#444"${fit}>${esc(t)}</text>`);
+        });
+      }
     }
     return { svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}"${opts.fluid ? "" : ' width="11in" height="8.5in"'}>${parts.join("")}</svg>`, model };
   }

@@ -31,11 +31,11 @@
 
 Each batch: generate → answer-line check first (failures to `data/rework.js`) → pixel check → level fit → joy rank → by-eye QC (`qc.md`) → scores → fingerprints → commit.
 
-- [ ] **Batch 1** — #001–#032 (the ten + 40 new)
-- [ ] **Batch 2** — #033–#064
-- [ ] **Batch 3** — #065–#096
-- [ ] **Batch 4** — #097–#0C8
-- [ ] After all four: rework list reviewed with `fix_puzzles`; level mix reported against the plan
+- [x] **Batch 1** — #001–#032 (the ten + 40 new)
+- [x] **Batch 2** — #033–#064
+- [x] **Batch 3** — #065–#096
+- [x] **Batch 4** — #097–#0C8
+- [ ] After all four: rework list (8 designs, see `data/rework.js`) reviewed with `fix_puzzles`. Result: 192 puzzles, levels 1–5 = 40/70/55/21/6, mean 2.39 (plan 2.5), 0.03% of tries touched a wall. Long footers now wrap to two lines.
 
 ## Now
 
