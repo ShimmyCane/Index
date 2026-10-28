@@ -33,6 +33,34 @@ for (const [n, givens, easy] of [[2, 2, false], [3, 4, true], [3, 4, false], [4,
   }
   console.log(`${n}x${n}${easy ? ' easy' : ''}: ${made}/30 made, ${seen.size} different, ${Math.round(100 * lessonCells / cells)}% of cells are recent characters, ${(Date.now() - t) / 30 | 0} ms each`);
 }
+// 2.0 lines: every line is a word, no character repeats, the bank holds the answers plus decoys that are never right.
+for (const lines of [2, 3, 4, 5]) {
+  const seen = new Set(); let made = 0, lessonCells = 0, cells = 0, traps = 0;
+  const t = Date.now();
+  for (let k = 0; k < 40; k++) {
+    const p = Engine.generateLines(idx, { lines, bankMult: 3, lessonChars: lesson });
+    if (!p) { fail++; console.log('NO LINES', lines); continue; }
+    made++; seen.add(p.key);
+    if (!Engine.checkLines(idx, p.solution, lines).ok) { fail++; console.log('BAD LINES', p.solution.join('')); }
+    if (new Set(p.solution).size !== p.solution.length) { fail++; console.log('REPEAT', p.solution.join('')); }
+    const blanks = p.given.filter(x => !x).length;
+    if (p.bank.length !== blanks * 3 || new Set(p.bank).size !== p.bank.length) { fail++; console.log('LINES BANK', p.bank.join('')); }
+    if (![...p.solution, ...p.bank].every(c => bankChars.has(c))) { fail++; console.log('LINES OUTSIDE BANK'); }
+    // A decoy must not make a word in any line (otherwise it would be a second right answer).
+    const answers = p.solution.filter((_, i) => !p.given[i]);
+    const decoys = p.bank.filter(c => !answers.includes(c));
+    for (const d of decoys) {
+      for (let r = 0; r < lines; r++) {
+        const blankFirst = !p.given[2 * r];
+        const shown = p.solution[blankFirst ? 2 * r + 1 : 2 * r];
+        if (blankFirst ? idx.isWord(d, shown) : idx.isWord(shown, d)) { fail++; console.log('DECOY IS RIGHT', d, shown); }
+        if (blankFirst ? idx.isWord(shown, d) : idx.isWord(d, shown)) traps++;
+      }
+    }
+    lessonCells += p.solution.filter(c => lesson.has(c)).length; cells += p.solution.length;
+  }
+  console.log(`lines ${lines}: ${made}/40 made, ${seen.size} different, ${Math.round(100 * lessonCells / cells)}% recent characters, ${traps} wrong-order decoys, ${(Date.now() - t) / 40 | 0} ms each`);
+}
 // Rule spot checks
 const g = ['爸', '爸', '妈', '妈'];
 const g2 = ['白', '雪', '天', '花']; // 白雪 天花 | 白天 雪花
