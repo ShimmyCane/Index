@@ -3,7 +3,7 @@
 **Status:** MVP (browser-tested in headless Chromium; not yet tested on an iPad)
 **Owner:** Jimmy
 **Platform:** iPad web app (plain HTML/CSS/JS, no build step, GitHub Pages)
-**Conversation:** `convo/convo v0.1.md` (questions), `convo/convo v0.2.md` (answers + open checks), `convo/convo v0.3.md` (character bank from three photos)
+**Conversation:** `convo/convo v0.1.md` (questions), `convo/convo v0.2.md` (answers + open checks), `convo/convo v0.3.md` (character bank from three photos), `convo/convo v0.4.md` (answers, 超纲字, lesson words)
 
 ## Purpose
 
@@ -17,6 +17,7 @@ A digital version of a printed Chinese word-grid card (汉字数独). Some cells
 - **Challenge (挑战):** every character must make a word in its row and in its column. Nothing changes colour until ✅ 检查. Wrong cells shake red and their lines are tinted; 💡 答案 then appears.
 - Any valid board counts, not only the generated one. A character may appear only once per puzzle.
 - **Undo** (↩️), **New** (🔄), and a celebration with confetti and a Web Audio tune (Twinkle Twinkle) on a win. ⭐ counts finished puzzles.
+- **超纲字** (characters outside the three photos' lists) always show pinyin, even when the pinyin setting is off.
 - **Words made** panel lists the words on the board with pinyin (live in easy mode; at the end in challenge mode). Lesson words show in yellow.
 
 ## Settings (⚙️, lower right)
@@ -27,8 +28,8 @@ Size · mode · number of givens · bank size · pinyin · simplified/traditiona
 
 - `index.html`, `css/style.css`, `js/app.js` — page, theme, UI (drag, settings, audio, saving).
 - `js/engine.js` — word index, puzzle generator, decoys, easy/challenge checks. No DOM; runs under Node.
-- `assets/phrases.json` — **edit this to add words.** `lesson` = recent lesson words (puzzles favour them); `phrases` = 976 two-character words, all made only from the 字库 characters (a word with another character gets that character added under 其他 by `tools/build_data.py`).
-- `assets/characters.json` — **the 字库: the 266 characters from three photos** (第3级新增字表 60, 课本写字表 100, 第4级总字表 240, plus 4 超纲字), listed as the photos show them, with `[pinyin, traditional]` per character and per-word overrides (还书 huán, 头发 頭髮).
+- `assets/phrases.json` — **edit this to add words.** `lesson` = recent lesson words (puzzles favour them); `phrases` = 981 two-character words, all made only from the 字库 characters (a word with another character gets that character added under 其他 by `tools/build_data.py`). `lesson` = 78 words: Jimmy's 9 plus the poster's example words.
+- `assets/characters.json` — **the 字库: 267 characters** — the three photos (第3级新增字表 60, 一年级上册写字表 100, 第4级总字表 240) plus 超纲字 (the booklet's 巨 棵 抱 放, and 声), listed as the photos show them, with `[pinyin, traditional]` per character and per-word overrides (还书 huán, 头发 頭髮).
 - `tools/build_data.py` — optional: fills pinyin/traditional for new characters and tidies the JSON (needs `pypinyin`, `opencc-python-reimplemented`).
 - `tools/test_engine.js` — `node tools/test_engine.js` generates puzzles at every size and checks them.
 

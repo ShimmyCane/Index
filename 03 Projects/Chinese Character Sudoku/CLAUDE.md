@@ -12,6 +12,6 @@ Test the engine: `node tools/test_engine.js`.
 
 Project rules:
 - Words live in `assets/phrases.json` (two-character words only). Jimmy adds words there by hand; keep the one-entry-per-line layout (`tools/build_data.py` rewrites it).
-- The character bank is the 266 characters from Jimmy's three photos (`assets/characters.json` categories). Build words only from them; run `python3 tools/build_data.py` after editing, and `node tools/test_engine.js` checks that no word or puzzle goes outside the bank.
+- The character bank is the characters from Jimmy's three photos plus the 超纲字 (`assets/characters.json` categories). Build words only from them; a new character in a word goes into 其他 when you run `python3 tools/build_data.py`. 超纲字 (categories 本册超纲字 and 其他) always show pinyin. `node tools/test_engine.js` checks that no word or puzzle goes outside the bank.
 - Keep word content kid-appropriate. No names or school details (public repo).
 - Bump `APP_VERSION` and add a `CHANGELOG` line in `js/app.js` for each user-visible change.

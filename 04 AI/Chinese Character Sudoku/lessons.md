@@ -17,3 +17,9 @@
 - **Keep two sets: characters that appear in words, and the whole bank.** Generation needs the first; distractors can use the second so every character in the textbook gets practice even before it has a word.
 - **Saved game state needs the data version.** Changing the word list can leave a restored puzzle containing characters that are now out of scope; store the data version with the save and drop it on mismatch.
 - **A lesson word can sit outside the bank** (叫声: 声 is on none of the photos). Surface it as a question rather than silently widening or shrinking the bank.
+
+## 2026-10-29 — 超纲 characters and lesson words
+
+- **Treat "add it but mark the pinyin" as a display rule.** Characters the child hasn't been taught (the booklet's 超纲字, and 声) always show pinyin, independent of the pinyin toggle. Stated in `convo v0.4` so Jimmy can say if only a data entry was meant.
+- **A bigger lesson list trades variety for relevance.** Going from 8 to 78 lesson words kept every puzzle on-topic but cut distinct 3×3 challenge boards (about 20 → 15 per 30 tries), because the generator prefers boards containing lesson words. The recent-solutions list covers repeats in real play.
+- **Give an out-of-bank character a few ordinary words**, not only the lesson word that needed it (叫声 plus 大声 小声 笑声 哭声), so it can appear in more puzzles.

@@ -1,7 +1,8 @@
 // 汉字数独 — UI: board, drag-and-drop bank, settings, sounds, celebration.
-const APP_VERSION = '0.2.0';
+const APP_VERSION = '0.3.0';
 const CHANGELOG = [
   ['0.1.0', '2026-10-27', '第一版：2×2 到 4×4；从字库拖字；简单（放对马上变绿）和挑战（最后检查）；拼音、繁体、加新词、撤销、答案、完成音乐。'],
+  ['0.3.0', '2026-10-29', '超纲字（本册超纲字和「声」）一直显示拼音；最近学的词加入海报上的例词和「叫声」；写字表标明是一年级上册。'],
   ['0.2.0', '2026-10-28', '字库换成三张照片里的字（第3级新增60字、第4级240字、课本写字表100字，共266字）；词库只用这些字。'],
 ];
 
@@ -59,7 +60,7 @@ async function loadData() {
   let data = null;
   try {
     const [p, c] = await Promise.all([fetchJson('assets/phrases.json'), fetchJson('assets/characters.json')]);
-    data = { lesson: p.lesson, phrases: p.phrases, version: p.version, chars: c.chars || {}, words: c.words || {}, pool: Object.values(c.categories || {}).join('') };
+    data = { lesson: p.lesson, phrases: p.phrases, version: p.version, chars: c.chars || {}, words: c.words || {}, pool: Object.values(c.categories || {}).join(''), extra: (c.categories['本册超纲字'] || '') + (c.categories['其他'] || '') };
     save('data', data);
   } catch (e) {
     data = load('data', null);
@@ -100,8 +101,10 @@ function showChar(ch, cell) {
   if (cell != null) { const wa = wordAt(cell); if (wa) return [...S.data.words[wa.w][1]][wa.pos]; }
   return (S.data.chars[ch] || [ch, ch])[1];
 }
+// 超纲字 (beyond the textbook list) always show pinyin, whatever the setting.
+const isExtra = ch => !!ch && (S.data.extra || '').includes(ch);
 function glyph(ch, cell) {
-  const py = S.settings.pinyin ? `<span class="py">${pinyinOf(ch, cell)}</span>` : '';
+  const py = S.settings.pinyin || isExtra(ch) ? `<span class="py">${pinyinOf(ch, cell)}</span>` : '';
   return `<span class="glyph">${py}<span>${showChar(ch, cell)}</span></span>`;
 }
 function wordPinyin(w) {
@@ -283,7 +286,7 @@ function render() {
 
 function wordChip(w) {
   const lesson = S.lessonWords.has(w) ? ' lesson' : '';
-  const py = S.settings.pinyin ? `<small>${wordPinyin(w)}</small>` : '';
+  const py = S.settings.pinyin || [...w].some(isExtra) ? `<small>${wordPinyin(w)}</small>` : '';
   return `<span class="word${lesson}">${py}${wordShown(w)}</span>`;
 }
 
