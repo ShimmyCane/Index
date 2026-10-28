@@ -18,8 +18,15 @@
 - **Saved game state needs the data version.** Changing the word list can leave a restored puzzle containing characters that are now out of scope; store the data version with the save and drop it on mismatch.
 - **A lesson word can sit outside the bank** (叫声: 声 is on none of the photos). Surface it as a question rather than silently widening or shrinking the bank.
 
-## 2026-10-29 — 超纲 characters and lesson words
+## 2026-10-28 — 超纲 characters and lesson words
 
 - **Treat "add it but mark the pinyin" as a display rule.** Characters the child hasn't been taught (the booklet's 超纲字, and 声) always show pinyin, independent of the pinyin toggle. Stated in `convo v0.4` so Jimmy can say if only a data entry was meant.
 - **A bigger lesson list trades variety for relevance.** Going from 8 to 78 lesson words kept every puzzle on-topic but cut distinct 3×3 challenge boards (about 20 → 15 per 30 tries), because the generator prefers boards containing lesson words. The recent-solutions list covers repeats in real play.
 - **Give an out-of-bank character a few ordinary words**, not only the lesson word that needed it (叫声 plus 大声 小声 笑声 哭声), so it can appear in more puzzles.
+
+## 2026-10-28 — "recently learned" is a set of characters
+
+- **Jimmy defines the current lesson by characters (the last 60 in the textbook table), not by words.** Favouring a character set needs different machinery than favouring a word list: plant words that contain them, try them first in the search, and score boards per cell. Ask which unit the user means before building lesson bias.
+- **Some recent characters had no words at all** (为, 干, 呢) and several had one or two. Count words per target character before relying on a bias; add short everyday words for the thin ones.
+- **Preferring characters made the search 10× slower until restarts were capped.** A planted word that cannot fit burned 12 restarts × 3,000 steps; 4 restarts × 800 steps for planted attempts (free search keeps more) brought 4×4 from ~800 ms back to ~100 ms with the same recent-character share. Time the generator after changing its bias.
+- **Check the date.** I labelled a change log entry with tomorrow's date; read the current date from the session, not from habit.

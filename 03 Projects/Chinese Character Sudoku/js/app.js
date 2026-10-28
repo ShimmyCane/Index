@@ -1,8 +1,9 @@
 // 汉字数独 — UI: board, drag-and-drop bank, settings, sounds, celebration.
-const APP_VERSION = '0.3.0';
+const APP_VERSION = '0.4.0';
 const CHANGELOG = [
   ['0.1.0', '2026-10-27', '第一版：2×2 到 4×4；从字库拖字；简单（放对马上变绿）和挑战（最后检查）；拼音、繁体、加新词、撤销、答案、完成音乐。'],
-  ['0.3.0', '2026-10-29', '超纲字（本册超纲字和「声」）一直显示拼音；最近学的词加入海报上的例词和「叫声」；写字表标明是一年级上册。'],
+  ['0.4.0', '2026-10-28', '最近学的字改成第4级总字表第29页最后60个字；题目优先用这些字；新增约60个带这些字的词。'],
+  ['0.3.0', '2026-10-28', '超纲字（本册超纲字和「声」）一直显示拼音；最近学的词加入海报上的例词和「叫声」；写字表标明是一年级上册。'],
   ['0.2.0', '2026-10-28', '字库换成三张照片里的字（第3级新增60字、第4级240字、课本写字表100字，共266字）；词库只用这些字。'],
 ];
 
@@ -13,7 +14,7 @@ const save = (k, v) => { try { localStorage.setItem(STORE + k, JSON.stringify(v)
 
 // Used only when assets/*.json can't load and nothing is cached (e.g. opened as a local file).
 const FALLBACK = {
-  lesson: ['喜欢', '主人', '国王', '公主', '过去', '还书', '高兴', '快乐'],
+  lessonChars: '土火光力气午发电宝贝自己身今年岁米面包瓜果点字话机船菜孩为比会站行叫过关喜欢怕给跟进干坏青明晚真饱错东西外每这她也还以呢',
   phrases: '国王 王子 女王 王后 中国 国家 爸妈 白雪 雪花 白天 天花 大山 山上 上下 下山 天上 大小 小山 高山 山下 天下 一天 地上 地下 大地 天地 过去 来去 回去 出去 过来 出来 回来 上去 下去 快乐 高兴 主人 人家 大人 家人 公主 公园 学生 学校 老师 小鸟 大树 树上 上学 看见 好吃'.split(' '),
   pool: '',
 };
@@ -23,9 +24,9 @@ const GIVENS = { true: { 2: 2, 3: 5, 4: 9 }, false: { 2: 1, 3: 4, 4: 7 } };
 
 const S = {
   settings: { ...DEFAULTS, ...load('settings', {}) },
-  data: null,          // { lesson, phrases, chars, words }
+  data: null,          // { lessonChars, phrases, chars, words, pool, extra }
   idx: null,           // Engine word index
-  lessonWords: new Set(),
+  lessonChars: new Set(),   // recently learned characters
   puzzle: null,        // { n, solution, given, bank }
   place: [],           // place[cell] = bank tile index, or null
   undo: [],
@@ -60,7 +61,7 @@ async function loadData() {
   let data = null;
   try {
     const [p, c] = await Promise.all([fetchJson('assets/phrases.json'), fetchJson('assets/characters.json')]);
-    data = { lesson: p.lesson, phrases: p.phrases, version: p.version, chars: c.chars || {}, words: c.words || {}, pool: Object.values(c.categories || {}).join(''), extra: (c.categories['本册超纲字'] || '') + (c.categories['其他'] || '') };
+    data = { lessonChars: p.lessonChars || '', phrases: p.phrases, version: p.version, chars: c.chars || {}, words: c.words || {}, pool: Object.values(c.categories || {}).join(''), extra: (c.categories['本册超纲字'] || '') + (c.categories['其他'] || '') };
     save('data', data);
   } catch (e) {
     data = load('data', null);
@@ -73,8 +74,9 @@ async function loadData() {
 
 function rebuildIndex() {
   const extra = load('extraWords', []), extraLesson = load('extraLesson', []);
-  S.idx = Engine.buildIndex([...S.data.phrases, ...S.data.lesson, ...extra], [...(S.data.pool || '')]);
-  S.lessonWords = new Set([...S.data.lesson, ...extraLesson].filter(w => S.idx.W.has(w)));
+  S.idx = Engine.buildIndex([...S.data.phrases, ...extra], [...(S.data.pool || '')]);
+  // Words added in ⚙️ as "recently learned" make their characters count as recent too.
+  S.lessonChars = new Set([...(S.data.lessonChars || ''), ...extraLesson.join('')]);
 }
 
 // ---------- pinyin and traditional, using the word a cell makes when there is one ----------
@@ -129,14 +131,14 @@ function newPuzzle() {
   const recent = load('recent', []);
   const p = Engine.generate(S.idx, {
     n, easy: st.easy, givens: GIVENS[st.givensMany][n], bankMult: st.decoysMany ? 3 : 2,
-    lessonWords: S.lessonWords, avoid: new Set(recent),
+    lessonChars: S.lessonChars, avoid: new Set(recent),
   });
   if (!p) {
     logError(`出不了 ${n}×${n} 的题，词库可能太小`);
     setMessage('这个大小出不了题，换小一点试试 🙂');
     return;
   }
-  save('recent', [p.solution.join(''), ...recent].slice(0, 40));
+  save('recent', [p.solution.join(''), ...recent].slice(0, 150));
   S.puzzle = p;
   S.place = Array(n * n).fill(null);
   S.undo = []; S.checked = null; S.done = false; S.revealed = false; S.selected = null;
@@ -285,7 +287,7 @@ function render() {
 }
 
 function wordChip(w) {
-  const lesson = S.lessonWords.has(w) ? ' lesson' : '';
+  const lesson = [...w].some(c => S.lessonChars.has(c)) ? ' lesson' : '';
   const py = S.settings.pinyin || [...w].some(isExtra) ? `<small>${wordPinyin(w)}</small>` : '';
   return `<span class="word${lesson}">${py}${wordShown(w)}</span>`;
 }
@@ -407,7 +409,7 @@ function renderSettings() {
   $('errorsPanel').hidden = !S.settings.showErrors;
   const extra = load('extraWords', []);
   $('extraInfo').textContent = extra.length ? `我加的词（${extra.length}）：${extra.join(' ')}` : '还没有加词。长期保存请加到 assets/phrases.json。';
-  $('dataInfo').innerHTML = `${S.idx.W.size} 个词 · ${S.idx.pool.length} 个字 · 版本 ${S.data.version || ''}<br>最近学的：${[...S.lessonWords].join(' ') || '（无）'}`;
+  $('dataInfo').innerHTML = `${S.idx.W.size} 个词 · ${S.idx.pool.length} 个字 · 版本 ${S.data.version || ''}<br>最近学的字（${S.lessonChars.size}）：${[...S.lessonChars].join('') || '（无）'}`;
   $('doneCount').textContent = load('stars', 0);
   $('version').textContent = 'v' + APP_VERSION;
   $('changelog').innerHTML = CHANGELOG.map(([v, d, t]) => `<li><b>v${v}</b> ${d}：${t}</li>`).join('');

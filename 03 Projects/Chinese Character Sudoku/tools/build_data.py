@@ -45,10 +45,6 @@ def main():
             seen.add(w)
             clean.append(w)
     pdata['phrases'] = clean
-    for w in pdata['lesson']:
-        if w not in seen and HAN.match(w):
-            clean.append(w)
-            seen.add(w)
 
     # Every character used anywhere gets a pinyin + traditional entry.
     all_chars = ''.join(cdata['categories'].values()) + ''.join(clean)
@@ -79,7 +75,10 @@ def main():
 
     dump(cdata, CHARS)
     dump(pdata, PHRASES)
-    print(f'{len(chars)} characters, {len(words)} word readings, {len(clean)} phrases, {len(pdata["lesson"])} lesson words')
+    print(f'{len(chars)} characters, {len(words)} word readings, {len(clean)} phrases, {len(pdata.get("lessonChars", ""))} recent characters')
+    stray = [c for c in pdata.get('lessonChars', '') if c not in chars]
+    if stray:
+        print('lessonChars not in the bank:', ''.join(stray))
     if bad:
         print('Skipped (not two different Chinese characters):', ' '.join(bad))
     if missing:
