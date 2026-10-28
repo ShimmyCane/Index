@@ -17,7 +17,7 @@ const file = path.join(__dirname, "fingerprints.json");
 const old = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : {};
 const now = {};
 let bad = 0;
-for (const rc of ctx.FMZ_CATALOG) {
+for (const rc of ctx.FMZ_CATALOG.filter(r => !r.retired)) {
   const code = S.code(rc);
   const { svg, model } = S.svg(rc);
   const fp = crypto.createHash("sha1").update(svg).digest("hex").slice(0, 12);

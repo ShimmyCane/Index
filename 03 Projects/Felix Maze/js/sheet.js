@@ -8,13 +8,15 @@
   const INK = "#222";
 
   // Difficulty 1–5, each with a rough time to solve. size = cell size (1/100 inch).
+  // Calibrated on Jimmy's judgement that a 0.54 in maze (the old 330-00A, effort ≈ 2.2) is level 2.
   const LEVELS = {
-    1: { name: "Level 1 · about 1 minute", short: "1 min", size: 100, mix: 0, braid: 0 },
-    2: { name: "Level 2 · about 3 minutes", short: "3 min", size: 80, mix: 0.05, braid: 0 },
-    3: { name: "Level 3 · about 5 minutes", short: "5 min", size: 64, mix: 0.12, braid: 0.04 },
-    4: { name: "Level 4 · about 10 minutes", short: "10 min", size: 50, mix: 0.22, braid: 0.06 },
-    5: { name: "Level 5 · 20 minutes or more", short: "20+ min", size: 38, mix: 0.32, braid: 0.08 }
+    1: { name: "Level 1 · about 1 minute", short: "1 min", size: 88, mix: 0, braid: 0 },
+    2: { name: "Level 2 · about 3 minutes", short: "3 min", size: 54, mix: 0.05, braid: 0 },
+    3: { name: "Level 3 · about 5 minutes", short: "5 min", size: 42, mix: 0.12, braid: 0.04 },
+    4: { name: "Level 4 · about 10 minutes", short: "10 min", size: 35, mix: 0.2, braid: 0.06 },
+    5: { name: "Level 5 · 20 minutes or more", short: "20+ min", size: 30, mix: 0.3, braid: 0.08 }
   };
+
   const FAMILIES = {
     1: "Classical", 2: "Famous mazes", 3: "Art", 4: "Nature", 5: "Systems and maps", 6: "Math and patterns", 7: "Music and sound", 8: "Story worlds"
   };
@@ -233,6 +235,7 @@
     const drawn = model.drawn = { walls: [] };
     const ptsOf = geo => { let p = samplesOf(geo, look.chords, warp ? 10 : 40); if (warp) p = p.map(warp); p = wobbly(p, look.wobble || 0, r); drawn.walls.push(p); return p; };
     const out = [];
+    let coverUnder = null;
     const entrance = new Set([model.start.edge, model.end.edge]);
     const center = c => { const p = [g.cells[c].cx, g.cells[c].cy]; return warp ? warp(p) : p; };
     const mid = geo => { const p = E.edgeMid(geo); return warp ? warp(p) : p; };
@@ -249,10 +252,12 @@
       });
       const all = d.concat(bd).join("");
       const w = look.wall, ow = look.outline || w;
-      if (look.hedge) {
+      if (look.hedge && opts.verify) {
+        out.push(`<path d="${all}" fill="none" stroke="${INK}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`);
+      } else if (look.hedge) {
         out.push(`<path d="${all}" fill="none" stroke="${INK}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`);
         out.push(`<path d="${all}" fill="none" stroke="url(#leaf${uid})" stroke-width="${w - 5}" stroke-linecap="round" stroke-linejoin="round"/>`);
-      } else if (look.double) {
+      } else if (look.double && !opts.verify) {
         out.push(`<path d="${all}" fill="none" stroke="${INK}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`);
         out.push(`<path d="${all}" fill="none" stroke="#fff" stroke-width="${look.double}" stroke-linecap="round" stroke-linejoin="round"/>`);
       } else {
@@ -261,7 +266,7 @@
       }
     } else {
       // Paths drawn as ribbons, tunnels or subway lines.
-      const segs = [], overs = [];
+      const segs = [], overs = [], overCells = [];
       g.edges.forEach((e, i) => {
         if (!links.has(i)) return;
         if (e.under) { segs.push([center(e.a), center(e.b)]); return; }
@@ -270,7 +275,7 @@
       for (const b of model.bridges) {
         const c = g.cells[b.cell], s = g.s / 2;
         const p = b.over === "NS" ? [[c.cx, c.cy - s], [c.cx, c.cy + s]] : [[c.cx - s, c.cy], [c.cx + s, c.cy]];
-        overs.push(warp ? p.map(warp) : p);
+        overs.push(warp ? p.map(warp) : p); overCells.push(b.cell);
       }
       for (const end of [model.start, model.end]) {
         if (end.edge < 0) continue;
@@ -294,15 +299,22 @@
         if (look.chamber) g.cells.forEach((c, i) => {
           if (E.degree(g, links, i) === 1) { const [x, y] = center(i); out.push(`<circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(ow * look.chamber / 2 - look.edge)}" fill="#fff"/>`); }
         });
-        if (overs.length) {
-          const O = overs.map(p => smooth(p)).join("");
-          out.push(`<path d="${O}" fill="none" stroke="${INK}" stroke-width="${ow}" stroke-linecap="butt"/>`);
-          out.push(`<path d="${O}" fill="none" stroke="#fff" stroke-width="${look.wall}" stroke-linecap="square"/>`);
-        }
+        // a bridge: the over passage is drawn on top of the tunnel that runs under it
+        const overDraw = keep => {
+          const O = overs.filter((p, k) => !keep || keep.has(overCells[k])).map(p => smooth(p)).join("");
+          return O ? `<path d="${O}" fill="none" stroke="${INK}" stroke-width="${ow}" stroke-linecap="butt"/><path d="${O}" fill="none" stroke="#fff" stroke-width="${look.wall}" stroke-linecap="square"/>` : "";
+        };
+        if (overs.length) out.push(overDraw(null));
+        coverUnder = keep => overDraw(keep);
       }
     }
     if (opts.answer && model.path) {
       out.push(`<path class="fmz-answer" d="${smooth(model.path)}" fill="none" stroke="${opts.answerColor || "#e0604a"}" stroke-width="${opts.answerWidth || Math.max(8, (spec.size || 40) * 0.18)}" stroke-linecap="round" stroke-linejoin="round" ${opts.answerDash ? `stroke-dasharray="${opts.answerDash}"` : ""}/>`);
+      // where the answer goes under a bridge, the bridge is drawn on top of it again
+      if (coverUnder && model.sol) {
+        const under = new Set(model.sol.edges.map(ei => g.edges[ei].under).filter(c => c !== undefined));
+        if (under.size) out.push(coverUnder(under));
+      }
     }
     return out.join("");
   }
@@ -332,26 +344,27 @@
     const parts = [];
     parts.push(defs(uid));
     parts.push(`<rect width="${W}" height="${H}" fill="#fff"/>`);
-    if (st.under) parts.push(st.under(model, uid));
+    const art = !opts.verify; // verify: only the maze itself, so a pixel check sees nothing but walls and the answer
+    if (st.under && art) parts.push(st.under(model, uid));
     parts.push(`<g class="fmz-maze">${renderMaze(model, uid, opts)}</g>`);
-    if (st.over) parts.push(st.over(model, uid));
+    if (st.over && (art || recipe.style === "doodle")) parts.push(st.over(model, uid));
     const sp = model.spec;
-    for (const c of model.treats || []) {
+    for (const c of art ? model.treats || [] : []) {
       const cell = model.g.cells[c], p = model.warp ? model.warp([cell.cx, cell.cy]) : [cell.cx, cell.cy];
       parts.push(`<g class="fmz-treat">${A.draw(sp.treat, p[0], p[1], Math.max(26, (model.g.s || sp.size || 60) * 0.42))}</g>`);
     }
-    if (sp.chars && model.sol !== undefined) {
+    if (art && sp.chars && model.sol !== undefined) {
       const sz = sp.charSize || 84;
       const inside = end => end.edge >= 0 ? sz : model.g.kind === "polar" && end.cell === 0 ? model.g.r0 * 1.5 : Math.min(sz, (model.g.s || sp.size || 60) * 0.9);
       const a = standAt(model, model.start), b = standAt(model, model.end);
       parts.push(`<g class="fmz-start">${A.draw(sp.chars[0], a[0], a[1], inside(model.start))}</g>`);
       parts.push(`<g class="fmz-finish">${A.draw(sp.chars[1], b[0], b[1], inside(model.end))}</g>`);
     }
-    if (!opts.bare) {
+    if (!opts.bare && art) {
       parts.push(`<text x="40" y="70" ${font} font-size="44" fill="${INK}">Felix Maze <tspan font-size="30">#${id}</tspan></text>`);
       const foot = [`Felix Maze #${id}`, recipe.title, recipe.inspired, recipe.fun].filter(Boolean).join("  ·  ");
       const fit = foot.length * 7.6 > 1020 ? ` textLength="1020" lengthAdjust="spacingAndGlyphs"` : "";
-      parts.push(`<text x="${W / 2}" y="822" text-anchor="middle" ${font} font-size="17" fill="#444"${fit}>${esc(foot)}</text>`);
+      parts.push(`<text x="${W / 2}" y="806" text-anchor="middle" ${font} font-size="17" fill="#444"${fit}>${esc(foot)}</text>`);
     }
     return { svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}"${opts.fluid ? "" : ' width="11in" height="8.5in"'}>${parts.join("")}</svg>`, model };
   }

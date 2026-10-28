@@ -15,3 +15,8 @@
 13. **Don't warp a child's drawing.** Swirling the maze but not his line made them cross; bending his line would change his drawing. Turn the swirl off where his line is drawn on top. _(round 3)_
 14. **Calibrate levels from samples, not guesses.** Level boundaries sit halfway between the typical effort of each level's settings; time labels are targets to tune from Felix's log. _(round 3)_
 15. **Scores that all read 5 are useless.** Add measures that vary (ink density, dull stretch) and check the spread over real samples. _(round 3)_
+16. **Verify the picture, not only the model.** Render without and with the answer and compare pixels (answer on ink; a shorter white route than the answer). It catches layering bugs the geometry check can't, like an answer drawn over a bridge it passes under. Float32 distances in Dijkstra made duplicates re-expand forever: use Float64. _(round 4)_
+17. **Layer by what the solver sees.** Where the answer goes under a bridge, draw the answer, then redraw the bridge on top of it. Where it goes over, leave the answer on top. _(round 4)_
+18. **A child's judgement is the calibration.** One "that's a level 2" from Jimmy moved every level boundary. Keep the scale anchored to a named reference maze. _(round 4)_
+19. **Keep device-made and published counters apart** (800–FFF vs 001–7FF) so a later batch never collides with something saved on a device. _(round 4)_
+20. **Offline isn't an error.** A page that can't reach the database should say "this device only", not add an error to the panel on every load. _(round 4)_

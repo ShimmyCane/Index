@@ -7,6 +7,10 @@
   "use strict";
   const E = root.FMZ.engine;
 
+  // Effort → level. Boundaries sit between the typical efforts of each level's settings (≈0.8, 2.0, 3.2, 4.3, 5.5).
+  // Jimmy's check: the old 330-00A (effort ≈ 2.2) is a level 2.
+  const levelOf = effort => (effort < 1.35 ? 1 : effort < 2.65 ? 2 : effort < 3.75 ? 3 : effort < 4.9 ? 4 : 5);
+
   function measure(model) {
     const { g, links, sol } = model;
     if (!sol) return null;
@@ -52,7 +56,7 @@
     // level's settings (measured over all styles). The level's time label is a target for Felix,
     // to be tuned from his log, not a measurement.
     const effort = secs / 60;
-    const level = effort <= 0.85 ? 1 : effort <= 1.25 ? 2 : effort <= 1.8 ? 3 : effort <= 2.8 ? 4 : 5;
+    const level = levelOf(effort);
     // the longest stretch of the right path with no choice at all (a dull hallway)
     let run = 0, longest = 0;
     for (const c of sol.cells) {
@@ -110,5 +114,5 @@
   }
 
   root.FMZ = root.FMZ || {};
-  root.FMZ.score = { measure, joy, score };
+  root.FMZ.score = { measure, joy, score, levelOf };
 })(typeof window !== "undefined" ? window : globalThis);

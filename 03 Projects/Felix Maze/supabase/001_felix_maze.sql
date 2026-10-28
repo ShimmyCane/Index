@@ -2,6 +2,7 @@
 -- Felix Maze — the maze bank, Felix's doodles, and characters
 -- Family Supabase project. Signed-in users only. Prefix: fmz_  App: felix-maze
 -- NOT APPLIED YET. Apply in a rolled-back transaction first (see /supabase-project).
+-- (The flags table is in 002_flags.sql, which is applied.)
 --
 -- A maze is stored as its recipe: the same recipe always rebuilds the same
 -- maze, answer key and answer animation in the browser (js/sheet.js), so the

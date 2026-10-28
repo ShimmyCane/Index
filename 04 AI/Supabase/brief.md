@@ -30,7 +30,7 @@ Rules:
 ## Current state
 
 - Adventure is the first nursery app with a database. It uses the existing **Family** project (shared with the family apps, one family login), tables `adv_*` (roles, entries, chapters, turns, runs, places, notes, history), registered as app `adventure` in the same migration. SQL in `03 Projects/Adventure/supabase/`. Not yet applied as of 2026-10-27.
-- Felix Maze plans tables `fmz_mazes`, `fmz_doodles`, `fmz_characters` in the Family project, app `felix-maze`. SQL in `03 Projects/Felix Maze/supabase/001_felix_maze.sql`, written 2026-10-28, not applied.
+- Felix Maze: `fmz_flags` is **live** in the Family project (applied 2026-10-28 as migration `felix_maze_flags`, tested first in a rolled-back transaction, RLS on, registered under app `felix-maze`; SQL in `03 Projects/Felix Maze/supabase/002_flags.sql`). `fmz_mazes`, `fmz_doodles`, `fmz_characters` are written in `001_felix_maze.sql` and not applied.
 - Athena's world has no database need yet.
 - Private family projects live in ShimmyAI. Their project references and table state are not recorded here.
 

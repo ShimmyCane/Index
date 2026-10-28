@@ -29,24 +29,31 @@ The families follow `inspirations.md`. The levels follow `js/sheet.js` `LEVELS` 
 
 ## Where mazes live
 
-- **Published bank:** `data/catalog.js`. One recipe per maze: counter, family, level, source, style, seed, title, footer text, tags. The recipe rebuilds the maze, its answer key and its animation exactly, so no images are stored.
+- **Published bank:** `data/catalog.js`. One recipe per maze: counter, family, level, source, style, seed, title, footer text, tags (plus `design`, `batch`, `retired` when they apply). Scores are computed into `data/scores.js`; puzzles the generator couldn't finish are in `data/rework.js`. The recipe rebuilds the maze, its answer key and its animation exactly, so no images are stored.
 - **Baked on a device:** mazes saved from **Make a maze** are kept in that browser (`localStorage`, key `fmz.saved`) and appear in the Library marked "this device". To publish one, copy its recipe into `data/catalog.js`.
 - **Later:** the Supabase tables in `supabase/001_felix_maze.sql` (`fmz_mazes`, `fmz_doodles`, `fmz_characters`), not applied yet.
 
+## Counter ranges
+
+- `001`–`7FF`: the published bank (`data/catalog.js`). Counters are never reused: a replaced puzzle is marked `retired: true` and its counter stays.
+- `800`–`FFF`: mazes baked on a device from Felix's doodles (source 1). They never collide with the bank.
+
 ## The first ten (a test set, mixed difficulty)
+
+Codes changed on 2026-10-28 (twice, before anything was printed): levels moved from 1–4 to 1–5, then were recalibrated so Jimmy's reference maze (the old 330-00A, 0.54 in cells) is level 2.
 
 | Code | Maze | Level | Style |
 |---|---|---|---|
 | 810-001 | Mouse and Cheese | 1 | Square grid, bold hand-drawn walls, crumbs to collect |
-| 340-002 | Starry Night | 4 | Square grid bent into swirls, cypress tree, stars |
-| 430-003 | Honeycomb | 3 | Hexagons |
-| 150-004 | Chartres Rings | 5 | Rings and spokes, double lines |
-| 330-005 | Dancing Figure | 3 | Maze inside a Keith Haring-style figure, hearts |
-| 520-006 | Subway Map | 2 | Lines and stations, with loops |
-| 240-007 | Hampton Court Hedges | 4 | Trapezoid hedge maze, goal in the middle |
-| 430-008 | Spider Web | 3 | Rings with straight threads |
-| 430-009 | Ant Tunnels | 3 | Tunnels in dotted earth, rooms at dead ends, crumbs |
-| 340-00A | Celtic Knot | 4 | Ribbons that cross over and under (bridges) |
+| 330-002 | Starry Night | 3 | Square grid bent into swirls, cypress tree, stars |
+| 420-003 | Honeycomb | 2 | Hexagons |
+| 140-004 | Chartres Rings | 4 | Rings and spokes, double lines |
+| 320-005 | Dancing Figure | 2 | Maze inside a Keith Haring-style figure, hearts |
+| 510-006 | Subway Map | 1 | Lines and stations, with loops |
+| 230-007 | Hampton Court Hedges | 3 | Trapezoid hedge maze, goal in the middle |
+| 420-008 | Spider Web | 2 | Rings with straight threads |
+| 420-009 | Ant Tunnels | 2 | Tunnels in dotted earth, rooms at dead ends, crumbs |
+| 320-00A | Celtic Knot | 2 | Ribbons that cross over and under (bridges) |
 
 ## Adding a maze
 

@@ -51,6 +51,8 @@ Computer's guess: does it have a story (start and goal), a special mechanic (bri
 
 The computer measures: right-path length, choices along it, total and longest wrong turns, loops. It turns those into an "effort" number and a guessed level, and the sheet's level must match the guess (`tools/check_sheets.js`). The target times are guesses until Felix tries them.
 
+**Calibration:** Jimmy judged the old 330-00A (0.54 in cells, effort about 2.2) to be a level 2. The level boundaries on effort are 1.35 / 2.65 / 3.75 / 4.9, so level 2 is the middle of the everyday range and level 2.5 is the middle of the whole bank. The bank is shaped as a bell curve around 2.5: about 20% level 1, 35% level 2, 28% level 3, 12% level 4 and 5% level 5.
+
 ## Felix's sweet spot
 
 On each sheet, ⚙️ has three faces: 😴 too easy, 😊 just right, 😣 too hard, and an optional minutes box. The last five faces set his **sweet spot**. "Just right" keeps that level, "too easy" points one up, "too hard" one down. The Library's **Just right for Felix** button shows mazes at that level, and Make a maze starts there. Mix in an easier one now and then, just for the fun of zooming through.

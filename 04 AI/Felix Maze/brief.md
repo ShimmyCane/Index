@@ -1,7 +1,7 @@
 # Felix Maze — AI Brief
 
 **Updated:** 2026-10-28
-**Status:** MVP, round 3 (checks, white space, difficulty 1–5, joy scores, treats, Felix's sweet spot). Not printed or tried with Felix yet. Open questions in `03 Projects/Felix Maze/convo/convo v0.2.md` and `v0.3.md`.
+**Status:** MVP, round 4 (flags + rework page + `fmz_flags` live, `fix_puzzles` skill, puzzle of the day, top five, duplex packs, pixel check, levels recalibrated around Jimmy's level-2 reference). Bank grows to 200 in four batches of 50. Not printed or tried with Felix yet. Open questions in `03 Projects/Felix Maze/convo/` v0.2–v0.4.
 
 ## Goal
 
@@ -16,6 +16,13 @@ Printed maze worksheets for Felix (US Letter landscape, black and white, "Felix 
 - `FMZ.sheet.lint(model)`: samples the answer curve and checks distance to every wall polyline as drawn (plus `spec.extraWalls`).
 - Bank: `data/catalog.js` recipes + device-saved recipes (`localStorage fmz.saved`). Recipe → same maze every time; `tools/check_sheets.js` fingerprints published mazes.
 - Supabase SQL `supabase/001_felix_maze.sql` (fmz_mazes with generated `code`, fmz_doodles, fmz_characters, registry rows). Not applied.
+
+## Round 4 notes
+
+- Flags: localStorage `fmz.flags` + Supabase `fmz_flags` (live; unique (n, created_at), upsert on that key; newest `updated_at` wins). Sign-in is the family account, reusing Adventure's session on the same origin.
+- `pack.html`: even number of pages, one puzzle per page; long-edge printers get the backs rotated 180° (`.rot180`), plus a 2-page test sheet.
+- Counters: 001–7FF bank, 800–FFF device doodles. `retired: true` hides a puzzle but keeps its counter.
+- `tools/verify_raster.js`: pixel overlap + shortcut check; bridge mazes get the ink check only; subway is skipped (the track is the path).
 
 ## Verified vs. unverified
 
