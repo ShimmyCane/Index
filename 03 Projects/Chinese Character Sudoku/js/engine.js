@@ -2,7 +2,8 @@
 // No DOM here, so it also runs under Node for tests (tools/test_engine.js).
 const Engine = (() => {
   // ---------- word index ----------
-  function buildIndex(words) {
+  // pool: extra characters (the whole 字库) that may show up as distractors even without a word.
+  function buildIndex(words, pool = []) {
     const W = new Set(), next = new Map();
     for (const w of words) {
       if (w.length !== 2 || w[0] === w[1] || W.has(w)) continue;
@@ -11,7 +12,7 @@ const Engine = (() => {
       next.get(w[0]).push(w[1]);
     }
     const chars = [...new Set([...W].join(''))];
-    return { W, next, chars, isWord: (a, b) => !!a && !!b && W.has(a + b) };
+    return { W, next, chars, pool: [...new Set([...chars, ...pool])], isWord: (a, b) => !!a && !!b && W.has(a + b) };
   }
 
   function makeRng(seed) {
@@ -221,7 +222,7 @@ const Engine = (() => {
 
   // Decoys: characters that make a word with one neighbour of a blank cell but don't fit the
   // whole puzzle (黑 fits 黑白, but 白马 next to it leaves no room). Topped up with lesson
-  // characters, then random ones.
+  // characters, then random ones from the whole 字库.
   function pickDecoys(idx, sol, given, n, count, rng, lessonChars) {
     const taken = new Set(sol), out = [];
     const add = ch => { if (ch && !taken.has(ch) && out.length < count) { taken.add(ch); out.push(ch); } };
@@ -242,7 +243,7 @@ const Engine = (() => {
     });
     shuffle(near, rng).sort((a, b) => b.w - a.w).forEach(d => add(d.x));
     shuffle([...lessonChars], rng).forEach(add);
-    shuffle([...idx.chars], rng).forEach(add);
+    shuffle([...idx.pool], rng).forEach(add);
     return out;
   }
 

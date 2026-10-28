@@ -1,7 +1,8 @@
 // 汉字数独 — UI: board, drag-and-drop bank, settings, sounds, celebration.
-const APP_VERSION = '0.1.0';
+const APP_VERSION = '0.2.0';
 const CHANGELOG = [
   ['0.1.0', '2026-10-27', '第一版：2×2 到 4×4；从字库拖字；简单（放对马上变绿）和挑战（最后检查）；拼音、繁体、加新词、撤销、答案、完成音乐。'],
+  ['0.2.0', '2026-10-28', '字库换成三张照片里的字（第3级新增60字、第4级240字、课本写字表100字，共266字）；词库只用这些字。'],
 ];
 
 const $ = id => document.getElementById(id);
@@ -11,8 +12,9 @@ const save = (k, v) => { try { localStorage.setItem(STORE + k, JSON.stringify(v)
 
 // Used only when assets/*.json can't load and nothing is cached (e.g. opened as a local file).
 const FALLBACK = {
-  lesson: ['喜欢', '主人', '国王', '公主', '过去', '还书', '叫声', '高兴', '快乐'],
-  phrases: '国王 王子 女王 王后 中国 国家 爸妈 白雪 雪花 白天 天花 大山 山上 上下 下山 天上 大小 小山 高山 山下 天下 一天 一路 路上 上来 下来 地上 地下 大地 天地 过去 来去 回去 出去 过来 出来 回来 上去 下去 快乐 高兴 声音 叫声 主人 人家 大人 家人 公主 公园 外公'.split(' '),
+  lesson: ['喜欢', '主人', '国王', '公主', '过去', '还书', '高兴', '快乐'],
+  phrases: '国王 王子 女王 王后 中国 国家 爸妈 白雪 雪花 白天 天花 大山 山上 上下 下山 天上 大小 小山 高山 山下 天下 一天 地上 地下 大地 天地 过去 来去 回去 出去 过来 出来 回来 上去 下去 快乐 高兴 主人 人家 大人 家人 公主 公园 学生 学校 老师 小鸟 大树 树上 上学 看见 好吃'.split(' '),
+  pool: '',
 };
 
 const DEFAULTS = { n: 2, easy: true, givensMany: true, decoysMany: true, pinyin: false, trad: false, sound: true, showErrors: false };
@@ -57,7 +59,7 @@ async function loadData() {
   let data = null;
   try {
     const [p, c] = await Promise.all([fetchJson('assets/phrases.json'), fetchJson('assets/characters.json')]);
-    data = { lesson: p.lesson, phrases: p.phrases, version: p.version, chars: c.chars || {}, words: c.words || {} };
+    data = { lesson: p.lesson, phrases: p.phrases, version: p.version, chars: c.chars || {}, words: c.words || {}, pool: Object.values(c.categories || {}).join('') };
     save('data', data);
   } catch (e) {
     data = load('data', null);
@@ -70,7 +72,7 @@ async function loadData() {
 
 function rebuildIndex() {
   const extra = load('extraWords', []), extraLesson = load('extraLesson', []);
-  S.idx = Engine.buildIndex([...S.data.phrases, ...S.data.lesson, ...extra]);
+  S.idx = Engine.buildIndex([...S.data.phrases, ...S.data.lesson, ...extra], [...(S.data.pool || '')]);
   S.lessonWords = new Set([...S.data.lesson, ...extraLesson].filter(w => S.idx.W.has(w)));
 }
 
@@ -141,7 +143,7 @@ function newPuzzle() {
 }
 
 function saveGame() {
-  save('game', { puzzle: S.puzzle, place: S.place, done: S.done, revealed: S.revealed, mode: S.settings.easy });
+  save('game', { v: S.data.version, puzzle: S.puzzle, place: S.place, done: S.done, revealed: S.revealed, mode: S.settings.easy });
 }
 
 function changePlace(fn) {
@@ -402,7 +404,7 @@ function renderSettings() {
   $('errorsPanel').hidden = !S.settings.showErrors;
   const extra = load('extraWords', []);
   $('extraInfo').textContent = extra.length ? `我加的词（${extra.length}）：${extra.join(' ')}` : '还没有加词。长期保存请加到 assets/phrases.json。';
-  $('dataInfo').innerHTML = `${S.idx.W.size} 个词 · ${S.idx.chars.length} 个字 · 版本 ${S.data.version || ''}<br>最近学的：${[...S.lessonWords].join(' ') || '（无）'}`;
+  $('dataInfo').innerHTML = `${S.idx.W.size} 个词 · ${S.idx.pool.length} 个字 · 版本 ${S.data.version || ''}<br>最近学的：${[...S.lessonWords].join(' ') || '（无）'}`;
   $('doneCount').textContent = load('stars', 0);
   $('version').textContent = 'v' + APP_VERSION;
   $('changelog').innerHTML = CHANGELOG.map(([v, d, t]) => `<li><b>v${v}</b> ${d}：${t}</li>`).join('');
@@ -461,7 +463,8 @@ async function start() {
   renderSettings();
   const g = load('game', null);
   const st = S.settings;
-  if (g && g.puzzle && g.puzzle.n === +st.n && g.mode === st.easy && !g.done) {
+  // A saved puzzle from an older word list may use characters that are no longer in the bank.
+  if (g && g.puzzle && g.v === S.data.version && g.puzzle.n === +st.n && g.mode === st.easy && !g.done) {
     Object.assign(S, { puzzle: g.puzzle, place: g.place, done: g.done, revealed: g.revealed });
     render();
   } else {

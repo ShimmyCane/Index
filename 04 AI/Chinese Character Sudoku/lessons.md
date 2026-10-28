@@ -9,3 +9,11 @@
 - **Pinyin and traditional forms depend on the word, not just the character** (还书 huán, 头发 頭髮, 面条 麵條). Store per-word overrides and look up the word a cell is part of.
 - **Pointer events, not HTML5 drag-and-drop,** for iPad dragging: a ghost tile follows the finger, `elementFromPoint` finds the drop cell, and a small movement threshold separates tap from drag.
 - Tools: `wordfreq`'s `top_n_list('zh', …)` works without jieba and is a good source of candidate words to curate; `pypinyin` and `opencc` (s2tw) give pinyin and Taiwan traditional forms.
+
+## 2026-10-28 — character bank from photos
+
+- **Cross-check hand transcription against totals printed on the page.** The photos print "60字", "100个字", "240字"; matching those counts, and noticing that the 60-character poster equals the first five rows of the 240 table, caught transcription errors without needing a second reader.
+- **Restricting the vocabulary to a given character set is cheap if generation is word-based.** Filtering 1,311 words down to 612 still generated every size and mode with plenty of variety; adding poster examples and kid words brought it to 976. Check generation before assuming a smaller list needs a smarter engine.
+- **Keep two sets: characters that appear in words, and the whole bank.** Generation needs the first; distractors can use the second so every character in the textbook gets practice even before it has a word.
+- **Saved game state needs the data version.** Changing the word list can leave a restored puzzle containing characters that are now out of scope; store the data version with the save and drop it on mismatch.
+- **A lesson word can sit outside the bank** (叫声: 声 is on none of the photos). Surface it as a question rather than silently widening or shrinking the bank.

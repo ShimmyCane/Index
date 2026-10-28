@@ -2,7 +2,15 @@
 // Generates puzzles at every size and confirms each solution passes the challenge rule.
 const Engine = require('../js/engine.js');
 const data = require('../assets/phrases.json');
-const idx = Engine.buildIndex(data.phrases);
+const chars = require('../assets/characters.json');
+const bankChars = new Set(Object.values(chars.categories).join(''));
+const idx = Engine.buildIndex(data.phrases, [...bankChars]);
+// Every word must be built from the bank, and every bank character needs a pinyin entry.
+const outside = data.phrases.filter(w => ![...w].every(c => bankChars.has(c)));
+if (outside.length) { console.log('WORDS OUTSIDE THE BANK', outside.join(' ')); process.exit(1); }
+const noPinyin = [...bankChars].filter(c => !chars.chars[c]);
+if (noPinyin.length) { console.log('NO PINYIN', noPinyin.join('')); process.exit(1); }
+console.log(`bank ${bankChars.size} characters, ${data.phrases.length} words`);
 const lesson = new Set(data.lesson);
 let fail = 0;
 for (const [n, givens, easy] of [[2, 2, false], [3, 4, true], [3, 4, false], [4, 7, true], [4, 7, false]]) {
@@ -17,6 +25,7 @@ for (const [n, givens, easy] of [[2, 2, false], [3, 4, true], [3, 4, false], [4,
     const ok = easy ? p.solution.every((_, i) => Engine.easyCellOk(idx, p.solution, n, i)) : Engine.checkHard(idx, p.solution, n).ok;
     if (!ok) { fail++; console.log('BAD', p.solution.join('')); }
     const blanks = p.given.filter(x => !x).length;
+    if (![...p.solution, ...p.bank].every(c => bankChars.has(c))) { fail++; console.log('OUTSIDE BANK', p.solution.join(''), p.bank.join('')); }
     if (p.bank.length !== blanks * 3 || new Set(p.bank).size !== p.bank.length) { fail++; console.log('BANK', p.bank.join('')); }
     if (Engine.wordsOnBoard(idx, p.solution, n).some(w => lesson.has(w))) lessonHits++;
     if (k === 0) console.log(' ', n + 'x' + n, p.solution.join('').match(new RegExp('.{' + n + '}', 'g')).join(' / '), '| bank', p.bank.join(''));
