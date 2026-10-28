@@ -14,10 +14,18 @@
   <div class="row noprint">
     <a class="btn" id="prev">◀</a>
     <a class="btn" id="next">▶</a>
+    <button class="btn" id="flag">🚩 Flag</button>
     <button class="btn go" id="print">🖨️ Print</button>
   </div>
 </header>
 <main class="wrap">
+  <section class="paper noprint" id="flagBox" hidden style="max-width:900px;margin:0 auto 14px">
+    <h2 class="step" style="margin-top:6px">🚩 Flag this puzzle for rework</h2>
+    <div class="row" id="reasons"></div>
+    <textarea class="field" id="flagNote" rows="2" placeholder="What's wrong? (optional, but it helps the fix)" style="width:100%;margin:10px 0"></textarea>
+    <div class="row"><button class="btn go" id="flagSave" type="button">🚩 Save flag</button><button class="btn" id="flagCancel" type="button">Cancel</button></div>
+  </section>
+  <p class="note noprint" id="flagged" hidden style="max-width:900px;margin:0 auto 14px"></p>
   <div class="paper print-sheet fit" id="sheet"></div>
   <p class="note noprint" id="missing" hidden>No maze with that number. <a href="library.html">Open the library</a>.</p>
 </main>
@@ -25,13 +33,26 @@
 <script src="js/art.js"></script>
 <script src="js/sheet.js"></script>
 <script src="js/doodle.js"></script>
+<script src="js/score.js"></script>
 <script src="data/catalog.js"></script>
+<script src="data/scores.js"></script>
+<script src="data/rework.js"></script>
+<script src="js/config.js"></script>
 <script src="js/common.js"></script>
 <script>
   (function () {
     const app = FMZ.app, S = FMZ.sheet;
-    app.init(`<h3>Answer key</h3><div id="key"><small>Making the picture…</small></div>
-      <p><a id="animLink" href="answer.html">🎬 Watch the answer</a></p>`);
+    app.init(`<h3>How did Felix do?</h3>
+      <div class="row" id="moods">
+        <button class="btn" data-mood="easy">😴 Too easy</button>
+        <button class="btn" data-mood="right">😊 Just right</button>
+        <button class="btn" data-mood="hard">😣 Too hard</button>
+      </div>
+      <label>Minutes <input class="field" id="mins" type="number" min="0" max="120" style="width:90px;min-height:44px"></label>
+      <p id="moodNote"><small></small></p>
+      <h3>Answer key</h3><div id="key"><small>Making the picture…</small></div>
+      <p><a id="animLink" href="answer.html">🎬 Watch the answer</a></p>
+      <h3>Scores</h3><div id="scores"></div>`);
     const all = app.bank();
     const rc = app.find(app.param("code") || "") || all[0];
     if (!rc) { document.getElementById("missing").hidden = false; return; }
@@ -44,10 +65,62 @@
     document.getElementById("next").href = app.sheetUrl(all[(i + 1) % all.length]);
     document.getElementById("animLink").href = "answer.html?code=" + encodeURIComponent(rc.code);
     document.getElementById("print").addEventListener("click", () => window.print());
+
+    // 🚩 flag: saved on this device and, when signed in, in the database. Flagged puzzles are never picked as
+    // the puzzle of the day, in the top five, or in a pack, until the fix_puzzles skill (or you) closes the flag.
+    const flagBox = document.getElementById("flagBox"), flagged = document.getElementById("flagged");
+    let reason = null;
+    const reasons = document.getElementById("reasons");
+    app.REASONS.forEach(([key, text]) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "tag"; b.textContent = text; b.dataset.key = key;
+      b.addEventListener("click", () => { reason = key; reasons.querySelectorAll(".tag").forEach(x => x.classList.toggle("on", x === b)); });
+      reasons.append(b);
+    });
+    const showFlag = () => {
+      const f = app.openFlags().find(x => x.n === rc.n);
+      document.getElementById("flag").classList.toggle("on", !!f);
+      document.getElementById("flag").textContent = f ? "🚩 Flagged" : "🚩 Flag";
+      flagged.hidden = !f;
+      if (f) {
+        const why = (app.REASONS.find(r => r[0] === f.reason) || [, f.reason])[1];
+        flagged.innerHTML = `🚩 Flagged: ${app.esc(why)}${f.note ? " · " + app.esc(f.note) : ""}. It won't be picked for the puzzle of the day, the top five or a pack until it's fixed. <button class="btn" id="unflag" type="button" style="min-height:40px">Unflag</button> <a href="rework.html">See all to rework</a>`;
+        document.getElementById("unflag").addEventListener("click", () => { app.resolveFlag(rc.n, "kept", "Unflagged from the sheet"); showFlag(); });
+      }
+    };
+    document.getElementById("flag").addEventListener("click", () => { if (!app.isFlagged(rc.n)) { flagBox.hidden = !flagBox.hidden; } else showFlag(); });
+    document.getElementById("flagCancel").addEventListener("click", () => { flagBox.hidden = true; });
+    document.getElementById("flagSave").addEventListener("click", () => {
+      if (!reason) { alert("Pick what's wrong first."); return; }
+      app.addFlag({ n: rc.n, code: rc.code, reason, note: document.getElementById("flagNote").value.trim() });
+      flagBox.hidden = true; showFlag();
+    });
+    app.onFlags = showFlag;
+    showFlag();
+    // Felix's reactions tune his sweet spot (see the library)
+    const moodNote = document.querySelector("#moodNote small");
+    const showSpot = () => { const sp = app.sweetSpot(); moodNote.textContent = sp.from ? "Sweet spot so far: level " + sp.level + " (from " + sp.from + " mazes)." : "Tap a face after he tries it."; };
+    document.getElementById("moods").addEventListener("click", e => {
+      const b = e.target.closest("[data-mood]"); if (!b) return;
+      const mins = +document.getElementById("mins").value || null;
+      app.addLog({ code: rc.code, level: rc.level, mood: b.dataset.mood, minutes: mins });
+      document.querySelectorAll("#moods .btn").forEach(x => x.classList.toggle("on", x === b));
+      showSpot();
+    });
+    showSpot();
+
     // the answer key shows only in ⚙️, small, as a JPEG; it never prints
     let made = false;
     app.onDrawer = () => {
       if (made) return; made = true;
+      try {
+        const sc = FMZ.score.score(out.model);
+        const dots = v => "●".repeat(Math.round(v)) + "○".repeat(5 - Math.round(v));
+        document.getElementById("scores").innerHTML = `
+          <p>${sc.lint.ok ? "✅ The answer stays clear of every wall." : "⚠️ The answer touches a wall here. Try another seed."}</p>
+          <p>👀 Looking ${dots(sc.looking)}<br>✏️ Doing ${dots(sc.doing)}<br>🎉 Solving ${dots(sc.solving)}</p>
+          <p><small>Level ${rc.level} on the sheet, the computer guesses ${sc.level}. Right path ${sc.L} squares, ${sc.choices} choices on the way, wrong turns ${sc.trapSum} squares (longest ${sc.trapMax}). See rubric.md.</small></p>`;
+      } catch (e) { app.logError("scores: " + e.message); }
       const key = S.svg(rc, { answer: true, model: out.model }).svg;
       app.toJpeg(key, 520).then(url => {
         document.getElementById("key").innerHTML = `<a href="${url}" download="felix-maze-${rc.code}-answer.jpg"><img src="${url}" alt="Answer key for maze ${rc.code}"></a>`;

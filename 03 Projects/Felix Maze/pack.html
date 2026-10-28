@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Felix Maze Print a Pack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+<style>
+  .sheets { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 18px; }
+  .pair { background: #fff; border: var(--line); border-radius: 18px 18px 18px 6px; box-shadow: var(--pop); padding: 10px; }
+  .pair h3 { font: 22px var(--hand); margin: 0 0 6px; }
+  .pair .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .side { position: relative; }
+  .side img, .side .ph { width: 100%; aspect-ratio: 11 / 8.5; object-fit: contain; border: 2px solid #eee4cc; border-radius: 8px; background: #fff; display: block; }
+  .side small { display: block; font-weight: 700; line-height: 1.2; margin-top: 3px; }
+  .side .swap { position: absolute; top: 4px; right: 4px; min-height: 36px; padding: 0 10px; font-size: 14px; }
+  .side .up { position: absolute; top: 4px; left: 4px; background: var(--sun); border: 2px solid var(--ink); border-radius: 8px; font-size: 12px; font-weight: 700; padding: 0 6px; }
+  .flip label { display: flex; align-items: center; gap: 8px; min-height: 48px; font-weight: 700; }
+  .flip input { width: 24px; height: 24px; accent-color: var(--coral-dark); }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1 class="title"><a href="index.html">Felix Maze</a> <small>Print a pack · 10 puzzles, double-sided</small></h1>
+</header>
+<main class="wrap">
+  <div class="noprint">
+    <div class="row">
+      <button class="btn go" id="print" type="button">🖨️ Print the pack</button>
+      <button class="btn" id="shuffle" type="button">🎲 New pack</button>
+      <button class="btn" id="test" type="button">🧪 Test sheet first</button>
+    </div>
+    <div class="row flip" style="margin-top:8px">
+      <b>Printer flips on the…</b>
+      <label><input type="radio" name="flip" value="short"> short edge <small>(like turning a page; right for most landscape prints)</small></label>
+      <label><input type="radio" name="flip" value="long"> long edge <small>(this turns the backs upside down for you)</small></label>
+    </div>
+    <p class="note" id="how"></p>
+    <p class="note" id="after" hidden>Did it print all right? <button class="btn mint" id="mark" type="button">✅ Yes, don't pick these again</button> <button class="btn" id="notYet" type="button">Not yet</button></p>
+    <div class="sheets" id="sheets"></div>
+  </div>
+
+  <div class="printOnly" id="packArea"></div>
+  <div class="printOnly" id="testArea"></div>
+</main>
+<script src="js/engine.js"></script>
+<script src="js/art.js"></script>
+<script src="js/sheet.js"></script>
+<script src="js/doodle.js"></script>
+<script src="js/score.js"></script>
+<script src="js/designs.js"></script>
+<script src="data/catalog.js"></script>
+<script src="data/scores.js"></script>
+<script src="data/rework.js"></script>
+<script src="js/config.js"></script>
+<script src="js/common.js"></script>
+<script>
+  /* A pack is 10 puzzles = 5 sheets of paper, printed on both sides. Page 1 is the front of sheet 1, page 2 its back,
+     and so on. The pages come out of the browser in that order, one puzzle per page, with no blank pages.
+     Landscape pages need the printer to flip on the SHORT edge to read upright (like turning a page). If your printer
+     flips on the long edge instead, choose that here: the backs are then turned upside down so they still read upright. */
+  (function () {
+    const app = FMZ.app, S = FMZ.sheet;
+    app.init(`<p><small>The pack skips puzzles you've already printed and any that are flagged. Levels cluster around Felix's sweet spot (level <span id="spotLvl"></span>).</small></p>
+      <button class="btn" id="forget" type="button">Forget what I've printed</button>`);
+    let pack = [], flip = app.store.get("fmz.flip", "short");
+    document.getElementById("spotLvl").textContent = app.sweetSpot().level;
+
+    const pages = () => {                       // the 10 (or an even number) puzzles, with a spare "your turn" back if odd
+      const list = pack.slice();
+      if (list.length % 2) list.push(null);
+      return list;
+    };
+    const blankBack = () => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 850" width="11in" height="8.5in">
+      <rect width="1100" height="850" fill="#fff"/>
+      <text x="550" y="120" text-anchor="middle" font-family="Patrick Hand, cursive" font-size="64">Your turn!</text>
+      <text x="550" y="175" text-anchor="middle" font-family="Patrick Hand, cursive" font-size="30" fill="#555">Draw your own maze in the box.</text>
+      <rect x="150" y="215" width="800" height="540" rx="24" fill="none" stroke="#222" stroke-width="6" stroke-dasharray="2 16" stroke-linecap="round"/>
+      <text x="550" y="806" text-anchor="middle" font-family="Patrick Hand, cursive" font-size="17" fill="#444">Felix Maze</text></svg>`;
+
+    function describe() {
+      const n = pack.length;
+      document.getElementById("how").innerHTML = n
+        ? `<b>${n} puzzles → ${Math.ceil(n / 2)} sheets.</b> Print dialog: <b>Letter</b>, <b>Landscape</b>, margins <b>None</b>, scale <b>100%</b>, and turn on <b>Two-sided</b> (Chrome: More settings → Two-sided; set <b>${flip === "short" ? "Flip on short edge" : "Flip on long edge"}</b>). Not sure which your printer needs? Print the 🧪 test sheet first.`
+        : "No puzzles are available to pack right now.";
+    }
+
+    function renderPreview() {
+      const box = document.getElementById("sheets"); box.innerHTML = "";
+      const list = pages();
+      for (let i = 0; i < list.length; i += 2) {
+        const div = document.createElement("div"); div.className = "pair";
+        div.innerHTML = `<h3>Sheet ${i / 2 + 1} <small style="font:600 14px var(--ui)">pages ${i + 1}–${i + 2}</small></h3><div class="two"></div>`;
+        [i, i + 1].forEach((k, j) => {
+          const r = list[k], side = document.createElement("div"); side.className = "side";
+          if (!r) { side.innerHTML = `<div class="ph" style="display:grid;place-items:center">✏️ your turn</div><small>Back: draw your own</small>`; }
+          else {
+            side.innerHTML = `<img alt=""><small>${j ? "Back" : "Front"} · #${app.esc(r.code)} · ${app.esc(r.title)}</small>
+              <button class="btn swap" type="button" title="Swap this puzzle for another">↻</button>
+              ${j && flip === "long" ? `<span class="up">prints upside down</span>` : ""}`;
+            app.lazyThumb(side.querySelector("img"), r, 360);
+            side.querySelector(".swap").addEventListener("click", () => swap(k));
+          }
+          div.querySelector(".two").append(side);
+        });
+        box.append(div);
+      }
+    }
+    function renderPrint() {
+      const area = document.getElementById("packArea"); area.innerHTML = "";
+      pages().forEach((r, k) => {
+        const d = document.createElement("div");
+        d.className = "print-sheet" + (k % 2 && flip === "long" ? " rot180" : "");
+        try { d.innerHTML = r ? S.svg(r).svg : blankBack(); } catch (e) { app.logError("page " + (k + 1) + ": " + e.message); }
+        area.append(d);
+      });
+    }
+    // Two pages that show which way is up, to learn how this printer flips before printing ten.
+    function renderTest() {
+      const arrow = (text, extra) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 850" width="11in" height="8.5in">
+        <rect width="1100" height="850" fill="#fff"/>
+        <path d="M550 70 L640 190 L590 190 L590 330 L510 330 L510 190 L460 190 Z" fill="#fff" stroke="#222" stroke-width="6" stroke-linejoin="round"/>
+        <text x="550" y="440" text-anchor="middle" font-family="Patrick Hand, cursive" font-size="120">${text}</text>
+        <text x="550" y="520" text-anchor="middle" font-family="Patrick Hand, cursive" font-size="40">The arrow points to the top of the page.</text>
+        <text x="550" y="620" text-anchor="middle" font-family="Patrick Hand, cursive" font-size="32" fill="#444">${extra}</text></svg>`;
+      const area = document.getElementById("testArea");
+      area.innerHTML = "";
+      [["FRONT", "Turn the sheet over like a page. The back should have its arrow at the top too."],
+       ["BACK", "If this arrow is at the bottom, choose the other “flip on” setting and test again."]].forEach(([t, x], k) => {
+        const d = document.createElement("div");
+        d.className = "print-sheet" + (k && flip === "long" ? " rot180" : "");
+        d.innerHTML = arrow(t, x); area.append(d);
+      });
+    }
+
+    function newPack() { pack = app.pickPack(10); refresh(); }
+    function swap(k) {
+      const have = new Set(pack.map(r => r.n)), cur = pack[k];
+      const choices = app.eligible().filter(r => !have.has(r.n) && !app.printed()[r.n]);
+      const near = choices.filter(r => Math.abs(r.level - cur.level) <= 1);
+      const pool = near.length ? near : choices;
+      if (!pool.length) return;
+      pack[k] = pool[Math.floor(Math.random() * pool.length)]; refresh();
+    }
+    function refresh() { describe(); renderPreview(); renderPrint(); renderTest(); }
+
+    document.querySelectorAll("input[name=flip]").forEach(i => {
+      i.checked = i.value === flip;
+      i.addEventListener("change", () => { flip = i.value; app.store.set("fmz.flip", flip); refresh(); });
+    });
+    const go = mode => {
+      document.body.dataset.print = mode;
+      window.print();
+    };
+    window.addEventListener("afterprint", () => { if (document.body.dataset.print === "pack") document.getElementById("after").hidden = false; document.body.dataset.print = ""; });
+    document.getElementById("print").addEventListener("click", () => go("pack"));
+    document.getElementById("test").addEventListener("click", () => go("test"));
+    document.getElementById("shuffle").addEventListener("click", newPack);
+    document.getElementById("mark").addEventListener("click", () => { app.markPrinted(pack.filter(Boolean)); document.getElementById("after").innerHTML = "Saved. The next pack will be different."; });
+    document.getElementById("notYet").addEventListener("click", () => { document.getElementById("after").hidden = true; });
+    document.getElementById("forget").addEventListener("click", () => { app.clearPrinted(); newPack(); });
+    app.onFlags = () => { pack = pack.filter(r => !app.isFlagged(r.n)); if (pack.length < 10) newPack(); else refresh(); };
+    newPack();
+  })();
+</script>
+</body>
+</html>

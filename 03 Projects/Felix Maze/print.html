@@ -17,21 +17,25 @@
   <button class="btn go noprint" id="print">🖨️ Print</button>
 </header>
 <main class="wrap">
-  <p class="note noprint">Letter paper, landscape, no margins (“None” or “Minimum”), scale 100%. One maze per page. Answers don't print.</p>
+  <p class="note noprint">Letter paper, landscape, no margins (“None” or “Minimum”), scale 100%. One maze per page. Answers don't print. For double-sided printing, use <a href="pack.html">Print a pack</a>: it pairs the pages and handles the flip.</p>
   <div class="stack" id="stack"></div>
 </main>
 <script src="js/engine.js"></script>
 <script src="js/art.js"></script>
 <script src="js/sheet.js"></script>
 <script src="js/doodle.js"></script>
+<script src="js/score.js"></script>
 <script src="data/catalog.js"></script>
+<script src="data/scores.js"></script>
+<script src="data/rework.js"></script>
+<script src="js/config.js"></script>
 <script src="js/common.js"></script>
 <script>
   (function () {
     const app = FMZ.app, S = FMZ.sheet;
     app.init();
     const codes = (app.param("codes") || "").split(",").filter(Boolean);
-    const list = codes.length ? codes.map(c => app.find(c)).filter(Boolean) : app.bank().filter(r => r.published);
+    const list = codes.length ? codes.map(c => app.find(c)).filter(Boolean) : app.eligible(); // flagged puzzles are left out
     document.getElementById("sub").textContent = list.length + " sheets";
     const stack = document.getElementById("stack");
     list.forEach(r => {

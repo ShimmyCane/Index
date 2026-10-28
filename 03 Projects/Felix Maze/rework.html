@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Felix Maze To Rework</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="top">
+  <h1 class="title"><a href="index.html">Felix Maze</a> <small>Puzzles to rework</small></h1>
+  <span class="chip" id="counts"></span>
+</header>
+<main class="wrap">
+  <p class="note">Flagged puzzles and puzzles the generator couldn't finish cleanly wait here. They never show up as the puzzle of the day, in the top five, or in a print pack. Run the <b>fix_puzzles</b> skill now and then: it looks at each one and either repairs it, finds a different answer, or replaces the puzzle.</p>
+  <div class="row noprint">
+    <button class="btn mint" id="copy" type="button">📋 Copy the list for fix_puzzles</button>
+    <button class="btn" id="download" type="button">⬇️ Download as a file</button>
+  </div>
+
+  <h2 class="step">🚩 Flagged by hand <span id="nFlag"></span></h2>
+  <div class="cards" id="flagged"></div>
+  <p class="note" id="noFlag" hidden>Nothing flagged. Use the 🚩 button on a sheet when something looks off.</p>
+
+  <h2 class="step">🔧 The generator couldn't finish these <span id="nAuto"></span></h2>
+  <div class="cards" id="auto"></div>
+  <p class="note" id="noAuto" hidden>Nothing waiting. Every puzzle in the bank passed the answer-line check.</p>
+
+  <h2 class="step">✅ Closed lately</h2>
+  <div class="cards" id="closed"></div>
+  <p class="note" id="noClosed" hidden>Nothing closed yet.</p>
+</main>
+<script src="js/engine.js"></script>
+<script src="js/art.js"></script>
+<script src="js/sheet.js"></script>
+<script src="js/doodle.js"></script>
+<script src="js/score.js"></script>
+<script src="js/designs.js"></script>
+<script src="data/catalog.js"></script>
+<script src="data/scores.js"></script>
+<script src="data/rework.js"></script>
+<script src="js/config.js"></script>
+<script src="js/common.js"></script>
+<script>
+  (function () {
+    const app = FMZ.app, S = FMZ.sheet;
+    app.init();
+    const day = s => (s || "").slice(0, 10);
+    const reasonText = key => (app.REASONS.find(r => r[0] === key) || [, key])[1];
+
+    function card(parts) {
+      const a = document.createElement("div");
+      a.className = "card";
+      a.innerHTML = `<img alt="">${parts.html}`;
+      return a;
+    }
+    function render() {
+      const all = app.bank();
+      const byN = new Map(all.map(r => [r.n, r]));
+      const open = app.openFlags();
+      const done = app.flags().filter(f => f.status !== "open").sort((a, b) => (b.resolved_at || "").localeCompare(a.resolved_at || "")).slice(0, 12);
+      const auto = root.FMZ_REWORK || [];
+
+      document.getElementById("counts").textContent = open.length + " flagged · " + auto.length + " unfinished";
+      document.getElementById("nFlag").textContent = open.length ? "(" + open.length + ")" : "";
+      document.getElementById("nAuto").textContent = auto.length ? "(" + auto.length + ")" : "";
+
+      // flagged by hand
+      const box = document.getElementById("flagged"); box.innerHTML = "";
+      document.getElementById("noFlag").hidden = open.length > 0;
+      open.forEach(f => {
+        const rc = byN.get(f.n);
+        const c = card({ html: `<b>${app.esc(rc ? rc.title : "#" + f.code)}</b>
+          <div class="meta"><span>#${app.esc(f.code)}</span><span class="t">${app.esc(reasonText(f.reason))}</span><span class="s">${f.synced ? "☁️ saved" : "💾 this device"}</span></div>
+          <small>${app.esc(f.note || "No note.")} · flagged ${app.esc(day(f.created_at))}</small>
+          <div class="row">
+            ${rc ? `<a class="btn" href="${app.sheetUrl(rc)}">Open</a>` : ""}
+            <button class="btn mint" data-a="fixed" type="button">✅ Fixed</button>
+            <button class="btn" data-a="kept" type="button">👍 It's fine</button>
+          </div>` });
+        c.addEventListener("click", e => { const b = e.target.closest("[data-a]"); if (b) { app.resolveFlag(f.n, b.dataset.a, b.dataset.a === "fixed" ? "Marked fixed by hand" : "Kept as it is"); render(); } });
+        box.append(c);
+        const img = c.querySelector("img");
+        if (rc) app.lazyThumb(img, rc); else img.remove();
+      });
+
+      // not finished by the generator
+      const abox = document.getElementById("auto"); abox.innerHTML = "";
+      document.getElementById("noAuto").hidden = auto.length > 0;
+      auto.forEach(w => {
+        const c = card({ html: `<b>${app.esc(w.title || w.design)}</b>
+          <div class="meta"><span>level ${app.esc(w.level)}</span><span class="t">${app.esc(w.design || "")}</span><span class="s">batch ${app.esc(w.batch || "?")}</span></div>
+          <small>${(w.reasons || []).map(app.esc).join("; ")} · ${app.esc(w.tries || "?")} seeds tried</small>` });
+        abox.append(c);
+        const img = c.querySelector("img");
+        try { app.lazyThumb(img, Object.assign({ code: "rw" + (w.id || w.title) , n: 0 }, w.recipe || {}, { code: "rw-" + (w.id || w.title) }), 480); } catch (e) { img.remove(); }
+      });
+
+      // closed
+      const cbox = document.getElementById("closed"); cbox.innerHTML = "";
+      document.getElementById("noClosed").hidden = done.length > 0;
+      done.forEach(f => {
+        const rc = byN.get(f.n);
+        const c = card({ html: `<b>${app.esc(rc ? rc.title : "#" + f.code)}</b>
+          <div class="meta"><span>#${app.esc(f.code)}</span><span class="t">${app.esc(f.status)}</span></div>
+          <small>${app.esc(f.resolution || "")} · ${app.esc(day(f.resolved_at))}</small>` });
+        cbox.append(c);
+        const img = c.querySelector("img");
+        if (rc) app.lazyThumb(img, rc); else img.remove();
+      });
+    }
+    const root = window;
+    app.onFlags = render;
+    render();
+
+    // the list the fix_puzzles skill works from
+    const list = () => JSON.stringify({
+      made: new Date().toISOString(),
+      flagged: app.openFlags().map(f => ({ n: f.n, code: f.code, reason: f.reason, note: f.note, since: f.created_at })),
+      unfinished: (root.FMZ_REWORK || []).map(w => ({ id: w.id, title: w.title, level: w.level, reasons: w.reasons, recipe: w.recipe }))
+    }, null, 2);
+    document.getElementById("copy").addEventListener("click", async e => {
+      try { await navigator.clipboard.writeText(list()); e.currentTarget.textContent = "✅ Copied"; }
+      catch (err) { app.logError("Could not copy: " + err.message); e.currentTarget.textContent = "Could not copy: use the download"; }
+    });
+    document.getElementById("download").addEventListener("click", () => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([list()], { type: "application/json" }));
+      a.download = "felix-maze-to-rework.json"; a.click();
+    });
+  })();
+</script>
+</body>
+</html>

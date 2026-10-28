@@ -143,14 +143,19 @@ a { color: var(--coral-dark); font-weight: 700; }
 }
 
 /* ---------- printing: only the sheets, one per Letter landscape page ---------- */
+.printOnly { display: none; }
 @page { size: letter landscape; margin: 0; }
 @media print {
-  body { background: #fff; }
+  html, body { margin: 0; padding: 0; background: #fff; }
+  .printOnly { display: block; }
+  body[data-print="pack"] #testArea, body[data-print="test"] #packArea { display: none !important; }
+  .rot180 svg { transform: rotate(180deg); }
   .noprint, .gear, .drawer, .errors, .top { display: none !important; }
   .wrap { padding: 0; max-width: none; }
   .print-sheet { width: 11in; height: 8.5in; page-break-after: always; break-after: page; overflow: hidden; }
   .print-sheet:last-child { page-break-after: auto; break-after: auto; }
   .print-sheet svg { width: 11in; height: 8.5in; display: block; }
+  .print-sheet { margin: 0; padding: 0; border: 0; }
   .paper { border: 0; box-shadow: none; padding: 0; border-radius: 0; }
   .fit { max-width: none; margin: 0; }
 }

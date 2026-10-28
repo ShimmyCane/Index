@@ -7,89 +7,133 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/app.css">
+<style>
+  .card.flag { border-color: var(--coral-dark); }
+  .card .meta span.f { background: #ffd9d3; }
+  .tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .tools select { min-height: 56px; font: 700 17px var(--ui); color: var(--ink); border: var(--line); border-radius: 16px; background: #fff; padding: 0 12px; box-shadow: var(--pop); }
+</style>
 </head>
 <body>
 <header class="top">
   <h1 class="title"><a href="index.html">Felix Maze</a> <small>Library</small></h1>
+  <button class="btn mint noprint" id="spot">😊 Just right for Felix</button>
   <a class="btn go noprint" id="printSome" href="print.html">🖨️ Print these</a>
 </header>
 <main class="wrap">
-  <input class="search" id="search" type="search" placeholder="Search names, places, painters, animals…" autocomplete="off">
+  <div class="tools">
+    <input class="search" id="search" type="search" placeholder="Search names, places, painters, animals…" autocomplete="off" style="flex:1 1 320px;width:auto">
+    <select id="sort" aria-label="Sort"><option value="n">Sort: number</option><option value="joy">Sort: joy score</option><option value="level">Sort: level</option><option value="new">Sort: newest first</option></select>
+  </div>
   <div class="filters" id="filters"></div>
   <div class="count" id="count"></div>
   <div class="cards" id="cards"></div>
+  <p style="margin-top:18px"><button class="btn" id="more" type="button" hidden>Show more</button></p>
 </main>
 <script src="js/engine.js"></script>
 <script src="js/art.js"></script>
 <script src="js/sheet.js"></script>
 <script src="js/doodle.js"></script>
+<script src="js/score.js"></script>
+<script src="js/designs.js"></script>
 <script src="data/catalog.js"></script>
+<script src="data/scores.js"></script>
+<script src="data/rework.js"></script>
+<script src="js/config.js"></script>
 <script src="js/common.js"></script>
 <script>
   /* Same idea as the Detail Library: search + tag buttons + a card grid with pictures.
-     Changes here: tags come in groups (time, theme, made by, things in it); within a group a card
-     needs any of the picked tags, across groups it needs all of them; pictures are drawn on the fly. */
+     Changes here: tags come in groups (level, theme, made by, things in it); within a group a card needs any of the
+     picked tags, across groups it needs all of them; pictures are drawn when a card scrolls into view. */
   (function () {
     const app = FMZ.app, S = FMZ.sheet;
-    app.init(`<label><input type="checkbox" id="mine"> Only mazes made on this device</label>`);
+    app.init(`<label><input type="checkbox" id="mine"> Only mazes made on this device</label>
+      <label><input type="checkbox" id="hideFlag"> Hide flagged puzzles</label>`);
     const all = app.bank();
     const groups = [
-      ["Time", r => [S.LEVELS[r.level] ? S.LEVELS[r.level].name : "?"]],
+      ["Level", r => [S.LEVELS[r.level] ? S.LEVELS[r.level].name : "?"]],
       ["Theme", r => [S.FAMILIES[r.family] || "Other"]],
       ["Made", r => [S.SOURCES[r.source || 0]]],
       ["In it", r => r.tags || []]
     ];
     const picked = groups.map(() => new Set());
-    let q = "", onlyMine = false;
+    let q = "", onlyMine = false, hideFlag = false, sortBy = "n", shown = 60;
+    const PAGE = 60;
 
     const box = document.getElementById("filters");
+    const groupEls = [];
     groups.forEach(([name, get], gi) => {
-      let values = [...new Set(all.flatMap(get))];
-      if (gi === 0) values = Object.values(S.LEVELS).map(l => l.name).filter(v => values.includes(v)); // shortest first
+      const counts = new Map();
+      all.forEach(r => get(r).forEach(v => counts.set(v, (counts.get(v) || 0) + 1)));
+      let values = [...counts.keys()];
+      if (gi === 0) values = Object.values(S.LEVELS).map(l => l.name).filter(v => counts.has(v)); // easiest first
+      else values.sort((a, b) => counts.get(b) - counts.get(a) || a.localeCompare(b));
       const div = document.createElement("div");
-      div.className = "group";
-      div.innerHTML = `<b>${name}</b>`;
-      values.forEach(v => {
+      div.className = "group"; div.innerHTML = `<b>${name}</b>`;
+      const LIMIT = gi === 3 ? 24 : 99;
+      values.forEach((v, k) => {
         const b = document.createElement("button");
-        b.className = "tag"; b.textContent = v;
-        b.addEventListener("click", () => { picked[gi].has(v) ? picked[gi].delete(v) : picked[gi].add(v); b.classList.toggle("on"); render(); });
+        b.className = "tag"; b.textContent = v + (gi >= 1 ? " " + counts.get(v) : ""); b.dataset.v = v;
+        if (k >= LIMIT) b.hidden = true;
+        b.addEventListener("click", () => { picked[gi].has(v) ? picked[gi].delete(v) : picked[gi].add(v); b.classList.toggle("on"); reset(); });
         div.append(b);
       });
-      box.append(div);
+      if (values.length > LIMIT) {
+        const more = document.createElement("button");
+        more.className = "tag"; more.textContent = "more…";
+        more.addEventListener("click", () => { div.querySelectorAll(".tag[hidden]").forEach(t => { t.hidden = false; }); more.remove(); });
+        div.append(more);
+      }
+      groupEls.push(div); box.append(div);
     });
-    document.getElementById("search").addEventListener("input", e => { q = e.target.value.trim().toLowerCase(); render(); });
-    document.getElementById("mine").addEventListener("change", e => { onlyMine = e.target.checked; render(); });
+    document.getElementById("search").addEventListener("input", e => { q = e.target.value.trim().toLowerCase(); reset(); });
+    document.getElementById("sort").addEventListener("change", e => { sortBy = e.target.value; reset(); });
+    document.getElementById("mine").addEventListener("change", e => { onlyMine = e.target.checked; reset(); });
+    document.getElementById("hideFlag").addEventListener("change", e => { hideFlag = e.target.checked; reset(); });
+    document.getElementById("more").addEventListener("click", () => { shown += PAGE; render(); });
 
-    const pics = new Map();
-    function picture(rc, img) {
-      if (pics.has(rc.code)) { img.src = pics.get(rc.code); return; }
-      try {
-        app.toJpeg(S.svg(rc).svg, 480).then(url => { pics.set(rc.code, url); img.src = url; }).catch(e => app.logError("picture " + rc.code + ": " + e.message));
-      } catch (e) { app.logError("picture " + rc.code + ": " + e.message); }
-    }
+    // his sweet spot, from the faces tapped on each sheet's ⚙️
+    const spot = app.sweetSpot();
+    document.getElementById("spot").textContent = "😊 Just right for Felix (level " + spot.level + ")";
+    document.getElementById("spot").addEventListener("click", e => {
+      const name = S.LEVELS[spot.level].name, on = !picked[0].has(name);
+      picked[0].clear(); if (on) picked[0].add(name);
+      groupEls[0].querySelectorAll(".tag").forEach(t => t.classList.toggle("on", picked[0].has(t.dataset.v)));
+      e.currentTarget.classList.toggle("on", on);
+      reset();
+    });
 
+    const reset = () => { shown = PAGE; render(); };
+    const joy = r => (r.score && r.score.overall) || 0;
     function render() {
-      const list = all.filter(r => {
+      let list = all.filter(r => {
         if (onlyMine && r.published) return false;
+        if (hideFlag && app.isFlagged(r.n)) return false;
         if (!groups.every(([, get], gi) => !picked[gi].size || get(r).some(v => picked[gi].has(v)))) return false;
         if (!q) return true;
-        const text = [r.code, r.title, r.inspired, r.fun, (r.tags || []).join(" ")].join(" ").toLowerCase();
-        return text.includes(q);
+        return [r.code, r.title, r.inspired, r.fun, (r.tags || []).join(" ")].join(" ").toLowerCase().includes(q);
       });
+      if (sortBy === "joy") list.sort((a, b) => joy(b) - joy(a) || a.n - b.n);
+      else if (sortBy === "level") list.sort((a, b) => a.level - b.level || a.n - b.n);
+      else if (sortBy === "new") list.sort((a, b) => b.n - a.n);
       document.getElementById("count").textContent = list.length + (list.length === 1 ? " maze" : " mazes");
-      document.getElementById("printSome").href = "print.html?codes=" + list.map(r => r.code).join(",");
+      document.getElementById("printSome").href = "print.html?codes=" + list.slice(0, 60).map(r => r.code).join(",");
       const cards = document.getElementById("cards");
       cards.innerHTML = "";
-      list.forEach(r => {
+      list.slice(0, shown).forEach(r => {
+        const flagged = app.isFlagged(r.n);
         const a = document.createElement("a");
-        a.className = "card"; a.href = app.sheetUrl(r);
+        a.className = "card" + (flagged ? " flag" : ""); a.href = app.sheetUrl(r);
         a.innerHTML = `<img alt="Maze ${app.esc(r.code)}"><b>${app.esc(r.title)}</b>
-          <div class="meta"><span>#${app.esc(r.code)}</span><span class="t">⏱ ${app.esc((S.LEVELS[r.level] || {}).name || "")}</span>${r.published ? "" : '<span class="s">✏️ this device</span>'}</div>
+          <div class="meta"><span>#${app.esc(r.code)}</span><span class="t">${"●".repeat(r.level)}${"○".repeat(5 - r.level)} ${app.esc((S.LEVELS[r.level] || {}).short || "")}</span>${joy(r) ? `<span>★ ${joy(r)}</span>` : ""}${flagged ? '<span class="f">🚩 to rework</span>' : ""}${r.published ? "" : '<span class="s">✏️ this device</span>'}</div>
           <small>${app.esc(r.inspired || "")}</small>`;
         cards.append(a);
-        picture(r, a.querySelector("img"));
+        app.lazyThumb(a.querySelector("img"), r);
       });
+      document.getElementById("more").hidden = list.length <= shown;
+      document.getElementById("more").textContent = "Show " + Math.min(PAGE, list.length - shown) + " more (" + (list.length - shown) + " left)";
     }
+    app.onFlags = render;
     render();
   })();
 </script>

@@ -15,15 +15,19 @@ The cast that walks through the mazes. Drawings live in `js/art.js` (one functio
 | Key | Name | Usually goes to | Used on |
 |---|---|---|---|
 | `mouse` | Mouse | `cheese` | #810-001 Mouse and Cheese |
-| `bee` | Bee | `flower` | #420-003 Honeycomb |
-| `spider` | Friendly spider (smiling, big eyes) | `star` (dewdrop) in the middle of its web | #420-008 Spider Web |
-| `ant` | Ant | `cookie` (crumb) in the deepest room | #420-009 Ant Tunnels |
-| `train` | Little train | `house` | #510-006 Subway Map |
-| `cat` | Felix the cat | `moon`, `heart`, `tree`, `yarn`, `rosette` | #330-002, #320-005, #230-007, #330-00A, #140-004 |
+| `bee` | Bee | `flower` | #430-003 Honeycomb |
+| `spider` | Friendly spider (smiling, big eyes) | `star` (dewdrop) in the middle of its web | #430-008 Spider Web |
+| `ant` | Ant | `cookie` (crumb) in the deepest room | #430-009 Ant Tunnels |
+| `train` | Little train | `house` | #520-006 Subway Map |
+| `cat` | Felix the cat | `moon`, `heart`, `tree`, `yarn`, `rosette` | #340-002, #330-005, #240-007, #340-00A, #150-004 |
 
 ## Props (goals)
 
 `cheese`, `flower`, `star`, `cookie`, `house`, `moon`, `heart`, `tree`, `yarn`, `rosette`.
+
+## Treats (collect along the way)
+
+`crumb` (mouse, ants), `star` (Starry Night), `drop` (honeycomb, spider, when the cells are big enough), `leaf` (hedges), `heart` (dancing figure). Three sit on the right path and two at the ends of wrong turns, so exploring pays off too. Only on paths roomy enough to hold them.
 
 ## Ideas, not drawn yet
 

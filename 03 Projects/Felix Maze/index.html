@@ -7,6 +7,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/app.css">
+<style>
+  .today { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  @media (max-width: 760px) { .today { grid-template-columns: 1fr; } }
+  .five { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+  .rank { position: absolute; top: 6px; left: 6px; width: 34px; height: 34px; border-radius: 50%; background: var(--sun); border: 2.5px solid var(--ink); display: grid; place-items: center; font: 20px var(--hand); }
+  .five .card { position: relative; }
+  .dots { letter-spacing: 2px; }
+</style>
 </head>
 <body>
 <header class="top">
@@ -15,34 +23,76 @@
 </header>
 <main class="wrap">
   <div class="tiles">
+    <a class="tile" href="pack.html" style="background:var(--coral)"><span class="big">🖨️</span><b>Print a pack</b><span>10 puzzles, double-sided, ready for the printer.</span></a>
     <a class="tile" href="library.html" style="background:var(--mint)"><span class="big">📚</span><b>Library</b><span>Every maze. Find one, print it.</span></a>
     <a class="tile" href="make.html" style="background:var(--peach)"><span class="big">✏️</span><b>Make a maze</b><span>Draw a few lines. Pick a sprout. Bake it.</span></a>
     <a class="tile" href="answer.html" style="background:var(--lavender)"><span class="big">🎬</span><b>Answers</b><span>Type a maze number, watch the way through.</span></a>
-    <a class="tile" href="print.html" style="background:var(--sky)"><span class="big">🖨️</span><b>Print all</b><span>Every published maze, one per page.</span></a>
   </div>
-  <h2 class="step">Newest</h2>
-  <a class="paper" id="newest" style="display:block;max-width:760px" href="library.html"></a>
+
+  <h2 class="step">⭐ Puzzle of the day</h2>
+  <div class="today">
+    <a class="paper" id="potd" href="library.html" style="display:block"></a>
+    <div>
+      <p class="note" id="potdInfo"></p>
+      <div class="row">
+        <a class="btn go" id="potdOpen" href="library.html">Open it</a>
+        <a class="btn" id="potdPrint" href="print.html">🖨️ Print just this one</a>
+      </div>
+      <p class="note">Picked fresh each day from puzzles that passed every check, near Felix's sweet spot. Flagged puzzles are never picked.</p>
+    </div>
+  </div>
+
+  <h2 class="step">🏆 Top five</h2>
+  <div class="five" id="five"></div>
+
+  <p style="margin-top:26px"><a class="btn" id="reworkLink" href="rework.html">🔧 To rework</a></p>
 </main>
 <script src="js/engine.js"></script>
 <script src="js/art.js"></script>
 <script src="js/sheet.js"></script>
 <script src="js/doodle.js"></script>
+<script src="js/score.js"></script>
+<script src="js/designs.js"></script>
 <script src="data/catalog.js"></script>
+<script src="data/scores.js"></script>
+<script src="data/rework.js"></script>
+<script src="js/config.js"></script>
 <script src="js/common.js"></script>
 <script>
   (function () {
-    const app = FMZ.app;
+    const app = FMZ.app, S = FMZ.sheet;
     app.init();
-    try {
-      const all = app.bank();
-      document.getElementById("count").textContent = all.length + " mazes";
-      const last = all[all.length - 1];
-      if (last) {
-        const a = document.getElementById("newest");
-        a.href = app.sheetUrl(last);
-        a.innerHTML = FMZ.sheet.svg(last, { fluid: true }).svg;
-      }
-    } catch (e) { app.logError("home: " + e.message); }
+    const dots = n => "●".repeat(n) + "○".repeat(5 - n);
+    function render() {
+      try {
+        const all = app.bank();
+        document.getElementById("count").textContent = all.length + " mazes";
+        const nOpen = app.openFlags().length + (window.FMZ_REWORK || []).length;
+        document.getElementById("reworkLink").textContent = "🔧 To rework" + (nOpen ? " (" + nOpen + ")" : "");
+
+        const p = app.potd();
+        const box = document.getElementById("potd");
+        if (p) {
+          box.href = app.sheetUrl(p);
+          box.innerHTML = S.svg(p, { fluid: true }).svg;
+          document.getElementById("potdOpen").href = app.sheetUrl(p);
+          document.getElementById("potdPrint").href = "print.html?codes=" + encodeURIComponent(p.code);
+          document.getElementById("potdInfo").innerHTML = `<b>#${app.esc(p.code)} · ${app.esc(p.title)}</b><br><span class="dots">${dots(p.level)}</span> ${app.esc((S.LEVELS[p.level] || {}).name || "")}<br><small>${app.esc(p.inspired || "")}</small>`;
+        } else { box.innerHTML = "<p style='padding:20px'>No puzzle is available right now.</p>"; }
+
+        const five = document.getElementById("five"); five.innerHTML = "";
+        app.topFive().forEach((r, i) => {
+          const a = document.createElement("a");
+          a.className = "card"; a.href = app.sheetUrl(r);
+          a.innerHTML = `<span class="rank">${i + 1}</span><img alt="Maze ${app.esc(r.code)}"><b>${app.esc(r.title)}</b>
+            <div class="meta"><span>#${app.esc(r.code)}</span><span class="t dots">${dots(r.level)}</span></div>`;
+          five.append(a);
+          app.lazyThumb(a.querySelector("img"), r, 400);
+        });
+      } catch (e) { app.logError("home: " + e.message); }
+    }
+    app.onFlags = render;
+    render();
   })();
 </script>
 </body>

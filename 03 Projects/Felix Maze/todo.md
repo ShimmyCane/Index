@@ -1,29 +1,55 @@
 # Felix Maze — To-do
 
+## Goals
+
+1. **A bank of 200 puzzles** with a bell curve of difficulty around level 2.5, a mix of every theme, and every one passing the checks. Built in four batches of 50.
+2. **Never an answer line on a wall.** Every puzzle passes the geometry check and the pixel check before it is published; the ones that don't go to rework, not into the bank.
+3. **Joy first.** White space, a story from start to goal, something to find on the way (`rubric.md`).
+4. **Print with confidence.** A pack of 10, double-sided, comes out the right way up.
+5. **Learn Felix's sweet spot.** Faces on each sheet; the level he enjoys sets the puzzle of the day and the packs.
+
+## Level plan for the 200 (mean ≈ 2.5)
+
+| Level | Share | Of 200 | Per batch of 50 |
+|---|---|---|---|
+| 1 | 20% | 40 | 10 |
+| 2 | 35% | 70 | 17–18 |
+| 3 | 28% | 56 | 14 |
+| 4 | 12% | 24 | 6 |
+| 5 | 5% | 10 | 2–3 |
+
 ## Done
 
-- [x] Inspirations: 100 maze types, tagged and sorted (`inspirations.md`)
-- [x] Research: what makes a good maze (`maze_research.md`) and the explainer page (`research/index.html`)
-- [x] Variations menu (`variations.md`)
-- [x] MVP: ten sheets, library, sheet view with answer key in ⚙️, answer animation, print all, doodle → spring → summer
-- [x] Numbering (`catalog.md`), characters (`characters.md`), quality check (`qc.md`)
-- [x] `tools/check_sheets.js` keeps published mazes from changing
+- [x] Inspirations (100), research, variations, rubric, qc, catalog numbering, characters
+- [x] MVP: ten sheets, library, sheet view, answers animation, print all, doodle → spring → summer
+- [x] Answer-line check (geometry) and pixel check (`verify_raster.js`); bridges draw over the answer where it goes under
+- [x] Levels 1–5, recalibrated on Jimmy's level-2 reference; computer level guess; joy scores
+- [x] 🚩 Flag, rework page, flags in the database (`fmz_flags` live), `fix_puzzles` skill
+- [x] ⭐ Puzzle of the day, 🏆 top five, 🖨️ pack of 10 with duplex handling and a test sheet
+
+## Batches (50 each, counters in hex but numbered in tens: 1–50 = 001–032)
+
+Each batch: generate → answer-line check first (failures to `data/rework.js`) → pixel check → level fit → joy rank → by-eye QC (`qc.md`) → scores → fingerprints → commit.
+
+- [ ] **Batch 1** — #001–#032 (the ten + 40 new)
+- [ ] **Batch 2** — #033–#064
+- [ ] **Batch 3** — #065–#096
+- [ ] **Batch 4** — #097–#0C8
+- [ ] After all four: rework list reviewed with `fix_puzzles`; level mix reported against the plan
 
 ## Now
 
-- [ ] Jimmy prints the ten on Letter landscape and tries them with Felix: path width, time per level, which styles he likes
-- [ ] Jimmy answers `convo/convo v0.2.md`
-- [ ] **Quality-control pass** (`qc.md`) on paper: sensitive shapes or risky images in walls, swirls and doodle overlays
-- [ ] Try Make a maze with Felix on the iPad (finger and Apple Pencil)
+- [ ] Jimmy prints a pack (try the 🧪 test sheet first) and tries a few with Felix: path width, time per level, which styles he likes
+- [ ] Jimmy answers `convo/convo v0.4.md`
+- [ ] **Quality-control pass on paper** (`qc.md`): sensitive shapes or risky images in walls, swirls and doodle overlays
 
 ## Next
 
-- [ ] Supabase: apply `supabase/001_felix_maze.sql` to the Family project (test in a rolled-back transaction first), then save baked mazes, doodles, answer paths and thumbnails there; keep this device + `data/catalog.js` as fallbacks
-- [ ] Publish flow: move a device-saved maze into the bank from the Library (today: copy its recipe into `data/catalog.js` by hand)
-- [ ] More styles from `inspirations.md`: Great Wave, goblin caves, record groove, Truchet tiles, Hilbert curve, Greek key, river delta, snail shell
-- [ ] Toward 200: a couple of mazes per theme, then grow the themes
+- [ ] Supabase: apply `001_felix_maze.sql` (mazes, doodles, characters) when baked doodle mazes should sync across devices; keep this device + `data/catalog.js` as fallbacks
+- [ ] Publish button in the library for doodle mazes (needs the database)
+- [ ] More styles from `inspirations.md` beyond the first 200
 - [ ] True organic mazes (curve growth, Pedersen–Singh) once the papers are read
-- [ ] Library improvements to carry back to the Detail Library (tag groups, any-within-group / all-across-groups, generated thumbnails)
+- [ ] Carry the library improvements back to the Detail Library (tag groups, any-within / all-across, lazy pictures)
 - [ ] Save copies of sources to `research/private/` (blocked: network policy denied the paper hosts)
 
 ## Back pocket (interactive, not now)
