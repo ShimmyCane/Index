@@ -26,3 +26,9 @@
 - Check the answer line first, then level, then joy, then pixels: 0.03% of tries touched a wall, so the wall check is cheap; level misses (~15%) and low joy (~30%) are where tries go.
 - Designs that can't reach a level (spirals/wave at 5, checker at 3) should have their `levels` range narrowed in `designs_data.js`; the matcher then gives that level to a design that can.
 - Long footer lines squeezed by `textLength` look bad past ~135 characters: wrap to two lines instead.
+
+## Batch 5 (50 new designs)
+- Check the whole page, not just the maze: start and finish pictures sit outside the maze, so tall shapes plus zoom pushed them into the title or footer. `tools/check_layout.js` now runs in the generator; zoom is capped by the shape's height (`zoomCap`).
+- Small silhouettes cap at level 3 (corridors can't go below the pencil floor); only wide pages (rings, rectangles, waves) reach 4–5. Plan quotas from what shapes can reach.
+- Variety came cheaply from shapes (a list of yes/no functions) plus a look (bold, hedge, dots): 36 new silhouettes in `js/shapes.js` preview well on a canvas before any maze is built.
+- Replacing a published maze: retire it, give the replacement a new counter (`generate.js --redo n,n,...`, `--level` to change it).

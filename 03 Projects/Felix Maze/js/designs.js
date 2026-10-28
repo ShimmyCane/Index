@@ -95,7 +95,7 @@
       const p = rc.p || {}, size = lv.size * (p.scale || 1), v = p.v || 0;
       return {
         box: { x: 230, y: 175, w: 640, h: 490 }, size, start: { side: "W", at: 0.75 }, finish: { side: "E", at: 0.3 }, chars: ["boat", "mountain"], charSize: 76, treat: p.treat || null,
-        look: { mode: "walls", wall: wallFor(size) * 0.9, wobble: 1, sine: { a: 30 + 6 * (v % 2), k: 0.013 + 0.002 * v, ph: v }, vortices: [{ x: 690 - 40 * (v % 2), y: 320, r: 120, s: -1.5 }] }
+        look: { mode: "walls", wall: wallFor(size) * (p.thin ? 0.55 : 0.9), wobble: 1, sine: { a: 30 + 6 * (v % 2), k: 0.013 + 0.002 * v, ph: v }, vortices: [{ x: 690 - 40 * (v % 2), y: 320, r: 120, s: -1.5 }] }
       };
     }
   });
@@ -169,6 +169,31 @@
         look: { mode: "subway", wall: 5, pad: 8, wobble: 0 } };
     },
     under: () => [[130, 120], [880, 640]].map(([x, y]) => `<rect x="${x}" y="${y}" width="70" height="50" rx="5" fill="#fff" stroke="${INK}" stroke-width="4"/>${[0, 1, 2, 3].map(k => `<path d="M${x + 12 + k * 16} ${y} v-12 M${x + 12 + k * 16} ${y + 50} v12" stroke="${INK}" stroke-width="3"/>`).join("")}`).join("")
+  });
+
+  // Paul Klee's patchwork: rooms washed with soft grey squares
+  const KLEE = ["#fff", "#ececec", "#dcdcdc", "#f6f6f6"];
+  reg("klee", "grid", {
+    spec: (rc, lv) => {
+      const p = rc.p || {}, size = lv.size * (p.scale || 1), seed = rc.seed || 1;
+      const shade = (i, j) => KLEE[(((Math.floor(i / 2) * 73856093) ^ (Math.floor(j / 2) * 19349663) ^ seed) >>> 0) % 4];
+      return { box: { x: 215, y: 165, w: 670, h: 510 }, size, start: { side: "W", at: 0.5 }, finish: { side: "E", at: 0.5 }, chars: ["cat", "star"], charSize: 76, treat: p.treat || null,
+        look: { mode: "walls", wall: wallFor(size), wobble: 1, bg: (uid, m) => m.g.cells.map(c => `<rect x="${f1(c.cx - m.g.s / 2)}" y="${f1(c.cy - m.g.s / 2)}" width="${f1(m.g.s + 0.5)}" height="${f1(m.g.s + 0.5)}" fill="${shade(c.i, c.j)}"/>`).join("") } };
+    }
+  });
+  // a carpet: the maze sits inside borders inside borders
+  reg("carpet", "grid", {
+    spec: (rc, lv) => {
+      const p = rc.p || {}, size = lv.size * (p.scale || 1);
+      return { box: { x: 270, y: 215, w: 560, h: 420 }, size, start: { side: "W", at: 0.5 }, finish: { side: "E", at: 0.5 }, chars: ["cat", "star"], charSize: 76, treat: p.treat || null,
+        look: { mode: "walls", wall: wallFor(size), wobble: 0.8 } };
+    },
+    under: () => {
+      let s = `<rect x="170" y="135" width="760" height="570" rx="6" fill="none" stroke="${INK}" stroke-width="5"/><rect x="186" y="151" width="728" height="538" rx="3" fill="none" stroke="${INK}" stroke-width="2.5"/>`;
+      for (let k = 0; k < 24; k++) s += `<circle cx="${f1(222 + k * 30.8)}" cy="173" r="5" fill="${INK}"/><circle cx="${f1(222 + k * 30.8)}" cy="667" r="5" fill="${INK}"/>`;
+      for (let k = 0; k < 15; k++) s += `<circle cx="208" cy="${f1(200 + k * 31)}" r="5" fill="${INK}"/><circle cx="892" cy="${f1(200 + k * 31)}" r="5" fill="${INK}"/>`;
+      return s + `<rect x="236" y="199" width="628" height="442" fill="none" stroke="${INK}" stroke-width="3"/>`;
+    }
   });
 
   root.FMZ.designsLoaded = true;

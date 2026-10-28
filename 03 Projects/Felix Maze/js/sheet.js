@@ -369,16 +369,20 @@
       const cell = model.g.cells[c], p = model.warp ? model.warp([cell.cx, cell.cy]) : [cell.cx, cell.cy];
       inner.push(`<g class="fmz-treat">${A.draw(sp.treat, p[0], p[1], Math.max(26, (model.g.s || sp.size || 60) * 0.42))}</g>`);
     }
+    let lift = 0;                                   // a start/finish picture below the maze must not touch the footer: slide the drawing up (never the title)
     if (art && sp.chars && model.sol !== undefined) {
       const sz = sp.charSize || 84;
       const inside = end => end.edge >= 0 ? sz : model.g.kind === "polar" && end.cell === 0 ? model.g.r0 * 1.5 : Math.min(sz, (model.g.s || sp.size || 60) * 0.9);
       const a = standAt(model, model.start), b = standAt(model, model.end);
       inner.push(`<g class="fmz-start">${A.draw(sp.chars[0], a[0], a[1], inside(model.start))}</g>`);
       inner.push(`<g class="fmz-finish">${A.draw(sp.chars[1], b[0], b[1], inside(model.end))}</g>`);
+      const kz = recipe.zoom || 1, low = Math.max(a[1], b[1]), bottom = ZC[1] + (low - ZC[1]) * kz + 0.52 * sz * kz;
+      lift = Math.max(0, Math.min(44, Math.ceil(bottom - 772)));
     }
     // zoom: a bigger maze on the page (the harder levels), drawn by scaling everything about the page's maze center
     const zr = recipe.zoom || 1;
-    parts.push(zr !== 1 ? `<g class="fmz-zoom" transform="translate(${ZC[0]} ${ZC[1]}) scale(${zr}) translate(${-ZC[0]} ${-ZC[1]})">${inner.join("")}</g>` : inner.join(""));
+    const drawing = zr !== 1 ? `<g class="fmz-zoom" transform="translate(${ZC[0]} ${ZC[1]}) scale(${zr}) translate(${-ZC[0]} ${-ZC[1]})">${inner.join("")}</g>` : inner.join("");
+    parts.push(lift ? `<g class="fmz-lift" transform="translate(0 ${-lift})">${drawing}</g>` : drawing);
     if (!opts.bare && art) {
       parts.push(`<text x="40" y="70" ${font} font-size="44" fill="${INK}">Felix Maze <tspan font-size="30">#${id}</tspan></text>`);
       const bits = [`Felix Maze #${id}`, recipe.title, recipe.inspired, recipe.fun].filter(Boolean);
