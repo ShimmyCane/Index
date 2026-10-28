@@ -45,17 +45,14 @@ def main():
             seen.add(w)
             clean.append(w)
     pdata['phrases'] = clean
-    for w in pdata['lesson']:
-        if w not in seen and HAN.match(w):
-            clean.append(w)
-            seen.add(w)
 
     # Every character used anywhere gets a pinyin + traditional entry.
     all_chars = ''.join(cdata['categories'].values()) + ''.join(clean)
     missing = sorted({c for w in clean for c in w} - set(''.join(cdata['categories'].values())))
     if missing:
         cdata['categories']['其他'] = cdata['categories'].get('其他', '') + ''.join(missing)
-    chars = cdata.get('chars', {})
+    # Keep earlier hand fixes, but drop characters that are no longer in the bank.
+    chars = {c: v for c, v in cdata.get('chars', {}).items() if c in set(all_chars)}
     for c in dict.fromkeys(all_chars):
         if c not in chars:
             chars[c] = [pinyin(c)[0][0], s2t.convert(c)]
@@ -78,11 +75,14 @@ def main():
 
     dump(cdata, CHARS)
     dump(pdata, PHRASES)
-    print(f'{len(chars)} characters, {len(words)} word readings, {len(clean)} phrases, {len(pdata["lesson"])} lesson words')
+    print(f'{len(chars)} characters, {len(words)} word readings, {len(clean)} phrases, {len(pdata.get("lessonChars", ""))} recent characters')
+    stray = [c for c in pdata.get('lessonChars', '') if c not in chars]
+    if stray:
+        print('lessonChars not in the bank:', ''.join(stray))
     if bad:
         print('Skipped (not two different Chinese characters):', ' '.join(bad))
     if missing:
-        print('Added to category 其他:', ''.join(missing))
+        print('Added to category 其他 (not in the three photos):', ''.join(missing))
 
 
 if __name__ == '__main__':

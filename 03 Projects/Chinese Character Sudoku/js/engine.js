@@ -2,7 +2,8 @@
 // No DOM here, so it also runs under Node for tests (tools/test_engine.js).
 const Engine = (() => {
   // ---------- word index ----------
-  function buildIndex(words) {
+  // pool: extra characters (the whole 字库) that may show up as distractors even without a word.
+  function buildIndex(words, pool = []) {
     const W = new Set(), next = new Map();
     for (const w of words) {
       if (w.length !== 2 || w[0] === w[1] || W.has(w)) continue;
@@ -11,7 +12,7 @@ const Engine = (() => {
       next.get(w[0]).push(w[1]);
     }
     const chars = [...new Set([...W].join(''))];
-    return { W, next, chars, isWord: (a, b) => !!a && !!b && W.has(a + b) };
+    return { W, next, chars, pool: [...new Set([...chars, ...pool])], isWord: (a, b) => !!a && !!b && W.has(a + b) };
   }
 
   function makeRng(seed) {
@@ -82,7 +83,8 @@ const Engine = (() => {
 
   // pre: Map(cell → character) placed before the search (used to plant a lesson word).
   // Easy puzzles only need rows to be words; each column is a word chain half the time.
-  function solveOnce(idx, n, rng, maxSteps, pre, easy) {
+  // prefer: Set of recent characters to try first (shuffled within each group), or null.
+  function solveOnce(idx, n, rng, maxSteps, pre, easy, prefer) {
     const H = Array.from({ length: n }, () => linePattern(n, rng)); // H[r][c]: cell c + c+1 in row r
     const V = Array.from({ length: n }, () => // V[c][r]: cell r + r+1 in column c
       easy && rng() < 0.5 ? Array(n - 1).fill(false) : linePattern(n, rng));
@@ -108,7 +110,9 @@ const Engine = (() => {
         g[i] = null;
         return false;
       }
-      for (const x of shuffle([...cand], rng)) {
+      const order = shuffle([...cand], rng);
+      if (prefer) order.sort((a, b) => prefer.has(b) - prefer.has(a));
+      for (const x of order) {
         if (used.has(x) || outDeg(x) < needOut) continue;
         // Look ahead to planted cells on the right and below.
         if (c < n - 1 && H[r][c] && pre.has(i + 1) && !idx.isWord(x, pre.get(i + 1))) continue;
@@ -123,21 +127,27 @@ const Engine = (() => {
     return fill(0) ? g : null;
   }
 
-  function findSolution(idx, n, rng, pre, easy) {
+  function findSolution(idx, n, rng, pre, easy, prefer) {
     // A planted word may not fit at all, so give it fewer restarts than a free search.
-    for (let t = 0, max = pre.size ? 12 : 60; t < max; t++) {
-      const g = solveOnce(idx, n, rng, 3000, pre, easy);
+    for (let t = 0, max = pre.size ? 4 : 30; t < max; t++) {
+      const g = solveOnce(idx, n, rng, pre.size ? 800 : 2000, pre, easy, prefer);
       if (g) return g;
     }
     return null;
   }
 
-  // Put one lesson word on the bottom row (across) or right column (down). Cells there need
-  // fewer partner words, so a lesson word fits far more often than in the top-left corner.
-  function plantLessonWord(idx, n, rng, lessonWords) {
-    const usable = [...lessonWords].filter(w => idx.W.has(w));
-    if (!usable.length) return new Map();
-    const w = usable[Math.floor(rng() * usable.length)];
+  // Put a word that uses recent characters on the bottom row (across) or right column (down).
+  // Cells there need fewer partner words, so it fits far more often than in the top-left corner.
+  // Half the time the word is made only of recent characters.
+  function plantLessonWord(idx, n, rng, lessonChars) {
+    const both = [], some = [];
+    for (const w of idx.W) {
+      const k = (lessonChars.has(w[0]) ? 1 : 0) + (lessonChars.has(w[1]) ? 1 : 0);
+      if (k === 2) both.push(w); else if (k === 1) some.push(w);
+    }
+    const pool = both.length && (rng() < 0.5 || !some.length) ? both : some;
+    if (!pool.length) return new Map();
+    const w = pool[Math.floor(rng() * pool.length)];
     const k = Math.floor(rng() * (n - 1));
     const a = rng() < 0.5 ? (n - 1) * n + k : k * n + (n - 1);
     return new Map([[a, w[0]], [a >= (n - 1) * n ? a + 1 : a + n, w[1]]]);
@@ -167,38 +177,39 @@ const Engine = (() => {
     return (idx.grids3 = out);
   }
 
-  // Score favours this week's lesson words and characters.
-  function score(idx, g, n, lessonWords, lessonChars) {
+  // Score favours boards made of recent characters (a word made only of them counts extra).
+  function score(idx, g, n, lessonChars) {
     let s = 0;
-    for (const w of wordsOnBoard(idx, g, n)) if (lessonWords.has(w)) s += 4;
-    for (const ch of g) if (lessonChars.has(ch)) s += 1;
+    for (const ch of g) if (lessonChars.has(ch)) s += 2;
+    for (const w of wordsOnBoard(idx, g, n)) if (lessonChars.has(w[0]) && lessonChars.has(w[1])) s += 1;
     return s;
   }
 
   // ---------- puzzle ----------
-  // opts: { n, easy, givens, bankMult, lessonWords:Set, avoid:Set (recent solutions), seed }
+  // opts: { n, easy, givens, bankMult, lessonChars:Set (recently learned characters), avoid:Set (recent solutions), seed }
   function generate(idx, opts) {
     const n = opts.n, rng = makeRng(opts.seed);
-    const lessonWords = opts.lessonWords || new Set();
-    const lessonChars = new Set([...lessonWords].join(''));
+    const lessonChars = opts.lessonChars || new Set();
     const avoid = opts.avoid || new Set();
     let best = null, bestScore = -1;
     const consider = g => {
       if (!g || avoid.has(g.join(''))) return;
-      const s = score(idx, g, n, lessonWords, lessonChars) + rng() * 2;
+      const s = score(idx, g, n, lessonChars) + rng() * 3;
       if (s > bestScore) { best = g; bestScore = s; }
     };
     if (n === 3 && !opts.easy) {
-      // Sample from the full list: 60 random grids, plus any that use a lesson word.
+      // Sample from the full list: the grids with the most recent characters, plus some random ones.
       const all = allGrids3(idx);
-      for (let k = 0; k < 60 && all.length; k++) consider([...all[Math.floor(rng() * all.length)]]);
-      if (rng() < 0.6) for (const s of all) if (wordsOnBoard(idx, [...s], 3).some(w => lessonWords.has(w))) consider([...s]);
+      const ranked = all.map(g => [[...g].filter(c => lessonChars.has(c)).length + rng() * 0.9, g]).sort((x, y) => y[0] - x[0]);
+      ranked.slice(0, 80).forEach(([, g]) => consider([...g]));
+      for (let k = 0; k < 20 && all.length; k++) consider([...all[Math.floor(rng() * all.length)]]);
     } else {
-      const tries = n === 2 ? 40 : n === 3 ? 20 : 6;
+      const tries = n === 2 ? 40 : n === 3 ? 20 : 8;
+      const prefer = lessonChars.size ? lessonChars : null;
       for (let k = 0; k < tries; k++) {
-        // Most attempts plant a lesson word; the rest search freely so there is always a fallback.
-        const pre = k % 3 === 2 ? new Map() : plantLessonWord(idx, n, rng, lessonWords);
-        consider(findSolution(idx, n, rng, pre, opts.easy));
+        // Most attempts plant a word with recent characters; the rest search freely so there is always a fallback.
+        const pre = k % 3 === 2 ? new Map() : plantLessonWord(idx, n, rng, lessonChars);
+        consider(findSolution(idx, n, rng, pre, opts.easy, prefer));
       }
     }
     if (!best) return null;
@@ -221,7 +232,7 @@ const Engine = (() => {
 
   // Decoys: characters that make a word with one neighbour of a blank cell but don't fit the
   // whole puzzle (黑 fits 黑白, but 白马 next to it leaves no room). Topped up with lesson
-  // characters, then random ones.
+  // characters, then random ones from the whole 字库.
   function pickDecoys(idx, sol, given, n, count, rng, lessonChars) {
     const taken = new Set(sol), out = [];
     const add = ch => { if (ch && !taken.has(ch) && out.length < count) { taken.add(ch); out.push(ch); } };
@@ -242,7 +253,7 @@ const Engine = (() => {
     });
     shuffle(near, rng).sort((a, b) => b.w - a.w).forEach(d => add(d.x));
     shuffle([...lessonChars], rng).forEach(add);
-    shuffle([...idx.chars], rng).forEach(add);
+    shuffle([...idx.pool], rng).forEach(add);
     return out;
   }
 
