@@ -20,3 +20,9 @@
 18. **A child's judgement is the calibration.** One "that's a level 2" from Jimmy moved every level boundary. Keep the scale anchored to a named reference maze. _(round 4)_
 19. **Keep device-made and published counters apart** (800–FFF vs 001–7FF) so a later batch never collides with something saved on a device. _(round 4)_
 20. **Offline isn't an error.** A page that can't reach the database should say "this device only", not add an error to the panel on every load. _(round 4)_
+
+## Generation round (batches 1–4)
+- Every tool that builds mazes must load the same files list (`shapes.js`, `designs.js`); `check_sheets.js` silently rebuilt new styles as the wrong style until it loaded them. Keep one list (`tools/lib.js load`).
+- Check the answer line first, then level, then joy, then pixels: 0.03% of tries touched a wall, so the wall check is cheap; level misses (~15%) and low joy (~30%) are where tries go.
+- Designs that can't reach a level (spirals/wave at 5, checker at 3) should have their `levels` range narrowed in `designs_data.js`; the matcher then gives that level to a design that can.
+- Long footer lines squeezed by `textLength` look bad past ~135 characters: wrap to two lines instead.

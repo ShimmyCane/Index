@@ -11,7 +11,7 @@ const root = path.join(__dirname, "..");
 const ctx = { console, Math };
 ctx.window = ctx; ctx.globalThis = ctx;
 vm.createContext(ctx);
-for (const f of ["js/engine.js", "js/art.js", "js/sheet.js", "js/doodle.js", "js/score.js", "data/catalog.js"]) vm.runInContext(fs.readFileSync(path.join(root, f), "utf8"), ctx, { filename: f });
+for (const f of ["js/engine.js", "js/art.js", "js/sheet.js", "js/doodle.js", "js/score.js", "js/shapes.js", "js/designs.js", "data/catalog.js"]) vm.runInContext(fs.readFileSync(path.join(root, f), "utf8"), ctx, { filename: f });
 const S = ctx.FMZ.sheet, E = ctx.FMZ.engine;
 
 // Build what the browser needs for one recipe (strings and numbers only).
@@ -21,7 +21,8 @@ function job(rc) {
   if (!sol) return { code: S.code(rc), error: "no way through" };
   const bare = S.svg(rc, { model, verify: true, bare: true }).svg;
   const ans = S.svg(rc, { model, verify: true, bare: true, answer: true }).svg;
-  const w = model.warp || (p => p);
+  const z = rc.zoom || 1, w0 = model.warp || (p => p);
+  const w = p => { const q = w0(p); return z === 1 ? q : [550 + (q[0] - 550) * z, 420 + (q[1] - 420) * z]; };
   const c0 = model.g.cells[sol.cells[0]], c1 = model.g.cells[sol.cells[sol.cells.length - 1]];
   const doors = [];
   for (const end of [model.start, model.end]) {
@@ -35,7 +36,7 @@ function job(rc) {
     doors.push(line);
   }
   const look = model.spec.look, cell = model.g.kind === "polar" ? model.g.dr : model.g.kind === "hex" ? model.g.s * 1.7 : model.g.s;
-  return { code: S.code(rc), bare, ans, start: w([c0.cx, c0.cy]), end: w([c1.cx, c1.cy]), doors, zone: Math.max(10, cell * 0.42), skip: look.mode === "subway", bridged: model.bridges.length > 0 };
+  return { code: S.code(rc), bare, ans, start: w([c0.cx, c0.cy]), end: w([c1.cx, c1.cy]), doors, zone: Math.max(10, cell * 0.42 * z), skip: look.mode === "subway", bridged: model.bridges.length > 0 };
 }
 
 // Runs in the page: draw both SVGs, compare.
@@ -100,7 +101,20 @@ async function inPage(j) {
   return { overlap, redCount, any: Math.round(any), along: Math.round(along) };
 }
 
-(async () => {
+// Turn the page's measurements into a list of problems (empty = fine).
+function verdict(j, r) {
+  const problems = [];
+  if (j.skip) return problems;
+  if (r.overlap > 8) problems.push("answer on ink (" + r.overlap + " px)");
+  if (r.bridged) return problems;
+  if (r.any === -2) problems.push("answer not found in the picture");
+  else if (r.any < 0) problems.push("no white route start to finish");
+  else if (r.along < 0) problems.push("red route is not a white corridor");
+  else if (r.any < r.along * 0.94) problems.push("shortcut in the picture (" + r.any + " vs " + r.along + ")");
+  return problems;
+}
+
+if (require.main === module) (async () => {
   const want = process.argv.slice(2).map(s => S.parseCode(s)).filter(Boolean).map(p => p.n);
   const list = ctx.FMZ_CATALOG.filter(r => !r.retired && (!want.length || want.includes(r.n)));
   const { chromium } = require("playwright");
@@ -128,3 +142,5 @@ async function inPage(j) {
   await browser.close();
   if (bad) { console.log(bad + " problem(s)"); process.exit(1); }
 })();
+
+module.exports = { job, inPage, verdict };

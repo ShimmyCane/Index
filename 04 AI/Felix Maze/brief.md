@@ -37,3 +37,7 @@ Printed maze worksheets for Felix (US Letter landscape, black and white, "Felix 
 2. QC pass on paper (`qc.md`).
 3. Supabase via `/supabase-project` if Jimmy says yes.
 4. Next styles toward 200.
+
+
+## Status after generation round
+- Bank: 192 puzzles (batches 1–4, `tools/generate.js --batch N`), levels 40/70/55/21/6, mean 2.39. 8 designs in `data/rework.js` for `/fix-puzzles`. Report: `tools/generation_report.md`.

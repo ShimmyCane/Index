@@ -2,7 +2,7 @@
 // Run after any change to the catalog or the engine.   node tools/score_catalog.js
 "use strict";
 const { load, writeData } = require("./lib");
-const ctx = load(["js/engine.js", "js/art.js", "js/sheet.js", "js/doodle.js", "js/score.js", "js/designs.js", "data/catalog.js"]);
+const ctx = load(["js/engine.js", "js/art.js", "js/sheet.js", "js/doodle.js", "js/score.js", "js/shapes.js", "js/designs.js", "data/catalog.js"]);
 const S = ctx.FMZ.sheet, Q = ctx.FMZ.score;
 const out = {};
 for (const rc of ctx.FMZ_CATALOG.filter(r => !r.retired)) {

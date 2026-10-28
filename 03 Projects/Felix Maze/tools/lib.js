@@ -3,7 +3,7 @@
 const fs = require("fs"), path = require("path"), vm = require("vm");
 const root = path.join(__dirname, "..");
 
-function load(files = ["js/engine.js", "js/art.js", "js/sheet.js", "js/doodle.js", "js/score.js", "js/designs.js", "data/catalog.js", "data/scores.js", "data/rework.js"]) {
+function load(files = ["js/engine.js", "js/art.js", "js/sheet.js", "js/doodle.js", "js/score.js", "js/shapes.js", "js/designs.js", "data/catalog.js", "data/scores.js", "data/rework.js"]) {
   const ctx = { console, Math };
   ctx.window = ctx; ctx.globalThis = ctx;
   vm.createContext(ctx);
