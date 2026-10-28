@@ -1,43 +1,57 @@
 # Shimmy Specs — To-do
 
-**Purpose of this list:** get to an MVP that proves the core loop on one sample project and one section:
-**project → recommended sections (with reasons) → section schematic (questions) → decisions (with alternatives) → three-part draft → impacts on other sections.**
+**Purpose of this list:** reach an MVP of the **framework**: any section template runs end to end (import → survey → sections → section workspace → flags/decisions → PPD, outline, full section). Then write real templates together, one at a time, publish and check them online.
+
+- MVP design: `mvp schematic.md`
+- Build steps for a Haiku session: `mvp tasks.md`
 
 Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Jimmy
 
-## Now (background, before coding)
+## Now
 - [x] Set up the project folders, `CLAUDE.md`, `schematic.md`, `convo/convo v0.1.md`.
-- [x] Draft the body of knowledge: `knowledge/` Specs 101, 201, 301, 401, 501 and `base sections.md`.
-- [?] Jimmy answers `convo/convo v0.1.md`.
-- [ ] Check the "verify" marks in `knowledge/` against current CSI publications (SectionFormat and PageFormat article lists, MasterFormat edition, UniFormat edition). Jimmy has the books; Claude can't read them from here.
-- [ ] Pick the first sample project (synthetic; see convo Q on sample project).
-- [ ] Pick the first one to three sections to build deeply (suggestion: `04 01 20 Maintenance of Unit Masonry`, `07 92 00 Joint Sealants`, `01 35 16 Alteration Project Procedures`).
+- [x] Draft the body of knowledge: `knowledge/` and `base sections.md`.
+- [x] Jimmy answered convo v0.1 (recorded in `convo/convo v0.2.md`).
+- [x] Write `mvp schematic.md` and `mvp tasks.md`.
+- [?] Jimmy answers the five open questions at the end of `convo/convo v0.2.md` (roofing system, ladder scope, doors/hardware split, import file name, users).
+- [ ] Haiku session builds the MVP from `mvp tasks.md` (phases 0–5).
+- [ ] Publish on GitHub Pages and check online.
 
-## MVP
-- [ ] **Data model** in plain JSON: project, drivers, sections, questions, decisions, options, impacts (see `schematic.md` → Data model).
-- [ ] **Project intake page**: summary, code analysis (occupancy, construction type, sprinklers, ratings, energy code), scope type (new / repair / alteration / historic), keynote list paste.
-- [ ] **Keynote import**: paste or CSV of `number, text` → linked to sections.
-- [ ] **Section recommender**: rules from drivers to sections, each with a "why" and a confidence (required / likely / consider / unlikely), and the option to add or reject with a note.
-- [ ] **Section schematic** for the first section: its question set (Part 1/2/3), each answer an option with a hover explanation.
-- [ ] **Decision log**: every choice records chosen option, alternatives, reason, source, and who decided. Hidden notes travel with the draft.
-- [ ] **Three-part draft view**: SectionFormat/PageFormat numbering, plain-text editor with headings, editor's notes hidden or shown.
-- [ ] **Impacts panel (right side)**: what this decision means for other sections, including ones not yet in the book.
-- [ ] **Save**: localStorage + export/import JSON file (no server).
-- [ ] **Show errors** toggle in ⚙️, errors at the bottom.
+## First sections (in order, written together, each a `knowledge/5xx` chapter + `data/sections/<number>.json`)
+1. [ ] **Roofing** (501) — system to be picked (convo v0.2 open Q1); e.g. `07 54 23 TPO Roofing` or `07 52 00 Modified Bituminous`, plus `07 01 50 Preparation for Re-Roofing` if re-roof.
+2. [ ] **Firestopping** (502) — `07 84 00`.
+3. [ ] **Joint sealants** (503) — `07 92 00`.
+4. [ ] **Exterior painting** (504) — `09 91 13`.
+5. [ ] **CMU wall** (505) — `04 22 00` (with `04 05 13` / `04 05 16` / `04 05 19` folded in or split).
+6. [ ] **Ladder fall protection** (506) — `05 51 33 Metal Ladders` and/or a Division 11 fall-protection section **(verify number)**; scope in convo v0.2 open Q2.
+7. [ ] **Doors and hardware** (507) — `08 11 13` + `08 71 00` (or one section; convo v0.2 open Q3).
 
-## Later
-- [ ] Guidance tiers: *See everything* (now) → *Guided* → *Expert* (shows only open questions and conflicts).
-- [ ] More section schematics, one at a time, each reviewed by Jimmy.
-- [ ] Coordination checks: section referenced but not in the book; requirement stated twice; drawing keynote without a section; section with no keynote.
-- [ ] Outline spec / PPD output per phase (SD, DD, CD).
-- [ ] Import from a drawing set (sheet index, keynote legend, code analysis sheet) — method to be chosen (see convo).
-- [ ] Optional AI drafting help (needs a decision on keys and where it runs).
-- [ ] Optional Supabase sync if work must move between devices (`/supabase-project`).
+For each: schematic of questions → bracket options with explanations and perspectives (master guide / manufacturer / performance / contractor) → impacts → draft → publish → review online → lessons.
+
+## Learning (Jimmy)
+- [ ] Contracts and relationships: owner–contractor–architect under AIA families (A101/A201, A102, A104, A105, A141, CM variants), and how Division 00/01 and the General Conditions divide the work. Becomes `knowledge/301`.
+- [ ] CCS study: optional practice questions per chapter, later.
+
+## AI later (not in the MVP; everything that needs or would benefit from AI)
+- [ ] Read a free-text project dump and propose drivers (beyond keyword rules).
+- [ ] Suggest options and reasons for a bracket choice from project context ("we think it's this because X, Y, Z").
+- [ ] Draft or tighten paragraph text in our own words; check against writing rules (imperative, streamlined, no "and/or").
+- [ ] Compare perspectives: summarize what a manufacturer guide spec pushes vs. a performance approach.
+- [ ] Coordination review across the whole book (conflicts, repetition, missing sections).
+- [ ] Turn conversation lessons into section-library lessons (no project details).
+- [ ] Read drawing sets / keynote sheets / code-analysis sheets (PDF).
+- Needs a decision: where the AI runs (Claude Code session vs. a key in ⚙️ vs. a Supabase edge function).
+
+## Later (non-AI)
+- [ ] Guidance tiers: *See everything* → *Guided* → *Expert*.
+- [ ] Coordination checks: section referenced but not in the book; requirement stated twice; keynote without a section; section without a keynote.
+- [ ] Import the project file from the other repo once it exists (replace the placeholder schema).
+- [ ] Supabase (Architecture project): apply `supabase/001_shimmy_specs.sql` via `/supabase-project` (needs Jimmy's OK).
 - [ ] Export to `.docx` with an office template.
+- [ ] Move to its own repo when grown (Jimmy, by hand).
 
 ## To research (Jimmy)
-- CSI *Construction Specifications Practice Guide* (CSPG) and *Project Delivery Practice Guide* (PDPG): the CDT/CCS bodies of knowledge.
-- CSI *MasterFormat*, *UniFormat*, *SectionFormat/PageFormat* (current editions).
-- Commercial master guides to compare how they teach: AIA MasterSpec (Deltek), SpecText, BSD SpecLink (Deltek), and their evaluation / editor's notes.
-- Institutional guide specs you use (e.g. a university or agency design standard) and how they layer on top of a master.
+- CSI *Construction Specifications Practice Guide* (CSPG) and *Project Delivery Practice Guide* (PDPG).
+- CSI *MasterFormat*, *UniFormat*, *SectionFormat/PageFormat* (latest editions).
+- How master guides teach: MasterSpec evaluations and editor's notes; manufacturer guide specs; performance specs.
+- AIA contract families and what each changes for the spec.
 - Secretary of the Interior's Standards and NPS Preservation Briefs (repair and historic work).

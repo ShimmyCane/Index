@@ -18,6 +18,9 @@ Companion files: `patterns.md` (reusable patterns and template candidates), `Per
 8. **Don't merge a draft silently.** Mark drafts as drafts until the owner confirms the merge. _(Speech Therapy)_
 9. **Finish line for seeds.** Give each project one status: idea → MVP → device-tested → in use → spun out or retired. Without this, open loops pile up. _(Planning reviews)_
 10. **Keep the seed small.** Projects leave the nursery when mature. Don't grow a seed into a second product here.
+11. **Ask "What should never happen in this tool?"** in every first convo round. It surfaces privacy and IP limits early. _(Shimmy Specs)_
+12. **Lessons from past work, never the past work.** When Jimmy draws on an old or office project, commit only the general lesson. Nothing that identifies the project goes in text, scripts, GitHub or a database. Sketch/test projects and Jimmy's own projects are the exception. _(Shimmy Specs)_
+13. **Hand-off lists for a smaller model.** When a cheaper model will build from a plan, split it into a design file plus an ordered task list with a check per task, rules up front, a "don't invent content" line, and a place to park questions. _(Shimmy Specs)_
 
 ## 2. Designing for kids on iPad
 

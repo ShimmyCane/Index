@@ -1,6 +1,6 @@
 # Shimmy Specs — Schematic
 
-**Status:** idea (background set, no code yet)
+**Status:** idea → MVP planned. See `mvp schematic.md` (it supersedes this file where they differ: desktop-first professional look, static MVP, Architecture Supabase, bracket options, flag levels).
 **Started:** 2026-10-28 with `/start-project`
 
 ## 1. Intent
@@ -131,7 +131,7 @@ Every file is written in our own words. Points still to check against a current 
 
 ## 9. Open questions
 
-See `convo/convo v0.1.md`.
+Answered in `convo/convo v0.2.md`; five still open at its end.
 
 ## 10. Out of scope for the MVP
 
