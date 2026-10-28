@@ -189,7 +189,7 @@ Numbering is computed after conditions are applied, so hidden paragraphs never l
 
 ## 8. Supabase (phase 2, Architecture project)
 
-- Project: **Architecture** (`xabgankckrcuhcgdolrg`). It registers tables in `public.table_index (table_name, project, purpose)`. Prefix tables `ss_`, register them with project `Shimmy Specs` in the same migration, RLS on, signed-in users only.
+- Project: **Architecture** (`<project-ref>`). It registers tables in `public.table_index (table_name, project, purpose)`. Prefix tables `ss_`, register them with project `Shimmy Specs` in the same migration, RLS on, signed-in users only.
 - Tables (draft): `ss_templates` (section templates JSON, versioned), `ss_lessons` (lessons tied to a section/question), `ss_projects` (sketch/own projects only; `kind` check constraint rejects anything else).
 - Office project data never goes to Supabase. Exports stay on Jimmy's machine.
 - Write the SQL in `supabase/001_shimmy_specs.sql`; apply only through `/supabase-project` with Jimmy's OK.

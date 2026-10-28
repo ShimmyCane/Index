@@ -1,4 +1,4 @@
--- Shimmy Specs — Architecture Supabase project (xabgankckrcuhcgdolrg).
+-- Shimmy Specs — Architecture Supabase project (<project-ref>).
 -- WRITTEN, NOT APPLIED. Apply only through /supabase-project, after Jimmy's OK.
 -- Office project data never goes here: ss_projects accepts only kind 'sketch' or 'own'.
 
@@ -27,6 +27,8 @@ create table if not exists public.ss_projects (
   state jsonb not null,
   updated_at timestamptz not null default now()
 );
+
+revoke all on public.ss_templates, public.ss_lessons, public.ss_projects from anon;
 
 alter table public.ss_templates enable row level security;
 alter table public.ss_lessons enable row level security;

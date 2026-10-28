@@ -14,7 +14,7 @@ A web app that guides the process of writing CSI specifications (architectural s
 - Options are **bracket choices** inside paragraphs (`[[qid]]`).
 - Flags: auto / review / decision. Hand edits are never overwritten; changes behind them raise a review flag.
 - Contracts: assume AIA, pick the variant in the survey.
-- Supabase: **Architecture** project (`xabgankckrcuhcgdolrg`), registers tables in `public.table_index (table_name, project, purpose)`; existing tables belong to "Architecture practice" and "Quick Detail (wall sketch)". Shimmy Specs uses an `ss_` prefix; SQL written in phase 2, applied only with Jimmy's OK.
+- Supabase: **Architecture** project (`<project-ref>`), registers tables in `public.table_index (table_name, project, purpose)`; existing tables belong to "Architecture practice" and "Quick Detail (wall sketch)". Shimmy Specs uses an `ss_` prefix; SQL written in phase 2, applied only with Jimmy's OK.
 - Never store office project data; only lessons. Sketch and own projects allowed (`kind`).
 - Knowledge becomes non-overlapping chapters (map in `mvp schematic.md` §10); 5xx = template specs written together.
 - First templates, in order: roofing, firestopping, joint sealants, exterior painting, CMU wall, ladder fall protection, doors and hardware.
