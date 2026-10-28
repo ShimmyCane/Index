@@ -14,6 +14,18 @@
   .rank { position: absolute; top: 6px; left: 6px; width: 34px; height: 34px; border-radius: 50%; background: var(--sun); border: 2.5px solid var(--ink); display: grid; place-items: center; font: 20px var(--hand); }
   .five .card { position: relative; }
   .dots { letter-spacing: 2px; }
+  .quick { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 4px 0 6px; }
+  .quick .btn { width: 100%; }
+  .more { margin-top: 26px; }
+  .more > summary { list-style: none; cursor: pointer; font: 700 19px var(--ui); min-height: 52px; display: flex; align-items: center; padding: 8px 16px; background: #fff; border: var(--line); border-radius: 16px; box-shadow: var(--pop); }
+  .more > summary::-webkit-details-marker { display: none; }
+  .more[open] > summary { background: var(--sun); }
+  .more .tiles { margin-top: 18px; }
+  @media (max-width: 760px) {
+    .tile { min-height: 140px; }
+    .five { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .title small { display: none; }
+  }
 </style>
 </head>
 <body>
@@ -22,14 +34,9 @@
   <span class="chip sun" id="count">…</span>
 </header>
 <main class="wrap">
-  <div class="tiles">
-    <a class="tile" href="pack.html" style="background:var(--coral)"><span class="big">🖨️</span><b>Print a pack</b><span>10 puzzles, double-sided, ready for the printer.</span></a>
-    <a class="tile" href="library.html" style="background:var(--mint)"><span class="big">📚</span><b>Library</b><span>Every maze. Find one, print it.</span></a>
-    <a class="tile" href="make.html" style="background:var(--peach)"><span class="big">✏️</span><b>Make a maze</b><span>Draw a few lines. Pick a sprout. Bake it.</span></a>
-    <a class="tile" href="answer.html" style="background:var(--lavender)"><span class="big">🎬</span><b>Answers</b><span>Type a maze number, watch the way through.</span></a>
-    <a class="tile" id="driveTile" href="play.html" style="background:var(--sky)"><span class="big">🚗</span><b>Drive a maze</b><span>Draw your way through on screen. Green when you get there.</span></a>
-    <a class="tile" href="prototypes.html" style="background:var(--sun)"><span class="big">🧪</span><b>Prototypes</b><span>3D, spinning and shifting mazes, for screens only.</span></a>
-    <a class="tile" href="about.html" style="background:#fff"><span class="big">📖</span><b>About</b><span>How mazes work, the art behind them, and ideas to explore.</span></a>
+  <div class="quick">
+    <a class="btn go" href="library.html">📚 Library</a>
+    <a class="btn" href="pack.html">🖨️ Print a pack</a>
   </div>
 
   <h2 class="step">⭐ Puzzle of the day</h2>
@@ -46,10 +53,23 @@
     </div>
   </div>
 
-  <h2 class="step">🏆 Top five</h2>
-  <div class="five" id="five"></div>
+  <details class="more" id="more">
+    <summary>✨ More: make, answers, drive, prototypes, top five ▾</summary>
+      <div class="tiles">
+        <a class="tile" href="pack.html" style="background:var(--coral)"><span class="big">🖨️</span><b>Print a pack</b><span>10 puzzles, double-sided, ready for the printer.</span></a>
+        <a class="tile" href="library.html" style="background:var(--mint)"><span class="big">📚</span><b>Library</b><span>Every maze. Find one, print it.</span></a>
+        <a class="tile" href="make.html" style="background:var(--peach)"><span class="big">✏️</span><b>Make a maze</b><span>Draw a few lines. Pick a sprout. Bake it.</span></a>
+        <a class="tile" href="answer.html" style="background:var(--lavender)"><span class="big">🎬</span><b>Answers</b><span>Type a maze number, watch the way through.</span></a>
+        <a class="tile" id="driveTile" href="play.html" style="background:var(--sky)"><span class="big">🚗</span><b>Drive a maze</b><span>Draw your way through on screen. Green when you get there.</span></a>
+        <a class="tile" href="prototypes.html" style="background:var(--sun)"><span class="big">🧪</span><b>Prototypes</b><span>3D, spinning and shifting mazes, for screens only.</span></a>
+        <a class="tile" href="about.html" style="background:#fff"><span class="big">📖</span><b>About</b><span>How mazes work, the art behind them, and ideas to explore.</span></a>
+      </div>
 
-  <p style="margin-top:26px"><a class="btn" id="reworkLink" href="rework.html">🔧 To rework</a></p>
+    <h2 class="step">🏆 Top five</h2>
+    <div class="five" id="five"></div>
+
+    <p style="margin-top:26px"><a class="btn" id="reworkLink" href="rework.html">🔧 To rework</a></p>
+  </details>
 </main>
 <script src="js/engine.js"></script>
 <script src="js/art.js"></script>
@@ -100,6 +120,8 @@
     }
     app.onFlags = render;
     render();
+    // on a wide screen the extras start open; on a phone they wait behind "More"
+    if (window.matchMedia("(min-width: 761px)").matches) document.getElementById("more").open = true;
   })();
 </script>
 </body>

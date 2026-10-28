@@ -9,27 +9,50 @@
 <link rel="stylesheet" href="css/app.css">
 <style>
   #sheet { touch-action: none; user-select: none; -webkit-user-select: none; cursor: crosshair; }
-  .fmz-trail path { transition: stroke .5s ease; }
-  .fmz-explored { transition: opacity .8s ease; }
+  #sheet svg { display: block; width: 100%; height: auto; margin: 0 auto; }
+  .fmz-hint { transition: opacity .5s; }
   .result { max-width: 900px; margin: 14px auto 0; text-align: center; }
   .result .big { font: 34px var(--hand); }
   .pad { display: none; gap: 8px; justify-content: center; margin: 12px 0 0; }
   @media (pointer: coarse) { .pad { display: flex; } }
+  .more-btn { display: none; }
+  .focus-exit { display: none; position: fixed; top: 10px; right: 10px; z-index: 40; min-height: 44px; }
+  /* phones: the header keeps the title and a ⋯ button; the other buttons open from it */
+  @media (max-width: 760px) {
+    .top { padding: 8px 12px; }
+    .title { font-size: 30px; }
+    .more-btn { display: inline-flex; min-width: 52px; }
+    .tools { display: none; width: 100%; }
+    .tools.open { display: flex; }
+    .tools .btn { min-height: 46px; padding: 6px 12px; font-size: 16px; }
+    .wrap { padding: 0 10px 110px; }
+    .note { font-size: 15px; }
+  }
+  /* focus: the maze takes the whole screen, nothing else */
+  body.focus .top, body.focus #status, body.focus .how, body.focus #flagged, body.focus .note.keep-hidden { display: none; }
+  body.focus .focus-exit { display: inline-flex; }
+  body.focus .wrap { padding: 0; max-width: none; }
+  body.focus #sheet { height: 100dvh; border: 0; border-radius: 0; box-shadow: none; padding: 0; background: #fff; }
+  body.focus #sheet svg { height: 100dvh; width: 100%; }
+  body.focus .pad { position: fixed; bottom: 12px; left: 0; right: 0; }
 </style>
 </head>
 <body>
 <header class="top">
   <h1 class="title"><a href="index.html">Felix Maze</a> <small id="sub">Drive it</small></h1>
-  <div class="row noprint">
-    <a class="btn" id="prev">◀</a>
-    <a class="btn" id="next">▶</a>
+  <button class="btn more-btn" id="toolsBtn" type="button" aria-expanded="false" aria-label="More buttons">⋯</button>
+  <div class="row tools noprint" id="tools">
+    <a class="btn" id="prev" aria-label="Previous maze">◀</a>
+    <a class="btn" id="next" aria-label="Next maze">▶</a>
     <button class="btn" id="hint">💡 Hint</button>
     <button class="btn" id="back">↩ Back</button>
     <button class="btn" id="again">⟲ Start over</button>
+    <button class="btn" id="focus">⛶ Focus</button>
     <button class="btn" id="flag">🚩 Flag</button>
     <a class="btn" id="sheetLink">📄 Sheet</a>
   </div>
 </header>
+<button class="btn focus-exit" id="focusExit" type="button">✕ Exit focus</button>
 <main class="wrap">
   <section class="paper noprint" id="flagBox" hidden style="max-width:900px;margin:0 auto 14px">
     <h2 class="step" style="margin-top:6px">🚩 This maze doesn't work for me</h2>
@@ -38,10 +61,10 @@
     <div class="row"><button class="btn go" id="flagSave" type="button">🚩 Save flag</button><button class="btn" id="flagCancel" type="button">Cancel</button></div>
   </section>
   <p class="note noprint" id="flagged" hidden style="max-width:900px;margin:0 auto 14px"></p>
-  <p class="note" id="status" style="text-align:center">Drag along the path from the start to the finish. Arrow keys work too. Dead ends are fine: turn around.</p>
-  <div class="paper print-sheet fit" id="sheet"></div>
+  <p class="note how" id="status" style="text-align:center">Drag along the path from the start to the finish. Arrow keys work too. Dead ends are fine: turn around.</p>
+  <div class="paper print-sheet" id="sheet"></div>
   <div class="pad noprint" id="pad">
-    <button class="btn" data-k="left">◀</button><button class="btn" data-k="up">▲</button><button class="btn" data-k="down">▼</button><button class="btn" data-k="right">▶</button>
+    <button class="btn" data-k="left" aria-label="Left">◀</button><button class="btn" data-k="up" aria-label="Up">▲</button><button class="btn" data-k="down" aria-label="Down">▼</button><button class="btn" data-k="right" aria-label="Right">▶</button>
   </div>
   <section class="paper result noprint" id="result" hidden>
     <div class="big">🎉 You found the way!</div>
@@ -70,12 +93,12 @@
 <script>
   (function () {
     const app = FMZ.app, S = FMZ.sheet, $ = id => document.getElementById(id);
-    app.init(`<h3>Drive it</h3><p><small>Drag a finger (or the mouse) along the path. The line is one color; it turns green when you reach the finish. Turning around in a dead end is part of the fun, and the way you take does not have to be short.</small></p><div id="drives"></div>`);
+    app.init(`<h3>Drive it</h3><p><small>Drag a finger (or the mouse) along the path. The dots follow you and turn green when you reach the finish. Turning around in a dead end is part of the fun, and the way you take does not have to be short.</small></p><div id="drives"></div>`);
     const all = app.bank();
     const rc = app.find(app.param("code") || "") || all[0];
     if (!rc) { $("missing").hidden = false; return; }
     document.title = "Felix Maze #" + rc.code + " · Drive";
-    $("sub").textContent = "Drive #" + rc.code + " · " + rc.title;
+    $("sub").textContent = "#" + rc.code + " · " + rc.title;
     const i = all.indexOf(rc);
     $("prev").href = "play.html?code=" + encodeURIComponent(all[(i - 1 + all.length) % all.length].code);
     const nextRc = all[(i + 1) % all.length];
@@ -84,67 +107,86 @@
     $("shortWay").href = "answer.html?code=" + encodeURIComponent(rc.code);
     app.mountFlag(rc);
 
-    const out = S.svg(rc);
+    // phones: ⋯ opens the other buttons; focus hides everything but the maze
+    $("toolsBtn").addEventListener("click", () => {
+      const open = $("tools").classList.toggle("open");
+      $("toolsBtn").setAttribute("aria-expanded", String(open));
+    });
+    const setFocus = on => { document.body.classList.toggle("focus", on); $("focus").classList.toggle("on", on); };
+    $("focus").addEventListener("click", () => setFocus(!document.body.classList.contains("focus")));
+    $("focusExit").addEventListener("click", () => setFocus(false));
+
+    const out = S.svg(rc, { fluid: true });
     $("sheet").innerHTML = out.svg;
     const model = out.model, svg = document.querySelector("#sheet svg"), NS = "http://www.w3.org/2000/svg";
     const driver = new FMZ.play.Driver(model);
-    const mazeG = svg.querySelector(".fmz-maze"), host = mazeG ? mazeG.parentNode : svg;
-    const mk = (cls, parent, before) => { const g = document.createElementNS(NS, "g"); g.setAttribute("class", cls); parent.insertBefore(g, before || null); return g; };
+    const mazeG = svg.querySelector(".fmz-maze");
+    const host = mazeG ? mazeG.parentNode : svg;
+    const mk = (cls, before) => { const g = document.createElementNS(NS, "g"); g.setAttribute("class", cls); host.insertBefore(g, before || null); return g; };
     const anchor = mazeG ? mazeG.nextSibling : svg.querySelector(".fmz-start");
-    const explored = mk("fmz-explored", host, anchor), trailG = mk("fmz-trail", host, anchor), hintG = mk("fmz-hint", host, anchor);
-    explored.style.opacity = 0;
-    const size = model.g.s || model.spec.size || 40, W = Math.max(7, size * 0.2);
+    const dotsG = mk("fmz-trail", anchor), hintG = mk("fmz-hint", anchor);
+    const size = model.g.s || model.spec.size || 40;
+    const DOT = Math.max(5, size * 0.17);                 // one dot per square the cat has stood on
     const BLUE = "#3d8bfd", GREEN = "#2fb96b";
-    const mkPath = (g, color, w) => { const p = document.createElementNS(NS, "path"); p.setAttribute("fill", "none"); p.setAttribute("stroke", color); p.setAttribute("stroke-width", w); p.setAttribute("stroke-linecap", "round"); p.setAttribute("stroke-linejoin", "round"); g.append(p); return p; };
-    const trail = mkPath(trailG, BLUE, W);
-    const hintPath = mkPath(hintG, "#f2a900", W * 0.7); hintPath.setAttribute("stroke-dasharray", `1 ${W * 1.6}`);
+    const hintPath = document.createElementNS(NS, "path");
+    hintPath.setAttribute("fill", "none"); hintPath.setAttribute("stroke", "#f2a900"); hintPath.setAttribute("stroke-width", DOT * 1.1);
+    hintPath.setAttribute("stroke-linecap", "round"); hintPath.setAttribute("stroke-dasharray", `0.1 ${DOT * 2.2}`);
+    hintG.append(hintPath); hintG.style.opacity = 0;
     const walker = svg.querySelector(".fmz-start > g");
     const baseT = walker ? walker.getAttribute("transform") : "";
     const scale = baseT ? (baseT.match(/scale\(([^)]+)\)/) || [])[1] : 1;
     const put = (x, y) => walker && walker.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${scale})`);
     const dstr = pts => pts.length ? "M" + pts.map(p => p[0].toFixed(1) + " " + p[1].toFixed(1)).join("L") : "";
-    let replaying = false, timer = 0, hintTimer = 0;
+    let replaying = false, timer = 0, hintTimer = 0, wonShown = false;
 
+    // The dots are drawn from the walk itself: dot k sits on the k-th square the cat stood on. Nothing is pulled back
+    // from a fixed line, so the replay and the drive always agree with where the cat has been.
+    function paintDots(upto, color) {
+      dotsG.innerHTML = "";
+      for (let k = 0; k < upto; k++) {
+        const p = driver.pos(driver.walk[k]), el = document.createElementNS(NS, "circle");
+        el.setAttribute("cx", p[0].toFixed(1)); el.setAttribute("cy", p[1].toFixed(1)); el.setAttribute("r", DOT.toFixed(1));
+        el.setAttribute("fill", color);
+        dotsG.append(el);
+      }
+    }
     function draw() {
-      trail.setAttribute("d", dstr(driver.points()));
-      trail.setAttribute("stroke", driver.won ? GREEN : BLUE);
-      if (driver.walk.length > 1) { const p = driver.pos(driver.cur); put(p[0], p[1]); }
-      else if (walker) walker.setAttribute("transform", baseT);
+      paintDots(driver.walk.length, driver.won ? GREEN : BLUE);
+      const p = driver.pos(driver.cur); put(p[0], p[1]);
       if (driver.won) won();
     }
-    let wonShown = false;
+
     function won() {
       if (wonShown) return; wonShown = true;
+      setFocus(false);
       const st = driver.stats();
       $("status").textContent = "🎉 Connected!";
-      // the places you looked, as soft mint dots, then the whole drive replayed
-      const r = size * 0.3;
-      new Set(driver.walk).forEach(c => { const p = driver.pos(c), el = document.createElementNS(NS, "circle"); el.setAttribute("cx", p[0].toFixed(1)); el.setAttribute("cy", p[1].toFixed(1)); el.setAttribute("r", r.toFixed(1)); el.setAttribute("fill", "#9be3c4"); explored.append(el); });
-      setTimeout(() => { explored.style.opacity = 0.55; }, 500);
       const mins = Math.floor(st.seconds / 60), secs = st.seconds % 60;
       $("resultText").innerHTML = `You looked around <b>${st.explored}%</b> of the maze, ${st.sideSquares ? "tried <b>" + st.sideSquares + "</b> squares off the way, " : ""}turned around <b>${st.turns}</b> time${st.turns === 1 ? "" : "s"}, and took <b>${st.steps}</b> steps${st.seconds ? " in " + (mins ? mins + " min " : "") + secs + " s" : ""}${st.hints ? ", with " + st.hints + " hint" + (st.hints === 1 ? "" : "s") : ""}.<br><small>The shortest way is ${st.shortest} steps, but yours counts too.</small>`;
       $("result").hidden = false;
       const list = app.store.get("fmz.drives", []); list.push({ code: rc.code, steps: st.steps, shortest: st.shortest, seconds: st.seconds, at: new Date().toISOString() });
       app.store.set("fmz.drives", list.slice(-200));
-      setTimeout(replay, 1700);
+      setTimeout(replay, 1500);
     }
 
-    // watch the whole drive again, turn-arounds included
+    // Replay: the cat walks the drive at one even pace, one square per beat (turn-arounds included), and each dot
+    // appears the moment the cat reaches its square.
     function replay() {
       if (!driver.won || replaying) return;
       replaying = true; cancelAnimationFrame(timer);
-      explored.style.opacity = 0.55;
-      const pts = driver.points(), rp = mkPath(trailG, BLUE, W);
-      rp.setAttribute("d", dstr(pts)); trail.style.opacity = 0;
-      const L = rp.getTotalLength(); rp.style.strokeDasharray = L + " " + L; rp.style.strokeDashoffset = L;
-      const ms = Math.min(14000, Math.max(3000, driver.walk.length * 45)), t0 = performance.now();
-      const step = now => {
-        const t = Math.min(1, (now - t0) / ms), p = rp.getPointAtLength(L * t);
-        rp.style.strokeDashoffset = L * (1 - t); put(p.x, p.y);
-        if (t < 1) timer = requestAnimationFrame(step);
-        else { rp.setAttribute("stroke", GREEN); trail.style.opacity = 1; setTimeout(() => { rp.remove(); replaying = false; }, 600); }
+      const walk = driver.walk, n = walk.length - 1;
+      if (n < 1) { replaying = false; return; }
+      const beat = Math.max(90, Math.min(300, 14000 / n));       // ms per square; long drives get faster, never longer than ~14 s
+      const t0 = performance.now();
+      const frame = now => {
+        const t = Math.max(0, (now - t0) / beat), k = Math.min(n, Math.floor(t)), f = k >= n ? 0 : t - k;   // rAF may stamp a frame just before t0
+        const a = driver.pos(walk[k]), b = driver.pos(walk[Math.min(n, k + 1)]);
+        paintDots(k + 1, GREEN);
+        put(a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f);
+        if (k < n) timer = requestAnimationFrame(frame);
+        else { paintDots(walk.length, GREEN); put(...driver.pos(driver.end)); replaying = false; }
       };
-      timer = requestAnimationFrame(step);
+      timer = requestAnimationFrame(frame);
     }
     $("replay").addEventListener("click", replay);
 
@@ -152,7 +194,7 @@
     // pointer: follow the passages toward the finger, a few squares at a time
     let down = false;
     const sheet = $("sheet");
-    const toMaze = e => { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; return pt.matrixTransform(trailG.getScreenCTM().inverse()); };
+    const toMaze = e => { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; return pt.matrixTransform(dotsG.getScreenCTM().inverse()); };
     const drive = e => {
       if (!down || replaying || driver.won) return;
       const p = toMaze(e), here = driver.pos(driver.cur);
@@ -168,6 +210,7 @@
       if (KEYS[e.key]) { e.preventDefault(); act(() => driver.go(...KEYS[e.key])); }
       else if (e.key === " ") { e.preventDefault(); hint(); }
       else if (e.key === "Backspace") { e.preventDefault(); act(() => driver.back()); }
+      else if (e.key === "Escape") setFocus(false);
     });
     $("pad").addEventListener("click", e => { const k = e.target.closest("[data-k]"); if (k) act(() => driver.go(...{ left: [-1, 0], right: [1, 0], up: [0, -1], down: [0, 1] }[k.dataset.k])); });
     $("back").addEventListener("click", () => act(() => driver.back()));
@@ -179,20 +222,19 @@
       hintPath.setAttribute("d", dstr(cells.map(driver.pos))); hintG.style.opacity = 1;
       clearTimeout(hintTimer); hintTimer = setTimeout(() => { hintG.style.opacity = 0; }, 3500);
     }
-    hintG.style.opacity = 0; hintG.style.transition = "opacity .5s";
     $("hint").addEventListener("click", hint);
     $("again").addEventListener("click", () => {
       cancelAnimationFrame(timer); replaying = false; wonShown = false; driver.reset();
-      trailG.querySelectorAll("path").forEach(p => { if (p !== trail && p !== hintPath) p.remove(); });
-      trail.style.opacity = 1; explored.innerHTML = ""; explored.style.opacity = 0; hintG.style.opacity = 0;
-      $("result").hidden = true; $("status").textContent = "Drag along the path from the start to the finish. Arrow keys work too."; draw();
+      hintG.style.opacity = 0; $("result").hidden = true;
+      $("status").textContent = "Drag along the path from the start to the finish. Arrow keys work too.";
+      draw();
     });
     app.onDrawer = () => {
       const d = app.store.get("fmz.drives", []).filter(x => x.code === rc.code);
       $("drives").innerHTML = d.length ? "<small>You have driven this one " + d.length + " time" + (d.length === 1 ? "" : "s") + ".</small>" : "";
     };
     // for tests and tinkering
-    window.FMZ_DRIVE = { driver, draw };
+    window.FMZ_DRIVE = { driver, draw, replay };
     draw();
   })();
 </script>
