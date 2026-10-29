@@ -230,5 +230,141 @@
  "hex-snowflake:{\"shape\":\"snowflake\"}:hexshape": {
   "top": 5,
   "at": "2026-10-29"
+ },
+ "shape-rocket:{\"shape\":\"rocket\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-kite:{\"shape\":\"kite\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-dino:{\"shape\":\"dino\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-pyramid:{\"shape\":\"pyramid\",\"look\":{\"outline\":11}}:shape": {
+  "top": 3,
+  "at": "2026-10-29"
+ },
+ "shape-pineapple:{\"shape\":\"pineapple\",\"look\":{\"outline\":11}}:shape": {
+  "top": 1,
+  "at": "2026-10-29"
+ },
+ "shape-matisse:{\"shape\":\"matisse\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-dog:{\"shape\":\"dog\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-baby:{\"shape\":\"baby\",\"look\":{\"outline\":11}}:shape": {
+  "top": 3,
+  "at": "2026-10-29"
+ },
+ "shape-elephant:{\"shape\":\"elephant\",\"look\":{\"outline\":11}}:shape": {
+  "top": 5,
+  "at": "2026-10-29"
+ },
+ "shape-penguin:{\"shape\":\"penguin\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-octopus:{\"shape\":\"octopus\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-giraffe:{\"shape\":\"giraffe\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-lizard:{\"shape\":\"lizard\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-crab:{\"shape\":\"crab\",\"look\":{\"outline\":11}}:shape": {
+  "top": 3,
+  "at": "2026-10-29"
+ },
+ "shape-duck:{\"shape\":\"duck\",\"look\":{\"outline\":11}}:shape": {
+  "top": 3,
+  "at": "2026-10-29"
+ },
+ "shape-rabbit:{\"shape\":\"rabbit\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-cactus:{\"shape\":\"cactus\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-mound:{\"shape\":\"mound\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-roots:{\"shape\":\"roots\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-bolt:{\"shape\":\"bolt\",\"look\":{\"outline\":11}}:shape": {
+  "top": 1,
+  "at": "2026-10-29"
+ },
+ "shape-car:{\"shape\":\"car\",\"look\":{\"outline\":11}}:shape": {
+  "top": 3,
+  "at": "2026-10-29"
+ },
+ "shape-airplane:{\"shape\":\"airplane\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-submarine:{\"shape\":\"submarine\",\"look\":{\"outline\":11}}:shape": {
+  "top": 3,
+  "at": "2026-10-29"
+ },
+ "shape-lighthouse:{\"shape\":\"lighthouse\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-windmill:{\"shape\":\"windmill\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-guitar:{\"shape\":\"guitar\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-note:{\"shape\":\"note\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-rhino:{\"shape\":\"rhino\",\"look\":{\"outline\":11}}:shape": {
+  "top": 5,
+  "at": "2026-10-29"
+ },
+ "shape-mobile:{\"shape\":\"mobile\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-bell:{\"shape\":\"bell\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-hedgehog:{\"shape\":\"hedgehog\",\"look\":{\"outline\":11}}:shape": {
+  "top": 3,
+  "at": "2026-10-29"
+ },
+ "shape-teapot:{\"shape\":\"teapot\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-snowman:{\"shape\":\"snowman\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
+ },
+ "shape-caterpillar:{\"shape\":\"caterpillar\",\"look\":{\"outline\":11}}:shape": {
+  "top": 2,
+  "at": "2026-10-29"
  }
 }
