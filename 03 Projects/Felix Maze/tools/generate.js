@@ -32,14 +32,14 @@ const QUOTAS = PLAN ? [1, 2, 3, 4, 5, 6, 7].map(l => planned.filter(d => d.level
 if (!QUOTAS.some(q => q)) { console.log("batch must be 1 to 8"); process.exit(1); }
 const ALL6 = BATCH === 8;                            // batch 8: every puzzle is level 6 (about 40 minutes)
 const vi = BATCH >= 5 ? 0 : BATCH - 1;
-const FIRST_NEW = BATCH >= 7 ? Math.max(...ctx.FMZ_CATALOG.map(r => r.n)) + 1 : 0;   // batch 7 and later: counters continue after the last one
+const FIRST_NEW = BATCH >= 7 ? Math.max(0, ...ctx.FMZ_CATALOG.map(r => r.n)) + 1 : 0;   // batch 7 and later: counters continue after the last one
 
 // ---------- the slots ----------
 const catalog = ctx.FMZ_CATALOG.slice();
 const have = new Map(catalog.map(r => [r.n, r]));
 const slots = [];
 if (REDO) {
-  let next = Math.max(...catalog.map(r => r.n)) + 1;
+  let next = Math.max(0, ...catalog.map(r => r.n)) + 1;
   String(REDO).split(",").map(Number).forEach(n0 => {
     const r = have.get(n0); if (!r || r.retired) return;
     const d = [...designs1, ...designs5, ...designs7, ...designs8, ...planned].find(x => x.id === r.design); if (!d) return;

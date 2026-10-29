@@ -1,0 +1,8 @@
+{
+  "name": "batch10",
+  "count": 10,
+  "levels": { "2": 2, "4": 2, "5": 2, "6": 2, "7": 2 },
+  "inspirations": "all",
+  "maxPerInspiration": 2,
+  "seed": 10
+}
