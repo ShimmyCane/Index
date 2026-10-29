@@ -176,7 +176,7 @@
   // ---------- ⚙️ drawer ----------
   function init(extra = "") {
     const here = location.pathname.split("/").pop() || "index.html";
-    const links = [["index.html", "🏠 Home"], ["library.html", "📚 Library"], ["pack.html", "🖨️ Print a pack"], ["make.html", "✏️ Make a maze"], ["answer.html", "🎬 Answers"], ["play.html", "🚗 Drive a maze"], ["prototypes.html", "🧪 Prototypes"], ["about.html", "📖 About"], ["rework.html", "🔧 To rework"], ["research/index.html", "🔭 Research"]];
+    const links = [["index.html", "🏠 Home"], ["library.html", "📚 Library"], ["pack.html", "🖨️ Print a pack"], ["make.html", "✏️ Make a maze"], ["answer.html", "🎬 Answers"], ["play.html", "🚗 Drive a maze"], ["prototypes.html", "🧪 Prototypes"], ["pathlab.html", "🧭 Path Lab"], ["about.html", "📖 About"], ["rework.html", "🔧 To rework"], ["research/index.html", "🔭 Research"]];
     document.body.insertAdjacentHTML("beforeend", `
       <button class="gear noprint" id="gear" aria-label="Settings">⚙️</button>
       <div class="drawer noprint" id="drawer" hidden>
