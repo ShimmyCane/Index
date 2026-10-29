@@ -88,6 +88,8 @@
 
   /* Check the answer line against the walls as drawn. hits = points of the red line that sit on a wall's ink.
      Ribbon and subway mazes draw the path itself, so the answer follows it by construction. */
+  // the red answer line: 8 wide for normal squares (as on every published key), thinner for the tiny squares of levels 6-7
+  const answerWidthOf = (size, model) => (size >= 30 ? Math.max(8, size * 0.18) : Math.max(3, size * (model && (model.g.kind === "hex" || model.spec.look.mode !== "walls") ? 0.18 : 0.27)));   // hexagon and burrow corridors are narrower
   function lint(model) {
     const look = model.spec.look;
     if (!model.path) return { ok: false, hits: 0, why: "no way through" };
@@ -349,7 +351,7 @@
       }
     }
     if (opts.answer && model.path) {
-      out.push(`<path class="fmz-answer" d="${smooth(model.path)}" fill="none" stroke="${opts.answerColor || "#e0604a"}" stroke-width="${opts.answerWidth || Math.max(8, (spec.size || 40) * 0.18)}" stroke-linecap="round" stroke-linejoin="round" ${opts.answerDash ? `stroke-dasharray="${opts.answerDash}"` : ""}/>`);
+      out.push(`<path class="fmz-answer" d="${smooth(model.path)}" fill="none" stroke="${opts.answerColor || "#e0604a"}" stroke-width="${opts.answerWidth || answerWidthOf(spec.size || 40, model)}" stroke-linecap="round" stroke-linejoin="round" ${opts.answerDash ? `stroke-dasharray="${opts.answerDash}"` : ""}/>`);
       // where the answer goes under a bridge, the bridge is drawn on top of it again
       if (coverUnder && model.sol) {
         const under = new Set(model.sol.edges.map(ei => g.edges[ei].under).filter(c => c !== undefined));

@@ -16,18 +16,19 @@ const { root, load, writeData } = require("./lib");
 const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf("--" + k); return i < 0 ? d : (args[i + 1] && !args[i + 1].startsWith("--") ? args[i + 1] : true); };
 const REDO = opt("redo", null);                    // --redo 11,15,19: make replacements (new counters) for these mazes; the old ones are retired
+const PLAN = opt("plan", null);                    // --plan tools/plans/<name>.js: puzzles planned by tools/plan.js from data/seeds.js
 const BATCH = +opt("batch", 1), TRIES = +opt("tries", 90), DRY = !!opt("dry", false), ONLY = opt("only", null);
 
 const designs1 = require("./designs_data"), designs5 = require("./designs_data5"), designs7 = require("./designs_data7"), designs8 = require("./designs_data8");
-const designs9 = BATCH === 9 || REDO ? require("./designs_data9") : [];   // batch 9: level 7
-const designs = (BATCH === 5 ? designs5 : BATCH === 7 ? designs7 : BATCH === 8 ? designs8 : BATCH === 9 ? designs9 : designs1);
+const planned = PLAN ? require(path.resolve(PLAN)) : [];
+const designs = PLAN ? planned : (BATCH === 5 ? designs5 : BATCH === 7 ? designs7 : BATCH === 8 ? designs8 : designs1);
 const { layoutProblems } = require("./check_layout");
 const ctx = load();
 const S = ctx.FMZ.sheet, Q = ctx.FMZ.score;
 const vr = require("./verify_raster");
 
 // Levels per batch of 50: 40 / 70 / 56 / 24 / 10 over the four batches (mean 2.5).
-const QUOTAS = { 1: [10, 18, 14, 6, 2], 2: [10, 17, 14, 6, 3], 3: [10, 18, 14, 6, 2], 4: [10, 17, 14, 6, 3], 5: [10, 18, 15, 7, 0, 0, 0], 7: [2, 3, 2, 1, 0, 0, 0], 8: [0, 0, 0, 0, 0, 50, 0], 9: [0, 0, 0, 0, 8, 15, 27] }[BATCH] || [0, 0, 0, 0, 0, 0, 0];
+const QUOTAS = PLAN ? [1, 2, 3, 4, 5, 6, 7].map(l => planned.filter(d => d.level === l).length) : { 1: [10, 18, 14, 6, 2], 2: [10, 17, 14, 6, 3], 3: [10, 18, 14, 6, 2], 4: [10, 17, 14, 6, 3], 5: [10, 18, 15, 7, 0, 0, 0], 7: [2, 3, 2, 1, 0, 0, 0], 8: [0, 0, 0, 0, 0, 50, 0], 9: [0, 0, 0, 0, 8, 15, 27] }[BATCH] || [0, 0, 0, 0, 0, 0, 0];
 if (!QUOTAS.some(q => q)) { console.log("batch must be 1 to 8"); process.exit(1); }
 const ALL6 = BATCH === 8;                            // batch 8: every puzzle is level 6 (about 40 minutes)
 const vi = BATCH >= 5 ? 0 : BATCH - 1;
@@ -41,7 +42,7 @@ if (REDO) {
   let next = Math.max(...catalog.map(r => r.n)) + 1;
   String(REDO).split(",").map(Number).forEach(n0 => {
     const r = have.get(n0); if (!r || r.retired) return;
-    const d = [...designs1, ...designs5, ...designs7, ...designs8, ...designs9].find(x => x.id === r.design); if (!d) return;
+    const d = [...designs1, ...designs5, ...designs7, ...designs8, ...planned].find(x => x.id === r.design); if (!d) return;
     const v = d.variants[r.batch >= 5 ? 0 : r.v - 1];
     slots.push({ d, di: 0, v, n: next++, existing: null, replaces: n0, level: +opt("level", r.level), range: [+opt("level", r.level), +opt("level", r.level)], vi: r.batch >= 5 ? 0 : r.v - 1 });
   });
@@ -56,9 +57,7 @@ if (REDO) {
 // Effort depends on how many cells the maze has (about size^-1.8). Paths narrower than about 0.3 in are hard for a
 // pencil, so there is a floor on the cell size; the hardest levels get a bigger maze on the page instead (zoom, up to
 // 1.2, which still leaves white margins). Some designs top out below level 5, and that is fine.
-const MIN_CELL = 36, MAX_CELL = 110, MAX_ZOOM = 1.2;
-const maxZoomOf = level => (level >= 7 ? 1.3 : MAX_ZOOM);   // level 7 may zoom a little more (its maze is a cell smaller)
-const floorOf = level => (level >= 7 ? 28 : level === 6 ? 30 : MIN_CELL);   // paper square floor: 30 for levels 5-6 (as in the published set), 28 for level 7, with zoom
+const { MIN_CELL, MAX_CELL, MAX_ZOOM, floorOf, maxZoomOf } = require("./limits");   // size limits, shared with tools/plan.js
 const CENTER = { 1: 0.9, 2: 2.0, 3: 3.2, 4: 4.3, 5: 5.7, 6: 7.8, 7: 9.2 };       // effort at the middle of each level
 const hashSeed = (n, k) => { let h = 2166136261 ^ n; h = Math.imul(h ^ (k + 1), 16777619); h = Math.imul(h ^ (h >>> 13), 2246822519); return (h >>> 0) % 900000 + 1000; };
 const fixedCells = d => d.style === "checker";                      // its size comes from the board, not the level
@@ -121,7 +120,7 @@ function assignLevels() {
   const quota = QUOTAS.slice();
   fixed.forEach(l => { quota[l - 1]--; });
   const open = slots.filter(s => !s.existing && (!ONLY || s.d.id === ONLY));
-  if (ALL6) { open.forEach(s => { s.level = 6; s.range = [6, 6]; }); return; }
+  if (ALL6 || PLAN) { open.forEach(s => { s.level = ALL6 ? 6 : s.d.level; s.range = [s.level, s.level]; }); return; }   // planned: each puzzle has its level
   open.forEach(s => { s.range = reach(s); });
   if (ONLY) { open.forEach(s => { s.level = Math.round((s.range[0] + s.range[1]) / 2); }); return; }
   const tokens = [];
@@ -219,7 +218,7 @@ function recipeFor(s, seed, cell, level, zoom) {
       }
       // level 6 covers more of the page (its pictures are big), so white space scores lower; its bar is set lower on
       // Looking, and the lower overall bar is the one Jimmy should confirm (see the generation report)
-      const lookMin = s.level === 6 ? 2.4 : 3, overallMin = s.level === 6 ? 3.0 : 3.4;
+      const lookMin = s.level >= 6 ? 1.9 : s.level === 5 ? 2.4 : 3, overallMin = s.level >= 6 ? 3.0 : s.level === 5 ? 3.2 : 3.4;
       if (sc.looking < lookMin || sc.overall < overallMin) { rep.low++; stats.low++; continue; }
       if (layoutProblems(S, rc).length) { rep.layout++; stats.layout++; continue; }   // the pictures must not run into the title or footer
       cands.push({ rc, sc, m });
@@ -231,7 +230,7 @@ function recipeFor(s, seed, cell, level, zoom) {
       if (j.error) { rep.raster++; stats.raster++; continue; }
       const r = await page.evaluate(`(${vr.inPage.toString()})(${JSON.stringify(j)})`);
       const problems = vr.verdict(j, r);
-      if (problems.length) { rep.raster++; stats.raster++; continue; }
+      if (problems.length) { rep.raster++; stats.raster++; rep.rasterWhy = rep.rasterWhy || problems[0]; continue; }
       chosen = c; break;
     }
     if (chosen) { stats.ok++; made.push(chosen.rc); process.stdout.write("."); }
@@ -242,7 +241,7 @@ function recipeFor(s, seed, cell, level, zoom) {
       if (rep.levelMiss) reasons.push(`level ${s.level} not reached in ${rep.levelMiss} (last guess ${lastEst})`);
       if (rep.low) reasons.push(`${rep.low} scored too low to publish`);
       if (rep.layout) reasons.push(`${rep.layout} had a start or finish picture running into the words`);
-      if (rep.raster) reasons.push(`${rep.raster} failed the pixel check`);
+      if (rep.raster) reasons.push(`${rep.raster} failed the pixel check (${rep.rasterWhy || "?"})`);
       rework.push({ id: `${d.id}-v${vi + 1}`, n: s.n, design: d.id, title: v.title, level: s.level, tries: rep.attempts, batch: BATCH, at: new Date().toISOString().slice(0, 10), reasons, recipe: recipeFor(s, hashSeed(s.n, 0), cell, null, zoom) });
       process.stdout.write("x");
     }
@@ -255,7 +254,7 @@ function recipeFor(s, seed, cell, level, zoom) {
   [...catalog.filter(r => r.batch === BATCH || (BATCH === 1 && r.n <= 50)), ...made].forEach(r => { lvHist[r.level]++; });
   const total = lvHist.slice(1).reduce((a, b) => a + b, 0), mean = lvHist.slice(1).reduce((a, c, i) => a + c * (i + 1), 0) / (total || 1);
   const lines = [];
-  lines.push(REDO ? `## Repairs, batch ${BATCH} (${new Date().toISOString().slice(0, 10)}): ${REDO} replaced with new counters; the old ones are retired` : `## Batch ${BATCH} (${new Date().toISOString().slice(0, 10)})`, "");
+  lines.push(REDO ? `## Repairs, batch ${BATCH} (${new Date().toISOString().slice(0, 10)}): ${REDO} replaced with new counters; the old ones are retired` : `## Batch ${BATCH}${PLAN ? " (plan " + path.basename(PLAN, ".js") + ")" : ""} (${new Date().toISOString().slice(0, 10)})`, "");
   lines.push(`- Slots: ${slots.length} (${slots.filter(s => s.existing).length} already in the catalog). Made: ${made.length}. Sent to rework: ${rework.length}.`);
   lines.push(`- Seeds tried: ${stats.attempts}. Rejected: no way through ${stats.noWay}, **answer touched a wall ${stats.lint}** (${(100 * stats.lint / Math.max(1, stats.attempts)).toFixed(1)}% of tries), wrong level ${stats.levelMiss}, scored too low ${stats.low}, pictures hit the words ${stats.layout}, pixel check ${stats.raster}.`);
   lines.push(`- Levels in this batch: ${lvHist.slice(1).map((c, i) => `L${i + 1}: ${c}`).join(", ")} (plan: ${QUOTAS.map((c, i) => `L${i + 1}: ${c}`).join(", ")}). Mean level ${mean.toFixed(2)}.`);
