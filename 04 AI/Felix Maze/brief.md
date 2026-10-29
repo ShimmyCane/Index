@@ -45,3 +45,10 @@ Printed maze worksheets for Felix (US Letter landscape, black and white, "Felix 
 - Batch 5 (counters 0C9–0FA): 50 new designs from the inspirations log (`tools/designs_data5.js`, 36 new silhouettes). 10 earlier mazes whose pictures hit the title/footer were replaced under new counters (0FB+). Bank now 240 active puzzles. Sources: `tools/designs_sources.md`.
 
 - Round 6: policy = historical artists only (Kusama mazes retired, 8 historical-art mazes added as batch 7); new pages: `play.html` (drive), `about.html`, `prototypes.html` (10 digital-only ideas). Active bank 244.
+
+## Update 2026-10-29: batch 10 (restart)
+
+- Bank deleted and rebuilt: 10 puzzles, levels 2, 4, 5, 6, 7 (two each). Codes 320-009 to 370-002. See `03 Projects/Felix Maze/catalog.md`.
+- Generator: `node tools/plan.js briefs/batch10.json` then `node tools/generate.js --plan tools/plans/batch10.js --batch 9`. Solution-first for levels 5 and up.
+- Old flags (too easy, one answer-line issue) closed as `replaced` in `fmz_flags`.
+- Open questions in `03 Projects/Felix Maze/convo/convo v0.5.md`.

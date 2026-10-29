@@ -38,22 +38,24 @@ The families follow `inspirations.md`. The levels follow `js/sheet.js` `LEVELS` 
 - `001`–`7FF`: the published bank (`data/catalog.js`). Counters are never reused: a replaced puzzle is marked `retired: true` and its counter stays.
 - `800`–`FFF`: mazes baked on a device from Felix's doodles (source 1). They never collide with the bank.
 
-## The first ten (a test set, mixed difficulty)
+## Batch 10 (the restart, 2026-10-29)
 
-Codes changed on 2026-10-28 (twice, before anything was printed): levels moved from 1–4 to 1–5, then were recalibrated so Jimmy's reference maze (the old 330-00A, 0.54 in cells) is level 2.
+The old bank was deleted (it is in git history) after Jimmy flagged the puzzles as far too easy (2 to 30 seconds). Ten new puzzles, made by the solution-first generator (`build: "path"`: the route is drawn first, then the walls are carved around it, with waypoints and a lure). Levels 2, 4, 5, 6, 7, two each. Historical artists only.
 
-| Code | Maze | Level | Style |
+| Code | Maze | Level | Inspired by |
 |---|---|---|---|
-| 810-001 | Mouse and Cheese | 1 | Square grid, bold hand-drawn walls, crumbs to collect |
-| 330-002 | Starry Night | 3 | Square grid bent into swirls, cypress tree, stars |
-| 420-003 | Honeycomb | 2 | Hexagons |
-| 140-004 | Chartres Rings | 4 | Rings and spokes, double lines |
-| 320-005 | Dancing Figure | 2 | Maze inside a Keith Haring-style figure, hearts |
-| 510-006 | Subway Map | 1 | Lines and stations, with loops |
-| 230-007 | Hampton Court Hedges | 3 | Trapezoid hedge maze, goal in the middle |
-| 420-008 | Spider Web | 2 | Rings with straight threads |
-| 420-009 | Ant Tunnels | 2 | Tunnels in dotted earth, rooms at dead ends, crumbs |
-| 320-00A | Celtic Knot | 2 | Ribbons that cross over and under (bridges) |
+| 320-009 | Wire Circus | 2 | Alexander Calder (d. 1976), wire sculptures |
+| 320-00A | The Kiss | 2 | Gustav Klimt, 1907–08 |
+| 340-007 | Victory Boogie | 4 | Piet Mondrian (d. 1944), city grid |
+| 340-008 | Fish Magic | 4 | Paul Klee (d. 1940), dot field |
+| 350-005 | Day and Night | 5 | M. C. Escher (d. 1972), patchwork |
+| 350-006 | Japanese Bridge | 5 | Claude Monet (d. 1926), water garden |
+| 360-003 | Floating Stars | 6 | Joan Miró (d. 1983), rings |
+| 360-004 | Color Music | 6 | Wassily Kandinsky (d. 1944), sound waves |
+| 370-001 | The Dream | 7 | Henri Rousseau (d. 1910), burrow |
+| 370-002 | The Snail | 7 | Henri Matisse (d. 1954), patchwork |
+
+Counters restart at 001. Nothing from before batch 10 was printed.
 
 ## Adding a maze
 

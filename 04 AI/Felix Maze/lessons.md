@@ -43,3 +43,10 @@
 - Effort goes up about the same amount per doubling of time, so a logarithmic time scale is just a linear effort scale in log(time). Set the next level's center by adding one doubling's step to the last center, then check the published mazes: level 5 already reached effort 7.0, so the 5 → 6 boundary sat at 7.2, not at the midpoint.
 - Difficulty comes from cell count. Paper size is fixed by the pencil floor (30), so harder means zoom (cell = paper ÷ zoom). Zoom was capped by the picture's height (560 units): level 6 gets 640, and the layout check keeps the words clear.
 - Big pictures fill the page, which costs white-space points. A bar set by one rubric line can block a whole level, so set level-specific bars and say so in the report, not silently.
+
+## 2026-10-29: bank restart (batch 10)
+
+- The old bank was too easy: flags said 2 to 30 seconds at levels 1 to 5. Level guesses from the old generator did not match solve time. Restarted with ten solution-first puzzles at levels 2, 4, 5, 6, 7.
+- Solution-first (`build: "path"`, waypoints, lure) is the generator to use for level 5 and up. Planner (`tools/plan.js`) plus `generate.js --plan` made all ten in about 13 s, with no rejects.
+- Jimmy asked to delete the old puzzles. The "retire, don't delete" rule was set aside for this one restart; the old bank stays in git history. Old flags were closed as `replaced`.
+- Open: which puzzle is the "old double five" (no title or recipe matched it). Level 3 was left out of this batch; the five levels are 2, 4, 5, 6, 7.

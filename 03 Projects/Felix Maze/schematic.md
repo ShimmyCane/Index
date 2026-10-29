@@ -1,6 +1,6 @@
 # Felix Maze — Schematic
 
-**Status:** MVP plus flags, puzzle of the day, top five and double-sided packs. Ten mazes; the bank grows to 200 in four batches of 50. Not yet printed or tried with Felix.
+**Status:** Bank restarted in batch 10: ten solution-first puzzles (levels 2, 4, 5, 6, 7). Old bank deleted after flags (too easy). Not yet printed or tried with Felix.
 **Owner:** Jimmy
 **Platform:** plain HTML/CSS/JS, no build, GitHub Pages. Sheets print on US Letter, landscape, black and white.
 **Conversation:** `convo/convo v0.1.md` (answered), `convo/convo v0.2.md` (open), `convo/convo v0.3.md`, `convo/convo v0.4.md` (this round)
