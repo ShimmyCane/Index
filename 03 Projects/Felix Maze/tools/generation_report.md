@@ -59,9 +59,11 @@ One section per batch: how many seeds were tried, how many were rejected and why
 - Levels in this batch: L1: 0, L2: 0, L3: 0, L4: 0, L5: 0, L6: 50 (plan: L1: 0, L2: 0, L3: 0, L4: 0, L5: 0, L6: 50). Mean level 6.00.
 - Designs where more than 15% of tries had the answer touch a wall: spirals (11/22).
 
-## Batch 9 (plan batch10) (2026-10-29)
+## Batch 9 (plan batch11) (2026-10-29)
 
-- Slots: 10 (0 already in the catalog). Made: 10. Sent to rework: 0.
-- Seeds tried: 130. Rejected: no way through 0, **answer touched a wall 0** (0.0% of tries), wrong level 47, scored too low 3, pictures hit the words 0, pixel check 2.
-- Levels in this batch: L1: 0, L2: 2, L3: 0, L4: 2, L5: 2, L6: 2, L7: 2 (plan: L1: 0, L2: 2, L3: 0, L4: 2, L5: 2, L6: 2, L7: 2). Mean level 4.80.
+- Slots: 50 (0 already in the catalog). Made: 44. Sent to rework: 6.
+- Seeds tried: 1156. Rejected: no way through 0, **answer touched a wall 29** (2.5% of tries), wrong level 594, scored too low 179, pictures hit the words 0, pixel check 23.
+- Levels in this batch: L1: 0, L2: 4, L3: 4, L4: 9, L5: 18, L6: 12, L7: 7 (plan: L1: 0, L2: 2, L3: 5, L4: 10, L5: 17, L6: 11, L7: 5). Mean level 4.94.
+- Designs where more than 15% of tries had the answer touch a wall: vangogh-starry-sky-2 (28/36).
+- For `/fix-puzzles`: vangogh-starry-sky-2 (answer touched a wall in 28 of 36 tries; 8 failed the pixel check (answer on ink (24 px))) | delaunay-rings-thin (level 5 not reached in 3 (last guess 4); 8 failed the pixel check (shortcut in the picture (353 vs 750))) | okeeffe-hex-daisy (level 4 not reached in 90 (last guess 3)) | gaudi-gold-spirals (level 4 not reached in 4 (last guess 5); 86 scored too low to publish) | escher-honeycomb (level 4 not reached in 10 (last guess 5); 80 scored too low to publish) | gaudi-shape-babel (level 3 not reached in 90 (last guess 2))
 
