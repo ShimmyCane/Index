@@ -18,16 +18,17 @@ const opt = (k, d) => { const i = args.indexOf("--" + k); return i < 0 ? d : (ar
 const REDO = opt("redo", null);                    // --redo 11,15,19: make replacements (new counters) for these mazes; the old ones are retired
 const BATCH = REDO ? 6 : +opt("batch", 1), TRIES = +opt("tries", 90), DRY = !!opt("dry", false), ONLY = opt("only", null);
 
-const designs1 = require("./designs_data"), designs5 = require("./designs_data5"), designs7 = require("./designs_data7");   // batch 5: 50 more designs, one puzzle each
-const designs = (BATCH === 5 ? designs5 : BATCH === 7 ? designs7 : designs1);
+const designs1 = require("./designs_data"), designs5 = require("./designs_data5"), designs7 = require("./designs_data7"), designs8 = require("./designs_data8");   // batch 5: 50 more designs, one puzzle each
+const designs = (BATCH === 5 ? designs5 : BATCH === 7 ? designs7 : BATCH === 8 ? designs8 : designs1);
 const { layoutProblems } = require("./check_layout");
 const ctx = load();
 const S = ctx.FMZ.sheet, Q = ctx.FMZ.score;
 const vr = require("./verify_raster");
 
 // Levels per batch of 50: 40 / 70 / 56 / 24 / 10 over the four batches (mean 2.5).
-const QUOTAS = { 1: [10, 18, 14, 6, 2], 2: [10, 17, 14, 6, 3], 3: [10, 18, 14, 6, 2], 4: [10, 17, 14, 6, 3], 5: [10, 18, 15, 7, 0], 7: [2, 3, 2, 1, 0] }[BATCH] || [0, 0, 0, 0, 0];
-if (!QUOTAS) { console.log("batch must be 1 to 5"); process.exit(1); }
+const QUOTAS = { 1: [10, 18, 14, 6, 2], 2: [10, 17, 14, 6, 3], 3: [10, 18, 14, 6, 2], 4: [10, 17, 14, 6, 3], 5: [10, 18, 15, 7, 0], 7: [2, 3, 2, 1, 0, 0], 8: [0, 0, 0, 0, 0, 50] }[BATCH] || [0, 0, 0, 0, 0, 0];
+if (!QUOTAS.some(q => q)) { console.log("batch must be 1 to 8"); process.exit(1); }
+const ALL6 = BATCH === 8;                            // batch 8: every puzzle is level 6 (about 40 minutes)
 const vi = BATCH >= 5 ? 0 : BATCH - 1;
 const FIRST_NEW = BATCH >= 7 ? Math.max(...ctx.FMZ_CATALOG.map(r => r.n)) + 1 : 0;   // batch 7 and later: counters continue after the last one
 
@@ -55,7 +56,8 @@ if (REDO) {
 // pencil, so there is a floor on the cell size; the hardest levels get a bigger maze on the page instead (zoom, up to
 // 1.2, which still leaves white margins). Some designs top out below level 5, and that is fine.
 const MIN_CELL = 36, MAX_CELL = 110, MAX_ZOOM = 1.2;
-const CENTER = { 1: 0.9, 2: 2.0, 3: 3.2, 4: 4.3, 5: 5.7 };       // effort at the middle of each level
+const floorOf = level => (level === 6 ? 30 : MIN_CELL);   // level 6 may use a paper square of 30 (as level 5 does), with zoom
+const CENTER = { 1: 0.9, 2: 2.0, 3: 3.2, 4: 4.3, 5: 5.7, 6: 7.8 };       // effort at the middle of each level
 const hashSeed = (n, k) => { let h = 2166136261 ^ n; h = Math.imul(h ^ (k + 1), 16777619); h = Math.imul(h ^ (h >>> 13), 2246822519); return (h >>> 0) % 900000 + 1000; };
 const fixedCells = d => d.style === "checker";                      // its size comes from the board, not the level
 // size = how big a square is on paper (1/100 in); zoom = how much of the page the maze fills
@@ -71,22 +73,23 @@ function medianEffort(rc0, size, zoom, n = 3) {
 }
 // A picture that is tall on the page leaves no room for the start and finish pictures if it is also zoomed: cap the zoom.
 const capCache = {};
-function zoomCap(rc0) {
-  const key = rc0.design + "/" + rc0.style;
+// level 6 may use a taller picture (up to 640 of the 850 units, the layout check still keeps the words clear)
+function zoomCap(rc0, level = 5) {
+  const key = rc0.design + "/" + rc0.style + "/" + (level === 6 ? 6 : 5);
   if (capCache[key] === undefined) {
     let h = 510; try { const sp = S.buildModel(Object.assign({}, rc0, { cell: rc0.cell || 60, zoom: undefined })).spec; h = sp.box ? sp.box.h : 2 * sp.polar.R; } catch (e) { /* keep default */ }
-    capCache[key] = Math.max(1, Math.min(MAX_ZOOM, Math.floor(100 * 560 / h) / 100));
+    capCache[key] = Math.max(1, Math.min(MAX_ZOOM, Math.floor(100 * (level === 6 ? 640 : 560) / h) / 100));
   }
   return capCache[key];
 }
 function findCell(rc0, target) {
-  let size = S.LEVELS[target].size, zoom = 1;
+  let size = S.LEVELS[target].size, zoom = 1; const floor = floorOf(target);
   for (let it = 0; it < 8; it++) {
     const e = medianEffort(rc0, size, zoom);
     if (e == null) break;
     if (Q.levelOf(e) === target && Math.abs(e - CENTER[target]) < 0.3 * CENTER[target]) break;
     const ratio = e / CENTER[target];
-    if (ratio < 1) { if (size > MIN_CELL + 0.5) size = Math.max(MIN_CELL, size * Math.pow(ratio, 1 / 1.8)); else zoom = Math.min(zoomCap(rc0), zoom * Math.pow(1 / ratio, 1 / 2)); }
+    if (ratio < 1) { if (size > floor + 0.5) size = Math.max(floor, size * Math.pow(ratio, 1 / 1.8)); else zoom = Math.min(zoomCap(rc0, target), zoom * Math.pow(1 / ratio, 1 / 2)); }
     else { if (zoom > 1) zoom = Math.max(1, zoom * Math.pow(1 / ratio, 1 / 2)); else size = Math.min(MAX_CELL, size * Math.pow(ratio, 1 / 1.8)); }
   }
   return { size: Math.round(size), zoom: Math.round(zoom * 100) / 100 };
@@ -94,7 +97,7 @@ function findCell(rc0, target) {
 function reach(s) {                                                 // levels this slot's design can actually produce
   if (fixedCells(s.d)) return s.d.levels.slice();
   const base = recipeFor(s, 1000, null);
-  const eSmall = medianEffort(base, MIN_CELL, zoomCap(base)), eBig = medianEffort(base, MAX_CELL, 1);
+  const eSmall = medianEffort(base, MIN_CELL, zoomCap(base, s.level)), eBig = medianEffort(base, MAX_CELL, 1);
   if (eSmall == null || eBig == null) return s.d.levels.slice();
   const lo = Q.levelOf(eBig), hi = Q.levelOf(eSmall);
   const a = Math.max(lo, s.d.levels[0]), b = Math.min(hi, s.d.levels[1]);
@@ -107,6 +110,7 @@ function assignLevels() {
   const quota = QUOTAS.slice();
   fixed.forEach(l => { quota[l - 1]--; });
   const open = slots.filter(s => !s.existing && (!ONLY || s.d.id === ONLY));
+  if (ALL6) { open.forEach(s => { s.level = 6; s.range = [6, 6]; }); return; }
   open.forEach(s => { s.range = reach(s); });
   if (ONLY) { open.forEach(s => { s.level = Math.round((s.range[0] + s.range[1]) / 2); }); return; }
   const tokens = [];
@@ -193,11 +197,14 @@ function recipeFor(s, seed, cell, level, zoom) {
       if (sc.level !== s.level) {                                              // 2. the level must fit
         rep.levelMiss++; stats.levelMiss++; lastEst = sc.level;
         if (rep.levelMiss % 8 === 0 && nudge < 4) {                           // a design that can't reach its level: nudge the cells
-          nudge++; if (cell) cell = Math.max(Math.round(MIN_CELL / zoom), Math.min(MAX_CELL, Math.round(cell * (lastEst < s.level ? 0.94 : 1.07))));
+          nudge++; if (cell) cell = Math.max(Math.round(floorOf(s.level) / zoom), Math.min(MAX_CELL, Math.round(cell * (lastEst < s.level ? 0.94 : 1.07))));
         }
         continue;
       }
-      if (sc.looking < 3 || sc.overall < 3.4) { rep.low++; stats.low++; continue; }
+      // level 6 covers more of the page (its pictures are big), so white space scores lower; its bar is set lower on
+      // Looking, and the lower overall bar is the one Jimmy should confirm (see the generation report)
+      const lookMin = s.level === 6 ? 2.4 : 3, overallMin = s.level === 6 ? 3.0 : 3.4;
+      if (sc.looking < lookMin || sc.overall < overallMin) { rep.low++; stats.low++; continue; }
       if (layoutProblems(S, rc).length) { rep.layout++; stats.layout++; continue; }   // the pictures must not run into the title or footer
       cands.push({ rc, sc, m });
     }
@@ -228,7 +235,7 @@ function recipeFor(s, seed, cell, level, zoom) {
   console.log("");
 
   // ---------- report ----------
-  const lvHist = [0, 0, 0, 0, 0, 0];
+  const lvHist = [0, 0, 0, 0, 0, 0, 0];
   [...catalog.filter(r => r.batch === BATCH || (BATCH === 1 && r.n <= 50)), ...made].forEach(r => { lvHist[r.level]++; });
   const total = lvHist.slice(1).reduce((a, b) => a + b, 0), mean = lvHist.slice(1).reduce((a, c, i) => a + c * (i + 1), 0) / (total || 1);
   const lines = [];

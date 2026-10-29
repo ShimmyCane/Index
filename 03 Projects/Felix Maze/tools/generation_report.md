@@ -52,3 +52,10 @@ One section per batch: how many seeds were tried, how many were rejected and why
 - Seeds tried: 64. Rejected: no way through 0, **answer touched a wall 0** (0.0% of tries), wrong level 0, scored too low 0, pictures hit the words 0, pixel check 0.
 - Levels in this batch: L1: 2, L2: 4, L3: 2, L4: 0, L5: 0 (plan: L1: 2, L2: 3, L3: 2, L4: 1, L5: 0). Mean level 2.00.
 
+## Batch 8 (2026-10-29)
+
+- Slots: 50 (0 already in the catalog). Made: 50. Sent to rework: 0.
+- Seeds tried: 941. Rejected: no way through 0, **answer touched a wall 16** (1.7% of tries), wrong level 489, scored too low 42, pictures hit the words 0, pixel check 15.
+- Levels in this batch: L1: 0, L2: 0, L3: 0, L4: 0, L5: 0, L6: 50 (plan: L1: 0, L2: 0, L3: 0, L4: 0, L5: 0, L6: 50). Mean level 6.00.
+- Designs where more than 15% of tries had the answer touch a wall: spirals (11/22).
+
