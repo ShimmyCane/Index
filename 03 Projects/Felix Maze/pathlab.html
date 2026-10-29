@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Felix Maze Path Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+<style>
+  .lab { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr); gap: 18px; align-items: start; }
+  @media (max-width: 860px) { .lab { grid-template-columns: 1fr; } }
+  #view svg { display: block; width: 100%; height: auto; }
+  #view.stage1 .fmz-maze > :not(.fmz-answer), #view.stage1 .fmz-treat { opacity: .1; }
+  #view.stage3 .fmz-answer { display: none; }
+  .ctl label { display: block; font-weight: 700; margin: 10px 0 2px; }
+  .ctl input[type=range] { width: 100%; min-height: 36px; }
+  .ctl select { width: 100%; min-height: 48px; font: 600 17px var(--ui); border: var(--line); border-radius: 12px; padding: 4px 10px; background: #fff; }
+  .pill { display: inline-block; border: 2.5px solid var(--ink); border-radius: 99px; padding: 0 10px; background: var(--sun); font-weight: 700; font-size: 14px; }
+  .stages .btn { flex: 1; }
+  .nums { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; margin: 10px 0; }
+  .nums b { font: 26px var(--hand); display: block; }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1 class="title"><a href="index.html">Felix Maze</a> <small>Path Lab: design the right way first, then build the maze around it</small></h1>
+</header>
+<main class="wrap">
+  <div class="row stages" style="margin-bottom:12px">
+    <button class="btn" data-stage="1">1 · The right way</button>
+    <button class="btn" data-stage="2">2 · Wrong turns around it</button>
+    <button class="btn on" data-stage="3">3 · The maze</button>
+  </div>
+  <div class="lab">
+    <div class="paper" id="view"></div>
+    <div class="paper ctl">
+      <label for="design">Picture</label><select id="design"></select>
+      <label for="sweeps">Sweeps across the page <span class="pill" id="sweepsV"></span></label><input id="sweeps" type="range" min="0" max="6" value="3">
+      <label for="twist">Twists and turns <span class="pill" id="twistV"></span></label><input id="twist" type="range" min="0" max="100" value="80">
+      <label for="lure">Tempting wrong turns <span class="pill" id="lureV"></span></label><input id="lure" type="range" min="0" max="100" value="100">
+      <label for="cell">Size of a square <span class="pill" id="cellV"></span></label><input id="cell" type="range" min="20" max="60" value="30">
+      <div class="row" style="margin-top:12px"><button class="btn" id="seed">🎲 Another one</button><button class="btn" id="copy">📋 Copy recipe</button></div>
+      <div class="nums">
+        <div>Squares<b id="nN">–</b></div><div>Right way<b id="nL">–</b></div>
+        <div>A young solver walks<b id="nS">–</b></div><div>Level<b id="nLv">–</b></div>
+        <div>Joy<b id="nJ">–</b></div><div>One way through<b id="nOne">–</b></div>
+      </div>
+      <p class="note" id="how" style="margin:0"></p>
+    </div>
+  </div>
+</main>
+<script src="js/engine.js"></script>
+<script src="js/art.js"></script>
+<script src="js/sheet.js"></script>
+<script src="js/doodle.js"></script>
+<script src="js/score.js"></script>
+<script src="js/shapes.js"></script>
+<script src="js/designs.js"></script>
+<script src="data/catalog.js"></script>
+<script src="data/scores.js"></script>
+<script src="data/rework.js"></script>
+<script src="js/config.js"></script>
+<script src="js/common.js"></script>
+<script>
+  (function () {
+    const app = FMZ.app, S = FMZ.sheet, Q = FMZ.score, $ = id => document.getElementById(id);
+    app.init(`<p><small>The Path Lab builds a maze solution first: the right way is laid out (sweeping back and forth, with twists), wrong turns are hung off it where they look like the way, then every other square is filled in. The numbers come from a simulated young solver who always tries the way that points toward the finish first.</small></p>`);
+    // one picture per design in the bank (its look, its characters), rebuilt with the dials
+    const seenD = new Set(), designs = [];
+    app.bank().slice().reverse().forEach(r => { const k = r.design || r.style; if (!seenD.has(k) && !["checker", "mondrian"].includes(r.style)) { seenD.add(k); designs.push(r); } });
+    designs.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+    designs.forEach((r, i) => { const o = document.createElement("option"); o.value = i; o.textContent = r.title + " (" + (r.design || r.style) + ")"; $("design").append(o); });
+    const pre = designs.findIndex(r => r.design === "starry"); if (pre >= 0) $("design").value = pre;
+    let seed = 7013, stage = 3;
+
+    function recipe() {
+      const b = designs[+$("design").value];
+      return Object.assign({}, b, {
+        n: 999, level: 7, seed, cell: +$("cell").value, zoom: undefined, perfect: true, build: "path",
+        pathCfg: { waypoints: +$("sweeps").value, twist: $("twist").value / 100, lure: $("lure").value / 100, away: 0.7, len: 0.25, mix: 0.3 }
+      });
+    }
+    function draw() {
+      $("sweepsV").textContent = $("sweeps").value; $("twistV").textContent = $("twist").value + "%";
+      $("lureV").textContent = $("lure").value + "%"; $("cellV").textContent = ($("cell").value / 100).toFixed(2) + " in";
+      try {
+        const rc = recipe(), out = S.svg(rc, { fluid: true, answer: true });
+        $("view").innerHTML = out.svg; $("view").className = "paper stage" + stage;
+        const sc = Q.score(out.model), m = out.model, N = m.g.cells.length;
+        const inner = [...m.links].filter(i => m.g.edges[i].b !== null).length;
+        $("nN").textContent = N; $("nL").textContent = sc.L + " squares";
+        $("nS").textContent = sc.sim + " steps"; $("nLv").textContent = sc.level + " · " + ((S.LEVELS[sc.level] || {}).short || "");
+        $("nJ").textContent = sc.overall + " / 5"; $("nOne").textContent = inner === N - 1 ? "yes ✓" : "no";
+        $("how").innerHTML = `How to read this: the solver walked <b>${sc.sim}</b> squares to get through (${(sc.sim / N).toFixed(2)} × the ${N} squares; a maze can never cost much more than 2 × its squares). Each level is about twice the walking of the one below, so the steps set the level. More sweeps and more tempting turns make the same squares harder; smaller squares give more squares to walk.`;
+      } catch (e) { app.logError("path lab: " + e.message); }
+    }
+    ["design", "sweeps", "twist", "lure", "cell"].forEach(id => $(id).addEventListener("input", draw));
+    $("seed").addEventListener("click", () => { seed += 13; draw(); });
+    document.querySelector(".stages").addEventListener("click", e => {
+      const b = e.target.closest("[data-stage]"); if (!b) return;
+      stage = +b.dataset.stage; document.querySelectorAll(".stages .btn").forEach(x => x.classList.toggle("on", x === b)); draw();
+    });
+    $("copy").addEventListener("click", () => {
+      const rc = recipe(), keep = { style: rc.style, p: rc.p, chars: rc.chars, seed: rc.seed, cell: rc.cell, build: rc.build, pathCfg: rc.pathCfg, perfect: true };
+      const txt = JSON.stringify(keep);
+      (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => { $("copy").textContent = "Copied ✓"; setTimeout(() => { $("copy").textContent = "📋 Copy recipe"; }, 1500); }).catch(() => prompt("Copy this recipe:", txt));
+    });
+    draw();
+  })();
+</script>
+</body>
+</html>

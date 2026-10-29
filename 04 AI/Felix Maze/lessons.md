@@ -38,3 +38,8 @@
 - 3D without a library is small: yaw/pitch/perspective plus painter's sort covers walls, surfaces wrapped on a sphere/cylinder/torus (with a facing test per wall), cubes and stacked floors. A raycaster is ~40 lines.
 - Policy lines (like "no living artists") belong in the data too: `living: true` on a design stops the generator, so the rule can't be forgotten.
 - A page of theory is better with a live control (the dials lab uses the real engine).
+
+## Level 6 (40 minutes)
+- Effort goes up about the same amount per doubling of time, so a logarithmic time scale is just a linear effort scale in log(time). Set the next level's center by adding one doubling's step to the last center, then check the published mazes: level 5 already reached effort 7.0, so the 5 → 6 boundary sat at 7.2, not at the midpoint.
+- Difficulty comes from cell count. Paper size is fixed by the pencil floor (30), so harder means zoom (cell = paper ÷ zoom). Zoom was capped by the picture's height (560 units): level 6 gets 640, and the layout check keeps the words clear.
+- Big pictures fill the page, which costs white-space points. A bar set by one rubric line can block a whole level, so set level-specific bars and say so in the report, not silently.

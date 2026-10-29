@@ -7,9 +7,39 @@
   "use strict";
   const E = root.FMZ.engine;
 
-  // Effort → level. Boundaries sit between the typical efforts of each level's settings (≈0.8, 2.0, 3.2, 4.3, 5.5).
-  // Jimmy's check: the old 330-00A (effort ≈ 2.2) is a level 2.
-  const levelOf = effort => (effort < 1.35 ? 1 : effort < 2.65 ? 2 : effort < 3.75 ? 3 : effort < 4.9 ? 4 : 5);
+  // Effort → level. Level centers are ≈0.9, 2.0, 3.2, 4.3, 5.7, 7.8 and 9.2; level 5 already reaches 7.0 in published mazes
+  // (350-047, 350-079), so the 5 → 6 boundary sits at 7.2 and those stay level 5. The 6 → 7 boundary is 8.5.
+  // Time doubles per level from level 3 on (5, 10, 20, 40 minutes) and effort rises about 1.4 per doubling, so effort is
+  // roughly linear in log(time). Jimmy's check: the old 330-00A (effort ≈ 2.2) is a level 2.
+  const levelOf = effort => (effort < 1.35 ? 1 : effort < 2.65 ? 2 : effort < 3.75 ? 3 : effort < 4.9 ? 4 : effort < 7.2 ? 5 : effort < 8.5 ? 6 : 7);
+
+  /* A young solver, simulated: at every junction they try the way that points most toward the finish first (with a
+     little wobble, over a few runs), walk each wrong turn to its end and come back. Returns the squares walked.
+     Across the published bank this tracks effort closely (r ≈ 0.92) and roughly doubles per level, so it is the
+     time scale itself: level ≈ 1 + log2(steps / 30). Solution-first mazes (recipe.build = "path") are levelled by it. */
+  function simulate(model, runs = 6) {
+    const { g, links } = model, start = model.start.cell, end = model.end.cell;
+    const ex = g.cells[end].cx, ey = g.cells[end].cy, N = g.cells.length;
+    const nb = c => { const out = []; for (const ei of g.adj[c]) { if (!links.has(ei)) continue; const o = E.other(g.edges[ei], c); if (o !== null) out.push(o); } return out; };
+    let total = 0;
+    for (let k = 0; k < runs; k++) {
+      const r = E.rng(9000 + k), seen = new Uint8Array(N);
+      const order = c => nb(c).filter(o => !seen[o]).map(o => [o, Math.hypot(g.cells[o].cx - ex, g.cells[o].cy - ey) * (1 + (k ? (r() - 0.5) * 0.8 : 0))]).sort((a, b) => a[1] - b[1]).map(x => x[0]);
+      const stack = [start], its = [order(start)]; seen[start] = 1;
+      let steps = 0;
+      while (stack.length && stack[stack.length - 1] !== end && steps < 40 * N) {
+        const nx = its[its.length - 1].find(o => !seen[o]);
+        if (nx === undefined) { stack.pop(); its.pop(); steps++; continue; }
+        seen[nx] = 1; stack.push(nx); its.push(order(nx)); steps++;
+      }
+      total += steps;
+    }
+    return total / runs;
+  }
+  // steps → level: centers 30, 68, 122, 199, 338 measured on the bank, then doubling (676, 1352); boundaries are the
+  // geometric midpoints between centers
+  const STEP_CENTER = { 1: 30, 2: 68, 3: 122, 4: 199, 5: 338, 6: 676, 7: 1352 };
+  const levelOfSteps = st => (st < 45 ? 1 : st < 91 ? 2 : st < 156 ? 3 : st < 259 ? 4 : st < 478 ? 5 : st < 956 ? 6 : 7);
 
   function measure(model) {
     const { g, links, sol } = model;
@@ -56,7 +86,8 @@
     // level's settings (measured over all styles). The level's time label is a target for Felix,
     // to be tuned from his log, not a measurement.
     const effort = secs / 60;
-    const level = levelOf(effort);
+    const sim = Math.round(simulate(model));
+    const level = model.recipe && model.recipe.build === "path" ? levelOfSteps(sim) : levelOf(effort);
     // the longest stretch of the right path with no choice at all (a dull hallway)
     let run = 0, longest = 0;
     for (const c of sol.cells) {
@@ -64,10 +95,10 @@
       if (deg <= 2) { run++; longest = Math.max(longest, run); } else run = 0;
     }
     return { L, choices, trapSum, trapMax, confusion: Math.round(confusion * 100) / 100, loops, deadEnds: model.deadEnds,
-      effort: Math.round(effort * 10) / 10, level, dull: Math.round((longest / L) * 100) / 100 };
+      effort: Math.round(effort * 10) / 10, sim, level, dull: Math.round((longest / L) * 100) / 100 };
   }
 
-  const clamp = v => Math.max(1, Math.min(5, Math.round(v * 10) / 10));
+  const clamp = v => Math.max(1, Math.min(7, Math.round(v * 10) / 10));
 
   function joy(model, m, lint) {
     const sp = model.spec, look = sp.look, W = root.FMZ.sheet.W, H = root.FMZ.sheet.H;
@@ -114,5 +145,5 @@
   }
 
   root.FMZ = root.FMZ || {};
-  root.FMZ.score = { measure, joy, score, levelOf };
+  root.FMZ.score = { measure, joy, score, levelOf, levelOfSteps, simulate, STEP_CENTER };
 })(typeof window !== "undefined" ? window : globalThis);

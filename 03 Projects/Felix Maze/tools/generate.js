@@ -16,18 +16,21 @@ const { root, load, writeData } = require("./lib");
 const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf("--" + k); return i < 0 ? d : (args[i + 1] && !args[i + 1].startsWith("--") ? args[i + 1] : true); };
 const REDO = opt("redo", null);                    // --redo 11,15,19: make replacements (new counters) for these mazes; the old ones are retired
-const BATCH = REDO ? 6 : +opt("batch", 1), TRIES = +opt("tries", 90), DRY = !!opt("dry", false), ONLY = opt("only", null);
+const PLAN = opt("plan", null);                    // --plan tools/plans/<name>.js: puzzles planned by tools/plan.js from data/seeds.js
+const BATCH = +opt("batch", 1), TRIES = +opt("tries", 90), DRY = !!opt("dry", false), ONLY = opt("only", null);
 
-const designs1 = require("./designs_data"), designs5 = require("./designs_data5"), designs7 = require("./designs_data7");   // batch 5: 50 more designs, one puzzle each
-const designs = (BATCH === 5 ? designs5 : BATCH === 7 ? designs7 : designs1);
+const designs1 = require("./designs_data"), designs5 = require("./designs_data5"), designs7 = require("./designs_data7"), designs8 = require("./designs_data8");
+const planned = PLAN ? require(path.resolve(PLAN)) : [];
+const designs = PLAN ? planned : (BATCH === 5 ? designs5 : BATCH === 7 ? designs7 : BATCH === 8 ? designs8 : designs1);
 const { layoutProblems } = require("./check_layout");
 const ctx = load();
 const S = ctx.FMZ.sheet, Q = ctx.FMZ.score;
 const vr = require("./verify_raster");
 
 // Levels per batch of 50: 40 / 70 / 56 / 24 / 10 over the four batches (mean 2.5).
-const QUOTAS = { 1: [10, 18, 14, 6, 2], 2: [10, 17, 14, 6, 3], 3: [10, 18, 14, 6, 2], 4: [10, 17, 14, 6, 3], 5: [10, 18, 15, 7, 0], 7: [2, 3, 2, 1, 0] }[BATCH] || [0, 0, 0, 0, 0];
-if (!QUOTAS) { console.log("batch must be 1 to 5"); process.exit(1); }
+const QUOTAS = PLAN ? [1, 2, 3, 4, 5, 6, 7].map(l => planned.filter(d => d.level === l).length) : { 1: [10, 18, 14, 6, 2], 2: [10, 17, 14, 6, 3], 3: [10, 18, 14, 6, 2], 4: [10, 17, 14, 6, 3], 5: [10, 18, 15, 7, 0, 0, 0], 7: [2, 3, 2, 1, 0, 0, 0], 8: [0, 0, 0, 0, 0, 50, 0], 9: [0, 0, 0, 0, 8, 15, 27] }[BATCH] || [0, 0, 0, 0, 0, 0, 0];
+if (!QUOTAS.some(q => q)) { console.log("batch must be 1 to 8"); process.exit(1); }
+const ALL6 = BATCH === 8;                            // batch 8: every puzzle is level 6 (about 40 minutes)
 const vi = BATCH >= 5 ? 0 : BATCH - 1;
 const FIRST_NEW = BATCH >= 7 ? Math.max(...ctx.FMZ_CATALOG.map(r => r.n)) + 1 : 0;   // batch 7 and later: counters continue after the last one
 
@@ -39,7 +42,7 @@ if (REDO) {
   let next = Math.max(...catalog.map(r => r.n)) + 1;
   String(REDO).split(",").map(Number).forEach(n0 => {
     const r = have.get(n0); if (!r || r.retired) return;
-    const d = [...designs1, ...designs5].find(x => x.id === r.design); if (!d) return;
+    const d = [...designs1, ...designs5, ...designs7, ...designs8, ...planned].find(x => x.id === r.design); if (!d) return;
     const v = d.variants[r.batch >= 5 ? 0 : r.v - 1];
     slots.push({ d, di: 0, v, n: next++, existing: null, replaces: n0, level: +opt("level", r.level), range: [+opt("level", r.level), +opt("level", r.level)], vi: r.batch >= 5 ? 0 : r.v - 1 });
   });
@@ -54,49 +57,59 @@ if (REDO) {
 // Effort depends on how many cells the maze has (about size^-1.8). Paths narrower than about 0.3 in are hard for a
 // pencil, so there is a floor on the cell size; the hardest levels get a bigger maze on the page instead (zoom, up to
 // 1.2, which still leaves white margins). Some designs top out below level 5, and that is fine.
-const MIN_CELL = 36, MAX_CELL = 110, MAX_ZOOM = 1.2;
-const CENTER = { 1: 0.9, 2: 2.0, 3: 3.2, 4: 4.3, 5: 5.7 };       // effort at the middle of each level
+const { MIN_CELL, MAX_CELL, MAX_ZOOM, floorOf, maxZoomOf } = require("./limits");   // size limits, shared with tools/plan.js
+const CENTER = { 1: 0.9, 2: 2.0, 3: 3.2, 4: 4.3, 5: 5.7, 6: 7.8, 7: 9.2 };       // effort at the middle of each level
 const hashSeed = (n, k) => { let h = 2166136261 ^ n; h = Math.imul(h ^ (k + 1), 16777619); h = Math.imul(h ^ (h >>> 13), 2246822519); return (h >>> 0) % 900000 + 1000; };
 const fixedCells = d => d.style === "checker";                      // its size comes from the board, not the level
 // size = how big a square is on paper (1/100 in); zoom = how much of the page the maze fills
 function withSize(rc0, size, zoom) { const rc = Object.assign({}, rc0, { cell: Math.round(size / zoom) }); if (zoom !== 1) rc.zoom = Math.round(zoom * 100) / 100; else delete rc.zoom; return rc; }
+// How hard a maze is: solution-first mazes (build "path", levels 5 and up) are measured by the simulated young solver
+// (squares walked, Q.simulate), which doubles per level; grown mazes by effort, as the published bank always was.
+const isPath = rc => rc.build === "path";
+const diffOf = (rc, m) => { const q = Q.measure(m); return isPath(rc) ? q.sim : q.effort; };
+const levelFrom = (rc, v) => (isPath(rc) ? Q.levelOfSteps(v) : Q.levelOf(v));
+const centerOf = (rc, level) => (isPath(rc) ? Q.STEP_CENTER[level] : CENTER[level]);
+const sizePow = rc => (isPath(rc) ? 2 : 1.8);                     // difficulty ∝ size^-pow (steps follow the square count)
 function medianEffort(rc0, size, zoom, n = 3) {
   const out = [];
   for (let k = 0; k < n; k++) {
     const rc = withSize(Object.assign({}, rc0, { seed: hashSeed(rc0.n, 900 + k) }), size, zoom);
-    try { const m = S.buildModel(rc); if (!m.sol) continue; out.push(Q.measure(m).effort); } catch (e) { /* skip */ }
+    try { const m = S.buildModel(rc); if (!m.sol) continue; out.push(diffOf(rc, m)); } catch (e) { /* skip */ }
   }
   out.sort((a, b) => a - b);
   return out.length ? out[Math.floor(out.length / 2)] : null;
 }
 // A picture that is tall on the page leaves no room for the start and finish pictures if it is also zoomed: cap the zoom.
 const capCache = {};
-function zoomCap(rc0) {
-  const key = rc0.design + "/" + rc0.style;
+// level 6 may use a taller picture (up to 640 of the 850 units, the layout check still keeps the words clear)
+function zoomCap(rc0, level = 5) {
+  const key = rc0.design + "/" + rc0.style + "/" + level;
   if (capCache[key] === undefined) {
     let h = 510; try { const sp = S.buildModel(Object.assign({}, rc0, { cell: rc0.cell || 60, zoom: undefined })).spec; h = sp.box ? sp.box.h : 2 * sp.polar.R; } catch (e) { /* keep default */ }
-    capCache[key] = Math.max(1, Math.min(MAX_ZOOM, Math.floor(100 * 560 / h) / 100));
+    capCache[key] = Math.max(1, Math.min(maxZoomOf(level), Math.floor(100 * (level >= 6 ? 640 : 560) / h) / 100));
   }
   return capCache[key];
 }
 function findCell(rc0, target) {
-  let size = S.LEVELS[target].size, zoom = 1;
+  let size = S.LEVELS[target].size, zoom = 1; const floor = floorOf(target);
   for (let it = 0; it < 8; it++) {
     const e = medianEffort(rc0, size, zoom);
     if (e == null) break;
-    if (Q.levelOf(e) === target && Math.abs(e - CENTER[target]) < 0.3 * CENTER[target]) break;
-    const ratio = e / CENTER[target];
-    if (ratio < 1) { if (size > MIN_CELL + 0.5) size = Math.max(MIN_CELL, size * Math.pow(ratio, 1 / 1.8)); else zoom = Math.min(zoomCap(rc0), zoom * Math.pow(1 / ratio, 1 / 2)); }
-    else { if (zoom > 1) zoom = Math.max(1, zoom * Math.pow(1 / ratio, 1 / 2)); else size = Math.min(MAX_CELL, size * Math.pow(ratio, 1 / 1.8)); }
+    const c = centerOf(rc0, target), pw = sizePow(rc0);
+    if (levelFrom(rc0, e) === target && Math.abs(e - c) < 0.35 * c) break;
+    const ratio = e / c;
+    if (ratio < 1) { if (size > floor + 0.5) size = Math.max(floor, size * Math.pow(ratio, 1 / pw)); else zoom = Math.min(zoomCap(rc0, target), zoom * Math.pow(1 / ratio, 1 / 2)); }
+    else { if (zoom > 1) zoom = Math.max(1, zoom * Math.pow(1 / ratio, 1 / 2)); else size = Math.min(MAX_CELL, size * Math.pow(ratio, 1 / pw)); }
   }
   return { size: Math.round(size), zoom: Math.round(zoom * 100) / 100 };
 }
 function reach(s) {                                                 // levels this slot's design can actually produce
   if (fixedCells(s.d)) return s.d.levels.slice();
-  const base = recipeFor(s, 1000, null);
-  const eSmall = medianEffort(base, MIN_CELL, zoomCap(base)), eBig = medianEffort(base, MAX_CELL, 1);
+  // measured as a perfect maze at level 7 (the most squares, the most depth), from the paper floor to the biggest cells
+  const base = recipeFor(s, 1000, null, 7);
+  const eSmall = medianEffort(base, floorOf(7), maxZoomOf(7)), eBig = medianEffort(base, MAX_CELL, 1);
   if (eSmall == null || eBig == null) return s.d.levels.slice();
-  const lo = Q.levelOf(eBig), hi = Q.levelOf(eSmall);
+  const lo = levelFrom(base, eBig), hi = levelFrom(base, eSmall);
   const a = Math.max(lo, s.d.levels[0]), b = Math.min(hi, s.d.levels[1]);
   return a <= b ? [a, b] : [Math.min(lo, hi), Math.max(lo, hi)];
 }
@@ -107,6 +120,7 @@ function assignLevels() {
   const quota = QUOTAS.slice();
   fixed.forEach(l => { quota[l - 1]--; });
   const open = slots.filter(s => !s.existing && (!ONLY || s.d.id === ONLY));
+  if (ALL6 || PLAN) { open.forEach(s => { s.level = ALL6 ? 6 : s.d.level; s.range = [s.level, s.level]; }); return; }   // planned: each puzzle has its level
   open.forEach(s => { s.range = reach(s); });
   if (ONLY) { open.forEach(s => { s.level = Math.round((s.range[0] + s.range[1]) / 2); }); return; }
   const tokens = [];
@@ -147,11 +161,16 @@ const charTags = chars => [...new Set((chars || []).map(c => (c === "cat" ? "Fel
 
 function recipeFor(s, seed, cell, level, zoom) {
   const { d, v } = s;
+  const lvl = level || s.level;
   const rc = {
     n: s.n, family: d.family, level: level || s.level, source: 0, style: v.style || d.style, seed,
     title: v.title, inspired: v.inspired || d.inspired, fun: v.fun,
     tags: [...new Set([...(d.tags || []), ...(v.tags || []), ...charTags(v.chars)])].slice(0, 7),
-    design: d.id, v: (s.vi !== undefined ? s.vi : vi) + 1, batch: BATCH, ...(s.replaces ? { replaces: s.replaces } : {})
+    design: d.id, v: (s.vi !== undefined ? s.vi : vi) + 1, batch: BATCH, ...(s.replaces ? { replaces: s.replaces } : {}),
+    ...(lvl >= 5 || s.perfect ? { perfect: true } : {}),         // levels 5 and up: one way through (no loops, no bridges)
+    // levels 5 and up are built solution first: the right path is laid out (sweeping back and forth, twisting), the
+    // wrong turns are hung off it where they look like the way, then the maze is grown around it
+    ...(lvl >= 5 && !s.d.noPath ? { build: "path", pathCfg: { waypoints: lvl >= 7 ? 4 : lvl >= 6 ? 3 : 2, len: 0.25, twist: 0.8, away: 0.7, lure: 1, mix: 0.3 } } : {})
   };
   const p = Object.assign({}, d.base, v.p);
   if (Object.keys(p).length) rc.p = p;
@@ -193,11 +212,14 @@ function recipeFor(s, seed, cell, level, zoom) {
       if (sc.level !== s.level) {                                              // 2. the level must fit
         rep.levelMiss++; stats.levelMiss++; lastEst = sc.level;
         if (rep.levelMiss % 8 === 0 && nudge < 4) {                           // a design that can't reach its level: nudge the cells
-          nudge++; if (cell) cell = Math.max(Math.round(MIN_CELL / zoom), Math.min(MAX_CELL, Math.round(cell * (lastEst < s.level ? 0.94 : 1.07))));
+          nudge++; if (cell) cell = Math.max(Math.round(floorOf(s.level) / zoom), Math.min(MAX_CELL, Math.round(cell * (lastEst < s.level ? 0.94 : 1.07))));
         }
         continue;
       }
-      if (sc.looking < 3 || sc.overall < 3.4) { rep.low++; stats.low++; continue; }
+      // level 6 covers more of the page (its pictures are big), so white space scores lower; its bar is set lower on
+      // Looking, and the lower overall bar is the one Jimmy should confirm (see the generation report)
+      const lookMin = s.level >= 6 ? 1.9 : s.level === 5 ? 2.4 : 3, overallMin = s.level >= 6 ? 3.0 : s.level === 5 ? 3.2 : 3.4;
+      if (sc.looking < lookMin || sc.overall < overallMin) { rep.low++; stats.low++; continue; }
       if (layoutProblems(S, rc).length) { rep.layout++; stats.layout++; continue; }   // the pictures must not run into the title or footer
       cands.push({ rc, sc, m });
     }
@@ -208,7 +230,7 @@ function recipeFor(s, seed, cell, level, zoom) {
       if (j.error) { rep.raster++; stats.raster++; continue; }
       const r = await page.evaluate(`(${vr.inPage.toString()})(${JSON.stringify(j)})`);
       const problems = vr.verdict(j, r);
-      if (problems.length) { rep.raster++; stats.raster++; continue; }
+      if (problems.length) { rep.raster++; stats.raster++; rep.rasterWhy = rep.rasterWhy || problems[0]; continue; }
       chosen = c; break;
     }
     if (chosen) { stats.ok++; made.push(chosen.rc); process.stdout.write("."); }
@@ -219,7 +241,7 @@ function recipeFor(s, seed, cell, level, zoom) {
       if (rep.levelMiss) reasons.push(`level ${s.level} not reached in ${rep.levelMiss} (last guess ${lastEst})`);
       if (rep.low) reasons.push(`${rep.low} scored too low to publish`);
       if (rep.layout) reasons.push(`${rep.layout} had a start or finish picture running into the words`);
-      if (rep.raster) reasons.push(`${rep.raster} failed the pixel check`);
+      if (rep.raster) reasons.push(`${rep.raster} failed the pixel check (${rep.rasterWhy || "?"})`);
       rework.push({ id: `${d.id}-v${vi + 1}`, n: s.n, design: d.id, title: v.title, level: s.level, tries: rep.attempts, batch: BATCH, at: new Date().toISOString().slice(0, 10), reasons, recipe: recipeFor(s, hashSeed(s.n, 0), cell, null, zoom) });
       process.stdout.write("x");
     }
@@ -228,11 +250,11 @@ function recipeFor(s, seed, cell, level, zoom) {
   console.log("");
 
   // ---------- report ----------
-  const lvHist = [0, 0, 0, 0, 0, 0];
+  const lvHist = [0, 0, 0, 0, 0, 0, 0, 0];
   [...catalog.filter(r => r.batch === BATCH || (BATCH === 1 && r.n <= 50)), ...made].forEach(r => { lvHist[r.level]++; });
   const total = lvHist.slice(1).reduce((a, b) => a + b, 0), mean = lvHist.slice(1).reduce((a, c, i) => a + c * (i + 1), 0) / (total || 1);
   const lines = [];
-  lines.push(`## Batch ${BATCH}${REDO ? " (repairs: new counters for mazes whose pictures ran into the words)" : ""} (${new Date().toISOString().slice(0, 10)})`, "");
+  lines.push(REDO ? `## Repairs, batch ${BATCH} (${new Date().toISOString().slice(0, 10)}): ${REDO} replaced with new counters; the old ones are retired` : `## Batch ${BATCH}${PLAN ? " (plan " + path.basename(PLAN, ".js") + ")" : ""} (${new Date().toISOString().slice(0, 10)})`, "");
   lines.push(`- Slots: ${slots.length} (${slots.filter(s => s.existing).length} already in the catalog). Made: ${made.length}. Sent to rework: ${rework.length}.`);
   lines.push(`- Seeds tried: ${stats.attempts}. Rejected: no way through ${stats.noWay}, **answer touched a wall ${stats.lint}** (${(100 * stats.lint / Math.max(1, stats.attempts)).toFixed(1)}% of tries), wrong level ${stats.levelMiss}, scored too low ${stats.low}, pictures hit the words ${stats.layout}, pixel check ${stats.raster}.`);
   lines.push(`- Levels in this batch: ${lvHist.slice(1).map((c, i) => `L${i + 1}: ${c}`).join(", ")} (plan: ${QUOTAS.map((c, i) => `L${i + 1}: ${c}`).join(", ")}). Mean level ${mean.toFixed(2)}.`);
@@ -253,11 +275,11 @@ function recipeFor(s, seed, cell, level, zoom) {
     if (d) { r.design = d.id; r.v = 1; r.batch = 1; }
   });
   writeData("data/catalog.js", "FMZ_CATALOG", next, "The Felix Maze bank: one recipe per maze. A recipe rebuilds its maze, answer key and animation exactly.\nCode = family · level · source - counter (hex); see catalog.md. Written by tools/generate.js; the first ten were picked by hand.");
-  const old = ctx.FMZ_REWORK.filter(w => w.batch !== BATCH || (ONLY && w.design !== ONLY));
+  const old = REDO ? ctx.FMZ_REWORK : ctx.FMZ_REWORK.filter(w => w.batch !== BATCH || (ONLY && w.design !== ONLY));
   writeData("data/rework.js", "FMZ_REWORK", old.concat(rework), "Puzzles the generator could not finish cleanly (answer line touching a wall, a level that would not fit, a failed pixel check).\nThey are not in the catalog and are never printed or picked. The fix_puzzles skill repairs or replaces them. Shown on rework.html.");
   const reportFile = path.join(root, "tools", "generation_report.md");
   const prev = fs.existsSync(reportFile) ? fs.readFileSync(reportFile, "utf8") : "# Felix Maze: generation report\n\nOne section per batch: how many seeds were tried, how many were rejected and why, and the level mix against the plan.\n\n";
-  const cut = prev.indexOf(`## Batch ${BATCH} `);
+  const cut = REDO ? -1 : prev.indexOf(`## Batch ${BATCH} `);
   fs.writeFileSync(reportFile, (cut < 0 ? prev : prev.slice(0, cut)).replace(/\n*$/, "\n\n") + lines.join("\n") + "\n");
   console.log("wrote data/catalog.js (" + next.length + " puzzles), data/rework.js (" + (old.length + rework.length) + "), tools/generation_report.md");
 })().catch(e => { console.error(e); process.exit(1); });

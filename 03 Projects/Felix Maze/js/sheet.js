@@ -15,8 +15,12 @@
     2: { name: "Level 2 · about 3 minutes", short: "3 min", size: 54, mix: 0.05, braid: 0 },
     3: { name: "Level 3 · about 5 minutes", short: "5 min", size: 42, mix: 0.12, braid: 0.04 },
     4: { name: "Level 4 · about 10 minutes", short: "10 min", size: 35, mix: 0.2, braid: 0.06 },
-    5: { name: "Level 5 · 20 minutes or more", short: "20+ min", size: 30, mix: 0.3, braid: 0.08 }
+    5: { name: "Level 5 · about 20 minutes", short: "20 min", size: 30, mix: 0.3, braid: 0.08 },
+    // Levels above 3 roughly double the time each time, so the scale is logarithmic in time (5, 10, 20, 40, ...).
+    6: { name: "Level 6 · about 40 minutes", short: "40 min", size: 30, mix: 0.35, braid: 0.1 },
+    7: { name: "Level 7 · about 80 minutes", short: "80 min", size: 28, mix: 0.4, braid: 0 }
   };
+  const MAX_LEVEL = 7;
 
   const FAMILIES = {
     1: "Classical", 2: "Famous mazes", 3: "Art", 4: "Nature", 5: "Systems and maps", 6: "Math and patterns", 7: "Music and sound", 8: "Story worlds"
@@ -84,6 +88,8 @@
 
   /* Check the answer line against the walls as drawn. hits = points of the red line that sit on a wall's ink.
      Ribbon and subway mazes draw the path itself, so the answer follows it by construction. */
+  // the red answer line: 8 wide for normal squares (as on every published key), thinner for the tiny squares of levels 6-7
+  const answerWidthOf = (size, model) => (size >= 30 ? Math.max(8, size * 0.18) : Math.max(3, size * (model && (model.g.kind === "hex" || model.spec.look.mode !== "walls") ? 0.18 : 0.27)));   // hexagon and burrow corridors are narrower
   function lint(model) {
     const look = model.spec.look;
     if (!model.path) return { ok: false, hits: 0, why: "no way through" };
@@ -162,12 +168,32 @@
     else g = E.buildGrid(Object.assign({}, spec.box, { size: spec.size, mask: spec.mask }));
     if (spec.mask) g = E.keepLargest(g);
     const prep = spec.prepare ? spec.prepare(g, r) : {};
-    const grown = spec.generate
+    // solution first (recipe.build = "path"): choose the two doorways, lay the right path, grow the maze around it
+    const pathMode = recipe.build === "path" && !spec.generate && !spec.prepare;
+    let pathEnds = null;
+    if (pathMode) {
+      const open = new Set(); g.edges.forEach((e, i) => { if (e.b !== null) open.add(i); });
+      const farOpen = (cell, side) => {
+        const d = E.distances(g, open, cell);
+        let best = -1, bc = -1;
+        g.edges.forEach((e, i) => { if (e.b === null && d[e.a] > best && (!side || sideOk(e, side))) { best = d[e.a]; bc = i; } });
+        return bc < 0 ? { cell: 0, edge: -1 } : { cell: g.edges[bc].a, edge: bc };
+      };
+      let s0, t0;
+      if (spec.start.far) { t0 = E.pickEnd(g, spec.finish, spec.box || {}); s0 = farOpen(t0.cell, spec.start.side); }
+      else { s0 = E.pickEnd(g, spec.start, spec.box || {}); t0 = spec.finish.far ? farOpen(s0.cell, spec.finish.side) : E.pickEnd(g, spec.finish, spec.box || {}); }
+      pathEnds = [s0, t0];
+    }
+    const PATH_LEN = { 1: 0.14, 2: 0.18, 3: 0.22, 4: 0.26, 5: 0.3, 6: 0.34, 7: 0.38 };
+    const grown = pathMode
+      ? E.pathFirst(g, r, pathEnds[0].cell, pathEnds[1].cell, Object.assign({ len: PATH_LEN[recipe.level] || 0.3, twist: 0.7, mix: lv.mix }, recipe.pathCfg))
+      : spec.generate
       ? spec.generate(g, r, lv, prep)                       // e.g. recursive division: returns { links, seen, heavy }
       : E.grow(g, r, Object.assign({ mix: spec.mix !== undefined ? spec.mix : lv.mix, growth: recipe.growth || 1 }, prep));
     const links = grown.links;
     let bridges = [];
-    if ((recipe.growth || 1) >= 1) {
+    // perfect (levels 5 and up): one way through, so no loops and no bridges that open a second route
+    if ((recipe.growth || 1) >= 1 && !recipe.perfect && !pathMode) {
       if (spec.weave) bridges = E.weave(g, links, r, spec.weave);
       E.braid(g, links, r, spec.braid !== undefined ? spec.braid : lv.braid);
     }
@@ -179,7 +205,8 @@
       return bc < 0 ? { cell: 0, edge: -1 } : { cell: g.edges[bc].a, edge: bc };
     };
     let start, end;
-    if (spec.start.far) {
+    if (pathEnds) { [start, end] = pathEnds; }
+    else if (spec.start.far) {
       end = prep.finish || E.pickEnd(g, spec.finish, spec.box || {});
       start = farFrom(end.cell, spec.start.side);
     } else {
@@ -324,7 +351,7 @@
       }
     }
     if (opts.answer && model.path) {
-      out.push(`<path class="fmz-answer" d="${smooth(model.path)}" fill="none" stroke="${opts.answerColor || "#e0604a"}" stroke-width="${opts.answerWidth || Math.max(8, (spec.size || 40) * 0.18)}" stroke-linecap="round" stroke-linejoin="round" ${opts.answerDash ? `stroke-dasharray="${opts.answerDash}"` : ""}/>`);
+      out.push(`<path class="fmz-answer" d="${smooth(model.path)}" fill="none" stroke="${opts.answerColor || "#e0604a"}" stroke-width="${opts.answerWidth || answerWidthOf(spec.size || 40, model)}" stroke-linecap="round" stroke-linejoin="round" ${opts.answerDash ? `stroke-dasharray="${opts.answerDash}"` : ""}/>`);
       // where the answer goes under a bridge, the bridge is drawn on top of it again
       if (coverUnder && model.sol) {
         const under = new Set(model.sol.edges.map(ei => g.edges[ei].under).filter(c => c !== undefined));
@@ -525,5 +552,5 @@
   };
 
   root.FMZ = root.FMZ || {};
-  root.FMZ.sheet = { W, H, LEVELS, FAMILIES, SOURCES, STYLES, code, parseCode, buildModel, renderMaze, svg, smooth, curve, lint, standAt, makeWarp };
+  root.FMZ.sheet = { W, H, LEVELS, MAX_LEVEL, FAMILIES, SOURCES, STYLES, code, parseCode, buildModel, renderMaze, svg, smooth, curve, lint, standAt, makeWarp };
 })(typeof window !== "undefined" ? window : globalThis);

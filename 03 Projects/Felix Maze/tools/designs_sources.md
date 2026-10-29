@@ -55,3 +55,22 @@ Public sources only, no copies of pages. "Check" means worth a second look befor
 | guitar | Most have six strings | Common fact, not all |
 | note | Notes show how high or low to sing | Music reading |
 | chladni | Sand jumps into patterns on a plate played with a bow | Ernst Chladni, 1787 |
+
+## Batch 8 (level 6)
+
+All 50 are historical or traditional sources. Fun lines to check before printing:
+- Van Gogh (Starry Night, 1889): painted from memory, during the day, and he often painted outdoors in one or two sittings. Standard biographies (letters to Theo).
+- Mondrian: jazz and Broadway (Broadway Boogie Woogie, 1942–43); red, yellow, blue, black, white and gray; straight lines, avoided curves.
+- Seurat (A Sunday on La Grande Jatte, 1884–86): dots of paint; about two years on the big park painting.
+- Manhattan street grid planned in 1811 (Commissioners' Plan). Early streetlights lit by hand (lamplighters).
+- Paul Klee: "drawing is taking a line for a walk" (Klee, *Creative Confession*, 1920).
+- Hokusai, The Great Wave off Kanagawa (about 1831): one of the most copied prints; woodblock, one color at a time; Prussian blue. Check: "most copied" is widely stated, not measured.
+- Klimt, Tree of Life (about 1909): gold leaf; gold and silver in his wall pictures.
+- Antelope Canyon, Arizona: on Navajo Nation land; layered sandstone; carved by water and wind.
+- Sound: a louder sound makes a taller wave; a higher sound wiggles more often.
+- Ants: can lift many times their own weight (common statement; check a species if printing for a classroom).
+- Rabbit warrens; a group of rabbits underground is a warren (standard usage).
+- Mice: can squeeze through a gap about a pencil's width (about 6 mm); good sense of smell; tail for balance.
+- Honeycomb: hexagon cells fit with no gaps; a hive can hold tens of thousands of bees; worker bees are all female.
+- Lattice windows in Chinese gardens frame views.
+- Klee squares and Mondrian's later squares: the "Rooms in Blue" line is a loose description; check before printing.

@@ -176,7 +176,7 @@
   // ---------- ⚙️ drawer ----------
   function init(extra = "") {
     const here = location.pathname.split("/").pop() || "index.html";
-    const links = [["index.html", "🏠 Home"], ["library.html", "📚 Library"], ["pack.html", "🖨️ Print a pack"], ["make.html", "✏️ Make a maze"], ["answer.html", "🎬 Answers"], ["play.html", "🚗 Drive a maze"], ["prototypes.html", "🧪 Prototypes"], ["about.html", "📖 About"], ["rework.html", "🔧 To rework"], ["research/index.html", "🔭 Research"]];
+    const links = [["index.html", "🏠 Home"], ["library.html", "📚 Library"], ["pack.html", "🖨️ Print a pack"], ["make.html", "✏️ Make a maze"], ["answer.html", "🎬 Answers"], ["play.html", "🚗 Drive a maze"], ["prototypes.html", "🧪 Prototypes"], ["pathlab.html", "🧭 Path Lab"], ["about.html", "📖 About"], ["rework.html", "🔧 To rework"], ["research/index.html", "🔭 Research"]];
     document.body.insertAdjacentHTML("beforeend", `
       <button class="gear noprint" id="gear" aria-label="Settings">⚙️</button>
       <div class="drawer noprint" id="drawer" hidden>
@@ -265,7 +265,7 @@
     if (!l.length) return { level: 2, from: 0 };
     let sum = 0, wsum = 0;
     l.forEach((e, i) => { const w = i + 1, v = e.level + (e.mood === "easy" ? 1 : e.mood === "hard" ? -1 : 0); sum += w * v; wsum += w; });
-    return { level: Math.max(1, Math.min(5, Math.round(sum / wsum))), from: l.length };
+    return { level: Math.max(1, Math.min(FMZ.sheet.MAX_LEVEL, Math.round(sum / wsum))), from: l.length };
   }
 
   // Grow a few versions of a recipe and keep the best one that passes the check (the answer never touches a wall).
