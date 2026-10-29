@@ -88,6 +88,14 @@ Status: `[ ]` open · `[x]` done · `[!]` blocked (say why)
 - Verified: `validate_data` passes; `test_engine` passes (20); `smoke` passes end to end including reload and `file://`.
 - Not verified: iPad or narrow widths beyond a basic 900px breakpoint; real printing; publishing on GitHub Pages.
 
+## Accounts round (2026-10-28)
+
+- Username and password accounts (usernames: any text with letters, numbers, `. _ + - @` and spaces; password can be blank for now). Not Supabase Auth, so usernames need not be emails. Google and Microsoft are not built; see convo v0.3, question 1.
+- Cloud projects through the `ss_` functions only. Tables have RLS and no policies, so the browser cannot read or write them directly. Injection-shaped usernames are refused by a fixed pattern, and no SQL is built from text.
+- Layout: menu and notes panel minimize, the notes panel resizes by drag, and its panels reorder with ▲▼. The menu starts folded on phones.
+- SQL: `supabase/002_shimmy_specs_accounts.sql` (to run by Jimmy) and `002_test_rollback.sql` (rolled back; prints PASS or the first failed check).
+- Not yet done: applying the SQL; filling in `index.html config block`; wrong-password limits; Google/Microsoft.
+
 ## Questions for Jimmy / Opus
 
-_(none open from the build)_
+- Open questions are in `convo/convo v0.3.md`.

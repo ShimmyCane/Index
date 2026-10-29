@@ -1,11 +1,36 @@
-// Shimmy Specs — shell: boot, router, navigation, ⚙️ drawer, error panel, and event wiring.
+// Shimmy Specs — shell: boot, header, router, navigation, layout (minimize, resize, reorder),
+// ⚙️ drawer, error panel, account actions, and event wiring.
 (function (root) {
   'use strict';
   var SS = root.SS = root.SS || {};
   var doc = root.document;
   var ui = SS.ui = SS.ui || {};
   var store = SS.store;
-  var UI = { focus: null, editing: null, flagFilter: 'open', decSection: '', decKind: '', drawer: false };
+  var LAYOUT_KEY = 'ss.layout';
+  var DEFAULT_LAYOUT = { navHidden: false, sideHidden: false, sideWidth: 340, sideOrder: ['explain', 'perspectives', 'decisions'] };
+  SS.layoutDefaults = DEFAULT_LAYOUT;
+
+  function loadLayout() {
+    var out = Object.assign({}, DEFAULT_LAYOUT, { sideOrder: DEFAULT_LAYOUT.sideOrder.slice() });
+    try {
+      var saved = JSON.parse(root.localStorage.getItem(LAYOUT_KEY) || '{}');
+      Object.keys(DEFAULT_LAYOUT).forEach(function (k) { if (saved[k] !== undefined) out[k] = saved[k]; });
+      var ok = Array.isArray(out.sideOrder) && out.sideOrder.length === 3 && DEFAULT_LAYOUT.sideOrder.every(function (k) { return out.sideOrder.indexOf(k) >= 0; });
+      if (!ok) out.sideOrder = DEFAULT_LAYOUT.sideOrder.slice();
+      // On a phone, start with the menu folded away unless the user chose otherwise.
+      if (saved.navHidden === undefined && root.innerWidth < 900) out.navHidden = true;
+    } catch (e) { /* keep defaults */ }
+    return out;
+  }
+
+  var UI = {
+    focus: null, editing: null, flagFilter: 'open', decSection: '', decKind: '', drawer: false,
+    layout: loadLayout(), cloudList: null, cloudError: '', cloudLoading: false, authError: '', dbMessage: ''
+  };
+
+  function saveLayout() {
+    try { root.localStorage.setItem(LAYOUT_KEY, JSON.stringify(UI.layout)); } catch (e) { SS.errors.log(e); }
+  }
 
   ui.LEVELS = ['auto', 'review', 'decision'];
   ui.esc = function (s) {
@@ -34,14 +59,34 @@
   function renderErrors() {
     var panel = doc && doc.getElementById('errors');
     if (!panel) return;
-    var show = store.settings().showErrors;
-    panel.hidden = !show;
+    panel.hidden = !store.settings().showErrors;
     panel.innerHTML = '<strong>Errors</strong> <button class="btn small" data-act="clear-errors">Clear</button>' +
       (errorLog.length ? '<ul>' + errorLog.map(function (e) { return '<li>' + e.at + ' ' + ui.esc(e.msg) + '</li>'; }).join('') + '</ul>' : '<p class="muted">None.</p>');
   }
 
   root.addEventListener('error', function (e) { SS.errors.log(e.error || e.message); });
   root.addEventListener('unhandledrejection', function (e) { SS.errors.log(e.reason || 'Unhandled promise rejection'); });
+
+  // ---- status light (header pill) --------------------------------------------
+  function statusInfo() {
+    var c = SS.cloud.status();
+    if (!c.configured) return { cls: 'device', text: 'On this device · database not set up' };
+    if (!c.signedIn) return { cls: 'device', text: 'On this device · not signed in' };
+    if (root.navigator && root.navigator.onLine === false) return { cls: 'device', text: 'Offline · saved on this device' };
+    if (c.status === 'saving') return { cls: 'saving', text: 'Saving to account…' };
+    if (c.status === 'error') return { cls: 'error', text: 'Not saved to account' };
+    return { cls: 'saved', text: 'Saved to account · ' + SS.cloud.session().username };
+  }
+
+  function refreshStatus() {
+    var el = doc && doc.getElementById('syncPill');
+    if (!el || !SS.cloud) return;
+    var info = statusInfo();
+    el.className = 'pill pill-' + info.cls;
+    el.textContent = info.text;
+    el.title = SS.cloud.status().message || info.text;
+  }
+  SS.app = { refreshStatus: refreshStatus, UI: UI };
 
   // ---- router ---------------------------------------------------------------
   function route() {
@@ -70,9 +115,22 @@
           (l[2] ? ' <span class="count">' + ui.esc(l[2]) + '</span>' : '') + '</a>';
       }).join('') +
       (book.length ? '<div class="sub">Book</div>' + book.map(function (s) {
-        return '<a class="book ' + ui.divClass(s.number) + '" href="#/section/' + ui.esc(s.number) + '"' +
-          (current === 'section' && UI.focus && UI.focus.num === s.number ? ' class="on"' : '') + '>' + ui.esc(s.number) + ' ' + ui.esc((SS.recommend.sectionEntry(store.data, s.number) || {}).title || '') + '</a>';
+        var on = current === 'section' && UI.focus && UI.focus.num === s.number;
+        return '<a class="book ' + ui.divClass(s.number) + (on ? ' on' : '') + '" href="#/section/' + ui.esc(s.number) + '">' +
+          ui.esc(s.number) + ' ' + ui.esc((SS.recommend.sectionEntry(store.data, s.number) || {}).title || '') + '</a>';
       }).join('') : '') + '</nav>';
+  }
+
+  function topbar(r) {
+    var p = store.current;
+    var notes = r.name === 'section'
+      ? '<button class="btn small" data-act="toggle-side">' + (UI.layout.sideHidden ? 'Show notes' : 'Hide notes') + '</button>'
+      : '';
+    return '<header class="topbar">' +
+      '<button class="btn small" data-act="toggle-nav" aria-label="Show or hide the menu" aria-pressed="' + (UI.layout.navHidden ? 'false' : 'true') + '">☰ Menu</button>' +
+      '<a class="brand" href="#/start">Shimmy Specs</a>' +
+      '<span class="proj">' + (p ? ui.esc(p.name) : '') + '</span>' +
+      '<span id="syncPill" class="pill"></span>' + notes + '</header>';
   }
 
   function drawer() {
@@ -86,28 +144,52 @@
         '</select></label>' +
         '<label><input type="checkbox" data-chg="setting" data-set="showNotes"' + (s.showNotes ? ' checked' : '') + ' /> Show decision notes</label>' +
         '<label><input type="checkbox" data-chg="setting" data-set="showErrors"' + (s.showErrors ? ' checked' : '') + ' /> Show errors</label>' +
-        '<p class="muted">Data is kept in this browser. Export a project from Start.</p>' +
+        '<h3>Database</h3>' +
+        '<p class="muted">' + (SS.cloud.configured() ? 'Connection set in index.html.' : 'Not set up: the two values in index.html still have placeholders.') + '</p>' +
+        '<p><button class="btn small" data-act="check-db"' + (SS.cloud.configured() ? '' : ' disabled') + '>Check database</button></p>' +
+        (UI.dbMessage ? '<p class="hint">' + ui.esc(UI.dbMessage) + '</p>' : '') +
+        '<p class="muted">Projects also stay on this device.</p>' +
         '<button class="btn" data-act="toggle-drawer">Close</button></div>' : '');
+  }
+
+  function ensureCloudList() {
+    if (!SS.cloud.configured() || !SS.cloud.session() || UI.cloudList !== null || UI.cloudLoading) return;
+    UI.cloudLoading = true;
+    SS.cloud.list().then(function (rows) {
+      UI.cloudList = rows || [];
+      UI.cloudError = '';
+    }).catch(function (err) {
+      UI.cloudList = [];
+      UI.cloudError = err.message;
+      SS.errors.log(err);
+    }).then(function () {
+      UI.cloudLoading = false;
+      render();
+    });
   }
 
   function render() {
     if (!doc) return;
     var r = route();
     var main;
-    var side = '';
     var screens = SS.screens;
-    if (!store.data) { main = '<p>Loading data…</p>'; }
-    else if (r.name === 'section') { main = screens.section(r.arg, UI); }
-    else if (screens[r.name] && typeof screens[r.name] === 'function') {
-      main = (r.name === 'flags') ? screens.flags(UI) : (r.name === 'decisions') ? screens.decisions(UI) : screens[r.name]();
-    } else { main = '<h1>Not found</h1><p><a href="#/start">Start</a></p>'; }
-    var root2 = doc.getElementById('app');
-    root2.innerHTML = '<div class="layout">' + nav(r.name) + '<main class="main">' + main + '</main></div>' + drawer();
+    if (!store.data) main = '<p>Loading data…</p>';
+    else if (r.name === 'section') main = screens.section(r.arg, UI);
+    else if (r.name === 'flags') main = screens.flags(UI);
+    else if (r.name === 'decisions') main = screens.decisions(UI);
+    else if (typeof screens[r.name] === 'function') main = screens[r.name](UI);
+    else main = '<h1>Not found</h1><p><a href="#/start">Start</a></p>';
+    var layoutClass = 'layout' + (UI.layout.navHidden ? ' nav-hidden' : '');
+    doc.getElementById('app').innerHTML = topbar(r) +
+      '<div class="' + layoutClass + '" style="--side-w:' + UI.layout.sideWidth + 'px">' +
+      nav(r.name) + '<main class="main">' + main + '</main></div>' + drawer();
     doc.documentElement.dataset.theme = store.settings().theme === 'auto' ? '' : store.settings().theme;
+    refreshStatus();
     renderErrors();
+    if (r.name === 'start') ensureCloudList();
   }
 
-  // ---- actions --------------------------------------------------------------
+  // ---- files ----------------------------------------------------------------
   function readFile(file) {
     return file.text().then(function (txt) {
       var obj = JSON.parse(txt);
@@ -119,7 +201,6 @@
         store.touch();
       }
       root.location.hash = '#/import';
-      render();
     });
   }
 
@@ -133,19 +214,26 @@
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 0);
   }
 
+  function outputText(type) {
+    var s = store.settings();
+    var p = store.current, d = store.data;
+    if (type === 'ppd') return SS.outputs.ppd(p, d, s.showNotes);
+    if (type === 'outline') return SS.outputs.outline(p, d, s.showNotes);
+    return SS.outputs.full(p, d, s.showNotes);
+  }
+
+  // ---- actions --------------------------------------------------------------
   var handlers = {
     'new-project': function () {
       var name = (doc.getElementById('newName').value || '').trim() || 'Untitled sketch';
-      var kind = doc.getElementById('newKind').value;
-      store.create(name, kind);
+      store.create(name, doc.getElementById('newKind').value);
       root.location.hash = '#/import';
     },
     'load-sample': function () {
       var sample = JSON.parse(JSON.stringify(store.data.sample));
       store.create(sample.name, 'sketch');
       SS.importer.applyFile(store.current, sample, store.data);
-      store.current.textDump = sample.text_dump || '';
-      store.readDump(store.current.textDump);
+      store.readDump(sample.text_dump || '');
       store.touch();
       root.location.hash = '#/survey';
     },
@@ -156,9 +244,7 @@
     'export-state': function () {
       downloadText((store.current.name || 'project').replace(/\W+/g, '-') + '.shimmy.json', store.exportState(), 'application/json');
     },
-    'read-dump': function () {
-      store.readDump(doc.getElementById('dump').value);
-    },
+    'read-dump': function () { store.readDump(doc.getElementById('dump').value); },
     'hit-accept': function (el) { store.setHitStatus(Number(el.dataset.idx), 'accepted'); },
     'hit-reject': function (el) { store.setHitStatus(Number(el.dataset.idx), 'rejected'); },
     'sec-accept': function (el) { store.setSection(el.dataset.num, 'accepted', ''); },
@@ -180,8 +266,7 @@
     'cancel-edit': function () { UI.editing = null; render(); },
     'save-para': function (el) {
       var num = route().arg;
-      var text = doc.getElementById('edit-' + el.dataset.key).value;
-      store.setEdit(num, el.dataset.key, text);
+      store.setEdit(num, el.dataset.key, doc.getElementById('edit-' + el.dataset.key).value);
       UI.editing = null;
     },
     'revert-para': function (el) {
@@ -194,9 +279,7 @@
       store.revertEdit(f.section, String(f.key).split('|')[2]);
       store.resolveFlag(f.id, 'done', 'Took the new generated text');
     },
-    'keep-edit': function (el) {
-      store.resolveFlag(el.dataset.id, 'dismissed', 'Kept the hand edit');
-    },
+    'keep-edit': function (el) { store.resolveFlag(el.dataset.id, 'dismissed', 'Kept the hand edit'); },
     'flag-done': function (el) { store.resolveFlag(el.dataset.id, 'done', ''); },
     'flag-dismiss': function (el) {
       var note = root.prompt('Why dismiss this flag? (kept on the record)', '');
@@ -213,30 +296,80 @@
       downloadText(name, el.dataset.ext === 'md' ? '# ' + el.dataset.type + '\n\n```\n' + text + '\n```\n' : text, 'text/plain');
     },
     'copy-output': function (el) {
-      var text = outputText(el.dataset.type);
       if (root.navigator && root.navigator.clipboard) {
-        root.navigator.clipboard.writeText(text).catch(function (e) { SS.errors.log(e); });
+        root.navigator.clipboard.writeText(outputText(el.dataset.type)).catch(function (e) { SS.errors.log(e); });
       }
     },
     'toggle-drawer': function () { UI.drawer = !UI.drawer; render(); },
-    'clear-errors': function () { errorLog = []; renderErrors(); }
+    'clear-errors': function () { errorLog = []; renderErrors(); },
+
+    // layout: minimize, resize, reorder
+    'toggle-nav': function () { UI.layout.navHidden = !UI.layout.navHidden; saveLayout(); },
+    'toggle-side': function () { UI.layout.sideHidden = !UI.layout.sideHidden; saveLayout(); },
+    'side-move': function (el) {
+      var order = UI.layout.sideOrder.slice();
+      var i = order.indexOf(el.dataset.key);
+      var j = i + Number(el.dataset.dir);
+      if (i < 0 || j < 0 || j >= order.length) return;
+      order.splice(j, 0, order.splice(i, 1)[0]);
+      UI.layout.sideOrder = order;
+      saveLayout();
+    },
+
+    // accounts and cloud projects
+    'sign-in': function () {
+      var user = doc.getElementById('authUser').value;
+      var pass = doc.getElementById('authPass').value;
+      UI.authError = '';
+      return SS.cloud.signIn(user, pass).then(function () {
+        UI.cloudList = null;
+        if (store.current) return SS.cloud.saveNow(store.current).catch(function (err) { SS.errors.log(err); });
+      }).catch(function (err) {
+        UI.authError = err.message;
+        SS.errors.log(err);
+      });
+    },
+    'sign-out': function () {
+      return SS.cloud.signOut().then(function () { UI.cloudList = null; UI.authError = ''; });
+    },
+    'cloud-open': function (el) {
+      return SS.cloud.load(el.dataset.id).then(function (state) {
+        if (!state) throw new Error('That project was not found on the account.');
+        state.cloudId = el.dataset.id;
+        store.current = state;
+        store.saveNow();
+        root.location.hash = '#/survey';
+      }).catch(function (err) { SS.errors.log(err); UI.cloudError = err.message; });
+    },
+    'cloud-delete': function (el) {
+      if (!root.confirm('Delete this project from the account? Copies on this device stay.')) return;
+      return SS.cloud.remove(el.dataset.id).then(function () { UI.cloudList = null; })
+        .catch(function (err) { SS.errors.log(err); UI.cloudError = err.message; });
+    },
+    'cloud-save-now': function () {
+      if (store.current) return SS.cloud.saveNow(store.current).catch(function (err) { SS.errors.log(err); });
+    },
+    'check-db': function () {
+      UI.dbMessage = 'Checking…';
+      return SS.cloud.health().then(function (msg) { UI.dbMessage = msg; })
+        .catch(function (err) { UI.dbMessage = 'Not reachable: ' + err.message; SS.errors.log(err); });
+    }
   };
 
-  function outputText(type) {
-    var s = store.settings();
-    var p = store.current, d = store.data;
-    if (type === 'ppd') return SS.outputs.ppd(p, d, s.showNotes);
-    if (type === 'outline') return SS.outputs.outline(p, d, s.showNotes);
-    return SS.outputs.full(p, d, s.showNotes);
-  }
-
+  // Clicks. A handler that returns a promise is re-drawn when it settles.
   doc && doc.addEventListener('click', function (e) {
     var el = e.target.closest && e.target.closest('[data-act]');
     if (!el || !handlers[el.dataset.act]) return;
     e.preventDefault();
-    try { handlers[el.dataset.act](el, e); }
+    var act = el.dataset.act;
+    var result;
+    try { result = handlers[act](el, e); }
     catch (err) { SS.errors.log(err); }
-    if (el.dataset.act !== 'focus' && el.dataset.act !== 'edit-para') {
+    if (result && typeof result.then === 'function') {
+      result.then(render, function (err) { SS.errors.log(err); render(); });
+      return;
+    }
+    if (act !== 'focus' && act !== 'edit-para') {
       if (store.current) store.save();
       render();
     }
@@ -249,12 +382,9 @@
     try {
       if (kind === 'survey') {
         var qid = el.dataset.q;
-        var value;
-        if (el.dataset.type === 'many') {
-          value = Array.from(doc.querySelectorAll('input[name="' + qid + '"]:checked')).map(function (x) { return x.value; });
-        } else {
-          value = el.value;
-        }
+        var value = el.dataset.type === 'many'
+          ? Array.from(doc.querySelectorAll('input[name="' + qid + '"]:checked')).map(function (x) { return x.value; })
+          : el.value;
         store.setSurvey(qid, value);
       } else if (kind === 'choice') {
         var reason = (doc.getElementById('reason-' + el.dataset.q) || {}).value || '';
@@ -264,11 +394,9 @@
         store.setKeynotes(el.value);
       } else if (kind === 'import-file') {
         var f = el.files && el.files[0];
-        if (f) return readFile(f);
+        if (f) return readFile(f).then(render, function (err) { SS.errors.log(err); render(); });
       } else if (kind === 'setting') {
-        var key = el.dataset.set;
-        var val = el.type === 'checkbox' ? el.checked : el.value;
-        store.setSetting(key, val);
+        store.setSetting(el.dataset.set, el.type === 'checkbox' ? el.checked : el.value);
       } else if (kind === 'filter-flags') {
         UI.flagFilter = el.value;
       } else if (kind === 'filter-dec-section') {
@@ -282,6 +410,25 @@
   }
   doc && doc.addEventListener('change', onChange);
 
+  // Splitter: drag (mouse or finger) to resize the notes panel.
+  var drag = null;
+  doc && doc.addEventListener('pointerdown', function (e) {
+    var el = e.target.closest && e.target.closest('[data-splitter]');
+    if (!el) return;
+    drag = { x: e.clientX, w: UI.layout.sideWidth };
+    e.preventDefault();
+  });
+  doc && doc.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    var w = Math.round(drag.w - (e.clientX - drag.x));
+    UI.layout.sideWidth = Math.max(240, Math.min(w, Math.round(root.innerWidth * 0.7)));
+    var layout = doc.querySelector('.layout');
+    if (layout) layout.style.setProperty('--side-w', UI.layout.sideWidth + 'px');
+  });
+  function endDrag() { if (drag) { drag = null; saveLayout(); } }
+  doc && doc.addEventListener('pointerup', endDrag);
+  doc && doc.addEventListener('pointercancel', endDrag);
+
   // ---- boot -----------------------------------------------------------------
   function boot() {
     renderErrors();
@@ -290,6 +437,8 @@
       store.resume();
       render();
       root.addEventListener('hashchange', function () { UI.editing = null; render(); });
+      root.addEventListener('online', refreshStatus);
+      root.addEventListener('offline', refreshStatus);
       root.addEventListener('beforeunload', function () { if (store.current) store.saveNow(); });
     }).catch(function (err) {
       SS.errors.log(err);
@@ -301,5 +450,4 @@
     if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', boot);
     else boot();
   }
-  SS.app = { render: render, UI: UI };
 })(typeof window !== 'undefined' ? window : globalThis);

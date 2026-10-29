@@ -9,6 +9,15 @@
 <body>
   <div id="app"></div>
   <div id="errors" class="errors" hidden></div>
+  <script>
+    // Database connection. Fill in both values from the Architecture project's API settings.
+    // The publishable key is safe in browser code. Never put the service-role key here.
+    // Until both are filled in, the app saves on this device only.
+    window.SS_CONFIG = {
+      supabaseUrl: '<project-url>',
+      publishableKey: '<publishable-key>'
+    };
+  </script>
   <script src="js/data.bundle.js"></script>
   <script src="js/template.js"></script>
   <script src="js/recommend.js"></script>
@@ -19,6 +28,7 @@
   <script src="js/outputs.js"></script>
   <script src="js/store.js"></script>
   <script src="js/data.js"></script>
+  <script src="js/cloud.js"></script>
   <script src="js/screens.js"></script>
   <script src="js/app.js"></script>
 </body>

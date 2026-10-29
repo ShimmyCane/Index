@@ -1,3 +1,4 @@
+-- SUPERSEDED by 002_shimmy_specs_accounts.sql. Never applied. Do not run this file.
 -- Shimmy Specs — Architecture Supabase project (<project-ref>).
 -- WRITTEN, NOT APPLIED. Apply only through /supabase-project, after Jimmy's OK.
 -- Office project data never goes here: ss_projects accepts only kind 'sketch' or 'own'.

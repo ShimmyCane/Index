@@ -19,6 +19,12 @@ A web app that guides the process of writing CSI specifications (architectural s
 - Knowledge becomes non-overlapping chapters (map in `mvp schematic.md` §10); 5xx = template specs written together.
 - First templates, in order: roofing, firestopping, joint sealants, exterior painting, CMU wall, ladder fall protection, doors and hardware.
 
+## Accounts and cloud (round 2)
+
+- Username + password accounts in our own tables (`ss_users`, `ss_sessions`), passwords as bcrypt, sessions as hashed random tokens (30 days). Browser code only calls the `ss_` functions; tables have RLS with no policies. Password can be blank for now (decision pending, convo v0.3 Q2).
+- `js/cloud.js` autosaves to the account 2 s after a change; the header light shows the state. Device-only until `index.html config block` is filled in.
+- SQL `002_shimmy_specs_accounts.sql` supersedes 001. Not applied: Jimmy runs it.
+
 ## Architecture (as built)
 
 - Plain HTML/CSS/JS in `03 Projects/Shimmy Specs/`. Engine in `js/` with no DOM (runs in Node for tests), screens in `js/screens.js`, shell in `js/app.js`.
@@ -29,7 +35,7 @@ A web app that guides the process of writing CSI specifications (architectural s
 ## Verified vs. unverified
 
 - Verified: Architecture Supabase project exists and is healthy; its `table_index` layout (read-only query, 2026-10-28). `validate_data`, `test_engine` (20) and `smoke` pass in headless Chromium.
-- Unverified: the SQL in `supabase/001_shimmy_specs.sql` (not applied; `table_index` unique constraint not checked); GitHub Pages; iPad Safari; printing.
+- Unverified: the SQL in `supabase/002_shimmy_specs_accounts.sql` (not applied; to be run by Jimmy, then `002_test_rollback.sql`); GitHub Pages; iPad Safari; printing.
 - Unverified: knowledge **(verify)** marks; AIA variant list in the survey; UniFormat titles; the import file format (the other repo doesn't exist yet).
 
 ## Next steps

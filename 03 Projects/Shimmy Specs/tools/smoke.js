@@ -107,6 +107,24 @@ function check(name, ok, extra) {
     check('⚙️ drawer opens', true);
     await page.click('.drawer [data-act="toggle-drawer"]');
 
+    // Layout: menu and notes minimize, panels reorder, status light says device-only without a database.
+    await page.goto(base + '#/section/00 00 00');
+    await page.waitForSelector('.ws-cols');
+    check('status light says device only when no database is set up', (await page.locator('#syncPill').innerText()).includes('database not set up'));
+    await page.click('[data-act="toggle-nav"]');
+    check('menu minimizes', (await page.locator('.layout.nav-hidden').count()) === 1);
+    await page.click('[data-act="toggle-nav"]');
+    check('menu restores', (await page.locator('.layout.nav-hidden').count()) === 0);
+    await page.click('[data-act="toggle-side"]');
+    check('notes minimize', (await page.locator('.ws-cols.side-hidden').count()) === 1);
+    await page.click('[data-act="toggle-side"]');
+    const firstBefore = await page.locator('aside.side summary').first().innerText();
+    await page.locator('aside.side [data-act="side-move"][data-dir="1"]').first().click();
+    const firstAfter = await page.locator('aside.side summary').first().innerText();
+    check('notes panels reorder', firstBefore.split('\n')[0] !== firstAfter.split('\n')[0]);
+    const sideWidth = await page.evaluate(() => document.querySelector('.layout').style.getPropertyValue('--side-w'));
+    check('notes panel has a resize handle', (await page.locator('[data-splitter]').count()) === 1 && sideWidth.endsWith('px'));
+
     // Reload keeps the project (localStorage)
     await page.reload();
     await page.waitForSelector('nav');
