@@ -9,7 +9,8 @@
 "use strict";
 const fs = require("fs"), path = require("path");
 const root = path.join(__dirname, "..");
-const SEEDS = require(path.join(root, "data", "seeds.js"));
+const BASE_SEEDS = require(path.join(root, "data", "seeds.js")), MORE_SEEDS = require(path.join(root, "data", "seeds_more.js"));
+const SEEDS = Object.assign({}, BASE_SEEDS, { templates: BASE_SEEDS.templates.concat(MORE_SEEDS.templates), inspirations: BASE_SEEDS.inspirations.concat(MORE_SEEDS.inspirations) });
 const { load } = require("./lib");
 
 const file = process.argv[2];
