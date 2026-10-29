@@ -19,6 +19,13 @@
     <button class="btn" id="undo">↩️ Undo</button>
     <button class="btn" id="clear">🧽 Clear</button>
     <span class="row" id="levels"></span>
+    <div class="ideas" id="ideas" role="group" aria-label="Ways to read the lines">
+      <label><input type="checkbox" value="path" checked> 🛤️ Solution (path lab)</label>
+      <label><input type="checkbox" value="outline" checked> 🔲 Boundaries</label>
+      <label><input type="checkbox" value="walls" checked> 🧱 Walls and obstructions</label>
+      <label><input type="checkbox" value="keys" disabled> 🔑 Key items (soon)</label>
+      <label><input type="checkbox" value="guide" checked> 🧭 General movement</label>
+    </div>
     <button class="btn go" id="grow">🌱 Grow 10 sprouts</button>
   </div>
 
@@ -91,7 +98,7 @@
     let level = 2;
     const lv = document.getElementById("levels");
     level = app.sweetSpot().level; // start at Felix's sweet spot
-    [1, 2, 3, 4, 5, 6].forEach(n => {
+    [...Array(S.MAX_LEVEL).keys()].map(k => k + 1).forEach(n => {
       const b = document.createElement("button");
       b.className = "btn" + (n === level ? " on" : ""); b.textContent = "Level " + n; b.dataset.level = n; b.title = S.LEVELS[n].name;
       b.addEventListener("click", () => { level = n; lv.querySelectorAll(".btn").forEach(x => x.classList.toggle("on", +x.dataset.level === n)); });
@@ -114,12 +121,16 @@
     }
     function grow() {
       if (!strokes.length) { alert("Draw a line first!"); return; }
+      // each ticked idea reads the lines one way; walls and obstructions covers both the walls and the river modes
+      const IDEA = { path: ["path"], outline: ["outline"], walls: ["walls", "obstacle"], guide: ["guide"] };
+      const modes = [...document.querySelectorAll("#ideas input:checked")].flatMap(i => IDEA[i.value] || []);
+      if (!modes.length) { alert("Tick at least one idea."); return; }
       const r = E.rng(Date.now() & 0xffffff);
       const themes = E.shuffle(themeKeys.slice(), r);
       // ten sprouts: five ways to read the lines, each at two levels, from two below to two above the chosen level
       sprouts = Array.from({ length: 10 }, (_, i) => {
         const lvl = Math.min(7, Math.max(1, level + Math.floor(i / 2) - 2));
-        return recipeFor(modeKeys[i % modeKeys.length], themes[i % themes.length], 1 + r.int(1e6), 0.35, lvl);
+        return recipeFor(modes[i % modes.length], themes[i % themes.length], 1 + r.int(1e6), 0.35, lvl);
       });
       picked.clear();
       const box = document.getElementById("sprouts");
