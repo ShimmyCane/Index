@@ -19,7 +19,7 @@
     <button class="btn" id="undo">↩️ Undo</button>
     <button class="btn" id="clear">🧽 Clear</button>
     <span class="row" id="levels"></span>
-    <button class="btn go" id="grow">🌱 Grow 5 sprouts</button>
+    <button class="btn go" id="grow">🌱 Grow 10 sprouts</button>
   </div>
 
   <section id="springBox" hidden>
@@ -98,18 +98,29 @@
       lv.append(b);
     });
 
-    // ---------- 2. spring: five sprouts, each reads the lines a different way ----------
+    // ---------- 2. spring: ten sprouts, two per level (chosen level ±2), each reads the lines a different way ----------
     let sprouts = [], picked = new Set();
     const modeKeys = Object.keys(D.MODES), themeKeys = Object.keys(D.THEMES);
-    function recipeFor(mode, theme, seed, growth) {
-      return { n: 0, family: D.THEMES[theme].family, level, source: 1, style: "doodle", seed, growth,
+    // outline and obstacle sprouts are solution-first (the route is laid before the walls); walls, path and guide keep
+    // the growing-tree build for now, because their constraints (forbidden walls, a laid line) are not yet honoured by it.
+    function recipeFor(mode, theme, seed, growth, lvl) {
+      const rc = { n: 0, family: D.THEMES[theme].family, level: lvl, source: 1, style: "doodle", seed, growth,
         doodle: { mode, theme, strokes: strokes.map(s => s.map(([x, y]) => [x, y])) } };
+      if (mode === "outline" || mode === "obstacle") {
+        rc.build = "path";
+        if (lvl >= 5) Object.assign(rc, { perfect: true, pathCfg: { waypoints: lvl >= 7 ? 4 : lvl >= 6 ? 3 : 2, len: 0.25, twist: 0.8, away: 0.7, lure: 1, mix: 0.3 } });
+      }
+      return rc;
     }
     function grow() {
       if (!strokes.length) { alert("Draw a line first!"); return; }
       const r = E.rng(Date.now() & 0xffffff);
       const themes = E.shuffle(themeKeys.slice(), r);
-      sprouts = modeKeys.map((m, i) => recipeFor(m, themes[i], 1 + r.int(1e6), 0.35));
+      // ten sprouts: five ways to read the lines, each at two levels, from two below to two above the chosen level
+      sprouts = Array.from({ length: 10 }, (_, i) => {
+        const lvl = Math.min(7, Math.max(1, level + Math.floor(i / 2) - 2));
+        return recipeFor(modeKeys[i % modeKeys.length], themes[i % themes.length], 1 + r.int(1e6), 0.35, lvl);
+      });
       picked.clear();
       const box = document.getElementById("sprouts");
       box.innerHTML = "";
@@ -118,7 +129,7 @@
         b.className = "sprout";
         try { b.innerHTML = S.svg(rc, { bare: true, fluid: true }).svg; }
         catch (e) { app.logError("sprout " + rc.doodle.mode + ": " + e.message); }
-        b.insertAdjacentHTML("beforeend", `<b>${D.MODES[rc.doodle.mode].icon} ${D.MODES[rc.doodle.mode].label}</b><small>${D.THEMES[rc.doodle.theme].label}</small>`);
+        b.insertAdjacentHTML("beforeend", `<b>${D.MODES[rc.doodle.mode].icon} ${D.MODES[rc.doodle.mode].label}</b><small>${D.THEMES[rc.doodle.theme].label} · level ${rc.level}</small>`);
         b.addEventListener("click", () => {
           if (picked.has(i)) picked.delete(i);
           else { if (picked.size >= 2) picked.delete(picked.values().next().value); picked.add(i); }
