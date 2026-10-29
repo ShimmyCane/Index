@@ -87,7 +87,7 @@
   (function () {
     const app = FMZ.app, S = FMZ.sheet;
     app.init();
-    const dots = n => "●".repeat(n) + "○".repeat(5 - n);
+    const dots = n => "●".repeat(n) + "○".repeat(S.MAX_LEVEL - n);
     function render() {
       try {
         const all = app.bank();

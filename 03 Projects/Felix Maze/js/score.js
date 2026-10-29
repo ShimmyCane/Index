@@ -7,9 +7,11 @@
   "use strict";
   const E = root.FMZ.engine;
 
-  // Effort → level. Boundaries sit between the typical efforts of each level's settings (≈0.8, 2.0, 3.2, 4.3, 5.5).
-  // Jimmy's check: the old 330-00A (effort ≈ 2.2) is a level 2.
-  const levelOf = effort => (effort < 1.35 ? 1 : effort < 2.65 ? 2 : effort < 3.75 ? 3 : effort < 4.9 ? 4 : 5);
+  // Effort → level. Level centers are ≈0.9, 2.0, 3.2, 4.3, 5.7 and 7.8; level 5 already reaches 7.0 in published mazes
+  // (350-047, 350-079), so the 5 → 6 boundary sits at 7.2 and those stay level 5.
+  // Time doubles per level from level 3 on (5, 10, 20, 40 minutes) and effort rises about 1.4 per doubling, so effort is
+  // roughly linear in log(time). Jimmy's check: the old 330-00A (effort ≈ 2.2) is a level 2.
+  const levelOf = effort => (effort < 1.35 ? 1 : effort < 2.65 ? 2 : effort < 3.75 ? 3 : effort < 4.9 ? 4 : effort < 7.2 ? 5 : 6);
 
   function measure(model) {
     const { g, links, sol } = model;
@@ -67,7 +69,7 @@
       effort: Math.round(effort * 10) / 10, level, dull: Math.round((longest / L) * 100) / 100 };
   }
 
-  const clamp = v => Math.max(1, Math.min(5, Math.round(v * 10) / 10));
+  const clamp = v => Math.max(1, Math.min(6, Math.round(v * 10) / 10));
 
   function joy(model, m, lint) {
     const sp = model.spec, look = sp.look, W = root.FMZ.sheet.W, H = root.FMZ.sheet.H;

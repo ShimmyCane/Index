@@ -265,7 +265,7 @@
     if (!l.length) return { level: 2, from: 0 };
     let sum = 0, wsum = 0;
     l.forEach((e, i) => { const w = i + 1, v = e.level + (e.mood === "easy" ? 1 : e.mood === "hard" ? -1 : 0); sum += w * v; wsum += w; });
-    return { level: Math.max(1, Math.min(5, Math.round(sum / wsum))), from: l.length };
+    return { level: Math.max(1, Math.min(FMZ.sheet.MAX_LEVEL, Math.round(sum / wsum))), from: l.length };
   }
 
   // Grow a few versions of a recipe and keep the best one that passes the check (the answer never touches a wall).

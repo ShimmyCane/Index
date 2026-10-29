@@ -75,7 +75,7 @@
   </div>
 
   <h2 id="level">Levels, joy and checks</h2>
-  <p><b>Level 1 to 5.</b> The computer measures how long the right way is, how many choices there are along it, how deep the dead ends are and how tempting they look, and turns that into a level (1 is a few minutes, 5 is a long, careful sit). The scale was set against a maze Jimmy knew was a level 2. The bank is a bell curve centered a little above 2:</p>
+  <p><b>Level 1 to 5.</b> The computer measures how long the right way is, how many choices there are along it, how deep the dead ends are and how tempting they look, and turns that into a level (level 1 is about a minute; from level 3 each level roughly doubles the time: 5, 10, 20 and now 40 minutes for level 6). The scale was set against a maze Jimmy knew was a level 2. The bank is a bell curve centered a little above 2:</p>
   <div class="card2"><div class="bars" id="bars"></div><p class="note" id="barsNote" style="margin-bottom:0"></p></div>
   <p><b>Joy.</b> A second score looks at three things: <i>Looking</i> (is it pretty, with room around it), <i>Doing</i> (do your hand and pencil have fun) and <i>Solving</i> (is the thinking satisfying, with wrong turns that are interesting rather than dull). Felix's faces (😴 😊 😣) after a try slowly move his "sweet spot" level.</p>
   <p><b>Checks before anything is published.</b> The red answer line must never touch a wall (first it is checked against the geometry, then against the pixels of the drawn picture, so what you see is what was checked). Only about 1 in 3,000 tries failed this, and failures never get out: they go on a list to be repaired. A layout check keeps the start and finish pictures off the title and footer. A sheet you flag with 🚩 is taken out of every pick (puzzle of the day, top five, packs) until it is fixed.</p>
@@ -157,9 +157,9 @@
 
     // the bank, by level
     try {
-      const all = app.bank(), by = [0, 0, 0, 0, 0, 0]; all.forEach(r => by[r.level]++);
+      const all = app.bank(), by = [0, 0, 0, 0, 0, 0, 0]; all.forEach(r => by[r.level]++);
       const mx = Math.max(...by);
-      $("bars").innerHTML = [1, 2, 3, 4, 5].map(l => `<div class="bar"><span>Level ${l}</span><i style="width:${Math.max(3, 100 * by[l] / mx)}%"></i><span>${by[l]}</span></div>`).join("");
+      $("bars").innerHTML = [1, 2, 3, 4, 5, 6].map(l => `<div class="bar"><span>Level ${l}</span><i style="width:${Math.max(3, 100 * by[l] / mx)}%"></i><span>${by[l]}</span></div>`).join("");
       const mean = all.reduce((s, r) => s + r.level, 0) / (all.length || 1);
       $("barsNote").textContent = all.length + " mazes in the bank, average level " + mean.toFixed(2) + ".";
     } catch (e) { app.logError("about bars: " + e.message); }

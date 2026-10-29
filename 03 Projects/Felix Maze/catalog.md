@@ -62,5 +62,10 @@ Codes changed on 2026-10-28 (twice, before anything was printed): levels moved f
 3. `node tools/pick_seeds.js <counter>` tries many seeds, rejects any where the answer touches a wall, and lists the best by level fit and joy score. Use the top seed, then look at it (`sheet.html?code=…`).
 4. `node tools/check_sheets.js --update`, then the by-eye check in `rubric.md` and `qc.md`.
 
+## Levels
+- 1 about 1 min · 2 about 3 min · 3 about 5 min · 4 about 10 min · 5 about 20 min · **6 about 40 min** (batch 8, all level 6).
+- Time doubles per level from level 3 on, so effort (which tracks path length and choices) goes up about the same amount per level: the scale is logarithmic in time. Boundaries in `js/score.js` (`levelOf`): 5 → 6 at effort 7.2.
+- Level 6 needs big mazes: the generator uses a paper square of 30 with zoom up to 1.2 (a cell of about 25). Its pictures cover more of the page, so its Looking bar is 2.4 and its overall bar 3.0 (see the batch 8 report).
+
 ## Retired and why
 - `retired: true` keeps the counter. `retiredWhy: "living artist"` marks the four mazes inspired by a living artist (polka dots, 014, 046, 078, 0AA). Counters 0FB onward are replacements (`replaces`) or later batches (batch 7: historical artists, 109–110).

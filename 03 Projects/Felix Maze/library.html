@@ -126,7 +126,7 @@
         const a = document.createElement("a");
         a.className = "card" + (flagged ? " flag" : ""); a.href = app.sheetUrl(r);
         a.innerHTML = `<img alt="Maze ${app.esc(r.code)}"><b>${app.esc(r.title)}</b>
-          <div class="meta"><span>#${app.esc(r.code)}</span><span class="t">${"●".repeat(r.level)}${"○".repeat(5 - r.level)} ${app.esc((S.LEVELS[r.level] || {}).short || "")}</span>${joy(r) ? `<span>★ ${joy(r)}</span>` : ""}${flagged ? '<span class="f">🚩 to rework</span>' : ""}${r.published ? "" : '<span class="s">✏️ this device</span>'}</div>
+          <div class="meta"><span>#${app.esc(r.code)}</span><span class="t">${"●".repeat(r.level)}${"○".repeat(S.MAX_LEVEL - r.level)} ${app.esc((S.LEVELS[r.level] || {}).short || "")}</span>${joy(r) ? `<span>★ ${joy(r)}</span>` : ""}${flagged ? '<span class="f">🚩 to rework</span>' : ""}${r.published ? "" : '<span class="s">✏️ this device</span>'}</div>
           <small>${app.esc(r.inspired || "")}</small>`;
         cards.append(a);
         app.lazyThumb(a.querySelector("img"), r);

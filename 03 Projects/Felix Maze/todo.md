@@ -38,6 +38,7 @@ Each batch: generate → answer-line check first (failures to `data/rework.js`) 
 - [x] **Batch 5** — #0C9–#0FA: 50 new designs from `inspirations.md` (animals, vehicles, plants, music, shapes with a hole, patchwork, carpet, Greek key band). 48 made, 2 to rework (opart, greekkey).
 - [x] **Repairs** — 10 mazes whose start/finish pictures ran into the title or footer were replaced under new counters (#0FB+); old ones retired. Layout check added (`tools/check_layout.js`).
 - [x] **Round 6**: living-artist policy (Kusama retired, Riley never made; 8 historical-art replacements, counters 109–110 in hex); 🚗 drive mode (`play.html`); `about.html`; 10 prototypes (`prototypes.html`).
+- [x] **Batch 8 (level 6)**: 50 puzzles, all about 40 minutes (#0FB+ counters). 48 passed first time after two carpet slots were swapped for klee and Mondrian variants. Level 6 added to the scale (time doubles per level from level 3). Joy bars for level 6 set lower (see the report).
 - [ ] After all four: rework list (8 designs, see `data/rework.js`) reviewed with `fix_puzzles`. Result: 192 puzzles, levels 1–5 = 40/70/55/21/6, mean 2.39 (plan 2.5), 0.03% of tries touched a wall. Long footers now wrap to two lines.
 
 ## Now
