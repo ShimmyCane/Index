@@ -110,7 +110,7 @@ function check(name, ok, extra) {
     // Layout: menu and notes minimize, panels reorder, status light says device-only without a database.
     await page.goto(base + '#/section/00 00 00');
     await page.waitForSelector('.ws-cols');
-    check('status light says device only when no database is set up', (await page.locator('#syncPill').innerText()).includes('database not set up'));
+    check('status light says device only (not signed in, or database not set up)', /not signed in|database not set up/.test(await page.locator('#syncPill').innerText()));
     await page.click('[data-act="toggle-nav"]');
     check('menu minimizes', (await page.locator('.layout.nav-hidden').count()) === 1);
     await page.click('[data-act="toggle-nav"]');
