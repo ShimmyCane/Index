@@ -11,7 +11,7 @@
   // (350-047, 350-079), so the 5 → 6 boundary sits at 7.2 and those stay level 5. The 6 → 7 boundary is 8.5.
   // Time doubles per level from level 3 on (5, 10, 20, 40 minutes) and effort rises about 1.4 per doubling, so effort is
   // roughly linear in log(time). Jimmy's check: the old 330-00A (effort ≈ 2.2) is a level 2.
-  const levelOf = effort => (effort < 1.35 ? 1 : effort < 2.65 ? 2 : effort < 3.75 ? 3 : effort < 4.9 ? 4 : effort < 7.2 ? 5 : effort < 8.5 ? 6 : 7);
+  const levelOf = effort => (effort < 1.35 ? 1 : effort < 2.65 ? 2 : effort < 3.75 ? 3 : effort < 4.9 ? 4 : 5);
 
   /* A young solver, simulated: at every junction they try the way that points most toward the finish first (with a
      little wobble, over a few runs), walk each wrong turn to its end and come back. Returns the squares walked.
@@ -39,7 +39,7 @@
   // steps → level: centers 30, 68, 122, 199, 338 measured on the bank, then doubling (676, 1352); boundaries are the
   // geometric midpoints between centers
   const STEP_CENTER = { 1: 30, 2: 68, 3: 122, 4: 199, 5: 338, 6: 676, 7: 1352 };
-  const levelOfSteps = st => (st < 45 ? 1 : st < 91 ? 2 : st < 156 ? 3 : st < 259 ? 4 : st < 478 ? 5 : st < 956 ? 6 : 7);
+  const levelOfSteps = st => (st < 45 ? 1 : st < 91 ? 2 : st < 156 ? 3 : st < 259 ? 4 : 5);
 
   function measure(model) {
     const { g, links, sol } = model;

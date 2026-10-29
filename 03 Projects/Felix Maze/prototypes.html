@@ -20,6 +20,9 @@
   .stage h2 { font: 32px var(--hand); margin: 0 auto 0 0; }
   .stage .how { margin: 0; max-width: 900px; }
   .stage .ctl { display: flex; gap: 10px; flex-wrap: wrap; }
+  .joy { position: absolute; left: 22px; bottom: 96px; width: 132px; height: 132px; border-radius: 50%; background: #fff; border: 3px solid var(--ink); box-shadow: 0 4px 0 var(--ink); touch-action: none; z-index: 2; }
+  .joy .knob { position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 50%; background: var(--sun); border: 3px solid var(--ink); }
+  .stage { position: fixed; }
   .tagc { font: 700 13px var(--ui); background: var(--sun); border: 2px solid var(--ink); border-radius: 99px; padding: 1px 10px; width: fit-content; }
 </style>
 </head>
@@ -34,6 +37,7 @@
 <section class="stage" id="stage" hidden>
   <div class="bar"><h2 id="sTitle"></h2><span class="tagc" id="sTag"></span><button class="btn" id="sClose" type="button">✕ Close</button></div>
   <canvas id="canvas"></canvas>
+  <div class="joy" id="joy" aria-label="Joystick: push to move"><span class="knob" id="knob"></span></div>
   <div class="ctl" id="sCtl"></div>
   <p class="note how" id="sHow"></p>
 </section>
@@ -69,11 +73,41 @@
 
     // stage: one prototype, animated
     let raf = 0, cur = null;
+    // Input: the lower-left joystick and gravity (tilt) add together. Tilt is measured from the position it was turned on in.
+    const input = { jx: 0, jy: 0, tx: 0, ty: 0, tilt: false, base: null };
+    const clamp1 = v => Math.max(-1, Math.min(1, v));
+    const inputVector = () => ({ x: clamp1(input.jx + input.tx), y: clamp1(input.jy + input.ty) });
+    const joy = $("joy"), knob = $("knob");
+    const setKnob = (x, y) => { knob.style.transform = "translate(" + x * 40 + "px," + y * 40 + "px)"; };
+    const joyFrom = e => { const r = joy.getBoundingClientRect(), R = r.width / 2; let x = (e.clientX - (r.left + R)) / R, y = (e.clientY - (r.top + R)) / R; const m = Math.hypot(x, y); if (m > 1) { x /= m; y /= m; } input.jx = x; input.jy = y; setKnob(x, y); };
+    const joyEnd = () => { input.jx = 0; input.jy = 0; setKnob(0, 0); };
+    joy.addEventListener("pointerdown", e => { e.preventDefault(); try { joy.setPointerCapture(e.pointerId); } catch (x) { /* ok */ } joyFrom(e); });
+    joy.addEventListener("pointermove", e => { if (e.buttons || e.pointerType === "touch") joyFrom(e); });
+    joy.addEventListener("pointerup", joyEnd); joy.addEventListener("pointercancel", joyEnd);
+    const onOrient = e => {
+      if (input.base === null) input.base = { g: e.gamma || 0, b: e.beta || 0 };
+      input.tx = clamp1(((e.gamma || 0) - input.base.g) / 25); input.ty = clamp1(((e.beta || 0) - input.base.b) / 25);
+    };
+    function stopTilt() { window.removeEventListener("deviceorientation", onOrient); input.tilt = false; input.tx = 0; input.ty = 0; input.base = null; }
+    function startTilt(btn) {
+      window.addEventListener("deviceorientation", onOrient); input.tilt = true; input.base = null;
+      btn.textContent = "🧭 Gravity: on";
+      setTimeout(() => { if (input.base === null) btn.textContent = "🧭 Gravity: no tilt sensor here"; }, 1200);
+    }
+    function toggleTilt(btn) {
+      if (input.tilt) { stopTilt(); btn.textContent = "🧭 Gravity: off"; return; }
+      if (typeof DeviceOrientationEvent === "undefined") { btn.textContent = "🧭 Gravity: no tilt sensor here"; return; }
+      if (typeof DeviceOrientationEvent.requestPermission === "function") {
+        DeviceOrientationEvent.requestPermission().then(r => { if (r === "granted") startTilt(btn); else btn.textContent = "🧭 Gravity: not allowed"; }).catch(() => { btn.textContent = "🧭 Gravity: not allowed"; });
+      } else startTilt(btn);
+    }
     function open(proto) {
       cur = proto; const st = proto.make(); st.keys = st.keys || {};
       $("sTitle").textContent = proto.title; $("sTag").textContent = proto.tag; $("sHow").textContent = proto.blurb + " " + proto.how;
       $("stage").hidden = false; document.body.style.overflow = "hidden";
       const ctl = $("sCtl"); ctl.innerHTML = "";
+      const grav = document.createElement("button"); grav.type = "button"; grav.className = "btn"; grav.textContent = "🧭 Gravity: off"; ctl.append(grav);
+      grav.addEventListener("click", () => toggleTilt(grav));
       (proto.buttons || []).forEach(bd => {
         const bt = document.createElement("button"); bt.type = "button"; bt.className = "btn"; bt.textContent = bd.label; ctl.append(bt);
         if (bd.hold) {
@@ -95,8 +129,10 @@
       c.addEventListener("pointerdown", onDown); c.addEventListener("pointermove", onMove); c.addEventListener("pointerup", onUp); c.addEventListener("pointercancel", onUp);
       document.addEventListener("keydown", kd); document.addEventListener("keyup", ku);
       const frame = now => {
+        const v = inputVector();
         const dt = Math.min(0.1, (now - last) / 1000); last = now;
         if (proto.orbit && !st.dragging && st.spin) st.yaw += st.spin * dt;
+        if (proto.joy) proto.joy(st, v.x, v.y, dt); else if (proto.orbit) { st.yaw += v.x * 1.6 * dt; st.pitch = Math.max(0.05, Math.min(1.45, st.pitch + v.y * 1.0 * dt)); }
         try { paint(c, proto, st, (now - t0) / 1000, dt); } catch (e) { app.logError(proto.id + ": " + e.message); cancelAnimationFrame(raf); return; }
         raf = requestAnimationFrame(frame);
       };
@@ -104,7 +140,7 @@
       close.cleanup = () => { c.removeEventListener("pointerdown", onDown); c.removeEventListener("pointermove", onMove); c.removeEventListener("pointerup", onUp); c.removeEventListener("pointercancel", onUp); document.removeEventListener("keydown", kd); document.removeEventListener("keyup", ku); };
       window.FMZ_STAGE = { st, proto };
     }
-    function close() { cancelAnimationFrame(raf); if (close.cleanup) close.cleanup(); $("stage").hidden = true; document.body.style.overflow = ""; cur = null; }
+    function close() { cancelAnimationFrame(raf); if (close.cleanup) close.cleanup(); stopTilt(); $("stage").hidden = true; document.body.style.overflow = ""; cur = null; }
     $("sClose").addEventListener("click", close);
     const q = new URLSearchParams(location.search).get("open");
     if (q) { const pr = list.find(p => p.id === q); if (pr) open(pr); }

@@ -41,13 +41,13 @@ Computer's guess: does it have a story (start and goal), a special mechanic (bri
 
 ## Difficulty, 1 to 5
 
-| Level | Target time for Felix | Feel |
-|---|---|---|
-| 1 | About 1 minute | A warm-up. Big paths, a few turns |
-| 2 | About 3 minutes | A few real choices |
-| 3 | About 5 minutes | Several forks, a loop or two |
-| 4 | About 10 minutes | Long wrong turns, more loops |
-| 5 | 20 minutes or more | A big one, for a long quiet sit |
+| Level | Feel |
+|---|---|
+| 1 | A warm-up. Big paths, a few turns |
+| 2 | A few real choices |
+| 3 | Several forks, a loop or two |
+| 4 | Long wrong turns, more loops |
+| 5 | A big one, for a long quiet sit |
 
 The computer measures: right-path length, choices along it, total and longest wrong turns, loops. It turns those into an "effort" number and a guessed level, and the sheet's level must match the guess (`tools/check_sheets.js`). The target times are guesses until Felix tries them.
 

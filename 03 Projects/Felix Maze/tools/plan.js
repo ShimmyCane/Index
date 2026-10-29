@@ -80,10 +80,12 @@ for (const level of tokens.slice(0, count)) {
       if ((per.get(insp.id) || 0) >= maxPer || insp.id === lastInsp) continue;
       const items = pool.get(insp.id).filter(s => !titles.has(s.title));
       if (!items.length) continue;
-      let tpl = shuffle(insp.templates.map(id => T.get(id)).filter(fits))[0];
+      // a series item may name its own template (series.template); use it when it fits the level, else any of the inspiration's
+      const pinned = items.find(s => s.template && T.get(s.template) && fits(T.get(s.template)));
+      let tpl = pinned ? T.get(pinned.template) : shuffle(insp.templates.map(id => T.get(id)).filter(fits))[0];
       if (!tpl && borrow) tpl = shuffle([...T.values()].filter(t => t.kind === "page" && fits(t) && (t.tags || []).some(g => insp.style.join(" ").includes(g))))[0];
       if (!tpl) continue;
-      pick = { insp, item: items[0], tpl, borrowed: !insp.templates.includes(tpl.id) };
+      pick = { insp, item: pinned || items[0], tpl, borrowed: !insp.templates.includes(tpl.id) };
       break;
     }
     if (pick) break;
