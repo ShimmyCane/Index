@@ -11,16 +11,15 @@
   // Difficulty 1–5, each with a rough time to solve. size = cell size (1/100 inch).
   // Calibrated on Jimmy's judgement that a 0.54 in maze (the old 330-00A, effort ≈ 2.2) is level 2.
   const LEVELS = {
-    1: { name: "Level 1 · about 1 minute", short: "1 min", size: 88, mix: 0, braid: 0 },
-    2: { name: "Level 2 · about 3 minutes", short: "3 min", size: 54, mix: 0.05, braid: 0 },
-    3: { name: "Level 3 · about 5 minutes", short: "5 min", size: 42, mix: 0.12, braid: 0.04 },
-    4: { name: "Level 4 · about 10 minutes", short: "10 min", size: 35, mix: 0.2, braid: 0.06 },
-    5: { name: "Level 5 · about 20 minutes", short: "20 min", size: 30, mix: 0.3, braid: 0.08 },
+    1: { name: "Level 1", size: 88, mix: 0, braid: 0 },
+    2: { name: "Level 2", size: 54, mix: 0.05, braid: 0 },
+    3: { name: "Level 3", size: 42, mix: 0.12, braid: 0.04 },
+    4: { name: "Level 4", size: 35, mix: 0.2, braid: 0.06 },
+    5: { name: "Level 5", size: 30, mix: 0.3, braid: 0.08 }
     // Levels above 3 roughly double the time each time, so the scale is logarithmic in time (5, 10, 20, 40, ...).
-    6: { name: "Level 6 · about 40 minutes", short: "40 min", size: 30, mix: 0.35, braid: 0.1 },
-    7: { name: "Level 7 · about 80 minutes", short: "80 min", size: 28, mix: 0.4, braid: 0 }
+
   };
-  const MAX_LEVEL = 7;
+  const MAX_LEVEL = 5;
 
   const FAMILIES = {
     1: "Classical", 2: "Famous mazes", 3: "Art", 4: "Nature", 5: "Systems and maps", 6: "Math and patterns", 7: "Music and sound", 8: "Story worlds"

@@ -39,13 +39,13 @@ Felix loves drawing his own free-flowing mazes. Felix Maze makes mazes for him i
 
 ## Difficulty 1–5
 
-| Level | Target time | Cell size | Feel |
-|---|---|---|---|
-| 1 | About 1 minute | 1.0 in | Warm-up, long winding halls |
-| 2 | About 3 minutes | 0.8 in | A few real choices |
-| 3 | About 5 minutes | 0.64 in | Several forks, a loop or two |
-| 4 | About 10 minutes | 0.5 in | Long wrong turns, more loops |
-| 5 | 20 minutes or more | 0.38 in | A big one |
+| Level | Cell size | Feel |
+|---|---|---|
+| 1 | 1.0 in | Warm-up, long winding halls |
+| 2 | 0.8 in | A few real choices |
+| 3 | 0.64 in | Several forks, a loop or two |
+| 4 | 0.5 in | Long wrong turns, more loops |
+| 5 | 0.38 in | A big one |
 
 The bank is a mixed bag, not easy to hard. The computer guesses each maze's level from the research measures (`rubric.md`); the sheet's level must match. Felix's faces (😴 😊 😣 in each sheet's ⚙️) set his sweet spot.
 

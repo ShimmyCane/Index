@@ -15,11 +15,11 @@ Typing only the counter (`001`, `00A`) also works, because the counter alone is 
 | Digit | Family (theme) | Level (time to solve) | Source (how it was made) |
 |---|---|---|---|
 | 0 | | | Made by the computer from the catalog |
-| 1 | Classical labyrinths and history | 1 · about 1 minute | Grown from Felix's doodle |
-| 2 | Famous mazes and gardens | 2 · about 3 minutes | Picked and tuned by hand |
-| 3 | Art and artists | 3 · about 5 minutes | |
-| 4 | Nature | 4 · about 10 minutes | |
-| 5 | Systems and maps | 5 · 20 minutes or more | |
+| 1 | Classical labyrinths and history | 1 | Grown from Felix's doodle |
+| 2 | Famous mazes and gardens | 2 | Picked and tuned by hand |
+| 3 | Art and artists | 3 | |
+| 4 | Nature | 4 | |
+| 5 | Systems and maps | 5 | |
 | 6 | Math and patterns | | |
 | 7 | Music and sound | | |
 | 8 | Story worlds | | |
@@ -65,7 +65,7 @@ Counters restart at 001. Nothing from before batch 10 was printed.
 4. `node tools/check_sheets.js --update`, then the by-eye check in `rubric.md` and `qc.md`.
 
 ## Levels
-- 1 about 1 min · 2 about 3 min · 3 about 5 min · 4 about 10 min · 5 about 20 min · **6 about 40 min** (batch 8, all level 6).
+- Levels 1 to 5, no time estimates. Level 6 and 7 puzzles were moved to level 5 when the scale was cut to five.
 - Time doubles per level from level 3 on, so effort (which tracks path length and choices) goes up about the same amount per level: the scale is logarithmic in time. Boundaries in `js/score.js` (`levelOf`): 5 → 6 at effort 7.2.
 - Level 6 needs big mazes: the generator uses a paper square of 30 with zoom up to 1.2 (a cell of about 25). Its pictures cover more of the page, so its Looking bar is 2.4 and its overall bar 3.0 (see the batch 8 report).
 

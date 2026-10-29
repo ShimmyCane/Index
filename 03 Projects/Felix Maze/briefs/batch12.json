@@ -1,0 +1,8 @@
+{
+  "name": "batch12",
+  "count": 50,
+  "levels": { "1": 3, "2": 12, "3": 20, "4": 12, "5": 3 },
+  "inspirations": ["tilings", "curves", "sky", "water", "plants", "shapes", "animals-land", "animals-sea", "nature-plants", "objects-everyday"],
+  "maxPerInspiration": 8,
+  "seed": 12
+}

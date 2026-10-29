@@ -277,6 +277,7 @@
       if (st.won && t - st.won > 1.8) Object.assign(st, P.find(p => p.id === "shift").make(), { next: t + 3 });
     },
     buttons: [{ label: "◀", press: [-1, 0] }, { label: "▲", press: [0, -1] }, { label: "▼", press: [0, 1] }, { label: "▶", press: [1, 0] }],
+    joy(st, x, y, dt) { st.joyCool = Math.max(0, (st.joyCool || 0) - dt); if (Math.hypot(x, y) < 0.5 || st.joyCool > 0) return; const d = Math.abs(x) > Math.abs(y) ? [Math.sign(x), 0] : [0, Math.sign(y)]; this.step(st, d); st.joyCool = 0.28; },
     key(st, e, down) { if (!down) return; const d = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1], a: [-1, 0], d: [1, 0], w: [0, -1], s: [0, 1] }[e.key]; if (d) { this.step(st, d); return true; } },
     step(st, d) {
       if (st.won) return; const m = st.m, { i, j } = m.at(st.pl), dir = d[0] > 0 ? "E" : d[0] < 0 ? "W" : d[1] > 0 ? "S" : "N", n = m.nb(st.pl).find(q => q.d === dir);
@@ -312,7 +313,8 @@
       if (Math.abs(d) < ring.gap / 2) st.lane++;
     },
     key(st, e, down) { if (e.key === "ArrowLeft") { st.drive = down ? -1 : (st.drive === -1 ? 0 : st.drive); return true; } if (e.key === "ArrowRight") { st.drive = down ? 1 : (st.drive === 1 ? 0 : st.drive); return true; } if (down && (e.key === "ArrowDown" || e.key === " ")) { this.dive(st); return true; } },
-    holdKey(st, k, down) { st.drive = down ? (k === "L" ? -1 : 1) : 0; }
+    holdKey(st, k, down) { st.drive = down ? (k === "L" ? -1 : 1) : 0; },
+    joy(st, x, y) { st.drive = x < -0.35 ? -1 : x > 0.35 ? 1 : 0; if (y > 0.7 && !st.diveHeld) { st.diveHeld = true; this.dive(st); } if (y < 0.3) st.diveHeld = false; }
   });
 
   // ================= 9. Stairs: a maze in floors =================

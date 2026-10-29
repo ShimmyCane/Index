@@ -1,5 +1,5 @@
-/* Extra seeds (batch 11): new animal, nature and object templates and their inspirations.
-   tools/plan.js reads these after data/seeds.js. Same shape as data/seeds.js. */
+/* Extra seeds: new animal, nature, object and shape templates and their inspirations (non-artist).
+   tools/plan.js reads these after data/seeds.js. Same shape as data/seeds.js. A series item may name its own template (series.template). */
 (function (root) {
   "use strict";
   const MORE = { templates: [
@@ -1023,6 +1023,593 @@
      "leaf"
     ],
     "p": null
+   }
+  ]
+ },
+ {
+  "id": "tilings",
+  "name": "Tilings and tessellations",
+  "inspired": "Inspired by shapes that fit together with no gaps",
+  "kind": "geometry",
+  "living": false,
+  "family": 6,
+  "palette": [
+   "#264653",
+   "#2a9d8f",
+   "#e9c46a",
+   "#f4a261"
+  ],
+  "style": [
+   "tiles",
+   "grids"
+  ],
+  "templates": [
+   "hex-daisy",
+   "hex-startile",
+   "hex-snowflake",
+   "honeycomb",
+   "lattice",
+   "carpet"
+  ],
+  "concepts": [
+   "tiling"
+  ],
+  "series": [
+   {
+    "title": "Penrose Tiles",
+    "fun": "Penrose tilings use just two shapes, and the pattern never repeats exactly.",
+    "chars": [
+     "star",
+     "cat"
+    ],
+    "p": null,
+    "template": "patchwork"
+   },
+   {
+    "title": "Honeycomb Hall",
+    "fun": "Hexagons fit together with no gaps, which is why bees build them.",
+    "chars": [
+     "bee",
+     "flower"
+    ],
+    "p": null,
+    "template": "honeycomb"
+   },
+   {
+    "title": "Star Tiles Floor",
+    "fun": "Tile makers in old palaces built patterns out of stars and shapes.",
+    "chars": [
+     "star",
+     "cat"
+    ],
+    "p": null,
+    "template": "hex-startile"
+   },
+   {
+    "title": "Woven Rug",
+    "fun": "Rugs are woven one knot at a time.",
+    "chars": [
+     "cat",
+     "star"
+    ],
+    "p": null,
+    "template": "carpet"
+   },
+   {
+    "title": "Six Arms",
+    "fun": "Snowflakes have six arms because ice freezes in a six-sided pattern.",
+    "chars": [
+     "star",
+     "cat"
+    ],
+    "p": null,
+    "template": "hex-snowflake"
+   },
+   {
+    "title": "Brick Wall",
+    "fun": "Bricks are laid in staggered rows so the wall stays strong.",
+    "chars": [
+     "cat",
+     "house"
+    ],
+    "p": null,
+    "template": "city-grid"
+   },
+   {
+    "title": "Tile Grid",
+    "fun": "Many old floors use square tiles set in a grid.",
+    "chars": [
+     "cat",
+     "star"
+    ],
+    "p": null,
+    "template": "lattice"
+   }
+  ]
+ },
+ {
+  "id": "curves",
+  "name": "Curves and spirals",
+  "inspired": "Inspired by spirals, rings and round shapes in nature",
+  "kind": "geometry",
+  "living": false,
+  "family": 6,
+  "palette": [
+   "#e76f51",
+   "#f4a261",
+   "#264653",
+   "#e9c46a"
+  ],
+  "style": [
+   "rings",
+   "spirals"
+  ],
+  "templates": [
+   "rings-double",
+   "rings-thin",
+   "rings-dots",
+   "gold-spirals",
+   "rings-petals",
+   "shape-donut"
+  ],
+  "concepts": [
+   "curve"
+  ],
+  "series": [
+   {
+    "title": "Golden Spiral",
+    "fun": "Each quarter turn of the golden spiral grows by about 1.618 times.",
+    "chars": [
+     "cat",
+     "star"
+    ],
+    "p": null,
+    "template": "gold-spirals"
+   },
+   {
+    "title": "Sunflower Seeds",
+    "fun": "Sunflower seeds spiral in two directions, often 34 and 55 spirals.",
+    "chars": [
+     "bee",
+     "sun"
+    ],
+    "p": null,
+    "template": "rings-dots"
+   },
+   {
+    "title": "Ripple Rings",
+    "fun": "A pebble dropped in water makes rings that spread outward.",
+    "chars": [
+     "fish",
+     "star"
+    ],
+    "p": null,
+    "template": "rings-thin"
+   },
+   {
+    "title": "Donut Ring",
+    "fun": "A donut is a shape with one hole, called a torus in maths.",
+    "chars": [
+     "cat",
+     "star"
+    ],
+    "p": null,
+    "template": "shape-donut"
+   },
+   {
+    "title": "Petal Circle",
+    "fun": "Many flowers have their petals arranged in rings.",
+    "chars": [
+     "flower",
+     "bee"
+    ],
+    "p": null,
+    "template": "rings-petals"
+   },
+   {
+    "title": "Wood Circles",
+    "fun": "A tree trunk grows one new ring each year, and the rings show its age.",
+    "chars": [
+     "cat",
+     "leaf"
+    ],
+    "p": null,
+    "template": "rings-double"
+   },
+   {
+    "title": "Dot Beads",
+    "fun": "Rings of dots can be counted like beads on a string.",
+    "chars": [
+     "cat",
+     "star"
+    ],
+    "p": null,
+    "template": "rings-dots"
+   }
+  ]
+ },
+ {
+  "id": "sky",
+  "name": "Sky and stars",
+  "inspired": "Inspired by the Moon, Sun, stars and clouds",
+  "kind": "nature",
+  "living": false,
+  "family": 4,
+  "palette": [
+   "#1d3557",
+   "#457b9d",
+   "#f1faee",
+   "#e9c46a"
+  ],
+  "style": [
+   "sky",
+   "night"
+  ],
+  "templates": [
+   "shape-moon",
+   "shape-sun",
+   "shape-cloud",
+   "starry-sky",
+   "starry-sky-2",
+   "shape-saturn"
+  ],
+  "concepts": [
+   "sky"
+  ],
+  "series": [
+   {
+    "title": "Moon Phases",
+    "fun": "The Moon takes about 29.5 days to go through all its phases.",
+    "chars": [
+     "cat",
+     "moon"
+    ],
+    "p": null,
+    "template": "shape-moon"
+   },
+   {
+    "title": "Sun Rays",
+    "fun": "Sunlight takes about eight minutes to reach Earth.",
+    "chars": [
+     "cat",
+     "sun"
+    ],
+    "p": null,
+    "template": "shape-sun"
+   },
+   {
+    "title": "Puffy Cloud",
+    "fun": "A cloud can weigh as much as several elephants.",
+    "chars": [
+     "cat",
+     "star"
+    ],
+    "p": null,
+    "template": "shape-cloud"
+   },
+   {
+    "title": "Ringed Planet",
+    "fun": "Saturn's rings are made mostly of ice and rock.",
+    "chars": [
+     "cat",
+     "star"
+    ],
+    "p": null,
+    "template": "shape-saturn"
+   },
+   {
+    "title": "Twinkle Stars",
+    "fun": "Stars twinkle because moving air bends their light.",
+    "chars": [
+     "cat",
+     "moon"
+    ],
+    "p": null,
+    "template": "starry-sky"
+   },
+   {
+    "title": "Star Map",
+    "fun": "People long ago used the stars to find their way at night.",
+    "chars": [
+     "cat",
+     "star"
+    ],
+    "p": null,
+    "template": "starry-sky-2"
+   }
+  ]
+ },
+ {
+  "id": "water",
+  "name": "Water and waves",
+  "inspired": "Inspired by ponds, tides, waves and sound",
+  "kind": "nature",
+  "living": false,
+  "family": 4,
+  "palette": [
+   "#0077b6",
+   "#90e0ef",
+   "#caf0f8",
+   "#023e8a"
+  ],
+  "style": [
+   "water",
+   "waves"
+  ],
+  "templates": [
+   "calm-sea",
+   "sound-wave",
+   "shape-fish",
+   "shape-whale",
+   "shape-sailboat",
+   "shape-lilypad",
+   "shape-island"
+  ],
+  "concepts": [
+   "water"
+  ],
+  "series": [
+   {
+    "title": "Lily Pad",
+    "fun": "A lily pad floats because its leaf spreads out flat on the water.",
+    "chars": [
+     "fish",
+     "flower"
+    ],
+    "p": null,
+    "template": "shape-lilypad"
+   },
+   {
+    "title": "Ocean Swell",
+    "fun": "Waves are made by wind pushing on the surface of the water.",
+    "chars": [
+     "fish",
+     "boat"
+    ],
+    "p": null,
+    "template": "calm-sea"
+   },
+   {
+    "title": "Sound Waves",
+    "fun": "Sound travels as waves of air pressure.",
+    "chars": [
+     "cat",
+     "star"
+    ],
+    "p": null,
+    "template": "sound-wave"
+   },
+   {
+    "title": "Island Hop",
+    "fun": "Some islands rise from the sea where volcanoes erupt.",
+    "chars": [
+     "boat",
+     "palm"
+    ],
+    "p": null,
+    "template": "shape-island"
+   },
+   {
+    "title": "Whale Song",
+    "fun": "Whales sing, and their songs can travel a long way under water.",
+    "chars": [
+     "fish",
+     "star"
+    ],
+    "p": null,
+    "template": "shape-whale"
+   },
+   {
+    "title": "Tide Pool",
+    "fun": "The Moon's pull on the oceans makes the tides rise and fall.",
+    "chars": [
+     "fish",
+     "moon"
+    ],
+    "p": null,
+    "template": "dot-field"
+   },
+   {
+    "title": "Coral Reef",
+    "fun": "Coral is built by tiny animals that live together in colonies.",
+    "chars": [
+     "fish",
+     "star"
+    ],
+    "p": null,
+    "template": "shape-fish"
+   }
+  ]
+ },
+ {
+  "id": "plants",
+  "name": "Plants and trees",
+  "inspired": "Inspired by leaves, flowers, trees and fungi",
+  "kind": "nature",
+  "living": false,
+  "family": 4,
+  "palette": [
+   "#606c38",
+   "#dda15e",
+   "#bc6c25",
+   "#fefae0"
+  ],
+  "style": [
+   "leaves",
+   "trees"
+  ],
+  "templates": [
+   "shape-palmleaf",
+   "shape-leaf",
+   "shape-mushroom",
+   "shape-daisy",
+   "shape-tree",
+   "shape-cactus"
+  ],
+  "concepts": [
+   "plant"
+  ],
+  "series": [
+   {
+    "title": "Palm Fan",
+    "fun": "Palm leaves fan out from one point, like the spokes of a wheel.",
+    "chars": [
+     "leaf",
+     "sun"
+    ],
+    "p": null,
+    "template": "shape-palmleaf"
+   },
+   {
+    "title": "Mushroom Ring",
+    "fun": "Mushrooms are fungi, not plants.",
+    "chars": [
+     "cat",
+     "leaf"
+    ],
+    "p": null,
+    "template": "shape-mushroom"
+   },
+   {
+    "title": "Daisy Chain",
+    "fun": "A daisy has many petals arranged in a circle around its centre.",
+    "chars": [
+     "flower",
+     "bee"
+    ],
+    "p": null,
+    "template": "shape-daisy"
+   },
+   {
+    "title": "Leaf Veins",
+    "fun": "Leaves catch sunlight and use it to make food for the plant.",
+    "chars": [
+     "leaf",
+     "sun"
+    ],
+    "p": null,
+    "template": "shape-leaf"
+   },
+   {
+    "title": "Oak Tree",
+    "fun": "Some oak trees live for hundreds of years.",
+    "chars": [
+     "leaf",
+     "cat"
+    ],
+    "p": null,
+    "template": "shape-tree"
+   },
+   {
+    "title": "Tall Trees",
+    "fun": "Trees move water from their roots all the way up to their leaves.",
+    "chars": [
+     "leaf",
+     "bird"
+    ],
+    "p": null,
+    "template": "shape-tree"
+   },
+   {
+    "title": "Desert Cactus Row",
+    "fun": "Cactus plants store water in their thick stems.",
+    "chars": [
+     "cat",
+     "sun"
+    ],
+    "p": null,
+    "template": "shape-cactus"
+   }
+  ]
+ },
+ {
+  "id": "shapes",
+  "name": "Shapes everywhere",
+  "inspired": "Inspired by the everyday shapes we see every day",
+  "kind": "geometry",
+  "living": false,
+  "family": 5,
+  "palette": [
+   "#e63946",
+   "#f1faee",
+   "#457b9d",
+   "#1d3557"
+  ],
+  "style": [
+   "shapes",
+   "outlines"
+  ],
+  "templates": [
+   "shape-oval",
+   "shape-rect",
+   "shape-octagon",
+   "shape-star5",
+   "shape-heart",
+   "shape-sun"
+  ],
+  "concepts": [
+   "shape"
+  ],
+  "series": [
+   {
+    "title": "Stop Sign",
+    "fun": "A stop sign is an octagon, with eight sides.",
+    "chars": [
+     "cat",
+     "star"
+    ],
+    "p": null,
+    "template": "shape-octagon"
+   },
+   {
+    "title": "Five Points",
+    "fun": "Five-pointed stars appear on the flags of many countries.",
+    "chars": [
+     "star",
+     "cat"
+    ],
+    "p": null,
+    "template": "shape-star5"
+   },
+   {
+    "title": "Egg Shape",
+    "fun": "An egg is an oval, not a circle, so it does not roll straight.",
+    "chars": [
+     "cat",
+     "bird"
+    ],
+    "p": null,
+    "template": "shape-oval"
+   },
+   {
+    "title": "Rounded Square",
+    "fun": "A rounded square is halfway between a square and a circle.",
+    "chars": [
+     "cat",
+     "star"
+    ],
+    "p": null,
+    "template": "shape-rect"
+   },
+   {
+    "title": "Heart Card",
+    "fun": "The heart shape has been a sign of love for hundreds of years.",
+    "chars": [
+     "cat",
+     "flower"
+    ],
+    "p": null,
+    "template": "shape-heart"
+   },
+   {
+    "title": "Sunburst",
+    "fun": "Sunburst patterns have been used in art and maps for centuries.",
+    "chars": [
+     "cat",
+     "sun"
+    ],
+    "p": null,
+    "template": "shape-sun"
    }
   ]
  }
