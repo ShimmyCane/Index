@@ -1,5 +1,6 @@
 -- Shimmy Specs — schema v1: accounts, sessions, cloud projects, templates, lessons.
--- Target: the Architecture Supabase project. Supersedes 001 (never applied).
+-- Target: the Architecture Supabase project. Supersedes 001. If 001 was run, this file upgrades its
+-- ss_projects table in place. The file is safe to run again.
 --
 -- Design
 -- - One allowed account for now. Only usernames in ss_allowed_users can sign in.
@@ -51,6 +52,20 @@ create table if not exists public.ss_projects (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+-- Upgrade path. If the first draft (001) was run, ss_projects already exists without user_id.
+-- Its rows are none, so these changes are safe. If rows ever exist, the NOT NULL step stops with an error.
+alter table public.ss_projects add column if not exists user_id uuid references public.ss_users (id) on delete cascade;
+alter table public.ss_projects add column if not exists created_at timestamptz not null default now();
+alter table public.ss_projects alter column user_id set not null;
+
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'ss_projects_state_size') then
+    alter table public.ss_projects add constraint ss_projects_state_size check (pg_column_size(state) < 4000000);
+  end if;
+end
+$$;
+
 create index if not exists ss_projects_user_updated_idx on public.ss_projects (user_id, updated_at desc);
 
 create table if not exists public.ss_templates (
@@ -77,6 +92,11 @@ alter table public.ss_allowed_users enable row level security;
 alter table public.ss_users enable row level security;
 alter table public.ss_sessions enable row level security;
 alter table public.ss_projects enable row level security;
+-- Drop the open policies from the first draft (001). They gave any signed-in role full access.
+drop policy if exists "ss_templates signed-in" on public.ss_templates;
+drop policy if exists "ss_lessons signed-in" on public.ss_lessons;
+drop policy if exists "ss_projects signed-in" on public.ss_projects;
+
 alter table public.ss_templates enable row level security;
 alter table public.ss_lessons enable row level security;
 
@@ -270,4 +290,4 @@ from (values
   ('ss_templates', 'Shimmy Specs', 'Section templates (versioned JSON), shared library. Not yet used by the app'),
   ('ss_lessons', 'Shimmy Specs', 'Lessons tied to a section or question; no project details. Not yet used by the app')
 ) as v(t, p, u)
-where not exists (select 1 from public.table_index x where x.table_name = v.t);
+on conflict (table_name) do update set project = excluded.project, purpose = excluded.purpose;
