@@ -94,7 +94,7 @@ Status: `[ ]` open · `[x]` done · `[!]` blocked (say why)
 - Cloud projects through the `ss_` functions only. Tables have RLS and no policies, so the browser cannot read or write them directly. Injection-shaped usernames are refused by a fixed pattern, and no SQL is built from text.
 - Layout: menu and notes panel minimize, the notes panel resizes by drag, and its panels reorder with ▲▼. The menu starts folded on phones.
 - SQL: `supabase/002_shimmy_specs_accounts.sql` (to run by Jimmy) and `002_test_rollback.sql` (rolled back; prints PASS or the first failed check).
-- Not yet done: applying the SQL; filling in `js/config.js`; wrong-password limits; Google/Microsoft.
+- Not yet done: applying the SQL; filling in `index.html config block`; wrong-password limits; Google/Microsoft.
 
 ## Questions for Jimmy / Opus
 

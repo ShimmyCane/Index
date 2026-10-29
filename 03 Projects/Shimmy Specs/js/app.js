@@ -145,7 +145,7 @@
         '<label><input type="checkbox" data-chg="setting" data-set="showNotes"' + (s.showNotes ? ' checked' : '') + ' /> Show decision notes</label>' +
         '<label><input type="checkbox" data-chg="setting" data-set="showErrors"' + (s.showErrors ? ' checked' : '') + ' /> Show errors</label>' +
         '<h3>Database</h3>' +
-        '<p class="muted">' + (SS.cloud.configured() ? 'Connection set in js/config.js.' : 'Not set up: js/config.js still has placeholders.') + '</p>' +
+        '<p class="muted">' + (SS.cloud.configured() ? 'Connection set in index.html.' : 'Not set up: the two values in index.html still have placeholders.') + '</p>' +
         '<p><button class="btn small" data-act="check-db"' + (SS.cloud.configured() ? '' : ' disabled') + '>Check database</button></p>' +
         (UI.dbMessage ? '<p class="hint">' + ui.esc(UI.dbMessage) + '</p>' : '') +
         '<p class="muted">Projects also stay on this device.</p>' +

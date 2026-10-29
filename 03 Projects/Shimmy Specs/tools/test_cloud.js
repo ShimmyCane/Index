@@ -41,7 +41,7 @@ async function test(name, fn) {
 
   await test('configured: sign-in posts the RPC with the publishable key and stores the session', async () => {
     calls.length = 0;
-    fakeFetch(() => ({ status: 200, body: { token: 'a'.repeat(64), username: 'Ann' } }));
+    fakeFetch(() => ({ status: 200, body: { ok: true, token: 'a'.repeat(64), username: 'Ann' } }));
     assert.strictEqual(cloud.configured(), true);
     const res = await cloud.signIn("Ann o'Brien; drop", '');
     assert.strictEqual(res.username, 'Ann');
@@ -51,10 +51,17 @@ async function test(name, fn) {
     assert.strictEqual(cloud.session().username, 'Ann');
   });
 
-  await test('wrong password: the database message is passed on', async () => {
-    fakeFetch(() => ({ status: 400, body: { message: 'wrong password' } }));
+  await test('wrong password and lockout: returned as ok false, message passed on, session kept', async () => {
+    fakeFetch(() => ({ status: 200, body: { ok: false, error: 'wrong password' } }));
     await assert.rejects(cloud.signIn('Ann', 'nope'), /wrong password/);
-    assert.ok(cloud.session(), 'a wrong password does not sign anyone out');
+    fakeFetch(() => ({ status: 200, body: { ok: false, error: 'too many wrong passwords: wait 15 minutes and try again' } }));
+    await assert.rejects(cloud.signIn('Ann', ''), /too many wrong passwords/);
+    assert.ok(cloud.session(), 'a failed sign-in does not sign anyone out');
+  });
+
+  await test('a database refusal (unlisted username) reaches the user', async () => {
+    fakeFetch(() => ({ status: 400, body: { message: 'this username is not allowed to sign in' } }));
+    await assert.rejects(cloud.signIn('stranger', ''), /not allowed/);
   });
 
   await test('expired session: signs out locally and says so', async () => {
@@ -65,7 +72,7 @@ async function test(name, fn) {
   });
 
   await test('save: first save sets cloudId and writes locally without queuing another cloud save', async () => {
-    fakeFetch((url) => url.endsWith('ss_sign_in') ? { status: 200, body: { token: 'b'.repeat(64), username: 'Ann' } }
+    fakeFetch((url) => url.endsWith('ss_sign_in') ? { status: 200, body: { ok: true, token: 'b'.repeat(64), username: 'Ann' } }
       : { status: 200, body: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc' });
     await cloud.signIn('Ann', '');
     const project = { name: 'P', kind: 'sketch', answers: {} };

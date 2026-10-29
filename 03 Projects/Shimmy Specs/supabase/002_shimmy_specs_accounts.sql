@@ -1,26 +1,36 @@
 -- Shimmy Specs — schema v1: accounts, sessions, cloud projects, templates, lessons.
--- Target: the Architecture Supabase project (<project-ref>). Supersedes 001 (never applied).
+-- Target: the Architecture Supabase project. Supersedes 001 (never applied).
 --
 -- Design
--- - Username + password, managed here (not Supabase Auth), so usernames can be any text.
---   Password may be blank for now. Passwords are stored as bcrypt hashes (pgcrypto).
--- - Tables have RLS on and NO policies, so anon and authenticated roles cannot read or
---   write them directly. The app only calls the ss_* functions below, which are
---   security definer, have a fixed search_path, and never build SQL from text.
--- - Sessions: a random token is returned once; only its SHA-256 hash is stored.
--- - Usernames are unique case-insensitively. A new username creates the account on first sign-in.
+-- - One allowed account for now. Only usernames in ss_allowed_users can sign in.
+--   The first sign-in sets the password (it may be blank). There is no reset feature.
+-- - Username + password, managed here (not Supabase Auth). Passwords are bcrypt hashes.
+-- - Five wrong passwords lock the account for 15 minutes.
+-- - Tables have RLS on and NO policies, so anon and authenticated cannot read or write
+--   them directly. The app calls only the ss_* functions below (security definer,
+--   fixed search_path, no SQL built from text).
+-- - Sessions: a random token is returned once; only its SHA-256 hash is stored. 30 days.
 --
 -- Run this whole file once in the SQL editor of the Architecture project.
+-- Then add the allowed sign-in by hand (NOT in this file, because the repo is public):
+--   insert into public.ss_allowed_users (username_key) values (lower('<your sign-in email>'));
 
 create extension if not exists pgcrypto with schema extensions;
 
 -- ---------------------------------------------------------------- tables
+
+create table if not exists public.ss_allowed_users (
+  username_key text primary key check (username_key = lower(username_key)),
+  added_at timestamptz not null default now()
+);
 
 create table if not exists public.ss_users (
   id uuid primary key default gen_random_uuid(),
   username text not null check (char_length(username) between 3 and 64),
   username_key text generated always as (lower(username)) stored,
   password_hash text not null,
+  failed_count integer not null default 0,
+  locked_until timestamptz,
   created_at timestamptz not null default now(),
   constraint ss_users_username_key_unique unique (username_key)
 );
@@ -63,14 +73,15 @@ create table if not exists public.ss_lessons (
 
 -- ---------------------------------------------------------------- lock down tables
 
+alter table public.ss_allowed_users enable row level security;
 alter table public.ss_users enable row level security;
 alter table public.ss_sessions enable row level security;
 alter table public.ss_projects enable row level security;
 alter table public.ss_templates enable row level security;
 alter table public.ss_lessons enable row level security;
 
-revoke all on public.ss_users, public.ss_sessions, public.ss_projects, public.ss_templates, public.ss_lessons
-  from anon, authenticated;
+revoke all on public.ss_allowed_users, public.ss_users, public.ss_sessions, public.ss_projects,
+  public.ss_templates, public.ss_lessons from anon, authenticated;
 
 -- ---------------------------------------------------------------- helpers
 
@@ -100,7 +111,8 @@ $$;
 
 -- ---------------------------------------------------------------- public functions (called by the app)
 
--- Signs in, or creates the account if the username is new. Returns a token once.
+-- Signs in. Returns { ok: true, token, username } or { ok: false, error }.
+-- Wrong passwords return (not raise) so the failure count is kept.
 create or replace function public.ss_sign_in(p_username text, p_password text)
 returns jsonb
 language plpgsql
@@ -119,14 +131,27 @@ begin
   if char_length(v_pass) > 200 then
     raise exception 'password is too long';
   end if;
+  if not exists (select 1 from public.ss_allowed_users a where a.username_key = lower(v_name)) then
+    raise exception 'this username is not allowed to sign in';
+  end if;
 
-  select * into v_user from public.ss_users u where u.username_key = lower(v_name);
+  select * into v_user from public.ss_users u where u.username_key = lower(v_name) for update;
   if not found then
     insert into public.ss_users (username, password_hash)
     values (v_name, extensions.crypt(v_pass, extensions.gen_salt('bf')))
     returning * into v_user;
-  elsif v_user.password_hash is distinct from extensions.crypt(v_pass, v_user.password_hash) then
-    raise exception 'wrong password';
+  else
+    if v_user.locked_until is not null and v_user.locked_until > now() then
+      return jsonb_build_object('ok', false, 'error', 'too many wrong passwords: wait 15 minutes and try again');
+    end if;
+    if v_user.password_hash is distinct from extensions.crypt(v_pass, v_user.password_hash) then
+      update public.ss_users
+      set failed_count = failed_count + 1,
+          locked_until = case when failed_count + 1 >= 5 then now() + interval '15 minutes' else null end
+      where id = v_user.id;
+      return jsonb_build_object('ok', false, 'error', 'wrong password');
+    end if;
+    update public.ss_users set failed_count = 0, locked_until = null where id = v_user.id;
   end if;
 
   v_token := encode(extensions.gen_random_bytes(32), 'hex');
@@ -134,7 +159,7 @@ begin
   values (encode(extensions.digest(v_token, 'sha256'), 'hex'), v_user.id, now() + interval '30 days');
   delete from public.ss_sessions where expires_at < now();
 
-  return jsonb_build_object('token', v_token, 'username', v_user.username);
+  return jsonb_build_object('ok', true, 'token', v_token, 'username', v_user.username);
 end;
 $$;
 
@@ -238,7 +263,8 @@ grant execute on function public.ss_delete_project(text, uuid) to anon, authenti
 insert into public.table_index (table_name, project, purpose)
 select v.t, v.p, v.u
 from (values
-  ('ss_users', 'Shimmy Specs', 'Accounts: username and password hash. No direct access; use the ss_ functions'),
+  ('ss_allowed_users', 'Shimmy Specs', 'Usernames allowed to sign in. Added by hand. No direct access'),
+  ('ss_users', 'Shimmy Specs', 'Accounts: username, password hash, lockout. No direct access; use the ss_ functions'),
   ('ss_sessions', 'Shimmy Specs', 'Session token hashes with expiry. No direct access'),
   ('ss_projects', 'Shimmy Specs', 'Cloud projects per account (state as JSON). No direct access'),
   ('ss_templates', 'Shimmy Specs', 'Section templates (versioned JSON), shared library. Not yet used by the app'),

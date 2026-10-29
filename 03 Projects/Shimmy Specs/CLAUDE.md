@@ -12,8 +12,8 @@ How to run: open `index.html` (no server or build). It also works from GitHub Pa
 
 - After editing anything in `data/` or `samples/`: `node tools/bundle_data.js` (regenerates `js/data.bundle.js`, used when opened from `file://`).
 - Checks, in order: `node tools/validate_data.js` (data, references, bundle fresh) · `node tools/test_engine.js` (engine, plain Node) · `node tools/test_cloud.js` (cloud client, fake network) · `node tools/smoke.js [screenshotDir]` (headless Chromium, uses the pre-installed Playwright; save screenshots outside the repo).
-- Accounts and cloud saving: fill in `js/config.js` (placeholders until then, so the app saves on the device only). Database: run `supabase/002_shimmy_specs_accounts.sql` once, then `002_test_rollback.sql`. `001` is superseded; never run it. Open questions: `convo/convo v0.3.md`.
-- Code map: `js/template.js` (conditions), `js/recommend.js` (drivers, recommender), `js/draft.js` (numbering, hashes), `js/decisions.js`, `js/flags.js`, `js/import.js`, `js/outputs.js`, `js/store.js` (state, localStorage, actions), `js/data.js`, `js/config.js` (database connection), `js/cloud.js` (accounts and cloud projects, via ss_ functions only), `js/screens.js`, `js/app.js` (header, layout, router, events).
+- Accounts and cloud saving: fill in the two values in the config block at the top of `index.html` (placeholders until then, so the app saves on the device only). Database: run `supabase/002_shimmy_specs_accounts.sql` once, then `002_test_rollback.sql`. `001` is superseded; never run it. Open questions: `convo/convo v0.3.md`.
+- Code map: `js/template.js` (conditions), `js/recommend.js` (drivers, recommender), `js/draft.js` (numbering, hashes), `js/decisions.js`, `js/flags.js`, `js/import.js`, `js/outputs.js`, `js/store.js` (state, localStorage, actions), `js/data.js`, `js/cloud.js` (accounts and cloud projects, via ss_ functions only), `js/screens.js`, `js/app.js` (header, layout, router, events).
 - Build steps and rules: `mvp schematic.md` and `mvp tasks.md`.
 
 Project rules:

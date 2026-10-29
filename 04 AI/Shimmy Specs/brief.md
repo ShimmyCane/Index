@@ -22,7 +22,7 @@ A web app that guides the process of writing CSI specifications (architectural s
 ## Accounts and cloud (round 2)
 
 - Username + password accounts in our own tables (`ss_users`, `ss_sessions`), passwords as bcrypt, sessions as hashed random tokens (30 days). Browser code only calls the `ss_` functions; tables have RLS with no policies. Password can be blank for now (decision pending, convo v0.3 Q2).
-- `js/cloud.js` autosaves to the account 2 s after a change; the header light shows the state. Device-only until `js/config.js` is filled in.
+- `js/cloud.js` autosaves to the account 2 s after a change; the header light shows the state. Device-only until `index.html config block` is filled in.
 - SQL `002_shimmy_specs_accounts.sql` supersedes 001. Not applied: Jimmy runs it.
 
 ## Architecture (as built)

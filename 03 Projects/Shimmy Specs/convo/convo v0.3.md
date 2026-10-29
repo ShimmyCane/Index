@@ -17,6 +17,8 @@
    - **(b)** Keep username and password, and add Google and Microsoft later as a second way in, once the OAuth apps exist.
    My suggestion: **(b) now**, and (a) only when people outside the family need accounts. Which one?
 
+   **Answer: Yes** (option b now; (a) later).
+
 2. **Blank passwords.** Right now anyone who knows a username can open its projects. For you and your own sketches that may be fine. Should blank passwords stay allowed, or should the app require at least 6 characters before anything real is saved?
 
 3. **Where the project URL lives.** `js/config.js` needs the database URL and publishable key. The URL contains the project ref, and the Supabase skill keeps refs out of the repo. Options:
@@ -24,13 +26,23 @@
    - **(b)** Keep it out of git (add it to `.gitignore`). Keeps the rule; cloud saving works only on your computer, not on Pages or the iPad.
    - **(c)** Keep the placeholders in git and paste the values in on each device.
 
+   **Answer:** the URL and key should not be hard-coded in the app's JavaScript. The only place for them is `index.html` in this sub-project, which moves to its own repository later. Done: the config block is now at the top of `index.html`, and `js/config.js` is removed. The values are still placeholders in git; Jimmy fills them in. (Supabase can't supply the URL to the app itself, because the app needs the URL before it can reach Supabase.)
+
 4. **Sign-in creates accounts.** A new username creates an account on first sign-in, so anyone can make one. Is that OK, or do you want an invite list or a separate "create account" step?
+
+   **Answer:** one account for now, Jimmy's sign-in email. The first sign-in sets the password. No reset feature. Built: only usernames on the `ss_allowed_users` list can sign in, and that list is filled in by hand in the database. The email is kept out of the repo because the repo is public.
 
 5. **Wrong-password limits.** There is no limit on guesses yet. Add a short lockout after repeated failures? (Recommended before others use it.)
 
+   **Answer:** "2. But once logged in, save it." Read as: a lockout is wanted, and once signed in, projects save to the account. Built: five wrong passwords lock the account for 15 minutes; signed-in projects save automatically. Tell me if "2" meant something else.
+
 6. **Two devices at once.** Saves are last-write-wins. Is that OK for now?
 
-## Next steps once answered
+   **Answer: Yes.**
 
-- Fill in `js/config.js` (or tell me where to read the values), run `002_shimmy_specs_accounts.sql`, then `002_test_rollback.sql`, and tell me the message it prints.
-- I'll check the advisors after you apply the SQL.
+## Next steps (Jimmy)
+
+- Run `supabase/002_shimmy_specs_accounts.sql` in the Architecture project, then add your sign-in email to `ss_allowed_users` by hand (the snippet is at the top of that file).
+- Run `supabase/002_test_rollback.sql` and tell Claude the message it prints.
+- Fill in the two values in the `index.html` config block (URL and publishable key from the project's API settings).
+- Then check the advisors after the SQL runs.

@@ -1,5 +1,5 @@
 // Shimmy Specs — accounts and cloud projects. Calls only the ss_* functions, through the REST RPC endpoint.
-// Reads the connection from window.SS_CONFIG (js/config.js). No DOM except the status hooks in app.js.
+// Reads the connection from window.SS_CONFIG (index.html, config block). No DOM except the status hooks in app.js.
 (function (root) {
   'use strict';
   var SS = root.SS = root.SS || {};
@@ -37,7 +37,7 @@
 
   // One RPC call. Errors from Postgres come back as { message }.
   function rpc(fn, body) {
-    if (!configured()) return Promise.reject(new Error('Database not set up: fill in js/config.js'));
+    if (!configured()) return Promise.reject(new Error('Database not set up: fill in the config block in index.html'));
     var c = config();
     return fetch(c.supabaseUrl.replace(/\/+$/, '') + '/rest/v1/rpc/' + fn, {
       method: 'POST',
@@ -83,6 +83,7 @@
 
     signIn: function (username, password) {
       return rpc('ss_sign_in', { p_username: username, p_password: password }).then(function (res) {
+        if (!res || res.ok !== true) throw new Error((res && res.error) || 'Sign-in failed');
         setSession({ token: res.token, username: res.username });
         setStatus('idle', 'Signed in');
         return res;

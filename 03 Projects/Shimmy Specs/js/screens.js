@@ -34,16 +34,16 @@
     var err = ui2.authError ? '<p class="error-text">' + ui.esc(ui2.authError) + '</p>' : '';
     if (!c.configured()) {
       return '<section class="card account"><h2>Account</h2>' +
-        '<p>Database not set up yet, so projects are saved on this device only. To turn on accounts, fill in <code>js/config.js</code> (see convo v0.3).</p></section>';
+        '<p>Database not set up yet, so projects are saved on this device only. To turn on accounts, fill in the two values in <code>index.html</code> (see convo v0.3).</p></section>';
     }
     if (!s) {
       return '<section class="card account"><h2>Account</h2>' +
-        '<p class="muted">Sign in to save projects to the database. A new username creates the account on first sign-in. The password can be blank for now.</p>' +
+        '<p class="muted">Sign in to save projects to the database. The first sign-in sets the password (it can be blank for now). There is no password reset. Five wrong passwords lock the account for 15 minutes.</p>' +
         err +
         '<div class="row">' +
         '<label>Username <input id="authUser" type="text" autocomplete="username" maxlength="64" placeholder="any name or email" /></label>' +
         '<label>Password <input id="authPass" type="password" autocomplete="current-password" maxlength="200" placeholder="optional for now" /></label>' +
-        '<button class="btn primary" data-act="sign-in">Sign in or create</button></div></section>';
+        '<button class="btn primary" data-act="sign-in">Sign in</button></div></section>';
     }
     var list = '';
     if (ui2.cloudError) list += '<p class="error-text">' + ui.esc(ui2.cloudError) + '</p>';
