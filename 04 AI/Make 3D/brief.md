@@ -1,44 +1,36 @@
 # Make 3D — AI Brief
 
 **Updated:** 2026-11-01
-**Status:** idea, round 2 answered (`03 Projects/Make 3D/convo/convo v0.2.md`). Schematic updated (§0 lists the changes). Waiting on Jimmy to confirm the open items.
+**Status:** MVP built (v0.1–v0.6 except the cloud copy and viewer outlines). Works from `index.html` (file://). Tests pass; headless browser run has no console errors. Not yet: GitHub Pages publish, real iPad check, cloud copy (needs Jimmy's OK on SQL).
 
 ## Goal
 
 A structured, cumulative geometry repository with a visual inspection engine, for Jimmy and his family, used on iPad and iPhone. Three things kept apart:
-- **Model**: what exists (`model.json`, objects with stable IDs).
-- **Rules**: what is allowed (`world.json`).
-- **Evidence**: drawings and instructions that explain how the model was made (`history.json`; later `drawing.json` + `drawing.png`).
+- **Model**: what exists (`model.json`, objects with stable IDs; replayed from history).
+- **Rules**: what is allowed (`worlds/default-world.json`).
+- **Evidence**: how it was made (`history.json`, the source of truth; later `drawing.json` + `drawing.png`).
 
-Four independent engines: input, geometry, rules, viewer. Three.js only renders.
+Four engines: input, geometry, rules, viewer. The viewer only reads; the engine has no DOM.
 
-## Decisions (round 2)
+## Decisions
 
-- MVP test model: the garden planter only. Outdoor table and kitchen are future.
-- Users: family. Devices: iPad and iPhone, touch first.
-- Position: origin is the centre of the major bounding box, refined by volume weighting when most elements are much smaller than the full box (convo v0.3 Q1–Q3 to confirm thresholds). Ground plane is a viewer setting, never stored.
-- Z-up with a Y-up toggle. Rotation about Y only for now.
-- Each object has `name`, `uuid` and `description`.
-- Overlap allowed by default; a world rule `mode: flag` turns on a model-check flag.
-- Reject: editor stays open, delete offending objects, or preview.
-- Viewer MVP: orbit and zoom. Everything else future.
-- Storage: local + cloud in the architecture database (`m3d_`), cloud from v0.4.
-- Drawings are drawn in the app (Quick Detail is the reference).
-- Look: Quick Detail palette, adapted as needed (confirmed).
-- Units: imperial. Files store inches; display feet and inches (convo v0.3 Q4–Q5).
-- History is the source of truth (confirmed).
-- Editing: form and paste box (a + c), confirmed.
+- Round 2 (convo v0.2): family users; iPad and iPhone, touch first; garden planter is the only MVP test model; outdoor table and kitchen are future; Y-up toggle and ground slider in the MVP; rotation about Y only; `description` per object; textures future and never stored; overlap allowed by default with a world mode; reject returns to the editor with delete-and-retry and preview; viewer MVP is orbit and zoom; cloud copy in the architecture database (`m3d_`); drawings drawn in the app; Quick Detail look; imperial units.
+- Build choices (not yet confirmed by Jimmy): origin uses 25% outlier share, 70% trigger, volume-weighted origin (convo v0.3 Q1–Q3). Stored in inches (v0.3 Q4). Rotation literal about model Y.
+
+## Architecture (as built)
+
+- `js/core/`: units, schema, geometry (replay), origin (major box), rules, io. Pure, Node-testable.
+- `js/viewer/viewer.js`: Three.js r160 classic build (vendored), custom orbit and pick.
+- `js/ui/app.js`: the page. Every change goes through `applyOp`: check, record, redraw.
+- `tools/build_samples.js` generates the planter and `js/samples.bundle.js`. `tools/smoke.js` runs the page headless.
 
 ## Open
 
-- Round 3 open: convo v0.3 Q1–Q6 (origin thresholds, weighting, inches storage, display precision, table length).
-
-## Reference: Quick Detail
-
-`shimmycane/quick-detail` (public, read-only clone used for review). Plain HTML/CSS/JS, no build. Pure logic in `sketch/` runs in Node; tests in `tests/`; code map in `docs/code-map/`. Palette: paper `#fbf6ea`, ink `#2d2a26`, pastel mint, sage, sky, peach, butter. 2.5 px ink lines. Cloud copy in Supabase. Lessons already in `lessons_pool.md` (single source of truth in real units; record relationships when created; `minmax(0, 1fr)` for grid columns).
+- Confirm convo v0.3 Q1–Q6. Confirm rotation axis. Confirm history-as-truth is in place (done).
+- Cloud copy needs the SQL OK.
 
 ## Next steps
 
-1. Jimmy answers convo v0.3.
-2. Freeze schema 0.1 and write the planter sample.
-3. Prompt Jimmy before building v0.1.
+1. Jimmy answers convo v0.3 and checks the page on iPad.
+2. Publish to GitHub Pages once Jimmy agrees.
+3. Viewer outlines for warnings and rejects; per-operation note field; cloud copy.

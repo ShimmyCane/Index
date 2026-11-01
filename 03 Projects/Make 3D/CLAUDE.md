@@ -8,7 +8,12 @@ Purpose: a browser-based 3D sandbox where the **JSON file is the model**. Object
 - AI notes: `04 AI/Make 3D/brief.md` and `lessons.md`
 - Shared conventions: root `CLAUDE.md` (public repo, privacy)
 
-How to run: not built yet. Planned: open `index.html` (no server or build), also from GitHub Pages.
+How to run: open `index.html` in a browser (no server or build). Also works from GitHub Pages.
+
+- Tests: `node tests/test_core.js` (engine, plain Node).
+- Sample: the planter is generated. Edit the operation list in `tools/build_samples.js`, then run `node tools/build_samples.js`. Never hand-edit `model.json` or `js/samples.bundle.js`.
+- Browser check: `node tools/smoke.js <screenshotDir>` (headless Chromium via pre-installed Playwright; save screenshots outside the repo).
+- Units are inches. Files: `model.json` (replayed result), `history.json` (source of truth), `worlds/default-world.json` (rules).
 
 Project rules:
 - Public repo. Sample models are synthetic. Real architectural details or client drawings go in `private/`.
