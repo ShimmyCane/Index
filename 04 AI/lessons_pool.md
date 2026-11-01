@@ -123,3 +123,7 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 
 1. **Validate generated output against what is drawn**, and reject or regrow failures automatically (best of several). Measure the failure rate over hundreds of seeds before trusting it. _(Felix Maze)_
 2. **Store seeds/recipes, fingerprint published ones**, so later code changes can't silently alter something already printed. _(Felix Maze)_
+
+## File-based pages and generated samples (Make 3D)
+- ES module imports don't load from `file://`. Use classic scripts and UMD builds so a double-click works. _(Make 3D)_
+- Generate sample files from one operation list and test that replaying the history equals the saved model. _(Make 3D)_

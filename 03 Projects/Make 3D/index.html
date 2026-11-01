@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Make 3D</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">Make 3D</div>
+  <div class="model-title" id="modelTitle">…</div>
+  <span class="pill" id="status">Saved on this device</span>
+</header>
+
+<main class="layout">
+  <aside class="side" aria-label="Model panels">
+    <section class="card" id="infoCard">
+      <h2>Model</h2>
+      <label class="field">Name
+        <input id="modelName" type="text" maxlength="80">
+      </label>
+      <label class="field">Description
+        <textarea id="modelDesc" rows="2" maxlength="400"></textarea>
+      </label>
+      <p class="hint" id="modelMeta"></p>
+    </section>
+
+    <section class="card" id="lastCard" hidden>
+      <h2 id="lastTitle">Last change</h2>
+      <ul class="issues" id="lastIssues"></ul>
+    </section>
+
+    <section class="card" id="rejectCard" hidden>
+      <h2>Not applied</h2>
+      <p class="hint">The change broke a rule, so the model is unchanged. Fix it, or pick a way forward.</p>
+      <ul class="issues" id="rejectIssues"></ul>
+      <div class="btn-row">
+        <button class="btn" id="rejectDelete" type="button">Delete the listed objects and retry</button>
+        <button class="btn" id="rejectPreview" type="button">Preview without saving</button>
+        <button class="btn ghost" id="rejectDismiss" type="button">Dismiss</button>
+      </div>
+    </section>
+
+    <section class="card" id="listCard">
+      <h2>Objects</h2>
+      <ul class="objects" id="objectList"></ul>
+      <p class="hint" id="emptyNote" hidden>No objects yet. Add one below, or paste an operation.</p>
+    </section>
+
+    <section class="card" id="selCard" hidden>
+      <h2>Selected</h2>
+      <dl class="facts" id="selFacts"></dl>
+      <div class="btn-row">
+        <button class="btn danger" id="selDelete" type="button">Delete this object</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="tabs" role="tablist">
+        <button class="btn" id="tabAdd" type="button" aria-pressed="true">Add an object</button>
+        <button class="btn" id="tabPaste" type="button" aria-pressed="false">Paste an operation</button>
+      </div>
+
+      <form id="addForm" class="stack" autocomplete="off">
+        <label class="field">Type
+          <select id="fType"></select>
+        </label>
+        <label class="field">Name
+          <input id="fName" type="text" required maxlength="60">
+        </label>
+        <label class="field">Description
+          <input id="fDesc" type="text" maxlength="120" placeholder="optional">
+        </label>
+        <div class="grid2" id="fDims"></div>
+        <div class="grid3">
+          <label class="field">X <input id="fX" type="text" value="0"></label>
+          <label class="field">Y <input id="fY" type="text" value="0"></label>
+          <label class="field">Z <input id="fZ" type="text" value="0"></label>
+        </div>
+        <label class="field">Rotation about Y (degrees)
+          <input id="fRot" type="number" value="0" step="1">
+        </label>
+        <div class="grid2">
+          <label class="field">Material
+            <select id="fMat"></select>
+          </label>
+          <label class="field">Parent group
+            <select id="fParent"></select>
+          </label>
+        </div>
+        <p class="hint">Lengths: 36, 3′ 6″, 3 1/2, or 7'. Plain numbers are inches.</p>
+        <p class="err" id="fErr" hidden></p>
+        <button class="btn primary" type="submit">Add object</button>
+      </form>
+
+      <div id="pastePanel" hidden class="stack">
+        <label class="field">One operation, or a list
+          <textarea id="pasteBox" rows="8" spellcheck="false" placeholder='{"op":"add","object":{"name":"Stone","type":"box","dimensions":[12,6,2],"position":[0,0,1]}}'></textarea>
+        </label>
+        <p class="err" id="pasteErr" hidden></p>
+        <button class="btn primary" id="pasteApply" type="button">Apply</button>
+        <ul class="issues" id="pasteResults"></ul>
+      </div>
+    </section>
+  </aside>
+
+  <section class="stage">
+    <canvas id="view" aria-label="3D view of the model"></canvas>
+    <div class="banner" id="previewBanner" hidden>
+      <span>Preview only. Not saved.</span>
+      <button class="btn small" id="previewDiscard" type="button">Discard preview</button>
+    </div>
+    <div class="stage-tools">
+      <button class="btn small" id="resetView" type="button">Reset view</button>
+    </div>
+  </section>
+</main>
+
+<footer class="bottombar">
+  <div class="history">
+    <button class="btn small" id="latestBtn" type="button" hidden>Go to latest</button>
+    <input id="scrub" type="range" min="0" max="0" value="0" aria-label="History step">
+    <span id="stepLabel">v0 / 0</span>
+  </div>
+  <button class="btn small chip" id="rulesChip" type="button">Check model</button>
+  <div class="bottom-errors" id="errorsArea" hidden>
+    <strong>Model check</strong>
+    <ul class="issues" id="errorsList"></ul>
+  </div>
+</footer>
+
+<button class="gear" id="gearBtn" type="button" aria-label="Settings" aria-expanded="false" aria-controls="gearPanel">⚙️</button>
+
+<div class="drawer" id="gearPanel" hidden>
+  <h2>Settings</h2>
+
+  <label class="field">Up axis of the file
+    <select id="upSel">
+      <option value="z">Z up (default)</option>
+      <option value="y">Y up</option>
+    </select>
+  </label>
+
+  <div class="field-row">
+    <label class="toggle"><input id="groundOn" type="checkbox"> Show ground</label>
+  </div>
+  <label class="field">Ground height <span id="groundReadout"></span>
+    <input id="groundSlider" type="range" min="-60" max="60" value="0" disabled>
+  </label>
+
+  <label class="field">Display
+    <select id="displaySel">
+      <option value="solid">Solid</option>
+      <option value="edges">Solid + edges</option>
+      <option value="wire">Wireframe</option>
+    </select>
+  </label>
+  <label class="field">Dimensions shown as
+    <select id="unitsSel">
+      <option value="ftin">Feet and inches</option>
+      <option value="in">Inches</option>
+    </select>
+  </label>
+  <div class="field-row">
+    <label class="toggle"><input id="showErrors" type="checkbox"> Show errors</label>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" id="checkBtn" type="button">Check model</button>
+    <button class="btn" id="saveBtn" type="button">Save file</button>
+  </div>
+  <label class="field">Open a file
+    <input id="openFile" type="file" accept="application/json,.json">
+  </label>
+  <label class="field">Sample
+    <select id="sampleSel"></select>
+  </label>
+  <div class="btn-row">
+    <button class="btn" id="loadSample" type="button">Load sample (replaces this model)</button>
+  </div>
+  <p class="hint">Saved in this browser only. Cloud copy: not set up yet.</p>
+  <button class="btn ghost" id="closeGear" type="button">Close</button>
+</div>
+
+<script src="vendor/three/three.min.js"></script>
+<script src="js/core/units.js"></script>
+<script src="js/core/schema.js"></script>
+<script src="js/core/geometry.js"></script>
+<script src="js/core/origin.js"></script>
+<script src="js/core/rules.js"></script>
+<script src="js/core/io.js"></script>
+<script src="js/viewer/viewer.js"></script>
+<script src="js/samples.bundle.js"></script>
+<script src="js/ui/app.js"></script>
+</body>
+</html>

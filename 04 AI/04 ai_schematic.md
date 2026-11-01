@@ -17,6 +17,7 @@ Projects with notes:
 - Chinese Character Sudoku/ — word-grid game MVP. `brief.md`, `lessons.md`.
 - Adventure/ — family story game. `brief.md`, `lessons.md`.
 - Felix Maze/ — printable maze worksheets MVP. `brief.md`, `lessons.md`.
+- Make 3D/ — JSON-as-model 3D sandbox. MVP built (v0.1–v0.6, engine, viewer, planter sample). Convo v0.3 open. `brief.md`, `lessons.md`.
 - Shimmy Specs/ — spec-writing process app; MVP planned (`mvp schematic.md`, `mvp tasks.md`). `brief.md`, `lessons.md`.
 
 Notes:
