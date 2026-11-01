@@ -1,7 +1,22 @@
 # Make 3D — MVP Schematic
 
-**Status:** idea · **Updated:** 2026-11-01
-**Based on:** Jimmy's brief (summarised in `convo/convo v0.1.md`). Items marked *(Q#)* are proposed defaults waiting on that convo question. Answers may change them.
+**Status:** idea, round 2 answered · **Updated:** 2026-11-01
+**Based on:** Jimmy's brief, `convo/convo v0.1.md` and `convo/convo v0.2.md`. Where v0.2 differs from the first draft, v0.2 wins (listed in §0). Items marked 🚩 are still open.
+
+## 0. What changed in round 2
+
+- **Users and devices:** family; iPad and iPhone first (touch).
+- **MVP test model:** the garden planter only. The outdoor table and the kitchen are future test models.
+- **Position:** the centre of the object's bounding box. A ground plane (opaque, double-sided, green, slider height) clips the model so it sits.
+- **Up axis:** Z-up by default, with a Y-up toggle in settings.
+- **Rotation:** Y axis only for now.
+- **Each object** has a `description` as well as a `name`.
+- **Textures:** future. The model never stores images or image mapping.
+- **Overlap:** allowed by default; a world rule can turn on a flag for a model check.
+- **Reject:** back to the editor, with delete-and-retry and preview.
+- **Viewer MVP:** orbit and zoom only. Walk, sections and measure are future.
+- **Storage:** local plus cloud. The cloud copy goes in the architecture database (`m3d_` tables), not in the first build.
+- **Look:** the Quick Detail paper and ink palette (🚩 to confirm).
 
 ## 1. Purpose
 
@@ -42,7 +57,7 @@ The LLM is optional. It may write operations, but nothing needs it to render, in
 
 1. Every object has a permanent `uuid` and a readable `name` *(Q7)*.
 2. Every file carries `schema` (e.g. `"make3d.model/0.1"`).
-3. Units and axes are explicit: mm, right-handed, **Z-up** *(Q4)*.
+3. Units and axes are explicit: mm, right-handed, **Z-up**. The viewer can show Y-up instead (a settings toggle, round 2).
 4. Changes are operations in `history.json`. Data is never just overwritten *(Q10)*.
 5. Rules are independent of geometry.
 6. Rendering never modifies the model.
@@ -68,8 +83,9 @@ The LLM is optional. It may write operations, but nothing needs it to render, in
     {
       "uuid": "6f1c…",
       "name": "top",
+      "description": "table top, 3 ft x 7 ft",
       "type": "box",
-      "dimensions": [1200, 600, 30],
+      "dimensions": [914, 2134, 30],
       "position": [0, 0, 720],
       "rotation": [0, 0, 0],
       "parent": "a91e…",
@@ -81,8 +97,10 @@ The LLM is optional. It may write operations, but nothing needs it to render, in
 }
 ```
 
-- `position` is the object's own origin. For a box and a cylinder that is the **centre of the base** *(Q5)*.
-- `rotation` is in degrees, Z-Y-X order, about the origin *(Q6)*.
+- `position` is the **centre of the object's bounding box** (round 2, Q5). Ground height is a viewer setting and is never stored.
+- `rotation` is in degrees, **about the Y axis only** for now (round 2, Q6). Other axes are future.
+- `description` is free text, for example "sits on the floor" or "floats 5 ft in the air" (round 2, Q7).
+- Materials are named references, colour only. Textures are future, and images or image mapping are never stored in the model (round 2, Q9).
 - `parent` is the uuid of a `group` object, or null *(Q8)*.
 - `version` equals the number of operations applied.
 
@@ -131,7 +149,7 @@ Later: `extrusion` (profile + path), `boolean` (union / subtract / intersect, ne
   "bounds": { "min": [-10000, -10000, 0], "max": [10000, 10000, 10000] },
   "rules": [
     { "id": "rule-001", "type": "minimum_dimension", "value": 1, "severity": "warning" },
-    { "id": "rule-002", "type": "object_overlap", "severity": "review" },
+    { "id": "rule-002", "type": "object_overlap", "mode": "allow", "severity": "review" },
     { "id": "rule-003", "type": "within_bounds", "severity": "warning" },
     { "id": "rule-004", "type": "valid_geometry", "severity": "reject" },
     { "id": "rule-005", "type": "valid_coordinates", "severity": "reject" }
@@ -147,10 +165,11 @@ Later: `extrusion` (profile + path), `boolean` (union / subtract / intersect, ne
 | `valid_geometry` | known type, all dimensions given and > 0, parent exists and is a group | reject |
 | `minimum_dimension` | every dimension ≥ value | warning |
 | `within_bounds` | bounding box inside `world.bounds` | warning |
-| `object_overlap` | bounding boxes overlap, unless listed in either object's `allowed_overlap` or sharing a parent marked `interlocking` *(Q13)* | review |
+| `object_overlap` | bounding boxes overlap. `mode: allow` (default) passes; `mode: flag` raises a review flag on a model check, not on every edit. Objects may list `allowed_overlap` (Lego-style interlocking) *(round 2, Q13)* | review |
 
 - **Outcome per operation:** `accept`, `accept_with_warnings` (any warning or review), or `reject` (any reject).
 - Severities and values come from the world file. The viewer has no hard-coded rules.
+- Overlap uses `mode`. Only a **model check** (a button) runs the flag rules, so quick rough modelling isn't slowed down.
 - Each rule is one small function `check(op, model, world) → [{rule, severity, message, uuids}]`, so new rules plug in without touching the others.
 - Results show in a panel, and the affected objects are outlined in the viewer (amber for warning or review, red for reject).
 
@@ -158,26 +177,32 @@ Later: `extrusion` (profile + path), `boolean` (union / subtract / intersect, ne
 
 | Feature | MVP behaviour |
 |---|---|
-| Orbit / pan / zoom | OrbitControls. Mouse, trackpad and touch |
-| Cameras | perspective ⇄ orthographic. Views: top, front, side, iso |
-| Display | solid · wireframe · solid + edges · "textured" (material colours) *(Q9)* |
+| Orbit / zoom | MVP. One-finger orbit, pinch zoom, on touch; mouse and trackpad also work. Pan is later |
+| Ground | toggle + vertical slider; opaque, double-sided, green, clips the model *(round 2, Q5)* |
+| Up axis | Z-up default; settings toggle for Y-up *(round 2, Q4)* |
+| Units | stored in mm; display in ft-in or mm (proposed, Q-E) |
+| Look | Quick Detail paper and ink palette (🚩 Q-D) |
+| Cameras | perspective ⇄ orthographic. Views: top, front, side, iso (later) |
+| Display | solid · wireframe · solid + edges (MVP); textures on/off (future) |
 | Lights | ambient + one sun. On/off, intensity, sun angle |
-| Hierarchy | tree of groups and objects: select, hide, isolate, show all |
+| Hierarchy | tree of groups and objects: select, hide, isolate, show all (later) |
 | Selection | click in the scene or the tree. Properties panel shows the object's JSON (read-only in v0.2) |
-| Section | section box with six faces dragged by sliders *(Q20)* |
-| Walk | first-person, eye height 1600 mm *(Q19)* |
-| Measure | click two points to read the distance *(Q21)* |
-| Export | PNG screenshot of the current view |
+| Section | future |
+| Walk | future |
+| Measure | future |
+| Export | PNG screenshot of the current view (later) |
 | Grid & axes | ground grid in mm, axis triad (Z up) |
 
 Axis conversion happens in one place (`viewer/axes.js`): model Z-up → Three.js Y-up.
 
 ## 7. Input and storage
 
-- **Form** *(Q16a)*: pick a type, enter name, dimensions, position, rotation, material and parent → produces an `add` or `modify` operation.
+- **Form** *(Q16a, v0.3)*: pick a type, enter name, description, dimensions, position, rotation (Y), material and parent → produces an `add` or `modify` operation.
 - **Paste operations** *(Q16c)*: a JSON box accepts one operation or a list. Each one is checked, applied or rejected, and the results are shown. This is where an LLM's output plugs in.
+- **Reject flow** *(round 2, Q15)*: the editor stays open with the reasons listed. Delete one or more of the offending objects and re-apply, or preview the result without saving.
 - **Files** *(Q17)*: open or save a bundle (`model.json` + `history.json` + `world.json`, or one combined `.make3d.json`). Sample models load from `models/`. The last session autosaves to localStorage.
-- No server, no database.
+- **Cloud** *(round 2, Q17, v0.4)*: a copy in the architecture database, tables `m3d_…`, registered in `table_index`, with row-level security on.
+- Drawing and component blocks are future (round 2, Q16 and Q14).
 
 ## 8. Page layout (draft)
 
@@ -216,7 +241,7 @@ Axis conversion happens in one place (`viewer/axes.js`): model Z-up → Three.js
     ui/*.js            hierarchy, properties, forms, history bar, rules panel
     app.js
   vendor/three/        local copy of Three.js + addons (Q18)
-  models/              samples: table, brick, wall (Q3), each with model/history/world
+  models/              samples: garden planter (MVP); outdoor table and kitchen (future), each with model/history/world
   worlds/default-world.json
   tools/               node tests: test_geometry.js, test_rules.js, smoke.js
   schematic.md · todo.md · CLAUDE.md · convo/
@@ -226,17 +251,19 @@ Axis conversion happens in one place (`viewer/axes.js`): model Z-up → Three.js
 
 | Version | Deliverable | Done when |
 |---|---|---|
-| v0.1 | Load JSON and render primitives | sample table renders from `models/` |
-| v0.2 | Interactive viewer | every row of §6 works on desktop |
+| v0.1 | Load JSON and render primitives | the garden planter renders from `models/` |
+| v0.2 | Interactive viewer | orbit/zoom on touch and mouse; Y-up toggle; ground slider |
 | v0.3 | Add, modify, delete objects | form + paste box create operations |
 | v0.4 | Save and reload | round-trip with no loss, unknown fields kept |
 | v0.5 | World rules and validation | the five rules, results panel, outlines |
 | v0.6 | Append instructions + history | history scrubber, replay = saved model |
-| — | **MVP line** *(Q22)* | |
+| — | **MVP line** *(round 2, Q22, confirmed)* | |
 | v0.7 | Import external geometry | glTF/OBJ/STL as `mesh` objects |
 | v0.8 | Three-view drawing interpretation | §11 |
 
 ## 11. Later: drawing → model (not in MVP)
+
+Drawings will be drawn in the app, not imported (round 2, Q23). Quick Detail (`shimmycane/quick-detail`) is the existing 2D sketch app and is the reference for this step.
 
 ```
 details/detail-0001/

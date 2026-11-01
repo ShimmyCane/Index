@@ -1,30 +1,42 @@
 # Make 3D — AI Brief
 
 **Updated:** 2026-11-01
-**Status:** idea. Set up with `/start-project`. MVP design drafted in `03 Projects/Make 3D/schematic.md` with proposed defaults; awaiting Jimmy's answers in `convo/convo v0.1.md`.
+**Status:** idea, round 2 answered (`03 Projects/Make 3D/convo/convo v0.2.md`). Schematic updated (§0 lists the changes). Waiting on Jimmy to confirm the open items.
 
 ## Goal
 
-A structured, cumulative geometry repository with a visual inspection engine. Three things kept apart:
-- **Model** — what physically exists (`model.json`, objects with stable IDs).
-- **Rules** — what is allowed to exist (`world.json`).
-- **Evidence** — drawings, images and instructions that explain how the model was made (`history.json`, later `drawing.json` + `drawing.png`).
+A structured, cumulative geometry repository with a visual inspection engine, for Jimmy and his family, used on iPad and iPhone. Three things kept apart:
+- **Model**: what exists (`model.json`, objects with stable IDs).
+- **Rules**: what is allowed (`world.json`).
+- **Evidence**: drawings and instructions that explain how the model was made (`history.json`; later `drawing.json` + `drawing.png`).
 
-Four independent engines: input, geometry, rules, viewer. Three.js only renders; it can be replaced without touching the format.
+Four independent engines: input, geometry, rules, viewer. Three.js only renders.
 
-## Decisions so far (from Jimmy's brief)
+## Decisions (round 2)
 
-- Plain HTML/CSS/JS + Three.js + JSON, GitHub Pages. No backend, database or LLM.
-- Roadmap v0.1–v0.8 (see `todo.md`). Drawings come last.
-- Every object gets a persistent ID; every model a schema version; units and axes explicit; changes recorded as operations; validation outcomes accept / accept-with-warnings / reject; overlap is not automatically an error; rules configurable.
-- No CAD kernel until booleans are truly needed.
+- MVP test model: the garden planter only. Outdoor table and kitchen are future.
+- Users: family. Devices: iPad and iPhone, touch first.
+- Position: centre of the bounding box. Ground plane is a viewer setting, never stored.
+- Z-up with a Y-up toggle. Rotation about Y only for now.
+- Each object has `name`, `uuid` and `description`.
+- Overlap allowed by default; a world rule `mode: flag` turns on a model-check flag.
+- Reject: editor stays open, delete offending objects, or preview.
+- Viewer MVP: orbit and zoom. Everything else future.
+- Storage: local + cloud in the architecture database (`m3d_`), cloud from v0.4.
+- Drawings are drawn in the app (Quick Detail is the reference).
+- Look: Quick Detail palette (🚩 to confirm).
 
-## Open (convo v0.1)
+## Open
 
-Audience and look, device, up-axis, position anchor, ID style, history-as-source-of-truth, overlap method, editing style, Three.js hosting, MVP stopping point.
+- 🚩 History as source of truth (convo v0.2 C10, recommendation given).
+- Confirm: planter "meats" = mint; table size 3 ft × 7 ft; ANC meaning; unit display (Q-E); look (Q-D).
+
+## Reference: Quick Detail
+
+`shimmycane/quick-detail` (public, read-only clone used for review). Plain HTML/CSS/JS, no build. Pure logic in `sketch/` runs in Node; tests in `tests/`; code map in `docs/code-map/`. Palette: paper `#fbf6ea`, ink `#2d2a26`, pastel mint, sage, sky, peach, butter. 2.5 px ink lines. Cloud copy in Supabase. Lessons already in `lessons_pool.md` (single source of truth in real units; record relationships when created; `minmax(0, 1fr)` for grid columns).
 
 ## Next steps
 
-1. Jimmy answers convo v0.1.
-2. Fix the schema (schematic §3–5) and write sample files.
-3. Build v0.1 → v0.2 and prompt Jimmy before going further.
+1. Jimmy confirms the open items.
+2. Freeze schema 0.1 and write the planter sample.
+3. Prompt Jimmy before building v0.1.
