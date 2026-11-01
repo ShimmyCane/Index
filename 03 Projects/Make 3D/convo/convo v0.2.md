@@ -12,10 +12,10 @@ Keep real project names, clients and addresses out of this file (public repo).
 2. ✅ **Devices:** iPad and iPhone. Touch first.
    - *Recommendation:* the viewer is touch-first from v0.2: one-finger orbit, two-finger pan and pinch zoom, and a bottom bar of large buttons (48–68 px, per the iPad rule). Desktop works with the same controls.
 3. ✅ **Test models.** Three were named. Only the first is in the MVP.
-   - **MVP test model 1: garden planter.** A cute planter with snap peas, mint (you wrote "meats") and lettuce sprouts. Sunny, mature plants and a surrounding scene.
+   - **MVP test model 1: garden planter.** A cute planter with snap peas and lettuce sprouts. Sunny, mature plants and a surrounding scene.
    - 🔁 **Future 2: outdoor table.** A 3 ft × 7 ft top on a yellow metal frame, with a branching, reaching bonsai-style tree and an umbrella with three canopies (one centre, two sides) for broad shade.
    - 🔁 **Future 3: kitchen.** A walk-in kitchen. Entering from the left: fridge, counter, stove. In front, a corner counter with a large triple sink and two faucets. On the right, a gap for a dishwasher, then a run of drawers and doors. Upper cabinets with a sliding acrylic display for cups over the sink.
-   - ❓ **Q-A:** the planter's "meats" is probably **mint**. Confirm? Also, is the table 3 ft × 7 ft? Those are 914 × 2134 mm (7 ft is long for a table, so please check).
+   - ✅ **Jimmy:** the "meats" note is withdrawn; the planter has no third plant for now. Table size 3 ft × 7 ft stands as written.
 
 ## B. The model file
 
@@ -23,7 +23,10 @@ Keep real project names, clients and addresses out of this file (public repo).
 5. ✅ **Position.** `position` is the centre of the object's **bounding box**, and the object's origin is that centre (not the base). Also:
    - ✅ **Ground plane:** a toggle shows a ground plane, with a vertical slider to move it up and down. It is opaque, double-sided and green, and it clips the model so the object appears to sit on it. It is large but finite.
    - *Recommendation:* the ground is a viewer aid, not part of the model. It is never stored in `model.json`.
-   - ❓ **Q-B:** confirm that the position is the centre of the bounding box, so a box sitting on the floor has its `position.z` at half its height.
+   - 🔁 **Jimmy (Q-B): use a weighted bounding box.**
+     - Use the **major bounding box**: the box around the bulk of the elements. If most of the elements are far smaller than the full box, the calculation is refined with a weighting. If not, the major box is used.
+     - Big features such as a spire or a wing still count in the overall extent, but the origin stays with the majority of the objects.
+     - *Claude's reading, to check in v0.3:* "70% significantly different" is the trigger. The threshold for "significantly different" is not yet defined. See v0.3 Q1–Q2.
 6. ✅🔁 **Rotation:** about the **Y axis only** for now. Other axes are future.
 7. ✅ **IDs:** a permanent `uuid` plus a readable `name` you can rename, and a **`description`** (free text). For example, "sits on the floor", "special table, floats 5 ft in the air".
 8. ✅ **Parent:** yes, in v0.1 (a simple `parent` field, shown as a tree).
@@ -36,7 +39,7 @@ Keep real project names, clients and addresses out of this file (public repo).
     - **Recommendation: `history.json` is the truth.** It is an ordered list of operations, and `model.json` is the replayed result, kept for speed. Any mismatch is a visible error, and the viewer can step back to any version.
     - *Why:* it matches your "record changes, don't overwrite" rule, and the viewer's scrub-back needs it anyway. Cost: replay on load (small for these models).
     - *Reconsider if:* models grow large enough that replay is slow. Then `model.json` could become the truth with history as an audit log.
-    - **Status:** open. Jimmy to confirm.
+    - ✅ **Jimmy: "Ok".** Accepted as recommended.
 11. 🔁 **Author and note per operation:** future. The **model description** is written up front in the side bar's info panel (name, description, author, date).
 
 ## D. World and rules
@@ -57,7 +60,7 @@ Keep real project names, clients and addresses out of this file (public repo).
 16. ✅ **Editing:** a and c for v0.3 (a form, and paste a JSON operation). b (drag handles) is future.
     - Repairs are done by **deleting** the element and adding it again, not by small edits.
     - 🔁 **Future:** rebuild a component separately (for example a piece of scientific gear), then **import it as a block**.
-    - ❓ **Q-C:** your note says "I am OK with ANC… all of this should be flat as future items." Does that mean "a and c are OK" (what I've recorded), or something else?
+    - ✅ **Jimmy: "A and C".** Confirmed for v0.3.
 17. ✅ **Storage:** local and cloud. The cloud copy goes in the **architecture database** (Supabase). This replaces "no Supabase" in the earlier draft.
     - *Recommendation:* tables prefixed `m3d_`, registered in `table_index`, with row-level security on, following the Shimmy Specs pattern. The cloud copy comes in v0.4, not in the first build.
 18. ✅ **Three.js:** a local copy in the project folder.
@@ -81,8 +84,8 @@ Keep real project names, clients and addresses out of this file (public repo).
 - Visual reference: **Quick Detail**. Its paper and ink look is the basis for Make 3D's style.
   - Palette: paper `#fbf6ea`, panel `#fffdf8`, ink `#2d2a26`, muted `#6f685f`, with pastel accents mint `#d9f1ea`, sage `#dfeadf`, sky `#dbe7f6`, peach `#fde3cf`, butter `#fff1b8`.
   - Lines: 2.5 px solid ink borders. Side bar and panels as in Quick Detail's CSS.
-- 🚩 **Recommendation:** adopt the Quick Detail look, with the iPad rules from `ipad_website.md` (gear in the lower right, big buttons). Fonts are not yet checked. Quick Detail's viewer uses the system font.
-- ❓ **Q-D:** is Quick Detail's look right for Make 3D, or do you want the family look (Quicksand and Orbitron, offset shadows, polka dots)?
+- ✅ **Jimmy: "Accept and further adapt as needed".** Adopt the Quick Detail look, with the iPad rules from `ipad_website.md` (gear in the lower right, big buttons). Fonts are not yet checked. Quick Detail's viewer uses the system font.
+- ✅ **Jimmy: "Ok"** to the Quick Detail look (not the family look).
 
 ## I. Reuse from Quick Detail (for Claude, not a question)
 
@@ -94,4 +97,4 @@ Keep real project names, clients and addresses out of this file (public repo).
 
 ## J. Units display
 
-- ❓ **Q-E:** Jimmy works in feet and inches (and Quick Detail is in inches). Store in mm and display in ft-in, with a toggle? *(Recommendation: yes. Files stay in mm, and display follows the setting.)*
+- ✅ **Jimmy: "Please use imperial dimensions".** Read as: the files store inches, and the display is feet and inches. Confirm the storage choice in v0.3 Q3.

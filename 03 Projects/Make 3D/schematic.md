@@ -5,9 +5,10 @@
 
 ## 0. What changed in round 2
 
+- **Project name:** Make 3D (confirmed).
 - **Users and devices:** family; iPad and iPhone first (touch).
 - **MVP test model:** the garden planter only. The outdoor table and the kitchen are future test models.
-- **Position:** the centre of the object's bounding box. A ground plane (opaque, double-sided, green, slider height) clips the model so it sits.
+- **Position:** the origin is the centre of the **major bounding box** (the bulk of the elements). If most elements are much smaller than the full box, the origin is refined by volume weighting. Big features (a spire, a wing) extend the extent but don't move the origin. A ground plane (opaque, double-sided, green, slider height) clips the model so it sits.
 - **Up axis:** Z-up by default, with a Y-up toggle in settings.
 - **Rotation:** Y axis only for now.
 - **Each object** has a `description` as well as a `name`.
@@ -16,7 +17,11 @@
 - **Reject:** back to the editor, with delete-and-retry and preview.
 - **Viewer MVP:** orbit and zoom only. Walk, sections and measure are future.
 - **Storage:** local plus cloud. The cloud copy goes in the architecture database (`m3d_` tables), not in the first build.
-- **Look:** the Quick Detail paper and ink palette (🚩 to confirm).
+- **Look:** the Quick Detail paper and ink palette, adapted as needed (confirmed).
+- **Units:** imperial. Files store inches; display feet and inches (v0.3 Q4–Q5 to confirm).
+- **Origin:** weighted major bounding box (v0.3 Q1–Q3 to confirm the thresholds).
+- **History** is the source of truth (confirmed).
+- **Overlap, reject flow, storage:** as listed above (confirmed in v0.2 with A and C for editing).
 
 ## 1. Purpose
 
@@ -57,7 +62,7 @@ The LLM is optional. It may write operations, but nothing needs it to render, in
 
 1. Every object has a permanent `uuid` and a readable `name` *(Q7)*.
 2. Every file carries `schema` (e.g. `"make3d.model/0.1"`).
-3. Units and axes are explicit: mm, right-handed, **Z-up**. The viewer can show Y-up instead (a settings toggle, round 2).
+3. Units and axes are explicit: **inches** (imperial, round 2 Q-E), right-handed, **Z-up**. The viewer can show Y-up instead (a settings toggle, round 2).
 4. Changes are operations in `history.json`. Data is never just overwritten *(Q10)*.
 5. Rules are independent of geometry.
 6. Rendering never modifies the model.
@@ -72,7 +77,7 @@ The LLM is optional. It may write operations, but nothing needs it to render, in
   "schema": "make3d.model/0.1",
   "model_id": "table-001",
   "version": 6,
-  "units": "mm",
+  "units": "in",
   "up": "z",
   "world": "default-world",
   "materials": {
@@ -85,8 +90,8 @@ The LLM is optional. It may write operations, but nothing needs it to render, in
       "name": "top",
       "description": "table top, 3 ft x 7 ft",
       "type": "box",
-      "dimensions": [914, 2134, 30],
-      "position": [0, 0, 720],
+      "dimensions": [36, 84, 1.5],
+      "position": [0, 0, 30],
       "rotation": [0, 0, 0],
       "parent": "a91e…",
       "material": "oak",
@@ -97,7 +102,7 @@ The LLM is optional. It may write operations, but nothing needs it to render, in
 }
 ```
 
-- `position` is the **centre of the object's bounding box** (round 2, Q5). Ground height is a viewer setting and is never stored.
+- `position` is the **centre of the object's bounding box**, in inches (round 2, Q5). Model origin rule: see §0 (weighted major box, v0.3 Q1–Q3). Ground height is a viewer setting and is never stored.
 - `rotation` is in degrees, **about the Y axis only** for now (round 2, Q6). Other axes are future.
 - `description` is free text, for example "sits on the floor" or "floats 5 ft in the air" (round 2, Q7).
 - Materials are named references, colour only. Textures are future, and images or image mapping are never stored in the model (round 2, Q9).
@@ -124,9 +129,9 @@ Later: `extrusion` (profile + path), `boolean` (union / subtract / intersect, ne
   "model_id": "table-001",
   "operations": [
     { "seq": 1, "op": "add",    "time": "2026-11-01T10:00:00Z", "author": "jimmy", "note": "table top",
-      "object": { "uuid": "6f1c…", "name": "top", "type": "box", "dimensions": [1200,600,30], "position": [0,0,720] } },
+      "object": { "uuid": "6f1c…", "name": "top", "type": "box", "dimensions": [36,84,1.5], "position": [0,0,30] } },
     { "seq": 2, "op": "modify", "time": "…", "author": "chat", "note": "thicker top",
-      "uuid": "6f1c…", "set": { "dimensions": [1200,600,40] } },
+      "uuid": "6f1c…", "set": { "dimensions": [36,84,1.75] } },
     { "seq": 3, "op": "delete", "time": "…", "author": "jimmy", "uuid": "…" }
   ]
 }
@@ -142,7 +147,7 @@ Later: `extrusion` (profile + path), `boolean` (union / subtract / intersect, ne
 {
   "schema": "make3d.world/0.1",
   "world_id": "default-world",
-  "units": "mm",
+  "units": "in",
   "coordinate_system": "right-handed",
   "up": "z",
   "gravity": [0, 0, -9.81],
@@ -180,7 +185,7 @@ Later: `extrusion` (profile + path), `boolean` (union / subtract / intersect, ne
 | Orbit / zoom | MVP. One-finger orbit, pinch zoom, on touch; mouse and trackpad also work. Pan is later |
 | Ground | toggle + vertical slider; opaque, double-sided, green, clips the model *(round 2, Q5)* |
 | Up axis | Z-up default; settings toggle for Y-up *(round 2, Q4)* |
-| Units | stored in mm; display in ft-in or mm (proposed, Q-E) |
+| Units | stored in inches; display feet and inches to 1/8 in (round 2 Q-E, v0.3 Q4–Q5) |
 | Look | Quick Detail paper and ink palette (🚩 Q-D) |
 | Cameras | perspective ⇄ orthographic. Views: top, front, side, iso (later) |
 | Display | solid · wireframe · solid + edges (MVP); textures on/off (future) |
@@ -191,7 +196,7 @@ Later: `extrusion` (profile + path), `boolean` (union / subtract / intersect, ne
 | Walk | future |
 | Measure | future |
 | Export | PNG screenshot of the current view (later) |
-| Grid & axes | ground grid in mm, axis triad (Z up) |
+| Grid & axes | ground grid in feet, axis triad (Z up) |
 
 Axis conversion happens in one place (`viewer/axes.js`): model Z-up → Three.js Y-up.
 

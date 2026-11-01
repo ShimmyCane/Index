@@ -16,7 +16,7 @@ Four independent engines: input, geometry, rules, viewer. Three.js only renders.
 
 - MVP test model: the garden planter only. Outdoor table and kitchen are future.
 - Users: family. Devices: iPad and iPhone, touch first.
-- Position: centre of the bounding box. Ground plane is a viewer setting, never stored.
+- Position: origin is the centre of the major bounding box, refined by volume weighting when most elements are much smaller than the full box (convo v0.3 Q1–Q3 to confirm thresholds). Ground plane is a viewer setting, never stored.
 - Z-up with a Y-up toggle. Rotation about Y only for now.
 - Each object has `name`, `uuid` and `description`.
 - Overlap allowed by default; a world rule `mode: flag` turns on a model-check flag.
@@ -24,12 +24,14 @@ Four independent engines: input, geometry, rules, viewer. Three.js only renders.
 - Viewer MVP: orbit and zoom. Everything else future.
 - Storage: local + cloud in the architecture database (`m3d_`), cloud from v0.4.
 - Drawings are drawn in the app (Quick Detail is the reference).
-- Look: Quick Detail palette (🚩 to confirm).
+- Look: Quick Detail palette, adapted as needed (confirmed).
+- Units: imperial. Files store inches; display feet and inches (convo v0.3 Q4–Q5).
+- History is the source of truth (confirmed).
+- Editing: form and paste box (a + c), confirmed.
 
 ## Open
 
-- 🚩 History as source of truth (convo v0.2 C10, recommendation given).
-- Confirm: planter "meats" = mint; table size 3 ft × 7 ft; ANC meaning; unit display (Q-E); look (Q-D).
+- Round 3 open: convo v0.3 Q1–Q6 (origin thresholds, weighting, inches storage, display precision, table length).
 
 ## Reference: Quick Detail
 
@@ -37,6 +39,6 @@ Four independent engines: input, geometry, rules, viewer. Three.js only renders.
 
 ## Next steps
 
-1. Jimmy confirms the open items.
+1. Jimmy answers convo v0.3.
 2. Freeze schema 0.1 and write the planter sample.
 3. Prompt Jimmy before building v0.1.

@@ -9,8 +9,9 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - [x] Draft the MVP schematic from Jimmy's brief (proposed defaults marked *(Q#)*).
 - [x] Jimmy answers `convo/convo v0.1.md`. Recorded in `convo/convo v0.2.md`; `schematic.md` §0 lists what changed.
 - [x] Look at Quick Detail as the visual and structural reference (paper and ink palette, tests in Node, code map, `m3d_` cloud pattern).
-- [?] Jimmy confirms the open items in `convo/convo v0.2.md`: 🚩 history as source of truth (C10), look (Q-D), the ❓ questions (Q-A to Q-E).
-- [ ] Freeze schema 0.1: `model`, `history`, `world` (§4). Write the garden planter sample and `worlds/default-world.json`.
+- [x] Jimmy confirms round 2 in `convo/convo v0.2.md`: history as truth, Quick Detail look, editing a + c, imperial units.
+- [?] Jimmy answers `convo/convo v0.3.md`: origin thresholds and weighting (Q1–Q3), units storage and precision (Q4–Q5), table length (Q6).
+- [ ] Freeze schema 0.1: `model`, `history`, `world` (§4), in inches. Write the garden planter sample and `worlds/default-world.json`.
 - [ ] Prompt Jimmy before building v0.1.
 
 ## MVP build
@@ -48,3 +49,4 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 ## Done log
 - 2026-11-01: project started with `/start-project`; schematic and convo v0.1 written.
 - 2026-11-01: round 2 answers recorded in convo v0.2; schematic §0 added; Quick Detail reviewed as the reference.
+- 2026-11-01: round 2 inline answers recorded in v0.2; convo v0.3 opened with origin, units and table-length questions.
