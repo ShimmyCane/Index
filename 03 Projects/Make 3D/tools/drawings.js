@@ -203,7 +203,23 @@ ${body.join('\n')}
 `;
 }
 
+// Stitch: put the plan and the four elevations on one sheet, one above the other (the sheet the drawings print from).
+function stitch(parts, title) {
+  const sizes = parts.map((p) => [Number(p.match(/width="(\d+)"/)[1]), Number(p.match(/height="(\d+)"/)[1])]);
+  const W = Math.max(...sizes.map((z) => z[0]));
+  let y = 0; const body = [];
+  parts.forEach((p, i) => {
+    const inner = p.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+    body.push(`<g transform="translate(0,${y})">${inner}</g>`);
+    y += sizes[i][1] + 20;
+  });
+  return svg(W, y, body, title);
+}
+
 fs.mkdirSync(outDir, { recursive: true });
-fs.writeFileSync(path.join(outDir, 'plan.svg'), svgPlan());
-for (const name of Object.keys(SIDES)) fs.writeFileSync(path.join(outDir, `elev-${name}.svg`), svgElevation(name));
+const plan = svgPlan();
+const elevs = Object.keys(SIDES).map((name) => svgElevation(name));
+fs.writeFileSync(path.join(outDir, 'plan.svg'), plan);
+Object.keys(SIDES).forEach((name, i) => fs.writeFileSync(path.join(outDir, `elev-${name}.svg`), elevs[i]));
+fs.writeFileSync(path.join(outDir, 'sheet.svg'), stitch([plan, ...elevs], `${modelId} · plan and elevations`));
 console.log(`wrote plan and ${Object.keys(SIDES).length} elevations for ${modelId} to ${outDir} (room ${ftin(W)} × ${ftin(L)} × ${ftin(H)})`);

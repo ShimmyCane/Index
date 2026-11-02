@@ -37,6 +37,7 @@ const MATERIALS = {
   shoe1: { color: '#2b2b2b', opacity: 1 },
   shoe2: { color: '#6b4f3a', opacity: 1 },
   cork: { color: '#a77f58', opacity: 1 },
+  chairPink: { color: '#e7a9c4', opacity: 1 },
   fan: { color: '#9ec9e8', opacity: 1 },
   fanPink: { color: '#f2b8c6', opacity: 1 },
   puzzleBox: { color: '#8c3b2e', opacity: 1 },
@@ -73,7 +74,18 @@ const FAR_OPENINGS = [
   { key: 'door', x0: 118, x1: 150, z0: 0, z1: 80, glass: false },
 ];
 
+// The far-wall openings for each version. V2.1 keeps one window at the corner only (on the TV wall), so the far
+// corner window is removed here. V2.3 sets the narrow right window's sill to 36 in, as the big window's sill.
+function farOpeningsFor(v) {
+  return FAR_OPENINGS
+    .filter((o) => !(v >= 21 && o.key === 'narrow-left'))
+    .map((o) => (v >= 23 && o.key === 'narrow-right' ? { ...o, z0: 36 } : o));
+}
+
 function defsFor2(v) {
+  const far = farOpeningsFor(v);
+  // V2.2 moves the TV console to the near unit; the far unit top gets the plants and fans.
+  const tvY = v >= 22 ? 28 : 84;
   const d = [];
   const add = (key, name, description, type, dimensions, position, material, extra = {}) =>
     d.push([key, { name, description, type, dimensions, position, material, ...extra }]);
@@ -126,8 +138,8 @@ function defsFor2(v) {
     add('glass-tv-wall', 'Window glass, TV wall', 'the one window on the TV wall, near the far corner', 'box', [0.5, tvWindow.y1 - tvWindow.y0, tvWindow.z1 - tvWindow.z0], [0.25, (tvWindow.y0 + tvWindow.y1) / 2, (tvWindow.z0 + tvWindow.z1) / 2], 'glass');
   }
   add('wall-right', 'Right wall', 'context only', 'box', [T, L, H], [W + T / 2, L / 2, H / 2], 'wall');
-  wallAlongX('far', 0, W, L + T / 2, FAR_OPENINGS);
-  FAR_OPENINGS.filter((o) => o.glass).forEach((o) =>
+  wallAlongX('far', 0, W, L + T / 2, far);
+  far.filter((o) => o.glass).forEach((o) =>
     add(`glass-${o.key}`, `Window glass, ${o.key}`, 'pane in the opening', 'box', [o.x1 - o.x0, 0.5, o.z1 - o.z0], [(o.x0 + o.x1) / 2, L - 0.25, (o.z0 + o.z1) / 2], 'glass'));
   add('door-panel', 'Front door', 'brown door in the far wall, right side', 'box', [32, 1.5, 80], [134, L - 0.75, 40], 'door');
 
@@ -142,8 +154,8 @@ function defsFor2(v) {
   add('bc-side-far', 'Bookcase far end', '', 'box', [14, 1.2, 28], [7, 111.4, 14], 'yellow', { parent: 'bookcase' });
   [14, 28, 42, 56, 70, 84, 98].forEach((y) =>
     add(`bc-divider-${y}`, `Bookcase divider at ${y} in`, '', 'box', [14, 1.2, 28], [7, y, 14], 'yellow', { parent: 'bookcase' }));
-  add('tv-console', 'Black TV console', 'low black stand on the second unit', 'box', [14, 56, 12], [7, 84, 34], 'black');
-  add('tv', 'TV', 'large flat TV on the console, about 60 in wide, face toward the room', 'box', [3, 60, 34], [4.5, 84, 57], 'black');
+  add('tv-console', 'Black TV console', 'low black stand on the TV unit', 'box', [14, 56, 12], [7, tvY, 34], 'black');
+  add('tv', 'TV', 'large flat TV on the console, about 60 in wide, face toward the room', 'box', [3, 60, 34], [4.5, tvY, 57], 'black');
 
   // Sofa under the big window, on the far wall.
   add('sofa', 'Grey sofa', 'under the big window on the far wall, 64 in long', 'group', [], [0, 0, 0], null);
@@ -202,7 +214,7 @@ function defsFor2(v) {
     if (v >= 14) {
     // V14: bookcase contents from the TV-wall photo. Near unit (y 0-56): printer on top, storage boxes and a bag.
     // Far unit (y 56-112): upright books in the cubbies, with a basket in the bottom cubby. Two rows: z 1.2-13.8 and 15.4-28.
-    add('printer', 'Printer', 'grey printer on top of the near unit', 'box', [14, 18, 10], [7, 32, 33], 'printer');
+    add('printer', 'Printer', 'grey printer on top of the bookcase', 'box', [14, 18, 10], [7, v >= 22 ? 84 : 32, 33], 'printer');
     add('box-brown', 'Cardboard box', 'brown box, bottom left cubby', 'box', [11, 13, 8], [6, 7, 5.2], 'boxBrown', { parent: 'bookcase' });
     add('bin-green', 'Green storage bin', 'green bin, bottom cubby', 'box', [10, 12, 8], [6, 21, 5.2], 'green', { parent: 'bookcase' });
     add('bag-paper', 'Paper bag', 'beige bag, bottom cubby', 'box', [12, 10, 9], [6, 35, 5.7], 'paperBag', { parent: 'bookcase' });
@@ -244,7 +256,7 @@ function defsFor2(v) {
         add(`${key}-right`, `${key} frame, right`, 'white frame', 'box', [1.5, 1, h], [o.x1 + 0.75, L - 0.5, (o.z0 + o.z1) / 2], 'trim');
       }
     };
-    FAR_OPENINGS.filter((o) => o.glass).forEach((o) => frame(`frame-${o.key}`, o, 'far'));
+    far.filter((o) => o.glass).forEach((o) => frame(`frame-${o.key}`, o, 'far'));
     // TV-wall window frame (on the room face, x = 0.5).
     add('frame-tv-top', 'TV-wall window frame, head', 'white frame', 'box', [1, 18 + 3, 1.5], [0.5, 179, 84.75], 'trim');
     add('frame-tv-sill', 'TV-wall window frame, sill', 'white frame', 'box', [1, 18 + 3, 1.5], [0.5, 179, 41.25], 'trim');
@@ -259,11 +271,22 @@ function defsFor2(v) {
     add('door-handle', 'Door handle', 'round handle, about waist high', 'sphere', [1], [126, L - 2, 38], 'trim');
 
     // Bookcase top and the table, restored from V10. Near unit top is y 0-56 at z 28; the TV console is on the far unit.
-    add('fan-blue', 'Blue fan', 'small blue fan on the near unit top', 'cylinder', [4, 7], [7, 50, 31.5], 'fan');
-    add('fan-pink', 'Pink fan', 'small pink fan on the near unit top', 'cylinder', [3.5, 7], [7, 12, 31.5], 'fanPink');
-    add('boxed-puzzle', 'Boxed puzzle', 'small boxed puzzle on the near unit top', 'box', [7, 4, 9], [7, 3, 32.5], 'puzzleBox');
-    add('plant-floor-pot', 'Plant pot by the bookcase', 'terracotta pot, floor, near end of the bookcase (moved from the bookcase top)', 'cylinder', [7, 14], [30, 14, 7], 'pot');
-    add('plant-floor-leaves', 'Plant by the bookcase, leaves', 'leafy plant, floor', 'sphere', [11], [30, 14, 36], 'leaf');
+    if (v < 22) {
+      add('fan-blue', 'Blue fan', 'small blue fan on the near unit top', 'cylinder', [4, 7], [7, 50, 31.5], 'fan');
+      add('fan-pink', 'Pink fan', 'small pink fan on the near unit top', 'cylinder', [3.5, 7], [7, 12, 31.5], 'fanPink');
+      add('boxed-puzzle', 'Boxed puzzle', 'small boxed puzzle on the near unit top', 'box', [7, 4, 9], [7, 3, 32.5], 'puzzleBox');
+      add('plant-floor-pot', 'Plant pot by the bookcase', 'terracotta pot, floor, near end of the bookcase (moved from the bookcase top)', 'cylinder', [7, 14], [30, 14, 7], 'pot');
+      add('plant-floor-leaves', 'Plant by the bookcase, leaves', 'leafy plant, floor', 'sphere', [11], [30, 14, 36], 'leaf');
+    } else {
+      // V2.2: the photos show the plants and fans on the far end of the bookcase, beside the corner window.
+      add('boxed-puzzle', 'Boxed puzzle', 'small boxed puzzle on the TV console, near end', 'box', [7, 4, 9], [7, 6, 44.5], 'puzzleBox');
+      add('plant-pot-far', 'Plant pot, far end of the bookcase', 'terracotta pot on the far unit top', 'cylinder', [6, 12], [7, 66, 34], 'pot');
+      add('plant-leaves-far', 'Plant, far end, leaves', 'leafy plant on the far unit top', 'sphere', [10], [7, 66, 50], 'leaf');
+      add('plant-pot-far-2', 'Second plant pot, far end', 'smaller pot beside the first', 'cylinder', [5, 10], [7, 92, 33], 'pot');
+      add('plant-leaves-far-2', 'Second plant, leaves', 'smaller leafy plant', 'sphere', [9], [7, 92, 46], 'leaf');
+      add('fan-pink', 'Pink fan', 'small pink fan, far end of the bookcase', 'cylinder', [3.5, 7], [7, 106, 31.5], 'fanPink');
+      add('fan-blue', 'Blue fan', 'small blue fan, far end of the bookcase', 'cylinder', [4, 7], [7, 100, 31.5], 'fan');
+    }
     add('bottle', 'Water bottle', 'teal bottle on the children’s table', 'cylinder', [2.3, 10], [74, 170, 27], 'bottle');
     add('dark-box', 'Dark box', 'dark case on the children’s table', 'box', [14, 8, 3], [60, 158, 23.5], 'boxDark');
     add('puzzle-1', 'Puzzle sheet 1', 'blue sheet on the table', 'box', [12, 9, 0.3], [52, 166, 22.15], 'puzzle1');
@@ -283,6 +306,15 @@ function defsFor2(v) {
         n++;
       }
     });
+  }
+
+  if (v >= 24) {
+    // V2.4: pink chair at the near end by the bookcase, as in the near-end photo. Its back faces the bookcase.
+    chair('chair-pink', 'Pink chair', 'small pink chair at the near end, by the bookcase', 10, 30, 1, 12, 'chairPink');
+  }
+  if (v >= 25) {
+    // V2.5: small white floor fan by the bookcase, as in the near-end photo.
+    add('fan-floor', 'Floor fan', 'small white floor fan by the bookcase', 'cylinder', [5, 12], [24, 72, 6], 'bin');
   }
 
   if (v >= 15) {
@@ -314,17 +346,24 @@ const NOTES = {
   13: 'V13: review of V12. The cork tiles hid the room from above, so they are now see-through. Added the red paper cut-outs and white chart on the TV wall, the blue poster and light switch on the right wall, a white frame round the front door, and the paper lantern.',
   14: 'V14: bookcase contents from the TV-wall photo: printer on top of the near unit, storage boxes and bags, and about 40 upright books in the far unit with a basket. Added the wooden chair with a dark jacket near the camera.',
   15: 'V15: final pass on V14. Plants are leaf clusters, not single balls. Objects grouped (room shell, windows, ceiling, TV wall, plants, children’s table and chairs, decor, floor items), so the Objects list shows the structure. Layout unchanged.',
+  21: 'V2.1: plan reconciled with all three photos. One window on the TV wall, at the far corner (it is the window beside the sofa and above the far end of the bookcase), not two. The far wall keeps the big window behind the sofa and the narrow window by the front door.',
+  22: 'V2.2: from the TV-wall and near-end photos. The TV stands on the near unit of the bookcase; the printer, plants and fans are on the far unit top, near the corner window, as in the first photo. The boxed puzzle sits on the TV console.',
+  23: 'V2.3: from the far-wall elevation. The narrow window by the door has its sill at 36 in, the same as the big window.',
+  24: 'V2.4: from the right-wall elevation and the near-end photo. A pink chair by the bookcase, at the near end.',
+  25: 'V2.5: final. A small white floor fan by the pink chair, as in the near-end photo. Grouped as before.',
   16: 'V16: merge of V15 and V10. Restored from V10: window frames on every window, a window on the TV wall (near the far corner, as in the photos), baseboards, door handle, blue and pink fans and the boxed puzzle on the bookcase, the water bottle, dark box, two puzzle sheets and the third wooden chair, plus books in the near unit. The V10 bookcase plants moved to the floor, since the TV console now sits on the far unit.',
 };
 
+// V2.1 to V2.5 are internal versions 21 to 25; they get ids living-room-v2-1 ... and names "Living room V2.1" ...
 function sceneFor2(v) {
-  const id = `living-room-v${String(v).padStart(2, '0')}`;
+  const label = v >= 21 ? `V2.${v - 20}` : `V${String(v).padStart(2, '0')}`;
+  const id = v >= 21 ? `living-room-v2-${v - 20}` : `living-room-v${String(v).padStart(2, '0')}`;
   return {
     id,
     builtin: true,
     header: {
       model_id: id,
-      name: `Living room V${String(v).padStart(2, '0')}`,
+      name: `Living room ${label}`,
       description: `Living room from two photos, estimated sizes in inches. ${NOTES[v]}`,
       units: 'in', up: 'z', world: 'default-world',
       view: { azimuth_deg: 34 },   // camera at the open near end, looking toward the far wall
