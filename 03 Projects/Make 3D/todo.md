@@ -102,3 +102,9 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - [ ] Jimmy checks the sizes against the room (estimates, not measured). Questions in `04 AI/Make 3D/brief.md`.
 - [ ] Viewer: a "hide walls" toggle, so the door and the far walls can be checked from any side.
 - [ ] Commit and publish when Jimmy agrees (not committed yet).
+
+## Living room, second look (2026-11-02)
+- [x] V11 re-layout from the two new photos (`tools/living_room_second_look.js`).
+- [x] V12 ceiling, V13 decor and see-through ceiling, V14 bookcase contents and near chair, V15 final grouping and leaf clusters.
+- [x] Each version rendered and reviewed; engine, cloud and smoke tests pass.
+- [ ] Jimmy checks the new sizes (156 × 216 in room, 14 in cubes, 96 in ceiling) against the room.
