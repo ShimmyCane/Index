@@ -193,6 +193,12 @@
       const dt = Math.min((now - anim.lastNow) / 1000, 0.1);   // a hidden tab doesn't jump ahead
       anim.lastNow = now;
       anim.t += dt * anim.speed;
+      if (anim.motion && anim.motion.loop === false) {
+        // a one-shot timeline (schematic §17): run once to the end, then hold the last frame
+        if (anim.t >= loopS()) { anim.t = loopS(); anim.playing = false; anim.lastNow = null; }
+        applyPose(); tick();
+        return;
+      }
       if (anim.t >= loopS()) {
         anim.playsLeft -= 1;
         if (anim.playsLeft <= 0) { anim.t = 0; anim.playing = false; anim.lastNow = null; }

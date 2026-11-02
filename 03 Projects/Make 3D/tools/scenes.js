@@ -325,5 +325,7 @@ const { ADVENTURE_PARK } = require('./adventure_park.js');
 const { ADVENTURE_PARK_COMPACT } = require('./adventure_park_compact.js');
 const { AQUARIUM } = require('./aquarium.js');
 const { SOLAR_SYSTEM, PLANET_VIEWS } = require('./solar_system.js');
+const { SOLAR_TRUE } = require('./solar_true.js');
+const { PLANET_VIEWS_V2V3, EARTH_VIEWS } = require('./planet_views.js');
 
-module.exports = { WORLD_ID, SCENES: [PLANTER, TABLE, OUTDOOR_V2, KITCHEN, ...LIVING_ROOM, ...KITCHEN_MOCKUP, ...HONDA_CRV, ...ADVENTURE_PARK, ...ADVENTURE_PARK_COMPACT, ...AQUARIUM, ...SOLAR_SYSTEM, ...PLANET_VIEWS, ROBOT_BANANA, ...HAWK] };
+module.exports = { WORLD_ID, SCENES: [PLANTER, TABLE, OUTDOOR_V2, KITCHEN, ...LIVING_ROOM, ...KITCHEN_MOCKUP, ...HONDA_CRV, ...ADVENTURE_PARK, ...ADVENTURE_PARK_COMPACT, ...AQUARIUM, ...SOLAR_SYSTEM, ...PLANET_VIEWS, ...PLANET_VIEWS_V2V3, ...EARTH_VIEWS, SOLAR_TRUE, ROBOT_BANANA, ...HAWK] };

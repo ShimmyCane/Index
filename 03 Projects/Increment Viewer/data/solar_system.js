@@ -2,8 +2,8 @@
 // Images are read relative to viewer.html, so they go up one folder into the Make 3D project.
 // Not to scale: sizes and distances are compressed so every body can be seen. Estimates from NASA fact sheets.
 window.REVIEW_DATA = {
-  title: "Solar System: V01 to V05",
-  subtitle: "The Sun and nine planets on their orbits, with a 160-rock asteroid belt, banded gas giants with rings, and one 240 s loop of orbits and spins. Not to scale. Tap a planet in Make 3D to open its own view; each planet view has a pink marker to fly back. Sizes and distances are estimates.",
+  title: "Solar System: V01 to V06",
+  subtitle: "The Sun and nine planets, now with true orbits (V06). The Sun and nine planets on their orbits, with a 160-rock asteroid belt, banded gas giants with rings, and one 240 s loop of orbits and spins. Not to scale. Tap a planet in Make 3D to open its own view; each planet view has a pink marker to fly back. Sizes and distances are estimates.",
   items: [
     {
       id: "V01", title: "Blockout: the Sun and nine planets",
@@ -39,6 +39,13 @@ window.REVIEW_DATA = {
       description: "Each planet with air gets a faint see-through haze, and the Sun gets a glow. Taps pass through the haze and glow to the planet. Tap a planet to get a button in the upper right that opens its own view with a zoom; each planet view has a way back.",
       changes: ["Atmosphere haze on Venus, Earth, Mars and the gas giants", "Sun glow", "Each planet tagged to open its own view (link:planet-<name>:zoom)", "Planet views: Mercury to Pluto, each with its moons and a fade back"],
       gaps: ["Haze is a flat colour, not a real atmosphere", "Planet surfaces are plain, with no textures", "Moons are only in the planet views, not here"]
+    }    ,
+    {
+      id: "V06", title: "True orbits, one lap of Pluto",
+      image: "../Make 3D/renders/solar-system/v06.png",
+      description: "Every orbit is now true: its shape (eccentricity), its tilt, and where each planet is on 2 November 2026. Orbits are scaled by the square root of their distance so the inner planets are not crowded. The whole animation is one lap of Pluto (about 248 years) in 240 s. It plays once and holds. Faster planets lap many times, so their spins blur at this pace. The month and year tracker at the lower right follows the timeline; scroll or drag it to move through time.",
+      changes: ["Real eccentricities and tilts (Pluto 17 degrees, Mercury 7 degrees)", "Start positions from JPL approximate elements for 2 November 2026 (Earth at about 40 degrees, as it should be)", "One-shot timeline: no loop; Pluto's lap sets the pace", "Spins are real in direction: Venus, Uranus and Pluto turn backwards", "Every belt rock on its own orbit, from a fixed pattern (not real asteroids)", "Month and year tracker, lower right: scroll or drag", "Tap a planet to open its own view; the view's Back button returns here"],
+      gaps: ["Speeds at this pace blur the spins of the fast planets", "Orbits are drawn as one-pixel boxes, so they look thin at a distance", "Sizes are rough and exaggerated; distances are square-root compressed", "Belt rocks are a pattern, not real asteroid positions"]
     }
   ]
 };

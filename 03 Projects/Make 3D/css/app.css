@@ -104,6 +104,17 @@ h2 { font-size: 16px; margin: 0 0 8px; }
 /* stage tools and banner */
 .stage-tools { position: absolute; left: 12px; top: 12px; }
 /* upper right: the link button (appears when a linked part is selected) and full screen */
+/* the Back button sits under Reset view; it only shows on a view that links back */
+.home-btn { margin-top: 8px; background: var(--butter); font-weight: 700; }
+/* lower right: the month and year tracker for a one-shot timeline (above the settings button) */
+.date-track {
+  position: absolute; right: 14px; bottom: 96px; width: 170px; height: 170px; overflow: hidden;
+  background: var(--panel); border: var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+  touch-action: none; cursor: ns-resize; user-select: none; -webkit-user-select: none;
+}
+.drum { display: flex; flex-direction: column; justify-content: center; height: 100%; text-align: center; }
+.drum-row { height: 34px; line-height: 34px; font-size: 15px; color: var(--muted); white-space: nowrap; }
+.drum-row.now { font-size: 19px; font-weight: 800; color: var(--ink); background: var(--butter); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
 .stage-top-right { position: absolute; right: 12px; top: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; max-width: 70%; }
 .link-btn { background: var(--butter); font-weight: 700; }
 /* linked-view transitions (durations match js/core/linked_views.js DURATION_MS: fade 380 ms, zoom 620 ms) */

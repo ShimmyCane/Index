@@ -149,3 +149,12 @@ Jimmy's note on V06: too slow, too small, "too diagrammatic and not real enough 
 - The library list shows only the latest version of each project; older versions fold under "versions". `render_versions.js` names must match the latest version. Render by `?model=<id>` (see the screenshot helper) when a version is not the latest.
 - Object list labels carry the type ("Earthsphere"). Match them with a prefix, not an exact name.
 - Gas-giant bands as stacked flat cylinders look stepped from close up. More bands (12+) or a true sphere-with-stripes primitive would fix it; not yet built.
+
+## True orbits, one-shot timeline, date tracker (2026-11-02, round 9)
+- A one-shot timeline is the honest pace for true orbits: integer loops force orbit ratios that are not real. `loop: false` lets cycles be fractional and negative (retrograde spins), at no cost to the other rules.
+- Orbits from elements need a Kepler solver in the engine itself (not baked points), so the viewer, the build and the tests all share one formula (`orbitPosition`). Rest pose = position at u = 0, so the first frame matches the model.
+- Earth's start longitude is a cheap check (about 40 degrees on 2 November); a wrong epoch shows up at once.
+- Rotations compose Z then Y then X in the viewer. Surface features use rotation_y = 90 - lat and rotation_z = lon for a cylinder whose axis is z, which lays a disc on the surface at that latitude and longitude.
+- Anything a planet's child must follow (a rocket on a pad, a storm on the Earth) must sit under the spinning body group, or it stays behind while the body turns.
+- The world file must cover the whole timeline, not only the rest pose: Pluto's aphelion reaches about 942 in, and its tilt about 300 in up.
+- Viewer tap targets: a button in the page is more reliable than a marker in 3-D space for "go back".

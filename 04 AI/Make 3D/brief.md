@@ -270,3 +270,10 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 - Linked views toolset: `js/core/linked_views.js` with the page button, zoom/fade transitions, and full screen. Schematic §16. Tests: `tests/test_linked_views.js`.
 - Review set: Increment Viewer `?set=solar_system`, renders in `renders/solar-system/`.
 - Open: planet views are V01 only; no retrograde spin; orbits are circles; gas-giant bands look stepped.
+
+## Round 9: planets to V03, Earth to V10, true orbits (2026-11-02)
+
+- Solar system V06: true orbits from JPL approximate elements for 2026-11-02, one lap of Pluto (240 s), played once, then held. Date tracker lower right. Research: `research/solar-system-true.md`.
+- Planet views: V02 and V03 for the eight planets (textures, more moons). Earth V02 to V10 (continents through a second launch). Earth V10 loop is 480 s.
+- Back to the Solar System is a page button (`header.links`), not an object.
+- Open: positions past 2050 are extrapolated; the element values were entered from the standard table, to be checked against the JPL page; belt rocks are a fixed pattern, not real asteroids; fast spins alias at one lap per 240 s.

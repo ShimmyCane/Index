@@ -265,4 +265,4 @@ function planetView(key) {
 const SOLAR_SYSTEM = [1, 2, 3, 4, 5].map(sceneSolar);
 const PLANET_VIEWS = ORDER.map(planetView);
 
-module.exports = { SOLAR_SYSTEM, PLANET_VIEWS, PLANETS, MOONS, WORLD_ID, LOOP_S, MATERIALS, solarDefs, planetView, sceneSolar };
+module.exports = { SOLAR_SYSTEM, PLANET_VIEWS, PLANETS, MOONS, ORDER, WORLD_ID, LOOP_S, MATERIALS, solarDefs, planetView, sceneSolar, bodyDefs, orbitLine };
