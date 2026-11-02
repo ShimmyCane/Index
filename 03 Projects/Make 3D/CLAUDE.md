@@ -10,6 +10,8 @@ Purpose: a browser-based 3D sandbox where the **JSON file is the model**. Object
 
 How to run: open `index.html` in a browser (no server or build). Also works from GitHub Pages.
 
+- Linked views: `js/core/linked_views.js` (tags `link:<model_id>[:zoom|:fade]`, schematic §16), test `node tests/test_linked_views.js`.
+- Solar System: `tools/solar_system.js` (V01–V05, planet views `planet-<name>`), world `worlds/solar-system-world.json`. Not to scale. Review: Increment Viewer `?set=solar_system`.
 - Tests: `node tests/test_core.js` (engine, plain Node), `node tests/test_ifc.js` (IFC export), `node tests/test_motion.js` (motion and the robot walk), `node tests/test_mesh.js` (skeleton meshes, bends and the hawk).
 - Motion: a separate `motion.json` per scene (`js/core/motion.js`, schematic §14). Every animation is a loop. Test scene: `tools/robot_banana.js`. Browser check: `node tools/anim_check.js <screenshotDir>` (autoplay, play bar, pinch zoom).
 - Skeleton meshes: `loft` (closed) and `sheet` (open, double sided) on a joint chain, with the `bend` motion kind and `attach` (schematic §15). Test scene: `tools/hawk.js` (V01 to V07; V07 flight and meadow in `tools/hawk_flight.js`, world `worlds/hawk-world.json`). Render stills or frames: `node tools/render_models.js <dir> hawk-v06@19.4 --follow=hawk`.

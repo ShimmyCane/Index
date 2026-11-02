@@ -103,6 +103,21 @@ h2 { font-size: 16px; margin: 0 0 8px; }
 
 /* stage tools and banner */
 .stage-tools { position: absolute; left: 12px; top: 12px; }
+/* upper right: the link button (appears when a linked part is selected) and full screen */
+.stage-top-right { position: absolute; right: 12px; top: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; max-width: 70%; }
+.link-btn { background: var(--butter); font-weight: 700; }
+/* linked-view transitions (durations match js/core/linked_views.js DURATION_MS: fade 380 ms, zoom 620 ms) */
+#view { transition: opacity 380ms ease, transform 380ms ease; transform-origin: 50% 50%; }
+.stage[data-transition="zoom"].leaving #view { transition: opacity 620ms ease, transform 620ms ease; opacity: 0; transform: scale(1.8); }
+.stage[data-transition="fade"].leaving #view { opacity: 0; }
+.stage[data-transition="zoom"].entering #view { transition: none; opacity: 0; transform: scale(0.55); }
+.stage[data-transition="fade"].entering #view { transition: none; opacity: 0; }
+/* full screen: the real Fullscreen API, or this fixed fill where it is not allowed (iPad Safari) */
+.stage.fake-full { position: fixed; inset: 0; z-index: 60; background: var(--paper); border: 0; }
+.stage.fake-full #view { width: 100%; height: 100%; }
+@media (prefers-reduced-motion: reduce) {
+  #view, .stage[data-transition="zoom"].leaving #view { transition: none !important; transform: none !important; }
+}
 /* animation bar: under the scene, centred */
 .anim-bar {
   position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 10px; align-items: center;

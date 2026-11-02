@@ -140,3 +140,12 @@ Jimmy's note on V06: too slow, too small, "too diagrammatic and not real enough 
 - **Keep older versions byte-identical.** New materials went into a V07-only list, not the shared one, so the V01 to V06 files did not change.
 - **Do not flap near the ground.** A big flap at 13 in altitude put a wing tip 10 in below the ground. Start flapping when the hawk has climbed clear.
 - **Give the prey a story (V07, Jimmy: "let the mouse bolt for a hole").** The mouse is a group on a closed path with a time profile: still until the hawk flares in, a 0.35 s dash, a dive under the ground (z below the meadow top, so the ground hides it, with a dark hole and rim drawn over the entry), a long wait, then a slow walk home. A flat stretch in the profile is how a path motion waits. Keep the start of the path straight and collinear so the heading is exactly the rest pose; a curved start was 0.1 degrees off and failed the first-frame test.
+
+## Solar System and linked views (2026-11-02)
+- A world file must cover the whole scene. With the default world (±240 in), a solar system warned on about 550 objects. A separate `worlds/solar-system-world.json` (±800 in) cleared them. Check the warnings before calling a build done.
+- Whole-number motion cycles: a loop closes only if every motion is a whole number of cycles. Real orbit ratios cannot all be whole, so speeds are stylised and the order is kept. Say so in the description.
+- Retrograde spin cannot be expressed (cycles must be positive), so Venus and Pluto spin the normal way. Logged as a gap in the review set.
+- Link tags stay on the object (`link:<id>[:zoom|:fade]`), not in the model format. Nothing in the schema changes, and the rules check ignores them.
+- The library list shows only the latest version of each project; older versions fold under "versions". `render_versions.js` names must match the latest version. Render by `?model=<id>` (see the screenshot helper) when a version is not the latest.
+- Object list labels carry the type ("Earthsphere"). Match them with a prefix, not an exact name.
+- Gas-giant bands as stacked flat cylinders look stepped from close up. More bands (12+) or a true sphere-with-stripes primitive would fix it; not yet built.
