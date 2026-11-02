@@ -55,6 +55,18 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - [ ] Tags on the planter, V1 table and kitchen (not done; V2 only).
 - [ ] Tag filter in the objects panel (not asked yet).
 
+## Animation (round 7, convo v0.7: designed, not built)
+- [?] Jimmy answers convo v0.7 A–D (path shape, robot look, play length, controls).
+- [ ] A1 Groups as scene nodes; children inherit the parent transform. Check: every library scene renders as before.
+- [ ] A2 `motion.json` format (`make3d.motion/0.1`), optional fourth part of the bundle; `checkMotion`. Node tests.
+- [ ] A3 `js/core/motion.js` `poseAt`: `swing`, `bob`, `path` (face along the curve). Node tests at several times.
+- [ ] A4 Viewer clock: autoplay twice then pause, ▶/⏸, ⟲, time slider; speed in ⚙️; redraw only while playing.
+- [ ] A5 Robot-with-banana test scene walking an S-curve (or loop, per A); steps timed to speed so feet don't slide.
+- [ ] A6 `spin` and `slide`; clash check sampled over time.
+- [ ] A7 `render_versions.js` at a time / frame strip for the Increment Viewer.
+- [ ] A8 Update the `make-3d` skill: motion as its own late increment.
+- [ ] Future: tap a part to start a motion, and chain motions (door opens, then the cuckoo comes out).
+
 ## Future (flat list, round 2)
 - [ ] Editable, resizable and parametric families in Revit (Dynamo or Revit API, `.rfa`). Not needed for the first IFC import.
 - [ ] Walk mode, section box, measure, PNG export (viewer).

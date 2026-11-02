@@ -312,3 +312,52 @@ Source: `convo/convo v0.4.md`. Open questions there. Nothing here is built yet.
 - **Exports:** a PNG of one view, for a background in Quick Detail (E3). A 3-D file for Revit: **IFC** (convo v0.6), built in `js/core/export_ifc.js` and downloaded from the gear panel. Up stays Z (up is up in Revit); units are handled inside the exporter so the model lands at real scale. Imports into Revit as placeable elements, not editable `.rfa` families (editable and parametric families are future).
 - **Future:** scene tags (S2); read-only share link (S1).
 
+
+## 14. Animation (round 7: designed, not built)
+
+Source: `convo/convo v0.7.md`. Open questions A–D there.
+
+**Files.** Motion is a fourth file, separate from the model:
+
+| Part | Question it answers | File |
+|---|---|---|
+| Model | What physically exists? | `model.json` |
+| Rules | What is allowed to exist? | `world.json` |
+| Evidence | How and why was it made? | `history.json` |
+| **Motion** | **How does it move?** | **`motion.json`** |
+
+```json
+{
+  "schema": "make3d.motion/0.1",
+  "model_id": "robot-banana",
+  "autoplay": { "plays": 2, "gap_s": 1 },
+  "duration_s": 8,
+  "motions": [
+    { "id": "walk", "target": "<robot group uuid>", "kind": "path",
+      "points": [[0,0,0],[48,36,0],[96,-36,0],[144,0,0]], "face": "tangent",
+      "start": "auto" },
+    { "id": "left-leg", "target": "<left leg group uuid>", "kind": "swing",
+      "pivot": [0, 4, 18], "axis": "y", "from": -25, "to": 25,
+      "period_s": 1, "phase": 0, "ease": "inOut" },
+    { "id": "right-leg", "target": "<right leg group uuid>", "kind": "swing",
+      "pivot": [0, -4, 18], "axis": "y", "from": -25, "to": 25,
+      "period_s": 1, "phase": 0.5, "ease": "inOut" }
+  ]
+}
+```
+
+- Units inches, Z up, angles in degrees, same as the model. `pivot` is in model coordinates at rest.
+- Kinds: `spin`, `swing`, `slide`, `bob`, `path` (curve through points, smoothed).
+- `start`: `"auto"` now. Future (Jimmy, round 7): `"tap:<uuid>"` starts a motion when a part is tapped, and `"then": "<motion id>"` chains one after another (tap the door, the door opens, then the cuckoo comes out).
+
+**Engine.** `js/core/motion.js` (pure, Node and browser):
+- `checkMotion(model, motion)`: targets exist, pivots and numbers valid, warns on missing targets.
+- `poseAt(model, motion, t)`: returns a per-uuid transform change at time `t`. Used by the viewer, the clash check over time and the render tool.
+
+**Viewer.**
+- Groups become scene nodes; children inherit their parent's transform (needed so the banana travels with the hand). Still scenes must render exactly as before.
+- Each node keeps its rest transform; the pose is applied on top each frame and removed on stop.
+- Clock: plays twice on open, then pauses. Redraw every frame only while playing; on touch only while paused (battery).
+- Editing pauses playback and shows the rest pose.
+
+**Tools.** `render_versions.js` takes a time (or a frame count for a strip) for the Increment Viewer. IFC export uses the rest pose.
