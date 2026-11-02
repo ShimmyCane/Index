@@ -211,6 +211,21 @@ h2 { font-size: 16px; margin: 0 0 8px; }
 }
 [hidden] { display: none !important; }
 
+/* upper-right Parts dropdown: show or hide groups tagged show:<label> */
+.groupctl { position: relative; }
+.groupbtn {
+  font: inherit; font-weight: 700; font-size: 15px; min-height: 44px; padding: 0 14px; border-radius: 999px;
+  border: var(--line); background: var(--sky); color: var(--ink); cursor: pointer; white-space: nowrap;
+}
+.grouppanel {
+  position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; min-width: 200px; padding: 10px 12px;
+  border: var(--line); border-radius: 14px; background: var(--panel); box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.grouppanel[hidden] { display: none; }
+.partrow { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 16px; font-weight: 600; cursor: pointer; }
+.partrow input { width: 22px; height: 22px; accent-color: var(--select); }
+
 /* collapsible panel headers (Model, Objects) */
 h2.collapse { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; min-height: 40px; }
 h2.collapse .chev-mark { font-size: 16px; transition: transform .15s; }

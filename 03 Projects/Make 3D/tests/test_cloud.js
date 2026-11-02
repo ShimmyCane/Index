@@ -68,14 +68,20 @@ const t = async (name, fn) => { await fn(); n++; console.log('ok', name); };
     assert.strictEqual('emailRedirectTo' in lib.otp.options, false);
   });
 
-  await t('cloud: references read sketch_details by the make 3-D tag, not deleted rows', async () => {
-    const lib = fakeLib({ rows: [{ id: 'd1', name: 'Window head', tags: ['make 3-D'] }] });
+  await t('cloud: references read sketch_details with the make3d tag in any letter case, not deleted rows', async () => {
+    const lib = fakeLib({ rows: [
+      { id: 'd1', name: 'Robot Loop', tags: ['make3d', 'make 3-d'] },
+      { id: 'd2', name: 'Upper case', tags: ['MAKE3D'] },
+      { id: 'd3', name: 'Retired spelling only', tags: ['make 3-D'] },
+      { id: 'd4', name: 'Other', tags: ['cat'] },
+      { id: 'd5', name: 'No tags', tags: null },
+    ] });
     const c = C.createCloud(lib);
     const rows = await c.listReferences();
-    assert.strictEqual(rows[0].name, 'Window head');
+    assert.deepStrictEqual(rows.map((r) => r.name), ['Robot Loop', 'Upper case']);
     const q = lib.calls[lib.calls.length - 1];
     assert.strictEqual(q.table, 'sketch_details');
-    assert.deepStrictEqual(q.ops.find((o) => o[0] === 'contains'), ['contains', 'tags', ['make 3-D']]);
+    assert.strictEqual(q.ops.find((o) => o[0] === 'contains'), undefined);
     assert.deepStrictEqual(q.ops.find((o) => o[0] === 'is'), ['is', 'deleted_at', null]);
   });
 

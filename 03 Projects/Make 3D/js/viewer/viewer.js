@@ -317,6 +317,7 @@
     function setModel(model, info) {
       lastModel = model;
       buildModel(model);
+      applyVisibility();
       const o = info && info.origin ? info.origin : [0, 0, 0];
       originMarker.position.set(...toScene(o));
       if (info && info.fullBox) {
@@ -450,12 +451,27 @@
       canvas.addEventListener(g, (e) => e.preventDefault(), { passive: false });
     }
     const raycaster = new THREE.Raycaster();
+    // Group visibility (the dropdown): objects whose uuid is hidden, with their whole branch.
+    let hiddenSet = new Set();
+    function applyVisibility() {
+      for (const [uuid, node] of nodes) node.visible = !hiddenSet.has(uuid);
+    }
+    function setHiddenUuids(list) {
+      hiddenSet = new Set(list || []);
+      applyVisibility();
+      requestRender();
+    }
+    // A mesh counts only if no ancestor is hidden.
+    function shown(obj) {
+      for (let p = obj; p; p = p.parent) if (p.visible === false) return false;
+      return true;
+    }
     function pick(x, y) {
       const r = canvas.getBoundingClientRect();
       const ndc = new THREE.Vector2(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
       raycaster.setFromCamera(ndc, camera);
       // Glass and water (opacity under 0.4) are see-through: a tap goes through them to the object behind.
-      const hit = raycaster.intersectObjects(meshes, false).find((h) => !(h.object.material && h.object.material.transparent && h.object.material.opacity < 0.4));
+      const hit = raycaster.intersectObjects(meshes, false).find((h) => shown(h.object) && !(h.object.material && h.object.material.transparent && h.object.material.opacity < 0.4));
       onSelect(hit ? hit.object.userData.uuid : null);
     }
 
@@ -475,7 +491,7 @@
     raf = requestAnimationFrame(loop);
 
     return {
-      setModel, setOptions, setSelected, render, resize: () => { resize(); requestRender(); },
+      setModel, setOptions, setSelected, setHiddenUuids, render, resize: () => { resize(); requestRender(); },
       onSelect(fn) { onSelect = fn; },
       resetView(origin, extent) { theta = 0.6; phi = 1.0; fitTo(origin, extent); requestRender(); },
       stop() { cancelAnimationFrame(raf); },

@@ -11,5 +11,6 @@ window.REVIEW_SETS = [
   { id: "planet_views", label: "Planet views: V02 and V03, eight planets" },
   { id: "earth_views", label: "Earth view: V02 to V10" },
   { id: "planet_views_v4", label: "Planet views: V04 to V06, shaded" },
-  { id: "earth_views_v11", label: "Earth view: V11 to V20, shaded" }
+  { id: "earth_views_v11", label: "Earth view: V11 to V20, shaded" },
+  { id: "robot_loop", label: "Robot loop: sketched walk, frisbee and top hat, V02 to V04" }
 ];

@@ -9,6 +9,8 @@
   const SAMPLE_ID = 'garden-planter';
 
   const st = {
+    hiddenParts: new Set(), // labels of the Parts dropdown that are turned off (show:<label> tags)
+    partsKey: null,         // the labels the dropdown was last built for
     history: null,      // { header, operations, ... }
     world: null,
     motion: null,       // make3d.motion file, separate from the model; null when the scene doesn't move
@@ -31,7 +33,7 @@
     viewer: null,
     cloud: null,        // createCloud(...) or { available: false }
     cloudEmail: '',
-    cloudRefs: [],      // Quick Detail details tagged make 3-D (read only)
+    cloudRefs: [],      // Quick Detail details tagged make3d, any letter case (read only)
     cloudScenes: [],    // saved scenes in m3d_scenes
     cloudNote: '',
   };
@@ -138,9 +140,42 @@
 
   function discardPreview() { st.preview = null; st.previewOp = null; setStatus('Saved on this device', ''); render(); }
 
+  // ---------- Parts dropdown (upper right): show or hide groups tagged show:<label>
+  function renderParts(model) {
+    const groups = M.groupsIn(model);
+    $('groupCtl').hidden = groups.length === 0;
+    if (st.viewer) st.viewer.setHiddenUuids(M.hiddenUuids(groups, [...st.hiddenParts]));
+    const key = groups.map((g) => g.label).join('|');
+    if (key === st.partsKey) return;
+    st.partsKey = key;
+    const panel = $('groupPanel');
+    panel.replaceChildren();
+    for (const g of groups) {
+      const row = document.createElement('label');
+      row.className = 'partrow';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = !st.hiddenParts.has(g.label);
+      cb.addEventListener('change', () => {
+        if (cb.checked) st.hiddenParts.delete(g.label); else st.hiddenParts.add(g.label);
+        renderParts(shown());
+      });
+      row.append(cb, document.createTextNode(` ${g.label.charAt(0).toUpperCase()}${g.label.slice(1)}`));
+      panel.appendChild(row);
+    }
+  }
+  function bindParts() {
+    const btn = $('groupBtn'), panel = $('groupPanel');
+    const setOpen = (open) => { panel.hidden = !open; btn.setAttribute('aria-expanded', String(open)); };
+    btn.addEventListener('click', (e) => { e.stopPropagation(); setOpen(panel.hidden); });
+    document.addEventListener('click', (e) => { if (!$('groupCtl').contains(e.target)) setOpen(false); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+  }
+
   // ---------- rendering
   function render() {
     const model = shown();
+    renderParts(model);
     const info = M.majorBox(model.objects, st.up);
     const v = st.up === 'y' ? 1 : 2;
     const full = info.fullBox;
@@ -801,7 +836,7 @@
     if (!signedIn) {
       const li = document.createElement('li'); li.textContent = 'Sign in to see them.'; rl.appendChild(li);
     } else if (!st.cloudRefs.length) {
-      const li = document.createElement('li'); li.textContent = 'None yet. In Quick Detail, add the tag "make 3-D" to a detail.'; rl.appendChild(li);
+      const li = document.createElement('li'); li.textContent = 'None yet. In Quick Detail, add the tag "make3d" to a detail.'; rl.appendChild(li);
     }
     for (const d of st.cloudRefs) {
       const li = document.createElement('li');
@@ -1014,6 +1049,7 @@
     fillSamples();
     if (modelFromUrl()) $('sampleSel').value = modelFromUrl();
     bind();
+    bindParts();
     setupCloud();
     render();
     setupTrack();
