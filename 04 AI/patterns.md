@@ -53,6 +53,7 @@ The ten recurring lessons are summarized in `profile_and_directions.md` §4. Pro
 - **Q&A in versioned convo files, never compacted.** When a decision is superseded, mark it in the brief, not by rewriting history. _(Family Accounting)_
 - **Split single-file apps** into css/js once they grow. Top-level registries that reference later functions must live in the last-loaded script. _(Coins tech notes)_
 - **Respect dropped features.** Don't re-add something Jimmy removed. _(Allowances)_
+- **Render, look, then change (for visual work).** Build a page, render it to PNG with headless Chromium, compare the render with the reference, list the gaps, then make the next version as a new file (V1, V2, …). Keep the reference's pixel grid as the SVG `viewBox` so positions compare directly. About five changes per round. _(Living Room Scene)_
 
 ## Template candidates
 

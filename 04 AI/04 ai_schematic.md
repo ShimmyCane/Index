@@ -18,6 +18,8 @@ Projects with notes:
 - Adventure/ — family story game. `brief.md`, `lessons.md`.
 - Felix Maze/ — printable maze worksheets MVP. `brief.md`, `lessons.md`.
 - Make 3D/ — JSON-as-model 3D sandbox. MVP built (v0.1–v0.6, engine, viewer, planter sample). Convo v0.3 open. `brief.md`, `lessons.md`.
+- Increment Viewer/ — subject-neutral slideshow and running log for reviewing increments. `brief.md`.
+- Living Room Scene/ — scene built from a photo over ten versions (V1–V10), render-and-compare loop. `brief.md` (version log), `lessons.md`.
 - Shimmy Specs/ — spec-writing process app; MVP planned (`mvp schematic.md`, `mvp tasks.md`). `brief.md`, `lessons.md`.
 
 Notes:
