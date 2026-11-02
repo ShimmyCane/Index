@@ -116,23 +116,43 @@
   },
   "habitat-aquarium-v01": {
     "created": "2026-11-02T21:42:43Z",
-    "updated": "2026-11-02T21:52:17Z",
-    "hash": "7e324f62bab67b0a"
+    "updated": "2026-11-02T22:01:31Z",
+    "hash": "af43a4730a1343dc"
   },
   "habitat-aquarium-v02": {
     "created": "2026-11-02T21:42:43Z",
-    "updated": "2026-11-02T21:52:17Z",
-    "hash": "57fc55ba608a1d3b"
+    "updated": "2026-11-02T22:01:31Z",
+    "hash": "2d69950bc613c548"
   },
   "habitat-aquarium-v03": {
     "created": "2026-11-02T21:42:43Z",
-    "updated": "2026-11-02T21:52:17Z",
-    "hash": "4ed7b793f6d2b14e"
+    "updated": "2026-11-02T22:01:31Z",
+    "hash": "5f0f7e55afd738e4"
   },
   "habitat-aquarium-v04": {
     "created": "2026-11-02T21:42:43Z",
-    "updated": "2026-11-02T21:52:17Z",
-    "hash": "22941d59d46393be"
+    "updated": "2026-11-02T22:01:31Z",
+    "hash": "30317214e3aede00"
+  },
+  "habitat-aquarium-v05": {
+    "created": "2026-11-02T22:01:31Z",
+    "updated": "2026-11-02T22:11:59Z",
+    "hash": "407d2fda2a707fdd"
+  },
+  "habitat-aquarium-v06": {
+    "created": "2026-11-02T22:01:31Z",
+    "updated": "2026-11-02T22:11:59Z",
+    "hash": "a839bfe2579d305d"
+  },
+  "habitat-aquarium-v07": {
+    "created": "2026-11-02T22:01:31Z",
+    "updated": "2026-11-02T22:11:59Z",
+    "hash": "ed7896e77876b434"
+  },
+  "habitat-aquarium-v07-cutaway": {
+    "created": "2026-11-02T22:06:20Z",
+    "updated": "2026-11-02T22:11:59Z",
+    "hash": "033e034e88164957"
   },
   "hawk-v01": {
     "created": "2026-11-02T19:40:23Z",

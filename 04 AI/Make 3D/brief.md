@@ -292,3 +292,13 @@ Jimmy's note on the Grand Ocean Aquarium: it is a water tank, but "Disneyfied": 
 - **Swim loops** are rejection-sampled against the outline (distance to the wall), the S-tunnel and the floor, and tested at 90 times per loop.
 - **Not carried over:** the rooms, sunroom, kids' den, bubble domes and touch pool of Grand Ocean V06. They belonged to the glass box. Open for Jimmy: where should they go (pavilions round the lobed outline?).
 - **Open:** rock is made of spheres, so it looks pebbly; plain cones and slabs only help a little. Rays, turtles and eels still glide stiffly.
+
+### Coastal Habitat Aquarium V05 to V07 (2026-11-02)
+
+Jimmy: the tank is not a vertical extrusion; some portions should be shallow with space below, others have bridges over them or tunnels through them. Built as three more increments of the habitat scene (H01 to H04 unchanged; checked by hashing their output before and after).
+
+- **V05 Not an extrusion:** the wall leans by angle (`lean(θ)`, ±10% at the top, so some stretches overhang and others flare); the rock cliff, ledges and spires, the rim and the tilted front window (7°) follow it. Three floor levels: deep basin 0 ft; solid rock terrace 8 ft (SE); shelf plateau 16 ft (NW) with 12 ft of water over it and a cavern gallery beneath, looking into the deep basin through a curved glass wall. The flat sand, mounds and tide terraces are replaced by this terrain.
+- **V06 Bridges and tunnels:** a deck ring; an arched skybridge over the deep basin; the Kelp Walk from the west deck over the plateau up to the skybridge; a 32 ft clear tunnel through the plateau water; a spiral stair tube up through the shelf from the cavern; two guests cross the skybridge.
+- **V07 Repopulated:** plateau residents and schools, terrace kelp and coral, plateau critters, guests on the Kelp Walk. A **cutaway** scene (front half of rock, glass, rim and deck removed) is included for review only; its images are the V07 render.
+- **Counts:** 1,768, 1,988, 2,175 (cutaway 1,890). **Swim loops** now test the leaning wall, the floor and terrain, the plateau tunnel and the shelf edge (`tests/test_habitat_aquarium.js`, 12 tests).
+- **Open:** no way into the cavern or onto the plateau (stairs from the deck and the gallery are only markers); no tunnel through solid rock; the rooms from Grand Ocean V06 are still unplaced. `js/samples.bundle.js` is now about 20 MB, because every scene is in it; it should be split or loaded on demand.

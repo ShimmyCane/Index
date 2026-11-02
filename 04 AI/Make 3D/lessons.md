@@ -174,3 +174,13 @@ Jimmy's note on V06: too slow, too small, "too diagrammatic and not real enough 
 - **Spheres on a floor must not sink below it.** Half-buried spheres hang under the model. Rest each sphere on the floor (centre at its radius) and make its radius the height you want, or the model shows pieces below the ground.
 - **Opaque rock, transparent water.** Semi-transparent boulders look like bubbles; opaque ones look like stone. Keep the front as the only glass.
 - **Copy the builders when you must not change the old versions.** The habitat copies the fish builder and species table instead of refactoring them, so Grand Ocean V01 to V06 stay byte-for-byte as reviewed.
+
+## Not an extrusion (2026-11-02, Jimmy's note on the habitat)
+
+- **A curved outline extruded straight up is still a box.** Add variation in height, not only in plan: a lean that changes with the angle (some stretches overhang), a floor with several levels, and space underneath. One lean function drove the rock, the rim and the glass tilt.
+- **Space underneath is a room.** Raising a plateau 16 ft made a cavern worth a gallery. Put a glass wall at the plateau edge and the cavern looks into the deep basin.
+- **Bridges go above the water; tunnels through it.** The bridge deck must be above the surface, and a tunnel through shallow water has to leave room above and below for the animals. Test both.
+- **Prove the old increments did not change.** Hash the output of V01 to V04 before the change and compare after. A later version changes parts by `if (v >= N)`; it never edits the old path.
+- **A test found what the render hid.** The first swimmer test failed on a school whose members crossed the plateau's vertical edge, because only the school's centre path had been checked. Check the spread of a group, not just its centre.
+- **Make a cutaway for review.** Opaque rock hides the structure. A scene that leaves the front half out shows the levels and the cavern; keep it as a separate scene, not a change to the model.
+- **Big scenes slow everything.** Every scene is in one bundle (now about 20 MB); renders time out. Time to split the bundle or load on demand.

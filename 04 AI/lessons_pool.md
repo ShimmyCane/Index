@@ -186,3 +186,10 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 - **Fix the container before the contents** when a scene reads as a stage set. Define the shape once as a function and derive walls, rock, windows and bounds from it.
 - **Rejection-sample motion paths against the shape** (distance to walls, obstacles), seeded by key, then prove them in a test at many times.
 - **Rest spheres on the floor** instead of burying them, or parts hang below the ground.
+
+## From the habitat's V05 to V07 (Make 3D, 2026-11-02)
+
+- **Extruding a plan is still a box.** Add vertical variation: a lean that varies by angle, several floor levels, space underneath, bridges over and tunnels through.
+- **Hash the old increments before changing a generator** and compare after, to prove the old versions did not change.
+- **Test a group's spread, not only its centre path.** A school passed the centre check but its members crossed an obstacle.
+- **Keep a cutaway scene for review** when opaque parts hide the structure.

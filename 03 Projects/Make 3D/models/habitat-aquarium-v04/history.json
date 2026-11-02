@@ -4,7 +4,7 @@
   "header": {
     "model_id": "habitat-aquarium-v04",
     "name": "Coastal Habitat Aquarium V04",
-    "description": "Coastal Habitat Aquarium, increment 4 of 4 (about 1600 objects). An organic, modelled habitat tank (curved outline, sculpted rockwork, kelp forest, reef) with a curved tunnel and a front window. Tap an animal to read about it. Sizes are estimates, in inches.",
+    "description": "Coastal Habitat Aquarium, increment 4 of 7 (about 1700 objects). An organic, modelled habitat tank: curved outline and leaning walls, sculpted rockwork, a three-level floor with a cavern under the shelf, bridges over and tunnels through, kelp forest and reef. Tap an animal to read about it. Sizes are estimates, in inches.",
     "units": "in",
     "up": "z",
     "world": "aquarium-world",
