@@ -234,3 +234,7 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 - **Viewer change:** taps now pass through anything with opacity under 0.4 (glass and water), so fish behind a glass wall can be picked. Other scenes are unaffected.
 
 **Open for Jimmy:** the tunnel ribs are straight chords, not a smooth arch; rays, turtles and eels do not beat wings or flippers; fish are boxes and cones; a "hide walls" toggle would help view the gallery; tap-to-start and chained motions are still future.
+
+### Aquarium V06: two storeys and small rooms (2026-11-02)
+
+Jimmy asked for a tank at least two stories tall with multiple small rooms, some with a sunroom view in the low sun, and tunnels and windows where kids can see the fish swim and somewhat interact. V06 (1,178 objects) adds: 8 small rooms on two levels (Reef, Jelly, Shark, Kids' Den; Dive, Quiet, Sunroom, Lookout), kid-height round windows, 3 bubble domes into the tank, a crawl tube, a touch pool with 2 small rays, a low drifting sun with beams, stairs, and a second-floor gallery. The 28 ft tank is read as two 14 ft floors. Interpretation to confirm: "interact" is taken as bubble domes plus a touch pool; "tunnels where kids can see" as the crawl tube and low windows. Open: ramp, doors, room sizes against a child's height.

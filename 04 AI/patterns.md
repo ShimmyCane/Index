@@ -76,3 +76,9 @@ Patterns that repeat often enough to become a template in `02 Refs/Templates/` o
 - **Loops by construction.** One loop length per file; each motion repeats a whole number of times per loop; paths close on themselves. Make the first frame the rest pose, so editing and export need no special case. Prove both in a test.
 - **Groups as scene nodes** so a moving group carries its parts; at rest every node is the identity, so still scenes don't change.
 - **Long lists of versions fold by project**, newest project first. Keep the dates and a content hash in a file the build maintains, so the order only changes when the content does.
+
+## Test part, several views, then compose (2026-11-02, from Make 3D; Jimmy's praise)
+
+- **Test one part alone.** A scratch scene with one of each part, at two headings, finds orientation and attachment mistakes before a thousand copies exist.
+- **Several views of the whole.** Render the full scene from the front, behind and the side, zoomed and dragged by a small script, and review each view. Put the scratch scripts in the scratchpad, not the repo.
+- **Then put them together.** The final increment image is chosen from these views; the review page says which view it is.

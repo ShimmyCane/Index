@@ -1,8 +1,8 @@
 // Review data for the Grand Ocean Aquarium: five increments built in Make 3D (tools/aquarium.js).
 // Images are read relative to viewer.html, so they go up one folder into the Make 3D project.
 window.REVIEW_DATA = {
-  title: "Grand Ocean Aquarium: V01 to V05",
-  subtitle: "A large imagined public aquarium in the style of the California Science Center kelp tank: a 100 x 60 ft tank, 28 ft deep, with a 100 ft walk-through tunnel, a viewing gallery, and a pool deck. Rough object counts of 100, 150, 200, 500 and 1,000. Tap an animal in Make 3D to read its name and description. Sizes are estimates.",
+  title: "Grand Ocean Aquarium: V01 to V06",
+  subtitle: "A large imagined public aquarium in the style of the California Science Center kelp tank: a 100 x 60 ft tank, 28 ft deep, with a 100 ft walk-through tunnel, a viewing gallery, and a pool deck. Rough object counts of 100, 150, 200, 500, 1,000 and 1,200. Tap an animal in Make 3D to read its name and description. Sizes are estimates.",
   items: [
     {
       id: "V01", title: "Blockout: about 100 objects",
@@ -38,6 +38,13 @@ window.REVIEW_DATA = {
       description: "A full aquarium. Eight schools in all, eight drifting moon jellies that pulse, a staff diver feeding the fish, bubble vents, swaying eelgrass, anemones with clownfish, urchins, sea stars, abalone, pebbles, more kelp, a crowd in the gallery and on the deck, and lamps over the deck.",
       changes: ["Five more schools, so eight in all", "8 moon jellies that drift and pulse", "A diver with a bubble trail", "3 bubble vents, 6 eelgrass patches that sway", "3 anemones with 2 clownfish, 12 urchins, stars and abalone, 10 pebbles", "10 more large animals; 6 more gallery guests and 6 on the deck; 6 deck lamps"],
       gaps: ["Rays, turtles and eels don't beat wings or flippers", "Fish are boxes and cones, not smooth shapes", "Tapping a tail or fin reads its name but the text is short for school fish", "Tap-to-start motions and chained motions are not built yet"]
+    },
+    {
+      id: "V06", title: "Two storeys and small rooms: about 1,200 objects",
+      image: "../Make 3D/renders/aquarium/v06.png",
+      description: "The tank is two storeys tall (28 ft, 14 ft a floor), and small rooms on both levels look into it. Seen here from behind. Ground level: Reef Room, Jelly Room, Shark Room and a Kids' Den with low round windows, a crawl tube, three bubble domes that poke into the tank, and a touch pool with two small rays. Upper level: Dive Room and Quiet Room at the back, a Sunroom with a glass roof at the east end that the low sun shines into, and a Lookout at the west end. Stairs and a second-floor gallery link the levels.",
+      changes: ["8 small rooms, 4 on each level, each with a window sill and header on the tank glass", "Kids' Den: 4 low round windows, a crawl tube, 3 bubble domes, beanbags", "Touch pool with 2 small bat rays that circle and 3 sea stars", "Sunroom with a glass roof, a low sun that drifts, and 3 soft sunbeams", "14-step stairs, a second-floor gallery with benches and rail, level signs", "Low and wall swimmers keep a little further from the back wall, clear of the domes"],
+      gaps: ["No ramp yet, only stairs", "Rooms are open boxes: no doors, so the way into each room is not shown", "The dome and window sizes need checking against a child's height", "Sunbeams are fixed; only the sun moves", "Not yet checked on an iPad"]
     }
   ]
 };

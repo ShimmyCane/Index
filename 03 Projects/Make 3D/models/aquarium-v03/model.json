@@ -1,7 +1,7 @@
 {
   "model_id": "aquarium-v03",
   "name": "Grand Ocean Aquarium V03",
-  "description": "Grand Ocean Aquarium, increment 3 of 5 (about 200 objects). A 100 x 60 ft tank with a 100 ft walk-through tunnel. Tap an animal to read about it. Sizes are estimates, in inches.",
+  "description": "Grand Ocean Aquarium, increment 3 of 6 (about 200 objects). A 100 x 60 x 28 ft tank, two storeys tall, with a 100 ft walk-through tunnel, and from V06 small rooms on two levels. Tap an animal to read about it. Sizes are estimates, in inches.",
   "units": "in",
   "up": "z",
   "world": "aquarium-world",
@@ -69,6 +69,10 @@
     "mint": {
       "color": "#a6e3d7",
       "opacity": 1
+    },
+    "beam": {
+      "color": "#ffe9a6",
+      "opacity": 0.16
     },
     "wall": {
       "color": "#e4dccb",

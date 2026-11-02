@@ -19,7 +19,7 @@ const M = require('../js/core/motion.js');
 const WORLD_ID = 'aquarium-world';
 const F = 12;
 const LOOP_S = 60;                  // one loop, seconds
-const COUNTS = [100, 150, 200, 500, 1000];
+const COUNTS = [100, 150, 200, 500, 1000, 1200];
 const rnd = (n) => Math.round(n * 1000) / 1000;
 const DEG = 180 / Math.PI;
 
@@ -47,6 +47,7 @@ const MATERIALS = {
   sign: { color: '#fff8e7', opacity: 1 },
   bench: { color: '#e9b99a', opacity: 1 },
   mint: { color: '#a6e3d7', opacity: 1 },
+  beam: { color: '#ffe9a6', opacity: 0.16 },
   wall: { color: '#e4dccb', opacity: 0.5 },
   coral: { color: '#f4a38c', opacity: 1 },
   // animals
@@ -120,6 +121,7 @@ const SP = {
   sheephead: { name: 'California sheephead', L: 2, kind: 'fish', mat: 'sheephead', fat: 1.2,
     desc: 'Males are black and red, females are pink. Strong teeth let it crack open sea urchins and crabs.' },
   clown: { name: 'Ocellaris clownfish', L: 0.4, kind: 'fish', mat: 'clown', fat: 1.2, desc: 'Orange with white stripes. It lives safely among the stinging tentacles of a sea anemone and the anemone is kept clean in return.' },
+  miniray: { name: 'Small bat ray', L: 1.6, kind: 'ray', mat: 'ray', desc: 'A young bat ray in the touch pool. Touch it gently with two fingers on its back, never its tail. Its skin feels like wet velvet.' },
   garibaldi: { name: 'Garibaldi', L: 1, kind: 'fish', mat: 'garibaldi', fat: 1.2,
     desc: 'California\'s official state marine fish. Bright orange and bold; it guards its little patch of reef.' },
   batray: { name: 'Bat ray', L: 5, kind: 'ray', mat: 'ray',
@@ -155,14 +157,15 @@ function loopPts(key, cx, cy, rx, ry, z0, za, dir = 1) {
 }
 
 // swimming zones: the tunnel fills y -5.5..5.5, z 0..11.5, so low swimmers stay to the sides
-function zoneLoop(key, zone, L) {
+// v6: from V06 the back wall has bubble domes, so low and wall swimmers keep a little further in
+function zoneLoop(key, zone, L, v6 = false) {
   const r = rngFor(key + '/zone');
   const u = (a, b) => a + (b - a) * r();
   switch (zone) {
     case 'high': return loopPts(key, u(-5, 5), u(-5, 5), u(26, 34), u(13, 17), 19, 3.5, r() < 0.5 ? 1 : -1);
     case 'mid': return loopPts(key, u(-6, 6), u(-4, 4), u(24, 33), u(11, 16), 15.5, 1.8, r() < 0.5 ? 1 : -1);
-    case 'wall': return loopPts(key, u(-4, 4), -20, u(26, 34), 3.5, u(12, 20), 3, r() < 0.5 ? 1 : -1);
-    case 'low': { const s = r() < 0.5 ? 1 : -1; return loopPts(key, u(-4, 4), s * 18.5, u(26, 34), u(5, 6.5), 5, 1.2, s); }
+    case 'wall': return loopPts(key, u(-4, 4), v6 ? -17 : -20, u(26, 34), 3.5, u(12, 20), 3, r() < 0.5 ? 1 : -1);
+    case 'low': { const s = r() < 0.5 ? 1 : -1; return loopPts(key, u(-4, 4), s * (v6 ? 16.5 : 18.5), u(26, 34), u(5, 6.5) * (v6 ? 0.8 : 1), 5, 1.2, s); }
     default: throw new Error('zone ' + zone);
   }
 }
@@ -295,14 +298,14 @@ function defsFor(v) {
   // A hero fish (its own group, its own swim loop, a beating tail). Speed from its length, whole cycles per loop.
   function hero(key, spId, zone, minDetail = 1, o = {}) {
     const s = SP[spId], r = rngFor(key + '/hero');
-    const pts = o.pts || zoneLoop(key, zone, s.L);
+    const pts = o.pts || zoneLoop(key, zone, s.L, v >= 6);
     const { heading } = M.pathAt(inchPts(pts), 0);
     const h = rnd(heading * DEG);
     const d = v >= 4 ? 3 : Math.min(v, 2);   // detail grows with the version: eyes and side fins arrive in V04
     const at = pts[0];
     const f = fish(key, spId, at, h, Math.min(d, 3), o);
     if (v >= 2) {
-      const speed = Math.min(4, Math.max(1.5, 0.4 * s.L));            // feet per second
+      const speed = o.speed || Math.min(4, Math.max(1.5, 0.4 * s.L));  // feet per second
       const cycles = Math.max(1, Math.round((speed * LOOP_S) / M.pathLength(pts)));
       motion({ id: `${key}-swim`, target: key, kind: 'path', points: inchPts(pts), face: 'tangent', rest_heading_deg: h,
         pivot: inch(at), cycles, phase: 0 });
@@ -403,7 +406,7 @@ function defsFor(v) {
   // a named, tappable object; the group carries them all.
   function school(key, spId, n, zone, spread, o = {}) {
     const s = SP[spId], r = rngFor(key + '/school');
-    const pts = o.pts || zoneLoop(key, zone, s.L);
+    const pts = o.pts || zoneLoop(key, zone, s.L, v >= 6);
     const { heading } = M.pathAt(inchPts(pts), 0);
     const h = rnd(heading * DEG), at = pts[0];
     group(key, o.title || `School of ${s.name.toLowerCase()}s`, s.desc, at);
@@ -565,6 +568,97 @@ function defsFor(v) {
     }
   }
 
+
+  // =====================================================================================================
+  // V06 two storeys and small rooms (~1200): the tank is two floors tall (14 ft each). Small rooms on both levels
+  // look into it: a sunroom, dark and quiet rooms, and a kids' den with low windows, bubble domes and a touch pool.
+  // =====================================================================================================
+  if (v >= 6) {
+    group('level2', 'Upper level', 'the second storey, 14 ft above the first: rooms, a gallery and a sunroom. The tank is two storeys tall');
+    // A small room beside the tank. Open on the tank side (the tank glass is its window; sill and header frame it).
+    // dir: 'back' (tank is toward -y), 'east' (tank toward -x), 'west' (tank toward +x).
+    function room(id, name, desc, x0, x1, y0, y1, z0, hgt, dir, o = {}) {
+      const g = `room-${id}`, wm = o.wall || 'wall', cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, w = x1 - x0, d = y1 - y0;
+      group(g, name, desc, [cx, cy, z0], { parent: o.parent });
+      const zc = z0 + hgt / 2;
+      box(`${g}-floor`, `${name} floor`, '', [w, d, 0.5], [cx, cy, z0 + 0.25], { parent: g, material: o.floor || 'concrete' });
+      const tankSide = dir; // which side faces the tank
+      const wall = (k, label, size, at) => box(`${g}-wall-${k}`, `${name} wall ${label}`, '', size, at, { parent: g, material: wm });
+      if (tankSide !== 'back') wall('far', 'far', [w, 0.6, hgt], [cx, y1, zc]); else wall('far', 'back', [w, 0.6, hgt], [cx, y1, zc]);
+      if (dir === 'back') { wall('a', 'side 1', [0.6, d, hgt], [x0, cy, zc]); wall('b', 'side 2', [0.6, d, hgt], [x1, cy, zc]); }
+      else { wall('a', 'side 1', [w, 0.6, hgt], [cx, y0, zc]); }
+      // window frame on the tank side
+      if (dir === 'back') {
+        box(`${g}-sill`, `${name} window sill`, 'where you lean to look in', [w - 1, 0.8, 0.6], [cx, y0 + 0.4, z0 + 2.8], { parent: g, material: 'bench' });
+        box(`${g}-header`, `${name} window header`, '', [w - 1, 0.8, 0.6], [cx, y0 + 0.4, z0 + hgt - 0.5], { parent: g, material: 'concrete' });
+      } else {
+        const sx = dir === 'east' ? x0 + 0.4 : x1 - 0.4;
+        box(`${g}-sill`, `${name} window sill`, 'where you lean to look in', [0.8, d - 1, 0.6], [sx, cy, z0 + 2.8], { parent: g, material: 'bench' });
+        box(`${g}-header`, `${name} window header`, '', [0.8, d - 1, 0.6], [sx, cy, z0 + hgt - 0.5], { parent: g, material: 'concrete' });
+      }
+      box(`${g}-roof`, `${name} roof`, o.glassRoof ? 'a glass roof lets the low sun in' : 'a soft roof', [w + 0.5, d + 0.5, 0.5], [cx, cy, z0 + hgt + 0.25], { parent: g, material: o.glassRoof ? 'glass' : 'roof' });
+      return { g, cx, cy, w, d, zc };
+    }
+    const bean = (key, name, x, y, z, mat, parent) => sph(key, name, 'a soft beanbag seat', 0.9, [x, y, z + 0.6], { parent, material: mat });
+
+    // --- ground level: four small rooms along the back of the tank, y 31..45
+    const A = room('reef', 'Reef Room', 'a cosy room that looks at the reef and sea fans. Low benches for little ones', -48, -28, 31, 45, 0.5, 13.5, 'back');
+    bean('reef-bean-1', 'Reef Room beanbag 1', -43, 35, 0.5, 'shirtB', A.g); bean('reef-bean-2', 'Reef Room beanbag 2', -38, 35, 0.5, 'shirtA', A.g);
+    box('reef-sign', 'Reef Room sign', 'Reef Room: look for the sea fans and the garibaldi', [5, 0.3, 2], [-38, 44.5, 8], { parent: A.g, material: 'sign' });
+    const B = room('jelly', 'Jelly Room', 'a dim room with soft glowing lamps. The moon jellies drift past the window', -26, -6, 31, 45, 0.5, 13.5, 'back');
+    [-21, -16, -11].forEach((x, i) => sph(`jelly-lamp-${i + 1}`, `Jelly Room lamp ${i + 1}`, 'a soft glowing ball', 0.6, [x, 40, 9], { parent: B.g, material: 'jelly' }));
+    box('jelly-bench', 'Jelly Room bench', 'a long bench in the dark', [12, 2, 1.4], [-16, 34, 1.4], { parent: B.g, material: 'bench' });
+    const C = room('shark', 'Shark Room', 'a dark room with a big window where the sharks glide past. Sit close and count the teeth', -4, 16, 31, 45, 0.5, 13.5, 'back');
+    box('shark-bench', 'Shark Room bench', 'a long bench facing the window', [12, 2, 1.4], [6, 34, 1.4], { parent: C.g, material: 'bench' });
+    box('shark-sign', 'Shark Room sign', 'Shark Room: sand tiger sharks are calm, even though they look fierce', [5, 0.3, 2], [6, 44.5, 8], { parent: C.g, material: 'sign' });
+    // the kids' den: low round windows, a crawl tube to the bubble domes, a touch pool
+    const D = room('den', "Kids' Den", 'a kid-height room: low round windows, bubble domes you can crawl up into, and a touch pool with gentle rays', 18, 38, 31, 45, 0.5, 13.5, 'back');
+    group('den-kit', "Kids' Den fittings", 'low windows, a crawl tube and domes: made for children under 4 ft tall', [28, 31, 2]);
+    [21, 25, 31, 35].forEach((x, i) => cyl(`den-porthole-${i + 1}`, `Low round window ${i + 1}`, 'a round window at kid height. Press your nose to it and watch the fish swim by', 1.2, 0.5, [x, 30.6, 2.5], { parent: 'den-kit', material: 'acrylic', rotation_x: 90 }));
+    cyl('den-crawl', 'Crawl tube', 'a low tunnel to crawl through to the bubble domes', 1.5, 8, [28, 36, 2.2], { parent: 'den-kit', material: 'mint', rotation_x: 90 });
+    [22, 28, 34].forEach((x, i) => {
+      sph(`dome-${i + 1}`, `Bubble dome ${i + 1}`, 'a clear dome that pokes into the tank. Pop your head up inside it and fish swim all round you', 2.2, [x, 28.3, 3.4], { parent: 'den-kit', material: 'acrylic' });
+      cyl(`dome-base-${i + 1}`, `Bubble dome ${i + 1} base`, 'the ring that holds the dome to the wall', 1.9, 0.6, [x, 30.2, 3.4], { parent: 'den-kit', material: 'rib', rotation_x: 90 });
+      bean(`den-bean-${i + 1}`, `Den beanbag ${i + 1}`, x, 34, 0.5, ['shirtA', 'shirtB', 'shirtC'][i], 'den-kit');
+    });
+    // touch pool: a shallow basin with two gentle small rays that circle, and sea stars
+    group('touch', 'Touch pool', 'a shallow pool: touch the rays gently with two fingers. Please do not pinch or lift them', [22, 41, 1.5], { parent: D.g });
+    [[22, 38.5, 9, 0.6], [22, 43.5, 9, 0.6], [17.8, 41, 0.6, 5], [26.2, 41, 0.6, 5]].forEach(([x, y, w, d], i) =>
+      box(`touch-rim-${i + 1}`, `Touch pool edge ${i + 1}`, '', [w, d, 1.6], [x, y, 1.3], { parent: 'touch', material: 'concrete' }));
+    box('touch-water', 'Touch pool water', 'shallow water, about one foot deep', [8.4, 4.4, 0.9], [22, 41, 1.15], { parent: 'touch', material: 'surface' });
+    for (let i = 0; i < 2; i++) {
+      const cx = 20.5 + i * 3, pts = loopPts(`minray-${i + 1}`, cx, 41, 1.3, 1.0, 1.35, 0.05, i ? 1 : -1);
+      hero(`minray-${i + 1}`, 'miniray', 'low', 1, { pts, tag: String(i + 1), speed: 0.6 });
+    }
+    [[19.5, 39.3], [24.5, 42.7], [21, 42.8]].forEach(([x, y], i) => box(`touch-star-${i + 1}`, `Touch pool sea star ${i + 1}`, 'a bat star that lives on the bottom of the pool', [0.5, 0.5, 0.1], [x, y, 0.9], { parent: 'touch', material: 'star', rotation_z: 20 * i }));
+
+    // --- upper level: two small back rooms over the ground rooms, a sunroom to the east and a lookout to the west
+    const E = room('dive', 'Dive Room', 'the diver waves at the window while feeding the fish. Look for the bubbles', -34, -16, 31, 45, 14.8, 11.7, 'back', { parent: 'level2' });
+    bean('dive-bean-1', 'Dive Room beanbag 1', -30, 35, 14.8, 'shirtC', E.g); bean('dive-bean-2', 'Dive Room beanbag 2', -25, 35, 14.8, 'shirtA', E.g);
+    const Q = room('quiet', 'Quiet Room', 'a calm room to rest and watch the big fish go by slowly', 4, 22, 31, 45, 14.8, 11.7, 'back', { parent: 'level2' });
+    box('quiet-bench', 'Quiet Room bench', 'a long bench facing the window', [10, 2, 1.4], [13, 34, 15.8], { parent: Q.g, material: 'bench' });
+    const S = room('sun', 'Sunroom', 'a warm room on the second floor with a glass roof. The low afternoon sun comes in across the water and lights the fish gold', 52, 78, -14, 14, 14.8, 12, 'east', { parent: 'level2', glassRoof: true, floor: 'deck' });
+    [[-8, 'shirtB'], [0, 'shirtC'], [8, 'shirtA']].forEach(([y, m], i) => bean(`sun-bean-${i + 1}`, `Sunroom beanbag ${i + 1}`, 56, y, 14.8, m, S.g));
+    box('sun-sign', 'Sunroom sign', 'Sunroom: sunshine on the water makes bright wobbly lines on the sand', [0.3, 6, 2], [77.4, 0, 22], { parent: S.g, material: 'sign' });
+    const K = room('lookout', 'Lookout', 'a small upper room at the west end. You look down the whole length of the tank and the tunnel', -78, -52, -14, 14, 14.8, 12, 'west', { parent: 'level2' });
+    box('lookout-bench', 'Lookout bench', 'a bench at the window', [2, 10, 1.4], [-56, 0, 15.8], { parent: K.g, material: 'bench' });
+    // the low sun and its beams
+    group('sunlight', 'Low sun', 'the afternoon sun, low in the east. Its beams come through the sunroom windows', [115, 0, 21], {});
+    sph('sun', 'The sun', 'the low afternoon sun', 4, [115, 0, 21], { parent: 'sunlight', material: 'lamp' });
+    [-6, 0, 6].forEach((y, i) => box(`sunbeam-${i + 1}`, `Sunbeam ${i + 1}`, 'a soft beam of low sunlight', [62, 0.8, 0.8], [83, y, 19 + (i % 2) * 1.5], { parent: 'sunlight', material: 'beam' }));
+    motion({ id: 'sun-drift', target: 'sunlight', kind: 'bob', axis: 'z', amount: -F * 8, cycles: 1, phase: 0 });
+    // the second-floor gallery and stairs up from the ground floor
+    group('stairs', 'Stairs', 'stairs from the lobby side up to the second floor. A ramp beside them is for strollers and wheelchairs', [-47, -40, 7]);
+    for (let i = 0; i < 14; i++) box(`step-${i + 1}`, `Stair ${i + 1}`, 'a step', [3.5, 1.1, 0.8], [-47, -46.6 + i * 1.1, 0.5 + i * 0.95], { parent: 'stairs', material: 'deck' });
+    box('stair-rail', 'Stair handrail', 'a handrail up the stairs', [0.3, 16, 0.3], [-45, -39, 8], { parent: 'stairs', material: 'steel', rotation_x: 0 });
+    group('gallery2', 'Second-floor gallery', 'a viewing gallery over the first, so you see the top half of the tank. 14 ft above the ground floor', [0, -39, 15], { parent: 'level2' });
+    [-36, -12, 12, 36].forEach((x, i) => box(`bench2-${i + 1}`, `Upper bench ${i + 1}`, 'a bench facing the glass on the second floor', [10, 2, 1.4], [x, -36, 15.5], { parent: 'gallery2', material: 'bench' }));
+    for (let i = 0; i < 5; i++) box(`pier2-${i + 1}`, `Upper window pier ${i + 1}`, 'concrete post between window panels', [1, 1.5, 12], [-50 + i * 25, -30.5, 20.8], { parent: 'gallery2', material: 'concrete' });
+    box('gallery2-rail', 'Upper handrail', 'a handrail on the second floor', [100, 0.3, 0.3], [0, -31.6, 17.6], { parent: 'gallery2', material: 'steel' });
+    box('level-sign-1', 'Level 1 sign', 'Level 1: the tunnel, the sharks and the kids\' den', [4, 0.3, 1.5], [-47, -47.4, 6], { parent: 'gallery2', material: 'sign' });
+    box('level-sign-2', 'Level 2 sign', 'Level 2: the sunroom, the lookout and the top of the tank', [4, 0.3, 1.5], [-47, -47.4, 20], { parent: 'gallery2', material: 'sign' });
+  }
+
   return { defs, motions };
 }
 
@@ -579,7 +673,7 @@ function sceneFor(v) {
     header: {
       model_id: id,
       name: `Grand Ocean Aquarium V${pad}`,
-      description: `Grand Ocean Aquarium, increment ${v} of 5 (about ${COUNTS[v - 1]} objects). A 100 x 60 ft tank with a 100 ft walk-through tunnel. Tap an animal to read about it. Sizes are estimates, in inches.`,
+      description: `Grand Ocean Aquarium, increment ${v} of 6 (about ${COUNTS[v - 1]} objects). A 100 x 60 x 28 ft tank, two storeys tall, with a 100 ft walk-through tunnel, and from V06 small rooms on two levels. Tap an animal to read about it. Sizes are estimates, in inches.`,
       units: 'in', up: 'z', world: WORLD_ID,
       materials: MATERIALS,
     },
@@ -601,6 +695,6 @@ function sceneFor(v) {
 }
 const defsForMotions = (v) => defsFor(v).motions;
 
-const AQUARIUM = Array.from({ length: 5 }, (_, i) => sceneFor(i + 1));
+const AQUARIUM = Array.from({ length: 6 }, (_, i) => sceneFor(i + 1));
 
 module.exports = { AQUARIUM, WORLD_ID, COUNTS, LOOP_S, MATERIALS, SP, defsFor, sceneFor };

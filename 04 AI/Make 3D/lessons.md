@@ -106,3 +106,10 @@ Appended over time. Promote anything reusable to `04 AI/lessons_pool.md`.
 - **Seed every random choice by the object's key.** Then adding objects in a later increment never moves the ones in an earlier one.
 - **Cone points along Z.** To point a cone or cylinder along X, set rotation_y = 90 (then rotation_z for the heading); check one of each animal in a small test scene before building many.
 - **Tall walls hide the inside.** From the front, opaque gallery walls hid the benches and guests. Semi-transparent walls (opacity 0.5) keep them tappable and let the room show.
+
+## Small test models and views, then compose (2026-11-02, Jimmy liked this)
+
+- **Build the part on its own, look at it, then place it in the scene.** Before making dozens of fish, a scratch scene with one of each animal at two headings showed the shark tail floating off its body and the cone pointing the right way. Fix the part in the small model, then build the full scene.
+- **Look from several views, not one.** The same scene from the front, from behind and from the side caught different things: walls hiding the benches (front), rooms and levels (behind), the sun and the beams (side). Name each view and keep its camera moves (zoom, drag) in a scratch script.
+- **Check the motion at two times.** A render at t = 14 s and at t = 40 s shows things moved; a single frame cannot.
+- **Keep the scratch tools outside the repo** (the scratchpad folder), and only commit the renders you chose.
