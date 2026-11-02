@@ -496,3 +496,15 @@ Purpose: the solar system (V06) follows real orbits from a real date; the animat
 **More increments.** Planet views V04 to V06 (eight planets, shaded surfaces and bands, extra craters, rings and moons). Earth V11 to V20 (shaded continents and clouds, mountains, a third storm, aurora, small satellites, city lights, Moon craters, two more launches, sea ice, a second cloud shell). Earth V11 to V20 loop 480 s. Versions are cumulative; V02 to V10 keep their flat dots and blobs, unchanged in geometry.
 
 **Limits.** Continents are ellipses on a map, about 21% of the sphere, not coastlines. Shading is a rough noise model, not a physical atmosphere. Halley's perihelion lies inside the drawn Sun (the Sun is stylised). Comet elements are approximate and are to be checked against the JPL Small-Body Database. Fast spins alias at one lap per 240 s.
+
+## 19. Earth dot map (V21: built)
+
+Source: research `04 AI/Make 3D/research/earth-land.md`. Request: the continents do not look right; keep the dots, make the grid four times denser and the dots smaller, and be more precise.
+
+- **Land:** `tools/earth_land_5deg.js` holds a 36 by 72 grid of land cells (5 degrees; cell centres from latitude 87.5 to -87.5, longitude -177.5 to 177.5), sampled from Natural Earth 1:50m land. Antarctica (latitude below -80) is forced to land and drawn as ice. Desert boxes are rough.
+- **Dots:** one sphere per land cell, radius 0.36 in, sunk 0.1 in, parented to the Earth body (so they spin with it). Keys `land21-N`. Sand in the desert boxes.
+- **Sea:** material `earth_ocean21` (V21 only): the ocean colour with `no_land: true`. The viewer's Earth shader then sets land to 0 (`uNoLand`), so no noise continents appear. Older materials and shared lists are unchanged.
+- **Scene:** `planet-earth-v21` (`EARTH_VIEWS_V21` in `tools/planet_views_v4.js`), 1,134 objects, loop 480 s as V20.
+- **Tests:** `node tests/test_earth_land.js`.
+- **Limits:** 5-degree coasts (about 300 km); coastal cities can fall a cell off; deserts are boxes; the city lights of V15 stay on the older grid.
+

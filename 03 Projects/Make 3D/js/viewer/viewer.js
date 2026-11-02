@@ -41,7 +41,7 @@
   `;
   // planet surface: land from a rough map (boxes of latitude and longitude, soft edges) plus noise, ocean and ice
   const EARTH_FRAG = NOISE_GLSL + `
-    uniform vec4 uLand[12]; uniform vec4 uDesert[3];
+    uniform vec4 uLand[12]; uniform vec4 uDesert[3]; uniform float uNoLand;
     uniform vec3 uOcean; uniform vec3 uOceanDeep; uniform vec3 uLandCol; uniform vec3 uDesertCol; uniform vec3 uIce;
     uniform float uSeed;
     varying vec3 vP; varying vec3 vN;
@@ -60,7 +60,7 @@
       float nz = fbm(n * 2.6 + vec3(uSeed));
       float coast = fbm(n * 2.6 + vec3(uSeed)) - 0.5 + (fbm(n * 7.5 + vec3(uSeed * 1.7)) - 0.5) * 0.45;
       float land = soft + coast * 1.7;
-      float isLand = smoothstep(0.47, 0.53, land);
+      float isLand = uNoLand > 0.5 ? 0.0 : smoothstep(0.47, 0.53, land);   // no_land: land comes from dots
       vec3 ocean = mix(uOceanDeep, uOcean, smoothstep(0.2, 0.48, land));
       vec3 ground = mix(uLandCol, uDesertCol, smoothstep(0.4, 0.8, dsoft + (nz - 0.5)));
       vec3 col = mix(ocean, ground, isLand);
@@ -170,7 +170,7 @@
         uniforms: { uColor: { value: col(m.color) }, uCover: { value: m.coverage ?? 0.5 }, uScale: { value: m.scale ?? 2.2 },
           uSeed: { value: m.seed ?? 1 }, uAlpha: { value: m.alpha ?? 0.9 } } });
       if (m.kind === 'earth') return new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: EARTH_FRAG,
-        uniforms: { uLand: { value: vec4s(m.land, 12) }, uDesert: { value: vec4s(m.desert, 3) }, uOcean: { value: col(m.ocean || '#4f8fd6') },
+        uniforms: { uLand: { value: vec4s(m.land, 12) }, uDesert: { value: vec4s(m.desert, 3) }, uNoLand: { value: m.no_land ? 1 : 0 }, uOcean: { value: col(m.ocean || '#4f8fd6') },
           uOceanDeep: { value: col(m.oceanDeep || '#2f6aa8') }, uLandCol: { value: col(m.land_color || '#5f9e5a') },
           uDesertCol: { value: col(m.desert_color || '#d9b77a') }, uIce: { value: col(m.ice || '#ffffff') }, uSeed: { value: m.seed ?? 1 } } });
       if (m.kind === 'bands') return new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: BANDS_FRAG,

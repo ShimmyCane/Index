@@ -13,6 +13,7 @@
 const M = require('../js/core/motion.js');
 const SS = require('./solar_system.js');
 const PV = require('./planet_views.js');
+const LAND5 = require('./earth_land_5deg.js');
 
 const { surf, disc, dot, cone, ring, rocket, storm, textures, bodyDefs, cells, inAny, LAND, DESERT, CITY, WORLD_ID, EXTRA, earthEarlierDefs } = PV;
 const LOOP_S = 240, LOOP_EARTH = 480;
@@ -41,6 +42,10 @@ const EARTH_MATS = {
   clouds_layer2: { color: '#ffffff', opacity: 0.3, kind: 'clouds', coverage: 0.6, scale: 3.1, seed: 9, alpha: 0.7 },
   aurora: { color: '#7dffb0', opacity: 0.35 },
 };
+// V21 only (kept out of the shared list, so V01 to V20 files do not change): the sea alone; the land is a dot
+// per 5-degree cell (earth_land_5deg.js), not ellipses
+const OCEAN21 = { earth_ocean21: { color: '#3f80c8', opacity: 1, kind: 'earth', ocean: '#3f80c8', oceanDeep: '#3f80c8', land_color: '#5f9e5a',
+  desert_color: '#d9b77a', ice: '#f4f8ff', seed: 3, land: [], desert: [], no_land: true } };
 const MATERIALS_V4 = { ...PV.MATERIALS, ...SHADE, ...EARTH_MATS, stormhaze: { color: '#ffffff', opacity: 0.45 } };
 
 // extra moons and spots, by the version they arrive in
@@ -158,7 +163,7 @@ function stormSoft(key, label, c, R, lat, lon) {
 function earthV4Defs(v) {
   const base = earthEarlierDefs(10).defs.filter((d) => !/^land-|^cloud-|^ice-[ns]$|^clouds$|^storm-/.test(d[0]));
   // the ball takes the shaded surface (its atmosphere and rim are kept as they are)
-  const defs = base.map((d) => (d[0] === 'ball-earth' ? [d[0], { ...d[1], material: 'earth_surface' }] : d));
+  const defs = base.map((d) => (d[0] === 'ball-earth' ? [d[0], { ...d[1], material: v >= 21 ? 'earth_ocean21' : 'earth_surface' }] : d));
   const c = [0, 0, 0], R = SS.PLANETS.earth.R, body = 'body-earth';
   if (v >= 11) {
     defs.push(['clouds', { name: 'Cloud layer', description: 'a noise shell that drifts faster than the ground', type: 'group', dimensions: [], position: c }]);
@@ -206,12 +211,24 @@ function earthV4Defs(v) {
   if (v >= 19) {
     for (let k = 0; k < 12; k++) defs.push(dot(`ice19-${k}`, 'Sea ice', c, R, 78, k * 30, 1.6, 'ice', body, -0.2));
   }
+  if (v >= 21) {
+    // the dot map: one dot per land cell of a 5-degree grid (four times the 10-degree grid of V02 to V10), each
+    // smaller, sand in the rough desert boxes and white on Antarctica. Real coastline cells, not ellipses.
+    let i = 0;
+    for (const cell of LAND5.landCells()) {
+      const mat = cell.ice ? 'ice' : cell.desert ? 'dsand' : 'land';
+      const name = cell.ice ? 'Antarctic ice' : cell.desert ? 'Desert' : 'Land';
+      defs.push(dot(`land21-${i++}`, name, c, R, cell.lat, cell.lon, 0.36, mat, body, -0.1));
+    }
+  }
   if (v >= 20) {
     defs.push(['clouds2', { name: 'Upper cloud layer', description: 'a second, thinner cloud shell turning the other way', type: 'group', dimensions: [], position: c }]);
     defs.push(['cloud-shell2', { name: 'Upper cloud shell', description: '', type: 'sphere', dimensions: [rnd(R * 1.05)], position: c, material: 'clouds_layer2', parent: 'clouds2' }]);
   }
   return defs;
 }
+
+const EARTH_V21_DESC = 'Earth on its own, increment 21 of 21. The continents are a dot map: one dot per cell of a 5-degree grid that is land on a real coastline map (Natural Earth 1:50m, sampled), so the coasts follow the real shapes. Dots are smaller and four times denser than V02 to V10. Deserts are rough boxes; sizes are rough, not to scale.';
 
 function earthSceneV4(v) {
   const p0 = SS.PLANETS.earth, id = `planet-earth-v${v}`;
@@ -250,8 +267,8 @@ function earthSceneV4(v) {
     id, builtin: true, project: 'Earth (planet view)',
     header: {
       model_id: id, name: `Earth (planet view) V${v}`,
-      description: `Earth on its own, increment ${v} of 20. Shaded continents, deserts and ice from a rough map; a noise cloud shell that drifts; a station, launches, storms, aurora, a constellation of small satellites, city lights and craters on the Moon. Sizes are rough; not to scale.`,
-      units: 'in', up: 'z', world: WORLD_ID, materials: MATERIALS_V4,
+      description: v >= 21 ? EARTH_V21_DESC : `Earth on its own, increment ${v} of 20. Shaded continents, deserts and ice from a rough map; a noise cloud shell that drifts; a station, launches, storms, aurora, a constellation of small satellites, city lights and craters on the Moon. Sizes are rough; not to scale.`,
+      units: 'in', up: 'z', world: WORLD_ID, materials: v >= 21 ? { ...MATERIALS_V4, ...OCEAN21 } : MATERIALS_V4,
       view: { fill: 0.75, radius: p0.R },
       links: [{ label: 'Back to the Solar System', target: 'solar-system-v07', transition: 'fade' }],
     },
@@ -263,5 +280,7 @@ function earthSceneV4(v) {
 const PLANET_VIEWS_V4_6 = ['mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto']
   .flatMap((k) => [4, 5, 6].map((v) => planetSceneV4(k, v)));
 const EARTH_VIEWS_V11_20 = Array.from({ length: 10 }, (_, i) => earthSceneV4(11 + i));
+// V21: the dot map of real coastlines (see earthV4Defs); the same moving parts as V20
+const EARTH_VIEWS_V21 = [earthSceneV4(21)];
 
-module.exports = { PLANET_VIEWS_V4_6, EARTH_VIEWS_V11_20, MATERIALS_V4 };
+module.exports = { PLANET_VIEWS_V4_6, EARTH_VIEWS_V11_20, EARTH_VIEWS_V21, MATERIALS_V4 };

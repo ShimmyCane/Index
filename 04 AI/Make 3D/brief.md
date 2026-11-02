@@ -292,3 +292,14 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 - Planet views fill three quarters of the screen (`header.view`). V04 to V06 added (shaded surfaces and bands). Earth V11 to V20 added (shaded continents, a cloud shell, more features; loop 480 s).
 - Procedural materials replace flat dots for clouds and surfaces; the numbers live in the header, no images.
 - Open: continents are ellipses (real coastlines need a map texture and a decision about image assets); comet elements to be checked against JPL; Halley dips inside the drawn Sun.
+
+## Earth dot map, V21 (2026-11-02, research mode)
+
+- **Request (Jimmy):** the continents do not look right. Keep the dots, but make the grid four times denser and the dots smaller, and be more precise.
+- **Mode:** research. Source and checks: `research/earth-land.md` (Natural Earth 1:50m land, sampled at 5-degree cell centres; public domain).
+- **Plan (before building):** keep V20 as it is; V21 replaces the ellipse continents with one dot per land cell of a 5-degree grid (4x the cells of the 10-degree grid of V02 to V10), each dot about a third of the old diameter. Sea is plain (no noise land). Antarctica is ice-white; deserts are sand dots in rough boxes. Clouds, storms, launches, Moon and rotation are unchanged.
+- **Build:** `tools/earth_land_5deg.js` (the mask and the desert boxes), `tools/planet_views_v4.js` (`earthV4Defs` at v >= 21, `earth_ocean21` material, `EARTH_VIEWS_V21`), `js/viewer/viewer.js` (`no_land` flag: the shader's land is off, so the sea has no noise continents). Scene `planet-earth-v21`, 1,134 objects, model check accept with 0 issues.
+- **Older versions:** unchanged. The V21 sea material is kept out of the shared list, so the V01 to V20 files are byte-identical (checked with `git status` after the build).
+- **Checks:** `tests/test_earth_land.js` (6 tests), `tests/test_core.js`, and the other Make 3D suites pass. Renders checked at the default camera and four azimuths (`renders/earth/v21.png`).
+- **Review:** Increment Viewer `?set=earth_views_v21`.
+- **Open for Jimmy:** (1) Is 5 degrees precise enough, or do you want a finer map (for example 2.5 degrees, which means 4x again)? (2) Coastal cities sit a cell off (Sydney, Tokyo); do you want the city lights (V15) moved onto the new grid? (3) Deserts are rough boxes; do you want a real desert map?
