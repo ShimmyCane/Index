@@ -69,3 +69,10 @@ Patterns that repeat often enough to become a template in `02 Refs/Templates/` o
 - **One function, numbered versions.** `defsFor(v)` builds each version from the same code. Each review adds an `if (v >= N)` block, so older versions can be rebuilt. A later version removes a part by key, not by deleting the code that built it.
 - **Check that old versions do not change** after each new version (a diff of the generated files).
 - **Each increment is one visible step** (shell, then counters, then stove, and so on), so a review can say what changed and why.
+
+## Animation and long lists (2026-11-02, from Make 3D)
+
+- **Motion is its own file, beside the model.** The model says what exists; the motion file says how it moves, by part id. The viewer applies a pose on top of the rest pose and never changes the model.
+- **Loops by construction.** One loop length per file; each motion repeats a whole number of times per loop; paths close on themselves. Make the first frame the rest pose, so editing and export need no special case. Prove both in a test.
+- **Groups as scene nodes** so a moving group carries its parts; at rest every node is the identity, so still scenes don't change.
+- **Long lists of versions fold by project**, newest project first. Keep the dates and a content hash in a file the build maintains, so the order only changes when the content does.

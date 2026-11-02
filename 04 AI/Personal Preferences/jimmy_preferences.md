@@ -35,6 +35,13 @@
 * **Toggleable stacked panels (+/−)** instead of tabs that replace each other.
 * **Animate organizing** (e.g. Sort into piles of 5/10) so structure is visible.
 
+## 2c. Animation and 3-D (from Make 3D, round 7)
+* **Animations always loop.** Paths are organic, with turns, and close on themselves; the length is whatever makes a full loop.
+* **Autoplay twice, then pause** and wait for ▶. Play, back-to-start and a time slider sit under the scene; speed and autoplay go in ⚙️.
+* **Two-finger pinch zooms** any 3-D canvas on iPad.
+* **Interaction later:** tap a part to start a motion, and chain motions (the door opens, then the cuckoo comes out).
+* **Long lists fold up:** a project with many increments is one row, its older versions unfold on tap, and the most recently changed project is on top.
+
 ## 3. Architecture & Code Structure
 * **Zero Server / All Client-Side**:
   - Keep web applications completely self-contained in HTML, CSS, and vanilla JavaScript without requiring Node servers or build pipelines.

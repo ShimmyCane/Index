@@ -9,6 +9,7 @@ Layout:
 - Supabase/ — conventions for Supabase projects: `brief.md` (rules and state), `lessons.md` (generic lessons), `supabase_registry_template.sql` (app-table registry). Skill: `/supabase-project`.
 - Tools/artifacts.md — limits of the claude.ai Artifact host.
 - Tools/windows_local.md — tool quirks on a local Windows PC.
+- Tools/playwright_headless.md — headless Chromium checks: WebGL flags, two-finger touch, hidden controls.
 - <Project>/brief.md — current state: goal, architecture, verified vs. unverified, next steps.
 - <Project>/lessons.md — project-specific lessons, appended over time.
 

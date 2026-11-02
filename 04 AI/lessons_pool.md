@@ -129,6 +129,9 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 - Generate sample files from one operation list and test that replaying the history equals the saved model. _(Make 3D)_
 - Mirror a layout once at the end when the first render comes out reversed (Z-up handedness: from the front, +x points left). _(Make 3D living room)_
 - Add a group before its children, or a rules engine rejects them. Rotation about one axis means a piece can only face along that axis. _(Make 3D living room)_
+- Animation: keep motion in its own file, make every motion a whole number of repeats per loop, and make the first frame the rest pose. Test the loop has no jump. _(Make 3D robot)_
+- A swinging leg tips the foot into the ground: counter-turn the foot at the ankle and dip the body by the hip-to-ankle drop. _(Make 3D robot)_
+- "Not on the website" usually means "not merged": GitHub Pages serves `main`. _(Make 3D)_
 
 ## Logs and databases (2026-11-02)
 - Keep the log of record in a table, not in files in a repo. Notes and labels change without a merge or a rebuild. Keep the files as build output. _(Make 3D scene log)_

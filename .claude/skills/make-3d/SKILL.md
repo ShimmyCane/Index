@@ -1,6 +1,6 @@
 ---
 name: make-3d
-description: "Build a 3-D test model from a concept, a photo or other assets, in small increments, and set up a review in the Increment Viewer. Asks whether to research outside sources or use only the provided assets. Use when asked to make a 3-D model, a test model, or to build an object or room in 3-D from a concept or photo."
+description: "Build a 3-D test model from a concept, a photo or other assets, in small increments, and set up a review in the Increment Viewer. Asks whether to research outside sources or use only the provided assets. Can add a looping animation as a separate motion file. Use when asked to make a 3-D model, a test model, to build an object or room in 3-D from a concept or photo, or to make one move."
 argument-hint: "[subject name, optional]"
 ---
 
