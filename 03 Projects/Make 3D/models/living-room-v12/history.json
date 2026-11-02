@@ -100,6 +100,10 @@
         "color": "#a77f58",
         "opacity": 1
       },
+      "chairPink": {
+        "color": "#e7a9c4",
+        "opacity": 1
+      },
       "fan": {
         "color": "#9ec9e8",
         "opacity": 1
@@ -1070,7 +1074,7 @@
       "object": {
         "uuid": "living-room-v12-tv-console",
         "name": "Black TV console",
-        "description": "low black stand on the second unit",
+        "description": "low black stand on the TV unit",
         "type": "box",
         "dimensions": [
           14,

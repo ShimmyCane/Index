@@ -97,6 +97,10 @@
       "color": "#a77f58",
       "opacity": 0.4
     },
+    "chairPink": {
+      "color": "#e7a9c4",
+      "opacity": 1
+    },
     "fan": {
       "color": "#9ec9e8",
       "opacity": 1
@@ -893,7 +897,7 @@
       ]
     },
     {
-      "description": "low black stand on the second unit",
+      "description": "low black stand on the TV unit",
       "rotation_y": 0,
       "parent": null,
       "material": "black",
@@ -2396,7 +2400,7 @@
       ]
     },
     {
-      "description": "grey printer on top of the near unit",
+      "description": "grey printer on top of the bookcase",
       "rotation_y": 0,
       "parent": null,
       "material": "printer",

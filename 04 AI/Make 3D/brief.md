@@ -108,3 +108,16 @@ Drawings are generated from the model by `03 Projects/Make 3D/tools/drawings.js`
 1. The sofa has two windows: one behind it (the big window) and one on its left (the narrow window). The narrow window on the right of the big one is kept from the photo; you did not mention it.
 2. The TV wall window sits near the far corner, behind the monstera.
 3. The chairs and table are estimates.
+
+## V2.1 to V2.5 (2026-11-02)
+
+Rebuilt against all three photos. Internal versions 21 to 25; scene ids `living-room-v2-1` to `living-room-v2-5`.
+- **V2.1:** one window on the TV wall, at the far corner (the window beside the sofa, above the far end of the bookcase). The far wall keeps the big window behind the sofa and the narrow window by the door.
+- **V2.2:** the TV stands on the near unit; the printer, plants and fans sit on the far unit top, near the corner window, as in the first photo. The boxed puzzle sits on the TV console.
+- **V2.3:** the narrow window by the door has its sill at 36 in, as the big window does.
+- **V2.4:** a pink chair at the near end by the bookcase.
+- **V2.5:** a small floor fan by the bookcase.
+
+Drawings: `drawings/v2-1` and `drawings/v2-5`, each with a plan, four elevations and `sheet.svg`, which stitches them on one page.
+
+**Please check:** the TV's position (near unit in V2.2, far unit in V16) is the main conflict between the photos. Sizes are still estimates.
