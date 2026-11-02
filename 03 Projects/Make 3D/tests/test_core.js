@@ -186,9 +186,10 @@ t('samples: outdoor table V2 replays, checks, and uses only known tags', () => {
   const named = (name) => saved.objects.find((o) => o.name === name);
   assert.deepStrictEqual(named('Parasol pole').tags, ['stand']);
   assert.deepStrictEqual(named('Sandbag 1').tags, ['ballast']);
-  assert.strictEqual(saved.objects.filter((o) => o.tags.includes('shade')).length, 2);
-  // one canopy, red, and the legs are yellow angle frame
-  assert.strictEqual(saved.objects.filter((o) => o.type === 'cone').length, 1);
+  assert.ok(saved.objects.filter((o) => o.tags.includes('shade')).length >= 20, 'canopy cloth is tagged shade');
+  // three equal arms and a draped cloth of panels
+  assert.strictEqual(saved.objects.filter((o) => /^Canopy arm \d$/.test(o.name)).length, 3);
+  assert.ok(saved.objects.filter((o) => /^Canopy panel/.test(o.name)).length >= 20, 'cloth is made of panels');
   assert.strictEqual(named('Bonsai box').position[0], -150);
 });
 t('rotation: spin about Z (up), tilt about Y, turn about X, applied X then Y then Z', () => {

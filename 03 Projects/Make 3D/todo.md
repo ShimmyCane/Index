@@ -46,6 +46,7 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - [x] Object tags (`surface`, `frame`, `stand`, `shade`, `ballast`, `plant`, `container`): chips in the objects panel, purpose row in the selection card, status line next to Check model.
 - [x] Library shows four built-in scenes.
 - [x] Outdoor table V2 rebuilt: parasol moved outside the table end (pole no longer through the top); the bonsai is a slanting, tapered trunk with a leader, one main limb arching up in steps, forks on several sides, a balance branch, a dead branch (jin) and foliage pads.
+- [x] Canopy: one draped cloth (101 tilted panels on a wavy surface, ridges at three arms, edge sagging) held by three equal metal arms from the apex. Replaces the flat cone.
 - [x] Clash check (`js/core/clash.js`): finds solids that pass into each other; V2 has none; tested in `tests/test_core.js`.
 - [ ] Clash check in the UI (show clashes on Check model). Not built yet.
 - [ ] Bonsai reach: the crown no longer reaches over the table (a bonsai form in a 2 ft box can't do 8 ft of horizontal reach without looking like a bare arm). Jimmy to decide.
