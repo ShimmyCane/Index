@@ -151,6 +151,10 @@
       "opacity": 1
     }
   },
+  "view": {
+    "fill": 0.75,
+    "radius": 9
+  },
   "objects": [
     {
       "description": "spins on its own axis",

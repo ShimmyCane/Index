@@ -277,3 +277,11 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 - Planet views: V02 and V03 for the eight planets (textures, more moons). Earth V02 to V10 (continents through a second launch). Earth V10 loop is 480 s.
 - Back to the Solar System is a page button (`header.links`), not an object.
 - Open: positions past 2050 are extrapolated; the element values were entered from the standard table, to be checked against the JPL page; belt rocks are a fixed pattern, not real asteroids; fast spins alias at one lap per 240 s.
+
+## Round 10: shaders, zoom-linked time, 1958 start, more increments (2026-11-02)
+
+- Solar system V07: starts 31 January 1958 (Explorer 1); Halley's Comet, Encke and Tempel 1 on true orbits.
+- Tracker steps by year, month, week or day with the zoom; playback slows when zoomed in (about 0.1 times at close range).
+- Planet views fill three quarters of the screen (`header.view`). V04 to V06 added (shaded surfaces and bands). Earth V11 to V20 added (shaded continents, a cloud shell, more features; loop 480 s).
+- Procedural materials replace flat dots for clouds and surfaces; the numbers live in the header, no images.
+- Open: continents are ellipses (real coastlines need a map texture and a decision about image assets); comet elements to be checked against JPL; Halley dips inside the drawn Sun.

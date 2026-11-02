@@ -24,7 +24,8 @@ const WORLD_ID = 'solar-system-world';
 const K = 120;                       // model inches for sqrt(AU): a_model = K * sqrt(a_AU)
 const LOOP_S = 240;                  // one Pluto lap, seconds
 const SPAN_DAYS = 90560;             // Pluto's orbital period (the slowest body), days
-const START = '2026-11-02';          // the date the planets are placed on (00:00 UTC)
+const START_V06 = '2026-11-02';      // V06: the date the planets are placed on (00:00 UTC)
+const START_V07 = '1958-01-31';      // V07: Explorer 1, the first US satellite launch (NASA)
 const J2000_MS = Date.UTC(2000, 0, 1, 12);
 const DAY_MS = 86400000;
 const DEG = 180 / Math.PI;
@@ -45,24 +46,40 @@ const ELEMENTS = {
 };
 const SUN_ROT = 25.38;               // days, the Sun's equator
 
-const startDays = (Date.parse(START + 'T00:00:00Z') - J2000_MS) / DAY_MS;   // days from J2000 to the start date
+const daysSinceJ2000 = (iso) => (Date.parse(iso + 'T00:00:00Z') - J2000_MS) / DAY_MS;
 
 // Mean anomaly at the start: M = L - (node + peri) at J2000, advanced by the mean motion to the start date.
-function startM0(el) {
+function startM0(el, start) {
   const M2000 = el.L - (el.node + el.peri);
-  return (((M2000 + (360 * startDays) / el.period) % 360) + 360) % 360;
+  return (((M2000 + (360 * daysSinceJ2000(start)) / el.period) % 360) + 360) % 360;
 }
 // The motion-engine orbit for a body with these elements. a is in inches (scaled).
-function orbitOf(el) {
+function orbitOf(el, start = START_V06) {
   return { a: rnd(K * Math.sqrt(el.a)), e: el.e, inc_deg: el.inc, node_deg: el.node, peri_deg: el.peri,
-    M0_deg: rnd(startM0(el)), period_days: el.period, span_days: SPAN_DAYS };
+    M0_deg: rnd(startM0(el, start)), period_days: el.period, span_days: SPAN_DAYS };
 }
 // Where it is at the start (the rest pose), in inches. Same formula the viewer uses, so rest matches motion.
-const restPos = (el) => M.orbitPosition(orbitOf(el), 0);
+const restPos = (el, start = START_V06) => M.orbitPosition(orbitOf(el, start), 0);
+
+// Comets: the mean anomaly comes from the time of perihelion (Tp), not from a longitude.
+// Halley passes inside the drawn Sun at perihelion (its real perihelion is 0.59 AU); the Sun is stylised.
+const COMETS = {
+  halley: { name: "Halley's Comet", a: 17.834, e: 0.96714, inc: 162.26, node: 58.42, peri: 111.33, Tp: '1986-02-09', desc: 'returns about every 76 years; last seen 1986' },
+  encke: { name: 'Encke', a: 2.2153, e: 0.84833, inc: 11.78, node: 334.57, peri: 186.54, Tp: '2023-10-21', desc: 'the shortest-period comet we know, about 3.3 years' },
+  tempel1: { name: 'Tempel 1', a: 3.1, e: 0.5, inc: 10.5, node: 68.9, peri: 151.1, Tp: '2005-07-04', desc: 'visited by a NASA probe (Deep Impact) in 2005' },
+};
+const cometPeriod = (c) => Math.pow(c.a, 1.5) * 365.25;
+function cometEl(c) { return { a: c.a, e: c.e, inc: c.inc, node: c.node, peri: c.peri, period: cometPeriod(c) }; }
+function cometOrbit(c, start) {
+  const P = cometPeriod(c);
+  const M0 = (((360 * (daysSinceJ2000(start) - daysSinceJ2000(c.Tp))) / P) % 360 + 360) % 360;
+  return { a: rnd(K * Math.sqrt(c.a)), e: c.e, inc_deg: c.inc, node_deg: c.node, peri_deg: c.peri,
+    M0_deg: rnd(M0), period_days: rnd(P), span_days: SPAN_DAYS };
+}
 
 // Points along the orbit, for the one-pixel orbit line: N points, evenly in eccentric anomaly.
-function orbitRing(el, N = 72) {
-  const o = orbitOf(el), out = [];
+function orbitRing(el, N = 72, o = orbitOf(el)) {
+  const out = [];
   for (let k = 0; k < N; k++) {
     const E = (2 * Math.PI * k) / N;
     const xp = o.a * (Math.cos(E) - el.e), yp = o.a * Math.sqrt(1 - el.e * el.e) * Math.sin(E);
@@ -79,8 +96,8 @@ function orbitRing(el, N = 72) {
 
 // One-pixel orbit line: a box along each chord, turned to follow the orbit in 3D.
 // Box rotation: rotation_z then rotation_y (x is the box's long side; the viewer composes Z*Y*X).
-function orbitLineDefs(key, name, el) {
-  const pts = orbitRing(el), N = pts.length, out = [];
+function orbitLineDefs(key, name, el, start = START_V06, N = 72) {
+  const pts = orbitRing(el, N, orbitOf(el, start)), out = [];
   out.push([`orbit-line-${key}`, { name: `${name} orbit line`, description: 'the true path, drawn as one-pixel boxes', type: 'group', dimensions: [], position: [0, 0, 0] }]);
   for (let k = 0; k < N; k++) {
     const a = pts[k], b = pts[(k + 1) % N];
@@ -102,72 +119,101 @@ function beltEl(i) {
     node: f(i * 0.618034 + 0.31) * 360, peri: f(i * 0.754877) * 360, L: f(i * 0.2296) * 360, period: Math.pow(2.2 + 1.1 * f(i * 0.618034), 1.5) * 365.25 };
 }
 
-function trueDefs() {
-  const defs = [];
+// Build a true-orbit scene. opts: { id, name, start, comets, link(key) -> model id, description }.
+// Versions are kept reproducible: V06 has its own start, no comets and its own links, exactly as before.
+function trueDefs(o) {
+  const start = o.start, defs = [];
   defs.push(['sun', { name: 'Sun', description: 'the star at the centre (stylised size)', type: 'sphere', dimensions: [40], position: [0, 0, 0], material: 'sun' }]);
   defs.push(['corona', { name: 'Sun glow', description: 'a faint glow round the Sun (taps pass through it)', type: 'sphere', dimensions: [48], position: [0, 0, 0], material: 'corona' }]);
   for (const key of SS.ORDER) {
     const el = ELEMENTS[key], p = SS.PLANETS[key];
-    const c = restPos(el);
-    defs.push(...orbitLineDefs(key, p.name, el));
+    const c = restPos(el, start);
+    defs.push(...orbitLineDefs(key, p.name, el, start));
     defs.push([`orbit-${key}`, { name: `${p.name} orbit`, description: 'the true orbit: shape, tilt and place', type: 'group', dimensions: [], position: [0, 0, 0] }]);
-    // Tapping the ball opens the planet's own view (zoom). Its view is the newest version of that planet.
-    defs.push(...SS.bodyDefs(key, p, c, `orbit-${key}`, 5, { link: `${PV.latestId(key)}:zoom` }));
+    // Tapping the ball opens the planet's own view (zoom).
+    defs.push(...SS.bodyDefs(key, p, c, `orbit-${key}`, 5, { link: `${o.link(key)}:zoom` }));
+  }
+  if (o.comets) {
+    for (const [key, cm] of Object.entries(COMETS)) {
+      const el = cometEl(cm);
+      defs.push(...orbitLineDefs(`c-${key}`, cm.name, el, start, 160));
+      defs.push([`orbit-c-${key}`, { name: `${cm.name} orbit`, description: cm.desc, type: 'group', dimensions: [], position: [0, 0, 0] }]);
+      const c = M.orbitPosition(cometOrbit(cm, start), 0);
+      defs.push([`comet-${key}`, { name: cm.name, description: cm.desc, type: 'sphere', dimensions: [3.2], position: rnd3(c), material: 'comet', parent: `orbit-c-${key}` }]);
+      defs.push([`coma-${key}`, { name: `${cm.name} coma`, description: 'the cloud of gas round the nucleus (taps pass through it)', type: 'sphere', dimensions: [7], position: rnd3(c), material: 'coma', parent: `orbit-c-${key}` }]);
+    }
   }
   const rocks = [];
   for (let i = 0; i < BELT_N; i++) {
-    const el = beltEl(i), c = restPos(el);
+    const el = beltEl(i), c = restPos(el, start);
     rocks.push([`rock-${i}`, { name: `Asteroid ${i + 1}`, description: 'one rock on its own orbit (pattern, not a real asteroid)', type: 'sphere', dimensions: [rnd(0.8 + 1.6 * ((i * 0.37) % 1))],
-      position: [rnd(c[0]), rnd(c[1]), rnd(c[2])], material: i % 3 === 0 ? 'rock2' : 'rock' }]);
+      position: rnd3(c), material: i % 3 === 0 ? 'rock2' : 'rock' }]);
   }
   defs.push(['belt', { name: 'Asteroid belt', description: 'rocks between Mars and Jupiter, each on its own orbit', type: 'group', dimensions: [], position: [0, 0, 0] }]);
   for (const r of rocks) defs.push([r[0], { ...r[1], parent: 'belt' }]);
   return defs;
 }
+const rnd3 = (c) => [rnd(c[0]), rnd(c[1]), rnd(c[2])];
 
-function trueMotion(uuid, id) {
-  const list = [];
+function trueMotion(o, uuid) {
+  const start = o.start, list = [];
   for (const key of SS.ORDER) {
     const el = ELEMENTS[key], p = SS.PLANETS[key];
-    list.push({ id: `${key}-orbit`, target: `orbit-${key}`, kind: 'orbit', ...orbitOf(el) });
-    list.push({ id: `${key}-spin`, target: `body-${key}`, kind: 'spin', axis: p.spinAxis || 'z', pivot: restPos(el), cycles: rnd(SPAN_DAYS / el.rot) });
+    list.push({ id: `${key}-orbit`, target: `orbit-${key}`, kind: 'orbit', ...orbitOf(el, start) });
+    list.push({ id: `${key}-spin`, target: `body-${key}`, kind: 'spin', axis: p.spinAxis || 'z', pivot: restPos(el, start), cycles: rnd(SPAN_DAYS / el.rot) });
   }
   list.push({ id: 'sun-spin', target: 'sun', kind: 'spin', axis: 'z', pivot: [0, 0, 0], cycles: rnd(SPAN_DAYS / SUN_ROT) });
+  if (o.comets) for (const key of Object.keys(COMETS)) list.push({ id: `comet-${key}-orbit`, target: `orbit-c-${key}`, kind: 'orbit', ...cometOrbit(COMETS[key], start) });
   for (let i = 0; i < BELT_N; i++) {
     const el = beltEl(i);
-    list.push({ id: `rock-${i}-orbit`, target: `rock-${i}`, kind: 'orbit', ...orbitOf(el) });
+    list.push({ id: `rock-${i}-orbit`, target: `rock-${i}`, kind: 'orbit', ...orbitOf(el, start) });
   }
   return {
     schema: M.MOTION_SCHEMA,
-    model_id: id,
+    model_id: o.id,
     name: 'True orbits, one lap of Pluto',
-    description: `Every orbit is true (shape, tilt and place on ${START}). The animation is one lap of Pluto (about 248 years) in ${LOOP_S} s. It plays once and holds; faster bodies lap many times, so their spins and orbits blur at this pace.`,
+    description: `Every orbit is true (shape, tilt and place on ${start}). The animation is one lap of Pluto (about 248 years) in ${LOOP_S} s. It plays once and holds; faster bodies lap many times, so their spins and orbits blur at this pace.`,
     units: 'in', up: 'z',
     loop_s: LOOP_S,
     loop: false,
-    timeline: { start_date: START, span_days: SPAN_DAYS, note: 'one lap of Pluto around the Sun' },
+    timeline: { start_date: start, span_days: SPAN_DAYS, note: 'one lap of Pluto around the Sun' },
     autoplay: { plays: 1 },
     motions: list.map((m) => ({ ...m, target: uuid(m.target) })),
   };
 }
 
-function sceneTrue() {
-  const id = 'solar-system-v06';
+function sceneTrue(o) {
   return {
-    id,
+    id: o.id,
     builtin: true,
     project: 'Solar System',
     header: {
-      model_id: id,
-      name: 'Solar System V06',
-      description: `Solar System, increment 6 of 6: true orbits. Shape, tilt and place are true for ${START}; the planets are scaled by the square root of their distance and sized roughly. One lap of Pluto plays once. Tap a planet to open its own view.`,
+      model_id: o.id,
+      name: o.name,
+      description: o.description,
       units: 'in', up: 'z', world: WORLD_ID,
-      materials: SS.MATERIALS,
+      materials: o.comets ? { ...SS.MATERIALS, ...COMET_MATERIALS } : SS.MATERIALS,
     },
-    defs: trueDefs(),
-    motion: (uuid) => trueMotion(uuid, id),
+    defs: trueDefs(o),
+    motion: (uuid) => trueMotion(o, uuid),
   };
 }
 
-const SOLAR_TRUE = sceneTrue();
-module.exports = { SOLAR_TRUE, ELEMENTS, START, SPAN_DAYS, LOOP_S, restPos, orbitOf, beltEl, BELT_N };
+const COMET_MATERIALS = {
+  comet: { color: '#e9efe9', opacity: 1 },
+  coma: { color: '#dff6ff', opacity: 0.25 },
+};
+
+// V06: as before (2026 start, no comets, links to the V03 planet views and V10 Earth)
+const SOLAR_TRUE = sceneTrue({
+  id: 'solar-system-v06', name: 'Solar System V06', start: START_V06, comets: false,
+  link: (k) => (k === 'earth' ? 'planet-earth-v10' : `planet-${k}-v03`),
+  description: `Solar System, increment 6 of 6: true orbits. Shape, tilt and place are true for ${START_V06}; the planets are scaled by the square root of their distance and sized roughly. One lap of Pluto plays once. Tap a planet to open its own view.`,
+});
+// V07: starts at Explorer 1 (NASA's first satellite, 31 January 1958); adds comets; links to the newest views
+const SOLAR_TRUE_V07 = sceneTrue({
+  id: 'solar-system-v07', name: 'Solar System V07', start: START_V07, comets: true,
+  link: (k) => PV.latestId(k),
+  description: `Solar System, increment 7 of 7: the timeline starts on ${START_V07}, when Explorer 1, the first US satellite, launched. Halley's Comet, Encke and Tempel 1 added on their true orbits. One lap of Pluto plays once. Tap a planet to open its own view.`,
+});
+module.exports = { SOLAR_TRUE, SOLAR_TRUE_V07, ELEMENTS, COMETS, START_V06, START_V07, SPAN_DAYS, LOOP_S, restPos, orbitOf, cometOrbit, beltEl, BELT_N };

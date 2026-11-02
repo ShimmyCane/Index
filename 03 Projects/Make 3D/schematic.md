@@ -474,3 +474,24 @@ Purpose: the solar system (V06) follows real orbits from a real date; the animat
 - Positions beyond 2050 are extrapolated (JPL's table is fit for 1800 to 2050).
 - At one lap per 240 s, the fast spins (Jupiter, Earth) alias to flicker. This is expected.
 - Textures are rough discs, spheres and cones; they are not survey data.
+
+## 18. Procedural surfaces, zoom-linked time, planet framing, and the 1958 start (round 10: built)
+
+**Procedural materials (`js/viewer/viewer.js`).** A material may carry a `kind` and its numbers. The shader does the rest, so no image is stored in the model.
+- `clouds`: a see-through noise shell. Fields: `coverage` (0 to 1), `scale`, `seed`, `alpha`, `color`, and `opacity` (under 0.4 so taps pass through).
+- `earth`: a planet surface. `land` and `desert` are lists of ellipses on the map, `[centre lat, centre lon, radius lat, radius lon]` in degrees, with soft edges. Noise at two scales makes the coasts ragged. The colours are `ocean`, `oceanDeep`, `land_color`, `desert_color`, `ice`.
+- `bands`: a shaded planet with zonal bands (the palette is `a`, `b`, `c`; `freq` is the band frequency, and `freq` 0 gives a mottled rock). Gas giants and rocky planets use it.
+- Lighting is a fixed light in view space, so a spinning planet's shading does not swing.
+- The page does not store images; this is the answer to "more detailed modeling". Real map or photo textures would be the next step, and they need a decision about storing image assets in the repo (see the message that accompanies this round).
+
+**Framing (`header.view`).** `{ fill, radius }` on a planet view: the camera distance is set so a sphere of `radius` fills `fill` of the screen height (the 35 degree lens gives d = R / (fill x tan 17.5 degrees)). The button Reset view returns to this framing. Planets use `fill` 0.75.
+
+**Zoom-linked time.** A one-shot timeline runs at `speed x zoomSpeed(camera radius)`. `zoomSpeed` is `clamp(r / 1200, 0.04, 1)` on timeline scenes, so zoomed in (radius 120) the animation runs at about a tenth of its normal speed.
+
+**Tracker steps by zoom.** Far out (camera radius over 1200) a notch is a year, over 400 a month, over 150 a week, and closer a day. The tracker steps by the calendar (`setUTCFullYear`, `setUTCMonth`, days), and the drum shows the same unit. Scroll: one unit a notch (Shift: ten). Drag: one unit per 10 px.
+
+**1958 start and comets (`tools/solar_true.js`, scene `solar-system-v07`).** Start 31 January 1958 (Explorer 1, NASA's first US satellite). The planets are placed on that day from the JPL approximate elements. Comets have their mean anomaly set from the time of perihelion: Halley (1986-02-09), Encke (2023-10-21), Tempel 1 (2005-07-04). Their period is a^1.5 years. V06 is kept exactly as it was (2026 start, no comets).
+
+**More increments.** Planet views V04 to V06 (eight planets, shaded surfaces and bands, extra craters, rings and moons). Earth V11 to V20 (shaded continents and clouds, mountains, a third storm, aurora, small satellites, city lights, Moon craters, two more launches, sea ice, a second cloud shell). Earth V11 to V20 loop 480 s. Versions are cumulative; V02 to V10 keep their flat dots and blobs, unchanged in geometry.
+
+**Limits.** Continents are ellipses on a map, about 21% of the sphere, not coastlines. Shading is a rough noise model, not a physical atmosphere. Halley's perihelion lies inside the drawn Sun (the Sun is stylised). Comet elements are approximate and are to be checked against the JPL Small-Body Database. Fast spins alias at one lap per 240 s.

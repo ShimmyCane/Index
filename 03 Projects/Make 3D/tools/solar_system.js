@@ -242,6 +242,7 @@ function planetView(key) {
       description: `${p.name} on its own: ${p.desc}. Spins${moons.length ? ', with its moons going round' : ''}. Tap the pink marker to fly back to the Solar System. Sizes are estimates, in inches.`,
       units: 'in', up: 'z', world: WORLD_ID,
       materials: MATERIALS,
+      view: { fill: 0.75, radius: p.R },
     },
     defs,
   };
