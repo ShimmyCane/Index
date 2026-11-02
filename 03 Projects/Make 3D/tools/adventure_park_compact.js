@@ -43,6 +43,7 @@ const MATERIALS = {
   lavender: { color: '#c7b2ea', opacity: 1 },
   mint: { color: '#9fd8c0', opacity: 1 },
   sky: { color: '#bfe3f7', opacity: 0.85 },
+  skin: { color: '#ffd9b8', opacity: 1 },
 };
 
 // ---------- plan (feet). Thunder Trail is the V10 coaster scaled into the compact plan.
@@ -151,11 +152,33 @@ const lineTo = (a, b, spacing) => {
 const SP_UP = splineOpen(SP_CTRL.slice(0, 4), 10);
 const SP_D = [...SP_UP, ...lineTo(SP_CTRL[3], SP_CTRL[0], 10)];
 const SP_PROF = timeProfile(SP_D, rideSpeeds(SP_D, nearest(SP_D, SP_CTRL[1]), SP_UP.length - 1));
-const LOOP_S = Math.round(TH_PROF.T);   // one loop = one real lap of Thunder Trail. Pip runs one lap per loop too.
-const PIP_PROF = null;                  // Pip is driven at a steady speed: no time profile
+const LOOP_S = Math.round(TH_PROF.T);   // the loop is the people's loop (about 18 s), set by the coaster's real lap
+// The rides run for RIDE_FRAC of the loop and wait at the station for the rest. The physics shape is kept; the
+// whole ride runs 1 / RIDE_FRAC times faster than real time (an animation exaggeration, as agreed).
+const RIDE_FRAC = 0.8;
+const ride = (profile) => [...profile.map(([t, sf]) => [Math.round(t * RIDE_FRAC * 1e5) / 1e5, sf]), [1, 1]];
+const TH_PROFILE = ride(TH_PROF.profile);
+const SP_PROFILE = ride(SP_PROF.profile);
+const PIP_PROF = ride([[0, 0], [1, 1]]);   // Pip: a steady speed, one lap then the station
 
 // Where something sits at loop fraction `phase`: the point on its path (feet) and the heading (radians, about Z).
 const at = (pts, profile, phase) => M.pathAt(pts, M.warpTime(profile, phase));
+// Point, yaw and pitch (radians) of a path at a phase: what a car or boat needs to sit on a slope.
+const orient = (pts, profile, phase) => {
+  const w = M.warpTime(profile, phase);
+  const { point } = M.pathAt(pts, w);
+  const [dx, dy, dz] = M.tangentAt(pts, w);
+  return { point, yaw: Math.atan2(dy, dx), pitch: Math.atan2(dz, Math.hypot(dx, dy)) };
+};
+const GATE_LOOP = [[-6, -132, 0], [-6, -104, 0], [6, -104, 0], [6, -132, 0]];   // visitors in and out of the gate
+const RING = Array.from({ length: 12 }, (_, k) => {                                // visitors round the plaza
+  const t = (2 * Math.PI * k) / 12;
+  return [14 * Math.cos(t), 14 * Math.sin(t), 0];
+});
+const BIRD_LOOP = Array.from({ length: 12 }, (_, k) => {                           // birds, high over the park
+  const t = (2 * Math.PI * k) / 12;
+  return [100 * Math.cos(t), 75 * Math.sin(t), 85 + 10 * Math.sin(3 * t)];
+});
 
 function defsFor(v) {
   const defs = [];
@@ -196,8 +219,16 @@ function defsFor(v) {
     }
   };
   // A car on the track: centre at p (car centre, 2 ft above the rail), turned by heading (radians about Z).
-  const carAt = (key, name, p, heading, parent) =>
-    box(key, name, 'a seat car, five seats', [6, 3, 2.5], p, { parent, material: 'car', rotation_z: rnd(heading * DEG) });
+  // A car on the track: lifted 2 ft above the rail, turned and pitched to the slope (yaw about Z, pitch about Y).
+  const carOn = (key, name, pts, profile, phase, parent) => {
+    const r = orient(pts.map((p) => [p[0], p[1], p[2] + 2]), profile, phase);
+    box(key, name, 'a seat car, five seats', [6, 3, 2.5], r.point, { parent, material: 'car', rotation_z: rnd(r.yaw * DEG), rotation_y: rnd(-r.pitch * DEG) });
+  };
+  // A visitor: a body and a head, as two parts of the same group.
+  const person = (key, x, y, shirt, parent) => {
+    cyl(`${key}-body`, 'Visitor', 'a visitor', 0.9, 3.5, [x, y, 2.25], { parent, material: shirt });
+    sph(`${key}-head`, 'Visitor head', '', 0.8, [x, y, 4.9], { parent, material: 'skin' });
+  };
   const fence = (prefix, x0, y0, x1, y1, parent, h = 3) => {
     box(`${prefix}-n`, `${prefix} fence north`, 'queue or safety rail', [x1 - x0, 0.5, h], [(x0 + x1) / 2, y1, h / 2], { parent, material: 'fence' });
     box(`${prefix}-s`, `${prefix} fence south`, '', [x1 - x0, 0.5, h], [(x0 + x1) / 2, y0, h / 2], { parent, material: 'fence' });
@@ -239,10 +270,8 @@ function defsFor(v) {
 
   // Pip's Little Loop: a curved oval. The cars start at phase 0 and half way round.
   track('pip', PIP_D, 'pip');
-  [[0, 'pip-car-1', 'Pip car 1'], [0.5, 'pip-car-2', 'Pip car 2']].forEach(([ph, key, name]) => {
-    const r = at(PIP_D, PIP_PROF, ph);
-    carAt(key, name, [r.point[0], r.point[1], r.point[2] + 2], r.heading, 'pip');
-  });
+  [[0, 'pip-car-1', 'Pip car 1'], [0.5, 'pip-car-2', 'Pip car 2']].forEach(([ph, key, name]) =>
+    carOn(key, name, PIP_D, PIP_PROF, ph, 'pip'));
   box('pip-station', 'Pip station', 'low station beside the oval', [16, 10, 10], [PIP.cx, PIP.cy - 34, 5], { parent: 'pip', material: 'cream' });
   box('pip-roof', 'Pip station roof', 'coral roof', [18, 12, 1], [PIP.cx, PIP.cy - 34, 10.5], { parent: 'pip', material: 'roof' });
 
@@ -257,10 +286,8 @@ function defsFor(v) {
 
   // Thunder Trail: a curved coaster with a 60 ft lift. Cars start at phase 0 and half way round the lap (in time).
   track('thunder', TH_D, 'thunder');
-  [[0, 'thunder-car-1', 'Thunder car 1'], [0.5, 'thunder-car-2', 'Thunder car 2']].forEach(([ph, key, name]) => {
-    const r = at(TH_D, TH_PROF.profile, ph);
-    carAt(key, name, [r.point[0], r.point[1], r.point[2] + 2], r.heading, 'thunder');
-  });
+  [[0, 'thunder-car-1', 'Thunder car 1'], [0.5, 'thunder-car-2', 'Thunder car 2']].forEach(([ph, key, name]) =>
+    carOn(key, name, TH_D, TH_PROFILE, ph, 'thunder'));
   box('thunder-station', 'Thunder station', 'boarding hall', [20, 12, 10], [14, 36, 5], { parent: 'thunder', material: 'cream' });
   box('thunder-motor', 'Lift motor house', 'drives the chain lift', [7, 6, 7], [60, 22, 3.5], { parent: 'thunder', material: 'wood' });
 
@@ -291,8 +318,9 @@ function defsFor(v) {
     cupRing.forEach((p, i) => cyl(`tea-cup-${i + 1}`, `Teacup ${i + 1}`, 'a cup for two riders', 3.2, 3, p, { parent: 'tea-cups', material: 'cup' }));
     [-82, -68, -54].forEach((x, i) => box(`bumble-boat-${i + 1}`, `Bumble boat ${i + 1}`, 'floats on the river, four seats', [6, 4, 2], [x, BUMBLE.y, 2.5], { parent: 'bumble', material: 'boat' }));
     [0, 0.33, 0.66].forEach((ph, i) => {
-      const r = at(SP_D, SP_PROF.profile, ph);
-      box(`splash-boat-${i + 1}`, `Log boat ${i + 1}`, 'rides the lift, drops into the pool; two seats', [6, 4, 2], r.point, { parent: 'splash', material: 'wood', rotation_z: rnd(r.heading * DEG) });
+      const r = orient(SP_D, SP_PROFILE, ph);
+      box(`splash-boat-${i + 1}`, `Log boat ${i + 1}`, 'rides the lift, drops into the pool; two seats', [6, 4, 2], r.point,
+        { parent: 'splash', material: 'wood', rotation_z: rnd(r.yaw * DEG), rotation_y: rnd(-r.pitch * DEG) });
     });
   }
 
@@ -334,6 +362,43 @@ function defsFor(v) {
     }
   }
 
+  // ================= V16 life in the park: visitors in and out of the gate and round the plaza, vendor stalls,
+  // birds on a loop high over the park, and free balloons. Visitors walk about 4.5 ft/s, so their loop is the whole loop.
+  if (v >= 16) {
+    add('crowd', { name: 'Visitors', description: 'people walking in and out, and round the plaza', type: 'group', dimensions: [], position: [0, 0, 0] });
+    add('birds', { name: 'Birds', description: 'small birds on a loop high over the park', type: 'group', dimensions: [], position: [0, 0, 0] });
+    add('vendors', { name: 'Vendors', description: 'food and souvenir stalls by the plaza', type: 'group', dimensions: [], position: [0, 0, 0] });
+    add('floating', { name: 'Free balloons', description: 'balloons drifting over the plaza', type: 'group', dimensions: [], position: [0, 0, 0] });
+    const walkers = [
+      { key: 'walker-gate-1', loop: GATE_LOOP, phase: 0, shirt: 'lavender' },
+      { key: 'walker-gate-2', loop: GATE_LOOP, phase: 0.5, shirt: 'mint' },
+      ...[0, 0.25, 0.5, 0.75].map((ph, i) => ({ key: `walker-ring-${i + 1}`, loop: RING, phase: ph, shirt: ['roof', 'flag', 'car', 'lavender'][i] })),
+    ];
+    walkers.forEach((w) => {
+      const r = M.pathAt(w.loop, w.phase).point;
+      add(w.key, { name: 'Visitor walking', description: 'walks the loop', type: 'group', dimensions: [], position: [0, 0, 0], parent: 'crowd' });
+      person(`${w.key}-p`, r[0], r[1], w.shirt, w.key);
+    });
+    // Vendor stalls: a counter, a striped awning and a keeper behind it
+    [[-36, -24, 'roof'], [-36, 28, 'mint'], [34, 30, 'lavender'], [34, -22, 'flag']].forEach(([x, y, m], i) => {
+      box(`stall-${i + 1}-counter`, `Stall ${i + 1} counter`, 'food or souvenirs', [8, 5, 3], [x, y, 1.5], { parent: 'vendors', material: 'cream' });
+      box(`stall-${i + 1}-awning`, `Stall ${i + 1} awning`, 'striped awning', [10, 7, 0.6], [x, y, 4.5], { parent: 'vendors', material: m });
+      person(`stall-${i + 1}-keeper`, x + 6, y, m, 'vendors');
+    });
+    // Birds: a body and two wings, flying the loop. A bob on top of the flight gives the wing beat.
+    [0, 0.2, 0.45, 0.7, 0.9].forEach((ph, i) => {
+      const key = `bird-${i + 1}`, r = orient(BIRD_LOOP, null, ph);
+      add(key, { name: `Bird ${i + 1}`, description: 'flies the loop over the park', type: 'group', dimensions: [], position: [0, 0, 0], parent: 'birds' });
+      box(`${key}-body`, `Bird ${i + 1} body`, '', [1.5, 0.4, 0.4], r.point, { parent: key, material: 'cream', rotation_z: rnd(r.yaw * DEG), rotation_y: rnd(-r.pitch * DEG) });
+      const lx = -Math.sin(r.yaw) * 1.6, ly = Math.cos(r.yaw) * 1.6;
+      [1, -1].forEach((sg, j) => box(`${key}-wing-${j + 1}`, `Bird ${i + 1} wing`, '', [0.8, 2.6, 0.12],
+        [r.point[0] + sg * lx, r.point[1] + sg * ly, r.point[2]], { parent: key, material: 'lavender', rotation_z: rnd(r.yaw * DEG), rotation_y: rnd(-r.pitch * DEG) }));
+    });
+    // Free balloons, drifting
+    [[-20, 60, 34, 'lavender'], [44, 12, 40, 'mint'], [-52, -4, 30, 'roof']].forEach(([x, y, z, m], i) =>
+      sph(`free-balloon-${i + 1}`, `Free balloon ${i + 1}`, 'a party balloon drifting', 1.6, [x, y, z], { parent: 'floating', material: m }));
+  }
+
   return defs;
 }
 
@@ -345,26 +410,26 @@ function motionFor(v, uuid) {
   // A car's path is its centre line: the rail path lifted 2 ft. Pivot = where the car sits at its phase.
   const carPath = (id, key, pts, profile, phase) => {
     const lifted = pts.map((p) => [p[0], p[1], p[2] + 2]);
-    const r = at(lifted, profile, phase);
-    return { id, target: uuid(key), kind: 'path', points: inchPts(lifted), face: 'tangent',
-      pivot: [I(r.point[0]), I(r.point[1]), I(r.point[2])], rest_heading_deg: rnd(r.heading * DEG),
+    const r = orient(lifted, profile, phase);
+    return { id, target: uuid(key), kind: 'path', points: inchPts(lifted), face: 'tangent3d',
+      pivot: [I(r.point[0]), I(r.point[1]), I(r.point[2])], rest_yaw_deg: rnd(r.yaw * DEG), rest_pitch_deg: rnd(r.pitch * DEG),
       cycles: 1, phase, ...(profile ? { profile } : {}) };
   };
   if (v >= 12) {
     motions.push(carPath('pip-car-1-run', 'pip-car-1', PIP_D, PIP_PROF, 0));
     motions.push(carPath('pip-car-2-run', 'pip-car-2', PIP_D, PIP_PROF, 0.5));
-    motions.push(carPath('thunder-car-1-run', 'thunder-car-1', TH_D, TH_PROF.profile, 0));
-    motions.push(carPath('thunder-car-2-run', 'thunder-car-2', TH_D, TH_PROF.profile, 0.5));
+    motions.push(carPath('thunder-car-1-run', 'thunder-car-1', TH_D, TH_PROFILE, 0));
+    motions.push(carPath('thunder-car-2-run', 'thunder-car-2', TH_D, TH_PROFILE, 0.5));
   }
   if (v >= 13) {
     motions.push({ id: 'teacups-spin', target: uuid('tea-cups'), kind: 'spin', pivot: [I(TEA.x), I(TEA.y), 0], axis: 'z', cycles: 3 });
     [[-82, 0], [-68, 0.33], [-54, 0.66]].forEach(([x, ph], i) =>
       motions.push({ id: `bumble-boat-${i + 1}-drift`, target: uuid(`bumble-boat-${i + 1}`), kind: 'slide', axis: 'x', distance: I(16), cycles: 1, phase: ph }));
     [0, 0.33, 0.66].forEach((ph, i) => {
-      const r = at(SP_D, SP_PROF.profile, ph);
+      const r = orient(SP_D, SP_PROFILE, ph);
       motions.push({ id: `splash-boat-${i + 1}-ride`, target: uuid(`splash-boat-${i + 1}`), kind: 'path',
-        points: inchPts(SP_D), face: 'tangent', pivot: [I(r.point[0]), I(r.point[1]), I(r.point[2])],
-        rest_heading_deg: rnd(r.heading * DEG), cycles: 1, phase: ph, profile: SP_PROF.profile });
+        points: inchPts(SP_D), face: 'tangent3d', pivot: [I(r.point[0]), I(r.point[1]), I(r.point[2])],
+        rest_yaw_deg: rnd(r.yaw * DEG), rest_pitch_deg: rnd(r.pitch * DEG), cycles: 1, phase: ph, profile: SP_PROFILE });
     });
   }
   if (v >= 14) {
@@ -380,6 +445,29 @@ function motionFor(v, uuid) {
       motions.push({ id: `jet-${k + 1}-wave`, target: uuid(`jet-${k + 1}`), kind: 'bob', axis: 'z', amount: I(3), cycles: 1, phase: k / 8 });
     }
   }
+  if (v >= 16) {
+    // Visitors walk their loop (2-D: they face the way they walk). Pivot = where they stand at their phase.
+    const walk = (key, loop, phase) => {
+      const r = M.pathAt(loop, phase).point;
+      return { id: `${key}-walk`, target: uuid(key), kind: 'path', points: inchPts(loop), face: 'tangent',
+        pivot: [I(r[0]), I(r[1]), 0], rest_heading_deg: 0, cycles: 1, phase };
+    };
+    motions.push(walk('walker-gate-1', GATE_LOOP, 0));
+    motions.push(walk('walker-gate-2', GATE_LOOP, 0.5));
+    [0, 0.25, 0.5, 0.75].forEach((ph, i) => motions.push(walk(`walker-ring-${i + 1}`, RING, ph)));
+    // Birds fly the 3-D loop with yaw and pitch, and bob for the wing beat.
+    [0, 0.2, 0.45, 0.7, 0.9].forEach((ph, i) => {
+      const key = `bird-${i + 1}`, r = orient(BIRD_LOOP, null, ph);
+      motions.push({ id: `${key}-fly`, target: uuid(key), kind: 'path', points: inchPts(BIRD_LOOP), face: 'tangent3d',
+        pivot: [I(r.point[0]), I(r.point[1]), I(r.point[2])], rest_yaw_deg: rnd(r.yaw * DEG), rest_pitch_deg: rnd(r.pitch * DEG), cycles: 1, phase: ph });
+      motions.push({ id: `${key}-beat`, target: uuid(key), kind: 'bob', axis: 'z', amount: I(1.5), cycles: 9, phase: ph });
+    });
+    // Free balloons drift up and down and sideways
+    [[-20, 60, 34], [44, 12, 40], [-52, -4, 30]].forEach((_, i) => {
+      motions.push({ id: `free-balloon-${i + 1}-bob`, target: uuid(`free-balloon-${i + 1}`), kind: 'bob', axis: 'z', amount: I(4), cycles: 1, phase: i * 0.3 });
+      motions.push({ id: `free-balloon-${i + 1}-drift`, target: uuid(`free-balloon-${i + 1}`), kind: 'slide', axis: 'x', distance: I(8), cycles: 1, phase: i * 0.3 });
+    });
+  }
   return { schema: M.MOTION_SCHEMA, model_id: `adventure-park-v${String(v).padStart(2, '0')}`, loop_s: LOOP_S,
     autoplay: { plays: 2 }, motions };
 }
@@ -393,7 +481,7 @@ function sceneFor(v) {
     header: {
       model_id: id,
       name: `Adventure park V${pad}`,
-      description: `Adventure Coaster Park, compact, curved and animated, increment ${v} of 15. Capacity ${PPH} persons per hour. Estimated from published figures, in inches.`,
+      description: `Adventure Coaster Park, compact, curved and animated, increment ${v} of 16. Capacity ${PPH} persons per hour. Estimated from published figures, in inches.`,
       units: 'in', up: 'z', world: WORLD_ID,
       materials: MATERIALS,
     },
@@ -403,7 +491,7 @@ function sceneFor(v) {
   return scene;
 }
 
-const ADVENTURE_PARK_COMPACT = [11, 12, 13, 14, 15].map(sceneFor);
+const ADVENTURE_PARK_COMPACT = [11, 12, 13, 14, 15, 16].map(sceneFor);
 
 // Physics summary, for the brief and the review page.
 const PHYSICS = {

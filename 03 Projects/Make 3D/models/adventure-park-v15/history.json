@@ -4,7 +4,7 @@
   "header": {
     "model_id": "adventure-park-v15",
     "name": "Adventure park V15",
-    "description": "Adventure Coaster Park, compact, curved and animated, increment 15 of 15. Capacity 1000 persons per hour. Estimated from published figures, in inches.",
+    "description": "Adventure Coaster Park, compact, curved and animated, increment 15 of 16. Capacity 1000 persons per hour. Estimated from published figures, in inches.",
     "units": "in",
     "up": "z",
     "world": "adventure-park-world",
@@ -96,6 +96,10 @@
       "sky": {
         "color": "#bfe3f7",
         "opacity": 0.85
+      },
+      "skin": {
+        "color": "#ffd9b8",
+        "opacity": 1
       }
     }
   },
@@ -1981,7 +1985,7 @@
           -480,
           96
         ],
-        "rotation_y": 0,
+        "rotation_y": -8.95,
         "rotation_z": 90,
         "parent": "adventure-park-v15-pip",
         "material": "car"
@@ -2004,12 +2008,12 @@
           30
         ],
         "position": [
-          -1536,
-          -480,
-          96
+          -1378.754,
+          -701.759,
+          119.095
         ],
-        "rotation_y": 0,
-        "rotation_z": -90,
+        "rotation_y": 0.961,
+        "rotation_z": -29.247,
         "parent": "adventure-park-v15-pip",
         "material": "car"
       }
@@ -4769,7 +4773,7 @@
           513,
           72
         ],
-        "rotation_y": 0,
+        "rotation_y": -49.678,
         "rotation_z": -55.842,
         "parent": "adventure-park-v15-thunder",
         "material": "car"
@@ -4792,11 +4796,12 @@
           30
         ],
         "position": [
-          573.136,
-          513,
-          691.133
+          695.753,
+          517.517,
+          397.102
         ],
-        "rotation_y": 0,
+        "rotation_y": 79.964,
+        "rotation_z": 2.437,
         "parent": "adventure-park-v15-thunder",
         "material": "car"
       }
@@ -5836,7 +5841,7 @@
           1200,
           36
         ],
-        "rotation_y": 0,
+        "rotation_y": -44.2,
         "rotation_z": 180,
         "parent": "adventure-park-v15-splash",
         "material": "wood"
@@ -5859,11 +5864,11 @@
           24
         ],
         "position": [
-          -846.72,
+          -943.609,
           1200,
-          30.655
+          30.817
         ],
-        "rotation_y": 0,
+        "rotation_y": 0.007,
         "rotation_z": 180,
         "parent": "adventure-park-v15-splash",
         "material": "wood"
@@ -5886,11 +5891,11 @@
           24
         ],
         "position": [
-          -1234.282,
+          -1428.07,
           1200,
-          32.899
+          34.324
         ],
-        "rotation_y": 0,
+        "rotation_y": -0.421,
         "rotation_z": 180,
         "parent": "adventure-park-v15-splash",
         "material": "wood"
