@@ -114,6 +114,41 @@
     "updated": "2026-11-02T04:13:47Z",
     "hash": "3cba3eee34dd8951"
   },
+  "hawk-v01": {
+    "created": "2026-11-02T19:40:23Z",
+    "updated": "2026-11-02T20:18:18Z",
+    "hash": "c479a214653411db"
+  },
+  "hawk-v02": {
+    "created": "2026-11-02T19:40:23Z",
+    "updated": "2026-11-02T20:18:18Z",
+    "hash": "5b35d8348be10fb5"
+  },
+  "hawk-v03": {
+    "created": "2026-11-02T19:40:23Z",
+    "updated": "2026-11-02T20:18:18Z",
+    "hash": "d48314042f83c6a5"
+  },
+  "hawk-v04": {
+    "created": "2026-11-02T19:40:23Z",
+    "updated": "2026-11-02T20:18:18Z",
+    "hash": "e27dcdd05dc7c48b"
+  },
+  "hawk-v05": {
+    "created": "2026-11-02T19:40:23Z",
+    "updated": "2026-11-02T20:18:18Z",
+    "hash": "c1a0536e4c02b4e6"
+  },
+  "hawk-v06": {
+    "created": "2026-11-02T19:40:23Z",
+    "updated": "2026-11-02T20:18:18Z",
+    "hash": "68844b06ec1fa965"
+  },
+  "hawk-v07": {
+    "created": "2026-11-02T20:17:10Z",
+    "updated": "2026-11-02T20:33:55Z",
+    "hash": "0493688c7960127b"
+  },
   "honda-crv-test-v01": {
     "created": "2026-11-02T17:00:41Z",
     "updated": "2026-11-02T17:00:41Z",
@@ -314,9 +349,209 @@
     "updated": "2026-11-02T06:07:36Z",
     "hash": "4f2d457b9aaa2b61"
   },
+  "planet-earth": {
+    "created": "2026-11-02T20:43:41Z",
+    "updated": "2026-11-02T20:44:13Z",
+    "hash": "261b32be976048b8"
+  },
+  "planet-earth-v02": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "30deaa10743b0a8b"
+  },
+  "planet-earth-v03": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "ef826cbd8f05eb9b"
+  },
+  "planet-earth-v04": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "334b5cb92728a26f"
+  },
+  "planet-earth-v05": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "ebe62e8652a01a88"
+  },
+  "planet-earth-v06": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "d3832ca86f6b4ea4"
+  },
+  "planet-earth-v07": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "49c3564b770c9355"
+  },
+  "planet-earth-v08": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "8214a6428767c5ae"
+  },
+  "planet-earth-v09": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "59c7b2a5be997fd3"
+  },
+  "planet-earth-v10": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "7e9379019d01a19f"
+  },
+  "planet-jupiter": {
+    "created": "2026-11-02T20:43:41Z",
+    "updated": "2026-11-02T20:44:13Z",
+    "hash": "cd7c02ccaa6594fc"
+  },
+  "planet-jupiter-v02": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "e4cba5bdb5f8f787"
+  },
+  "planet-jupiter-v03": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "15f8a2ccc6f0ad84"
+  },
+  "planet-mars": {
+    "created": "2026-11-02T20:43:41Z",
+    "updated": "2026-11-02T20:44:13Z",
+    "hash": "7260a9d5fcddede7"
+  },
+  "planet-mars-v02": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "726780575dcaa36d"
+  },
+  "planet-mars-v03": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "955280cba56c998d"
+  },
+  "planet-mercury": {
+    "created": "2026-11-02T20:43:41Z",
+    "updated": "2026-11-02T20:44:13Z",
+    "hash": "12629a7f8730c259"
+  },
+  "planet-mercury-v02": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "f48cf0efabc4cffa"
+  },
+  "planet-mercury-v03": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "91df9cb8d990d66d"
+  },
+  "planet-neptune": {
+    "created": "2026-11-02T20:43:41Z",
+    "updated": "2026-11-02T20:44:13Z",
+    "hash": "fb19af1f597920fe"
+  },
+  "planet-neptune-v02": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "666df31a538b5980"
+  },
+  "planet-neptune-v03": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "48a574ce4775650b"
+  },
+  "planet-pluto": {
+    "created": "2026-11-02T20:43:41Z",
+    "updated": "2026-11-02T20:44:13Z",
+    "hash": "ba6c45df48c8a719"
+  },
+  "planet-pluto-v02": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "b2b22d05492d8b03"
+  },
+  "planet-pluto-v03": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "975c854c8a28e201"
+  },
+  "planet-saturn": {
+    "created": "2026-11-02T20:43:41Z",
+    "updated": "2026-11-02T20:44:13Z",
+    "hash": "dffbe6874b6543ab"
+  },
+  "planet-saturn-v02": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "1e2574308321d6b0"
+  },
+  "planet-saturn-v03": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "d3d0bf96048fe653"
+  },
+  "planet-uranus": {
+    "created": "2026-11-02T20:43:41Z",
+    "updated": "2026-11-02T20:44:13Z",
+    "hash": "2647186b7fe0beaf"
+  },
+  "planet-uranus-v02": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "a14bc655fac701c9"
+  },
+  "planet-uranus-v03": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "c07ac83b6fef2a27"
+  },
+  "planet-venus": {
+    "created": "2026-11-02T20:43:41Z",
+    "updated": "2026-11-02T20:44:13Z",
+    "hash": "a34ce288ce0e391b"
+  },
+  "planet-venus-v02": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "431716d459f18911"
+  },
+  "planet-venus-v03": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "448083ad7e55be9e"
+  },
   "robot-banana": {
     "created": "2026-11-02T18:13:01Z",
     "updated": "2026-11-02T18:13:01Z",
     "hash": "a538ee1ed7916fd3"
+  },
+  "solar-system-v01": {
+    "created": "2026-11-02T20:43:41Z",
+    "updated": "2026-11-02T20:44:13Z",
+    "hash": "52f396bcdaae547c"
+  },
+  "solar-system-v02": {
+    "created": "2026-11-02T20:43:41Z",
+    "updated": "2026-11-02T20:44:13Z",
+    "hash": "6a5d1646d250c624"
+  },
+  "solar-system-v03": {
+    "created": "2026-11-02T20:43:41Z",
+    "updated": "2026-11-02T20:44:13Z",
+    "hash": "d1ff799e5e8286f6"
+  },
+  "solar-system-v04": {
+    "created": "2026-11-02T20:43:41Z",
+    "updated": "2026-11-02T20:44:13Z",
+    "hash": "022184e9bec0612e"
+  },
+  "solar-system-v05": {
+    "created": "2026-11-02T20:43:41Z",
+    "updated": "2026-11-02T20:44:13Z",
+    "hash": "c8967fc2267758c1"
+  },
+  "solar-system-v06": {
+    "created": "2026-11-02T21:09:12Z",
+    "updated": "2026-11-02T21:09:12Z",
+    "hash": "3a6e1a46be9aa683"
   }
 }

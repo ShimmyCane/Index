@@ -375,3 +375,102 @@ Source: `convo/convo v0.7.md` (answers A–E). Test scene: robot with a banana (
 **Library order (round 7, G–H).** One row per project (the scene name without its "V…" label, or the scene's `project`), most recently changed first; older versions fold away, newest first. Each sample bundle carries `listing: { project, created, updated }` from `models/scene_dates.json`, which the build keeps: a new scene takes its dates from git, and a changed history or motion sets `updated` to now.
 
 **Tools.** `render_versions.js` takes a time (or a frame count for a strip) for the Increment Viewer. IFC export uses the rest pose.
+
+
+## 15. Skeleton meshes: closed lofts and thin sheets (round 8: built, from the hawk)
+
+Boxes, cylinders, spheres and cones give hard, extruded shapes. For things that bend (a wing, a tail, a neck, a blade of grass, a flag) there are two more types. Both are built on a **skeleton line**: a chain of joints that the motion file can bend.
+
+| Type | What it is | Drawn |
+|---|---|---|
+| `loft` | a **closed** mesh: a smooth tube along the skeleton with end caps. Solid, watertight, outward faces. Bodies, wings, tails, beaks, legs, a mouse. | one side |
+| `sheet` | an **open** thin surface along the skeleton. Leaves, blades of grass, flags, ears. | **double sided** |
+
+```json
+{ "type": "loft", "dimensions": [..], "position": [..],
+  "shape": { "joints": [[x,y,z], ...],   // the skeleton line at rest, absolute model coordinates, 2 or more
+             "facing": [0,1,0],          // which way the wide side of the cross-section points
+             "rings": [[t, w, h], ...],  // loft: t 0..1 along the line, w half width, h half height (sheet: [t, w])
+             "samples": 14, "sides": 12, // cross-sections along the line; points round each (sheet: across, odd)
+             "cup": 0.3 } }              // sheet only: how far the middle lifts, as a fraction of the half width
+```
+
+- `dimensions` and `position` are the box around the rest mesh, written by the scene tool, so the rules, bounds and origin work as for any part. Lofts and sheets are never rotated (`rotation_*` stay 0); orient them through `joints` and `facing`.
+- `sheet` is exempt from the minimum-dimension rule (thin on purpose). The clash check skips lofts and sheets (no volume test yet).
+- `attach: { "to": "<loft uuid>", "joint": k }` on any part makes it **ride that joint** of another loft's skeleton: eyes on the head joint, a tail on the rump joint. Same group as the skeleton's owner.
+- Motion kind **`bend`**: `{ target: <loft or sheet>, kind: "bend", joint: k, axis: "x|y|z", ... }` turns everything after joint `k` about joint `k`'s rest position, in the frame of the joints before it (so a wing's elbow bends with its shoulder). Angle: `from`/`to`/`cycles`/`phase` (a sine, as `swing`), or `keys: [[t, deg], ...]`. `envelope: [[t, 0..1], ...]` scales the whole angle (a flap that starts and stops).
+- `keys` is a closed list: `t` rises from 0 and stays below 1, and after the last key the value eases back to the first key's value at t = 1. `swing` accepts `keys` too.
+- A `path` can use **`face: "flight"`**: the nose follows the path, and the up axis leans into turns and pulls (`bank_gain`), so a bird banks and pitches without any roll keys. The up axis keeps a floor so the bird never rolls onto its back; the frame at the start is the rest pose.
+- `face: "flight"` options: `gravity` (the world's g in in/s^2; with the speed it sets the bank, default 386.1), `bank_gain` (1 = a coordinated turn), `max_bank_deg` and `half_span` with `ground_z` (a roll cap that shrinks near the ground so the lower wing tip clears it), `step` (chord, as a fraction of the loop, used to read curvature).
+- Several `bend`s on one joint add up. For the first frame to be the rest pose, each bend must be 0 at t = 0 (use phase 0, or an offset that cancels it; the envelope multiplies the whole angle).
+
+**Engine.** `js/core/mesh.js` builds the vertices and triangles (the vertex layout depends on the shape only, so a viewer builds triangles once and moves vertices), `meshStats` checks a loft is closed, `shapeIssues` is the rules check. `js/core/motion.js` adds `skinAt` (a matrix per joint), `keyAt`, `flightFrame`, `pathMarks`. The viewer builds one `BufferGeometry` per part, rewrites its vertices each frame only for parts whose joints move, and draws sheets with `DoubleSide`.
+
+**Not yet:** IFC export skips lofts and sheets; the clash check ignores them; no way to add one from the form (they come from a scene tool); a bend's frame is the chain's, so a twist about the line itself is not available.
+
+**Test scene:** `tools/hawk.js` (V01 to V06), `tests/test_mesh.js`. Render stills and frames with `node tools/render_models.js <dir> hawk-v06@19.4 --follow=hawk --zoom=62`.
+
+**Physical flight (hawk V07).** A path's `profile` can come from energy instead of a chosen speed: along the path, `d(v^2/2)/ds = -g sin(slope) - k v^2 + thrust`, with `k` the drag per inch (wings spread, tucked, or flared open as an air brake), `thrust` only while flapping, and rising air (a thermal, or wind pushed up a bluff) holding the soaring speed. The flap thrust is solved by bisection so the speed at the end of the climb equals the soaring speed, so the lap closes with no jump. `tools/hawk_flight.js` does this and writes the constants into the motion file under `physics`; `tests/test_mesh.js` checks the energy balance back from the profile. The scaled world (about a tenth of real size) uses g = 150 in/s^2, so speeds are scaled with it.
+
+## 16. Linked views (the toolset for moving between 3-D views)
+
+Purpose: a model can hold a link to another model, so a tap on one part opens that model (for example a planet opens its own view, and the planet view links back to the whole system). A tool set, not a one-off: any scene can use it.
+
+**Parts of the toolset**
+- `js/core/linked_views.js` (pure data, no DOM, Node-testable): `parseLinkTag`, `linkOf`, `linksIn`, `transitionFor`, `DURATION_MS`.
+- `js/ui/app.js` (the page): the upper-right button (`#linkBtn`), `goLink()` (the transition and the load), and full screen (`#fullBtn`, `toggleFull()`).
+- `css/app.css`: the fade and zoom states (`.stage.leaving`, `.stage.entering`, `data-transition`), the full-screen fill (`.fake-full`), and reduced motion.
+- `tests/test_linked_views.js`: the tag format, the transition choice, and that every link in the solar scenes points at a scene that exists.
+
+**Link format (a tag on the object, so the model format does not change)**
+- `link:<model_id>` opens the model with a fade.
+- `link:<model_id>:zoom` zooms into the object, then opens the model.
+- `link:<model_id>:fade` is the same as the plain form, written out.
+- Anything else is not a link. A bad link is ignored, not an error.
+
+**Behaviour**
+1. Tap a part. If it has a link, its name appears on the button in the upper right, as "<name> →". Tapping the part does not jump, so an accidental tap is harmless.
+2. Tap the button. The canvas leaves: for a zoom, it scales up to 1.8× and fades (620 ms); for a fade, it fades (380 ms). The target model is loaded (no confirm, since the page is only moving between linked views). The canvas arrives: a zoom starts small and grows; a fade comes up from nothing. Then the page's address changes to `?model=<target>`, so the link can be shared.
+3. Taps during a transition are ignored.
+4. Reduced motion (the system setting) always uses the fade, with no transform.
+5. Full screen: the stage uses the Fullscreen API. Where the browser refuses it (some iPad Safari versions), the stage fills the window with a fixed layer (`.fake-full`). The button says "Full screen" or "Exit full screen" and follows the real state.
+
+**Rules**
+- A link target must be a scene in the library (`SAMPLES`). The test checks this for the solar scenes; a link to a missing scene does nothing (the button stays hidden).
+- Each planet view holds one way back (`link:solar-system-v05:fade`), in a pink marker. The solar system holds one link per planet (`link:planet-<name>:zoom`) on the planet's ball, not on its atmosphere (haze lets taps through).
+- Links are per model, so a view can be shared without the other views in it.
+
+**Use in another scene.** Tag a part with `link:<model_id>` (or with `:zoom`), add a way back in the target, and run `node tests/test_linked_views.js`. Nothing else needs changing.
+
+**Limits (not built yet)**
+- No return history: "back" is a link in the scene, not a browser back button.
+- The link button shows for the selected part only; no hover labels.
+- The transition is a screen-level fade or scale, not a camera fly-through.
+
+## 17. True orbits, one-shot timelines, the date tracker, and page buttons (round 9: built)
+
+Purpose: the solar system (V06) follows real orbits from a real date; the animation plays one lap of the slowest body; the page shows the date and offers a way back.
+
+**Motion engine (`js/core/motion.js`)**
+- New kind `orbit`: `{ a, e, inc_deg, node_deg, peri_deg, M0_deg, period_days, span_days }`. `orbitPosition(m, u)` solves Kepler's equation (Newton) for the body's position at timeline fraction u, in inches, z up. The motion is the move from its rest pose: `translate(p(u) - p(0))`. Only an orbit's own parent moves, so a body's spin stays about its own centre.
+- New top-level flag `loop: false` (a one-shot timeline): `u = t / loop_s`, clamped to 0..1, no wrap. `cycles` may then be fractional and negative (a retrograde spin); integer cycles are still required for a loop.
+- `timeline: { start_date, span_days }` (metadata for the page) and `autoplay.plays` as before.
+- Tests: `tests/test_orbits.js` (circle radius, ellipse peri/aphelion, inclination height, node and peri, one period closes, one-shot rules, the start longitude of Earth, the scale of the orbits).
+
+**Viewer (`js/viewer/viewer.js`)**: a one-shot motion stops at its end and holds the last frame (no wrap).
+
+**Page (`js/ui/app.js`, `index.html`, `css/app.css`)**
+- **Date tracker** (lower right, `#dateTrack`): shown when the motion is a one-shot timeline with `timeline`. It shows the month and year (drum of five rows, the middle one highlighted). Scroll moves one month a notch (Shift: one year). Drag moves about one month per 10 px. Moving it seeks the animation to that date; while the animation plays, the tracker follows it.
+- **Back button** (top left, `#homeBtn`): shown when the header has `links: [{ label, target, transition }]`. It is a page button, not an object in 3-D space. Planet and Earth views use it.
+- **Object links** (`link:` tags, §16) still open a linked view from a tapped object, with the zoom or fade transition.
+- **Replay**: the play button restarts a finished one-shot from the start.
+
+**Scenes**
+- `tools/solar_true.js`: solar system V06, true orbits from the JPL approximate elements for 2026-11-02 (`research/solar-system-true.md`). Orbits are scaled by 120 / sqrt(a). Each belt rock has its own orbit (fixed pattern). Each planet's ball links to its newest view.
+- `tools/planet_views.js`: planet views V02 and V03 (textures, extra moons; Venus bands from V02); Earth V02 to V10 (continents, deserts, ice caps, clouds, a station, a launch, a storm, a polar satellite, city lights, a second launch and storm). Earth V10 loop is 480 s (twice the others). Versions are cumulative; V01 views (`planet-<name>`, `planet-earth`) are unchanged.
+- World: `worlds/solar-system-world.json` (bounds ±1000 in across, ±400 in up, to cover Pluto's aphelion and tilt).
+
+**Limits**
+- Positions beyond 2050 are extrapolated (JPL's table is fit for 1800 to 2050).
+- At one lap per 240 s, the fast spins (Jupiter, Earth) alias to flicker. This is expected.
+- Textures are rough discs, spheres and cones; they are not survey data.

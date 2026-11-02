@@ -44,7 +44,8 @@ for (const scene of SCENES) {
       object: { uuid: uuid(key), name: d.name, description: d.description || '', type: d.type,
         dimensions: d.dimensions, position: d.position, rotation_y: d.rotation_y || 0,
         ...(d.rotation_x ? { rotation_x: d.rotation_x } : {}), ...(d.rotation_z ? { rotation_z: d.rotation_z } : {}),
-        parent: d.parent ? uuid(d.parent) : null, material: d.material || null, ...(d.tags ? { tags: d.tags } : {}) } });
+        parent: d.parent ? uuid(d.parent) : null, material: d.material || null, ...(d.tags ? { tags: d.tags } : {}),
+        ...(d.shape ? { shape: d.shape } : {}), ...(d.attach ? { attach: { to: uuid(d.attach.to), joint: d.attach.joint } } : {}) } });
   }
   for (const m of scene.modify || []) {
     seq++;

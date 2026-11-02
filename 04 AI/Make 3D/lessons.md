@@ -96,6 +96,24 @@ Appended over time. Promote anything reusable to `04 AI/lessons_pool.md`.
 - **Check the rest pose is the identity.** If a motion's pose at its start is not the identity, the object jumps when the motion plays. Check it numerically.
 - **Bounds checks need absolute positions.** A pose's translation is an offset from rest, so checking it against the world bounds gives false alarms. Use the pivot transformed by the pose.
 
+## Hawk: closed meshes on a skeleton line, double-sided sheets (2026-11-02)
+
+Jimmy's direction: the models so far were mostly polygon extrusions (boxes, cylinders, cones). Start exploring **closed meshes**, each set up with a **line** (a skeleton), so that animating gives more realistic components. Keep a place for **meshes that are truly thin** (leaves, grasses, flags), and make those **double sided**.
+
+- **Closed mesh plus a line.** A `loft` is a smooth tube along a chain of joints, with cross-sections of any width and height and capped ends. The same line is the rig: a `bend` at joint k turns everything after it, so a wing flaps from the shoulder, folds at the elbow and wrist, and the surface stays smooth and joined. A stack of rotated boxes can only hinge at its seams.
+- **Prove a mesh is closed with a number.** Every edge must belong to exactly two triangles, and the signed volume must be positive (negative means the faces point in). `meshStats` does both, and the test runs it on every part of the hawk.
+- **Thin things are a different type, not a thin box.** A `sheet` is open, so it has edges and no volume, and it is drawn double sided (`THREE.DoubleSide`), so the back of a leaf or a flag is not invisible. It gets the same skeleton, so grass and flags bend, and an exemption from the minimum-dimension rule.
+- **Parts that follow a joint need an `attach`.** Eyes, beak and tail are separate meshes, but ride a joint of the body skeleton, so the head dipping carries them. Without it each would need its own copy of the head motion.
+- **Keyframes beat sine waves for a story.** Folding for the dive, flaring on the pull-out, dropping the feet: each happens once per loop. Eased `keys` that close back to their first value, plus an `envelope` for a flap that starts and stops, kept the loop closed.
+- **Bank and pitch from the path, not from keys.** A flight frame (nose along the path, up axis leaning into the turn) gave banking and pitching for free. Keeping a floor on the up axis stops a bird rolling onto its back in a push-over.
+- **First frame is the rest pose, again.** A sine with a phase is not zero at t = 0. Make each bend cancel its own offset, and let the envelope multiply the whole angle. The test caught a 17° wrist bend at the start.
+- **Numbers found real faults.** Checking every vertex over the loop found a wing tip 0.7 in below the ground at the pull-out (the bank was too strong, and the path too low). Looking at one picture would not have shown it.
+- **A tolerance for rounding.** Rounding sway angles to 0.01° left 0.009 in of pivot error. Round to 0.0001°, and test with 1e-3 in.
+- **A rig test is a distance test.** "The talons reach the mouse" became "the closest talon is within 4 in" (it is 3.4 in). That told us the hawk skims over the mouse rather than touching it, which we state openly.
+- **Look from where the action is.** The default camera frames the whole motion, so the dive was tiny. `--follow=<part>` in `render_models.js` keeps the hawk centred in each frame.
+- **Shell habit.** Don't print every failing item from a loop; filter the output (one run printed 150 lines of grass).
+- **`render_versions.js` no longer finds older versions.** The library folds versions into one row per project, so the old click-by-name script can't open V01 to V05. The shareable link `index.html?model=<id>` works for any version, so use `render_models.js`.
+
 ## Grand Ocean Aquarium (2026-11-02)
 
 - **Glass blocks taps.** The picker used the nearest hit, so a glass wall in front of a fish selected the glass. Picking now skips anything with opacity under 0.4. Make see-through surfaces below that and anything meant to be selected above it.
@@ -113,3 +131,37 @@ Appended over time. Promote anything reusable to `04 AI/lessons_pool.md`.
 - **Look from several views, not one.** The same scene from the front, from behind and from the side caught different things: walls hiding the benches (front), rooms and levels (behind), the sun and the beams (side). Name each view and keep its camera moves (zoom, drag) in a scratch script.
 - **Check the motion at two times.** A render at t = 14 s and at t = 40 s shows things moved; a single frame cannot.
 - **Keep the scratch tools outside the repo** (the scratchpad folder), and only commit the renders you chose.
+
+## Hawk V07: making a flight look real (2026-11-02)
+
+Jimmy's note on V06: too slow, too small, "too diagrammatic and not real enough (gravity, friction, air channel rising, bluff)". He wanted a faster, larger loop, several cycles, and more flapping when climbing.
+
+- **Real means energy, not a chosen speed.** V06 picked a speed from height, which looked like a ride. V07 integrates d(v²/2)/ds = −g sin(slope) − k v² + thrust along the path. Gravity makes the stoop fast, drag caps it, the open wings brake the pull-out, and flapping is the only thing that adds energy on the way up. Each of the four things Jimmy named became a term or a visible object.
+- **Close the loop by solving, not by hand.** Rising air holds the soaring speed; the thrust of the climb is found by bisection so the hawk reaches the bluff at exactly that speed. The lap closes with no speed jump, and a test reads the energy balance back from the saved profile.
+- **Show the air.** Rising air that cannot be seen is invisible physics: thermal as spinning translucent bands over a warm patch, bluff wind as ribbons curling up the rock face. The hawk flaps where there is no lift and rests its wings where there is.
+- **Scale the world, then scale gravity with it.** The arena is about a tenth of real size, so g is 150 in/s², not 386. Bank angle, speeds and the time to fall all use the same g, so a 40° bank at the thermal radius and a stoop of about 240 in/s are consistent.
+- **Bank from the turn, then cap it.** A coordinated turn banked the inside wing tip 10 in below the ground during the skim. A roll cap that shrinks near the ground (`half_span`, `ground_z`) fixed it. The ground test (every vertex, over the loop) found it; a picture did not.
+- **A joint at the rest pose needs a calm start.** The loop starts on a straight glide, so the flight frame at t = 0 (the rest pose) is level. Starting on a banked turn would put the hawk at a tilt in the first frame, or cancel the bank for the whole loop.
+- **Off-by-one in a spline chain.** Two context points before the first control shifted every label by one segment, so the path folded back on itself at the join. The jump in the nose direction (2.3 rad between samples) is what showed it: sample the orientation densely and test the largest step.
+- **Judge a turn rate, not a step.** A fixed limit per sample changes when the sampling does; a limit in rad/s (a pull-out is a few) does not.
+- **Keep older versions byte-identical.** New materials went into a V07-only list, not the shared one, so the V01 to V06 files did not change.
+- **Do not flap near the ground.** A big flap at 13 in altitude put a wing tip 10 in below the ground. Start flapping when the hawk has climbed clear.
+- **Give the prey a story (V07, Jimmy: "let the mouse bolt for a hole").** The mouse is a group on a closed path with a time profile: still until the hawk flares in, a 0.35 s dash, a dive under the ground (z below the meadow top, so the ground hides it, with a dark hole and rim drawn over the entry), a long wait, then a slow walk home. A flat stretch in the profile is how a path motion waits. Keep the start of the path straight and collinear so the heading is exactly the rest pose; a curved start was 0.1 degrees off and failed the first-frame test.
+
+## Solar System and linked views (2026-11-02)
+- A world file must cover the whole scene. With the default world (±240 in), a solar system warned on about 550 objects. A separate `worlds/solar-system-world.json` (±800 in) cleared them. Check the warnings before calling a build done.
+- Whole-number motion cycles: a loop closes only if every motion is a whole number of cycles. Real orbit ratios cannot all be whole, so speeds are stylised and the order is kept. Say so in the description.
+- Retrograde spin cannot be expressed (cycles must be positive), so Venus and Pluto spin the normal way. Logged as a gap in the review set.
+- Link tags stay on the object (`link:<id>[:zoom|:fade]`), not in the model format. Nothing in the schema changes, and the rules check ignores them.
+- The library list shows only the latest version of each project; older versions fold under "versions". `render_versions.js` names must match the latest version. Render by `?model=<id>` (see the screenshot helper) when a version is not the latest.
+- Object list labels carry the type ("Earthsphere"). Match them with a prefix, not an exact name.
+- Gas-giant bands as stacked flat cylinders look stepped from close up. More bands (12+) or a true sphere-with-stripes primitive would fix it; not yet built.
+
+## True orbits, one-shot timeline, date tracker (2026-11-02, round 9)
+- A one-shot timeline is the honest pace for true orbits: integer loops force orbit ratios that are not real. `loop: false` lets cycles be fractional and negative (retrograde spins), at no cost to the other rules.
+- Orbits from elements need a Kepler solver in the engine itself (not baked points), so the viewer, the build and the tests all share one formula (`orbitPosition`). Rest pose = position at u = 0, so the first frame matches the model.
+- Earth's start longitude is a cheap check (about 40 degrees on 2 November); a wrong epoch shows up at once.
+- Rotations compose Z then Y then X in the viewer. Surface features use rotation_y = 90 - lat and rotation_z = lon for a cylinder whose axis is z, which lays a disc on the surface at that latitude and longitude.
+- Anything a planet's child must follow (a rocket on a pad, a storm on the Earth) must sit under the spinning body group, or it stays behind while the body turns.
+- The world file must cover the whole timeline, not only the rest pose: Pluto's aphelion reaches about 942 in, and its tilt about 300 in up.
+- Viewer tap targets: a button in the page is more reliable than a marker in 3-D space for "go back".

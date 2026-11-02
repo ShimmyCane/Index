@@ -216,6 +216,25 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 - **V16 life in the park:** visitors in and out of the gate (80 ft loop, about 4.4 ft/s) and round the plaza (14 ft ring, about 4.9 ft/s), four vendor stalls with keepers, five birds on a 3-D loop (about 31 ft/s) with a wing-beat bob, three free balloons.
 - **Open:** (1) keep the 80° drop, or soften it? (2) keep the ride speed at 1.25× or go back to real time?
 
+## Hawk: closed skeleton meshes (2026-11-02, research mode)
+
+- **Request (Jimmy):** a hawk looping around and diving down before picking back up. Move beyond polygon extrusions to **closed meshes set up with a line** (a skeleton), so animation is more realistic; use **thin double-sided meshes** for leaves, grass and flags. Log it in the lessons. Merge.
+- **Mode:** research. Sizes and sources in `research/hawk.md` (Cornell Lab: 17.7 to 25.6 in long, 44.9 to 52.4 in wingspan).
+- **Engine (new):** types `loft` (closed) and `sheet` (open, double sided) with a `shape` (joints, facing, rings); `attach` to a joint; motion kind `bend`; `keys`, `envelope`; `face: "flight"`. Schematic §15. Code in `js/core/mesh.js`, `js/core/motion.js`; viewer builds a geometry per part and moves vertices each frame.
+- **Build:** `tools/hawk.js`, one `defsFor(v)`, six increments; scenes `hawk-v01` to `hawk-v06`; library project "Hawk". Renders `renders/hawk/`. Review page `viewer.html?set=hawk`.
+
+| Version | Increment |
+|---|---|
+| V01 | Blockout: body, tail and two wings as closed meshes on straight skeleton lines |
+| V02 | Wings with shoulder, elbow, wrist and tip; five-joint body; tail rides the rump joint |
+| V03 | Beak, eyes, legs and feet riding body joints |
+| V04 | Meadow: 120 grass blades and 6 leaves (double-sided sheets), pennant flag, mouse |
+| V05 | Cream breast, eye ridges, smaller eyes set lower |
+| V06 | Motion: 23 s loop of circling, stoop, flare, skim and climb; wings bend, head dips, legs drop, grass and flag move |
+
+- **Checks run:** build (six scenes accept, 0 issues); `tests/test_mesh.js` 14 groups (closed meshes, FK bends, keys, rest pose, loop closes, frame is a rotation, lowest point 4.9 in, wings tuck from 49 in to about 3 in); `test_core`, `test_motion`, `test_ifc`, `test_cloud`, `smoke`, `anim_check` still pass; older scenes' generated files unchanged.
+- **Open for Jimmy:** (1) "looping around" was built as circling the meadow, then a stoop. Did you mean a vertical loop-the-loop? The flight frame can do one if the up-axis floor is lifted. (2) The talons skim 3.4 in above the mouse rather than touching it. (3) The loop is slow (about 43 in/s at the bottom) so the wing bends can be read. (4) IFC export skips lofts and sheets. (5) Check on iPad (play bar, pinch, speed).
+
 ## Grand Ocean Aquarium (2026-11-02)
 
 - **Subject:** a large imagined public aquarium, in the style of the California Science Center kelp tank (Los Angeles): 100 x 60 ft tank, 28 ft deep, a 100 ft round acrylic walk-through tunnel along the floor, a front viewing gallery, entry lobby, exit hall and a pool deck. Sharks, large fish, schools of small fish, kelp and reef plants. Tap an animal to read its name and description.
@@ -238,3 +257,27 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 ### Aquarium V06: two storeys and small rooms (2026-11-02)
 
 Jimmy asked for a tank at least two stories tall with multiple small rooms, some with a sunroom view in the low sun, and tunnels and windows where kids can see the fish swim and somewhat interact. V06 (1,178 objects) adds: 8 small rooms on two levels (Reef, Jelly, Shark, Kids' Den; Dive, Quiet, Sunroom, Lookout), kid-height round windows, 3 bubble domes into the tank, a crawl tube, a touch pool with 2 small rays, a low drifting sun with beams, stairs, and a second-floor gallery. The 28 ft tank is read as two 14 ft floors. Interpretation to confirm: "interact" is taken as bubble domes plus a touch pool; "tunnels where kids can see" as the crawl tube and low windows. Open: ramp, doors, room sizes against a child's height.
+
+## Hawk V07: physical flight, larger loop (2026-11-02)
+
+- **Request (Jimmy, after V06):** fly much faster; a larger loop; multiple cycles; more flapping when climbing; less diagrammatic, more real: gravity, friction, a rising air channel, a bluff.
+- **Built:** V07 in the same `tools/hawk.js`, with `tools/hawk_flight.js` and `worlds/hawk-world.json` (bounds ±520 by ±420 in, 460 in high). V01 to V06 are unchanged (checked: their generated files do not change).
+- **The lap (26 s):** glide, stoop onto the mouse, flared skim, flapping climb, ride the bluff updraft, then 2.5 turns up a thermal with no flapping.
+- **Physics:** speed from gravity, drag (spread, tucked, flared) and flap thrust; rising air holds the soaring speed (130 in/s); thrust solved (about 100 in/s²) so the lap closes. Banking from the turn (coordinated turn, g = 150 in/s² in a world about a tenth of real size), capped at 55° and lower near the ground.
+- **Numbers:** path about 3,430 in, stoop about 240 in/s at the bottom (about 1.9 times soaring speed), 62 wing beats a lap at 2.4 per second, all in the climb; thermal 2.5 turns, 120 in per turn.
+- **Checks:** `tests/test_mesh.js` 26 groups (V06 and V07 rigs; speed constant in rising air; stoop energy balance within 8%; flare sheds speed; arrival at the bluff at soaring speed; flaps only when climbing; lowest point 5.3 in; nose turns under 10 rad/s). Other suites, smoke and anim_check pass.
+- **Open for Jimmy:** (1) Is a tenth-scale world right, or should the hawk be scaled down inside a bigger arena? (2) The air is drawn as ribbons, not simulated. (3) Talons skim 4 in above the mouse. (4) ~~Should the mouse react?~~ Answered: Jimmy said the mouse bolts for a hole, and the hawk size is good. Done: burrow 52 in west of the mouse, bolt at about 160 in/s as the hawk flares in, hides underground, walks home before the wrap (`mouseRun` in `tools/hawk_flight.js`).
+
+## Solar System (2026-11-02)
+
+- Subject: Solar System, not to scale (sun, nine planets, orbit lines, asteroid belt, gas giants with bands and rings, Pluto, moons in planet views). Five increments (`tools/solar_system.js`, `solar-system-v01` to `v05`) and one view per planet (`planet-<name>`). Research note: `04 AI/Make 3D/research/solar-system.md`. Mode: research (NASA fact sheet values and a Pluto/Charon page; the live NASA table was not reachable in search, so re-check before public use).
+- Linked views toolset: `js/core/linked_views.js` with the page button, zoom/fade transitions, and full screen. Schematic §16. Tests: `tests/test_linked_views.js`.
+- Review set: Increment Viewer `?set=solar_system`, renders in `renders/solar-system/`.
+- Open: planet views are V01 only; no retrograde spin; orbits are circles; gas-giant bands look stepped.
+
+## Round 9: planets to V03, Earth to V10, true orbits (2026-11-02)
+
+- Solar system V06: true orbits from JPL approximate elements for 2026-11-02, one lap of Pluto (240 s), played once, then held. Date tracker lower right. Research: `research/solar-system-true.md`.
+- Planet views: V02 and V03 for the eight planets (textures, more moons). Earth V02 to V10 (continents through a second launch). Earth V10 loop is 480 s.
+- Back to the Solar System is a page button (`header.links`), not an object.
+- Open: positions past 2050 are extrapolated; the element values were entered from the standard table, to be checked against the JPL page; belt rocks are a fixed pattern, not real asteroids; fast spins alias at one lap per 240 s.

@@ -125,6 +125,14 @@
     </div>
     <div class="stage-tools">
       <button class="btn small" id="resetView" type="button">Reset view</button>
+      <button class="btn small home-btn" id="homeBtn" type="button" hidden>Back</button>
+    </div>
+    <div class="date-track" id="dateTrack" role="slider" aria-label="Date on the timeline. Scroll or drag to move." tabindex="0" hidden>
+      <div class="drum" id="drum"></div>
+    </div>
+    <div class="stage-top-right">
+      <button class="btn small link-btn" id="linkBtn" type="button" hidden>Open</button>
+      <button class="btn small" id="fullBtn" type="button" aria-pressed="false">Full screen</button>
     </div>
     <div class="anim-bar" id="animBar" hidden>
       <button class="btn small anim-btn" id="animPlay" type="button" aria-label="Play"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></button>
@@ -261,7 +269,9 @@
 <script src="js/core/rules.js"></script>
 <script src="js/core/io.js"></script>
 <script src="js/core/export_ifc.js"></script>
+<script src="js/core/mesh.js"></script>
 <script src="js/core/motion.js"></script>
+<script src="js/core/linked_views.js"></script>
 <script src="vendor/supabase/supabase.js"></script>
 <script src="js/cloud/cloud.js"></script>
 <script src="js/viewer/viewer.js"></script>

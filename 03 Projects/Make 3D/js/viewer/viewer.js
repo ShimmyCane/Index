@@ -38,6 +38,7 @@
     let lastModel = null;
     let nodes = new Map();           // uuid -> THREE.Group (motion node)
     let meshes = [];                 // pickable meshes
+    let skins = new Map();           // uuid -> { geo, o, posed } for skeleton meshes
     let dirty = true;                // redraw on the next frame
     const requestRender = () => { dirty = true; };
     // animation clock
@@ -50,7 +51,26 @@
     };
     const modelAxis = (i) => { const v = [0, 0, 0]; v[i] = 1; return new THREE.Vector3(...toScene(v)); };
 
+    // Skeleton meshes (loft, sheet): vertices are absolute model coordinates, converted to scene axes.
+    function skinGeometry(o) {
+      const M = root.M3D;
+      if (!M || !M.buildMesh || !o.shape || M.shapeIssues(o).length) return null;
+      const geo = new THREE.BufferGeometry();
+      const { positions, indices } = M.buildMesh(o.shape, o.type, null);
+      geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions.length), 3));
+      geo.setIndex(indices);
+      writeSkin(geo, positions);
+      return geo;
+    }
+    function writeSkin(geo, p) {
+      const a = geo.attributes.position.array;
+      for (let i = 0; i < p.length; i += 3) { const s = toScene([p[i], p[i + 1], p[i + 2]]); a[i] = s[0]; a[i + 1] = s[1]; a[i + 2] = s[2]; }
+      geo.attributes.position.needsUpdate = true;
+      geo.computeVertexNormals(); geo.computeBoundingSphere(); geo.computeBoundingBox();
+    }
+
     function makeGeometry(o) {
+      if (o.type === 'loft' || o.type === 'sheet') return skinGeometry(o);
       const d = o.dimensions || [];
       const ok = d.every((x) => Number.isFinite(x) && x > 0);
       if (!ok) return null;
@@ -66,6 +86,7 @@
     function materialFor(o, model) {
       const m = (model.materials || {})[o.material] || { color: '#c9c3b5', opacity: 1 };
       const opts = { color: m.color, transparent: m.opacity < 1, opacity: m.opacity };
+      if (o.type === 'sheet') opts.side = THREE.DoubleSide;   // leaves, grass and flags show from both sides
       if (display === 'wire') return new THREE.MeshBasicMaterial({ ...opts, wireframe: true });
       return new THREE.MeshStandardMaterial({ ...opts, roughness: 0.75, metalness: 0 });
     }
@@ -76,7 +97,7 @@
         c.traverse((x) => { if (x.geometry) x.geometry.dispose(); if (x.material) x.material.dispose(); });
       }
       selectionHelper = null;
-      nodes = new Map(); meshes = [];
+      nodes = new Map(); meshes = []; skins = new Map();
       const objects = (model.objects || []).filter((o) => o.uuid);
       // one node per object (groups too), identity at rest
       for (const o of objects) {
@@ -87,6 +108,13 @@
         const geo = makeGeometry(o);
         if (!geo || !Array.isArray(o.position) || o.position.some((v) => !Number.isFinite(v))) continue;
         const mesh = new THREE.Mesh(geo, materialFor(o, model));
+        if (o.type === 'loft' || o.type === 'sheet') {
+          mesh.frustumCulled = false;
+          skins.set(o.uuid, { geo, o, posed: false });
+          mesh.userData.uuid = o.uuid;
+          node.add(mesh); meshes.push(mesh);
+          continue;
+        }
         mesh.position.set(...toScene(o.position));
         // model axes: X, then Y, then Z (same order as origin.rotateVector)
         const qX = new THREE.Quaternion().setFromAxisAngle(modelAxis(0), ((o.rotation_x || 0) * Math.PI) / 180);
@@ -127,6 +155,14 @@
         else node.matrix.identity();
         node.matrixWorldNeedsUpdate = true;
       }
+      // skeleton meshes: move the vertices to follow their bent joints; back to rest when nothing bends them
+      const skinAt = root.M3D && root.M3D.skinAt;
+      const bent = anim.motion && lastModel && skinAt ? skinAt(lastModel, anim.motion, anim.t) : {};
+      for (const [uuid, sk] of skins) {
+        const G = bent[uuid];
+        if (G) { writeSkin(sk.geo, root.M3D.meshPositions(sk.o.shape, sk.o.type, G)); sk.posed = true; }
+        else if (sk.posed) { writeSkin(sk.geo, root.M3D.meshPositions(sk.o.shape, sk.o.type, null)); sk.posed = false; }
+      }
       if (selectionHelper) { modelRoot.updateMatrixWorld(true); selectionHelper.update(); }
       requestRender();
     }
@@ -157,6 +193,12 @@
       const dt = Math.min((now - anim.lastNow) / 1000, 0.1);   // a hidden tab doesn't jump ahead
       anim.lastNow = now;
       anim.t += dt * anim.speed;
+      if (anim.motion && anim.motion.loop === false) {
+        // a one-shot timeline (schematic §17): run once to the end, then hold the last frame
+        if (anim.t >= loopS()) { anim.t = loopS(); anim.playing = false; anim.lastNow = null; }
+        applyPose(); tick();
+        return;
+      }
       if (anim.t >= loopS()) {
         anim.playsLeft -= 1;
         if (anim.playsLeft <= 0) { anim.t = 0; anim.playing = false; anim.lastNow = null; }
@@ -341,6 +383,7 @@
       onTick(fn) { anim.onTick = fn || (() => {}); tick(); },
       animState: () => ({ t: anim.t, loop_s: loopS(), playing: anim.playing, has: !!anim.motion, playsLeft: anim.playsLeft }),
       viewState: () => ({ radius, theta, phi }),
+      setView(v) { if (v.target) target.set(...toScene(v.target)); if (v.radius) radius = v.radius; if (v.theta !== undefined) theta = v.theta; if (v.phi !== undefined) phi = v.phi; requestRender(); },
     };
   }
 
