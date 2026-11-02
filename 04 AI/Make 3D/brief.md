@@ -350,3 +350,12 @@ Jimmy: the tank is not a vertical extrusion; some portions should be shallow wit
 - **Review:** Increment Viewer `?set=earth_views_v22`.
 - **Open for Jimmy:** (1) the minimum size (0.25 in) makes the satellites and rockets chunkier than to scale; is that fine? (2) the mountains (V12) are still large cones; do you want them scaled? (3) the Moon's distance (30 in) is not to scale; leave it, or move it out? (4) James Webb is not drawn.
 
+## Earth V23: launches, deployment, large satellites only, mountain ranges (2026-11-02)
+
+- **Request (Jimmy):** the rockets are unclear: fix the launch sites and show the launch and return. Show deployment of new satellites. Reduce the satellites to large units (Hubble class, the station if still there). The mountains look weird.
+- **Decision on deployment (Jimmy, after a question):** the satellite is released at the top and disappears; the rocket returns to its pad or splashes into the sea. No full-length animation needed.
+- **Build:** `tools/earth_v23.js`, built on V22 with the replaced parts dropped. Six real sites (`research/earth-launches.md`); four rockets back to their pads, two first stages falling into the sea (Kourou, Wenchang). Each carries a new satellite that drops into the planet and is hoisted back to the nose so the loop closes. Large satellites only: ISS, Tiangong (new), Hubble, a geostationary weather satellite (new). Mountains: small peaks along the Andes, Rockies, Alps and Himalaya (base 0.25 in, 0.35 to 0.6 in tall).
+- **Checks:** `tests/test_earth_v23.js` (9 tests): the satellites, the sites and climb along the normal, the profiles, the sea splashes, the deployed satellites, the mountains, and V22 unchanged.
+- **Review:** Increment Viewer `?set=earth_views_v23`.
+- **Open for Jimmy:** (1) the deployed satellite drops into the planet instead of staying in orbit; OK for now? (2) the first stages do not break up; add a break-up? (3) the rockets are still much bigger than to scale.
+

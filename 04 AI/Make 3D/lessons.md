@@ -223,3 +223,12 @@ Jimmy's note on V06: too slow, too small, "too diagrammatic and not real enough 
 - **A merge can conflict after a merge is opened.** `main` moved while PR #65 was open: the conflicts were two additions in the notes and the viewer list, plus the generated bundle. Keep both sides, and rebuild the generated file rather than merge it by hand.
 - **Look at the picture before the text.** The storm looked like a dome (2.6 in across), not the 1.3 in the header said. Measure the render, then correct the words.
 
+## Earth V23: launches, deployment, mountain ranges (2026-11-02)
+
+- **A closed loop cannot show a one-way event.** A satellite that is released and stays in orbit has no way back to its start, so the loop has to hide it (it drops into the planet and is hoisted back). Say so in the description, and ask Jimmy when the story can't close.
+- **Rocket paths should follow the ground normal.** The old launches moved along an axis, which misses the real sites. A path of points along the normal keeps the rocket on its line on any site.
+- **A profile is the fastest way to stage a launch.** Holding on the pad, climbing, and returning are one profile over the loop; the length of each leg comes from the polyline between marks.
+- **Check the splash target against the land mask.** Both sea targets were tested before use.
+- **Remove what the regex does not match.** A regex for the satellite bodies missed the new ones; checking the keys by name is simpler.
+- **A stash can conflict with a moved main.** Resolve the generated bundle by rebuilding, and keep both sides of the scene list.
+
