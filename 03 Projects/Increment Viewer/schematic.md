@@ -32,6 +32,9 @@ window.REVIEW_DATA = {
 
 Images are read relative to `viewer.html`. The Living Room data reaches its renders with `../Living Room Scene/renders/`.
 
+## Scene drop-down
+`data/sets.js` lists every review for the drop-down in the header: `window.REVIEW_SETS = [{ id, label }]`. `id` is the data file name without `.js`; `label` is what the drop-down shows. Add one line per new data file. If `sets.js` is missing, the drop-down is hidden and `?set=` still works.
+
 ## Behaviour
 - Slideshow: all views are stacked in one box and cross-fade. Back, Play/Pause and Next buttons. Dots jump to a view. Arrow keys work too. Auto-advance every 4 seconds.
 - Running log: every item in order, scrollable on its own. The active item is highlighted and kept in view. Clicking an item jumps to it.

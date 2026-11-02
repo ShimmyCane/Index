@@ -26,6 +26,13 @@
   header { padding: 14px 16px; background: var(--sun); border-bottom: 3px solid var(--ink); }
   header h1 { margin: 0; font-size: 1.3rem; }
   header p { margin: 4px 0 0; font-size: 0.95rem; }
+  .picker { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-weight: bold; flex-wrap: wrap; }
+  .picker select {
+    font: inherit; color: var(--ink); background: var(--card);
+    border: 3px solid var(--ink); border-radius: 14px;
+    min-height: 48px; padding: 0 12px; max-width: 100%; box-shadow: var(--shadow);
+  }
+  .picker select[hidden] { display: none; }
 
   .layout {
     display: grid;
@@ -113,6 +120,9 @@
 <header>
   <h1 id="title">Increment Viewer</h1>
   <p id="subtitle">Loading…</p>
+  <label class="picker">Scene
+    <select id="picker" aria-label="Choose a scene"></select>
+  </label>
 </header>
 
 <main class="layout">
@@ -293,13 +303,34 @@
     }
   }
 
-  var s = document.createElement('script');
-  s.src = 'data/' + set + '.js';
-  s.onload = function () { start(window.REVIEW_DATA); };
-  s.onerror = function () {
-    setText(el('subtitle'), 'Could not load data/' + set + '.js. Check the ?set= name.');
-  };
-  document.head.appendChild(s);
+  // Scene drop-down: the list comes from data/sets.js. If that file is missing, the drop-down stays hidden.
+  function buildPicker() {
+    var sel = el('picker');
+    var sets = window.REVIEW_SETS || [];
+    if (!sets.length) { sel.hidden = true; return; }
+    if (sets.every(function (x) { return x.id !== set; })) sets = sets.concat([{ id: set, label: set }]);
+    sets.forEach(function (x) {
+      var o = document.createElement('option');
+      o.value = x.id;
+      setText(o, x.label || x.id);
+      if (x.id === set) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.onchange = function () { location.search = '?set=' + encodeURIComponent(sel.value); };
+  }
+
+  function loadScript(src, onload, onerror) {
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = onload;
+    s.onerror = onerror;
+    document.head.appendChild(s);
+  }
+
+  loadScript('data/sets.js', buildPicker, function () { el('picker').hidden = true; });
+  loadScript('data/' + set + '.js',
+    function () { start(window.REVIEW_DATA); },
+    function () { setText(el('subtitle'), 'Could not load data/' + set + '.js. Check the ?set= name.'); });
 })();
 </script>
 </body>
