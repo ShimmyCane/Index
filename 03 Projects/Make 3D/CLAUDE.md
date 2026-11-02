@@ -13,7 +13,10 @@ How to run: open `index.html` in a browser (no server or build). Also works from
 - Tests: `node tests/test_core.js` (engine, plain Node).
 - Sample: the planter is generated. Edit the operation list in `tools/build_samples.js`, then run `node tools/build_samples.js`. Never hand-edit `model.json` or `js/samples.bundle.js`.
 - Browser check: `node tools/smoke.js <screenshotDir>` (headless Chromium via pre-installed Playwright; save screenshots outside the repo).
+- Cloud client test: `node tests/test_cloud.js` (fake Supabase, no network).
 - Units are inches. Files: `model.json` (replayed result), `history.json` (source of truth), `worlds/default-world.json` (rules).
+- Scenes: edit `tools/scenes.js`, then `node tools/build_samples.js`. Three samples: garden planter, outdoor table with parasol, kitchen.
+- Supabase (Architecture project): `m3d_scenes` (saved scenes, owner only). Reads Quick Detail's `sketch_details` where tags contain `make 3-D` (read only). SQL in `supabase/001_m3d_scenes.sql` (applied).
 
 Project rules:
 - Public repo. Sample models are synthetic. Real architectural details or client drawings go in `private/`.

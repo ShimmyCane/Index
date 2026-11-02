@@ -14,6 +14,7 @@ const url = 'file://' + path.join(__dirname, '..', 'index.html');
   const errors = [];
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
   page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
+  page.on('dialog', (d) => d.accept());
   await page.goto(url);
   await page.waitForFunction(() => document.querySelectorAll('#objectList li').length > 0);
   const count = await page.locator('#objectList li').count();
@@ -77,6 +78,21 @@ const url = 'file://' + path.join(__dirname, '..', 'index.html');
   await page.setViewportSize({ width: 820, height: 1180 });
   await page.waitForTimeout(300);
   if (shotDir) await page.screenshot({ path: path.join(shotDir, '5-ipad-portrait.png') });
+
+  // Library: built-in scenes, sign-in box (offline here), Quick Detail references note
+  await page.click('#libBtn');
+  console.log('library scenes listed:', await page.locator('#builtinList li').count(), '| sign-in box visible:', await page.isVisible('#signInBox'));
+  if (shotDir) await page.screenshot({ path: path.join(shotDir, '6-library.png') });
+  for (const [i, name] of [[1, 'outdoor table'], [2, 'kitchen']]) {
+    if (await page.isHidden('#libPanel')) await page.click('#libBtn');
+    await page.click(`#builtinList li >> nth=${i} >> button`);
+    await page.waitForTimeout(400);
+    console.log(`opened ${name}: ${await page.textContent('#modelTitle')} with ${await page.locator('#objectList li').count()} objects`);
+    if (shotDir) await page.screenshot({ path: path.join(shotDir, `7-${name.replace(/ /g, '-')}.png`) });
+  }
+  // back to the planter for the rest of the run
+  if (await page.isHidden('#libPanel')) await page.click('#libBtn');
+  await page.click('#builtinList li >> nth=0 >> button');
 
   console.log('console errors:', errors.length ? errors : 'none');
   await browser.close();

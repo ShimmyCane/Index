@@ -1,7 +1,7 @@
 # Make 3D — AI Brief
 
 **Updated:** 2026-11-01
-**Status:** MVP built (v0.1–v0.6 except the cloud copy and viewer outlines). Works from `index.html` (file://). Tests pass; headless browser run has no console errors. Not yet: GitHub Pages publish, real iPad check, cloud copy (needs Jimmy's OK on SQL).
+**Status:** MVP built (v0.1–v0.6, viewer outlines still open). Three input scenes: garden planter, outdoor table with parasol, kitchen. Library button. Cloud: `m3d_scenes` live in the Architecture project; sign-in by email code. Not yet: GitHub Pages publish, real iPad check, a real sign-in test by Jimmy, Quick Detail details tagged `make 3-D`.
 
 ## Goal
 
@@ -23,6 +23,12 @@ Four engines: input, geometry, rules, viewer. The viewer only reads; the engine 
 - `js/viewer/viewer.js`: Three.js r160 classic build (vendored), custom orbit and pick.
 - `js/ui/app.js`: the page. Every change goes through `applyOp`: check, record, redraw.
 - `tools/build_samples.js` generates the planter and `js/samples.bundle.js`. `tools/smoke.js` runs the page headless.
+
+## Library and cloud (2026-11-02)
+
+- Library (lower right): built-in scenes, cloud scenes after sign-in, Quick Detail `make 3-D` references (read only, future).
+- `m3d_scenes` (owner only, RLS). Quick Detail's `sketch_details` read by tag `make 3-D` (exact string).
+- Only input scenes for now. LLM and drawn scenes come later, linked in as JSON.
 
 ## Open
 

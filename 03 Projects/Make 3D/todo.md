@@ -18,16 +18,21 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - [x] **v0.1** Load JSON and render primitives. Three.js vendored, Z-up conversion, box, cylinder, sphere, cone, group. Test model: the garden planter.
 - [x] **v0.2** Interactive viewer, touch first: orbit and zoom (custom, no OrbitControls), Y-up toggle, ground plane with slider, solid / edges / wireframe, Quick Detail look. Tap to select.
 - [x] **v0.3** Add / modify / delete via form and paste box (operations). Reject flow: editor stays open, delete offenders, preview. Model name and description are operations too.
-- [~] **v0.4** Save / reload bundle, localStorage autosave, unknown fields kept: done. Cloud copy in the architecture database (`m3d_` tables, RLS, `table_index`): **not built, waiting for Jimmy's OK on the SQL.**
+- [x] **v0.4** Save / reload bundle, localStorage autosave, unknown fields kept. Cloud copy: `m3d_scenes` in the Architecture project (RLS, owner only, registered in `table_index`), applied 2026-11-02 after a rolled-back test. Library → Save this scene to the cloud. Sign-in by email code (owner account only).
 - [x] **v0.5** Rules engine: five rules, accept / warn / reject, overlap `mode` (allow by default, flag on model check), results panel. Outlines in the viewer: not done (the selection box only).
 - [x] **v0.6** History: replay, scrubber (back to any step, editing only at the latest step). Author and note per operation: author is recorded; the note field is not yet in the UI.
 - [x] Node tests (`node tests/test_core.js`, 19 groups) and the browser smoke run (`node tools/smoke.js`, no console errors) pass.
 - [ ] Publish on GitHub Pages and check online on iPad and iPhone. (Headless iPad-size screenshot checked; not on a real device.)
 - [ ] `/summarize-code` on `index.html`.
 
+## Scenes and library (round 3)
+- [x] Outdoor table with parasol: 3 ft × 7 ft top on a yellow metal frame, bonsai-style tree, parasol with three canopies (one on the pole, one on each side arm). Table length (7 ft) still to confirm (v0.3 Q6).
+- [x] Kitchen: fridge, counter and stove on the left; sink run with a triple sink and two faucets; dishwasher, drawers and a door on the right; upper cabinets with a sliding acrylic cup display.
+- [x] Library button (lower right, next to the gear): built-in input scenes, cloud scenes after sign-in, Quick Detail details tagged `make 3-D` (read only, future references).
+- [ ] Quick Detail: tag details `make 3-D` before they appear. None have it yet.
+- [ ] LLM-made scenes and drawn scenes (linked in as JSON input): future, not built.
+
 ## Future (flat list, round 2)
-- [ ] Outdoor table test model: 3 ft × 7 ft top on a yellow metal frame (Q-A to confirm the size), with a branching bonsai-style tree and a three-canopy umbrella.
-- [ ] Kitchen test model: fridge, counter, stove, corner sink (triple, two faucets), dishwasher, drawers and doors, upper cabinets with a sliding acrylic cup display.
 - [ ] Walk mode, section box, measure, PNG export (viewer).
 - [ ] Gizmo editing (drag handles).
 - [ ] Textures on/off toggle (the model never stores images).
@@ -36,6 +41,7 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - [ ] Blocks: link models; import a rebuilt component as a block.
 - [ ] Material list beyond colour.
 - [ ] Viewer: full orthographic views, hierarchy isolate, and the rest of schematic §6.
+- [ ] Editable cloud scenes: versions table (the `m3d_scenes` row is one scene; editing history is kept in its bundle).
 
 ## After MVP
 - [ ] **v0.7** Import glTF / OBJ / STL as `mesh` objects.
@@ -54,7 +60,6 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - Viewer: custom orbit controls, no OrbitControls, so the page works from file://.
 
 ## Not done yet
-- Cloud copy (v0.4): needs the SQL OK.
 - Outlines in the viewer for warnings and rejects (v0.5).
 - Note field per operation in the UI (v0.6).
 - GitHub Pages publish.
@@ -65,3 +70,4 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - 2026-11-01: round 2 answers recorded in convo v0.2; schematic §0 added; Quick Detail reviewed as the reference.
 - 2026-11-01: round 2 inline answers recorded in v0.2; convo v0.3 opened with origin, units and table-length questions.
 - 2026-11-01: MVP built (v0.1–v0.6 except cloud copy and outlines): engine, viewer, UI, planter sample, 19 test groups, headless smoke run.
+- 2026-11-02: outdoor table and kitchen samples; Library button; cloud client (`m3d_scenes`, read-only `sketch_details` by tag); migration applied after a rolled-back test; 8 cloud test groups; smoke run covers the library.

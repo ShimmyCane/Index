@@ -28,3 +28,9 @@ Generic lessons from running a shared Supabase project for several small apps. P
 13. **Test a changed front end with a stand-in client that enforces the real schema.** Use the real app code and real rows, in a headless browser, with a fake client that rejects unknown tables and columns. It cannot test a real login, so say so.
 14. **Shared logins are a hidden dependency.** If a shared project has one auth user, two apps may sign in as the same person. Check the login before switching an app over.
 15. **Register what you create.** A function or table that the app uses but that is not registered will not show up in the unregistered check. Register it in the migration.
+
+## Added from Make 3D (2026-11-02)
+
+16. **The sandbox proxy may block the Supabase host.** A curl from the sandbox to `*.supabase.co` returned 403 at the proxy. Test RLS through `execute_sql` instead, switching `role` and the `request.jwt.claims` setting inside one statement that ends in a `raise exception 'RESULT: …'` so nothing persists. Confirm afterwards that the table does not exist.
+17. **Anon revoke has to be explicit.** `revoke all … from anon` in the same migration as the policy. Check `pg_class.relrowsecurity`, the policy count and the anon grants after applying.
+

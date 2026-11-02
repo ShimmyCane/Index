@@ -207,7 +207,8 @@ Axis conversion happens in one place (`viewer/axes.js`): model Z-up → Three.js
 - **Paste operations** *(Q16c)*: a JSON box accepts one operation or a list. Each one is checked, applied or rejected, and the results are shown. This is where an LLM's output plugs in.
 - **Reject flow** *(round 2, Q15)*: the editor stays open with the reasons listed. Delete one or more of the offending objects and re-apply, or preview the result without saving.
 - **Files** *(Q17)*: open or save a bundle (`model.json` + `history.json` + `world.json`, or one combined `.make3d.json`). Sample models load from `models/`. The last session autosaves to localStorage.
-- **Cloud** *(round 2, Q17, v0.4)*: a copy in the architecture database, tables `m3d_…`, registered in `table_index`, with row-level security on.
+- **Cloud** *(round 2, Q17, v0.4)*: `m3d_scenes` in the architecture database (one row per scene: bundle and replayed model), registered in `table_index`, owner only (RLS). Built 2026-11-02.
+- **Library** *(round 3)*: lower-right button. Lists input scenes (built in, and saved in the cloud). Lists Quick Detail details tagged `make 3-D` as read-only future references. Scenes from an LLM or from drawings come later, linked in as JSON input.
 - Drawing and component blocks are future (round 2, Q16 and Q14).
 
 ## 8. Page layout (draft)

@@ -110,7 +110,7 @@ h2 { font-size: 16px; margin: 0 0 8px; }
 
 /* bottom bar */
 .bottombar {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 8px 110px 8px 16px; border-top: var(--line);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 8px 210px 8px 16px; border-top: var(--line);
   background: var(--panel);
 }
 .history { display: flex; align-items: center; gap: 10px; flex: 1 1 320px; min-width: 0; }
@@ -118,6 +118,16 @@ h2 { font-size: 16px; margin: 0 0 8px; }
 #stepLabel { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .bottom-errors { flex-basis: 100%; background: var(--peach); border: var(--line); border-radius: 12px; padding: 8px 12px; }
 .bottom-errors .issues { margin-top: 6px; }
+
+/* library button, to the left of the gear */
+.libbtn {
+  position: fixed; right: 100px; bottom: 26px; height: 52px; padding: 0 18px; border-radius: 999px;
+  border: var(--line); background: var(--mint); box-shadow: var(--shadow); font: inherit; font-weight: 800; font-size: 16px;
+  color: var(--ink); cursor: pointer; z-index: 5;
+}
+#libPanel { right: 100px; }
+#libPanel h3 { font-size: 14px; margin: 14px 0 6px; }
+#libPanel .objects li button .kind { color: var(--muted); }
 
 /* gear */
 .gear {
@@ -130,6 +140,8 @@ h2 { font-size: 16px; margin: 0 0 8px; }
 }
 .drawer[hidden] { display: none; }
 .drawer h2 { font-size: 18px; }
+.drawer ul.objects { margin-bottom: 4px; }
+.drawer .objects li button { font-size: 15px; }
 
 /* narrow screens (iPad portrait, phone): the side panel sits above the view */
 @media (max-width: 860px) {

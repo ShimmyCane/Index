@@ -26,6 +26,11 @@
     showErrors: false,
     fit: true,
     viewer: null,
+    cloud: null,        // createCloud(...) or { available: false }
+    cloudEmail: '',
+    cloudRefs: [],      // Quick Detail details tagged make 3-D (read only)
+    cloudScenes: [],    // saved scenes in m3d_scenes
+    cloudNote: '',
   };
 
   // ---------- storage
@@ -147,7 +152,8 @@
 
     if (st.viewer) {
       st.viewer.setOptions({ up: st.up, display: st.display, ground: { on: st.groundOn, z: groundZ } });
-      st.viewer.setModel(model, { origin: info.empty ? [0, 0, 0] : info.origin, fullBox: full, fit: st.fit });
+      const azimuth = model.view && Number.isFinite(model.view.azimuth_deg) ? model.view.azimuth_deg : 34;
+      st.viewer.setModel(model, { origin: info.empty ? [0, 0, 0] : info.origin, fullBox: full, fit: st.fit, azimuth_deg: azimuth });
       st.viewer.setSelected(st.selected);
     }
     st.fit = false;
@@ -409,10 +415,139 @@
     render();
   }
 
+  // ---------- library (scenes, cloud, Quick Detail references)
+  function openScene(bundle, label) {
+    if (!confirm(`Open "${label}" and replace the current model?`)) return;
+    setState({ history: clone(bundle.history), world: clone(bundle.world || SAMPLES[SAMPLE_ID].world) });
+    setStatus(`Opened ${label}`, '');
+    $('libPanel').hidden = true; $('libBtn').setAttribute('aria-expanded', 'false');
+  }
+
+  function renderLibrary() {
+    const bl = $('builtinList');
+    bl.innerHTML = '';
+    Object.keys(SAMPLES).forEach((id) => {
+      const b = SAMPLES[id];
+      const li = document.createElement('li');
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = b.history.header.name || id;
+      const k = document.createElement('span'); k.className = 'kind'; k.textContent = `${b.model ? b.model.objects.length : b.history.operations.length} parts`;
+      btn.appendChild(k);
+      btn.addEventListener('click', () => openScene(b, b.history.header.name || id));
+      li.appendChild(btn); bl.appendChild(li);
+    });
+
+    const signedIn = !!st.cloudSession;
+    $('signInBox').hidden = signedIn;
+    $('signedBox').hidden = !signedIn;
+    $('cloudNote').textContent = st.cloudNote || (st.cloud && st.cloud.available
+      ? 'Sign in with the owner email to see saved scenes.'
+      : 'The cloud library is not available here.');
+    if (signedIn) $('cloudWho').textContent = st.cloudSession.user && st.cloudSession.user.email || 'owner';
+
+    const cl = $('cloudList');
+    cl.innerHTML = '';
+    if (signedIn && !st.cloudScenes.length) {
+      const li = document.createElement('li'); li.className = 'hint'; li.textContent = 'No saved scenes yet. Save this one above.'; cl.appendChild(li);
+    }
+    for (const row of st.cloudScenes) {
+      const li = document.createElement('li');
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = row.name;
+      const k = document.createElement('span'); k.className = 'kind'; k.textContent = `v${row.version}`;
+      btn.appendChild(k);
+      btn.addEventListener('click', () => openCloudScene(row));
+      li.appendChild(btn); cl.appendChild(li);
+    }
+
+    const rl = $('refList');
+    rl.innerHTML = '';
+    if (!signedIn) {
+      const li = document.createElement('li'); li.textContent = 'Sign in to see them.'; rl.appendChild(li);
+    } else if (!st.cloudRefs.length) {
+      const li = document.createElement('li'); li.textContent = 'None yet. In Quick Detail, add the tag "make 3-D" to a detail.'; rl.appendChild(li);
+    }
+    for (const d of st.cloudRefs) {
+      const li = document.createElement('li');
+      li.textContent = `${d.name} · ${d.scale || ''}`;
+      rl.appendChild(li);
+    }
+  }
+
+  async function openCloudScene(row) {
+    try {
+      const raw = await st.cloud.loadScene(row.model_id);
+      const { history, world } = M.readBundle(raw, clone(SAMPLES[SAMPLE_ID].world));
+      openScene({ history, world }, row.name);
+    } catch (e) { setStatus(`Could not open: ${e.message}`, 'bad'); }
+  }
+
+  async function cloudRefresh() {
+    if (!st.cloud || !st.cloud.available) { renderLibrary(); return; }
+    try {
+      st.cloudSession = await st.cloud.session();
+      st.cloudNote = '';
+      if (st.cloudSession) {
+        const [scenes, refs] = await Promise.all([st.cloud.listScenes(), st.cloud.listReferences()]);
+        st.cloudScenes = scenes; st.cloudRefs = refs;
+      } else { st.cloudScenes = []; st.cloudRefs = []; }
+    } catch (e) {
+      st.cloudNote = `Cloud: ${e.message}`;
+    }
+    renderLibrary();
+  }
+
+  async function sendCode() {
+    const email = $('cloudEmail').value.trim();
+    if (!email) { st.cloudNote = 'Type the owner email first.'; renderLibrary(); return; }
+    try {
+      await st.cloud.sendCode(email);
+      st.cloudEmail = email;
+      st.cloudNote = 'Code sent. Type it below, or open the link in the email.';
+    } catch (e) { st.cloudNote = `Could not send: ${e.message}`; }
+    renderLibrary();
+  }
+
+  async function verifyCode() {
+    const token = $('cloudCode').value.trim();
+    if (!st.cloudEmail || !token) { st.cloudNote = 'Send a code first, then type it here.'; renderLibrary(); return; }
+    try {
+      await st.cloud.verifyCode(st.cloudEmail, token);
+      st.cloudNote = '';
+      setStatus('Signed in', '');
+      await cloudRefresh();
+    } catch (e) { st.cloudNote = `Sign-in failed: ${e.message}`; renderLibrary(); }
+  }
+
+  async function signOutCloud() {
+    try { await st.cloud.signOut(); } catch (e) { /* ignore: the session is cleared locally below */ }
+    st.cloudSession = null; st.cloudScenes = []; st.cloudRefs = [];
+    renderLibrary();
+  }
+
+  async function saveCloud() {
+    try {
+      const bundle = M.makeBundle({ history: st.history, world: st.world });
+      await st.cloud.saveScene(bundle);
+      setStatus(`Saved "${bundle.model.name}" to the cloud`, '');
+      st.cloudScenes = await st.cloud.listScenes();
+    } catch (e) { st.cloudNote = `Could not save: ${e.message}`; }
+    renderLibrary();
+  }
+
+  function setupCloud() {
+    if (!window.supabase || !M.createCloud) { st.cloud = { available: false }; return; }
+    const redirectTo = /^https?:/.test(location.protocol) ? location.href.split('#')[0] : undefined;
+    st.cloud = M.createCloud(window.supabase, undefined, { redirectTo });
+  }
+
   // ---------- events
   function bind() {
     $('gearBtn').addEventListener('click', () => {
       const open = $('gearPanel').hidden;
+      $('libPanel').hidden = true; $('libBtn').setAttribute('aria-expanded', 'false');
       $('gearPanel').hidden = !open;
       $('gearBtn').setAttribute('aria-expanded', String(open));
     });
@@ -434,6 +569,19 @@
       $('gearPanel').hidden = true;
     });
     $('resetView').addEventListener('click', () => { st.fit = true; render(); });
+
+    $('libBtn').addEventListener('click', () => {
+      const open = $('libPanel').hidden;
+      $('gearPanel').hidden = true; $('gearBtn').setAttribute('aria-expanded', 'false');
+      $('libPanel').hidden = !open;
+      $('libBtn').setAttribute('aria-expanded', String(open));
+      if (open) { renderLibrary(); cloudRefresh(); }
+    });
+    $('closeLib').addEventListener('click', () => { $('libPanel').hidden = true; $('libBtn').setAttribute('aria-expanded', 'false'); });
+    $('sendCode').addEventListener('click', sendCode);
+    $('verifyCode').addEventListener('click', verifyCode);
+    $('signOutBtn').addEventListener('click', signOutCloud);
+    $('saveCloud').addEventListener('click', saveCloud);
 
     $('scrub').addEventListener('input', (e) => { st.cursor = Number(e.target.value); st.preview = null; st.rejected = null; render(); });
     $('latestBtn').addEventListener('click', () => { st.cursor = st.history.operations.length; render(); });
@@ -482,8 +630,11 @@
     buildTypeControls();
     fillSamples();
     bind();
+    setupCloud();
     render();
     save();
+    renderLibrary();
+    cloudRefresh();
     window.addEventListener('resize', () => st.viewer.resize());
   }
   // The script sits at the end of <body>, so the DOM is ready when it runs.
