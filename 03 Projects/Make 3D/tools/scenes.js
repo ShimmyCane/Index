@@ -318,4 +318,6 @@ KITCHEN.defs = KITCHEN.defs.map(([k, d]) => [k, { ...d, position: [240 - d.posit
 const { LIVING_ROOM } = require('./living_room.js');
 const { KITCHEN_MOCKUP } = require('./kitchen_mockup.js');
 
-module.exports = { WORLD_ID, SCENES: [PLANTER, TABLE, OUTDOOR_V2, KITCHEN, ...LIVING_ROOM, ...KITCHEN_MOCKUP] };
+const { HONDA_CRV } = require('./honda_crv.js');
+
+module.exports = { WORLD_ID, SCENES: [PLANTER, TABLE, OUTDOOR_V2, KITCHEN, ...LIVING_ROOM, ...KITCHEN_MOCKUP, ...HONDA_CRV] };
