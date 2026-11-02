@@ -14,6 +14,7 @@
     key: 'sb_publishable_kncKodoYJZ6ByexwWM_TtQ_OpW68M5f',
     tag: 'make 3-D',                 // the Quick Detail tag that marks a detail for Make 3D
     scenesTable: 'm3d_scenes',
+    logTable: 'm3d_scene_log',
     detailsTable: 'sketch_details',
   };
 
@@ -22,6 +23,27 @@
     if (/Failed to fetch|NetworkError|network/i.test(msg)) return 'No connection to the database. Try again when you are online.';
     if (/JWT|expired|not authenticated|permission/i.test(msg)) return 'Please sign in again.';
     return msg;
+  }
+
+  // Scene log rows from the built-in samples (window.M3D_SAMPLES in the browser). Pure, so tests can run it.
+  // Scene family and label come from the id: living-room-v2-5 -> living-room, V2.5.
+  function logRowsFromSamples(samples) {
+    return Object.keys(samples || {}).sort().map((id) => {
+      const b = samples[id];
+      const m = id.match(/^(.*)-v(\d+)(?:-(\d+))?$/);
+      const scene = m ? m[1] : id;
+      const label = !m ? '' : m[3] ? `V${m[2]}.${m[3]}` : `V${m[2].padStart(2, '0')}`;
+      const model = b.model || {};
+      const history = b.history || {};
+      return {
+        model_id: id, scene, label,
+        name: model.name || id,
+        description: model.description || '',
+        note: (history.header && history.header.note) || '',
+        version: model.version || (history.operations || []).length,
+        history, world: b.world || {}, model,
+      };
+    });
   }
 
   // lib: the supabase-js module (window.supabase in the browser). Pass a fake in tests.
@@ -78,6 +100,13 @@
       },
 
       // Read only. Quick Detail details tagged for Make 3D. Deleted details are left out.
+      // Upserts scene log rows by model_id (public.m3d_scene_log). Owner only, by the table's policy.
+      async saveSceneLog(rows) {
+        if (!rows.length) return 0;
+        ok(await client.from(cfg.logTable).upsert(rows, { onConflict: 'model_id' }));
+        return rows.length;
+      },
+
       async listReferences() {
         return ok(await client.from(cfg.detailsTable)
           .select('id, name, scale, tags, updated_at')
@@ -88,5 +117,5 @@
     };
   }
 
-  return { createCloud, CLOUD_CONFIG: CONFIG, cloudFriendly: friendly };
+  return { createCloud, logRowsFromSamples, CLOUD_CONFIG: CONFIG, cloudFriendly: friendly };
 });
