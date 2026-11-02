@@ -40,3 +40,35 @@ Four engines: input, geometry, rules, viewer. The viewer only reads; the engine 
 1. Jimmy answers convo v0.3 and checks the page on iPad.
 2. Publish to GitHub Pages once Jimmy agrees.
 3. Viewer outlines for warnings and rejects; per-operation note field; cloud copy.
+
+## Living room from a photo (2026-11-02)
+
+Jimmy gave a photo of a family living room and a rough description. Built in ten versions, each reviewed against the photo before the next (`03 Projects/Make 3D/tools/living_room.js`, one function `defsFor(v)`):
+
+| Version | Change after review |
+|---|---|
+| V01 | Blockout: room shell, bookcase, TV, plants, sofa, children's table and chairs as boxes |
+| V02 | Layout mirrored in x (the first render had the TV on the wrong side). Bookcase split into eight cubbies. Window glass |
+| V03 | Books in the cubbies, a basket in the bottom cubby. Door made thicker |
+| V04 | Chairs with four legs and backs. Chair 2 moved to the front of the table (chairs can only face along y). Sofa with back, arms and cushions |
+| V05 | Plants as leaf clusters instead of single balls |
+| V06 | Table: water bottle, dark box, two puzzle sheets. Two shoes on the rug |
+| V07 | White trim: window frames, baseboards, light switch |
+| V08 | Boxed puzzle on the bookcase. Camera kept; door checked with a zoom-out shot |
+| V09 | Door frame and round handle |
+| V10 | Objects grouped (room shell, windows, TV wall, plants, children's table, floor items). Layout unchanged |
+
+**Sizes:** visual estimates, scaled from the TV (about 56 in wide) and the bookcase (120 in, four cubes). Not measured. Room about 200 × 144 in, walls 96 in high.
+
+**Known limits:**
+- The right wall hides the door and light switch from the default camera. A zoom-out shot shows the room but not behind that wall. A "hide walls" toggle is needed in the viewer.
+- Chairs can only face along y, so the photo's chairs are placed to suit.
+- Sofa and plants are simplified. No textures.
+- All ten versions show in the Library as "Living room V01" to "V10".
+
+**Questions for Jimmy:**
+1. Are the room sizes close? Give the TV width, the bookcase length or the room size and I will rescale.
+2. Keep all ten versions in the Library, or only V10?
+3. Is the table and sofa placement right?
+
+**Privacy:** the photo is in `03 Projects/Make 3D/private/` (git-ignored) and is not committed. The committed model is approximate geometry with no personal details.

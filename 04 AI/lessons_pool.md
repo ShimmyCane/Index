@@ -127,3 +127,5 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 ## File-based pages and generated samples (Make 3D)
 - ES module imports don't load from `file://`. Use classic scripts and UMD builds so a double-click works. _(Make 3D)_
 - Generate sample files from one operation list and test that replaying the history equals the saved model. _(Make 3D)_
+- Mirror a layout once at the end when the first render comes out reversed (Z-up handedness: from the front, +x points left). _(Make 3D living room)_
+- Add a group before its children, or a rules engine rejects them. Rotation about one axis means a piece can only face along that axis. _(Make 3D living room)_
