@@ -8,6 +8,7 @@ const S = require(path.join(root, 'js/core/schema.js'));
 const G = require(path.join(root, 'js/core/geometry.js'));
 const O = require(path.join(root, 'js/core/origin.js'));
 const R = require(path.join(root, 'js/core/rules.js'));
+const CL = require(path.join(root, 'js/core/clash.js'));
 const IO = require(path.join(root, 'js/core/io.js'));
 const world = JSON.parse(fs.readFileSync(path.join(root, 'worlds/default-world.json'), 'utf8'));
 
@@ -209,27 +210,36 @@ t('rules: a non-numeric rotation_z is rejected', () => {
   assert.strictEqual(r.outcome, 'reject');
   assert.ok(r.issues.some((i) => /rotation_z/.test(i.message)));
 });
-t('samples: outdoor table V2 bonsai branches join end to end in 3-D', () => {
+t('samples: outdoor table V2 bonsai joins end to end in 3-D', () => {
   const saved = JSON.parse(fs.readFileSync(path.join(root, 'models/outdoor-table-v2/model.json'), 'utf8'));
   const byName = (name) => saved.objects.find((o) => o.name === name);
-  // the far end of an object, from its centre, along its own axis (rotated like the viewer and origin)
-  const end = (o) => {
-    const r = O.rotateVector([0, 0, o.dimensions[1] / 2], o.rotation_x, o.rotation_y, o.rotation_z);
-    return o.position.map((v, i) => v + r[i]);
-  };
-  const start = (o) => {
-    const r = O.rotateVector([0, 0, o.dimensions[1] / 2], o.rotation_x, o.rotation_y, o.rotation_z);
-    return o.position.map((v, i) => v - r[i]);
-  };
+  // the two ends of an object, along its own axis (rotated like the viewer and origin)
+  const axis = (o) => O.rotateVector([0, 0, o.dimensions[1] / 2], o.rotation_x, o.rotation_y, o.rotation_z);
+  const end = (o) => o.position.map((v, i) => v + axis(o)[i]);
+  const start = (o) => o.position.map((v, i) => v - axis(o)[i]);
   const near = (a, b) => a.every((v, i) => Math.abs(v - b[i]) < 0.05);
-  const trunk = byName('Trunk'), limb = byName('Main limb');
-  assert.ok(near(end(trunk), start(limb)), 'trunk end meets limb start');
-  assert.ok(near(start(trunk), [-150, 0, 24]), 'trunk starts at the top of the box');
-  const forks = saved.objects.filter((o) => /^Branch \d$/.test(o.name));
-  assert.strictEqual(forks.length, 3);
-  for (const f of forks) assert.ok(near(start(f), end(limb)), `${f.name} starts at the limb end`);
-  assert.strictEqual(saved.objects.filter((o) => /^Branch \d\.\d$/.test(o.name)).length, 6);
-  assert.strictEqual(saved.objects.filter((o) => /^Branch \d\.\d\.\d$/.test(o.name)).length, 12);
+  assert.ok(near(start(byName('Trunk 1')), [-150, 0, 24]), 'trunk starts at the top of the box');
+  for (const [a, b] of [['Trunk 1', 'Trunk 2'], ['Trunk 2', 'Trunk 3'], ['Trunk 3', 'Trunk 4'], ['Trunk 2', 'Main limb 1'], ['Main limb 1', 'Main limb 2'], ['Main limb 2', 'Main limb 3'], ['Main limb 1', 'Branch 1.1'], ['Main limb 2', 'Branch 2.1'], ['Main limb 3', 'Branch 3.1']]) {
+    assert.ok(near(start(byName(b)), end(byName(a))), `${b} starts where ${a} ends`);
+  }
+  assert.ok(byName('Dead branch (jin)'), 'a dead branch is there');
+});
+t('samples: outdoor table V2 bonsai has a leader above the crown and foliage on several sides', () => {
+  const saved = JSON.parse(fs.readFileSync(path.join(root, 'models/outdoor-table-v2/model.json'), 'utf8'));
+  const foliage = saved.objects.filter((o) => /^Foliage/.test(o.name) && o.type === 'sphere');
+  const apex = saved.objects.find((o) => o.name === 'Foliage apex');
+  const crownTop = Math.max(...foliage.filter((o) => !o.name.startsWith('Foliage apex')).map((o) => o.position[2] + o.dimensions[0]));
+  assert.ok(apex.position[2] > crownTop, 'the apex is the highest point');
+  const ys = foliage.map((o) => o.position[1]);
+  assert.ok(Math.min(...ys) < -5 && Math.max(...ys) > 5, 'foliage on both sides of the limb');
+});
+t('samples: outdoor table V2 has no clashes (parasol clear of the table, tree clear of canopy)', () => {
+  const saved = JSON.parse(fs.readFileSync(path.join(root, 'models/outdoor-table-v2/model.json'), 'utf8'));
+  assert.deepStrictEqual(CL.findClashes(saved), []);
+  // a pole through a plank must be caught (the check is not silent)
+  const mk = (name, type, dims, pos) => ({ uuid: name, name, type, dimensions: dims, position: pos, parent: null });
+  const demo = { objects: [mk('plank', 'box', [20, 20, 1.5], [0, 0, 10]), mk('pole', 'cylinder', [0.75, 30], [0, 0, 10])] };
+  assert.strictEqual(CL.findClashes(demo).length, 1);
 });
 
 console.log(`\n${n} test groups passed`);

@@ -33,7 +33,9 @@ Four engines: input, geometry, rules, viewer. The viewer only reads; the engine 
 ## Open
 
 - Object tags: a fixed set in `js/core/schema.js`. V2 is tagged; the other scenes are not yet.
-- Rotation is about X, Y and Z (Z up). The V2 bonsai branches are 3-D: forks turn about the limb, so they fan out sideways.
+- Rotation is about X, Y and Z (Z up). The V2 bonsai is 3-D: a slanting tapered trunk, one main limb arching up in steps, foliage pads on several sides, a leader above the crown.
+- Clash check: `js/core/clash.js` (tested; not in the UI). The V2 parasol now stands outside the table end.
+- Bonsai reach: the crown no longer reaches over the table. Open for Jimmy.
 
 - Confirm convo v0.3 Q1–Q6. Confirm rotation axis. Confirm history-as-truth is in place (done).
 - Cloud copy needs the SQL OK.

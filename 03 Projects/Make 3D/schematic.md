@@ -10,6 +10,7 @@
 - **MVP test model:** the garden planter only. The outdoor table and the kitchen are future test models.
 - **Position:** the origin is the centre of the **major bounding box** (the bulk of the elements). If most elements are much smaller than the full box, the origin is refined by volume weighting. Big features (a spire, a wing) extend the extent but don't move the origin. A ground plane (opaque, double-sided, green, slider height) clips the model so it sits.
 - **Up axis:** Z-up by default, with a Y-up toggle in settings.
+- **Clash check** *(round 4)*: `js/core/clash.js` samples each solid through its volume and reports pairs that pass into each other by more than 0.5 in. Parts of the same top-level group are not compared. Used in the tests; not yet shown in the UI.
 - **Rotation:** any part turns about all three model axes: `rotation_x`, `rotation_y`, `rotation_z`, in degrees. Order: X first, then Y, then Z. Z is up, so `rotation_z` spins a part on the ground. Missing means 0, and the form writes only non-zero angles.
 - **Each object** has a `description` as well as a `name`.
 - **Textures:** future. The model never stores images or image mapping.

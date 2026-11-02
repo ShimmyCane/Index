@@ -59,3 +59,9 @@ Also asked for: **object tags** that show a part's purpose. Built as a fixed set
 Notes for Jimmy:
 - The bonsai branches are now in 3-D (rotation about X, Y and Z, added after this round). The first build was flat, in one vertical plane; it has been rebuilt.
 - Tags are on the V2 scene only. The planter, V1 table and kitchen have none yet.
+
+## Follow-up: parasol and bonsai shape (2026-11-02)
+
+- **Parasol clear of the table.** The pole, base and canopy moved outside the far end (pole at x = 48 in), so the pole no longer goes through the table top. The clash check reports none.
+- **Bonsai shape.** The first 3-D build still read as a bare arm and a line of pads. Rebuilt as a bonsai: a thick trunk that tapers fast and leans toward the table; a leader that is the highest point; one main limb that arches up in steps (28°, 35°, 30°); branches off the limb on several sides, each ending in a foliage pad; a balance branch on the far side; a dead branch (jin) for age.
+- **Trade-off, for Jimmy to decide.** The crown no longer reaches over the table. A bonsai in a 2 ft box can't carry 8 ft of horizontal reach without looking like a bare arm. Options: keep this shape, or go for a windswept form (trunk swept low, crown on one side).
