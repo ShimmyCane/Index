@@ -66,4 +66,23 @@ t('every orbit in the true solar scene is scaled by square root of distance and 
   assert.strictEqual(o.e, T.ELEMENTS.jupiter.e);
 });
 
+t('V07 starts at Explorer 1 (1958-01-31) and Earth is at about 131 degrees then', () => {
+  const p = T.restPos(T.ELEMENTS.earth, T.START_V07);
+  const lon = (Math.atan2(p[1], p[0]) * 180 / Math.PI + 360) % 360;
+  assert.ok(Math.abs(lon - 131) < 3, `Earth longitude ${lon.toFixed(1)}`);
+  assert.strictEqual(T.START_V07, '1958-01-31');
+});
+t('Halley is at perihelion on 1986-02-09, at the expected distance', () => {
+  const o = T.cometOrbit(T.COMETS.halley, '1986-02-09');
+  near(o.M0_deg, 0, 1e-6);
+  near(Math.hypot(...M.orbitPosition(o, 0)), 120 * Math.sqrt(17.834) * (1 - 0.96714), 0.05);
+});
+t('V06 is unchanged: 2026 start, no comets; V07 adds the three comets', () => {
+  assert.strictEqual(T.SOLAR_TRUE.header.name, 'Solar System V06');
+  assert.strictEqual(T.SOLAR_TRUE.motion(() => 'x').timeline.start_date, '2026-11-02');
+  const v7 = T.SOLAR_TRUE_V07.motion((k) => k);
+  assert.strictEqual(v7.timeline.start_date, '1958-01-31');
+  assert.strictEqual(v7.motions.filter((m) => /^comet-/.test(m.id)).length, 3);
+});
+
 console.log(`\n${n} orbit tests passed`);

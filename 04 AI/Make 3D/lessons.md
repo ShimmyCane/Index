@@ -158,3 +158,10 @@ Jimmy's note on V06: too slow, too small, "too diagrammatic and not real enough 
 - Anything a planet's child must follow (a rocket on a pad, a storm on the Earth) must sit under the spinning body group, or it stays behind while the body turns.
 - The world file must cover the whole timeline, not only the rest pose: Pluto's aphelion reaches about 942 in, and its tilt about 300 in up.
 - Viewer tap targets: a button in the page is more reliable than a marker in 3-D space for "go back".
+
+## Shaders, zoom-linked time, framing, 1958 start (round 10)
+- Boxes of latitude and longitude make slabs; ellipses with soft edges and noise coasts look like land. Measure the covered share (the boxes covered 55% of the sphere; real land is about 29%) before judging a map by eye.
+- A header change to an old scene changes its history file but not its geometry. Framing and the new materials were added to all planet views; geometry is unchanged. Note this if a version's history is compared later.
+- A shader can only read what the header gives it: pass lists of numbers, not arrays of objects.
+- Tracker steps must follow the camera, not only the animation: check the drum with the camera zoomed in and out, and check the playback speed by counting seconds of timeline per real second.
+- Comets: take the mean anomaly from the perihelion time; from a longitude it is wrong for a body far from circular.
