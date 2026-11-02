@@ -129,3 +129,11 @@ Each scene version now lives as a row in `public.m3d_scene_log` (Architecture pr
 - JSON files in `models/` and `js/samples.bundle.js` are build output for the viewer. Rebuild them from `tools/scenes.js` and `tools/living_room*.js`.
 - Load or refresh: `node tools/push_scene_log.js` with the owner's session token (script header has the variables). `--dry-run` lists the 25 versions without network.
 - Open: the table is empty until the owner runs the loader.
+
+## Status and what is still needed (2026-11-02)
+
+- **Done:** V01 to V16 and V2.1 to V2.5 built, drawn and merged (#40, #41). Scene log table live, with the upload button in the app (#43, #45). Lessons consolidated in `04 AI/lessons_pool.md`.
+- **Needs Jimmy:** (1) check the room sizes (156 × 216 in, 14 in cubes, 96 in ceiling); (2) the TV position conflict between the photos (near unit in V2.2, far unit in V16); (3) sign in on the iPad and tap **Save all scenes to the log**, then confirm 25 rows appear.
+- **Not acted on yet:** the viewer "hide walls and ceiling" toggle (a viewer change); moving the owner's email out of the public migrations into a config row; the PR #44 loader, which the log button now makes optional.
+- **Further work is not queued.** Nothing else will be done until Jimmy answers the items above or asks for a change.
+
