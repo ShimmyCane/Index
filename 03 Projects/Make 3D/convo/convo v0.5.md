@@ -57,5 +57,5 @@ Jimmy answered the eight items from the chat summary, in order. Built as follows
 Also asked for: **object tags** that show a part's purpose. Built as a fixed set (`surface`, `frame`, `stand`, `shade`, `ballast`, `plant`, `container`), shown as chips in the objects panel and as a status line at the bottom, next to Check model.
 
 Notes for Jimmy:
-- The bonsai branches lean in the vertical plane only (rotation about Y is the only rotation the engine has). Branches can't point sideways toward or away from the viewer until rotation about X and Z exists (todo, future).
+- The bonsai branches are now in 3-D (rotation about X, Y and Z, added after this round). The first build was flat, in one vertical plane; it has been rebuilt.
 - Tags are on the V2 scene only. The planter, V1 table and kitchen have none yet.
