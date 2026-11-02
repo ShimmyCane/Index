@@ -32,3 +32,11 @@ Appended over time. Promote anything reusable to `04 AI/lessons_pool.md`.
 - Dimensions that look fine on paper can clash in 3-D (a pole through a table top). Run the clash check (`js/core/clash.js`) after every scene change.
 - "Sparse" in a user's description can be a complaint, not a spec. Re-read the user's sentence before building to it.
 - Shell: never run `cat > file` without input in a command that is not meant to read stdin; it hangs the shell.
+
+**Second look (V11 to V15, 2026-11-02)**
+
+- **New photos can change the layout, not just the details.** The second photo showed the room was longer and the TV wall was a side wall. Redrawing the room was faster and clearer than patching V01 to V10. Keep the first version reproducible and start a new file with its own coordinates.
+- **Pick the camera by where the room is open.** When the near end is open, the camera belongs there (azimuth 34° in this file), not outside the far wall.
+- **Ceilings hide rooms.** An opaque ceiling blocks the default view from above. Make it see-through (opacity 0.4) when a room is viewed from above.
+- **Rotation about Y only again.** Ceiling tiles that are angled in a photo become a straight grid here. Say so in the brief.
+- **Check the data when a close-up misses.** A zoomed camera can land on the wrong part of the room. Confirm the object positions in `model.json` instead of guessing from a screenshot.
