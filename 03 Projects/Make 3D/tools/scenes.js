@@ -87,34 +87,60 @@ const TABLE = {
 // Outdoor table V2 (convo v0.5): 7 ft x 3 ft white oak top on yellow painted 2 in angle legs, a rectangular
 // frame under the top, a centre beam and a low back bar. A folding red parasol with one large canopy at the far
 // end, on a square base that hides two sandbags. A bonsai in a 2 ft box on the ground, 8 ft from the table end,
-// with one main limb that forks three times and sparse leaves.
+// with one main limb that forks three times in 3-D and sparse leaves.
 const bonsaiBranches = () => {
-  // Branches grow in the vertical XZ plane (rotation about Y only). Angle is from vertical, toward +X.
+  // Real 3-D branching. Model axes, Z up. A branch is a cylinder along its own Z axis, turned by
+  // rotation_x then rotation_y (rotation_z stays 0) so that +Z points along its direction.
+  const vadd = (a, b) => a.map((v, i) => v + b[i]);
+  const vscale = (a, k) => a.map((v) => v * k);
+  const vnorm = (a) => { const l = Math.hypot(...a); return a.map((v) => v / l); };
+  const vcross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const toDeg = (r) => (r * 180) / Math.PI;
+  // angles that turn +Z onto dir (inverse of origin.rotateVector with rotation_z = 0)
+  const turnAngles = (dir) => ({
+    rotation_x: +toDeg(Math.asin(Math.max(-1, Math.min(1, -dir[1])))).toFixed(3),
+    rotation_y: +toDeg(Math.atan2(dir[0], dir[2])).toFixed(3),
+  });
+  // a new direction: pitch away from dir, then yaw around it (degrees)
+  const turn = (dir, pitch, yaw) => {
+    const ref = Math.abs(dir[2]) > 0.9 ? [1, 0, 0] : [0, 0, 1];
+    const u = vnorm(vcross(dir, ref));
+    const v = vcross(dir, u);
+    const p = (pitch * Math.PI) / 180, y = (yaw * Math.PI) / 180;
+    const side = vadd(vscale(u, Math.cos(y)), vscale(v, Math.sin(y)));
+    return vnorm(vadd(vscale(dir, Math.cos(p)), vscale(side, Math.sin(p))));
+  };
   const defs = [];
-  const at = (x, z, phi, len, rad, key, tags) => {
-    const r = (phi * Math.PI) / 180;
-    const mx = x + (Math.sin(r) * len) / 2, mz = z + (Math.cos(r) * len) / 2;
-    const label = key === 'b-trunk' ? 'Trunk' : key === 'b-limb' ? 'Main limb' : `Branch ${key.replace('b-fork-', '').replace(/-/g, '.')}`;
+  const branch = (start, dir, len, rad, key, label) => {
+    const mid = vadd(start, vscale(dir, len / 2));
     defs.push([key, { name: label, description: '', type: 'cylinder', dimensions: [rad, len],
-      position: [+mx.toFixed(2), 0, +mz.toFixed(2)], rotation_y: phi, material: 'trunk', parent: 'bonsai', tags }]);
-    return { x: x + Math.sin(r) * len, z: z + Math.cos(r) * len, phi };
+      position: mid.map((v) => +v.toFixed(2)), ...turnAngles(dir), material: 'trunk', parent: 'bonsai', tags: ['plant'] }]);
+    return vadd(start, vscale(dir, len));
   };
-  // trunk leans a little out of the box; one main limb; then forks of 3, 2 and 2 at each step
-  const trunk = at(-150, 24, 15, 26, 1.2, 'b-trunk', ['plant']);
-  const limb = at(trunk.x, trunk.z, 78, 70, 0.9, 'b-limb', ['plant']);
+  // trunk leans out of the box toward the table; one main limb; then forks of 3, 2 and 2
+  const trunkDir = vnorm([0.35, 0, 1]);
+  const trunkEnd = branch([-150, 0, 24], trunkDir, 26, 1.2, 'b-trunk', 'Trunk');
+  const limbDir = vnorm([1, 0.05, -0.1]);
+  const limbEnd = branch(trunkEnd, limbDir, 70, 0.9, 'b-limb', 'Main limb');
   const tips = [];
-  const grow = (node, key, depth, n, len, rad, spread) => {
-    const kids = [];
-    for (let i = 0; i < n; i++) kids.push(at(node.x, node.z, node.phi + spread[i], len, rad, `${key}-${i + 1}`, ['plant']));
+  // node: { p, d }. yaws spread the forks around the parent direction.
+  // names: "Branch 1", "Branch 1.2", "Branch 1.2.1" (position in the tree)
+  const grow = (node, prefix, depth, yaws, len, rad) => {
+    const kids = yaws.map((yaw, i) => {
+      const d = turn(node.d, 26, yaw);
+      const label = prefix ? `${prefix}.${i + 1}` : `Branch ${i + 1}`;
+      const p = branch(node.p, d, len, rad, `b-${label.replace('Branch ', '').replace(/\./g, '-')}`, label);
+      return { p, d, label };
+    });
     if (depth === 0) { tips.push(...kids); return; }
-    kids.forEach((k, i) => grow(k, `${key}-${i + 1}`, depth - 1, 2, len * 0.72, rad * 0.7, [-18, 18]));
+    kids.forEach((k) => grow({ p: k.p, d: k.d }, k.label, depth - 1, [-40, 40], len * 0.72, rad * 0.7));
   };
-  grow(limb, 'b-fork', 2, 3, 28, 0.7, [-12, 0, 12]);
+  grow({ p: limbEnd, d: limbDir }, '', 2, [-130, -90, -50], 34, 0.7);
   // sparse leaves: small pads on six of the twelve tips
   [0, 2, 5, 7, 9, 11].forEach((i, n) => {
-    const t = tips[i];
+    const t = tips[i].p;
     defs.push([`b-leaf-${n + 1}`, { name: `Leaf pad ${n + 1}`, description: '', type: 'sphere', dimensions: [2.6],
-      position: [+t.x.toFixed(2), 0, +t.z.toFixed(2)], material: 'leaf', parent: 'bonsai', tags: ['plant'] }]);
+      position: t.map((v) => +v.toFixed(2)), material: 'leaf', parent: 'bonsai', tags: ['plant'] }]);
   });
   return defs;
 };

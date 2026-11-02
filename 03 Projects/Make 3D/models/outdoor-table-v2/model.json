@@ -486,7 +486,7 @@
     },
     {
       "description": "",
-      "rotation_y": 15,
+      "rotation_y": 19.29,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
@@ -501,14 +501,14 @@
         26
       ],
       "position": [
-        -146.64,
+        -145.71,
         0,
-        36.56
+        36.27
       ]
     },
     {
       "description": "",
-      "rotation_y": 78,
+      "rotation_y": 95.711,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
@@ -523,472 +523,494 @@
         70
       ],
       "position": [
-        -109.04,
-        0,
-        56.39
-      ]
+        -106.63,
+        1.74,
+        45.06
+      ],
+      "rotation_x": -2.848
     },
     {
       "description": "",
-      "rotation_y": 66,
+      "rotation_y": 74.981,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-1",
+      "uuid": "outdoor-table-v2-b-1",
       "name": "Branch 1",
       "type": "cylinder",
       "dimensions": [
         0.7,
-        28
+        34
       ],
       "position": [
-        -62.01,
-        0,
-        69.36
-      ]
+        -56.33,
+        9.05,
+        45.75
+      ],
+      "rotation_x": -19.133
     },
     {
       "description": "",
-      "rotation_y": 78,
+      "rotation_y": 69.68,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-2",
+      "uuid": "outdoor-table-v2-b-2",
       "name": "Branch 2",
       "type": "cylinder",
       "dimensions": [
         0.7,
-        28
+        34
       ],
       "position": [
-        -61.11,
-        0,
-        66.58
-      ]
+        -55.92,
+        4.27,
+        47.48
+      ],
+      "rotation_x": -2.685
     },
     {
       "description": "",
-      "rotation_y": 90,
+      "rotation_y": 75.411,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-3",
+      "uuid": "outdoor-table-v2-b-3",
       "name": "Branch 3",
       "type": "cylinder",
       "dimensions": [
         0.7,
-        28
+        34
       ],
       "position": [
-        -60.8,
-        0,
-        63.67
-      ]
+        -55.85,
+        -0.52,
+        45.75
+      ],
+      "rotation_x": 13.598
     },
     {
       "description": "",
-      "rotation_y": 48,
+      "rotation_y": 60.413,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-1-1",
+      "uuid": "outdoor-table-v2-b-1-1",
       "name": "Branch 1.1",
       "type": "cylinder",
       "dimensions": [
         0.48999999999999994,
-        20.16
+        24.48
       ],
       "position": [
-        -41.73,
-        0,
-        81.8
-      ]
+        -30.19,
+        14.07,
+        55.95
+      ],
+      "rotation_x": 2.566
     },
     {
       "description": "",
-      "rotation_y": 84,
+      "rotation_y": 93.047,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-1-2",
+      "uuid": "outdoor-table-v2-b-1-2",
       "name": "Branch 1.2",
       "type": "cylinder",
       "dimensions": [
         0.48999999999999994,
-        20.16
+        24.48
       ],
       "position": [
-        -39.2,
-        0,
-        76.11
-      ]
+        -28.6,
+        14.64,
+        49.26
+      ],
+      "rotation_x": -0.107
     },
     {
       "description": "",
-      "rotation_y": 30,
+      "rotation_y": 42.222,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-1-1-1",
+      "uuid": "outdoor-table-v2-b-1-1-1",
       "name": "Branch 1.1.1",
       "type": "cylinder",
       "dimensions": [
         0.3429999999999999,
-        14.5152
+        17.6256
       ],
       "position": [
-        -30.61,
-        0,
-        94.83
-      ]
+        -14.05,
+        10.28,
+        68.05
+      ],
+      "rotation_x": 21.621
     },
     {
       "description": "",
-      "rotation_y": 66,
+      "rotation_y": 77.611,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-1-1-2",
+      "uuid": "outdoor-table-v2-b-1-1-2",
       "name": "Branch 1.1.2",
       "type": "cylinder",
       "dimensions": [
         0.3429999999999999,
-        14.5152
+        17.6256
       ],
       "position": [
-        -27.61,
-        0,
-        91.5
-      ]
+        -11.6,
+        10.15,
+        63.73
+      ],
+      "rotation_x": 22.505
     },
     {
       "description": "",
-      "rotation_y": 66,
+      "rotation_y": 75.65,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-1-2-1",
+      "uuid": "outdoor-table-v2-b-1-2-1",
       "name": "Branch 1.2.1",
       "type": "cylinder",
       "dimensions": [
         0.3429999999999999,
-        14.5152
+        17.6256
       ],
       "position": [
-        -22.54,
-        0,
-        80.12
-      ]
+        -8.33,
+        11.72,
+        50.67
+      ],
+      "rotation_x": 19.518
     },
     {
       "description": "",
-      "rotation_y": 102,
+      "rotation_y": 110.44,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-1-2-2",
+      "uuid": "outdoor-table-v2-b-1-2-2",
       "name": "Branch 1.2.2",
       "type": "cylinder",
       "dimensions": [
         0.3429999999999999,
-        14.5152
+        17.6256
       ],
       "position": [
-        -22.07,
-        0,
-        75.65
-      ]
+        -8.59,
+        11.72,
+        45.71
+      ],
+      "rotation_x": 19.522
     },
     {
       "description": "",
-      "rotation_y": 60,
+      "rotation_y": 52.878,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-2-1",
+      "uuid": "outdoor-table-v2-b-2-1",
       "name": "Branch 2.1",
       "type": "cylinder",
       "dimensions": [
         0.48999999999999994,
-        20.16
+        24.48
       ],
       "position": [
-        -38.68,
-        0,
-        74.53
-      ]
+        -30.68,
+        1.42,
+        60.43
+      ],
+      "rotation_x": 17.348
     },
     {
       "description": "",
-      "rotation_y": 96,
+      "rotation_y": 87.157,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-2-2",
+      "uuid": "outdoor-table-v2-b-2-2",
       "name": "Branch 2.2",
       "type": "cylinder",
       "dimensions": [
         0.48999999999999994,
-        20.16
+        24.48
       ],
       "position": [
-        -37.39,
-        0,
-        68.44
-      ]
+        -28.29,
+        1.54,
+        53.96
+      ],
+      "rotation_x": 16.763
     },
     {
       "description": "",
-      "rotation_y": 42,
+      "rotation_y": 28.751,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-2-1-1",
+      "uuid": "outdoor-table-v2-b-2-1-1",
       "name": "Branch 2.1.1",
       "type": "cylinder",
       "dimensions": [
         0.3429999999999999,
-        14.5152
+        17.6256
       ],
       "position": [
-        -25.1,
-        0,
-        84.96
-      ]
+        -17.75,
+        -6.82,
+        74.07
+      ],
+      "rotation_x": 31.43
     },
     {
       "description": "",
-      "rotation_y": 78,
+      "rotation_y": 68.036,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-2-1-2",
+      "uuid": "outdoor-table-v2-b-2-1-2",
       "name": "Branch 2.1.2",
       "type": "cylinder",
       "dimensions": [
         0.3429999999999999,
-        14.5152
+        17.6256
       ],
       "position": [
-        -22.85,
-        0,
-        81.08
-      ]
+        -15.08,
+        -7.87,
+        70.01
+      ],
+      "rotation_x": 39.783
     },
     {
       "description": "",
-      "rotation_y": 78,
+      "rotation_y": 66.62,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-2-2-1",
+      "uuid": "outdoor-table-v2-b-2-2-1",
       "name": "Branch 2.2.1",
       "type": "cylinder",
       "dimensions": [
         0.3429999999999999,
-        14.5152
+        17.6256
       ],
       "position": [
-        -20.26,
-        0,
-        68.89
-      ]
+        -9.98,
+        -7.07,
+        57.4
+      ],
+      "rotation_x": 35.231
     },
     {
       "description": "",
-      "rotation_y": 114,
+      "rotation_y": 107.116,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-2-2-2",
+      "uuid": "outdoor-table-v2-b-2-2-2",
       "name": "Branch 2.2.2",
       "type": "cylinder",
       "dimensions": [
         0.3429999999999999,
-        14.5152
+        17.6256
       ],
       "position": [
-        -20.73,
-        0,
-        64.43
-      ]
+        -9.75,
+        -7.14,
+        52.44
+      ],
+      "rotation_x": 35.775
     },
     {
       "description": "",
-      "rotation_y": 72,
+      "rotation_y": 54.717,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-3-1",
+      "uuid": "outdoor-table-v2-b-3-1",
       "name": "Branch 3.1",
       "type": "cylinder",
       "dimensions": [
         0.48999999999999994,
-        20.16
+        24.48
       ],
       "position": [
-        -37.21,
-        0,
-        66.78
-      ]
+        -31.33,
+        -10.88,
+        55.95
+      ],
+      "rotation_x": 31.357
     },
     {
       "description": "",
-      "rotation_y": 108,
+      "rotation_y": 93.66,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-3-2",
+      "uuid": "outdoor-table-v2-b-3-2",
       "name": "Branch 3.2",
       "type": "cylinder",
       "dimensions": [
         0.48999999999999994,
-        20.16
+        24.48
       ],
       "position": [
-        -37.21,
-        0,
-        60.55
-      ]
+        -29.69,
+        -11.29,
+        49.26
+      ],
+      "rotation_x": 33.63
     },
     {
       "description": "",
-      "rotation_y": 54,
+      "rotation_y": 24.536,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-3-1-1",
+      "uuid": "outdoor-table-v2-b-3-1-1",
       "name": "Branch 3.1.1",
       "type": "cylinder",
       "dimensions": [
         0.3429999999999999,
-        14.5152
+        17.6256
       ],
       "position": [
-        -21.76,
-        0,
-        74.16
-      ]
+        -20.03,
+        -23.01,
+        68.05
+      ],
+      "rotation_x": 40.818
     },
     {
       "description": "",
-      "rotation_y": 90,
+      "rotation_y": 69.741,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-3-1-2",
+      "uuid": "outdoor-table-v2-b-3-1-2",
       "name": "Branch 3.1.2",
       "type": "cylinder",
       "dimensions": [
         0.3429999999999999,
-        14.5152
+        17.6256
       ],
       "position": [
-        -20.37,
-        0,
-        69.9
-      ]
+        -18.07,
+        -24.48,
+        63.73
+      ],
+      "rotation_x": 55.08
     },
     {
       "description": "",
-      "rotation_y": 90,
+      "rotation_y": 67.822,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-3-2-1",
+      "uuid": "outdoor-table-v2-b-3-2-1",
       "name": "Branch 3.2.1",
       "type": "cylinder",
       "dimensions": [
         0.3429999999999999,
-        14.5152
+        17.6256
       ],
       "position": [
-        -20.37,
-        0,
-        57.44
-      ]
+        -14.47,
+        -25,
+        50.67
+      ],
+      "rotation_x": 51.768
     },
     {
       "description": "",
-      "rotation_y": 126,
+      "rotation_y": 120.985,
       "parent": "outdoor-table-v2-bonsai",
       "material": "trunk",
       "tags": [
         "plant"
       ],
       "allowed_overlap": [],
-      "uuid": "outdoor-table-v2-b-fork-3-2-2",
+      "uuid": "outdoor-table-v2-b-3-2-2",
       "name": "Branch 3.2.2",
       "type": "cylinder",
       "dimensions": [
         0.3429999999999999,
-        14.5152
+        17.6256
       ],
       "position": [
-        -21.76,
-        0,
-        53.17
-      ]
+        -14.69,
+        -24.85,
+        45.71
+      ],
+      "rotation_x": 50.255
     },
     {
       "description": "",
@@ -1006,9 +1028,9 @@
         2.6
       ],
       "position": [
-        -26.98,
-        0,
-        101.12
+        -8.54,
+        7.03,
+        74.12
       ]
     },
     {
@@ -1027,9 +1049,9 @@
         2.6
       ],
       "position": [
-        -15.91,
-        0,
-        83.07
+        -0.28,
+        8.78,
+        52.72
       ]
     },
     {
@@ -1048,9 +1070,9 @@
         2.6
       ],
       "position": [
-        -15.76,
-        0,
-        82.59
+        -8.8,
+        -13.51,
+        72.55
       ]
     },
     {
@@ -1069,9 +1091,9 @@
         2.6
       ],
       "position": [
-        -14.1,
-        0,
-        61.48
+        -2.92,
+        -12.29,
+        50.33
       ]
     },
     {
@@ -1090,9 +1112,9 @@
         2.6
       ],
       "position": [
-        -13.11,
-        0,
-        69.9
+        -13.33,
+        -31.71,
+        65.48
       ]
     },
     {
@@ -1111,9 +1133,9 @@
         2.6
       ],
       "position": [
-        -15.88,
-        0,
-        48.91
+        -9.86,
+        -31.63,
+        42.8
       ]
     }
   ],

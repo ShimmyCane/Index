@@ -209,5 +209,27 @@ t('rules: a non-numeric rotation_z is rejected', () => {
   assert.strictEqual(r.outcome, 'reject');
   assert.ok(r.issues.some((i) => /rotation_z/.test(i.message)));
 });
+t('samples: outdoor table V2 bonsai branches join end to end in 3-D', () => {
+  const saved = JSON.parse(fs.readFileSync(path.join(root, 'models/outdoor-table-v2/model.json'), 'utf8'));
+  const byName = (name) => saved.objects.find((o) => o.name === name);
+  // the far end of an object, from its centre, along its own axis (rotated like the viewer and origin)
+  const end = (o) => {
+    const r = O.rotateVector([0, 0, o.dimensions[1] / 2], o.rotation_x, o.rotation_y, o.rotation_z);
+    return o.position.map((v, i) => v + r[i]);
+  };
+  const start = (o) => {
+    const r = O.rotateVector([0, 0, o.dimensions[1] / 2], o.rotation_x, o.rotation_y, o.rotation_z);
+    return o.position.map((v, i) => v - r[i]);
+  };
+  const near = (a, b) => a.every((v, i) => Math.abs(v - b[i]) < 0.05);
+  const trunk = byName('Trunk'), limb = byName('Main limb');
+  assert.ok(near(end(trunk), start(limb)), 'trunk end meets limb start');
+  assert.ok(near(start(trunk), [-150, 0, 24]), 'trunk starts at the top of the box');
+  const forks = saved.objects.filter((o) => /^Branch \d$/.test(o.name));
+  assert.strictEqual(forks.length, 3);
+  for (const f of forks) assert.ok(near(start(f), end(limb)), `${f.name} starts at the limb end`);
+  assert.strictEqual(saved.objects.filter((o) => /^Branch \d\.\d$/.test(o.name)).length, 6);
+  assert.strictEqual(saved.objects.filter((o) => /^Branch \d\.\d\.\d$/.test(o.name)).length, 12);
+});
 
 console.log(`\n${n} test groups passed`);
