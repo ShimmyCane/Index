@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Living Room Scene V1</title>
+<style>
+  :root { --ink: #2d2a32; --paper: #f7f1e6; }
+  html, body { margin: 0; background: var(--paper); }
+  svg { display: block; width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 2000 1500" role="img" aria-label="Living room scene, version 1">
+  <defs>
+    <filter id="tac" x="-5%" y="-5%" width="115%" height="120%">
+      <feDropShadow dx="8" dy="8" stdDeviation="0" flood-color="#2d2a32" flood-opacity="0.35"/>
+    </filter>
+    <pattern id="blind" width="20" height="16" patternUnits="userSpaceOnUse">
+      <rect width="20" height="16" fill="#c4c8b8"/>
+      <rect y="12" width="20" height="4" fill="#8f9584"/>
+    </pattern>
+  </defs>
+
+  <!-- WALL and FLOOR -->
+  <rect x="0" y="0" width="2000" height="1500" fill="#f7f1e6"/>
+  <rect x="0" y="1110" width="2000" height="390" fill="#e0ad76"/>
+  <g stroke="#c48e5c" stroke-width="3" fill="none">
+    <line x1="0" y1="1200" x2="2000" y2="1200"/>
+    <line x1="0" y1="1290" x2="2000" y2="1290"/>
+    <line x1="0" y1="1380" x2="2000" y2="1380"/>
+  </g>
+  <!-- laminate: long planks running across the room, with a few staggered joints -->
+  <g stroke="#c48e5c" stroke-width="3" fill="none">
+    <line x1="0" y1="1160" x2="2000" y2="1160" stroke-dasharray="180 40 90 60" stroke-opacity="0.55"/>
+    <line x1="0" y1="1245" x2="2000" y2="1245" stroke-dasharray="120 70 260 50" stroke-opacity="0.55"/>
+    <line x1="0" y1="1335" x2="2000" y2="1335" stroke-dasharray="300 60 150 40" stroke-opacity="0.55"/>
+    <line x1="0" y1="1425" x2="2000" y2="1425" stroke-dasharray="210 50 110 80" stroke-opacity="0.55"/>
+  </g>
+  <rect x="0" y="1095" width="1720" height="22" fill="#fffdf8" stroke="#2d2a32" stroke-width="4"/>
+
+  <!-- RIGHT WALL STRIP and DOOR -->
+  <rect x="1720" y="0" width="120" height="1500" fill="#f2ece0" stroke="#2d2a32" stroke-width="4"/>
+  <g filter="url(#tac)">
+    <rect x="1845" y="0" width="155" height="1420" fill="#a8704b" stroke="#2d2a32" stroke-width="5"/>
+  </g>
+  <rect x="1880" y="60" width="90" height="600" fill="none" stroke="#8a5a3a" stroke-width="4"/>
+  <circle cx="1870" cy="820" r="9" fill="#e8c86a" stroke="#2d2a32" stroke-width="3"/>
+  <rect x="1790" y="540" width="52" height="80" rx="6" fill="#ffffff" stroke="#2d2a32" stroke-width="3"/>
+
+  <!-- WINDOWS and BLINDS -->
+  <rect x="1320" y="185" width="535" height="395" fill="#fffdf7" stroke="#2d2a32" stroke-width="5"/>
+  <rect x="1338" y="203" width="499" height="359" fill="url(#blind)" stroke="#2d2a32" stroke-width="3"/>
+  <rect x="1000" y="190" width="215" height="330" fill="#fffdf7" stroke="#2d2a32" stroke-width="5"/>
+  <!-- ceiling line at the top of the back wall -->
+  <polygon points="1240,0 2000,0 2000,40 1260,58" fill="#efe9dc" stroke="#2d2a32" stroke-width="4"/>
+  <rect x="1016" y="206" width="183" height="298" fill="url(#blind)" stroke="#2d2a32" stroke-width="3"/>
+
+  <!-- TALL CORNER PLANT (stem + leaves, behind the pots) -->
+  <g id="corner-plant" stroke="#2d2a32" stroke-width="4">
+    <path d="M1196,790 C1200,600 1210,420 1200,200" fill="none" stroke="#5c8a4e" stroke-width="12"/>
+    <ellipse cx="1170" cy="260" rx="52" ry="26" transform="rotate(-35 1170 260)" fill="#6fae6a"/>
+    <ellipse cx="1240" cy="320" rx="58" ry="28" transform="rotate(25 1240 320)" fill="#4f8f5a"/>
+    <ellipse cx="1160" cy="430" rx="56" ry="27" transform="rotate(-20 1160 430)" fill="#6fae6a"/>
+    <ellipse cx="1245" cy="520" rx="60" ry="28" transform="rotate(30 1245 520)" fill="#4f8f5a"/>
+  </g>
+
+  <!-- BIG MONSTERA and SNAKE-LIKE PLANT (leaves drawn by script) -->
+  <g stroke="#4f7d46" stroke-width="8" fill="none" stroke-linecap="round">
+    <path d="M840,650 C820,560 800,470 800,380"/>
+    <path d="M900,650 C920,560 930,480 880,430"/>
+    <path d="M960,600 C980,540 990,470 1010,390"/>
+    <path d="M760,650 C740,600 720,560 700,520"/>
+  </g>
+  <g id="plant-leaves"></g>
+
+  <!-- YELLOW SHELF, LEFT UNIT (under the TV) -->
+  <g id="left-unit">
+    <rect x="-20" y="800" width="80" height="330" fill="#f6e27a" stroke="#2d2a32" stroke-width="5"/>
+    <rect x="0" y="740" width="760" height="420" fill="#f6e27a" stroke="#2d2a32" stroke-width="5"/>
+    <g fill="#e6cc55" stroke="#2d2a32" stroke-width="3">
+      <rect x="60" y="790" width="225" height="165"/>
+      <rect x="290" y="790" width="165" height="165"/>
+      <rect x="460" y="790" width="155" height="165"/>
+      <rect x="620" y="790" width="130" height="165"/>
+      <rect x="60" y="960" width="225" height="180"/>
+      <rect x="290" y="960" width="165" height="180"/>
+      <rect x="460" y="960" width="155" height="180"/>
+      <rect x="620" y="960" width="130" height="180"/>
+    </g>
+    <g id="books-left-top"></g>
+    <g id="books-left-bottom"></g>
+    <rect x="0" y="730" width="760" height="22" fill="#fbeb9a" stroke="#2d2a32" stroke-width="4"/>
+  </g>
+
+  <!-- TV and its black base -->
+  <g id="tv">
+    <rect x="60" y="225" width="610" height="380" rx="6" fill="#262c31" stroke="#2d2a32" stroke-width="5"/>
+    <rect x="80" y="245" width="570" height="340" fill="#2e353b" opacity="0.6"/>
+    <rect x="100" y="590" width="530" height="26" fill="#b9bec4" stroke="#2d2a32" stroke-width="3"/>
+    <rect x="100" y="616" width="580" height="116" fill="#1f2326" stroke="#2d2a32" stroke-width="4"/>
+  </g>
+
+  <!-- SMALL ITEMS on the left shelf top -->
+  <g stroke="#2d2a32" stroke-width="3">
+    <rect x="185" y="645" width="75" height="85" fill="#d8643f"/>
+    <rect x="548" y="620" width="100" height="110" fill="#9ccf8a"/>
+    <ellipse cx="420" cy="735" rx="80" ry="18" fill="#7fb6e0"/>
+    <circle cx="350" cy="716" r="22" fill="#ffb347"/>
+    <circle cx="540" cy="695" r="28" fill="#9fd3e8"/>
+    <rect x="50" y="660" width="50" height="100" rx="18" fill="#4aa59a"/>
+  </g>
+
+  <!-- YELLOW SHELF, RIGHT UNIT (under the plants) -->
+  <g id="right-unit">
+    <rect x="760" y="660" width="440" height="400" fill="#f6e27a" stroke="#2d2a32" stroke-width="5"/>
+    <g fill="#e6cc55" stroke="#2d2a32" stroke-width="3">
+      <rect x="770" y="700" width="130" height="170"/>
+      <rect x="910" y="700" width="130" height="170"/>
+      <rect x="1050" y="700" width="140" height="170"/>
+      <rect x="770" y="880" width="130" height="180"/>
+      <rect x="910" y="880" width="130" height="180"/>
+      <rect x="1050" y="880" width="140" height="180"/>
+    </g>
+    <g id="books-right"></g>
+    <rect x="760" y="650" width="440" height="22" fill="#fbeb9a" stroke="#2d2a32" stroke-width="4"/>
+  </g>
+
+  <!-- POTS and FANS on the right shelf -->
+  <g stroke="#2d2a32" stroke-width="4">
+    <rect x="1060" y="575" width="90" height="75" rx="6" fill="#efe9dc"/>
+    <path d="M1060,640 L1150,640 L1140,690 L1070,690 Z" fill="#efe9dc"/>
+    <rect x="950" y="612" width="85" height="60" rx="6" fill="#b97a4f"/>
+    <circle cx="740" cy="640" r="48" fill="#a8d8ea"/>
+    <circle cx="740" cy="640" r="20" fill="#ffffff"/>
+    <circle cx="925" cy="640" r="45" fill="#f4b6c8"/>
+    <circle cx="925" cy="640" r="18" fill="#ffffff"/>
+    <path d="M785,600 L885,600 L875,725 L795,725 Z" fill="#d9896a"/>
+  </g>
+
+  <!-- SOFA (grey futon) along the right side -->
+  <g id="sofa" filter="url(#tac)">
+    <rect x="1240" y="610" width="550" height="190" rx="20" fill="#6b727a" stroke="#2d2a32" stroke-width="5"/>
+    <rect x="1160" y="780" width="630" height="300" rx="20" fill="#7f868e" stroke="#2d2a32" stroke-width="5"/>
+    <path d="M1400,790 L1400,1070 M1640,790 L1640,1070" stroke="#2d2a32" stroke-width="4" fill="none" opacity="0.6"/>
+    <rect x="1160" y="1070" width="630" height="60" rx="8" fill="#e9e4da" stroke="#2d2a32" stroke-width="5"/>
+  </g>
+
+  <!-- CHAIRS, BACK ROW -->
+  <g stroke="#2d2a32" stroke-width="4">
+    <rect x="1255" y="1055" width="22" height="150" fill="#f8f6f0"/>
+    <rect x="1115" y="1055" width="22" height="150" fill="#f8f6f0"/>
+    <rect x="1120" y="900" width="150" height="110" rx="14" fill="#d6b07f"/>
+    <rect x="1100" y="1020" width="185" height="35" rx="8" fill="#e2bf8f"/>
+    <rect x="885" y="1095" width="22" height="170" fill="#f8f6f0"/>
+    <rect x="1080" y="1095" width="22" height="170" fill="#f8f6f0"/>
+    <rect x="880" y="945" width="130" height="120" rx="14" fill="#d6b07f"/>
+    <rect x="870" y="1055" width="230" height="40" rx="8" fill="#e2bf8f"/>
+    <rect x="780" y="1036" width="20" height="130" fill="#f8f6f0"/>
+    <rect x="870" y="1036" width="20" height="130" fill="#f8f6f0"/>
+    <rect x="775" y="890" width="100" height="110" rx="14" fill="#d6b07f"/>
+    <rect x="765" y="1000" width="130" height="36" rx="8" fill="#e2bf8f"/>
+    <!-- white frame rails under each seat, as on the real kids' chairs -->
+    <rect x="790" y="1088" width="100" height="14" rx="4" fill="#f8f6f0"/>
+    <rect x="890" y="1126" width="170" height="14" rx="4" fill="#f8f6f0"/>
+    <rect x="1130" y="1150" width="160" height="14" rx="4" fill="#f8f6f0"/>
+  </g>
+
+  <!-- TABLE: back legs, top, items, front legs -->
+  <g id="table" stroke="#2d2a32" stroke-width="4">
+    <rect x="1285" y="880" width="26" height="260" fill="#fbfaf7"/>
+    <rect x="790" y="880" width="26" height="260" fill="#fbfaf7"/>
+    <rect x="752" y="818" width="615" height="84" rx="12" fill="#f3e7cf"/>
+    <rect x="752" y="890" width="615" height="30" rx="8" fill="#d7b48a"/>
+    <path d="M760,750 L1065,740 L1070,855 L765,868 Z" fill="#2b2f36" rx="10"/>
+    <rect x="1080" y="725" width="75" height="175" rx="18" fill="#d7ecf7" opacity="0.9"/>
+    <rect x="1092" y="700" width="52" height="32" rx="6" fill="#2f7fc0"/>
+    <rect x="1080" y="830" width="75" height="60" fill="#6aa8dc"/>
+    <rect x="1100" y="800" width="50" height="150" rx="20" fill="#2c6e6a"/>
+    <path d="M905,905 L1055,880 L1065,925 L912,945 Z" fill="#8ec5e8"/>
+    <path d="M1190,905 L1320,890 L1330,932 L1200,945 Z" fill="#bfe0f0"/>
+    <rect x="1110" y="930" width="34" height="200" fill="#fbfaf7"/>
+    <rect x="800" y="930" width="30" height="200" fill="#fbfaf7"/>
+    <rect x="1110" y="1130" width="34" height="150" fill="#d6b07f"/>
+    <rect x="800" y="1130" width="30" height="150" fill="#d6b07f"/>
+  </g>
+
+  <!-- FRONT BLUE CHAIR -->
+  <g stroke="#2d2a32" stroke-width="4">
+    <rect x="1180" y="1232" width="30" height="80" fill="#f8f6f0"/>
+    <rect x="1322" y="1232" width="30" height="80" fill="#f8f6f0"/>
+    <rect x="1170" y="1060" width="190" height="135" rx="22" fill="#7db4de"/>
+    <rect x="1160" y="1190" width="210" height="42" rx="10" fill="#6aa3d2"/>
+  </g>
+
+  <!-- WASTE BIN, RUG, SHOES -->
+  <g stroke="#2d2a32" stroke-width="4">
+    <path d="M0,1120 L140,1120 L130,1300 L10,1300 Z" fill="#fdfdfd" stroke-linejoin="round"/>
+    <ellipse cx="70" cy="1120" rx="70" ry="14" fill="#f2f2f2"/>
+    <polygon points="1405,1255 2000,1215 2000,1500 1390,1500" fill="#a8c3b5"/>
+    <ellipse cx="1640" cy="1400" rx="90" ry="45" transform="rotate(-20 1640 1400)" fill="#4b3b30"/>
+    <ellipse cx="1760" cy="1380" rx="70" ry="40" transform="rotate(15 1760 1380)" fill="#5b4a3d"/>
+    <ellipse cx="1880" cy="1430" rx="80" ry="40" transform="rotate(-10 1880 1430)" fill="#4b3b30"/>
+  </g>
+</svg>
+
+<script>
+(function () {
+  var NS = 'http://www.w3.org/2000/svg';
+  var svg = document.querySelector('svg');
+
+  function el(name, attrs, parent) {
+    var e = document.createElementNS(NS, name);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    (parent || svg).appendChild(e);
+    return e;
+  }
+
+  // Deterministic pseudo-random so every reload draws the same books
+  function rnd(n, seed) {
+    var v = Math.sin(n * 12.9898 + seed * 78.233) * 43758.5453;
+    return v - Math.floor(v);
+  }
+
+  var BOOK_COLS = ['#e86f5c', '#7cc3a0', '#f2a65a', '#6fa8dc', '#c79bd6', '#f7d46b', '#e9b1b8', '#5b8a72'];
+
+  // Stand a row of book spines in a cubby: x,y = top-left, w,h = inside size
+  function books(layerId, x, y, w, h, seed) {
+    var layer = document.getElementById(layerId);
+    var cx = x + 8, i = 0;
+    while (true) {
+      var bw = 14 + Math.floor(rnd(i, seed) * 16);
+      if (cx + bw > x + w - 6) break;
+      var bh = h * (0.5 + rnd(i + 50, seed) * 0.4);
+      var col = BOOK_COLS[Math.floor(rnd(i + 99, seed) * BOOK_COLS.length)];
+      el('rect', { x: cx, y: y + h - bh, width: bw, height: bh, fill: col,
+                   stroke: '#2d2a32', 'stroke-width': 2.5 }, layer);
+      cx += bw + 2;
+      i++;
+    }
+  }
+
+  // Books on the left unit (top row y 790-955, bottom row y 960-1140)
+  books('books-left-top', 60, 790, 225, 165, 1);
+  books('books-left-top', 290, 790, 165, 165, 2);
+  books('books-left-top', 460, 790, 155, 165, 3);
+  books('books-left-top', 620, 790, 130, 165, 4);
+  books('books-left-bottom', 60, 960, 225, 180, 5);
+  books('books-left-bottom', 460, 960, 155, 180, 6);
+  books('books-left-bottom', 620, 960, 130, 180, 7);
+
+  // Basket in the bottom-middle cubby
+  el('rect', { x: 300, y: 1000, width: 130, height: 90, rx: 8, fill: '#e8d7a8',
+               stroke: '#2d2a32', 'stroke-width': 3 });
+
+  // Books on the right unit (top row only; the table covers the rest)
+  books('books-right', 770, 700, 130, 170, 8);
+  books('books-right', 910, 700, 130, 170, 9);
+  books('books-right', 1050, 700, 140, 170, 10);
+
+  // Monstera-style leaves: [cx, cy, rx, ry, rotation, colour]
+  // Larger, fuller leaves, closer to the photo's heart-shaped monstera leaves
+  var leaves = [
+    [720, 470, 80, 135, -50, '#4f8f5a'],
+    [790, 370, 95, 150, -12, '#6fae6a'],
+    [880, 440, 92, 140, 22, '#4f8f5a'],
+    [965, 520, 80, 120, 48, '#6fae6a'],
+    [1015, 400, 70, 115, 60, '#4f8f5a'],
+    [840, 300, 70, 110, -30, '#6fae6a'],
+    [690, 360, 60, 95, -70, '#6fae6a']
+  ];
+  var layer = document.getElementById('plant-leaves');
+  leaves.forEach(function (l) {
+    el('ellipse', { cx: l[0], cy: l[1], rx: l[2], ry: l[3],
+                    transform: 'rotate(' + l[4] + ' ' + l[0] + ' ' + l[1] + ')',
+                    fill: l[5], stroke: '#2d2a32', 'stroke-width': 4 }, layer);
+  });
+})();
+</script>
+</body>
+</html>
