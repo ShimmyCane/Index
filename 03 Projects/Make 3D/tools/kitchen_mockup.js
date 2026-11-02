@@ -159,6 +159,20 @@ function defsFor(v) {
     box('shell-yellow', 'Yellow wall panel', 'yellow panel above the cabinets, on the back wall', [92, W], [0, 0.5], [86, 96], 'yellow');
   }
 
+  // ---- V11: open shelf bay at the left end of the back run (first photo) ----------------
+  // The left door and its knob go. The left end becomes an open bay with a side, top, bottom and back, and two wood shelves.
+  if (v >= 11) {
+    const gone = ['back-bl', 'back-bl-door-1', 'back-bl-knob-1'];
+    for (let i = d.length - 1; i >= 0; i--) if (gone.includes(d[i][0])) d.splice(i, 1);
+    box('back-bl-side', 'Base side, back left', 'left end panel of the open bay', [0, 1], [0, 24], [0.5, 34.5], 'cabinet');
+    box('back-bl-run', 'Base cabinets, back left, right of the bay', 'closed cabinet right of the open bay', [29, 60], [0, 24], [0.5, 34.5], 'cabinet');
+    box('back-bl-bay-top', 'Bay top', 'top of the open bay, under the counter', [1, 29], [0, 24], [32.5, 34.5], 'cabinet');
+    box('back-bl-bay-bottom', 'Bay bottom', 'floor of the open bay', [1, 29], [0, 24], [0.5, 1.5], 'cabinet');
+    box('back-bl-bay-back', 'Bay back', 'closes the bay at the wall', [1, 29], [0, 1], [1.5, 32.5], 'cabinet');
+    box('back-bl-shelf-1', 'Open shelf 1', 'wood shelf in the bay', [1, 29], [1, 24], [12, 13], 'wood');
+    box('back-bl-shelf-2', 'Open shelf 2', 'wood shelf in the bay', [1, 29], [1, 24], [22, 23], 'wood');
+  }
+
   // ---- V10: final pass, grouped ------------------------------------------------------
   // Groups first (parents before children), then every other part gets its group by key prefix.
   if (v >= 10) {
@@ -186,6 +200,7 @@ const VERSION_NOTES = {
   8: 'V08: double sink bowls and two faucets on the sink run.',
   9: 'V09: ceiling light over the sink, and a yellow panel above the upper cabinets.',
   10: 'V10: final pass. Objects grouped into room shell, back run, sink run, return run, wood bar, upper cabinets and fixtures. Layout unchanged.',
+  11: 'V11: review of V10. The left door of the back run becomes an open bay with two wood shelves, as in the first photo. Layout unchanged.',
 };
 
 function sceneFor(v) {
@@ -205,7 +220,7 @@ function sceneFor(v) {
   };
 }
 
-// Ten increments, V01 to V10. Add one number per review round.
-const KITCHEN_MOCKUP = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((v) => sceneFor(v));
+// Eleven versions, V01 to V11. Add one number per review round.
+const KITCHEN_MOCKUP = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((v) => sceneFor(v));
 
 module.exports = { KITCHEN_MOCKUP, defsFor, sceneFor };

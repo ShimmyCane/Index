@@ -148,3 +148,9 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 7. **Rotation about one axis only** means pieces can only face along that axis. Lay the room out to suit. _(Make 3D)_
 8. **Log every version in a table, not files,** so notes and labels change without a merge. _(Make 3D scene log)_
 9. **Keep the photos private.** They go in `private/` and are never committed. _(Make 3D)_
+
+## Pull requests and merges (2026-11-02, from Make 3D)
+
+- **Check mergeability before every merge.** A PR can show `dirty` (conflict) or `unknown` (not yet recomputed) after a push. Read it again before merging. Fetch the base and merge it into the branch. Do not rebase a shared branch.
+- **Keep both sides of a documentation conflict.** When both branches add a new section to the same notes file, keep both sections, one after the other.
+- **Merge with the head SHA you checked** (`expectedHeadSha`). A draft must be marked ready for review before it can merge.
