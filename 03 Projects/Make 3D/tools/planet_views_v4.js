@@ -283,4 +283,4 @@ const EARTH_VIEWS_V11_20 = Array.from({ length: 10 }, (_, i) => earthSceneV4(11 
 // V21: the dot map of real coastlines (see earthV4Defs); the same moving parts as V20
 const EARTH_VIEWS_V21 = [earthSceneV4(21)];
 
-module.exports = { PLANET_VIEWS_V4_6, EARTH_VIEWS_V11_20, EARTH_VIEWS_V21, MATERIALS_V4 };
+module.exports = { PLANET_VIEWS_V4_6, EARTH_VIEWS_V11_20, EARTH_VIEWS_V21, MATERIALS_V4, OCEAN21, earthV4Defs };
