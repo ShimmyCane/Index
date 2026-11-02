@@ -171,7 +171,25 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 - **Group many movers.** Move a school or a crowd as one group with one motion and keep each member as a named child, so a thousand parts need only a few hundred motions.
 - **Seed random layout by key.** Seeding each random choice by the object's key keeps earlier increments identical when later ones add objects.
 
+## Small models and several views (Jimmy liked this, Make 3D, 2026-11-02)
+
+- **Make a small test model of one part first** (one of each animal, one room), look at it close up, fix it, then build the full scene from it.
+- **Look at every scene from several named views** (front, behind, side, inside) and at two times if it moves. Each view catches something the others hide.
+
 ## Making motion look real (Make 3D hawk V07, 2026-11-02)
 
 - If a reviewer calls an animation diagrammatic, replace chosen speeds with energy: gravity, drag and a thrust that is solved so the loop closes. Draw the invisible cause (rising air, wind) so the motion has a reason.
 - Scale gravity with the world. Cap roll and flapping near the ground, and test every vertex over the whole loop against the ground.
+
+## From the Coastal Habitat Aquarium (Make 3D, 2026-11-02)
+
+- **Fix the container before the contents** when a scene reads as a stage set. Define the shape once as a function and derive walls, rock, windows and bounds from it.
+- **Rejection-sample motion paths against the shape** (distance to walls, obstacles), seeded by key, then prove them in a test at many times.
+- **Rest spheres on the floor** instead of burying them, or parts hang below the ground.
+
+## From the habitat's V05 to V07 (Make 3D, 2026-11-02)
+
+- **Extruding a plan is still a box.** Add vertical variation: a lean that varies by angle, several floor levels, space underneath, bridges over and tunnels through.
+- **Hash the old increments before changing a generator** and compare after, to prove the old versions did not change.
+- **Test a group's spread, not only its centre path.** A school passed the centre check but its members crossed an obstacle.
+- **Keep a cutaway scene for review** when opaque parts hide the structure.

@@ -125,6 +125,13 @@ Jimmy's direction: the models so far were mostly polygon extrusions (boxes, cyli
 - **Cone points along Z.** To point a cone or cylinder along X, set rotation_y = 90 (then rotation_z for the heading); check one of each animal in a small test scene before building many.
 - **Tall walls hide the inside.** From the front, opaque gallery walls hid the benches and guests. Semi-transparent walls (opacity 0.5) keep them tappable and let the room show.
 
+## Small test models and views, then compose (2026-11-02, Jimmy liked this)
+
+- **Build the part on its own, look at it, then place it in the scene.** Before making dozens of fish, a scratch scene with one of each animal at two headings showed the shark tail floating off its body and the cone pointing the right way. Fix the part in the small model, then build the full scene.
+- **Look from several views, not one.** The same scene from the front, from behind and from the side caught different things: walls hiding the benches (front), rooms and levels (behind), the sun and the beams (side). Name each view and keep its camera moves (zoom, drag) in a scratch script.
+- **Check the motion at two times.** A render at t = 14 s and at t = 40 s shows things moved; a single frame cannot.
+- **Keep the scratch tools outside the repo** (the scratchpad folder), and only commit the renders you chose.
+
 ## Hawk V07: making a flight look real (2026-11-02)
 
 Jimmy's note on V06: too slow, too small, "too diagrammatic and not real enough (gravity, friction, air channel rising, bluff)". He wanted a faster, larger loop, several cycles, and more flapping when climbing.
@@ -158,6 +165,26 @@ Jimmy's note on V06: too slow, too small, "too diagrammatic and not real enough 
 - Anything a planet's child must follow (a rocket on a pad, a storm on the Earth) must sit under the spinning body group, or it stays behind while the body turns.
 - The world file must cover the whole timeline, not only the rest pose: Pluto's aphelion reaches about 942 in, and its tilt about 300 in up.
 - Viewer tap targets: a button in the page is more reliable than a marker in 3-D space for "go back".
+
+## Habitat, not a box (2026-11-02, Jimmy's note on the aquarium)
+
+- **When Jimmy says a scene is too "set-like", change the container, not the contents.** The fish, kelp and rooms were fine; the glass rectangle was what read as a display. A lobed outline, rock walls hiding the glass, a rolling seabed and zones (kelp, reef, meadow, sand) turned it into a place. Redo the shell first, then populate it.
+- **A polar outline gives you everything.** One function R(angle) gave the wall panels, the rock stations, the window arc, a depth-from-wall test, and a bounds check for swimmers. Define the shape once as a function and derive the rest.
+- **Rejection-sample swim loops against the shape.** Try seeded loops until every sample point is far enough from the wall and the tunnel; it always finds one, and the test then proves it at many times.
+- **Spheres on a floor must not sink below it.** Half-buried spheres hang under the model. Rest each sphere on the floor (centre at its radius) and make its radius the height you want, or the model shows pieces below the ground.
+- **Opaque rock, transparent water.** Semi-transparent boulders look like bubbles; opaque ones look like stone. Keep the front as the only glass.
+- **Copy the builders when you must not change the old versions.** The habitat copies the fish builder and species table instead of refactoring them, so Grand Ocean V01 to V06 stay byte-for-byte as reviewed.
+
+## Not an extrusion (2026-11-02, Jimmy's note on the habitat)
+
+- **A curved outline extruded straight up is still a box.** Add variation in height, not only in plan: a lean that changes with the angle (some stretches overhang), a floor with several levels, and space underneath. One lean function drove the rock, the rim and the glass tilt.
+- **Space underneath is a room.** Raising a plateau 16 ft made a cavern worth a gallery. Put a glass wall at the plateau edge and the cavern looks into the deep basin.
+- **Bridges go above the water; tunnels through it.** The bridge deck must be above the surface, and a tunnel through shallow water has to leave room above and below for the animals. Test both.
+- **Prove the old increments did not change.** Hash the output of V01 to V04 before the change and compare after. A later version changes parts by `if (v >= N)`; it never edits the old path.
+- **A test found what the render hid.** The first swimmer test failed on a school whose members crossed the plateau's vertical edge, because only the school's centre path had been checked. Check the spread of a group, not just its centre.
+- **Make a cutaway for review.** Opaque rock hides the structure. A scene that leaves the front half out shows the levels and the cavern; keep it as a separate scene, not a change to the model.
+- **Big scenes slow everything.** Every scene is in one bundle (now about 20 MB); renders time out. Time to split the bundle or load on demand.
+
 - A sketch stroke often does not join at its ends. Measure the gap and the turn at the seam before using it as a closed path; a closed spline wraps the seam but keeps the corner. Smooth the points round the loop (Gaussian, a few points) and check the heading across the seam against the rest of the curve.
 - A motion engine can read its rest heading from a coarser set of points than the stroke it came from. Turn the final points by the heading the engine reads from them, not the heading of the dense curve.
 - The cloud's tag filter should not depend on the database's case-sensitive `contains`. Match tags in code when the user asks for case-insensitive tags.

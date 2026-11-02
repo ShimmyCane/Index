@@ -254,6 +254,10 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 
 **Open for Jimmy:** the tunnel ribs are straight chords, not a smooth arch; rays, turtles and eels do not beat wings or flippers; fish are boxes and cones; a "hide walls" toggle would help view the gallery; tap-to-start and chained motions are still future.
 
+### Aquarium V06: two storeys and small rooms (2026-11-02)
+
+Jimmy asked for a tank at least two stories tall with multiple small rooms, some with a sunroom view in the low sun, and tunnels and windows where kids can see the fish swim and somewhat interact. V06 (1,178 objects) adds: 8 small rooms on two levels (Reef, Jelly, Shark, Kids' Den; Dive, Quiet, Sunroom, Lookout), kid-height round windows, 3 bubble domes into the tank, a crawl tube, a touch pool with 2 small rays, a low drifting sun with beams, stairs, and a second-floor gallery. The 28 ft tank is read as two 14 ft floors. Interpretation to confirm: "interact" is taken as bubble domes plus a touch pool; "tunnels where kids can see" as the crawl tube and low windows. Open: ramp, doors, room sizes against a child's height.
+
 ## Hawk V07: physical flight, larger loop (2026-11-02)
 
 - **Request (Jimmy, after V06):** fly much faster; a larger loop; multiple cycles; more flapping when climbing; less diagrammatic, more real: gravity, friction, a rising air channel, a bluff.
@@ -277,6 +281,27 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 - Planet views: V02 and V03 for the eight planets (textures, more moons). Earth V02 to V10 (continents through a second launch). Earth V10 loop is 480 s.
 - Back to the Solar System is a page button (`header.links`), not an object.
 - Open: positions past 2050 are extrapolated; the element values were entered from the standard table, to be checked against the JPL page; belt rocks are a fixed pattern, not real asteroids; fast spins alias at one lap per 240 s.
+
+## Coastal Habitat Aquarium (2026-11-02)
+
+Jimmy's note on the Grand Ocean Aquarium: it is a water tank, but "Disneyfied": about the experience of standing in it, not a volume where the plants and animals live. It should be organic and modelled. Asked for a few increments on that, then to import the marine assets and populate the new scene.
+
+- **New subject** (the old one stays as built): `tools/habitat_aquarium.js`, four increments, test `tests/test_habitat_aquarium.js`, review `?set=habitat_aquarium`, world `aquarium-world`.
+- **H01** curved, lobed outline (polar function, 40 angled glass panels), sand floor, S-shaped tunnel. **H02** rockwork (four tiers of boulders, ledges, spires, three caves, tide shelf), rolling seabed, front window with frames. **H03** kelp forest (24), eelgrass, reef, anemones, light shafts. **H04** all marine assets from `tools/aquarium.js` (species table and fish shapes; the builders are copied, deliberately, so the old versions stay untouched), 38 large animals, 11 schools, jellies, diver, critters, front gallery and tunnel guests.
+- **Object counts:** 254, 615, 908, 1,710.
+- **Swim loops** are rejection-sampled against the outline (distance to the wall), the S-tunnel and the floor, and tested at 90 times per loop.
+- **Not carried over:** the rooms, sunroom, kids' den, bubble domes and touch pool of Grand Ocean V06. They belonged to the glass box. Open for Jimmy: where should they go (pavilions round the lobed outline?).
+- **Open:** rock is made of spheres, so it looks pebbly; plain cones and slabs only help a little. Rays, turtles and eels still glide stiffly.
+
+### Coastal Habitat Aquarium V05 to V07 (2026-11-02)
+
+Jimmy: the tank is not a vertical extrusion; some portions should be shallow with space below, others have bridges over them or tunnels through them. Built as three more increments of the habitat scene (H01 to H04 unchanged; checked by hashing their output before and after).
+
+- **V05 Not an extrusion:** the wall leans by angle (`lean(θ)`, ±10% at the top, so some stretches overhang and others flare); the rock cliff, ledges and spires, the rim and the tilted front window (7°) follow it. Three floor levels: deep basin 0 ft; solid rock terrace 8 ft (SE); shelf plateau 16 ft (NW) with 12 ft of water over it and a cavern gallery beneath, looking into the deep basin through a curved glass wall. The flat sand, mounds and tide terraces are replaced by this terrain.
+- **V06 Bridges and tunnels:** a deck ring; an arched skybridge over the deep basin; the Kelp Walk from the west deck over the plateau up to the skybridge; a 32 ft clear tunnel through the plateau water; a spiral stair tube up through the shelf from the cavern; two guests cross the skybridge.
+- **V07 Repopulated:** plateau residents and schools, terrace kelp and coral, plateau critters, guests on the Kelp Walk. A **cutaway** scene (front half of rock, glass, rim and deck removed) is included for review only; its images are the V07 render.
+- **Counts:** 1,768, 1,988, 2,175 (cutaway 1,890). **Swim loops** now test the leaning wall, the floor and terrain, the plateau tunnel and the shelf edge (`tests/test_habitat_aquarium.js`, 12 tests).
+- **Open:** no way into the cavern or onto the plateau (stairs from the deck and the gallery are only markers); no tunnel through solid rock; the rooms from Grand Ocean V06 are still unplaced. `js/samples.bundle.js` is now about 20 MB, because every scene is in it; it should be split or loaded on demand.
 
 ## Robot loop, Parts dropdown, make3d tag (2026-11-02)
 
