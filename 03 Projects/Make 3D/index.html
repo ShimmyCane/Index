@@ -130,6 +130,41 @@
   </div>
 </footer>
 
+<button class="libbtn" id="libBtn" type="button" aria-expanded="false" aria-controls="libPanel">Library</button>
+
+<div class="drawer" id="libPanel" hidden>
+  <h2>Library</h2>
+
+  <h3>Scenes (input)</h3>
+  <ul class="objects" id="builtinList"></ul>
+
+  <h3>Saved in the cloud</h3>
+  <p class="hint" id="cloudNote">Sign in with the owner email to see saved scenes.</p>
+  <div id="signInBox" class="stack">
+    <label class="field">Email <input id="cloudEmail" type="email" autocomplete="email"></label>
+    <div class="btn-row"><button class="btn" id="sendCode" type="button">Send a code</button></div>
+    <label class="field">Code from the email <input id="cloudCode" type="text" inputmode="numeric" autocomplete="one-time-code"></label>
+    <div class="btn-row"><button class="btn primary" id="verifyCode" type="button">Sign in</button></div>
+  </div>
+  <div id="signedBox" hidden>
+    <p class="hint">Signed in as <span id="cloudWho"></span></p>
+    <div class="btn-row">
+      <button class="btn primary" id="saveCloud" type="button">Save this scene to the cloud</button>
+      <button class="btn ghost" id="signOutBtn" type="button">Sign out</button>
+    </div>
+    <ul class="objects" id="cloudList"></ul>
+  </div>
+
+  <h3>Quick Detail: tagged make 3-D</h3>
+  <p class="hint">Read only. These are future references: they are not loaded as scenes yet.</p>
+  <ul class="issues" id="refList"></ul>
+
+  <h3>Later</h3>
+  <p class="hint">Scenes made from words (an LLM) and drawn scenes, linked in by JSON input, will appear here. Not built yet.</p>
+
+  <button class="btn ghost" id="closeLib" type="button">Close</button>
+</div>
+
 <button class="gear" id="gearBtn" type="button" aria-label="Settings" aria-expanded="false" aria-controls="gearPanel">⚙️</button>
 
 <div class="drawer" id="gearPanel" hidden>
@@ -179,7 +214,7 @@
   <div class="btn-row">
     <button class="btn" id="loadSample" type="button">Load sample (replaces this model)</button>
   </div>
-  <p class="hint">Saved in this browser only. Cloud copy: not set up yet.</p>
+  <p class="hint">Saved in this browser. The cloud copy is in the Library.</p>
   <button class="btn ghost" id="closeGear" type="button">Close</button>
 </div>
 
@@ -190,6 +225,8 @@
 <script src="js/core/origin.js"></script>
 <script src="js/core/rules.js"></script>
 <script src="js/core/io.js"></script>
+<script src="vendor/supabase/supabase.js"></script>
+<script src="js/cloud/cloud.js"></script>
 <script src="js/viewer/viewer.js"></script>
 <script src="js/samples.bundle.js"></script>
 <script src="js/ui/app.js"></script>

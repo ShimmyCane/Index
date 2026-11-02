@@ -1,7 +1,7 @@
 {
   "model_id": "garden-planter",
   "name": "Garden planter",
-  "description": "A sunny trough planter with snap peas and lettuce, on a stone path by a short picket fence. Sample for v0.1.",
+  "description": "A sunny trough planter with snap peas and lettuce, on a stone path by a short picket fence.",
   "units": "in",
   "up": "z",
   "world": "default-world",
@@ -47,7 +47,7 @@
       "material": "clay",
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-pot",
+      "uuid": "garden-planter-pot",
       "name": "Trough",
       "type": "box",
       "dimensions": [
@@ -68,7 +68,7 @@
       "material": "soil",
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-soil",
+      "uuid": "garden-planter-soil",
       "name": "Soil",
       "type": "box",
       "dimensions": [
@@ -89,7 +89,7 @@
       "material": null,
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-peas",
+      "uuid": "garden-planter-peas",
       "name": "Snap peas",
       "type": "group",
       "dimensions": [],
@@ -106,7 +106,7 @@
       "material": null,
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-lettuce",
+      "uuid": "garden-planter-lettuce",
       "name": "Lettuce",
       "type": "group",
       "dimensions": [],
@@ -119,11 +119,11 @@
     {
       "description": "",
       "rotation_y": 0,
-      "parent": "pl-peas",
+      "parent": "garden-planter-peas",
       "material": "stem",
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-pea1",
+      "uuid": "garden-planter-pea1",
       "name": "Pea stem 1",
       "type": "cylinder",
       "dimensions": [
@@ -139,11 +139,11 @@
     {
       "description": "",
       "rotation_y": 0,
-      "parent": "pl-peas",
+      "parent": "garden-planter-peas",
       "material": "stem",
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-pea2",
+      "uuid": "garden-planter-pea2",
       "name": "Pea stem 2",
       "type": "cylinder",
       "dimensions": [
@@ -159,11 +159,11 @@
     {
       "description": "tip bends over",
       "rotation_y": 20,
-      "parent": "pl-peas",
+      "parent": "garden-planter-peas",
       "material": "stem",
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-pea3",
+      "uuid": "garden-planter-pea3",
       "name": "Pea stem 3",
       "type": "cylinder",
       "dimensions": [
@@ -179,11 +179,11 @@
     {
       "description": "",
       "rotation_y": 0,
-      "parent": "pl-peas",
+      "parent": "garden-planter-peas",
       "material": "pea",
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-pod1",
+      "uuid": "garden-planter-pod1",
       "name": "Pea pod 1",
       "type": "sphere",
       "dimensions": [
@@ -198,11 +198,11 @@
     {
       "description": "",
       "rotation_y": 0,
-      "parent": "pl-peas",
+      "parent": "garden-planter-peas",
       "material": "pea",
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-pod2",
+      "uuid": "garden-planter-pod2",
       "name": "Pea pod 2",
       "type": "sphere",
       "dimensions": [
@@ -217,11 +217,11 @@
     {
       "description": "",
       "rotation_y": 0,
-      "parent": "pl-peas",
+      "parent": "garden-planter-peas",
       "material": "pea",
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-pod3",
+      "uuid": "garden-planter-pod3",
       "name": "Pea pod 3",
       "type": "sphere",
       "dimensions": [
@@ -236,11 +236,11 @@
     {
       "description": "a small cone tip",
       "rotation_y": 0,
-      "parent": "pl-peas",
+      "parent": "garden-planter-peas",
       "material": "stem",
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-tip",
+      "uuid": "garden-planter-tip",
       "name": "Pea tendril",
       "type": "cone",
       "dimensions": [
@@ -256,11 +256,11 @@
     {
       "description": "",
       "rotation_y": 0,
-      "parent": "pl-lettuce",
+      "parent": "garden-planter-lettuce",
       "material": "lettuce",
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-head1",
+      "uuid": "garden-planter-head1",
       "name": "Lettuce head 1",
       "type": "sphere",
       "dimensions": [
@@ -275,11 +275,11 @@
     {
       "description": "",
       "rotation_y": 0,
-      "parent": "pl-lettuce",
+      "parent": "garden-planter-lettuce",
       "material": "lettuce",
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-head2",
+      "uuid": "garden-planter-head2",
       "name": "Lettuce head 2",
       "type": "sphere",
       "dimensions": [
@@ -294,11 +294,11 @@
     {
       "description": "",
       "rotation_y": 0,
-      "parent": "pl-lettuce",
+      "parent": "garden-planter-lettuce",
       "material": "lettuce",
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-head3",
+      "uuid": "garden-planter-head3",
       "name": "Lettuce head 3",
       "type": "sphere",
       "dimensions": [
@@ -317,7 +317,7 @@
       "material": "stone",
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-path",
+      "uuid": "garden-planter-path",
       "name": "Stone path",
       "type": "box",
       "dimensions": [
@@ -338,7 +338,7 @@
       "material": null,
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-fence",
+      "uuid": "garden-planter-fence",
       "name": "Picket fence",
       "type": "group",
       "dimensions": [],
@@ -351,11 +351,11 @@
     {
       "description": "",
       "rotation_y": 0,
-      "parent": "pl-fence",
+      "parent": "garden-planter-fence",
       "material": "wood",
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-picket1",
+      "uuid": "garden-planter-picket1",
       "name": "Picket 1",
       "type": "box",
       "dimensions": [
@@ -372,11 +372,11 @@
     {
       "description": "",
       "rotation_y": 0,
-      "parent": "pl-fence",
+      "parent": "garden-planter-fence",
       "material": "wood",
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-picket2",
+      "uuid": "garden-planter-picket2",
       "name": "Picket 2",
       "type": "box",
       "dimensions": [
@@ -393,11 +393,11 @@
     {
       "description": "",
       "rotation_y": 0,
-      "parent": "pl-fence",
+      "parent": "garden-planter-fence",
       "material": "wood",
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-picket3",
+      "uuid": "garden-planter-picket3",
       "name": "Picket 3",
       "type": "box",
       "dimensions": [
@@ -414,11 +414,11 @@
     {
       "description": "",
       "rotation_y": 0,
-      "parent": "pl-fence",
+      "parent": "garden-planter-fence",
       "material": "wood",
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-picket4",
+      "uuid": "garden-planter-picket4",
       "name": "Picket 4",
       "type": "box",
       "dimensions": [
@@ -435,11 +435,11 @@
     {
       "description": "",
       "rotation_y": 0,
-      "parent": "pl-fence",
+      "parent": "garden-planter-fence",
       "material": "wood",
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-picket5",
+      "uuid": "garden-planter-picket5",
       "name": "Picket 5",
       "type": "box",
       "dimensions": [
@@ -456,11 +456,11 @@
     {
       "description": "",
       "rotation_y": 0,
-      "parent": "pl-fence",
+      "parent": "garden-planter-fence",
       "material": "wood",
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-picket6",
+      "uuid": "garden-planter-picket6",
       "name": "Picket 6",
       "type": "box",
       "dimensions": [
@@ -481,7 +481,7 @@
       "material": "sun",
       "tags": [],
       "allowed_overlap": [],
-      "uuid": "pl-sun",
+      "uuid": "garden-planter-sun",
       "name": "Sun",
       "type": "sphere",
       "dimensions": [

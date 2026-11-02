@@ -101,7 +101,10 @@
       if (info && info.fullBox) {
         const f = info.fullBox;
         const ext = Math.max(f.max[0] - f.min[0], f.max[1] - f.min[1], f.max[2] - f.min[2], 24);
-        if (info.fit) fitTo(o, ext);
+        if (info.fit) {
+          if (info.azimuth_deg !== undefined) theta = (info.azimuth_deg * Math.PI) / 180;
+          fitTo(o, ext);
+        }
       }
     }
 
