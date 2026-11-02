@@ -58,6 +58,13 @@ Appended over time. Promote anything reusable to `04 AI/lessons_pool.md`.
 - **A draft PR cannot be merged.** Mark it ready for review first, then merge with the head SHA that was checked (`expectedHeadSha`), so a late push cannot slip in.
 - **`mergeable_state: dirty` means a conflict.** Merge the base into the branch, keep both sides when both added a section, and commit the merge. Do not rebase a branch that has a PR open.
 
+## Adventure Coaster Park (2026-11-02)
+
+- **Gate every version block.** The first build ran every increment in every version (V05 had the same 141 objects as V01). Check the object count per version after the build; it must climb.
+- **Round the height first, then the position.** A post centred at half of a rounded height dipped 0.0005 in below the ground and failed the bounds rule. Round the size, then place the centre at or above half of it.
+- **A park needs its own world bounds.** The default world is 480 in across; a park of 600 ft needs a world file with bounds sized to it. Keep the rules in the world file, not the geometry.
+- **Plan the capacity as a sum.** Capacity = seats × 3600 / dispatch interval; a ladder of rides with exact totals (250, 350, 450, 850, 1000) made the iterations easy to explain.
+
 ## Animation (round 7, 2026-11-02)
 
 - **Make every motion loop by construction.** One loop length per file, and each motion repeats a whole number of times per loop. Then the last frame equals the first, and a test can prove it.

@@ -9,7 +9,7 @@ const R = require(path.join(root, 'js/core/rules.js'));
 const S = require(path.join(root, 'js/core/schema.js'));
 const MO = require(path.join(root, 'js/core/motion.js'));
 const { SCENES } = require(path.join(__dirname, 'scenes.js'));
-const world = JSON.parse(fs.readFileSync(path.join(root, 'worlds/default-world.json'), 'utf8'));
+const worldFor = (id) => JSON.parse(fs.readFileSync(path.join(root, 'worlds', `${id}.json`), 'utf8'));
 const crypto = require('crypto');
 const { execFileSync } = require('child_process');
 
@@ -31,6 +31,7 @@ const projectOf = (scene) => scene.project || scene.header.name.replace(/\s+V\d+
 
 const bundles = {};
 for (const scene of SCENES) {
+  const world = worldFor(scene.header.world);
   const uuid = (key) => `${scene.id}-${key}`;
   const t0 = Date.parse('2026-11-01T10:00:00Z');
   const ops = [];
