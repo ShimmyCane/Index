@@ -169,3 +169,6 @@ Jimmy's note on V06: too slow, too small, "too diagrammatic and not real enough 
 - A shader can only read what the header gives it: pass lists of numbers, not arrays of objects.
 - Tracker steps must follow the camera, not only the animation: check the drum with the camera zoomed in and out, and check the playback speed by counting seconds of timeline per real second.
 - Comets: take the mean anomaly from the perihelion time; from a longitude it is wrong for a body far from circular.
+- A sheet cannot be cut, so holes in fabric are discs laid on the surface. Say so in the notes, not as holes.
+- Keep bends as keyed angles that start at 0, shifted by the first key. A sine with a phase offset breaks the rest pose at the start of the loop.
+- A "mean" check is needed when a motion's keys are offset: compare each key with the mean, not with the start.

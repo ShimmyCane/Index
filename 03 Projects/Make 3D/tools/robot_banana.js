@@ -178,4 +178,4 @@ function motionFor(uuid, path = PATH) {
 
 ROBOT_BANANA.motion = motionFor;
 
-module.exports = { ROBOT_BANANA, motionFor, defs, MATERIALS, PATH };
+module.exports = { ROBOT_BANANA, motionFor, defs, MATERIALS, PATH, HAND_R };
