@@ -40,3 +40,6 @@ Appended over time. Promote anything reusable to `04 AI/lessons_pool.md`.
 - **Ceilings hide rooms.** An opaque ceiling blocks the default view from above. Make it see-through (opacity 0.4) when a room is viewed from above.
 - **Rotation about Y only again.** Ceiling tiles that are angled in a photo become a straight grid here. Say so in the brief.
 - **Check the data when a close-up misses.** A zoomed camera can land on the wrong part of the room. Confirm the object positions in `model.json` instead of guessing from a screenshot.
+
+**Consolidated 2026-11-02:** general lessons from this file are in `04 AI/lessons_pool.md` (sections on Make 3D, Supabase and logs). Project detail stays here. The scene log is in Supabase (`m3d_scene_log`), so edit scene notes there.
+

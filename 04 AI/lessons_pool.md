@@ -129,3 +129,11 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 - Generate sample files from one operation list and test that replaying the history equals the saved model. _(Make 3D)_
 - Mirror a layout once at the end when the first render comes out reversed (Z-up handedness: from the front, +x points left). _(Make 3D living room)_
 - Add a group before its children, or a rules engine rejects them. Rotation about one axis means a piece can only face along that axis. _(Make 3D living room)_
+
+## Logs and databases (2026-11-02)
+- Keep the log of record in a table, not in files in a repo. Notes and labels change without a merge or a rebuild. Keep the files as build output. _(Make 3D scene log)_
+- Check the live project's registry convention first. The same workspace can use `table_index` in one project and `app_table_registry` in another. _(Architecture project)_
+- Mirror an existing owner-only policy exactly for a new table, and test it in a rolled-back `do` block that raises the counts. _(Make 3D scene log)_
+- Large JSON loads go through a script run with the owner's own session token, not through a chat tool. The publishable key and the owner token stay out of the repo. _(Make 3D scene log)_
+- Flag a sign-in email that appears in a public repo's migration rather than repeating it. _(Make 3D scene log)_
+

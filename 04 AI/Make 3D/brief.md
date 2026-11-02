@@ -121,3 +121,11 @@ Rebuilt against all three photos. Internal versions 21 to 25; scene ids `living-
 Drawings: `drawings/v2-1` and `drawings/v2-5`, each with a plan, four elevations and `sheet.svg`, which stitches them on one page.
 
 **Please check:** the TV's position (near unit in V2.2, far unit in V16) is the main conflict between the photos. Sizes are still estimates.
+
+## Scene log in Supabase (2026-11-02)
+
+Each scene version now lives as a row in `public.m3d_scene_log` (Architecture project), not only as JSON in the project folder. The row holds the history (source of truth), the rules it was checked against, the replayed model, a label (V16, V2.1) and a note. Edit a note or label with an UPDATE, with no merge and no rebuild.
+
+- JSON files in `models/` and `js/samples.bundle.js` are build output for the viewer. Rebuild them from `tools/scenes.js` and `tools/living_room*.js`.
+- Load or refresh: `node tools/push_scene_log.js` with the owner's session token (script header has the variables). `--dry-run` lists the 25 versions without network.
+- Open: the table is empty until the owner runs the loader.
