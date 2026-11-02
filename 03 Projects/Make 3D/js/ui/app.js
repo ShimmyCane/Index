@@ -576,6 +576,18 @@
     renderLibrary();
   }
 
+  async function saveLog() {
+    try {
+      const n = await st.cloud.saveSceneLog(cloudLogRows());
+      setStatus(`Saved ${n} scene versions to the log`, '');
+    } catch (e) { st.cloudNote = `Could not save the log: ${e.message}`; }
+    renderLibrary();
+  }
+
+  function cloudLogRows() {
+    return M.logRowsFromSamples(window.M3D_SAMPLES || {});
+  }
+
   function setupCloud() {
     if (!window.supabase || !M.createCloud) { st.cloud = { available: false }; return; }
     const redirectTo = /^https?:/.test(location.protocol) ? location.href.split('#')[0] : undefined;
@@ -621,6 +633,7 @@
     $('verifyCode').addEventListener('click', verifyCode);
     $('signOutBtn').addEventListener('click', signOutCloud);
     $('saveCloud').addEventListener('click', saveCloud);
+    $('saveLog').addEventListener('click', saveLog);
 
     $('scrub').addEventListener('input', (e) => { st.cursor = Number(e.target.value); st.preview = null; st.rejected = null; render(); });
     $('latestBtn').addEventListener('click', () => { st.cursor = st.history.operations.length; render(); });

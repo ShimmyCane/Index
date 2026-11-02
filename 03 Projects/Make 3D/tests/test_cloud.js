@@ -109,3 +109,17 @@ const t = async (name, fn) => { await fn(); n++; console.log('ok', name); };
 
   console.log(`\n${n} cloud test groups passed`);
 })().catch((e) => { console.error(e); process.exit(1); });
+
+// Scene log rows: one per sample, scene family and label from the id, note and counts from the history.
+{
+  const C = require('../js/cloud/cloud.js');
+  const rows = C.logRowsFromSamples({
+    'living-room-v2-5': { history: { header: { note: 'n' }, operations: [1, 2] }, world: { w: 1 }, model: { name: 'Living room V2.5', version: 2, model_id: 'living-room-v2-5' } },
+    'outdoor-table': { history: { operations: [] }, world: {}, model: { name: 'Table', model_id: 'outdoor-table' } },
+  });
+  const a = rows.find((r) => r.model_id === 'living-room-v2-5');
+  const b = rows.find((r) => r.model_id === 'outdoor-table');
+  if (!(a.scene === 'living-room' && a.label === 'V2.5' && a.note === 'n' && a.version === 2 && a.world.w === 1)) throw new Error('scene log row for V2.5 is wrong');
+  if (!(b.scene === 'outdoor-table' && b.label === '' && b.version === 0)) throw new Error('scene log row for a plain scene is wrong');
+  console.log('ok scene log rows');
+}
