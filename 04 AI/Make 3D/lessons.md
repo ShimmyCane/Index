@@ -113,3 +113,14 @@ Jimmy's direction: the models so far were mostly polygon extrusions (boxes, cyli
 - **Look from where the action is.** The default camera frames the whole motion, so the dive was tiny. `--follow=<part>` in `render_models.js` keeps the hawk centred in each frame.
 - **Shell habit.** Don't print every failing item from a loop; filter the output (one run printed 150 lines of grass).
 - **`render_versions.js` no longer finds older versions.** The library folds versions into one row per project, so the old click-by-name script can't open V01 to V05. The shareable link `index.html?model=<id>` works for any version, so use `render_models.js`.
+
+## Grand Ocean Aquarium (2026-11-02)
+
+- **Glass blocks taps.** The picker used the nearest hit, so a glass wall in front of a fish selected the glass. Picking now skips anything with opacity under 0.4. Make see-through surfaces below that and anything meant to be selected above it.
+- **Count objects early.** A fish with eyes, fins and a tail is 6 to 10 objects, so ten animals were already 100. Set the count per increment first, then choose how much detail each fish gets (detail level by version). Drop parts (a stalk, one eye) before dropping animals.
+- **Moving thousands of parts cheaply.** A school is one group with a path motion, and its fish are plain children (a body and a tail). Each fish stays named and tappable, but only one motion runs per school.
+- **First frame is the rest pose for every kind.** A swing starts mid-angle only at phase 0 or 0.5; a bob starts at 0 only at phase 0. Use phase 0 or 0.5 and vary the cycle count instead.
+- **Compute the heading from the same points you write.** A rest heading worked out from feet, then rounded, left a 0.06 in jump at the first frame; take it from the inch points.
+- **Seed every random choice by the object's key.** Then adding objects in a later increment never moves the ones in an earlier one.
+- **Cone points along Z.** To point a cone or cylinder along X, set rotation_y = 90 (then rotation_z for the heading); check one of each animal in a small test scene before building many.
+- **Tall walls hide the inside.** From the front, opaque gallery walls hid the benches and guests. Semi-transparent walls (opacity 0.5) keep them tappable and let the room show.

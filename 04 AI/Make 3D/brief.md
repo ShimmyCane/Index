@@ -234,3 +234,22 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 
 - **Checks run:** build (six scenes accept, 0 issues); `tests/test_mesh.js` 14 groups (closed meshes, FK bends, keys, rest pose, loop closes, frame is a rotation, lowest point 4.9 in, wings tuck from 49 in to about 3 in); `test_core`, `test_motion`, `test_ifc`, `test_cloud`, `smoke`, `anim_check` still pass; older scenes' generated files unchanged.
 - **Open for Jimmy:** (1) "looping around" was built as circling the meadow, then a stoop. Did you mean a vertical loop-the-loop? The flight frame can do one if the up-axis floor is lifted. (2) The talons skim 3.4 in above the mouse rather than touching it. (3) The loop is slow (about 43 in/s at the bottom) so the wing bends can be read. (4) IFC export skips lofts and sheets. (5) Check on iPad (play bar, pinch, speed).
+
+## Grand Ocean Aquarium (2026-11-02)
+
+- **Subject:** a large imagined public aquarium, in the style of the California Science Center kelp tank (Los Angeles): 100 x 60 ft tank, 28 ft deep, a 100 ft round acrylic walk-through tunnel along the floor, a front viewing gallery, entry lobby, exit hall and a pool deck. Sharks, large fish, schools of small fish, kelp and reef plants. Tap an animal to read its name and description.
+- **Mode:** research. Sources and estimates in `04 AI/Make 3D/research/aquarium.md` (CSC kelp tank about 188,000 gallons and a 24 ft tunnel; Georgia Aquarium 100 ft tunnel; sand tiger, zebra and bonnethead shark sizes). Our tank is larger than the CSC tank and its layout is an estimate. Manta ray wingspan sources disagree (26 versus 29 ft); not used.
+- **Build:** `03 Projects/Make 3D/tools/aquarium.js`, one `defsFor(v)` that returns the objects and the motions. World `worlds/aquarium-world.json` (bounds ±100 by ±75 ft). Test: `tests/test_aquarium.js`. Review: Increment Viewer `?set=aquarium`.
+
+| Version | Objects | Change |
+|---|---|---|
+| V01 | 102 | Blockout: tank, tunnel, lobby, exit, gallery, deck; 8 animals; 4 kelp; rocks. Still |
+| V02 | 159 | Animated: swim loops, tail beats, kelp sway; 8 more animals; fins |
+| V03 | 215 | Guest spaces: tunnel ribs, benches, piers, lamps, signs, rails |
+| V04 | 525 | Schools (3), kelp forest, reef, moray, 12 more animals, eyes, guests walking the tunnel |
+| V05 | 1,028 | 8 schools, 8 jellyfish, a diver, bubble vents, eelgrass, anemones with clownfish, urchins, stars, a crowd, deck lamps |
+
+- **Motion:** one 60 s loop (autoplays twice), 44 motions in V02 up to 150 in V05. Swimmers follow closed organic loops that stay in the water and out of the tunnel (tested at 90 times per loop).
+- **Viewer change:** taps now pass through anything with opacity under 0.4 (glass and water), so fish behind a glass wall can be picked. Other scenes are unaffected.
+
+**Open for Jimmy:** the tunnel ribs are straight chords, not a smooth arch; rays, turtles and eels do not beat wings or flippers; fish are boxes and cones; a "hide walls" toggle would help view the gallery; tap-to-start and chained motions are still future.

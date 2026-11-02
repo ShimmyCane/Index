@@ -20,6 +20,8 @@ How to run: open `index.html` in a browser (no server or build). Also works from
 - Scenes: edit `tools/scenes.js`, then `node tools/build_samples.js`. Three samples: garden planter, outdoor table with parasol, kitchen.
 - Supabase (Architecture project): `m3d_scene_log` is the log of every scene version (history, world, model, label, note); edit it there, not in JSON. Load with `node tools/push_scene_log.js` (owner session token, never committed; `--dry-run` needs no token). SQL in `supabase/002_m3d_scene_log.sql` (applied). `m3d_scenes` (saved scenes, owner only). Reads Quick Detail's `sketch_details` where tags contain `make 3-D` (read only). SQL in `supabase/001_m3d_scenes.sql` (applied).
 
+- Aquarium: `tools/aquarium.js` (V01–V05, one `defsFor(v)` returning objects and motions), world `worlds/aquarium-world.json`, test `node tests/test_aquarium.js`. Review: Increment Viewer `?set=aquarium`. Taps pass through glass and water (opacity under 0.4).
+
 Project rules:
 - Public repo. Sample models are synthetic. Real architectural details or client drawings go in `private/`.
 - Rendering never modifies the model. Rules live outside the geometry. Every change is an operation in the history.

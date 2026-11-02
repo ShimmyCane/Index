@@ -163,3 +163,10 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 - For anything that bends, build a closed mesh on a skeleton line (smooth tube, capped, watertight) instead of stacking extruded boxes; keep a separate open, double-sided type for truly thin things (leaves, grass, flags). Prove closure by counting: every edge in exactly two triangles, positive signed volume.
 - Let separate parts ride a joint (`attach`) instead of copying motions; use eased, closed keyframes for one-off beats in a loop; derive banking and pitch from the path.
 - Test a rig by sampling every vertex over the whole loop (ground clearance, reach, fold), not by looking at one frame.
+
+## From Grand Ocean Aquarium (Make 3D, 2026-11-02)
+
+- **See-through surfaces must not block taps.** In a 3-D viewer, make glass and water ignore picks (opacity under 0.4) so the object behind can be selected.
+- **Plan the object budget before the detail.** Count parts per item (a fish is 4 to 10), then choose detail per increment so the counts land near the targets (100, 150, 200, 500, 1,000).
+- **Group many movers.** Move a school or a crowd as one group with one motion and keep each member as a named child, so a thousand parts need only a few hundred motions.
+- **Seed random layout by key.** Seeding each random choice by the object's key keeps earlier increments identical when later ones add objects.
