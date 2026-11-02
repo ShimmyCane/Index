@@ -110,3 +110,4 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - [x] V12 ceiling, V13 decor and see-through ceiling, V14 bookcase contents and near chair, V15 final grouping and leaf clusters.
 - [x] Each version rendered and reviewed; engine, cloud and smoke tests pass.
 - [ ] Jimmy checks the new sizes (156 × 216 in room, 14 in cubes, 96 in ceiling) against the room.
+- 2026-11-02: kitchen mockup V01 to V10 from two photos (`tools/kitchen_mockup.js`), added to the Library. Build, tests and renders pass. Not committed.

@@ -316,5 +316,6 @@ const KITCHEN = {
 KITCHEN.defs = KITCHEN.defs.map(([k, d]) => [k, { ...d, position: [240 - d.position[0], d.position[1], d.position[2]] }]);
 
 const { LIVING_ROOM } = require('./living_room.js');
+const { KITCHEN_MOCKUP } = require('./kitchen_mockup.js');
 
-module.exports = { WORLD_ID, SCENES: [PLANTER, TABLE, OUTDOOR_V2, KITCHEN, ...LIVING_ROOM] };
+module.exports = { WORLD_ID, SCENES: [PLANTER, TABLE, OUTDOOR_V2, KITCHEN, ...LIVING_ROOM, ...KITCHEN_MOCKUP] };
