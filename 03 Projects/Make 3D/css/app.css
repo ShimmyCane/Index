@@ -132,8 +132,10 @@ h2 { font-size: 16px; margin: 0 0 8px; }
 /* gear */
 .gear {
   position: fixed; right: 18px; bottom: 14px; width: 68px; height: 68px; border-radius: 50%;
-  border: var(--line); background: var(--butter); box-shadow: var(--shadow); font-size: 30px; cursor: pointer; z-index: 5;
+  border: var(--line); background: var(--butter); box-shadow: var(--shadow); cursor: pointer; z-index: 5;
+  display: grid; place-items: center; color: var(--ink); padding: 0;
 }
+.gear svg { display: block; }
 .drawer {
   position: fixed; right: 18px; bottom: 96px; width: min(360px, 92vw); max-height: 70vh; overflow-y: auto;
   background: var(--panel); border: var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px; z-index: 6;
@@ -151,3 +153,9 @@ h2 { font-size: 16px; margin: 0 0 8px; }
   .side { border-right: 0; overflow: visible; }
 }
 [hidden] { display: none !important; }
+
+/* collapsible panel headers (Model, Objects) */
+h2.collapse { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; min-height: 40px; }
+h2.collapse .chev-mark { font-size: 16px; transition: transform .15s; }
+h2.collapse[aria-expanded="false"] .chev-mark { transform: rotate(-90deg); }
+h2.collapse[aria-expanded="false"] + *, h2.collapse[aria-expanded="false"] ~ div[hidden] { display: none; }

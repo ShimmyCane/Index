@@ -16,7 +16,8 @@
 <main class="layout">
   <aside class="side" aria-label="Model panels">
     <section class="card" id="infoCard">
-      <h2>Model</h2>
+      <h2 class="collapse" data-target="infoBody" aria-expanded="true">Model <span class="chev-mark" aria-hidden="true">▾</span></h2>
+      <div id="infoBody">
       <label class="field">Name
         <input id="modelName" type="text" maxlength="80">
       </label>
@@ -24,6 +25,7 @@
         <textarea id="modelDesc" rows="2" maxlength="400"></textarea>
       </label>
       <p class="hint" id="modelMeta"></p>
+      </div>
     </section>
 
     <section class="card" id="lastCard" hidden>
@@ -43,9 +45,11 @@
     </section>
 
     <section class="card" id="listCard">
-      <h2>Objects</h2>
+      <h2 class="collapse" data-target="listBody" aria-expanded="true">Objects <span class="chev-mark" aria-hidden="true">▾</span></h2>
+      <div id="listBody">
       <ul class="objects" id="objectList"></ul>
-      <p class="hint" id="emptyNote" hidden>No objects yet. Add one below, or paste an operation.</p>
+      <p class="hint" id="emptyNote" hidden>No objects yet. Paste an operation or add one below.</p>
+      </div>
     </section>
 
     <section class="card" id="selCard" hidden>
@@ -58,11 +62,11 @@
 
     <section class="card">
       <div class="tabs" role="tablist">
-        <button class="btn" id="tabAdd" type="button" aria-pressed="true">Add an object</button>
-        <button class="btn" id="tabPaste" type="button" aria-pressed="false">Paste an operation</button>
+        <button class="btn" id="tabPaste" type="button" aria-pressed="true">Paste an operation</button>
+        <button class="btn" id="tabAdd" type="button" aria-pressed="false">Add an object</button>
       </div>
 
-      <form id="addForm" class="stack" autocomplete="off">
+      <form id="addForm" class="stack" autocomplete="off" hidden>
         <label class="field">Type
           <select id="fType"></select>
         </label>
@@ -94,7 +98,7 @@
         <button class="btn primary" type="submit">Add object</button>
       </form>
 
-      <div id="pastePanel" hidden class="stack">
+      <div id="pastePanel" class="stack">
         <label class="field">One operation, or a list
           <textarea id="pasteBox" rows="8" spellcheck="false" placeholder='{"op":"add","object":{"name":"Stone","type":"box","dimensions":[12,6,2],"position":[0,0,1]}}'></textarea>
         </label>
@@ -121,7 +125,6 @@
   <div class="history">
     <button class="btn small" id="latestBtn" type="button" hidden>Go to latest</button>
     <input id="scrub" type="range" min="0" max="0" value="0" aria-label="History step">
-    <span id="stepLabel">v0 / 0</span>
   </div>
   <button class="btn small chip" id="rulesChip" type="button">Check model</button>
   <div class="bottom-errors" id="errorsArea" hidden>
@@ -165,7 +168,7 @@
   <button class="btn ghost" id="closeLib" type="button">Close</button>
 </div>
 
-<button class="gear" id="gearBtn" type="button" aria-label="Settings" aria-expanded="false" aria-controls="gearPanel">⚙️</button>
+<button class="gear" id="gearBtn" type="button" aria-label="Settings" aria-expanded="false" aria-controls="gearPanel"><svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true"><path d="M10.3 2.5h3.4l.5 2.6c.6.2 1.2.5 1.7.9l2.5-.9 1.7 2.9-2 1.8c.1.6.1 1.2 0 1.8l2 1.8-1.7 2.9-2.5-.9c-.5.4-1.1.7-1.7.9l-.5 2.6h-3.4l-.5-2.6c-.6-.2-1.2-.5-1.7-.9l-2.5.9-1.7-2.9 2-1.8c-.1-.6-.1-1.2 0-1.8l-2-1.8 1.7-2.9 2.5.9c.5-.4 1.1-.7 1.7-.9z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button>
 
 <div class="drawer" id="gearPanel" hidden>
   <h2>Settings</h2>

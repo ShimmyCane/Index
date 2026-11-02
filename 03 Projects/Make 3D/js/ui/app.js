@@ -250,7 +250,6 @@
     const n = st.history.operations.length;
     const s = $('scrub');
     s.max = n; s.value = st.cursor;
-    $('stepLabel').textContent = `v${st.cursor} / ${n}`;
     $('latestBtn').hidden = latest();
   }
 
@@ -593,6 +592,12 @@
 
     $('tabAdd').addEventListener('click', () => showTab('add'));
     $('tabPaste').addEventListener('click', () => showTab('paste'));
+    document.querySelectorAll('h2.collapse').forEach((h) => h.addEventListener('click', () => {
+      const body = document.getElementById(h.dataset.target);
+      const open = h.getAttribute('aria-expanded') !== 'false';
+      h.setAttribute('aria-expanded', String(!open));
+      body.hidden = open;
+    }));
     $('addForm').addEventListener('submit', submitAdd);
     $('pasteApply').addEventListener('click', applyPaste);
 
