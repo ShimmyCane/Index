@@ -12,7 +12,7 @@ How to run: open `index.html` in a browser (no server or build). Also works from
 
 - Tests: `node tests/test_core.js` (engine, plain Node), `node tests/test_ifc.js` (IFC export), `node tests/test_motion.js` (motion and the robot walk), `node tests/test_mesh.js` (skeleton meshes, bends and the hawk).
 - Motion: a separate `motion.json` per scene (`js/core/motion.js`, schematic §14). Every animation is a loop. Test scene: `tools/robot_banana.js`. Browser check: `node tools/anim_check.js <screenshotDir>` (autoplay, play bar, pinch zoom).
-- Skeleton meshes: `loft` (closed) and `sheet` (open, double sided) on a joint chain, with the `bend` motion kind and `attach` (schematic §15). Test scene: `tools/hawk.js`. Render stills or frames: `node tools/render_models.js <dir> hawk-v06@19.4 --follow=hawk`.
+- Skeleton meshes: `loft` (closed) and `sheet` (open, double sided) on a joint chain, with the `bend` motion kind and `attach` (schematic §15). Test scene: `tools/hawk.js` (V01 to V07; V07 flight and meadow in `tools/hawk_flight.js`, world `worlds/hawk-world.json`). Render stills or frames: `node tools/render_models.js <dir> hawk-v06@19.4 --follow=hawk`.
 - Sample: the planter is generated. Edit the operation list in `tools/build_samples.js`, then run `node tools/build_samples.js`. Never hand-edit `model.json` or `js/samples.bundle.js`.
 - Browser check: `node tools/smoke.js <screenshotDir>` (headless Chromium via pre-installed Playwright; save screenshots outside the repo).
 - Cloud client test: `node tests/test_cloud.js` (fake Supabase, no network).

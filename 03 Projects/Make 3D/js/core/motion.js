@@ -148,15 +148,32 @@
   function flightFrame(m, u, L) {
     const c = m.cycles || 1, ph = m.phase || 0;
     const at = (x) => pathAt(m.points, warpTime(m.profile, c * x + ph)).point;
-    const h = Math.min(0.004, 0.5 / (c * 60));
+    const h = m.step || Math.min(0.004, 0.5 / (c * 60));      // chord half-length, as a fraction of the loop
     const a = at(u - h), b = at(u), d = at(u + h);
     const T = norm3([d[0] - a[0], d[1] - a[1], d[2] - a[2]]);
-    const dt = (h * L) * (h * L), G = 386.1, k = m.bank_gain === undefined ? 4 : m.bank_gain;
+    // gravity of the model's world (in/s^2): with the speed it sets how hard a turn banks. bank_gain 1 = a coordinated turn.
+    const dt = (h * L) * (h * L), G = m.gravity || 386.1, k = m.bank_gain === undefined ? 4 : m.bank_gain;
     const acc = [0, 1, 2].map((i) => (a[i] - 2 * b[i] + d[i]) / dt);
     // lift = up plus the pull of the turn; the up part is kept above 0.4 so the bird never rolls onto its back
     let lift = [k * acc[0] / G, k * acc[1] / G, 1 + Math.max(k * acc[2] / G, -0.6)];
     const dd = lift[0] * T[0] + lift[1] * T[1] + lift[2] * T[2];
-    lift = norm3([lift[0] - dd * T[0], lift[1] - dd * T[1], lift[2] - dd * T[2]]);
+    lift = [lift[0] - dd * T[0], lift[1] - dd * T[1], lift[2] - dd * T[2]];
+    // a hard sideways pull in a steep dive can still tip the up axis past the horizontal: lean it back toward the sky
+    // (along the part of "up" that is square to the path) until its height is at least 0.15
+    const zn = [-T[2] * T[0], -T[2] * T[1], 1 - T[2] * T[2]], mag = Math.hypot(...lift);
+    if (lift[2] < 0.15 * mag && zn[2] > 0.05) { const c = (0.15 * mag - lift[2]) / zn[2]; lift = [lift[0] + c * zn[0], lift[1] + c * zn[1], lift[2] + c * zn[2]]; }
+    lift = norm3(lift);
+    // optional cap on the roll (degrees)
+    if (m.max_bank_deg) {
+      // near the ground (ground_z, default 0) the roll is also limited so the lower wing tip (half_span) stays off it
+      const room = m.half_span ? Math.max(0, Math.min(1, (b[2] - (m.ground_z || 0) - 2.5) / m.half_span)) : 1;
+      const zu = norm3(zn), cosA = lift[0] * zu[0] + lift[1] * zu[1] + lift[2] * zu[2];
+      const lim = Math.min((m.max_bank_deg * Math.PI) / 180, Math.asin(room));
+      if (Math.acos(Math.min(1, cosA)) > lim && zn[2] > 0.05) {
+        const side = norm3([lift[0] - cosA * zu[0], lift[1] - cosA * zu[1], lift[2] - cosA * zu[2]]);
+        lift = [zu[0] * Math.cos(lim) + side[0] * Math.sin(lim), zu[1] * Math.cos(lim) + side[1] * Math.sin(lim), zu[2] * Math.cos(lim) + side[2] * Math.sin(lim)];
+      }
+    }
     const Y = [lift[1] * T[2] - lift[2] * T[1], lift[2] * T[0] - lift[0] * T[2], lift[0] * T[1] - lift[1] * T[0]];
     return { point: b, R: [T[0], Y[0], lift[0], 0, T[1], Y[1], lift[1], 0, T[2], Y[2], lift[2], 0, 0, 0, 0, 1] };
   }

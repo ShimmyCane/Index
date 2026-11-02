@@ -133,5 +133,6 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 ## Hawk: closed meshes on a skeleton line (2026-11-02)
 - [x] `loft` (closed mesh) and `sheet` (open, double sided) types on a skeleton line; `bend` motion, `attach`, `keys`, `envelope`, flight-frame paths (schematic §15).
 - [x] Hawk V01 to V06 (`tools/hawk.js`), meadow of sheet grass and leaves, a pennant flag, a mouse; `tests/test_mesh.js` (14 groups).
+- [x] V07 physical flight: larger meadow, bluff, thermal, energy-based speed, flapping only on the climb, 21 -> 26 test groups.
 - [ ] IFC export of lofts and sheets (tessellated); clash check for lofts; a form to add one.
 - [ ] Jimmy checks the hawk on iPad (play bar, pinch) and says whether "looping around" meant circling (built) or a vertical loop.

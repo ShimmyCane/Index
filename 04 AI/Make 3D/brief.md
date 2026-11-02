@@ -253,3 +253,13 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 - **Viewer change:** taps now pass through anything with opacity under 0.4 (glass and water), so fish behind a glass wall can be picked. Other scenes are unaffected.
 
 **Open for Jimmy:** the tunnel ribs are straight chords, not a smooth arch; rays, turtles and eels do not beat wings or flippers; fish are boxes and cones; a "hide walls" toggle would help view the gallery; tap-to-start and chained motions are still future.
+
+## Hawk V07: physical flight, larger loop (2026-11-02)
+
+- **Request (Jimmy, after V06):** fly much faster; a larger loop; multiple cycles; more flapping when climbing; less diagrammatic, more real: gravity, friction, a rising air channel, a bluff.
+- **Built:** V07 in the same `tools/hawk.js`, with `tools/hawk_flight.js` and `worlds/hawk-world.json` (bounds ±520 by ±420 in, 460 in high). V01 to V06 are unchanged (checked: their generated files do not change).
+- **The lap (26 s):** glide, stoop onto the mouse, flared skim, flapping climb, ride the bluff updraft, then 2.5 turns up a thermal with no flapping.
+- **Physics:** speed from gravity, drag (spread, tucked, flared) and flap thrust; rising air holds the soaring speed (130 in/s); thrust solved (about 100 in/s²) so the lap closes. Banking from the turn (coordinated turn, g = 150 in/s² in a world about a tenth of real size), capped at 55° and lower near the ground.
+- **Numbers:** path about 3,430 in, stoop about 240 in/s at the bottom (about 1.9 times soaring speed), 62 wing beats a lap at 2.4 per second, all in the climb; thermal 2.5 turns, 120 in per turn.
+- **Checks:** `tests/test_mesh.js` 26 groups (V06 and V07 rigs; speed constant in rising air; stoop energy balance within 8%; flare sheds speed; arrival at the bluff at soaring speed; flaps only when climbing; lowest point 5.3 in; nose turns under 10 rad/s). Other suites, smoke and anim_check pass.
+- **Open for Jimmy:** (1) Is a tenth-scale world right, or should the hawk be scaled down inside a bigger arena? (2) The air is drawn as ribbons, not simulated. (3) Talons skim 4 in above the mouse. (4) Should the mouse react (freeze, bolt)?
