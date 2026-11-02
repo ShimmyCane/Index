@@ -320,6 +320,7 @@ const { KITCHEN_MOCKUP } = require('./kitchen_mockup.js');
 
 const { HONDA_CRV } = require('./honda_crv.js');
 const { ROBOT_BANANA } = require('./robot_banana.js');
+const { ROBOT_LOOP } = require('./robot_loop.js');
 const { HAWK } = require('./hawk.js');
 const { ADVENTURE_PARK } = require('./adventure_park.js');
 const { ADVENTURE_PARK_COMPACT } = require('./adventure_park_compact.js');
@@ -328,4 +329,4 @@ const { SOLAR_SYSTEM, PLANET_VIEWS } = require('./solar_system.js');
 const { SOLAR_TRUE } = require('./solar_true.js');
 const { PLANET_VIEWS_V2V3, EARTH_VIEWS } = require('./planet_views.js');
 
-module.exports = { WORLD_ID, SCENES: [PLANTER, TABLE, OUTDOOR_V2, KITCHEN, ...LIVING_ROOM, ...KITCHEN_MOCKUP, ...HONDA_CRV, ...ADVENTURE_PARK, ...ADVENTURE_PARK_COMPACT, ...AQUARIUM, ...SOLAR_SYSTEM, ...PLANET_VIEWS, ...PLANET_VIEWS_V2V3, ...EARTH_VIEWS, SOLAR_TRUE, ROBOT_BANANA, ...HAWK] };
+module.exports = { WORLD_ID, SCENES: [PLANTER, TABLE, OUTDOOR_V2, KITCHEN, ...LIVING_ROOM, ...KITCHEN_MOCKUP, ...HONDA_CRV, ...ADVENTURE_PARK, ...ADVENTURE_PARK_COMPACT, ...AQUARIUM, ...SOLAR_SYSTEM, ...PLANET_VIEWS, ...PLANET_VIEWS_V2V3, ...EARTH_VIEWS, SOLAR_TRUE, ROBOT_BANANA, ...ROBOT_LOOP, ...HAWK] };

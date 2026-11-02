@@ -211,7 +211,8 @@ Axis conversion happens in one place (`viewer/axes.js`): model Z-up → Three.js
 - **Reject flow** *(round 2, Q15)*: the editor stays open with the reasons listed. Delete one or more of the offending objects and re-apply, or preview the result without saving.
 - **Files** *(Q17)*: open or save a bundle (`model.json` + `history.json` + `world.json`, or one combined `.make3d.json`). Sample models load from `models/`. The last session autosaves to localStorage.
 - **Cloud** *(round 2, Q17, v0.4)*: `m3d_scenes` in the architecture database (one row per scene: bundle and replayed model), registered in `table_index`, owner only (RLS). Built 2026-11-02.
-- **Library** *(round 3; four built-in scenes from v0.5: garden planter, outdoor table, outdoor table V2, kitchen)*: lower-right button. Lists input scenes (built in, and saved in the cloud). Lists Quick Detail details tagged `make 3-D` as read-only future references. Scenes from an LLM or from drawings come later, linked in as JSON input.
+- **Library** *(round 3; four built-in scenes from v0.5: garden planter, outdoor table, outdoor table V2, kitchen)*: lower-right button. Lists input scenes (built in, and saved in the cloud). Lists Quick Detail details tagged `make3d` (any letter case; `make 3-D` is retired) as read-only future references. Scenes from an LLM or from drawings come later, linked in as JSON input.
+- **Parts dropdown** *(round 10)*: upper-right button. Lists each group tagged `show:<label>` (for example `show:banana`) with a checkbox; unticking it hides that group and everything under it. The model stores only the tag; the rule is in `js/core/visibility.js`. Robot loop V02 to V04 use it for the banana, frisbee and hat.
 - Drawing and component blocks are future (round 2, Q16 and Q14).
 
 ## 8. Page layout (draft)

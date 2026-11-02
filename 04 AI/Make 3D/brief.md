@@ -277,3 +277,11 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 - Planet views: V02 and V03 for the eight planets (textures, more moons). Earth V02 to V10 (continents through a second launch). Earth V10 loop is 480 s.
 - Back to the Solar System is a page button (`header.links`), not an object.
 - Open: positions past 2050 are extrapolated; the element values were entered from the standard table, to be checked against the JPL page; belt rocks are a fixed pattern, not real asteroids; fast spins alias at one lap per 240 s.
+
+## Robot loop, Parts dropdown, make3d tag (2026-11-02)
+
+- **Quick Detail:** "Robot Loop" (`sketch_details` 3c4c380d-…, tags `make3d` and `make 3-d`). Its only stroke is the walk. The cloud filter now matches `make3d` ignoring case; `make 3-d` no longer matches (retired).
+- **Built:** `tools/robot_loop.js`, scenes `robot-loop-v02` to `v04`, project "Robot loop". V02 walk along the sketch (48 points, closed, rest heading +X, 38 s lap); V03 frisbee in the left hand; V04 top hat. V01 robot-banana is unchanged. Renders in `renders/robot-loop/`. Review `viewer.html?set=robot_loop`.
+- **Parts dropdown (upper right):** any group tagged `show:<label>` gets a checkbox that hides its whole branch. Pure rules in `js/core/visibility.js`; the viewer hides nodes and skips them when picking.
+- **Scale and seam:** the closed shape is labelled 19'-7" at 3"=1'-0". Its longest side is taken as 235 in, so sketch units × 3.72 in. The stroke does not join at its ends (about 8 in gap, sharp turn); a Gaussian average (sigma 3 points) closes it, turning the seam by about 1.6 degrees and moving no point more than about 3 in.
+- **Open:** the scale is an estimate (Jimmy to confirm); the antenna passes through the hat (not moved); the frisbee is held at the rim, not gripped.

@@ -9,5 +9,6 @@ window.REVIEW_SETS = [
   { id: "hawk", label: "Hawk: closed meshes on a skeleton line, V01 to V07" },
   { id: "solar_system", label: "Solar System: V01 to V06, true orbits from V06" },
   { id: "planet_views", label: "Planet views: V02 and V03, eight planets" },
-  { id: "earth_views", label: "Earth view: V02 to V10" }
+  { id: "earth_views", label: "Earth view: V02 to V10" },
+  { id: "robot_loop", label: "Robot loop: sketched walk, frisbee and top hat, V02 to V04" }
 ];
