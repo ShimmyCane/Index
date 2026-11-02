@@ -46,6 +46,13 @@ window.REVIEW_DATA = {
       description: "Every orbit is now true: its shape (eccentricity), its tilt, and where each planet is on 2 November 2026. Orbits are scaled by the square root of their distance so the inner planets are not crowded. The whole animation is one lap of Pluto (about 248 years) in 240 s. It plays once and holds. Faster planets lap many times, so their spins blur at this pace. The month and year tracker at the lower right follows the timeline; scroll or drag it to move through time.",
       changes: ["Real eccentricities and tilts (Pluto 17 degrees, Mercury 7 degrees)", "Start positions from JPL approximate elements for 2 November 2026 (Earth at about 40 degrees, as it should be)", "One-shot timeline: no loop; Pluto's lap sets the pace", "Spins are real in direction: Venus, Uranus and Pluto turn backwards", "Every belt rock on its own orbit, from a fixed pattern (not real asteroids)", "Month and year tracker, lower right: scroll or drag", "Tap a planet to open its own view; the view's Back button returns here"],
       gaps: ["Speeds at this pace blur the spins of the fast planets", "Orbits are drawn as one-pixel boxes, so they look thin at a distance", "Sizes are rough and exaggerated; distances are square-root compressed", "Belt rocks are a pattern, not real asteroid positions"]
+    }    ,
+    {
+      id: "V07", title: "From Explorer 1 (1958), with comets",
+      image: "../Make 3D/renders/solar-system/v07.png",
+      description: "The timeline now starts on 31 January 1958, when Explorer 1, the first US satellite, launched. The planets are placed on that day. Halley's Comet, Encke and Tempel 1 are added on their true orbits. Halley's real perihelion is inside Mercury's orbit, so in this view it dips inside the drawn Sun. The tracker steps by year when far out, and by day when close in; zoomed in, the animation slows down so the Earth moves smoothly.",
+      changes: ["Start on 31 January 1958 (Explorer 1)", "Halley's Comet, Encke and Tempel 1 on true orbits", "Tracker steps by year, month, week or day, following the zoom", "Playback slows as you zoom in (about 0.1 times at close range)"],
+      gaps: ["Halley's perihelion is inside the drawn Sun", "Hale-Bopp is not added (its orbit is too far for this scale)", "Comet elements are approximate and must be checked against the JPL Small-Body Database", "Comets have no tails"]
     }
   ]
 };

@@ -49,7 +49,8 @@ const R_DIR = [Math.sin(rad(R_ARM_TILT)), 0, -Math.cos(rad(R_ARM_TILT))];
 const R_SHOULDER = [0, -ARM_Y, SHOULDER_Z];
 const HAND_R = [0, 1, 2].map((i) => R_SHOULDER[i] + 10 * R_DIR[i]);
 
-function defs() {
+// path: the walk (defaults to V01's PATH). opts.tagged: give the banana group its visibility tag (Robot loop V02 on).
+function defs(path = PATH, opts = {}) {
   const d = [];
   const add = (key, o) => d.push([key, o]);
 
@@ -91,7 +92,8 @@ function defs() {
 
   // banana: a curved row of short tilted cylinders, fat in the middle, brown at the tips.
   // It bends forward (away from the robot), held upright by its middle.
-  add('banana', { name: 'Banana', description: 'held in the right hand', type: 'group', dimensions: [], position: HAND_R, parent: 'arm-r' });
+  add('banana', { name: 'Banana', description: 'held in the right hand', type: 'group', dimensions: [], position: HAND_R, parent: 'arm-r',
+    ...(opts.tagged ? { tags: ['show:banana'] } : {}) });
   const R = 6, N = 7, SPAN = 100;                 // arc radius (in), segments, degrees of arc
   const centre = [HAND_R[0] + 1.2 - R, HAND_R[1], HAND_R[2]];
   const segLen = (R * rad(SPAN)) / N;
@@ -110,7 +112,7 @@ function defs() {
 
   // stepping stones along the path, about one per step
   add('stones', { name: 'Stepping stones', description: 'the path the robot walks', type: 'group', dimensions: [], position: [0, 0, 0] });
-  const pts = PATH.map((p) => [p[0], p[1], 0]);
+  const pts = path.map((p) => [p[0], p[1], 0]);
   const count = Math.round(M.pathLength(pts) / 16);
   for (let i = 0; i < count; i++) {
     const { point } = M.pathAt(pts, i / count);
@@ -136,8 +138,8 @@ const ROBOT_BANANA = {
 };
 
 // The motion file. uuid(key) turns a scene key into the object's uuid.
-function motionFor(uuid) {
-  const pts = PATH.map((p) => [p[0], p[1], 0]);
+function motionFor(uuid, path = PATH) {
+  const pts = path.map((p) => [p[0], p[1], 0]);
   const strides = Math.max(1, Math.round(M.pathLength(pts) / STRIDE));
   const loop = strides * STRIDE_S;
   return {
@@ -176,4 +178,4 @@ function motionFor(uuid) {
 
 ROBOT_BANANA.motion = motionFor;
 
-module.exports = { ROBOT_BANANA, motionFor, PATH };
+module.exports = { ROBOT_BANANA, motionFor, defs, MATERIALS, PATH, HAND_R };

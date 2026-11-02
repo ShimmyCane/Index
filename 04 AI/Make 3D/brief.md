@@ -302,3 +302,51 @@ Jimmy: the tank is not a vertical extrusion; some portions should be shallow wit
 - **V07 Repopulated:** plateau residents and schools, terrace kelp and coral, plateau critters, guests on the Kelp Walk. A **cutaway** scene (front half of rock, glass, rim and deck removed) is included for review only; its images are the V07 render.
 - **Counts:** 1,768, 1,988, 2,175 (cutaway 1,890). **Swim loops** now test the leaning wall, the floor and terrain, the plateau tunnel and the shelf edge (`tests/test_habitat_aquarium.js`, 12 tests).
 - **Open:** no way into the cavern or onto the plateau (stairs from the deck and the gallery are only markers); no tunnel through solid rock; the rooms from Grand Ocean V06 are still unplaced. `js/samples.bundle.js` is now about 20 MB, because every scene is in it; it should be split or loaded on demand.
+
+## Robot loop, Parts dropdown, make3d tag (2026-11-02)
+
+- **Quick Detail:** "Robot Loop" (`sketch_details` 3c4c380d-…, tags `make3d` and `make 3-d`). Its only stroke is the walk. The cloud filter now matches `make3d` ignoring case; `make 3-d` no longer matches (retired).
+- **Built:** `tools/robot_loop.js`, scenes `robot-loop-v02` to `v04`, project "Robot loop". V02 walk along the sketch (48 points, closed, rest heading +X, 38 s lap); V03 frisbee in the left hand; V04 top hat. V01 robot-banana is unchanged. Renders in `renders/robot-loop/`. Review `viewer.html?set=robot_loop`.
+- **Parts dropdown (upper right):** any group tagged `show:<label>` gets a checkbox that hides its whole branch. Pure rules in `js/core/visibility.js`; the viewer hides nodes and skips them when picking.
+- **Scale and seam:** the closed shape is labelled 19'-7" at 3"=1'-0". Its longest side is taken as 235 in, so sketch units × 3.72 in. The stroke does not join at its ends (about 8 in gap, sharp turn); a Gaussian average (sigma 3 points) closes it, turning the seam by about 1.6 degrees and moving no point more than about 3 in.
+- **Open:** the scale is an estimate (Jimmy to confirm); the antenna passes through the hat (not moved); the frisbee is held at the rim, not gripped.
+## Round 10: shaders, zoom-linked time, 1958 start, more increments (2026-11-02)
+
+- Solar system V07: starts 31 January 1958 (Explorer 1); Halley's Comet, Encke and Tempel 1 on true orbits.
+- Tracker steps by year, month, week or day with the zoom; playback slows when zoomed in (about 0.1 times at close range).
+- Planet views fill three quarters of the screen (`header.view`). V04 to V06 added (shaded surfaces and bands). Earth V11 to V20 added (shaded continents, a cloud shell, more features; loop 480 s).
+- Procedural materials replace flat dots for clouds and surfaces; the numbers live in the header, no images.
+- Open: continents are ellipses (real coastlines need a map texture and a decision about image assets); comet elements to be checked against JPL; Halley dips inside the drawn Sun.
+
+## Earth dot map, V21 (2026-11-02, research mode)
+
+- **Request (Jimmy):** the continents do not look right. Keep the dots, but make the grid four times denser and the dots smaller, and be more precise.
+- **Mode:** research. Source and checks: `research/earth-land.md` (Natural Earth 1:50m land, sampled at 5-degree cell centres; public domain).
+- **Plan (before building):** keep V20 as it is; V21 replaces the ellipse continents with one dot per land cell of a 5-degree grid (4x the cells of the 10-degree grid of V02 to V10), each dot about a third of the old diameter. Sea is plain (no noise land). Antarctica is ice-white; deserts are sand dots in rough boxes. Clouds, storms, launches, Moon and rotation are unchanged.
+- **Build:** `tools/earth_land_5deg.js` (the mask and the desert boxes), `tools/planet_views_v4.js` (`earthV4Defs` at v >= 21, `earth_ocean21` material, `EARTH_VIEWS_V21`), `js/viewer/viewer.js` (`no_land` flag: the shader's land is off, so the sea has no noise continents). Scene `planet-earth-v21`, 1,134 objects, model check accept with 0 issues.
+- **Older versions:** unchanged. The V21 sea material is kept out of the shared list, so the V01 to V20 files are byte-identical (checked with `git status` after the build).
+- **Checks:** `tests/test_earth_land.js` (6 tests), `tests/test_core.js`, and the other Make 3D suites pass. Renders checked at the default camera and four azimuths (`renders/earth/v21.png`).
+- **Review:** Increment Viewer `?set=earth_views_v21`.
+- **Open for Jimmy:** (1) Is 5 degrees precise enough, or do you want a finer map (for example 2.5 degrees, which means 4x again)? (2) Coastal cities sit a cell off (Sydney, Tokyo); do you want the city lights (V15) moved onto the new grid? (3) Deserts are rough boxes; do you want a real desert map?
+## Robot cape and the Parts control (2026-11-02, round 2)
+
+- **Quick Detail "Robot Cape"** (`sketch_details` f3e32d04-…, tag `make3d`): a closed outline (ink), a yellow border, six brown tassels at the bottom, nine circles in the middle (four red, five blue). Its notes say the holes should show the circles, the tassels should be brown, and the cape should move like fabric with a sheen.
+- **Built:** `tools/robot_cape.js`, used by Robot loop V05 (`robot-loop-v05`). The outline is a sheet on a 7-joint skeleton down the back; the border is 24 beads on the outline; tassels are brown cylinders; the circles are coloured discs on the back.
+- **Motion:** a wave runs down the cape all the time (joints 1 to 6, 3 cycles per loop). The lower cape swings sideways on turns. Both follow the walk's turn rate (computed from the path), so tight turns flow more. Every key list starts at 0, so the first frame is the rest pose.
+- **Scale decision:** the cape is 22 in from the shoulders to near the ground, with the drawing's proportions. The drawn 7'-10" is not used, because it does not fit a 3 ft robot.
+- **Frisbee:** V05 moves it to the banana's right hand. V02 to V04 keep their history (the frisbee stays left there).
+- **Parts control:** now under Full screen in the stage's upper right, not in the header.
+- **Known limits:** a sheet cannot have holes (discs stand in), the border is beads, no sheen (flat colour), and the cape does not collide with the robot.
+
+## Earth V22: satellites, storms, rockets and clouds to scale (2026-11-02, research mode)
+
+- **Request (Jimmy):** fix the floating things (storms, clouds, satellites, rockets). Closer to scale, exaggeration fine. Faded orbit lines. About ten times the satellites. Hubble, and others.
+- **Mode:** research (scale figures, `research/earth-scale.md`).
+- **Plan (before building):** keep V21; replace the floating parts. Earth's radius is 9.5 in (about 670 km per inch). Satellites on four LEO rings, a navigation ring, a geostationary ring (turns with the Earth), the ISS, Hubble and a polar weather satellite. Faded orbit lines on the real planes. Storms about 2.5 in across on the cloud shell, cloud shells 0.1 and 0.2 in above the ground, rockets about 0.85 in tall.
+- **Build:** `tools/earth_v22.js` (`earthV22Defs`, `RINGS`, `EARTH_VIEWS_V22`), built on `earthV4Defs(21)` with the replaced parts filtered out. Scene `planet-earth-v22`: 1,190 objects, 81 satellites (V21 had 8), 10 orbit lines, 150 storm puffs, 4 launches.
+- **Rules:** every part is at least 0.25 in in each dimension (the minimum-dimension rule); orbit lines use a thin tube inside a 0.25 in box. The first build gave 262 warnings from the small parts; they are fixed, and the build has none.
+- **Older versions:** unchanged (checked with `git status`: only the V22 folder is new among the model files).
+- **Checks:** `tests/test_earth_v22.js` (10 tests): the satellite count, each satellite on its ring, the ISS/Hubble/polar radii, every orbit line a closed, faded tube, storm puffs on the shell, rockets under 0.9 in, the cloud shells, materials, and V21 unchanged. The full Make 3D suite passes.
+- **Review:** Increment Viewer `?set=earth_views_v22`.
+- **Open for Jimmy:** (1) the minimum size (0.25 in) makes the satellites and rockets chunkier than to scale; is that fine? (2) the mountains (V12) are still large cones; do you want them scaled? (3) the Moon's distance (30 in) is not to scale; leave it, or move it out? (4) James Webb is not drawn.
+

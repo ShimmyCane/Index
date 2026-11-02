@@ -1,6 +1,6 @@
 /* Make 3D — cloud client (Architecture project). Browser and Node.
    Two tables:
-   - public.sketch_details (Quick Detail, read only here): details whose tags include the make 3-D tag.
+   - public.sketch_details (Quick Detail, read only here): details with the make3d tag (any letter case).
    - public.m3d_scenes (Make 3D, read and write for the owner): saved scenes, one row per model_id.
    Access is owner only (RLS). The page can only sign in with an existing account (shouldCreateUser: false).
    The publishable key is meant for browsers; the database policies do the protecting. */
@@ -12,11 +12,15 @@
   const CONFIG = {
     url: 'https://xabgankckrcuhcgdolrg.supabase.co',
     key: 'sb_publishable_kncKodoYJZ6ByexwWM_TtQ_OpW68M5f',
-    tag: 'make 3-D',                 // the Quick Detail tag that marks a detail for Make 3D
+    tag: 'make3d',                   // the Quick Detail tag that marks a detail for Make 3D (case does not matter)
     scenesTable: 'm3d_scenes',
     logTable: 'm3d_scene_log',
     detailsTable: 'sketch_details',
   };
+
+  // Tags match ignoring letter case only. The retired "make 3-d" spelling is not the same tag, so it no longer matches.
+  const tagKey = (t) => String(t).trim().toLowerCase();
+  const hasTag = (tags, tag) => Array.isArray(tags) && tags.some((t) => tagKey(t) === tagKey(tag));
 
   function friendly(err) {
     const msg = (err && err.message) || String(err);
@@ -99,7 +103,6 @@
         return row.model_id;
       },
 
-      // Read only. Quick Detail details tagged for Make 3D. Deleted details are left out.
       // Upserts scene log rows by model_id (public.m3d_scene_log). Owner only, by the table's policy.
       async saveSceneLog(rows) {
         if (!rows.length) return 0;
@@ -107,12 +110,14 @@
         return rows.length;
       },
 
+      // Read only. Quick Detail details tagged for Make 3D, any letter case. Deleted details are left out.
+      // The tag match is done here, not in the query, because the database compares tags case-sensitively.
       async listReferences() {
-        return ok(await client.from(cfg.detailsTable)
+        const rows = ok(await client.from(cfg.detailsTable)
           .select('id, name, scale, tags, updated_at')
-          .contains('tags', [cfg.tag])
           .is('deleted_at', null)
           .order('updated_at', { ascending: false }));
+        return (rows || []).filter((r) => hasTag(r.tags, cfg.tag));
       },
     };
   }

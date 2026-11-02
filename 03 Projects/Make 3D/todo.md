@@ -137,3 +137,22 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - [x] V07 physical flight: larger meadow, bluff, thermal, energy-based speed, flapping only on the climb, 21 -> 26 test groups.
 - [ ] IFC export of lofts and sheets (tessellated); clash check for lofts; a form to add one.
 - [ ] Jimmy checks the hawk on iPad (play bar, pinch) and says whether "looping around" meant circling (built) or a vertical loop.
+
+## Robot loop, Parts dropdown, make3d tag (2026-11-02)
+
+- [x] Quick Detail tag: `make3d` in any letter case is the tag; `make 3-D` is retired (cloud filter now matches case only; `tests/test_cloud.js`).
+- [x] Robot loop V02: the walk follows the sketched "Robot Loop" (48 points, seam averaged, rest heading +X), `tools/robot_loop.js`, `tests/test_robot_loop.js`.
+- [x] Robot loop V03 frisbee and V04 top hat, each a group with a `show:<label>` tag.
+- [x] Parts dropdown in the upper right: a checkbox per tagged group, hides its branch (`js/core/visibility.js`, `tests/test_visibility.js`).
+- [ ] Jimmy checks the sketch scale (closed shape taken as 19'-7" on its longest side = 235 in) and the seam on iPad.
+- [ ] Antenna passes through the top hat (not moved; V05 could shorten it or tilt the hat).
+- [ ] Supabase migration `001` comment still says `make 3-D`; the migration is applied, so only its comment is out of date.
+
+## Robot cape and the Parts control (2026-11-02, round 2)
+
+- [x] Frisbee in the banana hand (V05); V02 to V04 unchanged.
+- [x] Parts control under Full screen in the stage (upper right), not in the header.
+- [x] Robot cape from the Quick Detail (`tools/robot_cape.js`): sheet on 7 joints, border beads, tassels, holes as discs; a wave all the time, a sideways swing in turns (`tests/test_robot_cape.js`).
+- [ ] Jimmy checks the cape size (22 in, drawn 7'-10" not used) and whether the sway in turns is too much (bottom up to about 7 in).
+- [ ] Holes are discs, not cut-outs; the border is beads, not a trim; no sheen. Tell me if these matter.
+- [ ] Cape does not collide with the robot; check on iPad.

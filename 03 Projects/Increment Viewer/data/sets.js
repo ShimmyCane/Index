@@ -8,7 +8,12 @@ window.REVIEW_SETS = [
   { id: "aquarium", label: "Grand Ocean Aquarium: V01 to V06" },
   { id: "habitat_aquarium", label: "Coastal Habitat Aquarium: V01 to V07, an organic habitat tank" },
   { id: "hawk", label: "Hawk: closed meshes on a skeleton line, V01 to V07" },
-  { id: "solar_system", label: "Solar System: V01 to V06, true orbits from V06" },
+  { id: "solar_system", label: "Solar System: V01 to V07, comets and the 1958 start from V07" },
   { id: "planet_views", label: "Planet views: V02 and V03, eight planets" },
-  { id: "earth_views", label: "Earth view: V02 to V10" }
+  { id: "earth_views", label: "Earth view: V02 to V10" },
+  { id: "planet_views_v4", label: "Planet views: V04 to V06, shaded" },
+  { id: "earth_views_v11", label: "Earth view: V11 to V20, shaded" },
+  { id: "earth_views_v21", label: "Earth view: V21, dot map from real coastlines" },
+  { id: "earth_views_v22", label: "Earth view: V22, satellites on faded orbits, storms and rockets to scale" },
+  { id: "robot_loop", label: "Robot loop: sketched walk, frisbee, top hat and cape, V02 to V05" }
 ];

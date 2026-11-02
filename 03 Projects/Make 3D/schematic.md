@@ -211,7 +211,8 @@ Axis conversion happens in one place (`viewer/axes.js`): model Z-up → Three.js
 - **Reject flow** *(round 2, Q15)*: the editor stays open with the reasons listed. Delete one or more of the offending objects and re-apply, or preview the result without saving.
 - **Files** *(Q17)*: open or save a bundle (`model.json` + `history.json` + `world.json`, or one combined `.make3d.json`). Sample models load from `models/`. The last session autosaves to localStorage.
 - **Cloud** *(round 2, Q17, v0.4)*: `m3d_scenes` in the architecture database (one row per scene: bundle and replayed model), registered in `table_index`, owner only (RLS). Built 2026-11-02.
-- **Library** *(round 3; four built-in scenes from v0.5: garden planter, outdoor table, outdoor table V2, kitchen)*: lower-right button. Lists input scenes (built in, and saved in the cloud). Lists Quick Detail details tagged `make 3-D` as read-only future references. Scenes from an LLM or from drawings come later, linked in as JSON input.
+- **Library** *(round 3; four built-in scenes from v0.5: garden planter, outdoor table, outdoor table V2, kitchen)*: lower-right button. Lists input scenes (built in, and saved in the cloud). Lists Quick Detail details tagged `make3d` (any letter case; `make 3-D` is retired) as read-only future references. Scenes from an LLM or from drawings come later, linked in as JSON input.
+- **Parts dropdown** *(round 10)*: upper-right button. Lists each group tagged `show:<label>` (for example `show:banana`) with a checkbox; unticking it hides that group and everything under it. The model stores only the tag; the rule is in `js/core/visibility.js`. Robot loop V02 to V04 use it for the banana, frisbee and hat.
 - Drawing and component blocks are future (round 2, Q16 and Q14).
 
 ## 8. Page layout (draft)
@@ -474,3 +475,49 @@ Purpose: the solar system (V06) follows real orbits from a real date; the animat
 - Positions beyond 2050 are extrapolated (JPL's table is fit for 1800 to 2050).
 - At one lap per 240 s, the fast spins (Jupiter, Earth) alias to flicker. This is expected.
 - Textures are rough discs, spheres and cones; they are not survey data.
+
+## 18. Procedural surfaces, zoom-linked time, planet framing, and the 1958 start (round 10: built)
+
+**Procedural materials (`js/viewer/viewer.js`).** A material may carry a `kind` and its numbers. The shader does the rest, so no image is stored in the model.
+- `clouds`: a see-through noise shell. Fields: `coverage` (0 to 1), `scale`, `seed`, `alpha`, `color`, and `opacity` (under 0.4 so taps pass through).
+- `earth`: a planet surface. `land` and `desert` are lists of ellipses on the map, `[centre lat, centre lon, radius lat, radius lon]` in degrees, with soft edges. Noise at two scales makes the coasts ragged. The colours are `ocean`, `oceanDeep`, `land_color`, `desert_color`, `ice`.
+- `bands`: a shaded planet with zonal bands (the palette is `a`, `b`, `c`; `freq` is the band frequency, and `freq` 0 gives a mottled rock). Gas giants and rocky planets use it.
+- Lighting is a fixed light in view space, so a spinning planet's shading does not swing.
+- The page does not store images; this is the answer to "more detailed modeling". Real map or photo textures would be the next step, and they need a decision about storing image assets in the repo (see the message that accompanies this round).
+
+**Framing (`header.view`).** `{ fill, radius }` on a planet view: the camera distance is set so a sphere of `radius` fills `fill` of the screen height (the 35 degree lens gives d = R / (fill x tan 17.5 degrees)). The button Reset view returns to this framing. Planets use `fill` 0.75.
+
+**Zoom-linked time.** A one-shot timeline runs at `speed x zoomSpeed(camera radius)`. `zoomSpeed` is `clamp(r / 1200, 0.04, 1)` on timeline scenes, so zoomed in (radius 120) the animation runs at about a tenth of its normal speed.
+
+**Tracker steps by zoom.** Far out (camera radius over 1200) a notch is a year, over 400 a month, over 150 a week, and closer a day. The tracker steps by the calendar (`setUTCFullYear`, `setUTCMonth`, days), and the drum shows the same unit. Scroll: one unit a notch (Shift: ten). Drag: one unit per 10 px.
+
+**1958 start and comets (`tools/solar_true.js`, scene `solar-system-v07`).** Start 31 January 1958 (Explorer 1, NASA's first US satellite). The planets are placed on that day from the JPL approximate elements. Comets have their mean anomaly set from the time of perihelion: Halley (1986-02-09), Encke (2023-10-21), Tempel 1 (2005-07-04). Their period is a^1.5 years. V06 is kept exactly as it was (2026 start, no comets).
+
+**More increments.** Planet views V04 to V06 (eight planets, shaded surfaces and bands, extra craters, rings and moons). Earth V11 to V20 (shaded continents and clouds, mountains, a third storm, aurora, small satellites, city lights, Moon craters, two more launches, sea ice, a second cloud shell). Earth V11 to V20 loop 480 s. Versions are cumulative; V02 to V10 keep their flat dots and blobs, unchanged in geometry.
+
+**Limits.** Continents are ellipses on a map, about 21% of the sphere, not coastlines. Shading is a rough noise model, not a physical atmosphere. Halley's perihelion lies inside the drawn Sun (the Sun is stylised). Comet elements are approximate and are to be checked against the JPL Small-Body Database. Fast spins alias at one lap per 240 s.
+
+## 19. Earth dot map (V21: built)
+
+Source: research `04 AI/Make 3D/research/earth-land.md`. Request: the continents do not look right; keep the dots, make the grid four times denser and the dots smaller, and be more precise.
+
+- **Land:** `tools/earth_land_5deg.js` holds a 36 by 72 grid of land cells (5 degrees; cell centres from latitude 87.5 to -87.5, longitude -177.5 to 177.5), sampled from Natural Earth 1:50m land. Antarctica (latitude below -80) is forced to land and drawn as ice. Desert boxes are rough.
+- **Dots:** one sphere per land cell, radius 0.36 in, sunk 0.1 in, parented to the Earth body (so they spin with it). Keys `land21-N`. Sand in the desert boxes.
+- **Sea:** material `earth_ocean21` (V21 only): the ocean colour with `no_land: true`. The viewer's Earth shader then sets land to 0 (`uNoLand`), so no noise continents appear. Older materials and shared lists are unchanged.
+- **Scene:** `planet-earth-v21` (`EARTH_VIEWS_V21` in `tools/planet_views_v4.js`), 1,134 objects, loop 480 s as V20.
+- **Tests:** `node tests/test_earth_land.js`.
+- **Limits:** 5-degree coasts (about 300 km); coastal cities can fall a cell off; deserts are boxes; the city lights of V15 stay on the older grid.
+
+## 20. Earth V22: satellites, storms, rockets and clouds to scale (built)
+
+Source: research `04 AI/Make 3D/research/earth-scale.md`. Request: fix the floating parts; closer to scale, exaggeration fine; faded orbit lines; about ten times the satellites; Hubble and others.
+
+- **Scale:** Earth's radius 9.5 in (about 670 km per inch). Rockets about 0.85 in tall; storms about 2.5 in across; cloud shells 0.1 and 0.2 in above the ground; satellites 0.25 in and placed on rings in the real order (LEO 2.5 to 3.4 in, navigation 7.5, geostationary 14.5, the Moon 30 from the centre).
+- **Satellites:** rings are groups that turn about their normal (`x`, `y` or `z`): LEO A to D (68 spheres), navigation (6), geostationary (4, 32 turns per loop so they stay over one spot). The ISS, Hubble and a polar satellite each have their own ring. About 81 satellites against 8 before.
+- **Orbit lines:** closed `loft` tubes on the same planes, material `orbit22` (opacity 0.3, so taps pass through). One for each ring, the ISS, Hubble, the polar orbit and the Moon.
+- **Storms and clouds:** storm puffs (0.25 in) on the shell at 0.14 in above the ground; cloud shells at R+0.1 and R+0.2.
+- **Rockets:** stage 0.6 in, nose and flame 0.25 in; pads 0.35 in radius; each lifts about 1 in per loop.
+- **Rules:** every part is at least 0.25 in in each dimension. Orbit tubes are thin inside a 0.25 in box.
+- **Tests:** `node tests/test_earth_v22.js`.
+- **Limits:** James Webb is not drawn; the mountains (V12) are still large cones; the Moon's distance is not to scale.
+

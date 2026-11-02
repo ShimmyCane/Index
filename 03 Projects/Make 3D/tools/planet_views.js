@@ -198,6 +198,7 @@ function planetScene(key, v) {
       description: `${p0.name} on its own, increment ${v}: ${p0.desc}. Textures are placed by latitude and longitude; sizes are rough. Spins${moons.length ? ', with its moons going round' : ''}. Use the button to go back to the Solar System.`,
       units: 'in', up: 'z', world: WORLD_ID,
       materials: MATERIALS,
+      view: { fill: 0.75, radius: p.R },
       links: [{ label: 'Back to the Solar System', target: 'solar-system-v06', transition: 'fade' }],
     },
     defs,
@@ -336,6 +337,7 @@ function earthScene(v) {
       description: `Earth on its own, increment ${v} of 10: ${v >= 2 ? 'continents' : 'a plain ball'}${v >= 3 ? ', deserts and ice caps' : ''}${v >= 4 ? ', clouds' : ''}${v >= 5 ? ', a station' : ''}${v >= 6 ? ', a launch' : ''}${v >= 7 ? ', a storm' : ''}${v >= 8 ? ', a polar satellite' : ''}${v >= 9 ? ', city lights' : ''}${v >= 10 ? ', a second launch and storm; the loop is twice as long' : ''}. Sizes are rough and not to scale.`,
       units: 'in', up: 'z', world: WORLD_ID,
       materials: MATERIALS,
+      view: { fill: 0.75, radius: p0.R },
       links: [{ label: 'Back to the Solar System', target: 'solar-system-v06', transition: 'fade' }],
     },
     defs,
@@ -370,7 +372,7 @@ const EARTH_VIEWS = [2, 3, 4, 5, 6, 7, 8, 9, 10].map(earthScene);
 
 // the newest version of each planet view (the solar system links here)
 function latestId(key) {
-  return key === 'earth' ? 'planet-earth-v10' : `planet-${key}-v03`;
+  return key === 'earth' ? 'planet-earth-v20' : `planet-${key}-v06`;
 }
 
-module.exports = { PLANET_VIEWS_V2V3, EARTH_VIEWS, MATERIALS, latestId, EXTRA, LOOP_S };
+module.exports = { PLANET_VIEWS_V2V3, EARTH_VIEWS, MATERIALS, latestId, EXTRA, LOOP_S, surf, disc, dot, cone, ring, rocket, storm, textures, bodyDefs: SS.bodyDefs, cells, inAny, LAND, DESERT, CITY, WORLD_ID, planetDefs, earthEarlierDefs };
