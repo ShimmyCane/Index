@@ -191,3 +191,10 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 - **Test scene:** robot with a banana (`tools/robot_banana.js`, `models/robot-banana/`): 62 parts, nine motions, an 18 s loop round a winding closed path of stepping stones.
 - **Checks:** `node tests/test_motion.js` (12 groups), `node tools/anim_check.js <dir>`; the existing tests and the smoke run still pass.
 - **Open:** Jimmy checks on iPad (walk, pinch). Next: clash check over time (A6), frame strips for the Increment Viewer (A7). The make-3d skill has a motion step (A8, done when Jimmy asked). The Library folds versions by project, newest first.
+
+## Adventure Coaster Park, compact and animated (V11 to V15, 2026-11-02)
+
+- **Build:** `03 Projects/Make 3D/tools/adventure_park_compact.js` (`defsFor(v)` and `motionFor(v, uuid)`), scenes V11 to V15 in the Library under "Adventure park". Renders in `renders/adventure_park_compact/`. Review page `viewer.html?set=adventure_park_compact`.
+- **Ladder:** V11 compact footprint (about 300 by 250 ft, was 600 by 400), Thunder Trail lift lowered to 50 ft; V12 Pip and Thunder cars run their tracks; V13 teacups spin, Bumble boats slide, Splash boats bob; V14 Sky Wheel turns (show ride, not counted in capacity), flags wave, balloons bob; V15 plaza fountain wave, so every ride moves.
+- **Motion:** one loop of 24 s per version, autoplay twice. Path motions use the car centre (rail + 2 ft) and `M.pathAt` for the second car's start. Checks: `build_samples` motion check accepts each file, `tests/test_motion.js` passes, poses are finite.
+- **Open for Jimmy:** (1) Does the Sky Wheel count toward capacity? (2) Keep the 50 ft lift, or go back to 60 ft? (3) Cars move on a smoothed curve through the track points, so they can sit a little off the rails; a straight-segment path would fix that but look less smooth. (4) Motion uses the browser's play bar; the Increment Viewer shows renders only, not the motion.

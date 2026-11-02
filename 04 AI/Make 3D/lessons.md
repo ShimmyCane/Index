@@ -75,3 +75,10 @@ Appended over time. Promote anything reusable to `04 AI/lessons_pool.md`.
 - **A uniform Catmull-Rom curve bulges past sharp corners.** It was fine for an organic path; don't expect the curve's length to equal the polygon's.
 - **"Not on the website" can mean "not merged".** GitHub Pages serves `main`; work on a pull request branch isn't live until it merges. Say so up front.
 - **Sort by a stored date, not by build time.** Keep each scene's created and updated dates plus a content hash in a file the build maintains, so rebuilding changes nothing and only a real change moves a project to the top. Break ties by build order (later scenes are newer), not by name ("V16" sorts above "V2.5").
+
+## Adventure Coaster Park, compact and animated (2026-11-02)
+
+- **Give each motion its real anchor.** A path motion moves the target's pivot along the path, so the pivot must be the object's rest centre. A car drawn 2 ft above the rail needs a path 2 ft higher, or it drops onto the rail.
+- **A rotating part needs a visible feature.** A flagpole spinning about its own axis shows nothing; the flag box has to hang off the pole and be the target.
+- **Check motion numbers, not just the rest pose.** Run `poseAt` at a few times and check the values are finite and the targets move. A rest-pose render cannot show a path or a loop.
+- **Units twice is a bug.** Dividing a path by 12 and then multiplying by 12 again leaves it in feet; check the first point of each path is in inches.
