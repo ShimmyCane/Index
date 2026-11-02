@@ -37,6 +37,13 @@ const MATERIALS = {
   shoe1: { color: '#2b2b2b', opacity: 1 },
   shoe2: { color: '#6b4f3a', opacity: 1 },
   cork: { color: '#a77f58', opacity: 1 },
+  fan: { color: '#9ec9e8', opacity: 1 },
+  fanPink: { color: '#f2b8c6', opacity: 1 },
+  puzzleBox: { color: '#8c3b2e', opacity: 1 },
+  bottle: { color: '#2f7f86', opacity: 1 },
+  boxDark: { color: '#3a3a3a', opacity: 1 },
+  puzzle1: { color: '#6fa8dc', opacity: 1 },
+  puzzle2: { color: '#f4c542', opacity: 1 },
   paperRed: { color: '#d64545', opacity: 1 },
   paperWhite: { color: '#fafafa', opacity: 1 },
   poster: { color: '#8fb8e0', opacity: 1 },
@@ -107,7 +114,17 @@ function defsFor2(v) {
 
   // ---- V11: re-layout in the new orientation (blockout) -------------------
   add('floor', 'Floor', 'wood floor, room footprint', 'box', [W, L, 0.5], [W / 2, L / 2, 0.25], 'floor');
-  add('wall-left', 'Left wall (TV wall)', 'context only, the bookcase runs along it', 'box', [T, L, H], [-T / 2, L / 2, H / 2], 'wall');
+  if (v < 16) add('wall-left', 'Left wall (TV wall)', 'context only, the bookcase runs along it', 'box', [T, L, H], [-T / 2, L / 2, H / 2], 'wall');
+  if (v >= 16) {
+    // V16: the TV wall has one window, near the far corner, as the plan and photos show. Wall pieces run along y.
+    const tvWindow = { key: 'tv-wall', y0: 170, y1: 188, z0: 42, z1: 84 };
+    const yc = -T / 2;
+    add('tvwall-y0', 'TV wall, near part', 'context only', 'box', [T, tvWindow.y0, H], [yc, tvWindow.y0 / 2, H / 2], 'wall');
+    add('tvwall-y1', 'TV wall, far part', 'context only', 'box', [T, L - tvWindow.y1, H], [yc, (L + tvWindow.y1) / 2, H / 2], 'wall');
+    add('tvwall-below', 'Wall below TV-wall window', 'context only', 'box', [T, tvWindow.y1 - tvWindow.y0, tvWindow.z0], [yc, (tvWindow.y0 + tvWindow.y1) / 2, tvWindow.z0 / 2], 'wall');
+    add('tvwall-above', 'Wall above TV-wall window', 'context only', 'box', [T, tvWindow.y1 - tvWindow.y0, H - tvWindow.z1], [yc, (tvWindow.y0 + tvWindow.y1) / 2, (H + tvWindow.z1) / 2], 'wall');
+    add('glass-tv-wall', 'Window glass, TV wall', 'the one window on the TV wall, near the far corner', 'box', [0.5, tvWindow.y1 - tvWindow.y0, tvWindow.z1 - tvWindow.z0], [0.25, (tvWindow.y0 + tvWindow.y1) / 2, (tvWindow.z0 + tvWindow.z1) / 2], 'glass');
+  }
   add('wall-right', 'Right wall', 'context only', 'box', [T, L, H], [W + T / 2, L / 2, H / 2], 'wall');
   wallAlongX('far', 0, W, L + T / 2, FAR_OPENINGS);
   FAR_OPENINGS.filter((o) => o.glass).forEach((o) =>
@@ -215,7 +232,60 @@ function defsFor2(v) {
     add('jacket', 'Dark jacket on the chair', 'jacket over the back of the near chair', 'box', [13, 2, 12], [100, 37.5, 33], 'jacket');
   }
 
-    if (v >= 15) {
+    if (v >= 16) {
+    // V16: detail restored from V10 and checked against the plan and elevations.
+    // Window frames: white, 1.5 in wide, on the room face of every window.
+    const frame = (key, o, face) => {
+      const w = o.x1 - o.x0, h = o.z1 - o.z0;
+      if (face === 'far') {
+        add(`${key}-top`, `${key} frame, head`, 'white frame', 'box', [w + 3, 1, 1.5], [(o.x0 + o.x1) / 2, L - 0.5, o.z1 + 0.75], 'trim');
+        add(`${key}-sill`, `${key} frame, sill`, 'white frame', 'box', [w + 3, 1, 1.5], [(o.x0 + o.x1) / 2, L - 0.5, o.z0 - 0.75], 'trim');
+        add(`${key}-left`, `${key} frame, left`, 'white frame', 'box', [1.5, 1, h], [o.x0 - 0.75, L - 0.5, (o.z0 + o.z1) / 2], 'trim');
+        add(`${key}-right`, `${key} frame, right`, 'white frame', 'box', [1.5, 1, h], [o.x1 + 0.75, L - 0.5, (o.z0 + o.z1) / 2], 'trim');
+      }
+    };
+    FAR_OPENINGS.filter((o) => o.glass).forEach((o) => frame(`frame-${o.key}`, o, 'far'));
+    // TV-wall window frame (on the room face, x = 0.5).
+    add('frame-tv-top', 'TV-wall window frame, head', 'white frame', 'box', [1, 18 + 3, 1.5], [0.5, 179, 84.75], 'trim');
+    add('frame-tv-sill', 'TV-wall window frame, sill', 'white frame', 'box', [1, 18 + 3, 1.5], [0.5, 179, 41.25], 'trim');
+    add('frame-tv-near', 'TV-wall window frame, near', 'white frame', 'box', [1, 1.5, 42], [0.5, 169.25, 63], 'trim');
+    add('frame-tv-far', 'TV-wall window frame, far', 'white frame', 'box', [1, 1.5, 42], [0.5, 188.75, 63], 'trim');
+    // Baseboards, 4 in high. Left wall skips the window; far wall skips the door.
+    add('base-left-near', 'Baseboard, left wall, near', 'white, 4 in high', 'box', [1, 170, 4], [0.5, 85, 2], 'trim');
+    add('base-left-far', 'Baseboard, left wall, far', 'white, 4 in high', 'box', [1, L - 188, 4], [0.5, (188 + L) / 2, 2], 'trim');
+    add('base-right', 'Baseboard, right wall', 'white, 4 in high', 'box', [1, L, 4], [W - 0.5, L / 2, 2], 'trim');
+    add('base-far-left', 'Baseboard, far wall, left of door', 'white, 4 in high', 'box', [118, 1, 4], [59, L - 0.5, 2], 'trim');
+    add('base-far-right', 'Baseboard, far wall, right of door', 'white, 4 in high', 'box', [W - 150, 1, 4], [(150 + W) / 2, L - 0.5, 2], 'trim');
+    add('door-handle', 'Door handle', 'round handle, about waist high', 'sphere', [1], [126, L - 2, 38], 'trim');
+
+    // Bookcase top and the table, restored from V10. Near unit top is y 0-56 at z 28; the TV console is on the far unit.
+    add('fan-blue', 'Blue fan', 'small blue fan on the near unit top', 'cylinder', [4, 7], [7, 50, 31.5], 'fan');
+    add('fan-pink', 'Pink fan', 'small pink fan on the near unit top', 'cylinder', [3.5, 7], [7, 12, 31.5], 'fanPink');
+    add('boxed-puzzle', 'Boxed puzzle', 'small boxed puzzle on the near unit top', 'box', [7, 4, 9], [7, 3, 32.5], 'puzzleBox');
+    add('plant-floor-pot', 'Plant pot by the bookcase', 'terracotta pot, floor, near end of the bookcase (moved from the bookcase top)', 'cylinder', [7, 14], [30, 14, 7], 'pot');
+    add('plant-floor-leaves', 'Plant by the bookcase, leaves', 'leafy plant, floor', 'sphere', [11], [30, 14, 36], 'leaf');
+    add('bottle', 'Water bottle', 'teal bottle on the children’s table', 'cylinder', [2.3, 10], [74, 170, 27], 'bottle');
+    add('dark-box', 'Dark box', 'dark case on the children’s table', 'box', [14, 8, 3], [60, 158, 23.5], 'boxDark');
+    add('puzzle-1', 'Puzzle sheet 1', 'blue sheet on the table', 'box', [12, 9, 0.3], [52, 166, 22.15], 'puzzle1');
+    add('puzzle-2', 'Puzzle sheet 2', 'yellow sheet on the table', 'box', [10, 8, 0.3], [78, 174, 22.15], 'puzzle2');
+    chair('chair-3', 'Wooden chair 3', 'near side of the table, beside chairs 1 and 2 (restored from V10)', 96, 138, 1, 12, 'chairWood');
+
+    // Books in the top row of the near unit, in the cubbies with no top-row items (y 14-28 and 42-56).
+    let n = 200;
+    [[14, 28], [42, 56]].forEach(([y0, y1]) => {
+      let y = y0 + 0.8;
+      for (let i = 0; i < 6 && y < y1 - 2.4; i++) {
+        const w = 1.2 + ((n * 7 + i * 3) % 5) * 0.2;
+        const h = 7.5 + ((n * 5 + i * 11) % 5) * 0.7;
+        if (y + w > y1 - 0.8 || h > 12.6) break;
+        add(`book-near-${n}`, `Book, near unit ${n - 199}`, '', 'box', [9, w, h], [6.5, y + w / 2, 15.4 + h / 2], ['book0', 'book1', 'book2', 'book3', 'book4', 'book5', 'book6'][(n * 3) % 7], { parent: 'bookcase' });
+        y += w + 0.1;
+        n++;
+      }
+    });
+  }
+
+  if (v >= 15) {
     // V15: group the parts so the Objects list shows the structure. Only ungrouped parts are moved; groups go first.
     const groups = [
       ['room-shell', 'Room shell', 'floor, walls, the far wall with openings and the front door', /^(floor$|wall-|far-|door-panel)/],
@@ -244,6 +314,7 @@ const NOTES = {
   13: 'V13: review of V12. The cork tiles hid the room from above, so they are now see-through. Added the red paper cut-outs and white chart on the TV wall, the blue poster and light switch on the right wall, a white frame round the front door, and the paper lantern.',
   14: 'V14: bookcase contents from the TV-wall photo: printer on top of the near unit, storage boxes and bags, and about 40 upright books in the far unit with a basket. Added the wooden chair with a dark jacket near the camera.',
   15: 'V15: final pass on V14. Plants are leaf clusters, not single balls. Objects grouped (room shell, windows, ceiling, TV wall, plants, children’s table and chairs, decor, floor items), so the Objects list shows the structure. Layout unchanged.',
+  16: 'V16: merge of V15 and V10. Restored from V10: window frames on every window, a window on the TV wall (near the far corner, as in the photos), baseboards, door handle, blue and pink fans and the boxed puzzle on the bookcase, the water bottle, dark box, two puzzle sheets and the third wooden chair, plus books in the near unit. The V10 bookcase plants moved to the floor, since the TV console now sits on the far unit.',
 };
 
 function sceneFor2(v) {

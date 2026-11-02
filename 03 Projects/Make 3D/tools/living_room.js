@@ -280,6 +280,6 @@ function sceneFor(v) {
 }
 
 // Versions built so far. Add one number per review round.
-const LIVING_ROOM = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map((v) => (v >= 11 ? require('./living_room_second_look.js').sceneFor2(v) : sceneFor(v)));
+const LIVING_ROOM = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].map((v) => (v >= 11 ? require('./living_room_second_look.js').sceneFor2(v) : sceneFor(v)));
 
 module.exports = { LIVING_ROOM, defsFor, sceneFor };

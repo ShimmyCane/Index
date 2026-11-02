@@ -100,6 +100,34 @@
         "color": "#a77f58",
         "opacity": 1
       },
+      "fan": {
+        "color": "#9ec9e8",
+        "opacity": 1
+      },
+      "fanPink": {
+        "color": "#f2b8c6",
+        "opacity": 1
+      },
+      "puzzleBox": {
+        "color": "#8c3b2e",
+        "opacity": 1
+      },
+      "bottle": {
+        "color": "#2f7f86",
+        "opacity": 1
+      },
+      "boxDark": {
+        "color": "#3a3a3a",
+        "opacity": 1
+      },
+      "puzzle1": {
+        "color": "#6fa8dc",
+        "opacity": 1
+      },
+      "puzzle2": {
+        "color": "#f4c542",
+        "opacity": 1
+      },
       "paperRed": {
         "color": "#d64545",
         "opacity": 1

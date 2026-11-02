@@ -91,3 +91,20 @@ Two more photos came in (a TV wall close up, and a view from the near end of the
 | V15 | Final pass: leaf clusters on the plants, objects grouped into 16 groups |
 
 **Open for Jimmy:** the second photo shows a pink chair near the camera and a fig tree in a blue pot by the door; the fig is a simplified cluster. The chairs and table are estimates. The viewer still has no wall or ceiling hide toggle, so interior checks rely on see-through materials and camera angles.
+
+## Plans and elevations, and V16 (2026-11-02)
+
+Drawings are generated from the model by `03 Projects/Make 3D/tools/drawings.js`, so they cannot drift from the 3-D scene: `node tools/drawings.js <model id> <dir>`. Each set has a plan and one elevation per side of the room (the walls you see standing inside facing that side). Sets are in `drawings/v10`, `drawings/v15` and `drawings/v16`.
+
+**V16 is the merge.** It keeps the V15 layout and restores what V10 had that V15 lost:
+- Window frames on every window; baseboards on the walls; the door handle.
+- A window on the TV wall, near the far corner (one window, as you noted). Its position is inferred from the blinds beyond the bookcase in the second photo.
+- The blue and pink fans and the boxed puzzle on the bookcase top; the water bottle, dark box, two puzzle sheets and the third wooden chair at the table.
+- More books in the near unit.
+
+**Changed on purpose:** the V10 bookcase plants cannot stay on the bookcase, because the TV console now sits on the far unit. They moved to the floor by the near end.
+
+**Assumptions to confirm:**
+1. The sofa has two windows: one behind it (the big window) and one on its left (the narrow window). The narrow window on the right of the big one is kept from the photo; you did not mention it.
+2. The TV wall window sits near the far corner, behind the monstera.
+3. The chairs and table are estimates.
