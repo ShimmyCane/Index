@@ -3,12 +3,14 @@
 //   V02  the sketched loop, smoothed into a closed curve; the banana is a visibility group (show:banana)
 //   V03  + frisbee held in the left hand (show:frisbee)
 //   V04  + top hat on the head (show:hat)
+//   V05  frisbee moves to the banana's right hand; + robot cape (show:cape), a wave that flows in turns (tools/robot_cape.js)
 // Robot V01 (tools/robot_banana.js) is unchanged. The new scenes reuse its parts and motions with a new path.
 //
 // Scale: the closed shape on the sketch is labelled 19'-7" (235 in) at 3"=1'-0". Its longest side is taken
 // as that length, so sketch units are scaled to inches by 235 / longest side. This is an estimate.
 
 const RB = require('./robot_banana.js');
+const CAPE = require('./robot_cape.js');
 const M = require('../js/core/motion.js');
 
 const SKETCH_ID = '3c4c380d-7901-4944-8929-d74e92903789';
@@ -130,6 +132,15 @@ function addFrisbee(add) {
   add('frisbee-rim', { name: 'Frisbee rim', description: 'raised ring on the disc', type: 'cylinder', dimensions: [2.8, 0.6], position: [0, 12.3, 17.05], material: 'joint', parent: 'frisbee' });
 }
 
+// V05: the frisbee moves to the banana's hand (right). The disc hangs outside the hand, so the rim touches it.
+function addFrisbeeRight(add) {
+  const [hx, hy, hz] = RB.HAND_R;
+  add('frisbee', { name: 'Frisbee', description: 'held in the right hand, with the banana', type: 'group', dimensions: [], position: [hx, hy, hz], parent: 'arm-r',
+    tags: ['show:frisbee'] });
+  add('frisbee-disc', { name: 'Frisbee disc', description: 'flat, coral', type: 'cylinder', dimensions: [4.5, 0.5], position: [hx, hy - 4.5, hz], material: 'accent', parent: 'frisbee' });
+  add('frisbee-rim', { name: 'Frisbee rim', description: 'raised ring on the disc', type: 'cylinder', dimensions: [2.8, 0.6], position: [hx, hy - 4.5, hz + 0.55], material: 'joint', parent: 'frisbee' });
+}
+
 // Top hat: a brim, a crown and a band, on the head (the head top is at z 37).
 function addHat(add) {
   add('hat', { name: 'Top hat', description: 'sits on the head', type: 'group', dimensions: [], position: [0, 0, 37], parent: 'upper',
@@ -139,13 +150,15 @@ function addHat(add) {
   add('hat-band', { name: 'Hat band', type: 'cylinder', dimensions: [3.65, 1], position: [0, 0, 38.1], material: 'accent', parent: 'hat' });
 }
 
-// The increment for version v (2, 3 or 4). Each version adds to the one before; older parts are kept.
+// The increment for version v (2 to 5). Each version adds to the one before; older parts are kept, and an older
+// increment is never rebuilt with newer parts (V03 and V04 keep the frisbee in the left hand).
 function defsFor(v) {
   const add = (() => { const d = []; const f = (key, o) => d.push([key, o]); f.list = d; return f; })();
   const base = RB.defs(PATH, { tagged: true });
   for (const [key, o] of base) add(key, o);
-  if (v >= 3) addFrisbee(add);
+  if (v >= 3 && v < 5) addFrisbee(add);
   if (v >= 4) addHat(add);
+  if (v >= 5) { addFrisbeeRight(add); CAPE.capeDefs(add); }
   return add.list;
 }
 
@@ -153,7 +166,17 @@ const NOTES = {
   2: 'The sketched loop, smoothed into a closed curve: the robot walks it with the banana. Banana is a visibility group.',
   3: 'Adds a frisbee held in the left hand. Frisbee is a visibility group.',
   4: 'Adds a top hat on the head. Hat is a visibility group.',
+  5: 'The frisbee moves to the banana hand. Adds the robot cape (Quick Detail "Robot Cape"): a sheet that ripples down its length, and flows more in tight turns. Cape is a visibility group.',
 };
+
+// Motion for version v. V05 adds the cape's wave and sway to the walk.
+function motionFor(v, uuid) {
+  const base = RB.motionFor(uuid, PATH);
+  if (v < 5) return base;
+  const path3 = PATH.map((p) => [p[0], p[1], 0]);
+  return { ...base, description: `${base.description} The cape ripples down its length and sways in turns.`,
+    motions: [...base.motions, ...CAPE.capeMotions(uuid('cape'), path3)] };
+}
 
 function sceneFor(v) {
   const id = `robot-loop-v0${v}`;
@@ -166,13 +189,13 @@ function sceneFor(v) {
       name: `Robot loop V0${v}`,
       description: `${NOTES[v]} Walks the loop from Quick Detail "Robot Loop" (${SKETCH_ID}).`,
       units: 'in', up: 'z', world: WORLD_ID,
-      materials: RB.MATERIALS,
+      materials: v >= 5 ? { ...RB.MATERIALS, cape: { color: '#bcd9f2', opacity: 1 } } : RB.MATERIALS,
     },
     defs: defsFor(v),
-    motion: (uuid) => RB.motionFor(uuid, PATH),
+    motion: (uuid) => motionFor(v, uuid),
   };
 }
 
-const ROBOT_LOOP = [2, 3, 4].map(sceneFor);
+const ROBOT_LOOP = [2, 3, 4, 5].map(sceneFor);
 
 module.exports = { ROBOT_LOOP, defsFor, loopPath, PATH, SKETCH_ID, SKETCH_PTS, LABEL_IN };
