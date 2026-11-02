@@ -16,7 +16,7 @@ How to run: open `index.html` in a browser (no server or build). Also works from
 - Cloud client test: `node tests/test_cloud.js` (fake Supabase, no network).
 - Units are inches. Files: `model.json` (replayed result), `history.json` (source of truth), `worlds/default-world.json` (rules).
 - Scenes: edit `tools/scenes.js`, then `node tools/build_samples.js`. Three samples: garden planter, outdoor table with parasol, kitchen.
-- Supabase (Architecture project): `m3d_scenes` (saved scenes, owner only). Reads Quick Detail's `sketch_details` where tags contain `make 3-D` (read only). SQL in `supabase/001_m3d_scenes.sql` (applied).
+- Supabase (Architecture project): `m3d_scene_log` is the log of every scene version (history, world, model, label, note); edit it there, not in JSON. Load with `node tools/push_scene_log.js` (owner session token, never committed; `--dry-run` needs no token). SQL in `supabase/002_m3d_scene_log.sql` (applied). `m3d_scenes` (saved scenes, owner only). Reads Quick Detail's `sketch_details` where tags contain `make 3-D` (read only). SQL in `supabase/001_m3d_scenes.sql` (applied).
 
 Project rules:
 - Public repo. Sample models are synthetic. Real architectural details or client drawings go in `private/`.
