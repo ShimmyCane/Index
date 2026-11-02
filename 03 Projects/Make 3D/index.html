@@ -126,6 +126,11 @@
     <div class="stage-tools">
       <button class="btn small" id="resetView" type="button">Reset view</button>
     </div>
+    <div class="anim-bar" id="animBar" hidden>
+      <button class="btn small anim-btn" id="animPlay" type="button" aria-label="Play"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></button>
+      <button class="btn small anim-btn" id="animReset" type="button" aria-label="Back to the start"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M5 12a7 7 0 1 0 2.2-5.1" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M4.5 3.5v5h5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <input id="animTime" type="range" min="0" max="1000" value="0" step="1" aria-label="Animation time">
+    </div>
   </section>
 </main>
 
@@ -217,6 +222,19 @@
     <label class="toggle"><input id="showErrors" type="checkbox"> Show errors</label>
   </div>
 
+  <div id="animSettings" hidden>
+    <label class="field">Animation speed
+      <select id="animSpeed">
+        <option value="0.5">½×</option>
+        <option value="1" selected>1×</option>
+        <option value="2">2×</option>
+      </select>
+    </label>
+    <div class="field-row">
+      <label class="toggle"><input id="animAuto" type="checkbox" checked> Play by itself on open (twice, then pause)</label>
+    </div>
+  </div>
+
   <div class="btn-row">
     <button class="btn" id="checkBtn" type="button">Check model</button>
     <button class="btn" id="saveBtn" type="button">Save file</button>
@@ -243,6 +261,7 @@
 <script src="js/core/rules.js"></script>
 <script src="js/core/io.js"></script>
 <script src="js/core/export_ifc.js"></script>
+<script src="js/core/motion.js"></script>
 <script src="vendor/supabase/supabase.js"></script>
 <script src="js/cloud/cloud.js"></script>
 <script src="js/viewer/viewer.js"></script>

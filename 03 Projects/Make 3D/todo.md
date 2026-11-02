@@ -55,16 +55,19 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - [ ] Tags on the planter, V1 table and kitchen (not done; V2 only).
 - [ ] Tag filter in the objects panel (not asked yet).
 
-## Animation (round 7, convo v0.7: designed, not built)
-- [?] Jimmy answers convo v0.7 A–D (path shape, robot look, play length, controls).
-- [ ] A1 Groups as scene nodes; children inherit the parent transform. Check: every library scene renders as before.
-- [ ] A2 `motion.json` format (`make3d.motion/0.1`), optional fourth part of the bundle; `checkMotion`. Node tests.
-- [ ] A3 `js/core/motion.js` `poseAt`: `swing`, `bob`, `path` (face along the curve). Node tests at several times.
-- [ ] A4 Viewer clock: autoplay twice then pause, ▶/⏸, ⟲, time slider; speed in ⚙️; redraw only while playing.
-- [ ] A5 Robot-with-banana test scene walking an S-curve (or loop, per A); steps timed to speed so feet don't slide.
-- [ ] A6 `spin` and `slide`; clash check sampled over time.
+## Animation (round 7, convo v0.7)
+- [x] Jimmy answers convo v0.7 A–D: always a loop; organic closed path; robot look OK; length as needed; controls OK.
+- [x] Two-finger pinch zoom on the canvas (E). Touch events, page zoom blocked over the canvas. Checked headless with two-finger touch; not yet on a real iPad.
+- [x] A1 Groups as scene nodes; children inherit the parent transform. Every library scene still renders (smoke run).
+- [x] A2 `motion.json` format (`make3d.motion/0.1`), optional fourth part of the bundle; `checkMotion`.
+- [x] A3 `js/core/motion.js` `poseAt`: `swing`, `bob`, `slide`, `spin`, `path` (closed, constant speed, faces along the curve). `node tests/test_motion.js`.
+- [x] A4 Viewer clock: autoplay twice then pause, ▶/⏸, ⟲, time slider; speed and autoplay in ⚙️; redraw only while playing or touched.
+- [x] A5 Robot-with-banana scene on a winding closed loop; steps timed to the walk, flat feet, no sliding into the ground. `node tools/anim_check.js <dir>`.
+- [?] Jimmy watches the robot on iPad: walk, speed, path, banana; and tries the pinch.
+- [ ] A6 Clash check sampled over time.
 - [ ] A7 `render_versions.js` at a time / frame strip for the Increment Viewer.
-- [ ] A8 Update the `make-3d` skill: motion as its own late increment.
+- [ ] A8 Update the `make-3d` skill: motion as its own late increment (skill file is Jimmy's; edit when asked).
+- [ ] Motion editing in the page (now motion comes from the scene file only).
 - [ ] Future: tap a part to start a motion, and chain motions (door opens, then the cuckoo comes out).
 
 ## Future (flat list, round 2)

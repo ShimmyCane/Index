@@ -319,5 +319,6 @@ const { LIVING_ROOM } = require('./living_room.js');
 const { KITCHEN_MOCKUP } = require('./kitchen_mockup.js');
 
 const { HONDA_CRV } = require('./honda_crv.js');
+const { ROBOT_BANANA } = require('./robot_banana.js');
 
-module.exports = { WORLD_ID, SCENES: [PLANTER, TABLE, OUTDOOR_V2, KITCHEN, ...LIVING_ROOM, ...KITCHEN_MOCKUP, ...HONDA_CRV] };
+module.exports = { WORLD_ID, SCENES: [PLANTER, TABLE, OUTDOOR_V2, KITCHEN, ...LIVING_ROOM, ...KITCHEN_MOCKUP, ...HONDA_CRV, ROBOT_BANANA] };

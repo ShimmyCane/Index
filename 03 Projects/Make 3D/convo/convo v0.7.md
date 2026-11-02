@@ -34,8 +34,28 @@ The viewer already redraws every frame (`requestAnimationFrame` in `js/viewer/vi
 
 A. **Path shape.** Proposed: an S-curve about 12 ft long on the ground. At the end of each play the robot jumps back to the start. Alternative: a closed loop (an oval or a figure eight), so it walks round and round with no jump. Which one?
 
+   **Jimmy:** Animations should always be loops. The path should be organic, with some turns, but still close on itself.
+
 B. **Robot look.** Proposed: a toy robot about 3 ft tall, made of boxes and cylinders: box head with round eyes and an antenna, box body, cylinder arms and legs, box feet. The banana is a curved row of short tilted cylinders, yellow with a brown tip. Colours from the pastel palette. OK?
+
+   **Jimmy:** OK.
 
 C. **Length of one play.** Proposed: about 8 seconds from start to end of the path. Then a pause of about 1 second, the second play, and stop.
 
+   **Jimmy:** Adjust the length as necessary, but the animation should always be a full loop.
+
 D. **Controls.** Proposed: ▶/⏸ and ⟲ (back to start), plus a time slider, in a small bar under the scene. Speed (½×, 1×, 2×) and "autoplay on open" go in ⚙️. OK?
+
+   **Jimmy:** OK.
+
+## Also asked (Jimmy, same review)
+
+E. **Two-finger pinch to zoom in and out on the 3-D canvas.**
+
+## Built from these answers
+
+- **Every animation is a loop.** The motion file has one `loop_s`; each motion repeats a whole number of times per loop (`cycles`), so the last frame flows into the first. The check rejects a motion that would not close.
+- **Path:** a winding closed loop of ten points through stepping stones, about 33 ft round, smoothed into a curve. The robot walks it at a steady speed and turns to face the way it goes.
+- **Length:** 18 seconds a lap (18 strides of about 22 in). The steps are timed to the walk, the feet turn back at the ankle to stay flat, and the robot dips while its legs are spread, so a foot stays on the ground.
+- **Autoplay:** plays the loop twice, then pauses at the start pose. ▶ then plays on until paused.
+- **Pinch:** two fingers apart zoom in, together zoom out. One finger still orbits, a tap still selects, and the page itself no longer zooms when you pinch the canvas.

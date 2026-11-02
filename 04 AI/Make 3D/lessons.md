@@ -57,3 +57,12 @@ Appended over time. Promote anything reusable to `04 AI/lessons_pool.md`.
 - **An opening needs the carcass split.** A solid carcass box clashes with anything placed inside it, so an open bay is built from side, top, bottom and back panels.
 - **A draft PR cannot be merged.** Mark it ready for review first, then merge with the head SHA that was checked (`expectedHeadSha`), so a late push cannot slip in.
 - **`mergeable_state: dirty` means a conflict.** Merge the base into the branch, keep both sides when both added a section, and commit the merge. Do not rebase a branch that has a PR open.
+
+## Animation (round 7, 2026-11-02)
+
+- **Make every motion loop by construction.** One loop length per file, and each motion repeats a whole number of times per loop. Then the last frame equals the first, and a test can prove it.
+- **Make the first frame the rest pose.** Start the path at the model's position, with the tangent along the way the model faces, and use phases that are zero at the start. Then editing, IFC export and the still renders don't need a separate pose.
+- **A swinging leg tilts the foot.** The heel corner digs into the ground. Turn the foot back at the ankle by the same angle, and dip the whole body by the hip-to-ankle drop, so one foot stays on the ground.
+- **Groups need scene nodes for motion.** With every part loose in the scene, nothing can carry the banana with the hand. Nodes rest at identity, so still scenes render exactly as before.
+- **Pinch on iPad: use touch events and block Safari's gesture events.** Pointer events can be cancelled when Safari takes the pinch for page zoom. Check headless with CDP `Input.dispatchTouchEvent` and two touch points.
+- **A uniform Catmull-Rom curve bulges past sharp corners.** It was fine for an organic path; don't expect the curve's length to equal the polygon's.

@@ -173,3 +173,11 @@ Two photos of a display kitchen (not committed). `tools/kitchen_mockup.js`, one 
 | V11 | Left door of the back run becomes an open bay with two wood shelves (first photo). Layout unchanged |
 
 V01 to V10 are unchanged by V11 (checked: their generated files do not change). The Library lists all eleven. The version log is also in each scene's description.
+
+## Animation, round 7 (2026-11-02)
+
+- **Decisions (convo v0.7):** motion is a separate file (`motion.json`, `make3d.motion/0.1`); every animation is a loop; autoplay twice, then pause; tap-to-start and chained motions are future (door opens, then the cuckoo comes out). Two-finger pinch zoom on the canvas.
+- **Built:** `js/core/motion.js` (`poseAt`, `checkMotion`, `motionBox`; kinds path, swing, bob, slide, spin). The viewer now makes a node per object with children inside their group, applies the pose each frame, redraws only while playing or touched, and frames the whole motion. Play bar under the scene; speed and autoplay in ⚙️. Pinch zoom by touch events (one finger orbits, a tap selects).
+- **Test scene:** robot with a banana (`tools/robot_banana.js`, `models/robot-banana/`): 62 parts, nine motions, an 18 s loop round a winding closed path of stepping stones.
+- **Checks:** `node tests/test_motion.js` (12 groups), `node tools/anim_check.js <dir>`; the existing tests and the smoke run still pass.
+- **Open:** Jimmy checks on iPad (walk, pinch). Next: clash check over time (A6), frame strips for the Increment Viewer (A7), the make-3d skill (A8, Jimmy's file).

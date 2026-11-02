@@ -259,6 +259,10 @@ Axis conversion happens in one place (`viewer/axes.js`): model Z-up → Three.js
   tools/render_versions.js headless render of named library scenes to PNG (outside the repo)
   private/                 git-ignored: the source photo (not committed)
   tests/test_core.js       Node tests for the engine
+  js/core/motion.js        motion files: poseAt, checkMotion, motionBox (round 7)
+  tools/robot_banana.js    robot-with-banana scene and its motion file
+  tools/anim_check.js      headless check: autoplay, play bar, pinch zoom
+  tests/test_motion.js     Node tests for motion and the robot walk
   schematic.md · todo.md · CLAUDE.md · convo/
 ```
 
@@ -313,9 +317,11 @@ Source: `convo/convo v0.4.md`. Open questions there. Nothing here is built yet.
 - **Future:** scene tags (S2); read-only share link (S1).
 
 
-## 14. Animation (round 7: designed, not built)
+## 14. Animation (round 7: built A1–A5)
 
-Source: `convo/convo v0.7.md`. Open questions A–D there.
+Source: `convo/convo v0.7.md` (answers A–E). Test scene: robot with a banana (`tools/robot_banana.js`, `models/robot-banana/motion.json`).
+
+**Always a loop** (Jimmy, round 7): one `loop_s` per file; every motion repeats a whole number of `cycles` per loop, and a path always closes on itself. Autoplay runs the loop `autoplay.plays` times (2), then pauses at the start pose.
 
 **Files.** Motion is a fourth file, separate from the model:
 
@@ -330,34 +336,40 @@ Source: `convo/convo v0.7.md`. Open questions A–D there.
 {
   "schema": "make3d.motion/0.1",
   "model_id": "robot-banana",
-  "autoplay": { "plays": 2, "gap_s": 1 },
-  "duration_s": 8,
+  "loop_s": 18,
+  "autoplay": { "plays": 2 },
   "motions": [
     { "id": "walk", "target": "<robot group uuid>", "kind": "path",
-      "points": [[0,0,0],[48,36,0],[96,-36,0],[144,0,0]], "face": "tangent",
-      "start": "auto" },
+      "points": [[0,0,0],[40,12,0],[80,0,0],[100,34,0],"…"], "face": "tangent",
+      "pivot": [0, 0, 0], "cycles": 1 },
     { "id": "left-leg", "target": "<left leg group uuid>", "kind": "swing",
       "pivot": [0, 4, 18], "axis": "y", "from": -25, "to": 25,
-      "period_s": 1, "phase": 0, "ease": "inOut" },
+      "cycles": 18, "phase": 0 },
     { "id": "right-leg", "target": "<right leg group uuid>", "kind": "swing",
       "pivot": [0, -4, 18], "axis": "y", "from": -25, "to": 25,
-      "period_s": 1, "phase": 0.5, "ease": "inOut" }
+      "cycles": 18, "phase": 0.5 }
   ]
 }
 ```
 
 - Units inches, Z up, angles in degrees, same as the model. `pivot` is in model coordinates at rest.
-- Kinds: `spin`, `swing`, `slide`, `bob`, `path` (curve through points, smoothed).
+- Kinds: `spin` (whole turns per loop), `swing` (sine between `from` and `to`, about `pivot` and `axis`), `slide` and `bob` (smooth rise from 0 to `distance` / `amount` and back), `path` (closed curve through `points`, constant speed; `face: "tangent"` turns the target to face the way it goes, from `rest_heading_deg`).
+- `phase` (0–1) shifts a motion within its cycle: legs half a step apart are phase 0 and 0.5.
+- Several motions on one target apply in file order. A motion moves its target's node, so a group carries its children.
 - `start`: `"auto"` now. Future (Jimmy, round 7): `"tap:<uuid>"` starts a motion when a part is tapped, and `"then": "<motion id>"` chains one after another (tap the door, the door opens, then the cuckoo comes out).
 
 **Engine.** `js/core/motion.js` (pure, Node and browser):
 - `checkMotion(model, motion)`: targets exist, pivots and numbers valid, warns on missing targets.
-- `poseAt(model, motion, t)`: returns a per-uuid transform change at time `t`. Used by the viewer, the clash check over time and the render tool.
+- `poseAt(model, motion, t)`: returns a per-uuid transform change at time `t`. Used by the viewer, and later by the clash check over time and the render tool.
+- `motionBox(model, motion)`: the space the motion covers, so the camera frames the whole walk.
 
 **Viewer.**
 - Groups become scene nodes; children inherit their parent's transform (needed so the banana travels with the hand). Still scenes must render exactly as before.
 - Each node keeps its rest transform; the pose is applied on top each frame and removed on stop.
 - Clock: plays twice on open, then pauses. Redraw every frame only while playing; on touch only while paused (battery).
-- Editing pauses playback and shows the rest pose.
+- Play bar under the scene: ▶/⏸, ⟲ (back to the start), time slider. ⚙️: speed (½×, 1×, 2×) and "play by itself on open" (saved in this browser). The bar shows only for scenes with motion.
+- Touch (round 7, E): one finger orbits, two fingers pinch to zoom (touch events, so iPad Safari keeps the gesture; the page's own pinch-zoom is blocked over the canvas), a tap selects. Mouse: drag, wheel, trackpad pinch.
+- Editing pauses playback and shows the rest pose (the first frame of the loop is the rest pose).
+- Bundles (file, browser save, cloud) carry `motion` as an optional fourth part; scenes without it load as before.
 
 **Tools.** `render_versions.js` takes a time (or a frame count for a strip) for the Increment Viewer. IFC export uses the rest pose.
