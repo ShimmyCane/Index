@@ -37,7 +37,7 @@
       if (type === 'box') return up === 'y' ? [d[0], d[1], d[2]] : [d[0], d[2], d[1]];
       return null;
     };
-    const modelYAxis = () => new THREE.Vector3(...toScene([0, 1, 0]));
+    const modelAxis = (i) => { const v = [0, 0, 0]; v[i] = 1; return new THREE.Vector3(...toScene(v)); };
 
     function makeGeometry(o) {
       const d = o.dimensions || [];
@@ -70,7 +70,11 @@
         if (!geo || !Array.isArray(o.position) || o.position.some((v) => !Number.isFinite(v))) continue;
         const mesh = new THREE.Mesh(geo, materialFor(o, model));
         mesh.position.set(...toScene(o.position));
-        mesh.quaternion.setFromAxisAngle(modelYAxis(), ((o.rotation_y || 0) * Math.PI) / 180);
+        // model axes: X, then Y, then Z (same order as origin.rotateVector)
+        const qX = new THREE.Quaternion().setFromAxisAngle(modelAxis(0), ((o.rotation_x || 0) * Math.PI) / 180);
+        const qY = new THREE.Quaternion().setFromAxisAngle(modelAxis(1), ((o.rotation_y || 0) * Math.PI) / 180);
+        const qZ = new THREE.Quaternion().setFromAxisAngle(modelAxis(2), ((o.rotation_z || 0) * Math.PI) / 180);
+        mesh.quaternion.copy(qZ).multiply(qY).multiply(qX);
         mesh.userData.uuid = o.uuid;
         if (display === 'edges') {
           const lines = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 20),

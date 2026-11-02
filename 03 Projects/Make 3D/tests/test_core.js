@@ -8,6 +8,7 @@ const S = require(path.join(root, 'js/core/schema.js'));
 const G = require(path.join(root, 'js/core/geometry.js'));
 const O = require(path.join(root, 'js/core/origin.js'));
 const R = require(path.join(root, 'js/core/rules.js'));
+const CL = require(path.join(root, 'js/core/clash.js'));
 const IO = require(path.join(root, 'js/core/io.js'));
 const world = JSON.parse(fs.readFileSync(path.join(root, 'worlds/default-world.json'), 'utf8'));
 
@@ -167,6 +168,79 @@ t('samples: garden planter history replays to the saved model.json', () => {
   const saved = JSON.parse(fs.readFileSync(path.join(dir, 'model.json'), 'utf8'));
   assert.deepStrictEqual(G.replay(history), saved);
   assert.strictEqual(R.checkModel(saved, world).outcome, 'accept');
+});
+t('tags: vocabulary is fixed and objects keep their tags through replay', () => {
+  assert.deepStrictEqual(Object.keys(S.TAGS).sort(), ['ballast', 'container', 'frame', 'plant', 'shade', 'stand', 'surface']);
+  const o = G.applyOperation(G.emptyModel(header), add(box('a', { tags: ['stand'] })));
+  assert.deepStrictEqual(o.objects[0].tags, ['stand']);
+  const untagged = G.applyOperation(G.emptyModel(header), add(box('b')));
+  assert.deepStrictEqual(untagged.objects[0].tags, []);
+});
+t('samples: outdoor table V2 replays, checks, and uses only known tags', () => {
+  const dir = path.join(root, 'models/outdoor-table-v2');
+  const history = JSON.parse(fs.readFileSync(path.join(dir, 'history.json'), 'utf8'));
+  const saved = JSON.parse(fs.readFileSync(path.join(dir, 'model.json'), 'utf8'));
+  assert.deepStrictEqual(G.replay(history), saved);
+  assert.strictEqual(R.checkModel(saved, world).outcome, 'accept');
+  for (const o of saved.objects) for (const tg of o.tags) assert.ok(tg in S.TAGS, `unknown tag ${tg} on ${o.name}`);
+  const named = (name) => saved.objects.find((o) => o.name === name);
+  assert.deepStrictEqual(named('Parasol pole').tags, ['stand']);
+  assert.deepStrictEqual(named('Sandbag 1').tags, ['ballast']);
+  assert.ok(saved.objects.filter((o) => o.tags.includes('shade')).length >= 20, 'canopy cloth is tagged shade');
+  // three equal arms and a draped cloth of panels
+  assert.strictEqual(saved.objects.filter((o) => /^Canopy arm \d$/.test(o.name)).length, 3);
+  assert.ok(saved.objects.filter((o) => /^Canopy panel/.test(o.name)).length >= 20, 'cloth is made of panels');
+  assert.strictEqual(named('Bonsai box').position[0], -150);
+});
+t('rotation: spin about Z (up), tilt about Y, turn about X, applied X then Y then Z', () => {
+  const close = (a, b) => a.every((v, i) => Math.abs(v - b[i]) < 1e-9);
+  assert.ok(close(O.rotateVector([1, 0, 0], 0, 0, 90), [0, 1, 0]), 'spin: x to y');
+  assert.ok(close(O.rotateVector([0, 0, 1], 0, 90, 0), [1, 0, 0]), 'tilt: z to x (matches the old rotation_y)');
+  assert.ok(close(O.rotateVector([0, 1, 0], 90, 0, 0), [0, 0, 1]), 'turn: y to z');
+  assert.ok(close(O.rotateVector([1, 0, 0], 90, 90, 0), [0, 0, -1]), 'X first: x stays, then Y sends it to -z');
+});
+t('rotation: a long box spun about Z has its long side along Y', () => {
+  const b = O.objectBox({ uuid: 'r', type: 'box', dimensions: [10, 2, 2], position: [0, 0, 0], rotation_z: 90 }, 'z');
+  const size = b.max.map((v, i) => +(v - b.min[i]).toFixed(6));
+  assert.deepStrictEqual(size, [2, 10, 2]);
+  const flat = O.objectBox({ uuid: 'r', type: 'box', dimensions: [10, 2, 2], position: [0, 0, 0] }, 'z');
+  assert.deepStrictEqual(flat.max.map((v, i) => +(v - flat.min[i]).toFixed(6)), [10, 2, 2]);
+});
+t('rules: a non-numeric rotation_z is rejected', () => {
+  const r = R.checkOperation(G.emptyModel(header), add(box('spin', { rotation_z: 'fast' })), world);
+  assert.strictEqual(r.outcome, 'reject');
+  assert.ok(r.issues.some((i) => /rotation_z/.test(i.message)));
+});
+t('samples: outdoor table V2 bonsai joins end to end in 3-D', () => {
+  const saved = JSON.parse(fs.readFileSync(path.join(root, 'models/outdoor-table-v2/model.json'), 'utf8'));
+  const byName = (name) => saved.objects.find((o) => o.name === name);
+  // the two ends of an object, along its own axis (rotated like the viewer and origin)
+  const axis = (o) => O.rotateVector([0, 0, o.dimensions[1] / 2], o.rotation_x, o.rotation_y, o.rotation_z);
+  const end = (o) => o.position.map((v, i) => v + axis(o)[i]);
+  const start = (o) => o.position.map((v, i) => v - axis(o)[i]);
+  const near = (a, b) => a.every((v, i) => Math.abs(v - b[i]) < 0.05);
+  assert.ok(near(start(byName('Trunk 1')), [-150, 0, 24]), 'trunk starts at the top of the box');
+  for (const [a, b] of [['Trunk 1', 'Trunk 2'], ['Trunk 2', 'Trunk 3'], ['Trunk 3', 'Trunk 4'], ['Trunk 2', 'Main limb 1'], ['Main limb 1', 'Main limb 2'], ['Main limb 2', 'Main limb 3'], ['Main limb 1', 'Branch 1.1'], ['Main limb 2', 'Branch 2.1'], ['Main limb 3', 'Branch 3.1']]) {
+    assert.ok(near(start(byName(b)), end(byName(a))), `${b} starts where ${a} ends`);
+  }
+  assert.ok(byName('Dead branch (jin)'), 'a dead branch is there');
+});
+t('samples: outdoor table V2 bonsai has a leader above the crown and foliage on several sides', () => {
+  const saved = JSON.parse(fs.readFileSync(path.join(root, 'models/outdoor-table-v2/model.json'), 'utf8'));
+  const foliage = saved.objects.filter((o) => /^Foliage/.test(o.name) && o.type === 'sphere');
+  const apex = saved.objects.find((o) => o.name === 'Foliage apex');
+  const crownTop = Math.max(...foliage.filter((o) => !o.name.startsWith('Foliage apex')).map((o) => o.position[2] + o.dimensions[0]));
+  assert.ok(apex.position[2] > crownTop, 'the apex is the highest point');
+  const ys = foliage.map((o) => o.position[1]);
+  assert.ok(Math.min(...ys) < -5 && Math.max(...ys) > 5, 'foliage on both sides of the limb');
+});
+t('samples: outdoor table V2 has no clashes (parasol clear of the table, tree clear of canopy)', () => {
+  const saved = JSON.parse(fs.readFileSync(path.join(root, 'models/outdoor-table-v2/model.json'), 'utf8'));
+  assert.deepStrictEqual(CL.findClashes(saved), []);
+  // a pole through a plank must be caught (the check is not silent)
+  const mk = (name, type, dims, pos) => ({ uuid: name, name, type, dimensions: dims, position: pos, parent: null });
+  const demo = { objects: [mk('plank', 'box', [20, 20, 1.5], [0, 0, 10]), mk('pole', 'cylinder', [0.75, 30], [0, 0, 10])] };
+  assert.strictEqual(CL.findClashes(demo).length, 1);
 });
 
 console.log(`\n${n} test groups passed`);

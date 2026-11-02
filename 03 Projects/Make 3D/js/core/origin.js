@@ -1,6 +1,6 @@
 /* Make 3D — major bounding box and origin.
    Rule (convo v0.2 B5 + v0.3 proposals, to confirm):
-   - Each object gets a world box from its position (centre), dimensions and rotation_y.
+   - Each object gets a world box from its position (centre), dimensions and rotation_x, rotation_y, rotation_z.
    - An object is an "outlier" when its box volume is under OUTLIER_SHARE (25%) of the full box volume.
    - Major box = union of the non-outlier boxes (groups and empty objects are skipped).
    - If at least REFINE_SHARE (70%) of the objects are outliers, the origin is the volume-weighted
@@ -30,19 +30,29 @@
     }
   }
 
-  // World AABB of an object, rotated about the model Y axis (x and z mix).
+  // Rotate a vector about the model axes (degrees): first X, then Y, then Z. Right-handed.
+  // The viewer uses the same order, so the box here matches what is drawn.
+  function rotateVector(v, rx, ry, rz) {
+    const r = (d) => (d || 0) * Math.PI / 180;
+    let [x, y, z] = v;
+    let c = Math.cos(r(rx)), s = Math.sin(r(rx));
+    [y, z] = [y * c - z * s, y * s + z * c];          // about X
+    c = Math.cos(r(ry)); s = Math.sin(r(ry));
+    [x, z] = [x * c + z * s, -x * s + z * c];         // about Y
+    c = Math.cos(r(rz)); s = Math.sin(r(rz));
+    [x, y] = [x * c - y * s, x * s + y * c];          // about Z
+    return [x, y, z];
+  }
+
+  // World AABB of an object, rotated about the model axes (see rotateVector).
   function objectBox(o, up = 'z') {
     const h = halfSize(o, up);
     if (!h || !o.position || h.some((v) => !Number.isFinite(v))) return null;
-    const a = (o.rotation_y || 0) * Math.PI / 180;
-    const c = Math.cos(a), s = Math.sin(a);
     const [hx, hy, hz] = h;
     let min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
     for (const sx of [-1, 1]) for (const sy of [-1, 1]) for (const sz of [-1, 1]) {
-      const x = sx * hx, y = sy * hy, z = sz * hz;
-      const rx = x * c + z * s;   // rotation about Y
-      const rz = -x * s + z * c;
-      const p = [o.position[0] + rx, o.position[1] + y, o.position[2] + rz];
+      const [rx, ry, rz] = rotateVector([sx * hx, sy * hy, sz * hz], o.rotation_x, o.rotation_y, o.rotation_z);
+      const p = [o.position[0] + rx, o.position[1] + ry, o.position[2] + rz];
       for (let i = 0; i < 3; i++) { min[i] = Math.min(min[i], p[i]); max[i] = Math.max(max[i], p[i]); }
     }
     return { min, max };
@@ -91,5 +101,5 @@
     };
   }
 
-  return { OUTLIER_SHARE, REFINE_SHARE, objectBox, majorBox, halfSize };
+  return { OUTLIER_SHARE, REFINE_SHARE, objectBox, majorBox, halfSize, rotateVector };
 });

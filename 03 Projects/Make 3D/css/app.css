@@ -116,6 +116,21 @@ h2 { font-size: 16px; margin: 0 0 8px; }
 .history { display: flex; align-items: center; gap: 10px; flex: 1 1 320px; min-width: 0; }
 #scrub { flex: 1; min-width: 120px; height: 36px; accent-color: var(--ink); }
 #stepLabel { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.selinfo { flex: 1 1 260px; min-width: 0; margin: 0; font-size: 14px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; color: var(--ink); }
+.selinfo strong { font-weight: 700; }
+.selinfo-desc { color: var(--muted); }
+.tag {
+  display: inline-block; font-size: 12px; font-weight: 700; line-height: 1.4; padding: 1px 8px; border: 2px solid var(--ink);
+  border-radius: 999px; background: #fff; color: var(--ink); white-space: nowrap;
+}
+.tag-surface { background: var(--butter); }
+.tag-frame { background: var(--sage); }
+.tag-stand { background: #dfe6ec; }
+.tag-shade { background: var(--peach); }
+.tag-ballast { background: #e9dcc0; }
+.tag-plant { background: var(--mint); }
+.tag-container { background: #f1e3d3; }
+.objects li button .tag { margin-left: 6px; }
 .bottom-errors { flex-basis: 100%; background: var(--peach); border: var(--line); border-radius: 12px; padding: 8px 12px; }
 .bottom-errors .issues { margin-top: 6px; }
 

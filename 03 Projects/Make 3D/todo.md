@@ -41,11 +41,23 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - [ ] Quick Detail: tag details `make 3-D` before they appear. None have it yet.
 - [ ] LLM-made scenes and drawn scenes (linked in as JSON input): future, not built.
 
+## Round 4 (convo v0.5, from the outdoor-table answers)
+- [x] Outdoor table V2 (`outdoor-table-v2`): white oak top, yellow angle legs, rectangular frame, centre beam, low back bar (back only); one large red folding canopy at the far end on a square base with two sandbags; bonsai in a 2 ft box on the ground 8 ft from the table, one limb with three forks (3, 2, 2), sparse leaves.
+- [x] Object tags (`surface`, `frame`, `stand`, `shade`, `ballast`, `plant`, `container`): chips in the objects panel, purpose row in the selection card, status line next to Check model.
+- [x] Library shows four built-in scenes.
+- [x] Outdoor table V2 rebuilt: parasol moved outside the table end (pole no longer through the top); the bonsai is a slanting, tapered trunk with a leader, one main limb arching up in steps, forks on several sides, a balance branch, a dead branch (jin) and foliage pads.
+- [x] Canopy: one draped cloth (101 tilted panels on a wavy surface, ridges at three arms, edge sagging) held by three equal metal arms from the apex. Replaces the flat cone.
+- [x] Clash check (`js/core/clash.js`): finds solids that pass into each other; V2 has none; tested in `tests/test_core.js`.
+- [ ] Clash check in the UI (show clashes on Check model). Not built yet.
+- [ ] Bonsai reach: the crown no longer reaches over the table (a bonsai form in a 2 ft box can't do 8 ft of horizontal reach without looking like a bare arm). Jimmy to decide.
+- [?] Jimmy checks the V2 scene on iPad: tree lean and reach, canopy size, base and sandbags.
+- [ ] Tags on the planter, V1 table and kitchen (not done; V2 only).
+- [ ] Tag filter in the objects panel (not asked yet).
+
 ## Future (flat list, round 2)
 - [ ] Walk mode, section box, measure, PNG export (viewer).
 - [ ] Gizmo editing (drag handles).
 - [ ] Textures on/off toggle (the model never stores images).
-- [ ] Rotation about X and Z.
 - [ ] Per-operation author and note.
 - [ ] Blocks: link models; import a rebuilt component as a block.
 - [ ] Material list beyond colour.
@@ -79,5 +91,6 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - 2026-11-01: round 2 answers recorded in convo v0.2; schematic §0 added; Quick Detail reviewed as the reference.
 - 2026-11-01: round 2 inline answers recorded in v0.2; convo v0.3 opened with origin, units and table-length questions.
 - 2026-11-01: MVP built (v0.1–v0.6 except cloud copy and outlines): engine, viewer, UI, planter sample, 19 test groups, headless smoke run.
+- 2026-11-02: round 4 outdoor table V2 and object tags built (convo v0.5 answers); smoke run covers four library scenes.
 - 2026-11-02: outdoor table and kitchen samples; Library button; cloud client (`m3d_scenes`, read-only `sketch_details` by tag); migration applied after a rolled-back test; 8 cloud test groups; smoke run covers the library.
 - 2026-11-02: round 4 notes (iPad): paste is the default tab, step counter removed, one gear icon, panels collapse. Annotation, groups, visibility and export designed in convo v0.4 and the schematic §13; not built.
