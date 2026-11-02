@@ -11,6 +11,9 @@
   const st = {
     history: null,      // { header, operations, ... }
     world: null,
+    motion: null,       // make3d.motion file, separate from the model; null when the scene doesn't move
+    animSpeed: 1,
+    animAuto: true,     // play twice by itself when a scene opens, then pause
     cursor: 0,          // how many operations are applied (history step being viewed)
     preview: null,      // model shown without being saved
     previewOp: null,
@@ -39,18 +42,18 @@
       const raw = localStorage.getItem(STORE_KEY);
       if (raw) {
         const d = JSON.parse(raw);
-        if (d && d.history) return { history: d.history, world: d.world || clone(SAMPLES[SAMPLE_ID].world) };
+        if (d && d.history) return { history: d.history, world: d.world || clone(SAMPLES[SAMPLE_ID].world), motion: d.motion || null };
       }
     } catch (e) { /* storage blocked or corrupt: fall back to the sample */ }
     return sampleBundle();
   }
   function sampleBundle(id = SAMPLE_ID) {
     const s = SAMPLES[id];
-    return { history: clone(s.history), world: clone(s.world) };
+    return { history: clone(s.history), world: clone(s.world), motion: s.motion ? clone(s.motion) : null };
   }
   function save() {
     try {
-      localStorage.setItem(STORE_KEY, JSON.stringify({ history: st.history, world: st.world }));
+      localStorage.setItem(STORE_KEY, JSON.stringify({ history: st.history, world: st.world, motion: st.motion }));
       setStatus('Saved on this device', '');
     } catch (e) {
       setStatus('Not saved: browser storage is blocked. Use Save file.', 'bad');
@@ -87,6 +90,7 @@
     st.rejected = null; st.preview = null; st.previewOp = null;
     st.last = { op: rec, outcome: r.outcome, issues: r.issues };
     if (op.op === 'delete' && st.selected === op.uuid) st.selected = null;
+    if (st.viewer) { st.viewer.pause(); st.viewer.seek(0); }   // editing shows the rest pose
     save();
     render();
     return r;
@@ -153,7 +157,14 @@
     if (st.viewer) {
       st.viewer.setOptions({ up: st.up, display: st.display, ground: { on: st.groundOn, z: groundZ } });
       const azimuth = model.view && Number.isFinite(model.view.azimuth_deg) ? model.view.azimuth_deg : 34;
-      st.viewer.setModel(model, { origin: info.empty ? [0, 0, 0] : info.origin, fullBox: full, fit: st.fit, azimuth_deg: azimuth });
+      // a moving scene is framed to hold the whole motion, centred on it
+      let origin = info.empty ? [0, 0, 0] : info.origin, box = full;
+      const mb = st.fit && st.motion ? M.motionBox(model, st.motion) : null;
+      if (mb && full) {
+        box = { min: full.min.map((v, i) => Math.min(v, mb.min[i])), max: full.max.map((v, i) => Math.max(v, mb.max[i])) };
+        origin = [0, 1, 2].map((i) => (i === v ? origin[i] : (box.min[i] + box.max[i]) / 2));
+      }
+      st.viewer.setModel(model, { origin, fullBox: box, fit: st.fit, azimuth_deg: azimuth });
       st.viewer.setSelected(st.selected);
     }
     st.fit = false;
@@ -426,7 +437,7 @@
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
   function saveFile() {
-    const bundle = M.makeBundle({ history: st.history, world: st.world });
+    const bundle = M.makeBundle({ history: st.history, world: st.world, motion: st.motion });
     download(`${st.history.model_id}.make3d.json`, bundle);
     setStatus('Saved file downloaded', '');
   }
@@ -451,9 +462,9 @@
     reader.onload = () => {
       try {
         const obj = JSON.parse(reader.result);
-        const { history, world } = M.readBundle(obj, clone(SAMPLES[SAMPLE_ID].world));
+        const { history, world, motion } = M.readBundle(obj, clone(SAMPLES[SAMPLE_ID].world));
         if (!confirm(`Open "${history.header && history.header.name || history.model_id}" and replace the current model?`)) return;
-        setState({ history, world });
+        setState({ history, world, motion });
         setStatus('File opened', '');
       } catch (e) {
         setStatus(`Could not open: ${e.message}`, 'bad');
@@ -461,37 +472,139 @@
     };
     reader.readAsText(file);
   }
-  function setState({ history, world }) {
-    st.history = history; st.world = world;
+  function setState({ history, world, motion }) {
+    st.history = history; st.world = world; st.motion = motion || null;
     st.cursor = history.operations.length;
     st.selected = null; st.rejected = null; st.preview = null; st.last = null; st.check = null;
     st.fit = true; st.groundZ = null;
     save();
     render();
+    startMotion();
+  }
+
+  const svg = (body) => `<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">${body}</svg>`;
+  const ICON_PLAY = svg('<path d="M7 4.5v15l12.5-7.5z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>');
+  const ICON_PAUSE = svg('<rect x="5.5" y="4.5" width="4.5" height="15" rx="1.2" fill="currentColor"/><rect x="14" y="4.5" width="4.5" height="15" rx="1.2" fill="currentColor"/>');
+
+  // ---------- animation (the viewer runs the clock; this wires the bar and the gear settings)
+  function startMotion() {
+    if (!st.viewer) return;
+    const plays = st.motion && st.motion.autoplay && st.motion.autoplay.plays || 2;
+    let issues = [];
+    if (st.motion) {
+      const c = M.checkMotion(modelAt(), st.motion);
+      issues = c.issues;
+      if (c.outcome === 'reject') { setStatus(`Motion not played: ${c.issues[0].message}`, 'bad'); st.viewer.setMotion(null); return; }
+    }
+    st.motionIssues = issues;
+    st.viewer.setMotion(st.motion, { autoplay: st.animAuto, plays });
+  }
+  function renderAnim(a) {
+    $('animBar').hidden = !a.has;
+    $('animSettings').hidden = !a.has;
+    if (!a.has) return;
+    const btn = $('animPlay');
+    btn.innerHTML = a.playing ? ICON_PAUSE : ICON_PLAY;
+    btn.setAttribute('aria-label', a.playing ? 'Pause' : 'Play');
+    const slider = $('animTime');
+    if (document.activeElement !== slider || a.playing) slider.value = String(Math.round((a.t / a.loop_s) * 1000));
+  }
+  function loadPrefs() {
+    try {
+      const p = JSON.parse(localStorage.getItem('make3d.v1.prefs') || '{}');
+      if (p.animSpeed) st.animSpeed = p.animSpeed;
+      if (typeof p.animAuto === 'boolean') st.animAuto = p.animAuto;
+    } catch (e) { /* storage blocked: defaults */ }
+    $('animSpeed').value = String(st.animSpeed);
+    $('animAuto').checked = st.animAuto;
+  }
+  function savePrefs() {
+    try { localStorage.setItem('make3d.v1.prefs', JSON.stringify({ animSpeed: st.animSpeed, animAuto: st.animAuto })); } catch (e) { /* ignore */ }
   }
 
   // ---------- library (scenes, cloud, Quick Detail references)
   function openScene(bundle, label) {
     if (!confirm(`Open "${label}" and replace the current model?`)) return;
-    setState({ history: clone(bundle.history), world: clone(bundle.world || SAMPLES[SAMPLE_ID].world) });
+    setState({ history: clone(bundle.history), world: clone(bundle.world || SAMPLES[SAMPLE_ID].world),
+      motion: bundle.motion ? clone(bundle.motion) : null });
     setStatus(`Opened ${label}`, '');
     $('libPanel').hidden = true; $('libBtn').setAttribute('aria-expanded', 'false');
   }
 
+  // Built-in scenes grouped by project, the project changed most recently first. Inside a project the
+  // newest version is first; older versions fold away under a "versions" button.
+  function sampleProjects() {
+    const groups = new Map();
+    const order = Object.keys(SAMPLES);   // build order: later scenes are newer
+    for (const id of order) {
+      const b = SAMPLES[id];
+      const name = b.history.header.name || id;
+      const l = b.listing || {};
+      const project = l.project || name.replace(/\s+V\d+(\.\d+)?$/i, '').trim();
+      if (!groups.has(project)) groups.set(project, { project, updated: '', versions: [] });
+      const g = groups.get(project);
+      const updated = l.updated || l.created || '';
+      g.versions.push({ id, bundle: b, name, updated, n: order.indexOf(id) });
+      if (updated > g.updated) g.updated = updated;
+    }
+    const list = [...groups.values()];
+    for (const g of list) g.versions.sort((a, b) => (b.updated > a.updated ? 1 : b.updated < a.updated ? -1 : b.n - a.n));
+    return list.sort((a, b) => (b.updated > a.updated ? 1 : b.updated < a.updated ? -1 : a.project.localeCompare(b.project)));
+  }
+  const versionLabel = (v, project) => (v.name.startsWith(project) ? v.name.slice(project.length).trim() : v.name) || 'V1';
+  const partsOf = (b) => `${b.model ? b.model.objects.length : b.history.operations.length} parts`;
+  const openProjects = new Set();   // projects whose older versions are unfolded (this visit only)
+
   function renderLibrary() {
     const bl = $('builtinList');
     bl.innerHTML = '';
-    Object.keys(SAMPLES).forEach((id) => {
-      const b = SAMPLES[id];
+    for (const g of sampleProjects()) {
+      const latest = g.versions[0];
       const li = document.createElement('li');
+      li.className = 'proj';
+      const row = document.createElement('div');
+      row.className = 'proj-row';
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.textContent = b.history.header.name || id;
-      const k = document.createElement('span'); k.className = 'kind'; k.textContent = `${b.model ? b.model.objects.length : b.history.operations.length} parts`;
+      btn.className = 'proj-open';
+      btn.textContent = g.project;
+      const k = document.createElement('span'); k.className = 'kind';
+      k.textContent = g.versions.length > 1 ? `${versionLabel(latest, g.project)} · ${partsOf(latest.bundle)}` : partsOf(latest.bundle);
       btn.appendChild(k);
-      btn.addEventListener('click', () => openScene(b, b.history.header.name || id));
-      li.appendChild(btn); bl.appendChild(li);
-    });
+      if (latest.bundle.motion) { const m = document.createElement('span'); m.className = 'tag'; m.textContent = 'moves'; btn.appendChild(m); }
+      btn.addEventListener('click', () => openScene(latest.bundle, latest.name));
+      row.appendChild(btn);
+      li.appendChild(row);
+      if (g.versions.length > 1) {
+        const open = openProjects.has(g.project);
+        const more = document.createElement('button');
+        more.type = 'button';
+        more.className = 'proj-more';
+        more.setAttribute('aria-expanded', String(open));
+        more.setAttribute('aria-label', `${g.versions.length} versions of ${g.project}`);
+        more.innerHTML = `${g.versions.length} <span aria-hidden="true">${open ? '▴' : '▾'}</span>`;
+        more.addEventListener('click', () => {
+          if (openProjects.has(g.project)) openProjects.delete(g.project); else openProjects.add(g.project);
+          renderLibrary();
+        });
+        row.appendChild(more);
+        const ul = document.createElement('ul');
+        ul.className = 'objects versions';
+        ul.hidden = !open;
+        for (const v of g.versions) {
+          const vli = document.createElement('li');
+          const vb = document.createElement('button');
+          vb.type = 'button';
+          vb.textContent = versionLabel(v, g.project);
+          const vk = document.createElement('span'); vk.className = 'kind'; vk.textContent = partsOf(v.bundle);
+          vb.appendChild(vk);
+          vb.addEventListener('click', () => openScene(v.bundle, v.name));
+          vli.appendChild(vb); ul.appendChild(vli);
+        }
+        li.appendChild(ul);
+      }
+      bl.appendChild(li);
+    }
 
     const signedIn = !!st.cloudSession;
     $('signInBox').hidden = signedIn;
@@ -534,8 +647,8 @@
   async function openCloudScene(row) {
     try {
       const raw = await st.cloud.loadScene(row.model_id);
-      const { history, world } = M.readBundle(raw, clone(SAMPLES[SAMPLE_ID].world));
-      openScene({ history, world }, row.name);
+      const { history, world, motion } = M.readBundle(raw, clone(SAMPLES[SAMPLE_ID].world));
+      openScene({ history, world, motion }, row.name);
     } catch (e) { setStatus(`Could not open: ${e.message}`, 'bad'); }
   }
 
@@ -584,7 +697,7 @@
 
   async function saveCloud() {
     try {
-      const bundle = M.makeBundle({ history: st.history, world: st.world });
+      const bundle = M.makeBundle({ history: st.history, world: st.world, motion: st.motion });
       await st.cloud.saveScene(bundle);
       setStatus(`Saved "${bundle.model.name}" to the cloud`, '');
       st.cloudScenes = await st.cloud.listScenes();
@@ -638,6 +751,18 @@
     });
     $('resetView').addEventListener('click', () => { st.fit = true; render(); });
 
+    $('animPlay').addEventListener('click', () => {
+      if (st.viewer.animState().playing) st.viewer.pause(); else st.viewer.play(Infinity);
+    });
+    $('animReset').addEventListener('click', () => { st.viewer.pause(); st.viewer.seek(0); });
+    $('animTime').addEventListener('input', (e) => {
+      const a = st.viewer.animState();
+      st.viewer.pause();
+      st.viewer.seek((Number(e.target.value) / 1000) * a.loop_s);
+    });
+    $('animSpeed').addEventListener('change', (e) => { st.animSpeed = Number(e.target.value) || 1; st.viewer.setOptions({ speed: st.animSpeed }); savePrefs(); });
+    $('animAuto').addEventListener('change', (e) => { st.animAuto = e.target.checked; savePrefs(); });
+
     $('libBtn').addEventListener('click', () => {
       const open = $('libPanel').hidden;
       $('gearPanel').hidden = true; $('gearBtn').setAttribute('aria-expanded', 'false');
@@ -688,26 +813,35 @@
   function fillSamples() {
     const sel = $('sampleSel');
     sel.innerHTML = '';
-    Object.keys(SAMPLES).forEach((id) => {
-      const o = document.createElement('option');
-      o.value = id; o.textContent = SAMPLES[id].history.header.name || id;
-      sel.appendChild(o);
-    });
+    for (const g of sampleProjects()) {
+      const parent = g.versions.length > 1 ? document.createElement('optgroup') : sel;
+      if (parent !== sel) { parent.label = g.project; sel.appendChild(parent); }
+      for (const v of g.versions) {
+        const o = document.createElement('option');
+        o.value = v.id; o.textContent = v.name;
+        parent.appendChild(o);
+      }
+    }
   }
 
   // ---------- start
   function start() {
     const b = loadInitial();
-    st.history = b.history; st.world = b.world;
+    st.history = b.history; st.world = b.world; st.motion = b.motion || null;
     st.cursor = st.history.operations.length;
     st.viewer = M.createViewer($('view'));
     st.viewer.onSelect(select);
+    st.viewer.onTick(renderAnim);
+    window.__m3dViewer = st.viewer;   // for the headless checks (tools/anim_check.js)
+    loadPrefs();
+    st.viewer.setOptions({ speed: st.animSpeed });
     buildTypeControls();
     fillSamples();
     bind();
     setupCloud();
     render();
     save();
+    startMotion();
     renderLibrary();
     cloudRefresh();
     window.addEventListener('resize', () => st.viewer.resize());

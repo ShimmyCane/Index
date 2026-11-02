@@ -55,6 +55,23 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - [ ] Tags on the planter, V1 table and kitchen (not done; V2 only).
 - [ ] Tag filter in the objects panel (not asked yet).
 
+## Animation (round 7, convo v0.7)
+- [x] Jimmy answers convo v0.7 A–D: always a loop; organic closed path; robot look OK; length as needed; controls OK.
+- [x] Two-finger pinch zoom on the canvas (E). Touch events, page zoom blocked over the canvas. Checked headless with two-finger touch; not yet on a real iPad.
+- [x] A1 Groups as scene nodes; children inherit the parent transform. Every library scene still renders (smoke run).
+- [x] A2 `motion.json` format (`make3d.motion/0.1`), optional fourth part of the bundle; `checkMotion`.
+- [x] A3 `js/core/motion.js` `poseAt`: `swing`, `bob`, `slide`, `spin`, `path` (closed, constant speed, faces along the curve). `node tests/test_motion.js`.
+- [x] A4 Viewer clock: autoplay twice then pause, ▶/⏸, ⟲, time slider; speed and autoplay in ⚙️; redraw only while playing or touched.
+- [x] A5 Robot-with-banana scene on a winding closed loop; steps timed to the walk, flat feet, no sliding into the ground. `node tools/anim_check.js <dir>`.
+- [?] Jimmy watches the robot on iPad: walk, speed, path, banana; and tries the pinch.
+- [ ] A6 Clash check sampled over time.
+- [ ] A7 `render_versions.js` at a time / frame strip for the Increment Viewer.
+- [x] A8 `make-3d` skill: motion as its own last increment, step 4b, report line (Jimmy asked).
+- [ ] Motion editing in the page (now motion comes from the scene file only).
+- [x] Library folds each project's versions under one row, most recently changed project first (convo v0.7 G–H). Dates in `models/scene_dates.json`, kept by `tools/build_samples.js`.
+- [x] Merge the pull request so the robot is on the live site (Jimmy asked).
+- [ ] Future: tap a part to start a motion, and chain motions (door opens, then the cuckoo comes out).
+
 ## Future (flat list, round 2)
 - [ ] Editable, resizable and parametric families in Revit (Dynamo or Revit API, `.rfa`). Not needed for the first IFC import.
 - [ ] Walk mode, section box, measure, PNG export (viewer).

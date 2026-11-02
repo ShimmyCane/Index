@@ -103,6 +103,15 @@ h2 { font-size: 16px; margin: 0 0 8px; }
 
 /* stage tools and banner */
 .stage-tools { position: absolute; left: 12px; top: 12px; }
+/* animation bar: under the scene, centred */
+.anim-bar {
+  position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 10px; align-items: center;
+  width: min(520px, calc(100% - 32px)); background: var(--panel); border: var(--line); border-radius: 999px;
+  padding: 6px 14px 6px 8px; box-shadow: var(--shadow);
+}
+.anim-bar[hidden] { display: none; }
+.anim-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 56px; min-height: 52px; padding: 4px 12px; background: var(--mint); border-radius: 999px; }
+.anim-bar input[type=range] { flex: 1 1 auto; min-height: 40px; border: 0; padding: 0; background: transparent; accent-color: var(--ink); }
 .banner {
   position: absolute; left: 50%; top: 12px; transform: translateX(-50%); display: flex; gap: 12px; align-items: center;
   background: var(--butter); border: var(--line); border-radius: 999px; padding: 6px 8px 6px 16px; box-shadow: var(--shadow);
@@ -143,6 +152,13 @@ h2 { font-size: 16px; margin: 0 0 8px; }
 #libPanel { right: 100px; }
 #libPanel h3 { font-size: 14px; margin: 14px 0 6px; }
 #libPanel .objects li button .kind { color: var(--muted); }
+/* library: one row per project; older versions fold away */
+#libPanel .proj-row { display: flex; gap: 6px; }
+#libPanel .proj-row .proj-open { flex: 1 1 auto; min-height: 52px; }
+#libPanel .proj-row .proj-more { flex: 0 0 auto; width: auto; min-width: 64px; min-height: 52px; text-align: center; background: var(--sky); }
+#libPanel .proj-row .proj-more[aria-expanded="true"] { background: var(--butter); }
+#libPanel .versions { margin: 6px 0 4px 18px; }
+#libPanel .versions[hidden] { display: none; }
 
 /* gear */
 .gear {

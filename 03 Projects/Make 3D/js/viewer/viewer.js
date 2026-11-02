@@ -1,6 +1,10 @@
 /* Make 3D — viewer engine (Three.js). Reads a model; never changes it.
    File axes -> scene axes:  Z-up file: (x, y, z) -> (x, z, -y).  Y-up file: identity.
-   Orbit and zoom with mouse, trackpad or touch. Tap an object to select it. */
+   Orbit and zoom with mouse, trackpad or touch (one finger orbits, two fingers pinch to zoom). Tap to select.
+   Scene graph: every object gets a node; children sit inside their parent group's node. At rest every node
+   is the identity, so parts keep their file positions. A motion pose (js/core/motion.js) sets the node
+   matrices, so a group carries its children (the banana travels with the hand). Stop puts nodes back to rest.
+   Redraws only when something changed, or every frame while an animation plays (saves iPad battery). */
 (function (root) {
   const CANVAS_BG = 0xfbf6ea, INK = 0x2d2a26, SELECT = 0x2f6fdd, GROUND = 0x8fc98a;
 
@@ -30,7 +34,14 @@
     let up = 'z', display = 'solid', selected = null, selectionHelper = null;
     let target = new THREE.Vector3(), theta = 0.6, phi = 1.0, radius = 180;
     let onSelect = () => {};
+    const ZOOM_MIN = 4, ZOOM_MAX = 3000;
     let lastModel = null;
+    let nodes = new Map();           // uuid -> THREE.Group (motion node)
+    let meshes = [];                 // pickable meshes
+    let dirty = true;                // redraw on the next frame
+    const requestRender = () => { dirty = true; };
+    // animation clock
+    const anim = { motion: null, t: 0, playing: false, speed: 1, playsLeft: 0, lastNow: null, onTick: () => {} };
 
     const toScene = (v) => (up === 'y' ? [v[0], v[1], v[2]] : [v[0], v[2], -v[1]]);
     const sceneSizes = (type, d) => {
@@ -64,8 +75,15 @@
         const c = modelRoot.children.pop();
         c.traverse((x) => { if (x.geometry) x.geometry.dispose(); if (x.material) x.material.dispose(); });
       }
-      selectionHelper = null; selected = null;
-      for (const o of model.objects || []) {
+      selectionHelper = null;
+      nodes = new Map(); meshes = [];
+      const objects = (model.objects || []).filter((o) => o.uuid);
+      // one node per object (groups too), identity at rest
+      for (const o of objects) {
+        const node = new THREE.Group();
+        node.matrixAutoUpdate = false;
+        node.userData.uuid = o.uuid;
+        nodes.set(o.uuid, node);
         const geo = makeGeometry(o);
         if (!geo || !Array.isArray(o.position) || o.position.some((v) => !Number.isFinite(v))) continue;
         const mesh = new THREE.Mesh(geo, materialFor(o, model));
@@ -81,9 +99,70 @@
             new THREE.LineBasicMaterial({ color: INK }));
           mesh.add(lines);
         }
-        modelRoot.add(mesh);
+        node.add(mesh);
+        meshes.push(mesh);
       }
+      // attach each node to its parent group's node; a missing parent or a loop falls back to the root
+      const byId = new Map(objects.map((o) => [o.uuid, o]));
+      for (const o of objects) {
+        let p = o.parent && nodes.has(o.parent) ? o.parent : null;
+        const seen = new Set([o.uuid]);
+        for (let q = p; q; q = (byId.get(q) || {}).parent) { if (seen.has(q)) { p = null; break; } seen.add(q); }
+        (p ? nodes.get(p) : modelRoot).add(nodes.get(o.uuid));
+      }
+      applyPose();
       if (selected) setSelected(selected);
+    }
+
+    // ---------- animation: model-space matrix -> scene-space matrix (axis change S * M * S^-1)
+    const axisMat = () => (up === 'y' ? new THREE.Matrix4()
+      : new THREE.Matrix4().set(1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1));
+    function applyPose() {
+      const poseAt = root.M3D && root.M3D.poseAt;
+      const pose = anim.motion && lastModel && poseAt ? poseAt(lastModel, anim.motion, anim.t) : {};
+      const S = axisMat(), Si = S.clone().invert(), m = new THREE.Matrix4();
+      for (const [uuid, node] of nodes) {
+        const p = pose[uuid];
+        if (p) { m.set(...p); node.matrix.copy(S).multiply(m).multiply(Si); }
+        else node.matrix.identity();
+        node.matrixWorldNeedsUpdate = true;
+      }
+      if (selectionHelper) { modelRoot.updateMatrixWorld(true); selectionHelper.update(); }
+      requestRender();
+    }
+
+    function setMotion(motion, opts = {}) {
+      anim.motion = motion && Array.isArray(motion.motions) ? motion : null;
+      anim.t = 0; anim.playing = false; anim.lastNow = null;
+      anim.playsLeft = 0;
+      if (anim.motion && opts.autoplay) play(opts.plays || 1);
+      applyPose(); tick();
+    }
+    const loopS = () => (anim.motion && anim.motion.loop_s > 0 ? anim.motion.loop_s : 1);
+    // plays = how many loops to run, then pause at the start pose (the end of a loop is the start)
+    function play(plays) {
+      if (!anim.motion) return;
+      anim.playsLeft = plays || Infinity;
+      anim.playing = true; anim.lastNow = null;
+      tick();
+    }
+    function pause() { anim.playing = false; anim.lastNow = null; tick(); requestRender(); }
+    function seek(t) { anim.t = Math.max(0, Math.min(t, loopS())); applyPose(); tick(); }
+    function tick() {
+      anim.onTick({ t: anim.t, loop_s: loopS(), playing: anim.playing, has: !!anim.motion });
+    }
+    function step(now) {
+      if (!anim.playing) return;
+      if (anim.lastNow === null) { anim.lastNow = now; return; }
+      const dt = Math.min((now - anim.lastNow) / 1000, 0.1);   // a hidden tab doesn't jump ahead
+      anim.lastNow = now;
+      anim.t += dt * anim.speed;
+      if (anim.t >= loopS()) {
+        anim.playsLeft -= 1;
+        if (anim.playsLeft <= 0) { anim.t = 0; anim.playing = false; anim.lastNow = null; }
+        else anim.t -= loopS();
+      }
+      applyPose(); tick();
     }
 
     // Ground height is a file coordinate along the vertical axis. In the scene that is always y.
@@ -110,31 +189,36 @@
           fitTo(o, ext);
         }
       }
+      requestRender();
     }
 
     function setOptions(opts) {
+      if (opts.speed) anim.speed = opts.speed;
       if (opts.up && opts.up !== up) { up = opts.up; if (lastModel) buildModel(lastModel); }
       if (opts.display && opts.display !== display) { display = opts.display; if (lastModel) buildModel(lastModel); }
       if (opts.ground) {
         ground.visible = !!opts.ground.on; grid.visible = !!opts.ground.on;
         if (opts.ground.z !== undefined) placeGround(opts.ground.z);
       }
+      requestRender();
     }
 
     function setSelected(uuid) {
       selected = uuid;
       if (selectionHelper) { scene.remove(selectionHelper); selectionHelper.dispose(); selectionHelper = null; }
-      const mesh = modelRoot.children.find((c) => c.userData.uuid === uuid);
+      const mesh = meshes.find((c) => c.userData.uuid === uuid);
       if (mesh) {
+        modelRoot.updateMatrixWorld(true);
         selectionHelper = new THREE.BoxHelper(mesh, SELECT);
         scene.add(selectionHelper);
       }
+      requestRender();
     }
 
     // --- camera
     function updateCamera() {
       phi = Math.min(Math.max(phi, 0.08), Math.PI / 2 - 0.02);
-      radius = Math.min(Math.max(radius, 4), 3000);
+      radius = Math.min(Math.max(radius, ZOOM_MIN), ZOOM_MAX);
       camera.position.set(
         target.x + radius * Math.sin(phi) * Math.sin(theta),
         target.y + radius * Math.cos(phi),
@@ -150,54 +234,84 @@
       camera.updateProjectionMatrix();
     }
 
-    // --- pointer: one finger or mouse drag orbits, two fingers pinch, wheel zooms, a tap selects
-    const pointers = new Map();
-    let downAt = null, pinchDist = null;
+    // --- input. Mouse and pen: drag orbits, wheel (or trackpad pinch) zooms, click selects.
+    // Touch: one finger orbits, two fingers pinch to zoom, a tap selects. Touch uses touch events, which
+    // iPad Safari delivers reliably for two fingers; the page's own pinch-zoom is blocked over the canvas.
+    const zoomBy = (f) => { radius = Math.min(Math.max(radius * f, ZOOM_MIN), ZOOM_MAX); requestRender(); };
+    const orbitBy = (dx, dy) => { theta -= dx * 0.008; phi -= dy * 0.008; requestRender(); };
     canvas.style.touchAction = 'none';
+
+    let mouse = null;
     canvas.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'touch') return;
       canvas.setPointerCapture(e.pointerId);
-      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      if (pointers.size === 1) downAt = { x: e.clientX, y: e.clientY, moved: 0 };
-      if (pointers.size === 2) pinchDist = pinchGap();
+      mouse = { x: e.clientX, y: e.clientY, moved: 0 };
     });
     canvas.addEventListener('pointermove', (e) => {
-      if (!pointers.has(e.pointerId)) return;
-      const prev = pointers.get(e.pointerId);
-      const dx = e.clientX - prev.x, dy = e.clientY - prev.y;
-      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      if (pointers.size === 1) {
-        theta -= dx * 0.008; phi -= dy * 0.008;
-        if (downAt) downAt.moved += Math.abs(dx) + Math.abs(dy);
-      } else if (pointers.size === 2 && pinchDist) {
-        const gap = pinchGap();
-        radius *= pinchDist / gap; pinchDist = gap;
-      }
-      render();
+      if (e.pointerType === 'touch' || !mouse) return;
+      const dx = e.clientX - mouse.x, dy = e.clientY - mouse.y;
+      mouse.x = e.clientX; mouse.y = e.clientY; mouse.moved += Math.abs(dx) + Math.abs(dy);
+      orbitBy(dx, dy);
     });
-    const endPointer = (e) => {
-      const wasSingle = pointers.size === 1;
-      pointers.delete(e.pointerId);
-      if (wasSingle && downAt && downAt.moved < 8 && e.type === 'pointerup') pick(e.clientX, e.clientY);
-      if (pointers.size < 2) pinchDist = null;
-      if (pointers.size === 0) downAt = null;
+    const endMouse = (e) => {
+      if (e.pointerType === 'touch' || !mouse) return;
+      if (mouse.moved < 8 && e.type === 'pointerup') pick(e.clientX, e.clientY);
+      mouse = null;
     };
-    canvas.addEventListener('pointerup', endPointer);
-    canvas.addEventListener('pointercancel', endPointer);
+    canvas.addEventListener('pointerup', endMouse);
+    canvas.addEventListener('pointercancel', endMouse);
     canvas.addEventListener('wheel', (e) => {
       e.preventDefault();
-      radius *= Math.exp(e.deltaY * 0.0015);
-      render();
+      zoomBy(Math.exp(e.deltaY * (e.ctrlKey ? 0.01 : 0.0015)));   // ctrlKey = trackpad pinch
     }, { passive: false });
-    function pinchGap() {
-      const [a, b] = [...pointers.values()];
-      return Math.hypot(a.x - b.x, a.y - b.y) || 1;
+
+    let touch = null;   // { x, y, moved, gap, multi }
+    const gapOf = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY) || 1;
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const t = e.touches;
+      if (t.length === 1) touch = { x: t[0].clientX, y: t[0].clientY, moved: 0, gap: null, multi: false };
+      else if (t.length >= 2) touch = Object.assign(touch || { moved: 0 }, { gap: gapOf(t), multi: true });
+    }, { passive: false });
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      const t = e.touches;
+      if (!touch) return;
+      if (t.length >= 2) {
+        const gap = gapOf(t);
+        if (touch.gap) zoomBy(touch.gap / gap);   // fingers apart = closer (zoom in)
+        touch.gap = gap; touch.multi = true;
+      } else if (t.length === 1 && !touch.multi) {
+        const dx = t[0].clientX - touch.x, dy = t[0].clientY - touch.y;
+        touch.x = t[0].clientX; touch.y = t[0].clientY; touch.moved += Math.abs(dx) + Math.abs(dy);
+        orbitBy(dx, dy);
+      }
+    }, { passive: false });
+    const endTouch = (e) => {
+      e.preventDefault();
+      if (!touch) return;
+      if (e.touches.length === 0) {
+        const c = e.changedTouches[0];
+        if (e.type === 'touchend' && !touch.multi && touch.moved < 8 && c) pick(c.clientX, c.clientY);
+        touch = null;
+      } else if (e.touches.length === 1) {
+        // one finger left after a pinch: don't jump into an orbit
+        touch.gap = null;
+        touch.x = e.touches[0].clientX; touch.y = e.touches[0].clientY;
+      }
+    };
+    canvas.addEventListener('touchend', endTouch, { passive: false });
+    canvas.addEventListener('touchcancel', endTouch, { passive: false });
+    // Safari's own pinch gesture would zoom the whole page
+    for (const g of ['gesturestart', 'gesturechange', 'gestureend']) {
+      canvas.addEventListener(g, (e) => e.preventDefault(), { passive: false });
     }
     const raycaster = new THREE.Raycaster();
     function pick(x, y) {
       const r = canvas.getBoundingClientRect();
       const ndc = new THREE.Vector2(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
       raycaster.setFromCamera(ndc, camera);
-      const hit = raycaster.intersectObjects(modelRoot.children, false)[0];
+      const hit = raycaster.intersectObjects(meshes, false)[0];
       onSelect(hit ? hit.object.userData.uuid : null);
     }
 
@@ -207,14 +321,25 @@
       renderer.render(scene, camera);
     }
     let raf = null;
-    function loop() { render(); raf = requestAnimationFrame(loop); }
-    loop();
+    function loop(now) {
+      step(now);
+      if (dirty) { dirty = false; render(); }
+      raf = requestAnimationFrame(loop);
+    // the canvas can change size without a window resize (panels opening, rotation)
+    if (root.ResizeObserver) new root.ResizeObserver(() => requestRender()).observe(canvas);
+    }
+    raf = requestAnimationFrame(loop);
 
     return {
-      setModel, setOptions, setSelected, render, resize,
+      setModel, setOptions, setSelected, render, resize: () => { resize(); requestRender(); },
       onSelect(fn) { onSelect = fn; },
-      resetView(origin, extent) { theta = 0.6; phi = 1.0; fitTo(origin, extent); },
+      resetView(origin, extent) { theta = 0.6; phi = 1.0; fitTo(origin, extent); requestRender(); },
       stop() { cancelAnimationFrame(raf); },
+      // animation
+      setMotion, play, pause, seek,
+      onTick(fn) { anim.onTick = fn || (() => {}); tick(); },
+      animState: () => ({ t: anim.t, loop_s: loopS(), playing: anim.playing, has: !!anim.motion, playsLeft: anim.playsLeft }),
+      viewState: () => ({ radius, theta, phi }),
     };
   }
 

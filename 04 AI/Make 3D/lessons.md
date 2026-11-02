@@ -64,3 +64,14 @@ Appended over time. Promote anything reusable to `04 AI/lessons_pool.md`.
 - **Round the height first, then the position.** A post centred at half of a rounded height dipped 0.0005 in below the ground and failed the bounds rule. Round the size, then place the centre at or above half of it.
 - **A park needs its own world bounds.** The default world is 480 in across; a park of 600 ft needs a world file with bounds sized to it. Keep the rules in the world file, not the geometry.
 - **Plan the capacity as a sum.** Capacity = seats × 3600 / dispatch interval; a ladder of rides with exact totals (250, 350, 450, 850, 1000) made the iterations easy to explain.
+
+## Animation (round 7, 2026-11-02)
+
+- **Make every motion loop by construction.** One loop length per file, and each motion repeats a whole number of times per loop. Then the last frame equals the first, and a test can prove it.
+- **Make the first frame the rest pose.** Start the path at the model's position, with the tangent along the way the model faces, and use phases that are zero at the start. Then editing, IFC export and the still renders don't need a separate pose.
+- **A swinging leg tilts the foot.** The heel corner digs into the ground. Turn the foot back at the ankle by the same angle, and dip the whole body by the hip-to-ankle drop, so one foot stays on the ground.
+- **Groups need scene nodes for motion.** With every part loose in the scene, nothing can carry the banana with the hand. Nodes rest at identity, so still scenes render exactly as before.
+- **Pinch on iPad: use touch events and block Safari's gesture events.** Pointer events can be cancelled when Safari takes the pinch for page zoom. Check headless with CDP `Input.dispatchTouchEvent` and two touch points.
+- **A uniform Catmull-Rom curve bulges past sharp corners.** It was fine for an organic path; don't expect the curve's length to equal the polygon's.
+- **"Not on the website" can mean "not merged".** GitHub Pages serves `main`; work on a pull request branch isn't live until it merges. Say so up front.
+- **Sort by a stored date, not by build time.** Keep each scene's created and updated dates plus a content hash in a file the build maintains, so rebuilding changes nothing and only a real change moves a project to the top. Break ties by build order (later scenes are newer), not by name ("V16" sorts above "V2.5").

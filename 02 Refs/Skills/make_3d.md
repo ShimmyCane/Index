@@ -10,6 +10,7 @@ Input
   - **Assets-only mode:** use only what is provided: photos, sketches, measurements, notes. No outside research. Anything not given is an estimate, labelled as one.
 - Optional assets: photos, sketches, dimensions, reference links. Note what each one is for.
 - Number of increments (default 5).
+- Whether it moves: what moves, how (walk a path, swing, slide, spin, bob), and from where (hinge, hip, axle). Default: no motion.
 
 Ask only what you cannot tell from the request: the mode, and whether any photo shows a real home or a real person.
 
@@ -20,6 +21,7 @@ Rules that always apply
 - Assets-only mode: do not search the web. Say which dimensions were missing and what was assumed.
 - Units are inches, Z is up, and the ground is z = 0. Each object's position is the centre of its box. Primitives are `group`, `box`, `cylinder`, `sphere`, `cone`.
 - Older increments are never deleted. Each increment is an `if (v >= N)` block in one `defsFor(v)` function, so every version stays reproducible.
+- Motion (optional) is a separate file, `motion.json` (`make3d.motion/0.1`), never part of the model. Every animation is a loop: one `loop_s`, each motion a whole number of `cycles` per loop, and paths close on themselves. The first frame is the rest pose. Autoplay runs the loop twice, then pauses.
 
 Steps
 1. **Intake.** Write the subject, mode, assets and privacy notes into `04 AI/Make 3D/brief.md` (create the subject section if needed). Put any private asset in `private/`.
@@ -28,8 +30,10 @@ Steps
    - V01 blockout: the overall envelope and the main sizes (length, width, height, positions of the big parts).
    - V02 to V04: the next layer of shape, detail and parts, one theme per increment.
    - V05 finish: the small items, and a check against the reference images.
+   - Motion, if asked: its own last increment, after the shape is settled. Put each moving part in its own group, with the pivot (hinge, hip, shoulder, axle) written down.
    Write the goal and the planned changes for each increment before building.
 4. **Build.** Create `03 Projects/Make 3D/tools/<subject-slug>.js` with `defsFor(v)` and `sceneFor(v)`, following `tools/honda_crv.js`. Add the scenes to `tools/scenes.js`, then run `node tools/build_samples.js`. Every step must pass the rules check. Then run `node tests/test_core.js`.
+4b. **Motion (if asked).** Give the scene a `motion(uuid)` function that returns the motion file, following `tools/robot_banana.js` (kinds `path`, `swing`, `bob`, `slide`, `spin`; see the project `schematic.md` §14). Time repeated motions to each other (steps to walking speed), so nothing slides. `node tools/build_samples.js` checks it and writes `models/<id>/motion.json`. Add tests like `tests/test_motion.js`: the loop has no jump, the first frame is the rest pose, attached parts stay attached, nothing sinks into the ground. Then run `node tools/anim_check.js <dir outside the repo>` and look at frames at several times.
 5. **Render.** Run `node tools/render_versions.js <screenshot dir outside the repo> "<Subject> V01" ...`. Look at each render. If an increment has a flaw, fix it in the next increment, not by editing the old one. Copy the chosen renders to `03 Projects/Make 3D/renders/<subject-slug>/vNN.png`.
 6. **Review document.** Create `03 Projects/Increment Viewer/data/<subject-slug>.js` (copy the format in `schematic.md`). For each increment: what it is, what changed, what is still to fix, and the image path. Add the set to `03 Projects/Increment Viewer/data/sets.js`. Check that the drop-down shows it and that it loads.
 7. **Record.** Update `04 AI/Make 3D/brief.md`. Log anything new in `04 AI/Make 3D/lessons.md`. If a lesson applies to every subject, add it to `04 AI/lessons_pool.md`.
@@ -39,5 +43,6 @@ Report
 - Mode used and what the sources or assets were.
 - The increments, each with what changed and what is still open.
 - Which numbers are estimates, and any that disagree between sources.
+- If it moves: the loop length, what moves, and what was checked.
 - Links: the pull request, and the review page (`viewer.html?set=<subject-slug>`).
 - Anything that needs Jimmy's decision.

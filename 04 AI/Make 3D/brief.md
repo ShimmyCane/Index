@@ -183,3 +183,11 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 - **Checks run:** build: 10 scenes accept with 0 issues; `tests/test_core.js` passes; ten renders checked (V01, V05, V07, V10 by eye in detail).
 - **Viewer:** `Increment Viewer/data/adventure_park.js`, in the drop-down.
 - **Open for Jimmy:** (1) Thunder's 60 ft lift is above the traveller-guide examples; 50 ft would fit. (2) Keep the step-by-step ladder, or spread the 1,000 target over V05 to V10. (3) The default camera does not frame the whole park; a fit-to-park view is needed. (4) Is a real ASTM or EN review wanted before any figure is treated as a design?
+
+## Animation, round 7 (2026-11-02)
+
+- **Decisions (convo v0.7):** motion is a separate file (`motion.json`, `make3d.motion/0.1`); every animation is a loop; autoplay twice, then pause; tap-to-start and chained motions are future (door opens, then the cuckoo comes out). Two-finger pinch zoom on the canvas.
+- **Built:** `js/core/motion.js` (`poseAt`, `checkMotion`, `motionBox`; kinds path, swing, bob, slide, spin). The viewer now makes a node per object with children inside their group, applies the pose each frame, redraws only while playing or touched, and frames the whole motion. Play bar under the scene; speed and autoplay in ⚙️. Pinch zoom by touch events (one finger orbits, a tap selects).
+- **Test scene:** robot with a banana (`tools/robot_banana.js`, `models/robot-banana/`): 62 parts, nine motions, an 18 s loop round a winding closed path of stepping stones.
+- **Checks:** `node tests/test_motion.js` (12 groups), `node tools/anim_check.js <dir>`; the existing tests and the smoke run still pass.
+- **Open:** Jimmy checks on iPad (walk, pinch). Next: clash check over time (A6), frame strips for the Increment Viewer (A7). The make-3d skill has a motion step (A8, done when Jimmy asked). The Library folds versions by project, newest first.
