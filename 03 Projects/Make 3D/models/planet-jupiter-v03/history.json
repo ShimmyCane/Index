@@ -330,6 +330,10 @@
         "opacity": 1
       }
     },
+    "view": {
+      "fill": 0.75,
+      "radius": 22
+    },
     "links": [
       {
         "label": "Back to the Solar System",

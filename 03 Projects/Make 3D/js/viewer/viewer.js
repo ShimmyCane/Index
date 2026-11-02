@@ -8,6 +8,84 @@
 (function (root) {
   const CANVAS_BG = 0xfbf6ea, INK = 0x2d2a26, SELECT = 0x2f6fdd, GROUND = 0x8fc98a;
 
+
+  // ---------- procedural shaders (schematic §18). Parameters are numbers in header.materials; no images are stored.
+  const NOISE_GLSL = `
+    vec3 h3(vec3 p){ p = vec3(dot(p,vec3(127.1,311.7,74.7)), dot(p,vec3(269.5,183.3,246.1)), dot(p,vec3(113.5,271.9,124.6)));
+      return -1.0 + 2.0 * fract(sin(p) * 43758.5453123); }
+    float gn(vec3 p){
+      vec3 i = floor(p), f = fract(p), u = f * f * (3.0 - 2.0 * f);
+      return mix(mix(mix(dot(h3(i), f), dot(h3(i + vec3(1,0,0)), f - vec3(1,0,0)), u.x),
+                     mix(dot(h3(i + vec3(0,1,0)), f - vec3(0,1,0)), dot(h3(i + vec3(1,1,0)), f - vec3(1,1,0)), u.x), u.y),
+                 mix(mix(dot(h3(i + vec3(0,0,1)), f - vec3(0,0,1)), dot(h3(i + vec3(1,0,1)), f - vec3(1,0,1)), u.x),
+                     mix(dot(h3(i + vec3(0,1,1)), f - vec3(0,1,1)), dot(h3(i + vec3(1,1,1)), f - vec3(1,1,1)), u.x), u.y), u.z);
+    }
+    float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 5; i++) { s += a * gn(p); p *= 2.03; a *= 0.5; } return s * 0.5 + 0.5; }
+  `;
+  const VERT = `
+    varying vec3 vP; varying vec3 vN;
+    void main(){ vP = position; vN = normalize(normalMatrix * normal);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
+  `;
+  // clouds: a see-through shell; coverage and softness from noise, drifting with the cloud layer's spin
+  const CLOUD_FRAG = NOISE_GLSL + `
+    uniform vec3 uColor; uniform float uCover; uniform float uScale; uniform float uSeed; uniform float uAlpha;
+    varying vec3 vP; varying vec3 vN;
+    void main(){
+      vec3 d = normalize(vP) * uScale + vec3(uSeed);
+      float f = fbm(d) * 0.75 + fbm(d * 3.1) * 0.25;
+      float a = smoothstep(uCover, uCover + 0.22, f) * uAlpha;
+      float lit = 0.55 + 0.45 * max(dot(normalize(vN), normalize(vec3(0.35, 0.55, 0.75))), 0.0);
+      gl_FragColor = vec4(uColor * lit, a);
+    }
+  `;
+  // planet surface: land from a rough map (boxes of latitude and longitude, soft edges) plus noise, ocean and ice
+  const EARTH_FRAG = NOISE_GLSL + `
+    uniform vec4 uLand[12]; uniform vec4 uDesert[3];
+    uniform vec3 uOcean; uniform vec3 uOceanDeep; uniform vec3 uLandCol; uniform vec3 uDesertCol; uniform vec3 uIce;
+    uniform float uSeed;
+    varying vec3 vP; varying vec3 vN;
+    // an ellipse on the map: centre (lat, lon) and radii (lat, lon) in degrees; soft edge
+    float ell(vec4 e, float lat, float lon){
+      float dl = (lat - e.x) / e.z, dn = (lon - e.y) / e.w;
+      return 1.0 - smoothstep(0.8, 1.15, sqrt(dl * dl + dn * dn));
+    }
+    void main(){
+      vec3 n = normalize(vP);
+      float lat = asin(clamp(n.z, -1.0, 1.0)) * 57.29578;
+      float lon = atan(n.y, n.x) * 57.29578;
+      float soft = 0.0, dsoft = 0.0;
+      for (int i = 0; i < 12; i++) soft = max(soft, ell(uLand[i], lat, lon));
+      for (int i = 0; i < 3; i++) dsoft = max(dsoft, ell(uDesert[i], lat, lon));
+      float nz = fbm(n * 2.6 + vec3(uSeed));
+      float coast = fbm(n * 2.6 + vec3(uSeed)) - 0.5 + (fbm(n * 7.5 + vec3(uSeed * 1.7)) - 0.5) * 0.45;
+      float land = soft + coast * 1.7;
+      float isLand = smoothstep(0.47, 0.53, land);
+      vec3 ocean = mix(uOceanDeep, uOcean, smoothstep(0.2, 0.48, land));
+      vec3 ground = mix(uLandCol, uDesertCol, smoothstep(0.4, 0.8, dsoft + (nz - 0.5)));
+      vec3 col = mix(ocean, ground, isLand);
+      float ice = smoothstep(74.0, 80.0, abs(lat) + (nz - 0.5) * 8.0);
+      col = mix(col, uIce, ice);
+      float lit = 0.3 + 0.7 * max(dot(normalize(vN), normalize(vec3(0.35, 0.55, 0.75))), 0.0);
+      gl_FragColor = vec4(col * lit, 1.0);
+    }
+  `;
+  // gas giant and cloudy planet: zonal bands by latitude, pushed about by noise
+  const BANDS_FRAG = NOISE_GLSL + `
+    uniform vec3 uA; uniform vec3 uB; uniform vec3 uC; uniform float uFreq; uniform float uSeed;
+    varying vec3 vP; varying vec3 vN;
+    void main(){
+      vec3 n = normalize(vP);
+      float lat = asin(clamp(n.z, -1.0, 1.0));
+      float t = lat * uFreq + 1.6 * (fbm(n * 1.7 + vec3(uSeed)) - 0.5);
+      float w = 0.5 + 0.5 * sin(t * 3.0);
+      vec3 col = mix(uA, uB, smoothstep(0.25, 0.75, w));
+      col = mix(col, uC, smoothstep(0.7, 0.95, fbm(n * 5.0 + vec3(uSeed)) ) * 0.6);
+      float lit = 0.3 + 0.7 * max(dot(normalize(vN), normalize(vec3(0.35, 0.55, 0.75))), 0.0);
+      gl_FragColor = vec4(col * lit, 1.0);
+    }
+  `;
+
   function createViewer(canvas) {
     const THREE = root.THREE;
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -83,8 +161,26 @@
       }
     }
 
+    const col = (hex) => new THREE.Color(hex);
+    const vec4s = (list, n) => Array.from({ length: n }, (_, i) => { const b = (list || [])[i]; return b ? new THREE.Vector4(...b) : new THREE.Vector4(-999, -999, 0, 0); });
+    // procedural materials: the header holds their numbers; the shader does the rest
+    function shaderFor(m) {
+      if (display === 'wire') return null;
+      if (m.kind === 'clouds') return new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: CLOUD_FRAG, transparent: true, depthWrite: false,
+        uniforms: { uColor: { value: col(m.color) }, uCover: { value: m.coverage ?? 0.5 }, uScale: { value: m.scale ?? 2.2 },
+          uSeed: { value: m.seed ?? 1 }, uAlpha: { value: m.alpha ?? 0.9 } } });
+      if (m.kind === 'earth') return new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: EARTH_FRAG,
+        uniforms: { uLand: { value: vec4s(m.land, 12) }, uDesert: { value: vec4s(m.desert, 3) }, uOcean: { value: col(m.ocean || '#4f8fd6') },
+          uOceanDeep: { value: col(m.oceanDeep || '#2f6aa8') }, uLandCol: { value: col(m.land_color || '#5f9e5a') },
+          uDesertCol: { value: col(m.desert_color || '#d9b77a') }, uIce: { value: col(m.ice || '#ffffff') }, uSeed: { value: m.seed ?? 1 } } });
+      if (m.kind === 'bands') return new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: BANDS_FRAG,
+        uniforms: { uA: { value: col(m.a) }, uB: { value: col(m.b) }, uC: { value: col(m.c || m.b) }, uFreq: { value: m.freq ?? 10 }, uSeed: { value: m.seed ?? 1 } } });
+      return null;
+    }
     function materialFor(o, model) {
       const m = (model.materials || {})[o.material] || { color: '#c9c3b5', opacity: 1 };
+      const sh = m.kind ? shaderFor(m) : null;
+      if (sh) { if (o.type === 'sheet') sh.side = THREE.DoubleSide; return sh; }
       const opts = { color: m.color, transparent: m.opacity < 1, opacity: m.opacity };
       if (o.type === 'sheet') opts.side = THREE.DoubleSide;   // leaves, grass and flags show from both sides
       if (display === 'wire') return new THREE.MeshBasicMaterial({ ...opts, wireframe: true });
@@ -192,7 +288,7 @@
       if (anim.lastNow === null) { anim.lastNow = now; return; }
       const dt = Math.min((now - anim.lastNow) / 1000, 0.1);   // a hidden tab doesn't jump ahead
       anim.lastNow = now;
-      anim.t += dt * anim.speed;
+      anim.t += dt * anim.speed * (anim.zoomSpeed ? anim.zoomSpeed(radius) : 1);
       if (anim.motion && anim.motion.loop === false) {
         // a one-shot timeline (schematic §17): run once to the end, then hold the last frame
         if (anim.t >= loopS()) { anim.t = loopS(); anim.playing = false; anim.lastNow = null; }
@@ -229,7 +325,11 @@
         const ext = Math.max(f.max[0] - f.min[0], f.max[1] - f.min[1], f.max[2] - f.min[2], 24);
         if (info.fit) {
           if (info.azimuth_deg !== undefined) theta = (info.azimuth_deg * Math.PI) / 180;
-          fitTo(o, ext);
+          if (model.view && model.view.fill && model.view.radius) {
+            // the camera distance at which a sphere of this radius fills `fill` of the screen height (35 degree lens)
+            target.set(...toScene(o));
+            radius = model.view.radius / (model.view.fill * Math.tan((35 * Math.PI) / 360));
+          } else fitTo(o, ext);
         }
       }
       requestRender();
@@ -237,6 +337,7 @@
 
     function setOptions(opts) {
       if (opts.speed) anim.speed = opts.speed;
+      if (opts.zoomSpeed !== undefined) anim.zoomSpeed = opts.zoomSpeed || null;
       if (opts.up && opts.up !== up) { up = opts.up; if (lastModel) buildModel(lastModel); }
       if (opts.display && opts.display !== display) { display = opts.display; if (lastModel) buildModel(lastModel); }
       if (opts.ground) {

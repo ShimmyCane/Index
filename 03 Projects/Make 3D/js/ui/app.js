@@ -425,66 +425,82 @@
     }, ms);
   }
 
-  // ---------- one-shot timeline: a month and year tracker (lower right). Scroll or drag to move through time.
-  // Scrolling moves one month a notch (hold Shift for a year); dragging moves about one month per 10 px.
-  const track = { start: null, span: 0, months: 0, idx: 0, acc: 0, drag: null };
+  // ---------- one-shot timeline: a date tracker (lower right). Scroll or drag to move through time (schematic §18).
+  // Its step follows the zoom: far away a year, closer a month, closer still a week, then a day. Zoomed in,
+  // the animation also runs slower, so the Earth moves smoothly instead of jumping.
+  const DAY = 86400000;
+  const track = { start: 0, end: 0, date: null, acc: 0, drag: null, unit: 'year' };
   const trackOn = () => !!(st.motion && st.motion.timeline && st.motion.loop === false);
-  const monthLabel = (d) => d.toLocaleString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+  const zoomRadius = () => (st.viewer ? st.viewer.viewState().radius : 1000);
+  const unitFor = (r) => (r > 1200 ? 'year' : r > 400 ? 'month' : r > 150 ? 'week' : 'day');
+  const fmt = {
+    year: (d) => String(d.getUTCFullYear()),
+    month: (d) => d.toLocaleString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' }),
+    week: (d) => d.toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }),
+    day: (d) => d.toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }),
+  };
+  function stepDate(d, unit, n) {
+    const e = new Date(d.getTime());
+    if (unit === 'year') e.setUTCFullYear(e.getUTCFullYear() + n);
+    else if (unit === 'month') e.setUTCMonth(e.getUTCMonth() + n);
+    else e.setUTCDate(e.getUTCDate() + n * (unit === 'week' ? 7 : 1));
+    return e;
+  }
+  const clampTime = (t) => Math.min(track.end, Math.max(track.start, t));
   function setupTrack() {
     $('dateTrack').hidden = !trackOn();
+    if (st.viewer) st.viewer.setOptions({ zoomSpeed: trackOn() ? (r) => Math.max(0.04, Math.min(1, r / 1200)) : null });
     if (!trackOn()) return;
     const tl = st.motion.timeline;
-    track.start = new Date(tl.start_date + 'T00:00:00Z');
-    track.span = tl.span_days;
-    track.months = Math.floor(tl.span_days / 30.436875);
-    track.idx = 0;
+    track.start = Date.parse(tl.start_date + 'T00:00:00Z');
+    track.end = track.start + tl.span_days * DAY;
+    track.date = new Date(track.start);
     drawTrack();
   }
-  function dateAt(idx) { const d = new Date(track.start.getTime()); d.setUTCMonth(d.getUTCMonth() + idx); return d; }
-  function monthAt(u) {
-    const d = new Date(track.start.getTime() + u * track.span * 86400000);
-    return (d.getUTCFullYear() - track.start.getUTCFullYear()) * 12 + (d.getUTCMonth() - track.start.getUTCMonth());
-  }
   function drawTrack() {
+    track.unit = unitFor(zoomRadius());
     const drum = $('drum');
     drum.innerHTML = '';
     for (let k = -2; k <= 2; k++) {
-      const i = track.idx + k, row = document.createElement('div');
+      const d = stepDate(track.date, track.unit, k), row = document.createElement('div');
       row.className = 'drum-row' + (k === 0 ? ' now' : '');
-      row.textContent = i >= 0 && i <= track.months ? monthLabel(dateAt(i)) : '';
+      const t = d.getTime();
+      row.textContent = t >= track.start && t <= track.end ? fmt[track.unit](d) : '';
       drum.appendChild(row);
     }
-    $('dateTrack').setAttribute('aria-valuetext', monthLabel(dateAt(track.idx)));
+    $('dateTrack').setAttribute('aria-valuetext', fmt[track.unit](track.date));
   }
-  function goMonth(i) {
-    track.idx = Math.max(0, Math.min(track.months, i));
-    const u = Math.min(1, Math.max(0, (dateAt(track.idx) - track.start) / 86400000 / track.span));
-    st.viewer.seek(u * st.motion.loop_s);
+  // move the timeline to a date: the animation seeks there, and the tracker shows it
+  function goDate(t) {
+    track.date = new Date(clampTime(t));
+    const u = (track.date.getTime() - track.start) / (track.end - track.start);
+    st.viewer.seek(Math.min(1, Math.max(0, u)) * st.motion.loop_s);
     drawTrack();
   }
   // called on every animation tick: the tracker follows the playing timeline (unless the user is dragging it)
   function onTrackTick(a) {
     if (!trackOn() || !a.has || track.drag) return;
-    const i = Math.max(0, Math.min(track.months, monthAt(a.t / a.loop_s)));
-    if (i !== track.idx) { track.idx = i; drawTrack(); }
+    track.date = new Date(clampTime(track.start + (a.t / a.loop_s) * (track.end - track.start)));
+    drawTrack();
   }
   function bindTrack() {
     const el = $('dateTrack');
     el.addEventListener('wheel', (e) => {
       e.preventDefault();
       track.acc += e.deltaY;
-      const step = e.shiftKey ? 12 : 1;
       const notches = Math.trunc(track.acc / 40);
-      if (notches) { track.acc -= notches * 40; goMonth(track.idx + notches * step); }
+      if (notches) { track.acc -= notches * 40; goDate(stepDate(track.date, unitFor(zoomRadius()), notches * (e.shiftKey ? 10 : 1)).getTime()); }
     }, { passive: false });
-    el.addEventListener('pointerdown', (e) => { track.drag = { y: e.clientY, base: track.idx }; el.setPointerCapture(e.pointerId); });
+    el.addEventListener('pointerdown', (e) => { track.drag = { y: e.clientY, base: new Date(track.date.getTime()), unit: unitFor(zoomRadius()) }; el.setPointerCapture(e.pointerId); });
     el.addEventListener('pointermove', (e) => {
       if (!track.drag) return;
-      goMonth(track.drag.base + Math.round((track.drag.y - e.clientY) / 10));
+      goDate(stepDate(track.drag.base, track.drag.unit, Math.round((track.drag.y - e.clientY) / 10)).getTime());
     });
-    const end = () => { track.drag = null; };
+    const end = () => { track.drag = null; drawTrack(); };
     el.addEventListener('pointerup', end);
     el.addEventListener('pointercancel', end);
+    // the step changes with the zoom even when nothing is playing
+    setInterval(() => { if (trackOn() && !track.drag && unitFor(zoomRadius()) !== track.unit) drawTrack(); }, 250);
   }
 
   // ---------- full screen: the Fullscreen API, or a fixed fill where the browser refuses it

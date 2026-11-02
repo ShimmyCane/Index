@@ -162,3 +162,10 @@ Jimmy's note on V06: too slow, too small, "too diagrammatic and not real enough 
 - A motion engine can read its rest heading from a coarser set of points than the stroke it came from. Turn the final points by the heading the engine reads from them, not the heading of the dense curve.
 - The cloud's tag filter should not depend on the database's case-sensitive `contains`. Match tags in code when the user asks for case-insensitive tags.
 - Visibility controls live in the model as `show:<label>` tags on group objects, not in the viewer. The viewer only reads them, so a saved model works the same in any viewer.
+
+## Shaders, zoom-linked time, framing, 1958 start (round 10)
+- Boxes of latitude and longitude make slabs; ellipses with soft edges and noise coasts look like land. Measure the covered share (the boxes covered 55% of the sphere; real land is about 29%) before judging a map by eye.
+- A header change to an old scene changes its history file but not its geometry. Framing and the new materials were added to all planet views; geometry is unchanged. Note this if a version's history is compared later.
+- A shader can only read what the header gives it: pass lists of numbers, not arrays of objects.
+- Tracker steps must follow the camera, not only the animation: check the drum with the camera zoomed in and out, and check the playback speed by counting seconds of timeline per real second.
+- Comets: take the mean anomaly from the perihelion time; from a longitude it is wrong for a body far from circular.

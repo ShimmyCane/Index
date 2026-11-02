@@ -328,5 +328,7 @@ const { AQUARIUM } = require('./aquarium.js');
 const { SOLAR_SYSTEM, PLANET_VIEWS } = require('./solar_system.js');
 const { SOLAR_TRUE } = require('./solar_true.js');
 const { PLANET_VIEWS_V2V3, EARTH_VIEWS } = require('./planet_views.js');
+const { SOLAR_TRUE_V07 } = require('./solar_true.js');
+const { PLANET_VIEWS_V4_6, EARTH_VIEWS_V11_20 } = require('./planet_views_v4.js');
 
-module.exports = { WORLD_ID, SCENES: [PLANTER, TABLE, OUTDOOR_V2, KITCHEN, ...LIVING_ROOM, ...KITCHEN_MOCKUP, ...HONDA_CRV, ...ADVENTURE_PARK, ...ADVENTURE_PARK_COMPACT, ...AQUARIUM, ...SOLAR_SYSTEM, ...PLANET_VIEWS, ...PLANET_VIEWS_V2V3, ...EARTH_VIEWS, SOLAR_TRUE, ROBOT_BANANA, ...ROBOT_LOOP, ...HAWK] };
+module.exports = { WORLD_ID, SCENES: [PLANTER, TABLE, OUTDOOR_V2, KITCHEN, ...LIVING_ROOM, ...KITCHEN_MOCKUP, ...HONDA_CRV, ...ADVENTURE_PARK, ...ADVENTURE_PARK_COMPACT, ...AQUARIUM, ...SOLAR_SYSTEM, ...PLANET_VIEWS, ...PLANET_VIEWS_V2V3, ...EARTH_VIEWS, SOLAR_TRUE, SOLAR_TRUE_V07, ...PLANET_VIEWS_V4_6, ...EARTH_VIEWS_V11_20, ROBOT_BANANA, ...ROBOT_LOOP, ...HAWK] };

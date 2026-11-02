@@ -153,6 +153,10 @@
         "color": "#ff8fa3",
         "opacity": 1
       }
+    },
+    "view": {
+      "fill": 0.75,
+      "radius": 6
     }
   },
   "operations": [

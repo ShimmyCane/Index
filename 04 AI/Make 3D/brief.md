@@ -285,3 +285,10 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 - **Parts dropdown (upper right):** any group tagged `show:<label>` gets a checkbox that hides its whole branch. Pure rules in `js/core/visibility.js`; the viewer hides nodes and skips them when picking.
 - **Scale and seam:** the closed shape is labelled 19'-7" at 3"=1'-0". Its longest side is taken as 235 in, so sketch units × 3.72 in. The stroke does not join at its ends (about 8 in gap, sharp turn); a Gaussian average (sigma 3 points) closes it, turning the seam by about 1.6 degrees and moving no point more than about 3 in.
 - **Open:** the scale is an estimate (Jimmy to confirm); the antenna passes through the hat (not moved); the frisbee is held at the rim, not gripped.
+## Round 10: shaders, zoom-linked time, 1958 start, more increments (2026-11-02)
+
+- Solar system V07: starts 31 January 1958 (Explorer 1); Halley's Comet, Encke and Tempel 1 on true orbits.
+- Tracker steps by year, month, week or day with the zoom; playback slows when zoomed in (about 0.1 times at close range).
+- Planet views fill three quarters of the screen (`header.view`). V04 to V06 added (shaded surfaces and bands). Earth V11 to V20 added (shaded continents, a cloud shell, more features; loop 480 s).
+- Procedural materials replace flat dots for clouds and surfaces; the numbers live in the header, no images.
+- Open: continents are ellipses (real coastlines need a map texture and a decision about image assets); comet elements to be checked against JPL; Halley dips inside the drawn Sun.
