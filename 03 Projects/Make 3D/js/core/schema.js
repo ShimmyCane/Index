@@ -13,6 +13,16 @@
   const TYPES = ['group', 'box', 'cylinder', 'sphere', 'cone'];
   // dimensions per type: box [x, y, z]; cylinder/cone [radius, height]; sphere [radius]; group []
   const DIM_COUNT = { group: 0, box: 3, cylinder: 2, sphere: 1, cone: 2 };
+  // Tags say what a part is for. Objects carry zero or more. Unknown tags are kept, but the viewer shows only these.
+  const TAGS = {
+    surface: 'Surface',     // what you put things on: table top, counter
+    frame: 'Frame',         // legs, rails, beams that carry the surface
+    stand: 'Stand',         // pole, base, support that holds up a canopy or shelf
+    shade: 'Shade',         // canopy, awning, cover
+    ballast: 'Ballast',     // weight that keeps something from moving: sandbags
+    plant: 'Plant',         // trunk, branches, leaves
+    container: 'Container', // pot, planter, box that holds soil or plants
+  };
 
   function newUuid() {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
@@ -39,5 +49,5 @@
     return header;
   }
 
-  return { SCHEMA, TYPES, DIM_COUNT, newUuid, normaliseObject, headerFromModel };
+  return { SCHEMA, TYPES, DIM_COUNT, TAGS, newUuid, normaliseObject, headerFromModel };
 });

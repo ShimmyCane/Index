@@ -181,15 +181,54 @@
       k.className = 'kind';
       k.textContent = o.type;
       b.appendChild(k);
+      for (const t of o.tags || []) {
+        const tg = document.createElement('span');
+        tg.className = `tag tag-${t}`;
+        tg.textContent = (M.TAGS && M.TAGS[t]) || t;
+        b.appendChild(tg);
+      }
       b.addEventListener('click', () => select(o.uuid));
       li.appendChild(b);
       ul.appendChild(li);
     }
   }
 
+  // Bottom bar, next to Check model: the selected part's purpose and description.
+  function renderStatusLine(o) {
+    const el = $('selInfo');
+    el.innerHTML = '';
+    if (!o) { el.textContent = 'Tap an object to see what it is for.'; return; }
+    const head = document.createElement('strong');
+    head.textContent = o.name;
+    el.appendChild(head);
+    for (const t of o.tags || []) {
+      const tg = document.createElement('span');
+      tg.className = `tag tag-${t}`;
+      tg.textContent = (M.TAGS && M.TAGS[t]) || t;
+      el.appendChild(tg);
+    }
+    if (o.description) {
+      const d = document.createElement('span');
+      d.className = 'selinfo-desc';
+      d.textContent = o.description;
+      el.appendChild(d);
+    }
+  }
+
+  // Only non-zero angles are written, so existing objects and history stay as they are.
+  function rotationFields() {
+    const out = {};
+    for (const [key, id] of [['rotation_x', 'fRotX'], ['rotation_y', 'fRot'], ['rotation_z', 'fRotZ']]) {
+      const v = Number($(id).value) || 0;
+      if (v) out[key] = v;
+    }
+    return out;
+  }
+
   function renderSelection(model) {
     const o = st.selected && findObj(model, st.selected);
     $('selCard').hidden = !o;
+    renderStatusLine(o);
     if (!o) return;
     const facts = [
       ['Name', o.name],
@@ -197,7 +236,8 @@
       ['Type', o.type],
       ['Size', o.dimensions && o.dimensions.length ? o.dimensions.map((d) => len(d)).join(' × ') : '—'],
       ['Centre', o.position ? o.position.map((p) => len(p)).join(', ') : '—'],
-      ['Rotation Y', `${o.rotation_y || 0}°`],
+      ['Rotation', `X ${o.rotation_x || 0}°, Y ${o.rotation_y || 0}°, Z ${o.rotation_z || 0}°`],
+      ['Purpose', (o.tags || []).map((t) => (M.TAGS && M.TAGS[t]) || t).join(', ') || '—'],
       ['Material', o.material || '—'],
       ['Parent', o.parent ? (findObj(model, o.parent) || {}).name || 'missing' : '—'],
       ['uuid', o.uuid],
@@ -347,7 +387,7 @@
       type,
       dimensions: dims,
       position: pos,
-      rotation_y: Number($('fRot').value) || 0,
+      ...rotationFields(),
       parent: $('fParent').value || null,
       material: $('fMat').value || null,
     };

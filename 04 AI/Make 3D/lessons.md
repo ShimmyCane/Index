@@ -25,3 +25,10 @@ Appended over time. Promote anything reusable to `04 AI/lessons_pool.md`.
 - **Chairs cannot turn to face sideways.** With rotation about Y only, a chair beside the table cannot face it. Move the chair to the end of the table instead.
 - **A wall can hide what you want to check.** The right wall hides the door from the default camera. A zoom-out shot shows the whole room, but not behind a wall. A "hide walls" toggle is the real fix (noted for the viewer).
 - **Keep old versions reproducible.** Each version is a `if (v >= N)` block in one function, so V01 to V10 all rebuild from the same file.
+
+## 2026-11-02: check the picture, not the numbers
+
+- A pass on the numbers is not a pass on the shape. The first bonsai "passed" every test and still looked like a bare line of sticks. Look at each screenshot from at least two angles (default and side) and ask what a real tree of this kind does: taper, lean, apex above the crown, branches that arch up, not flat arms.
+- Dimensions that look fine on paper can clash in 3-D (a pole through a table top). Run the clash check (`js/core/clash.js`) after every scene change.
+- "Sparse" in a user's description can be a complaint, not a spec. Re-read the user's sentence before building to it.
+- Shell: never run `cat > file` without input in a command that is not meant to read stdin; it hangs the shell.

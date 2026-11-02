@@ -85,12 +85,19 @@ const url = 'file://' + path.join(__dirname, '..', 'index.html');
   await page.click('#libBtn');
   console.log('library scenes listed:', await page.locator('#builtinList li').count(), '| sign-in box visible:', await page.isVisible('#signInBox'));
   if (shotDir) await page.screenshot({ path: path.join(shotDir, '6-library.png') });
-  for (const [i, name] of [[1, 'outdoor table'], [2, 'kitchen']]) {
+  for (const [i, name] of [[1, 'outdoor table'], [2, 'outdoor table V2'], [3, 'kitchen']]) {
     if (await page.isHidden('#libPanel')) await page.click('#libBtn');
     await page.click(`#builtinList li >> nth=${i} >> button`);
     await page.waitForTimeout(400);
     console.log(`opened ${name}: ${await page.textContent('#modelTitle')} with ${await page.locator('#objectList li').count()} objects`);
     if (shotDir) await page.screenshot({ path: path.join(shotDir, `7-${name.replace(/ /g, '-')}.png`) });
+    if (name === 'outdoor table V2') {
+      // tags in the objects list, and the purpose line next to Check model
+      await page.click('#objectList li:has-text("Parasol pole") button');
+      console.log('status line:', (await page.textContent('#selInfo')).replace(/\s+/g, ' ').trim());
+      console.log('tags shown in list:', await page.locator('#objectList .tag').count());
+      if (shotDir) await page.screenshot({ path: path.join(shotDir, '8-v2-pole-selected.png') });
+    }
   }
   // back to the planter for the rest of the run
   if (await page.isHidden('#libPanel')) await page.click('#libBtn');

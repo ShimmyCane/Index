@@ -10,7 +10,8 @@
 - **MVP test model:** the garden planter only. The outdoor table and the kitchen are future test models.
 - **Position:** the origin is the centre of the **major bounding box** (the bulk of the elements). If most elements are much smaller than the full box, the origin is refined by volume weighting. Big features (a spire, a wing) extend the extent but don't move the origin. A ground plane (opaque, double-sided, green, slider height) clips the model so it sits.
 - **Up axis:** Z-up by default, with a Y-up toggle in settings.
-- **Rotation:** Y axis only for now.
+- **Clash check** *(round 4)*: `js/core/clash.js` samples each solid through its volume and reports pairs that pass into each other by more than 0.5 in. Parts of the same top-level group are not compared. Used in the tests; not yet shown in the UI.
+- **Rotation:** any part turns about all three model axes: `rotation_x`, `rotation_y`, `rotation_z`, in degrees. Order: X first, then Y, then Z. Z is up, so `rotation_z` spins a part on the ground. Missing means 0, and the form writes only non-zero angles.
 - **Each object** has a `description` as well as a `name`.
 - **Textures:** future. The model never stores images or image mapping.
 - **Overlap:** allowed by default; a world rule can turn on a flag for a model check.
@@ -104,7 +105,7 @@ The LLM is optional. It may write operations, but nothing needs it to render, in
 ```
 
 - `position` is the **centre of the object's bounding box**, in inches (round 2, Q5). Model origin rule: see §0 (weighted major box, v0.3 Q1–Q3). Ground height is a viewer setting and is never stored.
-- `rotation_y` is in degrees, **about the Y axis only** for now (round 2, Q6). Other axes are future. Stored as one number, not a list.
+- `rotation_x`, `rotation_y`, `rotation_z` are in degrees, about the model's X, Y and Z axes (Z up). Applied X, then Y, then Z (round 2, Q6, widened in round 4 chat). Each is stored as one number and is optional (0 when missing). The viewer and the origin maths use the same order.
 - `description` is free text, for example "sits on the floor" or "floats 5 ft in the air" (round 2, Q7).
 - Materials are named references, colour only. Textures are future, and images or image mapping are never stored in the model (round 2, Q9).
 - `parent` is the uuid of a `group` object, or null *(Q8)*.
@@ -119,6 +120,8 @@ The LLM is optional. It may write operations, but nothing needs it to render, in
 | `cylinder` | `[radius, height]` | optional `segments` |
 | `sphere` | `[radius]` | origin at centre |
 | `cone` | `[radius, height]` | |
+
+**Tags** *(convo v0.5)*: each object may carry `tags`, a list of purposes from a fixed set in `js/core/schema.js` (`surface`, `frame`, `stand`, `shade`, `ballast`, `plant`, `container`). Tags only describe the part: they don't change geometry or rules. The objects panel shows them as chips, and the bottom bar shows the selected part's name, tags and description next to Check model. Unknown tags are kept but not styled.
 
 Later: `extrusion` (profile + path), `boolean` (union / subtract / intersect, needs a kernel), `mesh` (imported STL/OBJ/glTF), architectural components (wall, door, window).
 
@@ -208,7 +211,7 @@ Axis conversion happens in one place (`viewer/axes.js`): model Z-up → Three.js
 - **Reject flow** *(round 2, Q15)*: the editor stays open with the reasons listed. Delete one or more of the offending objects and re-apply, or preview the result without saving.
 - **Files** *(Q17)*: open or save a bundle (`model.json` + `history.json` + `world.json`, or one combined `.make3d.json`). Sample models load from `models/`. The last session autosaves to localStorage.
 - **Cloud** *(round 2, Q17, v0.4)*: `m3d_scenes` in the architecture database (one row per scene: bundle and replayed model), registered in `table_index`, owner only (RLS). Built 2026-11-02.
-- **Library** *(round 3)*: lower-right button. Lists input scenes (built in, and saved in the cloud). Lists Quick Detail details tagged `make 3-D` as read-only future references. Scenes from an LLM or from drawings come later, linked in as JSON input.
+- **Library** *(round 3; four built-in scenes from v0.5: garden planter, outdoor table, outdoor table V2, kitchen)*: lower-right button. Lists input scenes (built in, and saved in the cloud). Lists Quick Detail details tagged `make 3-D` as read-only future references. Scenes from an LLM or from drawings come later, linked in as JSON input.
 - Drawing and component blocks are future (round 2, Q16 and Q14).
 
 ## 8. Page layout (draft)

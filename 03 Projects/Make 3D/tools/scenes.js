@@ -84,6 +84,182 @@ const TABLE = {
   modify: [{ key: 'canopy-mid', set: { dimensions: [38, 12] }, note: 'slightly wider middle canopy' }],
 };
 
+// Outdoor table V2 (convo v0.5): 7 ft x 3 ft white oak top on yellow painted 2 in angle legs, a rectangular
+// frame under the top, a centre beam and a low back bar. A folding red parasol with one large canopy at the far
+// end, on a square base that hides two sandbags. A bonsai in a 2 ft box on the ground, 8 ft from the table end,
+// with one main limb that forks three times in 3-D and sparse leaves.
+const bonsaiBranches = () => {
+  // A bonsai, not a bare frame. Shape rules used here:
+  // - the trunk is thick at the soil and tapers fast; it leans toward the table and its leader ends in a pad;
+  // - branches arch UP from the trunk (never flat); the main limb climbs in steps, from about 15 to 45 degrees;
+  // - a balance branch goes out the other way, so the tree is not one-sided;
+  // - each branch ends in a foliage pad: a cluster of spheres, not a single ball;
+  // - a dead branch (jin) on the far side says the tree is old.
+  // Model axes, Z up. A cylinder lies along its own Z axis; rotation_x, then rotation_y, turn +Z onto its direction.
+  const vadd = (a, b) => a.map((v, i) => v + b[i]);
+  const vscale = (a, k) => a.map((v) => v * k);
+  const vnorm = (a) => { const l = Math.hypot(...a); return a.map((v) => v / l); };
+  const vcross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const toDeg = (r) => (r * 180) / Math.PI;
+  const turnAngles = (dir) => ({
+    rotation_x: +toDeg(Math.asin(Math.max(-1, Math.min(1, -dir[1])))).toFixed(3),
+    rotation_y: +toDeg(Math.atan2(dir[0], dir[2])).toFixed(3),
+  });
+  // a new direction: pitch away from dir, then yaw around it (degrees)
+  const turn = (dir, pitch, yaw) => {
+    const ref = Math.abs(dir[2]) > 0.9 ? [1, 0, 0] : [0, 0, 1];
+    const u = vnorm(vcross(dir, ref));
+    const v = vcross(dir, u);
+    const p = (pitch * Math.PI) / 180, y = (yaw * Math.PI) / 180;
+    const side = vadd(vscale(u, Math.cos(y)), vscale(v, Math.sin(y)));
+    return vnorm(vadd(vscale(dir, Math.cos(p)), vscale(side, Math.sin(p))));
+  };
+  const up = (deg, toward = [1, 0.04]) => { // climb deg above horizontal, toward a horizontal direction
+    const r = (deg * Math.PI) / 180;
+    const h = vnorm([toward[0], toward[1], 0]);
+    return vnorm([h[0] * Math.cos(r), h[1] * Math.cos(r), Math.sin(r)]);
+  };
+
+  const defs = [];
+  const seg = (start, dir, len, rad, key, label, material = 'trunk', tags = ['plant']) => {
+    const mid = vadd(start, vscale(dir, len / 2));
+    defs.push([key, { name: label, description: '', type: 'cylinder', dimensions: [rad, len],
+      position: mid.map((v) => +v.toFixed(2)), ...turnAngles(dir), material, parent: 'bonsai', tags }]);
+    return vadd(start, vscale(dir, len));
+  };
+  // a foliage pad: a cluster of spheres around a tip, so it reads as leaves, not a ball on a stick
+  const pads = [];
+  const pad = (c, size, name) => {
+    const offs = [[0, 0, 0, 1], [0.8, 0.2, 0.3, 0.8], [-0.7, -0.3, 0.1, 0.75], [0.1, 0.8, -0.2, 0.7]];
+    offs.forEach(([x, y, z, k], i) => {
+      const p = [c[0] + x * size, c[1] + y * size, c[2] + z * size];
+      defs.push([`${name}-${i}`, { name: i === 0 ? name : `${name} part ${i}`, description: '', type: 'sphere',
+        dimensions: [size * k], position: p.map((v) => +v.toFixed(2)), material: 'leaf', parent: 'bonsai', tags: ['plant'] }]);
+    });
+    pads.push(c);
+  };
+
+  // trunk: four tapered pieces, thick at the soil. The last piece is the leader.
+  const lean = [18, 24, 30, 36];   // slanting trunk: it leans toward the table as it rises
+  const radii = [4.0, 3.2, 2.5, 1.7];
+  const lengths = [16, 16, 16, 44]; // the last piece is the leader: the apex is the highest point
+  const trunkDirs = lean.map((deg) => vnorm([Math.sin((deg * Math.PI) / 180), 0, Math.cos((deg * Math.PI) / 180)]));
+  const trunkEnds = [];
+  let p = [-150, 0, 24];
+  trunkDirs.forEach((dir, i) => {
+    p = seg(p, dir, lengths[i], radii[i], `t-${i + 1}`, `Trunk ${i + 1}`);
+    trunkEnds.push(p);
+  });
+  pad(trunkEnds[3], 4.8, 'Foliage apex');
+
+  // dead branch on the far side (jin), from the first piece of trunk
+  seg(vadd([-150, 0, 24], vscale(trunkDirs[0], 5)), vnorm([-1, 0.1, 0.6]), 12, 1.0, 'jin', 'Dead branch (jin)', 'deadwood');
+
+  // balance branch: out the other way from the second piece, with its own pad
+  const balanceEnd = seg(trunkEnds[0], vnorm([-0.8, 0.05, 0.5]), 22, 1.4, 'bal', 'Balance branch');
+  pad(balanceEnd, 4.8, 'Foliage balance');
+
+  // main limb: leaves the second piece of trunk and climbs in three steps (15, 30, 45 degrees), arching toward the table
+  const limb1 = seg(trunkEnds[1], up(28), 26, 2.2, 'limb-1', 'Main limb 1');
+  const limb2 = seg(limb1, up(35), 22, 1.6, 'limb-2', 'Main limb 2');
+  const limbEnd = seg(limb2, up(30), 18, 1.1, 'limb-3', 'Main limb 3');
+
+  // crown: from three points along the main limb, four branches each. Two spread up and out on either side,
+  // two go out level. Each ends in a foliage pad, so the crown is a dome with pads at several heights.
+  const sprays = [[limb1, up(28), 15], [limb2, up(35), 13], [limbEnd, up(30), 11]];
+  for (const [start, dir, len] of sprays) {
+    [-135, -45, 0, 180].forEach((yaw, i) => {
+      const d = turn(dir, 30, yaw);
+      const end = seg(start, d, len, 0.7, `b-${sprays.findIndex((x) => x[0] === start) + 1}-${i + 1}`,
+        `Branch ${sprays.findIndex((x) => x[0] === start) + 1}.${i + 1}`);
+      pad(end, 4.0 + (i % 2) * 0.6, `Foliage ${sprays.findIndex((x) => x[0] === start) + 1}.${i + 1}`);
+    });
+  }
+
+  return defs;
+};
+
+// Canopy: one folding cloth draped over three arm tips, as in the older three-head parasol. The cloth is a
+// grid of thin tilted panels that follow a wavy surface: peaks at each arm (ridges at 0, 120 and 240 degrees),
+// sagging between them. Three metal arms hold the peaks from the pole top. All three arms are the same.
+const CANOPY = { cx: 48, cy: 0, r: 70, base: 106, ridge: 8, dome: 16 };  // apex at the top, edge sags, ridges at the arms
+const canopyZ = (x, y) => {
+  const r = Math.min(Math.hypot(x, y) / CANOPY.r, 1);
+  const th = Math.atan2(y, x);
+  return CANOPY.base + CANOPY.ridge * r * Math.cos(3 * th) - CANOPY.dome * r * r;
+};
+const canopyDefs = () => {
+  const defs = [];
+  const turnAngles = (dir) => ({
+    rotation_x: +((Math.asin(Math.max(-1, Math.min(1, -dir[1]))) * 180) / Math.PI).toFixed(3),
+    rotation_y: +((Math.atan2(dir[0], dir[2]) * 180) / Math.PI).toFixed(3),
+  });
+  const norm = (a) => { const l = Math.hypot(...a); return a.map((v) => v / l); };
+  // three arms from the pole top to the ridge peaks
+  const top = [CANOPY.cx, CANOPY.cy, canopyZ(0, 0)];
+  [0, 120, 240].forEach((deg, i) => {
+    const t = (deg * Math.PI) / 180;
+    const ex = CANOPY.cx + 0.95 * CANOPY.r * Math.cos(t), ey = CANOPY.cy + 0.95 * CANOPY.r * Math.sin(t);
+    const end = [ex, ey, canopyZ(ex - CANOPY.cx, ey - CANOPY.cy)];
+    const d = top.map((v, k) => end[k] - v);
+    const len = Math.hypot(...d);
+    const dir = norm(d);
+    const mid = top.map((v, k) => v + (d[k] / 2));
+    defs.push([`arm-${i + 1}`, { name: `Canopy arm ${i + 1}`, description: 'one of three arms, same length', type: 'cylinder',
+      dimensions: [0.5, len], position: mid.map((v) => +v.toFixed(2)), ...turnAngles(dir), material: 'metal', parent: 'parasol', tags: ['stand'] }]);
+  });
+  // cloth: panels on a grid, kept inside the circle; each panel is tilted to the surface normal
+  const N = 11, cell = (2 * CANOPY.r) / N, h = 0.5;
+  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
+    const x = -CANOPY.r + (i + 0.5) * cell, y = -CANOPY.r + (j + 0.5) * cell;
+    if (Math.hypot(x, y) > CANOPY.r + cell * 0.3) continue;
+    const dzdx = (canopyZ(x + h, y) - canopyZ(x - h, y)) / (2 * h);
+    const dzdy = (canopyZ(x, y + h) - canopyZ(x, y - h)) / (2 * h);
+    const n = norm([-dzdx, -dzdy, 1]);
+    defs.push([`cloth-${i}-${j}`, { name: `Canopy panel ${i + 1}-${j + 1}`, description: '', type: 'box',
+      dimensions: [cell * 1.3, cell * 1.3, 0.6], position: [CANOPY.cx + x, CANOPY.cy + y, +canopyZ(x, y).toFixed(2)],
+      ...turnAngles(n), material: 'canopy', parent: 'parasol', tags: ['shade'] }]);
+  }
+  return defs;
+};
+
+const OUTDOOR_V2 = {
+  id: 'outdoor-table-v2',
+  header: {
+    model_id: 'outdoor-table-v2',
+    name: 'Outdoor table with parasol V2',
+    description: 'A 7 ft x 3 ft white oak top on yellow painted angle-iron legs, with a rectangular frame, a centre beam and a low back bar. A folding red parasol with one large canopy at the far end, on a square base with two sandbags. A bonsai in a 2 ft box on the ground, 8 ft from the table, reaching over it.',
+    units: 'in', up: 'z', world: WORLD_ID,
+    materials: {
+      oak: { color: '#e6d3b3', opacity: 1 }, yellow: { color: '#f2c94c', opacity: 1 },
+      canopy: { color: '#c4544a', opacity: 1 }, metal: { color: '#9aa4ad', opacity: 1 },
+      sandbag: { color: '#c9b48a', opacity: 1 }, box: { color: '#b58a62', opacity: 1 },
+      trunk: { color: '#7a5a43', opacity: 1 }, leaf: { color: '#6fa86a', opacity: 1 },
+      deadwood: { color: '#cfc6b4', opacity: 1 },
+    },
+  },
+  defs: [
+    ['top', { name: 'Table top', description: 'white oak veneer, 7 ft x 3 ft, centre at 30 in high', type: 'box', dimensions: [84, 36, 1.5], position: [0, 0, 30], material: 'oak', tags: ['surface'] }],
+    ['frame', { name: 'Frame', description: 'yellow painted angle iron', type: 'group', dimensions: [], position: [0, 0, 0] }],
+    ...[[-36, -14], [-36, 14], [36, -14], [36, 14]].map(([x, y], i) => [`leg${i + 1}`, { name: `Leg ${i + 1}`, description: '2 in angle', type: 'box', dimensions: [2, 2, 29.25], position: [x, y, 14.625], material: 'yellow', parent: 'frame', tags: ['frame'] }]),
+    ['rail-front', { name: 'Rail front', description: 'rectangular frame, long side', type: 'box', dimensions: [84, 1.5, 2], position: [0, -14, 27.25], material: 'yellow', parent: 'frame', tags: ['frame'] }],
+    ['rail-back', { name: 'Rail back', description: 'rectangular frame, long side', type: 'box', dimensions: [84, 1.5, 2], position: [0, 14, 27.25], material: 'yellow', parent: 'frame', tags: ['frame'] }],
+    ['rail-end-l', { name: 'Rail end left', description: 'rectangular frame, short side', type: 'box', dimensions: [1.5, 28, 2], position: [-36, 0, 27.25], material: 'yellow', parent: 'frame', tags: ['frame'] }],
+    ['rail-end-r', { name: 'Rail end right', description: 'rectangular frame, short side', type: 'box', dimensions: [1.5, 28, 2], position: [36, 0, 27.25], material: 'yellow', parent: 'frame', tags: ['frame'] }],
+    ['centre-beam', { name: 'Centre beam', description: 'between the end rails, under the top', type: 'box', dimensions: [72, 1.5, 2], position: [0, 0, 27.25], material: 'yellow', parent: 'frame', tags: ['frame'] }],
+    ['low-bar', { name: 'Low back bar', description: 'about 6 in off the ground, back only, for feet', type: 'box', dimensions: [84, 1.5, 1.5], position: [0, 14, 6], material: 'yellow', parent: 'frame', tags: ['frame'] }],
+    ['parasol', { name: 'Parasol', description: 'folding, all canopy panels open as one, at the far end', type: 'group', dimensions: [], position: [0, 0, 0], tags: ['shade'] }],
+    ['pole', { name: 'Parasol pole', description: 'from the ground to the apex of the canopy', type: 'cylinder', dimensions: [0.75, 98], position: [48, 0, 57], material: 'metal', parent: 'parasol', tags: ['stand'] }],
+    ['base', { name: 'Square base', description: '24 in square, hides the sandbags', type: 'box', dimensions: [24, 24, 8], position: [48, 0, 4], material: 'metal', parent: 'parasol', tags: ['stand'] }],
+    ['sandbag-1', { name: 'Sandbag 1', description: 'inside the base', type: 'box', dimensions: [12, 6, 4], position: [48, -6, 4], material: 'sandbag', parent: 'parasol', tags: ['ballast'] }],
+    ['sandbag-2', { name: 'Sandbag 2', description: 'inside the base', type: 'box', dimensions: [12, 6, 4], position: [48, 6, 4], material: 'sandbag', parent: 'parasol', tags: ['ballast'] }],
+    ...canopyDefs(),
+    ['bonsai', { name: 'Bonsai tree', description: 'on the ground, 8 ft from the table end, one main limb', type: 'group', dimensions: [], position: [-150, 0, 0], tags: ['plant'] }],
+    ['box', { name: 'Bonsai box', description: '2 ft x 2 ft x 2 ft, on the ground', type: 'box', dimensions: [24, 24, 24], position: [-150, 0, 12], material: 'box', parent: 'bonsai', tags: ['container'] }],
+    ...bonsaiBranches(),
+  ],
+};
+
 // Kitchen: a run of cabinets along the back wall, fridge at the left, stove, a sink run with a triple sink
 // and two faucets, a dishwasher, drawers and a door, and upper cabinets with a sliding acrylic cup display.
 // Back wall is y = 0; base cabinets are 24 in deep; counter tops at 36 in.
@@ -141,4 +317,4 @@ KITCHEN.defs = KITCHEN.defs.map(([k, d]) => [k, { ...d, position: [240 - d.posit
 
 const { LIVING_ROOM } = require('./living_room.js');
 
-module.exports = { WORLD_ID, SCENES: [PLANTER, TABLE, KITCHEN, ...LIVING_ROOM] };
+module.exports = { WORLD_ID, SCENES: [PLANTER, TABLE, OUTDOOR_V2, KITCHEN, ...LIVING_ROOM] };

@@ -82,9 +82,17 @@
           <label class="field">Y <input id="fY" type="text" value="0"></label>
           <label class="field">Z <input id="fZ" type="text" value="0"></label>
         </div>
-        <label class="field">Rotation about Y (degrees)
-          <input id="fRot" type="number" value="0" step="1">
-        </label>
+        <div class="grid3">
+          <label class="field">Turn X (deg)
+            <input id="fRotX" type="number" value="0" step="1">
+          </label>
+          <label class="field">Tilt Y (deg)
+            <input id="fRot" type="number" value="0" step="1">
+          </label>
+          <label class="field">Spin Z, up (deg)
+            <input id="fRotZ" type="number" value="0" step="1">
+          </label>
+        </div>
         <div class="grid2">
           <label class="field">Material
             <select id="fMat"></select>
@@ -127,6 +135,7 @@
     <input id="scrub" type="range" min="0" max="0" value="0" aria-label="History step">
   </div>
   <button class="btn small chip" id="rulesChip" type="button">Check model</button>
+  <p class="selinfo" id="selInfo" aria-live="polite">Tap an object to see what it is for.</p>
   <div class="bottom-errors" id="errorsArea" hidden>
     <strong>Model check</strong>
     <ul class="issues" id="errorsList"></ul>
