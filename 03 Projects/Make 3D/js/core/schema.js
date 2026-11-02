@@ -10,9 +10,12 @@
     world: 'make3d.world/0.1',
     bundle: 'make3d.bundle/0.1',
   };
-  const TYPES = ['group', 'box', 'cylinder', 'sphere', 'cone'];
+  const TYPES = ['group', 'box', 'cylinder', 'sphere', 'cone', 'loft', 'sheet'];
+  // loft = closed mesh on a skeleton line; sheet = open double-sided surface on a skeleton line (js/core/mesh.js).
+  // Both carry object.shape, and their dimensions are the box that holds the rest mesh (computed, for the rules).
+  const SHAPE_TYPES = ['loft', 'sheet'];
   // dimensions per type: box [x, y, z]; cylinder/cone [radius, height]; sphere [radius]; group []
-  const DIM_COUNT = { group: 0, box: 3, cylinder: 2, sphere: 1, cone: 2 };
+  const DIM_COUNT = { group: 0, box: 3, cylinder: 2, sphere: 1, cone: 2, loft: 3, sheet: 3 };
   // Tags say what a part is for. Objects carry zero or more. Unknown tags are kept, but the viewer shows only these.
   const TAGS = {
     surface: 'Surface',     // what you put things on: table top, counter
@@ -49,5 +52,5 @@
     return header;
   }
 
-  return { SCHEMA, TYPES, DIM_COUNT, TAGS, newUuid, normaliseObject, headerFromModel };
+  return { SCHEMA, TYPES, SHAPE_TYPES, DIM_COUNT, TAGS, newUuid, normaliseObject, headerFromModel };
 });

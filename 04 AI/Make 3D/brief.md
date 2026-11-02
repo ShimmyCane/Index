@@ -215,3 +215,22 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 - **Steepest slope:** about 80° on the coaster's first drop. Steeper than typical family coasters; open for Jimmy whether to soften it.
 - **V16 life in the park:** visitors in and out of the gate (80 ft loop, about 4.4 ft/s) and round the plaza (14 ft ring, about 4.9 ft/s), four vendor stalls with keepers, five birds on a 3-D loop (about 31 ft/s) with a wing-beat bob, three free balloons.
 - **Open:** (1) keep the 80° drop, or soften it? (2) keep the ride speed at 1.25× or go back to real time?
+
+## Hawk: closed skeleton meshes (2026-11-02, research mode)
+
+- **Request (Jimmy):** a hawk looping around and diving down before picking back up. Move beyond polygon extrusions to **closed meshes set up with a line** (a skeleton), so animation is more realistic; use **thin double-sided meshes** for leaves, grass and flags. Log it in the lessons. Merge.
+- **Mode:** research. Sizes and sources in `research/hawk.md` (Cornell Lab: 17.7 to 25.6 in long, 44.9 to 52.4 in wingspan).
+- **Engine (new):** types `loft` (closed) and `sheet` (open, double sided) with a `shape` (joints, facing, rings); `attach` to a joint; motion kind `bend`; `keys`, `envelope`; `face: "flight"`. Schematic §15. Code in `js/core/mesh.js`, `js/core/motion.js`; viewer builds a geometry per part and moves vertices each frame.
+- **Build:** `tools/hawk.js`, one `defsFor(v)`, six increments; scenes `hawk-v01` to `hawk-v06`; library project "Hawk". Renders `renders/hawk/`. Review page `viewer.html?set=hawk`.
+
+| Version | Increment |
+|---|---|
+| V01 | Blockout: body, tail and two wings as closed meshes on straight skeleton lines |
+| V02 | Wings with shoulder, elbow, wrist and tip; five-joint body; tail rides the rump joint |
+| V03 | Beak, eyes, legs and feet riding body joints |
+| V04 | Meadow: 120 grass blades and 6 leaves (double-sided sheets), pennant flag, mouse |
+| V05 | Cream breast, eye ridges, smaller eyes set lower |
+| V06 | Motion: 23 s loop of circling, stoop, flare, skim and climb; wings bend, head dips, legs drop, grass and flag move |
+
+- **Checks run:** build (six scenes accept, 0 issues); `tests/test_mesh.js` 14 groups (closed meshes, FK bends, keys, rest pose, loop closes, frame is a rotation, lowest point 4.9 in, wings tuck from 49 in to about 3 in); `test_core`, `test_motion`, `test_ifc`, `test_cloud`, `smoke`, `anim_check` still pass; older scenes' generated files unchanged.
+- **Open for Jimmy:** (1) "looping around" was built as circling the meadow, then a stoop. Did you mean a vertical loop-the-loop? The flight frame can do one if the up-axis floor is lifted. (2) The talons skim 3.4 in above the mouse rather than touching it. (3) The loop is slow (about 43 in/s at the bottom) so the wing bends can be read. (4) IFC export skips lofts and sheets. (5) Check on iPad (play bar, pinch, speed).

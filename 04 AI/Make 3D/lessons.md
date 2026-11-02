@@ -95,3 +95,21 @@ Appended over time. Promote anything reusable to `04 AI/lessons_pool.md`.
 - **Keep the crowd's loop, change the ride's share of it.** Other motions must share one loop, so make the ride a fraction of it and let it wait at the station for the rest. That gives a faster ride without changing the loop.
 - **Check the rest pose is the identity.** If a motion's pose at its start is not the identity, the object jumps when the motion plays. Check it numerically.
 - **Bounds checks need absolute positions.** A pose's translation is an offset from rest, so checking it against the world bounds gives false alarms. Use the pivot transformed by the pose.
+
+## Hawk: closed meshes on a skeleton line, double-sided sheets (2026-11-02)
+
+Jimmy's direction: the models so far were mostly polygon extrusions (boxes, cylinders, cones). Start exploring **closed meshes**, each set up with a **line** (a skeleton), so that animating gives more realistic components. Keep a place for **meshes that are truly thin** (leaves, grasses, flags), and make those **double sided**.
+
+- **Closed mesh plus a line.** A `loft` is a smooth tube along a chain of joints, with cross-sections of any width and height and capped ends. The same line is the rig: a `bend` at joint k turns everything after it, so a wing flaps from the shoulder, folds at the elbow and wrist, and the surface stays smooth and joined. A stack of rotated boxes can only hinge at its seams.
+- **Prove a mesh is closed with a number.** Every edge must belong to exactly two triangles, and the signed volume must be positive (negative means the faces point in). `meshStats` does both, and the test runs it on every part of the hawk.
+- **Thin things are a different type, not a thin box.** A `sheet` is open, so it has edges and no volume, and it is drawn double sided (`THREE.DoubleSide`), so the back of a leaf or a flag is not invisible. It gets the same skeleton, so grass and flags bend, and an exemption from the minimum-dimension rule.
+- **Parts that follow a joint need an `attach`.** Eyes, beak and tail are separate meshes, but ride a joint of the body skeleton, so the head dipping carries them. Without it each would need its own copy of the head motion.
+- **Keyframes beat sine waves for a story.** Folding for the dive, flaring on the pull-out, dropping the feet: each happens once per loop. Eased `keys` that close back to their first value, plus an `envelope` for a flap that starts and stops, kept the loop closed.
+- **Bank and pitch from the path, not from keys.** A flight frame (nose along the path, up axis leaning into the turn) gave banking and pitching for free. Keeping a floor on the up axis stops a bird rolling onto its back in a push-over.
+- **First frame is the rest pose, again.** A sine with a phase is not zero at t = 0. Make each bend cancel its own offset, and let the envelope multiply the whole angle. The test caught a 17° wrist bend at the start.
+- **Numbers found real faults.** Checking every vertex over the loop found a wing tip 0.7 in below the ground at the pull-out (the bank was too strong, and the path too low). Looking at one picture would not have shown it.
+- **A tolerance for rounding.** Rounding sway angles to 0.01° left 0.009 in of pivot error. Round to 0.0001°, and test with 1e-3 in.
+- **A rig test is a distance test.** "The talons reach the mouse" became "the closest talon is within 4 in" (it is 3.4 in). That told us the hawk skims over the mouse rather than touching it, which we state openly.
+- **Look from where the action is.** The default camera frames the whole motion, so the dive was tiny. `--follow=<part>` in `render_models.js` keeps the hawk centred in each frame.
+- **Shell habit.** Don't print every failing item from a loop; filter the output (one run printed 150 lines of grass).
+- **`render_versions.js` no longer finds older versions.** The library folds versions into one row per project, so the old click-by-name script can't open V01 to V05. The shareable link `index.html?model=<id>` works for any version, so use `render_models.js`.

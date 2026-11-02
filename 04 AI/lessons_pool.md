@@ -157,3 +157,9 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 - **Check mergeability before every merge.** A PR can show `dirty` (conflict) or `unknown` (not yet recomputed) after a push. Read it again before merging. Fetch the base and merge it into the branch. Do not rebase a shared branch.
 - **Keep both sides of a documentation conflict.** When both branches add a new section to the same notes file, keep both sections, one after the other.
 - **Merge with the head SHA you checked** (`expectedHeadSha`). A draft must be marked ready for review before it can merge.
+
+## Skeleton meshes (Make 3D hawk, 2026-11-02)
+
+- For anything that bends, build a closed mesh on a skeleton line (smooth tube, capped, watertight) instead of stacking extruded boxes; keep a separate open, double-sided type for truly thin things (leaves, grass, flags). Prove closure by counting: every edge in exactly two triangles, positive signed volume.
+- Let separate parts ride a joint (`attach`) instead of copying motions; use eased, closed keyframes for one-off beats in a loop; derive banking and pitch from the path.
+- Test a rig by sampling every vertex over the whole loop (ground clearance, reach, fold), not by looking at one frame.

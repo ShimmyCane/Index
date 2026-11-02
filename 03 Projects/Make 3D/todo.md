@@ -129,3 +129,9 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - [ ] Jimmy checks the new sizes (156 × 216 in room, 14 in cubes, 96 in ceiling) against the room.
 - 2026-11-02: kitchen mockup V01 to V10 from two photos (`tools/kitchen_mockup.js`), added to the Library. Build, tests and renders pass. Not committed.
 - 2026-11-02: kitchen mockup V11 (open shelf bay at the left end of the back run). V01 to V10 unchanged. Version log added to `04 AI/Make 3D/brief.md`.
+
+## Hawk: closed meshes on a skeleton line (2026-11-02)
+- [x] `loft` (closed mesh) and `sheet` (open, double sided) types on a skeleton line; `bend` motion, `attach`, `keys`, `envelope`, flight-frame paths (schematic §15).
+- [x] Hawk V01 to V06 (`tools/hawk.js`), meadow of sheet grass and leaves, a pennant flag, a mouse; `tests/test_mesh.js` (14 groups).
+- [ ] IFC export of lofts and sheets (tessellated); clash check for lofts; a form to add one.
+- [ ] Jimmy checks the hawk on iPad (play bar, pinch) and says whether "looping around" meant circling (built) or a vertical loop.
