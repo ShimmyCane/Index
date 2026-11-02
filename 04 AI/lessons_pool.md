@@ -137,3 +137,14 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 - Large JSON loads go through a script run with the owner's own session token, not through a chat tool. The publishable key and the owner token stay out of the repo. _(Make 3D scene log)_
 - Flag a sign-in email that appears in a public repo's migration rather than repeating it. _(Make 3D scene log)_
 
+
+## Photo to 3-D workflow (2026-11-02, from the living room)
+1. **Read every photo before modelling**, and write a short scene list (walls, openings, big objects, small objects). Ask about any photo that contradicts another. _(Make 3D living room)_
+2. **Plan and elevations first, in 2-D.** Draw the room from the photos, then one elevation per wall, before any 3-D. Generate them from the model data so the drawings and the 3-D scene cannot drift. _(Make 3D tools/drawings.js)_
+3. **Largest objects first in 3-D:** room shell, openings, bookcase, sofa, table, then the small items. Check alignment against the plan after each tier. _(Make 3D)_
+4. **Name the next tier of questions** after each pass (what is on the top of the bookcase, what sits on the table) and put them to the owner, not guessed. _(Make 3D)_
+5. **Refine in increments, each reviewed against the photos and the plan.** Keep every version reproducible, and label it. Expect the first pass to need a re-layout when a new photo shows the room differently. _(Make 3D V01 to V15, V2.1 to V2.5)_
+6. **Mirror-check the first render** (with Z up, from the front, +x is on the left). _(Make 3D)_
+7. **Rotation about one axis only** means pieces can only face along that axis. Lay the room out to suit. _(Make 3D)_
+8. **Log every version in a table, not files,** so notes and labels change without a merge. _(Make 3D scene log)_
+9. **Keep the photos private.** They go in `private/` and are never committed. _(Make 3D)_
