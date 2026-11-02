@@ -5,7 +5,7 @@
   "coordinate_system": "right-handed",
   "up": "z",
   "gravity": [0, 0, -386.1],
-  "bounds": { "min": [-1500, -900, 0], "max": [1500, 900, 600] },
+  "bounds": { "min": [-1500, -900, -144], "max": [1500, 900, 600] },
   "rules": [
     { "id": "rule-001", "type": "valid_coordinates", "severity": "reject" },
     { "id": "rule-002", "type": "valid_geometry", "severity": "reject" },

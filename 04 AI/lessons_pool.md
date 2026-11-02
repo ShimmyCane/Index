@@ -180,3 +180,9 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 
 - If a reviewer calls an animation diagrammatic, replace chosen speeds with energy: gravity, drag and a thrust that is solved so the loop closes. Draw the invisible cause (rising air, wind) so the motion has a reason.
 - Scale gravity with the world. Cap roll and flapping near the ground, and test every vertex over the whole loop against the ground.
+
+## From the Coastal Habitat Aquarium (Make 3D, 2026-11-02)
+
+- **Fix the container before the contents** when a scene reads as a stage set. Define the shape once as a function and derive walls, rock, windows and bounds from it.
+- **Rejection-sample motion paths against the shape** (distance to walls, obstacles), seeded by key, then prove them in a test at many times.
+- **Rest spheres on the floor** instead of burying them, or parts hang below the ground.

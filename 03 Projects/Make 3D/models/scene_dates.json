@@ -114,6 +114,26 @@
     "updated": "2026-11-02T04:13:47Z",
     "hash": "3cba3eee34dd8951"
   },
+  "habitat-aquarium-v01": {
+    "created": "2026-11-02T21:42:43Z",
+    "updated": "2026-11-02T21:52:17Z",
+    "hash": "7e324f62bab67b0a"
+  },
+  "habitat-aquarium-v02": {
+    "created": "2026-11-02T21:42:43Z",
+    "updated": "2026-11-02T21:52:17Z",
+    "hash": "57fc55ba608a1d3b"
+  },
+  "habitat-aquarium-v03": {
+    "created": "2026-11-02T21:42:43Z",
+    "updated": "2026-11-02T21:52:17Z",
+    "hash": "4ed7b793f6d2b14e"
+  },
+  "habitat-aquarium-v04": {
+    "created": "2026-11-02T21:42:43Z",
+    "updated": "2026-11-02T21:52:17Z",
+    "hash": "22941d59d46393be"
+  },
   "hawk-v01": {
     "created": "2026-11-02T19:40:23Z",
     "updated": "2026-11-02T20:18:18Z",

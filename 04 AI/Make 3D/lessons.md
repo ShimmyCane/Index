@@ -165,3 +165,12 @@ Jimmy's note on V06: too slow, too small, "too diagrammatic and not real enough 
 - Anything a planet's child must follow (a rocket on a pad, a storm on the Earth) must sit under the spinning body group, or it stays behind while the body turns.
 - The world file must cover the whole timeline, not only the rest pose: Pluto's aphelion reaches about 942 in, and its tilt about 300 in up.
 - Viewer tap targets: a button in the page is more reliable than a marker in 3-D space for "go back".
+
+## Habitat, not a box (2026-11-02, Jimmy's note on the aquarium)
+
+- **When Jimmy says a scene is too "set-like", change the container, not the contents.** The fish, kelp and rooms were fine; the glass rectangle was what read as a display. A lobed outline, rock walls hiding the glass, a rolling seabed and zones (kelp, reef, meadow, sand) turned it into a place. Redo the shell first, then populate it.
+- **A polar outline gives you everything.** One function R(angle) gave the wall panels, the rock stations, the window arc, a depth-from-wall test, and a bounds check for swimmers. Define the shape once as a function and derive the rest.
+- **Rejection-sample swim loops against the shape.** Try seeded loops until every sample point is far enough from the wall and the tunnel; it always finds one, and the test then proves it at many times.
+- **Spheres on a floor must not sink below it.** Half-buried spheres hang under the model. Rest each sphere on the floor (centre at its radius) and make its radius the height you want, or the model shows pieces below the ground.
+- **Opaque rock, transparent water.** Semi-transparent boulders look like bubbles; opaque ones look like stone. Keep the front as the only glass.
+- **Copy the builders when you must not change the old versions.** The habitat copies the fish builder and species table instead of refactoring them, so Grand Ocean V01 to V06 stay byte-for-byte as reviewed.

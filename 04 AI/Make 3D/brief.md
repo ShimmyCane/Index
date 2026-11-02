@@ -281,3 +281,14 @@ Jimmy asked for a tank at least two stories tall with multiple small rooms, some
 - Planet views: V02 and V03 for the eight planets (textures, more moons). Earth V02 to V10 (continents through a second launch). Earth V10 loop is 480 s.
 - Back to the Solar System is a page button (`header.links`), not an object.
 - Open: positions past 2050 are extrapolated; the element values were entered from the standard table, to be checked against the JPL page; belt rocks are a fixed pattern, not real asteroids; fast spins alias at one lap per 240 s.
+
+## Coastal Habitat Aquarium (2026-11-02)
+
+Jimmy's note on the Grand Ocean Aquarium: it is a water tank, but "Disneyfied": about the experience of standing in it, not a volume where the plants and animals live. It should be organic and modelled. Asked for a few increments on that, then to import the marine assets and populate the new scene.
+
+- **New subject** (the old one stays as built): `tools/habitat_aquarium.js`, four increments, test `tests/test_habitat_aquarium.js`, review `?set=habitat_aquarium`, world `aquarium-world`.
+- **H01** curved, lobed outline (polar function, 40 angled glass panels), sand floor, S-shaped tunnel. **H02** rockwork (four tiers of boulders, ledges, spires, three caves, tide shelf), rolling seabed, front window with frames. **H03** kelp forest (24), eelgrass, reef, anemones, light shafts. **H04** all marine assets from `tools/aquarium.js` (species table and fish shapes; the builders are copied, deliberately, so the old versions stay untouched), 38 large animals, 11 schools, jellies, diver, critters, front gallery and tunnel guests.
+- **Object counts:** 254, 615, 908, 1,710.
+- **Swim loops** are rejection-sampled against the outline (distance to the wall), the S-tunnel and the floor, and tested at 90 times per loop.
+- **Not carried over:** the rooms, sunroom, kids' den, bubble domes and touch pool of Grand Ocean V06. They belonged to the glass box. Open for Jimmy: where should they go (pavilions round the lobed outline?).
+- **Open:** rock is made of spheres, so it looks pebbly; plain cones and slabs only help a little. Rays, turtles and eels still glide stiffly.
