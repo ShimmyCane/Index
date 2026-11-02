@@ -88,6 +88,14 @@
     "airband": {
       "color": "#ffe3a0",
       "opacity": 0.32
+    },
+    "mound": {
+      "color": "#d9c4a0",
+      "opacity": 1
+    },
+    "hole": {
+      "color": "#4a3f36",
+      "opacity": 1
     }
   },
   "objects": [
@@ -17021,14 +17029,71 @@
       }
     },
     {
-      "description": "closed mesh, nose toward -x",
+      "description": "",
       "rotation_y": 0,
       "parent": "hawk-v07-meadow-group",
+      "material": "mound",
+      "tags": [],
+      "allowed_overlap": [],
+      "uuid": "hawk-v07-hole-rim",
+      "name": "Burrow rim",
+      "type": "cylinder",
+      "dimensions": [
+        8.5,
+        0.6
+      ],
+      "position": [
+        94,
+        -92,
+        1.3
+      ]
+    },
+    {
+      "description": "the mouse bolts for this",
+      "rotation_y": 0,
+      "parent": "hawk-v07-meadow-group",
+      "material": "hole",
+      "tags": [],
+      "allowed_overlap": [],
+      "uuid": "hawk-v07-hole",
+      "name": "Burrow hole",
+      "type": "cylinder",
+      "dimensions": [
+        5,
+        0.3
+      ],
+      "position": [
+        94,
+        -92,
+        1.55
+      ]
+    },
+    {
+      "description": "the mouse and its tail and ears; the group runs to the hole",
+      "rotation_y": 0,
+      "parent": "hawk-v07-meadow-group",
+      "material": null,
+      "tags": [],
+      "allowed_overlap": [],
+      "uuid": "hawk-v07-mouse-rig",
+      "name": "Mouse",
+      "type": "group",
+      "dimensions": [],
+      "position": [
+        146,
+        -92,
+        0
+      ]
+    },
+    {
+      "description": "closed mesh, nose toward -x",
+      "rotation_y": 0,
+      "parent": "hawk-v07-mouse-rig",
       "material": "mouse",
       "tags": [],
       "allowed_overlap": [],
       "uuid": "hawk-v07-mouse",
-      "name": "Mouse",
+      "name": "Mouse body",
       "type": "loft",
       "dimensions": [
         9.56,
@@ -17102,7 +17167,7 @@
     {
       "description": "a thin closed tube on a skeleton line; twitches",
       "rotation_y": 0,
-      "parent": "hawk-v07-meadow-group",
+      "parent": "hawk-v07-mouse-rig",
       "material": "mouse",
       "tags": [],
       "allowed_overlap": [],
@@ -17171,7 +17236,7 @@
     {
       "description": "a thin round ear; double sided",
       "rotation_y": 0,
-      "parent": "hawk-v07-meadow-group",
+      "parent": "hawk-v07-mouse-rig",
       "material": "ear",
       "tags": [],
       "allowed_overlap": [],
@@ -17228,7 +17293,7 @@
     {
       "description": "a thin round ear; double sided",
       "rotation_y": 0,
-      "parent": "hawk-v07-meadow-group",
+      "parent": "hawk-v07-mouse-rig",
       "material": "ear",
       "tags": [],
       "allowed_overlap": [],
@@ -19419,5 +19484,5 @@
       }
     }
   ],
-  "version": 303
+  "version": 306
 }

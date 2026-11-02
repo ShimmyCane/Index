@@ -91,6 +91,14 @@
       "airband": {
         "color": "#ffe3a0",
         "opacity": 0.32
+      },
+      "mound": {
+        "color": "#d9c4a0",
+        "opacity": 1
+      },
+      "hole": {
+        "color": "#4a3f36",
+        "opacity": 1
       }
     }
   },
@@ -18404,10 +18412,82 @@
       "op": "add",
       "time": "2026-11-01T14:36:00.000Z",
       "author": "jimmy",
+      "note": "add Burrow rim",
+      "object": {
+        "uuid": "hawk-v07-hole-rim",
+        "name": "Burrow rim",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          8.5,
+          0.6
+        ],
+        "position": [
+          94,
+          -92,
+          1.3
+        ],
+        "rotation_y": 0,
+        "parent": "hawk-v07-meadow-group",
+        "material": "mound"
+      }
+    },
+    {
+      "seq": 277,
+      "op": "add",
+      "time": "2026-11-01T14:37:00.000Z",
+      "author": "jimmy",
+      "note": "add Burrow hole",
+      "object": {
+        "uuid": "hawk-v07-hole",
+        "name": "Burrow hole",
+        "description": "the mouse bolts for this",
+        "type": "cylinder",
+        "dimensions": [
+          5,
+          0.3
+        ],
+        "position": [
+          94,
+          -92,
+          1.55
+        ],
+        "rotation_y": 0,
+        "parent": "hawk-v07-meadow-group",
+        "material": "hole"
+      }
+    },
+    {
+      "seq": 278,
+      "op": "add",
+      "time": "2026-11-01T14:38:00.000Z",
+      "author": "jimmy",
       "note": "add Mouse",
       "object": {
-        "uuid": "hawk-v07-mouse",
+        "uuid": "hawk-v07-mouse-rig",
         "name": "Mouse",
+        "description": "the mouse and its tail and ears; the group runs to the hole",
+        "type": "group",
+        "dimensions": [],
+        "position": [
+          146,
+          -92,
+          0
+        ],
+        "rotation_y": 0,
+        "parent": "hawk-v07-meadow-group",
+        "material": null
+      }
+    },
+    {
+      "seq": 279,
+      "op": "add",
+      "time": "2026-11-01T14:39:00.000Z",
+      "author": "jimmy",
+      "note": "add Mouse body",
+      "object": {
+        "uuid": "hawk-v07-mouse",
+        "name": "Mouse body",
         "description": "closed mesh, nose toward -x",
         "type": "loft",
         "dimensions": [
@@ -18421,7 +18501,7 @@
           1.82
         ],
         "rotation_y": 0,
-        "parent": "hawk-v07-meadow-group",
+        "parent": "hawk-v07-mouse-rig",
         "material": "mouse",
         "shape": {
           "joints": [
@@ -18484,9 +18564,9 @@
       }
     },
     {
-      "seq": 277,
+      "seq": 280,
       "op": "add",
-      "time": "2026-11-01T14:37:00.000Z",
+      "time": "2026-11-01T14:40:00.000Z",
       "author": "jimmy",
       "note": "add Mouse tail",
       "object": {
@@ -18505,7 +18585,7 @@
           1.42
         ],
         "rotation_y": 0,
-        "parent": "hawk-v07-meadow-group",
+        "parent": "hawk-v07-mouse-rig",
         "material": "mouse",
         "shape": {
           "joints": [
@@ -18558,9 +18638,9 @@
       }
     },
     {
-      "seq": 278,
+      "seq": 281,
       "op": "add",
-      "time": "2026-11-01T14:38:00.000Z",
+      "time": "2026-11-01T14:41:00.000Z",
       "author": "jimmy",
       "note": "add Mouse left ear",
       "object": {
@@ -18579,7 +18659,7 @@
           3.12
         ],
         "rotation_y": 0,
-        "parent": "hawk-v07-meadow-group",
+        "parent": "hawk-v07-mouse-rig",
         "material": "ear",
         "shape": {
           "joints": [
@@ -18620,9 +18700,9 @@
       }
     },
     {
-      "seq": 279,
+      "seq": 282,
       "op": "add",
-      "time": "2026-11-01T14:39:00.000Z",
+      "time": "2026-11-01T14:42:00.000Z",
       "author": "jimmy",
       "note": "add Mouse right ear",
       "object": {
@@ -18641,7 +18721,7 @@
           3.14
         ],
         "rotation_y": 0,
-        "parent": "hawk-v07-meadow-group",
+        "parent": "hawk-v07-mouse-rig",
         "material": "ear",
         "shape": {
           "joints": [
@@ -18682,9 +18762,9 @@
       }
     },
     {
-      "seq": 280,
+      "seq": 283,
       "op": "add",
-      "time": "2026-11-01T14:40:00.000Z",
+      "time": "2026-11-01T14:43:00.000Z",
       "author": "jimmy",
       "note": "add Bluff rock A",
       "object": {
@@ -18761,9 +18841,9 @@
       }
     },
     {
-      "seq": 281,
+      "seq": 284,
       "op": "add",
-      "time": "2026-11-01T14:41:00.000Z",
+      "time": "2026-11-01T14:44:00.000Z",
       "author": "jimmy",
       "note": "add Bluff rock B",
       "object": {
@@ -18840,9 +18920,9 @@
       }
     },
     {
-      "seq": 282,
+      "seq": 285,
       "op": "add",
-      "time": "2026-11-01T14:42:00.000Z",
+      "time": "2026-11-01T14:45:00.000Z",
       "author": "jimmy",
       "note": "add Bluff rock C",
       "object": {
@@ -18919,9 +18999,9 @@
       }
     },
     {
-      "seq": 283,
+      "seq": 286,
       "op": "add",
-      "time": "2026-11-01T14:43:00.000Z",
+      "time": "2026-11-01T14:46:00.000Z",
       "author": "jimmy",
       "note": "add Updraft ribbon 1",
       "object": {
@@ -19004,9 +19084,9 @@
       }
     },
     {
-      "seq": 284,
+      "seq": 287,
       "op": "add",
-      "time": "2026-11-01T14:44:00.000Z",
+      "time": "2026-11-01T14:47:00.000Z",
       "author": "jimmy",
       "note": "add Updraft ribbon 2",
       "object": {
@@ -19089,9 +19169,9 @@
       }
     },
     {
-      "seq": 285,
+      "seq": 288,
       "op": "add",
-      "time": "2026-11-01T14:45:00.000Z",
+      "time": "2026-11-01T14:48:00.000Z",
       "author": "jimmy",
       "note": "add Updraft ribbon 3",
       "object": {
@@ -19174,9 +19254,9 @@
       }
     },
     {
-      "seq": 286,
+      "seq": 289,
       "op": "add",
-      "time": "2026-11-01T14:46:00.000Z",
+      "time": "2026-11-01T14:49:00.000Z",
       "author": "jimmy",
       "note": "add Updraft ribbon 4",
       "object": {
@@ -19259,9 +19339,9 @@
       }
     },
     {
-      "seq": 287,
+      "seq": 290,
       "op": "add",
-      "time": "2026-11-01T14:47:00.000Z",
+      "time": "2026-11-01T14:50:00.000Z",
       "author": "jimmy",
       "note": "add Updraft ribbon 5",
       "object": {
@@ -19344,9 +19424,9 @@
       }
     },
     {
-      "seq": 288,
+      "seq": 291,
       "op": "add",
-      "time": "2026-11-01T14:48:00.000Z",
+      "time": "2026-11-01T14:51:00.000Z",
       "author": "jimmy",
       "note": "add Updraft ribbon 6",
       "object": {
@@ -19429,9 +19509,9 @@
       }
     },
     {
-      "seq": 289,
+      "seq": 292,
       "op": "add",
-      "time": "2026-11-01T14:49:00.000Z",
+      "time": "2026-11-01T14:52:00.000Z",
       "author": "jimmy",
       "note": "add Updraft ribbon 7",
       "object": {
@@ -19514,9 +19594,9 @@
       }
     },
     {
-      "seq": 290,
+      "seq": 293,
       "op": "add",
-      "time": "2026-11-01T14:50:00.000Z",
+      "time": "2026-11-01T14:53:00.000Z",
       "author": "jimmy",
       "note": "add Updraft ribbon 8",
       "object": {
@@ -19599,9 +19679,9 @@
       }
     },
     {
-      "seq": 291,
+      "seq": 294,
       "op": "add",
-      "time": "2026-11-01T14:51:00.000Z",
+      "time": "2026-11-01T14:54:00.000Z",
       "author": "jimmy",
       "note": "add Updraft ribbon 9",
       "object": {
@@ -19684,9 +19764,9 @@
       }
     },
     {
-      "seq": 292,
+      "seq": 295,
       "op": "add",
-      "time": "2026-11-01T14:52:00.000Z",
+      "time": "2026-11-01T14:55:00.000Z",
       "author": "jimmy",
       "note": "add Rising air (thermal)",
       "object": {
@@ -19706,9 +19786,9 @@
       }
     },
     {
-      "seq": 293,
+      "seq": 296,
       "op": "add",
-      "time": "2026-11-01T14:53:00.000Z",
+      "time": "2026-11-01T14:56:00.000Z",
       "author": "jimmy",
       "note": "add Rising air band 1",
       "object": {
@@ -19832,9 +19912,9 @@
       }
     },
     {
-      "seq": 294,
+      "seq": 297,
       "op": "add",
-      "time": "2026-11-01T14:54:00.000Z",
+      "time": "2026-11-01T14:57:00.000Z",
       "author": "jimmy",
       "note": "add Rising air band 2",
       "object": {
@@ -19958,9 +20038,9 @@
       }
     },
     {
-      "seq": 295,
+      "seq": 298,
       "op": "add",
-      "time": "2026-11-01T14:55:00.000Z",
+      "time": "2026-11-01T14:58:00.000Z",
       "author": "jimmy",
       "note": "add Rising air band 3",
       "object": {
@@ -20084,9 +20164,9 @@
       }
     },
     {
-      "seq": 296,
+      "seq": 299,
       "op": "add",
-      "time": "2026-11-01T14:56:00.000Z",
+      "time": "2026-11-01T14:59:00.000Z",
       "author": "jimmy",
       "note": "add Rising air band 4",
       "object": {
@@ -20210,9 +20290,9 @@
       }
     },
     {
-      "seq": 297,
+      "seq": 300,
       "op": "add",
-      "time": "2026-11-01T14:57:00.000Z",
+      "time": "2026-11-01T15:00:00.000Z",
       "author": "jimmy",
       "note": "add Rising air band 5",
       "object": {
@@ -20336,9 +20416,9 @@
       }
     },
     {
-      "seq": 298,
+      "seq": 301,
       "op": "add",
-      "time": "2026-11-01T14:58:00.000Z",
+      "time": "2026-11-01T15:01:00.000Z",
       "author": "jimmy",
       "note": "add Rising air band 6",
       "object": {
@@ -20462,9 +20542,9 @@
       }
     },
     {
-      "seq": 299,
+      "seq": 302,
       "op": "add",
-      "time": "2026-11-01T14:59:00.000Z",
+      "time": "2026-11-01T15:02:00.000Z",
       "author": "jimmy",
       "note": "add Rising air band 7",
       "object": {
@@ -20588,9 +20668,9 @@
       }
     },
     {
-      "seq": 300,
+      "seq": 303,
       "op": "add",
-      "time": "2026-11-01T15:00:00.000Z",
+      "time": "2026-11-01T15:03:00.000Z",
       "author": "jimmy",
       "note": "add Rising air band 8",
       "object": {
@@ -20714,9 +20794,9 @@
       }
     },
     {
-      "seq": 301,
+      "seq": 304,
       "op": "add",
-      "time": "2026-11-01T15:01:00.000Z",
+      "time": "2026-11-01T15:04:00.000Z",
       "author": "jimmy",
       "note": "add Cream breast",
       "object": {
@@ -20792,9 +20872,9 @@
       }
     },
     {
-      "seq": 302,
+      "seq": 305,
       "op": "add",
-      "time": "2026-11-01T15:02:00.000Z",
+      "time": "2026-11-01T15:05:00.000Z",
       "author": "jimmy",
       "note": "add Left eye ridge",
       "object": {
@@ -20865,9 +20945,9 @@
       }
     },
     {
-      "seq": 303,
+      "seq": 306,
       "op": "add",
-      "time": "2026-11-01T15:03:00.000Z",
+      "time": "2026-11-01T15:06:00.000Z",
       "author": "jimmy",
       "note": "add Right eye ridge",
       "object": {

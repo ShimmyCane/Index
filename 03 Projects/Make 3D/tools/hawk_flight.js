@@ -24,7 +24,8 @@ const K_GLIDE = 0.00147;                 // drag per inch, wings spread (gives a
 const K_TUCK = K_GLIDE / 2;              // wings folded
 const K_FLARE = K_GLIDE * 5;             // wings and tail opened wide: the air brake
 const THERMAL = { c: [-170, 70], r: 140, turns: 2.5, z0: 180, z1: 300 };
-const FLAP_HZ = 2.4;                     // wing beats per second when climbing
+const FLAP_HZ = 2.4;
+const HOLE_DX = 52;                      // the burrow is this far west of the mouse                     // wing beats per second when climbing
 
 const helix = (phi) => {                 // clockwise from the south point; heading west at phi = 0, east at phi = pi
   const f = phi / (THERMAL.turns * 2 * Math.PI);
@@ -119,7 +120,7 @@ function physics(pts, ix) {
     const [t0, s0] = profile[k - 1], [t1, s1] = profile[k];
     return r5(t0 + (t1 - t0) * ((s - s0) / (s1 - s0 || 1)));
   };
-  return { T, total, profile, tOf, v, z, u, thrust, vMax: Math.max(...v), secs, marks };
+  return { T, total, profile, tOf, v, z, u, thrust, idx_d4: ix.d4, vMax: Math.max(...v), secs, marks };
 }
 
 // ---- the meadow, bluff and rising air of V07 (same part keys as V04 where they exist)
@@ -162,14 +163,18 @@ function meadow7(add, mesh, rnd) {
     facing: [0, 0, 1], samples: 14, sides: 5, rings: [[0, 6], [0.5, 4.4], [1, 0.25]] },
     { description: 'a thin pennant, streaming north in the wind; double sided; flutters', material: 'flag', parent: 'meadow-group' });
   const m = F.mouse;
-  mesh('mouse', 'loft', 'Mouse', { joints: [[m[0] - 5, m[1], 1.6], [m[0] - 2, m[1], 1.9], [m[0] + 2, m[1], 1.7], [m[0] + 4.5, m[1], 1.4]], facing: [0, 1, 0], samples: 12, sides: 10,
+  // the burrow: a dark hole in a low rim, due west of the mouse (the way it faces)
+  add('hole-rim', { name: 'Burrow rim', type: 'cylinder', dimensions: [8.5, 0.6], position: [m[0] - HOLE_DX, m[1], 1.3], material: 'mound', parent: 'meadow-group' });
+  add('hole', { name: 'Burrow hole', description: 'the mouse bolts for this', type: 'cylinder', dimensions: [5, 0.3], position: [m[0] - HOLE_DX, m[1], 1.55], material: 'hole', parent: 'meadow-group' });
+  add('mouse-rig', { name: 'Mouse', description: 'the mouse and its tail and ears; the group runs to the hole', type: 'group', dimensions: [], position: [m[0], m[1], 0], parent: 'meadow-group' });
+  mesh('mouse', 'loft', 'Mouse body', { joints: [[m[0] - 5, m[1], 1.6], [m[0] - 2, m[1], 1.9], [m[0] + 2, m[1], 1.7], [m[0] + 4.5, m[1], 1.4]], facing: [0, 1, 0], samples: 12, sides: 10,
     rings: [[0, 0.3, 0.3], [0.2, 0.9, 0.85], [0.55, 1.35, 1.25], [0.85, 1.0, 0.95], [1, 0.3, 0.3]] },
-    { description: 'closed mesh, nose toward -x', material: 'mouse', parent: 'meadow-group' });
+    { description: 'closed mesh, nose toward -x', material: 'mouse', parent: 'mouse-rig' });
   mesh('mouse-tail', 'loft', 'Mouse tail', { joints: [[m[0] + 4.2, m[1], 1.3], [m[0] + 7.5, m[1] + 1.2, 1.1], [m[0] + 10, m[1] + 0.2, 1.4], [m[0] + 12.5, m[1] + 1.6, 1.9]], facing: [0, 0, 1], samples: 10, sides: 6,
-    rings: [[0, 0.3, 0.3], [0.5, 0.18, 0.18], [1, 0.05, 0.05]] }, { description: 'a thin closed tube on a skeleton line; twitches', material: 'mouse', parent: 'meadow-group' });
+    rings: [[0, 0.3, 0.3], [0.5, 0.18, 0.18], [1, 0.05, 0.05]] }, { description: 'a thin closed tube on a skeleton line; twitches', material: 'mouse', parent: 'mouse-rig' });
   for (const [side, sg] of [['l', 1], ['r', -1]]) {
     mesh(`mouse-ear-${side}`, 'sheet', `Mouse ${side === 'l' ? 'left' : 'right'} ear`, { joints: [[m[0] - 3.2, m[1] + 0.8 * sg, 2.6], [m[0] - 3.4, m[1] + 1.4 * sg, 3.7]],
-      facing: [1, 0, 0], samples: 5, sides: 5, cup: 0.4, rings: [[0, 0.3], [0.5, 0.65], [1, 0.1]] }, { description: 'a thin round ear; double sided', material: 'ear', parent: 'meadow-group' });
+      facing: [1, 0, 0], samples: 5, sides: 5, cup: 0.4, rings: [[0, 0.3], [0.5, 0.65], [1, 0.1]] }, { description: 'a thin round ear; double sided', material: 'ear', parent: 'mouse-rig' });
   }
   // the bluff: three rock masses, closed meshes, along the south edge. Wind from the south is pushed up its face.
   const rock = (key, name, xs, y, hz, w, h) => mesh(key, 'loft', name, {
@@ -200,6 +205,21 @@ function meadow7(add, mesh, rnd) {
       { description: 'a band of rising warm air (translucent)', material: 'airband', parent: 'thermal' });
   }
   return { grass, ribbons };
+}
+
+// ---- the mouse bolts for its hole as the hawk flares in, drops out of sight, comes up again later and walks home
+function mouseRun(F, P, uuid) {
+  const [mx, my] = F.mouse, hx = mx - HOLE_DX;
+  // straight, level and collinear around the start, so the heading there is exactly the way it faces (the rest pose)
+  const pts = [
+    [mx, my, 0], [mx - 13, my, 0], [mx - 26, my, 0], [hx + 5, my, 0], [hx - 1, my, -1.5], [hx - 4, my, -7], [hx - 7, my + 2, -7],
+    [hx - 3, my + 9, -1], [hx + 10, my + 24, 0], [mx - 6, my + 36, 0], [mx + 22, my + 28, 0], [mx + 31, my + 12, 0], [mx + 22, my, 0], [mx + 11, my, 0],
+  ];
+  const marks = M.pathMarks(pts), T = P.T;
+  const tb = P.tOf(P.idx_d4) * T;                                  // the bolt starts as the hawk flares in
+  const at = (sec, i) => [r5(Math.min(sec, T) / T), r5(marks[i])];
+  const profile = [[0, 0], at(tb, 0), at(tb + 0.35, 3), at(tb + 0.5, 5), at(tb + 0.6, 6), at(tb + 12, 6), at(tb + 12.8, 7), at(T - 1.2, 13), [1, 1]];
+  return { id: 'mouse-bolt', target: uuid('mouse-rig'), kind: 'path', points: pts, profile, face: 'tangent', rest_heading_deg: 180, pivot: [mx, my, 0], cycles: 1 };
 }
 
 // ---- the motion file for V07
@@ -251,6 +271,7 @@ function motionFlight(v, uuid, parts) {
       motions.push({ id: `${key}-${j}`, target: uuid(key), kind: 'bend', joint: j, axis: 'x', ...sway(amp, 8, (ph + i * 0.07) % 1) });
     }
   });
+  motions.push(mouseRun(F, P, uuid));
   motions.push({ id: 'thermal-turn', target: uuid('thermal'), kind: 'spin', axis: 'z', pivot: [TC[0], TC[1], 0], cycles: 3 });
   return {
     schema: M.MOTION_SCHEMA,

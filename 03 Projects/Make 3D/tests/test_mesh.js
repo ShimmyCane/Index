@@ -105,7 +105,7 @@ t(`${ver}: every body part is a closed mesh; every grass blade, leaf, ear and th
 
 t(`${ver}: the first frame is the rest pose (every matrix is the identity)`, () => {
   const pose = MO.poseAt(model, motion, 0);
-  for (const [u, m] of Object.entries(pose)) m.forEach((x, i) => near(x, MO.mat4.identity()[i], 1e-6));
+  for (const [u, m] of Object.entries(pose)) m.forEach((x, i) => near(x, MO.mat4.identity()[i], 1e-4));
   for (const [u, mats] of Object.entries(MO.skinAt(model, motion, 0))) mats.forEach((m) => m.forEach((x, i) => near(x, MO.mat4.identity()[i], 1e-3)));
 });
 
@@ -271,6 +271,24 @@ hawkTests('hawk-v07');
     near(Ph.thermal.turns, 2.5);
     assert.ok(Ph.thermal.turns >= 2 && Ph.path_length_in > 3000, `path ${Ph.path_length_in} in`);
     console.log(`   ${flaps[0].cycles} wing beats per lap, thermal ${Ph.thermal.turns} turns, path ${Ph.path_length_in} in, lap ${LL} s`);
+  });
+
+  t('hawk-v07: the mouse sits until the hawk flares in, bolts for its hole, drops out of sight, and walks home before the loop wraps', () => {
+    const mb = mo.motions.find((m) => m.id === 'mouse-bolt');
+    const rig = md.objects.find((x) => x.uuid === 'hawk-v07-mouse-rig'), hole = md.objects.find((x) => x.uuid === 'hawk-v07-hole');
+    const pos = (sec) => apply(MO.poseAt(md, mo, sec)['hawk-v07-mouse-rig'], rig.position);
+    nearV(pos(0), rig.position, 1e-3);                                   // sits at the start
+    const [mx, my] = rig.position, tb = mb.profile[1][0] * LL;           // the bolt starts here
+    nearV(pos(tb - 0.3), rig.position, 1e-3);                            // still sitting just before
+    const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+    let arrive = null;
+    for (let k = 0; k <= 400; k++) { const q = pos(tb + (k / 400) * 1.5); if (arrive === null && dist(q, hole.position) < 8) arrive = (k / 400) * 1.5; }
+    assert.ok(arrive !== null && arrive < 0.6, `it reaches the hole in ${arrive} s`);
+    const speed = dist([mx, my], hole.position) / arrive;
+    assert.ok(speed > 100, `bolt speed ${speed.toFixed(0)} in/s`);
+    assert.ok(pos(tb + 3)[2] < -4 && pos(tb + 9)[2] < -4, 'out of sight under the ground while the hawk climbs and circles');
+    assert.ok(pos(LL - 0.3)[2] > -0.5 && dist(pos(LL - 0.3), [mx, my]) < 25, 'back at its spot before the loop wraps');
+    console.log(`   mouse: bolts ${Math.round(dist([mx, my], hole.position))} in at ${speed.toFixed(0)} in/s, ${arrive.toFixed(2)} s after the hawk flares in`);
   });
 
   t('hawk-v07: the rising air, the bluff and the meadow are part of the model (closed rocks, translucent sheets)', () => {

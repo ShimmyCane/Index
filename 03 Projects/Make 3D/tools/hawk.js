@@ -47,6 +47,8 @@ const MATERIALS7 = {
   rock: { color: '#cfc7bd', opacity: 1 },
   wind: { color: '#bfe0f2', opacity: 0.4 },
   airband: { color: '#ffe3a0', opacity: 0.32 },
+  mound: { color: '#d9c4a0', opacity: 1 },
+  hole: { color: '#4a3f36', opacity: 1 },
 };
 
 const round = (x) => Math.round(x * 100) / 100;
