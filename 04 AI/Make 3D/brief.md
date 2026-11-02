@@ -312,3 +312,16 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 - **Frisbee:** V05 moves it to the banana's right hand. V02 to V04 keep their history (the frisbee stays left there).
 - **Parts control:** now under Full screen in the stage's upper right, not in the header.
 - **Known limits:** a sheet cannot have holes (discs stand in), the border is beads, no sheen (flat colour), and the cape does not collide with the robot.
+
+## Earth V22: satellites, storms, rockets and clouds to scale (2026-11-02, research mode)
+
+- **Request (Jimmy):** fix the floating things (storms, clouds, satellites, rockets). Closer to scale, exaggeration fine. Faded orbit lines. About ten times the satellites. Hubble, and others.
+- **Mode:** research (scale figures, `research/earth-scale.md`).
+- **Plan (before building):** keep V21; replace the floating parts. Earth's radius is 9.5 in (about 670 km per inch). Satellites on four LEO rings, a navigation ring, a geostationary ring (turns with the Earth), the ISS, Hubble and a polar weather satellite. Faded orbit lines on the real planes. Storms about 2.5 in across on the cloud shell, cloud shells 0.1 and 0.2 in above the ground, rockets about 0.85 in tall.
+- **Build:** `tools/earth_v22.js` (`earthV22Defs`, `RINGS`, `EARTH_VIEWS_V22`), built on `earthV4Defs(21)` with the replaced parts filtered out. Scene `planet-earth-v22`: 1,190 objects, 81 satellites (V21 had 8), 10 orbit lines, 150 storm puffs, 4 launches.
+- **Rules:** every part is at least 0.25 in in each dimension (the minimum-dimension rule); orbit lines use a thin tube inside a 0.25 in box. The first build gave 262 warnings from the small parts; they are fixed, and the build has none.
+- **Older versions:** unchanged (checked with `git status`: only the V22 folder is new among the model files).
+- **Checks:** `tests/test_earth_v22.js` (10 tests): the satellite count, each satellite on its ring, the ISS/Hubble/polar radii, every orbit line a closed, faded tube, storm puffs on the shell, rockets under 0.9 in, the cloud shells, materials, and V21 unchanged. The full Make 3D suite passes.
+- **Review:** Increment Viewer `?set=earth_views_v22`.
+- **Open for Jimmy:** (1) the minimum size (0.25 in) makes the satellites and rockets chunkier than to scale; is that fine? (2) the mountains (V12) are still large cones; do you want them scaled? (3) the Moon's distance (30 in) is not to scale; leave it, or move it out? (4) James Webb is not drawn.
+

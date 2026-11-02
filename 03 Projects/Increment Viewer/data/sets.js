@@ -13,5 +13,6 @@ window.REVIEW_SETS = [
   { id: "planet_views_v4", label: "Planet views: V04 to V06, shaded" },
   { id: "earth_views_v11", label: "Earth view: V11 to V20, shaded" },
   { id: "earth_views_v21", label: "Earth view: V21, dot map from real coastlines" },
+  { id: "earth_views_v22", label: "Earth view: V22, satellites on faded orbits, storms and rockets to scale" },
   { id: "robot_loop", label: "Robot loop: sketched walk, frisbee, top hat and cape, V02 to V05" }
 ];

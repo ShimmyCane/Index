@@ -508,3 +508,16 @@ Source: research `04 AI/Make 3D/research/earth-land.md`. Request: the continents
 - **Tests:** `node tests/test_earth_land.js`.
 - **Limits:** 5-degree coasts (about 300 km); coastal cities can fall a cell off; deserts are boxes; the city lights of V15 stay on the older grid.
 
+## 20. Earth V22: satellites, storms, rockets and clouds to scale (built)
+
+Source: research `04 AI/Make 3D/research/earth-scale.md`. Request: fix the floating parts; closer to scale, exaggeration fine; faded orbit lines; about ten times the satellites; Hubble and others.
+
+- **Scale:** Earth's radius 9.5 in (about 670 km per inch). Rockets about 0.85 in tall; storms about 2.5 in across; cloud shells 0.1 and 0.2 in above the ground; satellites 0.25 in and placed on rings in the real order (LEO 2.5 to 3.4 in, navigation 7.5, geostationary 14.5, the Moon 30 from the centre).
+- **Satellites:** rings are groups that turn about their normal (`x`, `y` or `z`): LEO A to D (68 spheres), navigation (6), geostationary (4, 32 turns per loop so they stay over one spot). The ISS, Hubble and a polar satellite each have their own ring. About 81 satellites against 8 before.
+- **Orbit lines:** closed `loft` tubes on the same planes, material `orbit22` (opacity 0.3, so taps pass through). One for each ring, the ISS, Hubble, the polar orbit and the Moon.
+- **Storms and clouds:** storm puffs (0.25 in) on the shell at 0.14 in above the ground; cloud shells at R+0.1 and R+0.2.
+- **Rockets:** stage 0.6 in, nose and flame 0.25 in; pads 0.35 in radius; each lifts about 1 in per loop.
+- **Rules:** every part is at least 0.25 in in each dimension. Orbit tubes are thin inside a 0.25 in box.
+- **Tests:** `node tests/test_earth_v22.js`.
+- **Limits:** James Webb is not drawn; the mountains (V12) are still large cones; the Moon's distance is not to scale.
+

@@ -183,3 +183,16 @@ Jimmy's note on V06: too slow, too small, "too diagrammatic and not real enough 
 - A sheet cannot be cut, so holes in fabric are discs laid on the surface. Say so in the notes, not as holes.
 - Keep bends as keyed angles that start at 0, shifted by the first key. A sine with a phase offset breaks the rest pose at the start of the loop.
 - A "mean" check is needed when a motion's keys are offset: compare each key with the mean, not with the start.
+
+## Earth V22: satellites, storms and rockets to scale (2026-11-02)
+
+- **Pick the scale first, then state it.** One inch is about 670 km (Earth's radius is 9.5 in). Write the real size next to the model size for each part, so the exaggeration is visible.
+- **Keep the real order of heights.** LEO < navigation < geostationary < the Moon, even when each is stretched. Orbit radii are set from that list.
+- **The minimum-size rule is the honest check on tiny parts.** Satellites and rockets at real size would be invisible, and at 0.1 in they break the 0.25 in rule. The fix is an exaggeration, not a way round the rule: 262 warnings went to zero by raising the parts to 0.25 in.
+- **An orbit line is a tube in a box.** The tube can be thin, but its bounding box must meet the minimum. Check the box, not the tube.
+- **Turn a ring, not the satellite.** A group of satellites that turns about the ring's normal stays on its orbit, and its faded line stays still. Geostationary satellites turn once per Earth turn, so they stay over one spot.
+- **A material name can collide with a built-in one.** The solar orbit lines already use `orbit`; the V22 line is `orbit22`, so older headers are not touched.
+- **Check the key filters.** A test for "no V22 keys" matched `land-22`; match the V22 prefixes instead.
+- **A merge can conflict after a merge is opened.** `main` moved while PR #65 was open: the conflicts were two additions in the notes and the viewer list, plus the generated bundle. Keep both sides, and rebuild the generated file rather than merge it by hand.
+- **Look at the picture before the text.** The storm looked like a dome (2.6 in across), not the 1.3 in the header said. Measure the render, then correct the words.
+
