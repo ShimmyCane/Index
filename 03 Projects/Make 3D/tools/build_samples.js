@@ -23,7 +23,7 @@ for (const scene of SCENES) {
     ops.push({ seq, op: 'add', time: stamp(), author: 'jimmy', note: `add ${d.name}`,
       object: { uuid: uuid(key), name: d.name, description: d.description || '', type: d.type,
         dimensions: d.dimensions, position: d.position, rotation_y: d.rotation_y || 0,
-        parent: d.parent ? uuid(d.parent) : null, material: d.material || null } });
+        parent: d.parent ? uuid(d.parent) : null, material: d.material || null, ...(d.tags ? { tags: d.tags } : {}) } });
   }
   for (const m of scene.modify || []) {
     seq++;

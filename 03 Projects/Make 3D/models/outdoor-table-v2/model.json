@@ -1,0 +1,1121 @@
+{
+  "model_id": "outdoor-table-v2",
+  "name": "Outdoor table with parasol V2",
+  "description": "A 7 ft x 3 ft white oak top on yellow painted angle-iron legs, with a rectangular frame, a centre beam and a low back bar. A folding red parasol with one large canopy at the far end, on a square base with two sandbags. A bonsai in a 2 ft box on the ground, 8 ft from the table, reaching over it.",
+  "units": "in",
+  "up": "z",
+  "world": "default-world",
+  "materials": {
+    "oak": {
+      "color": "#e6d3b3",
+      "opacity": 1
+    },
+    "yellow": {
+      "color": "#f2c94c",
+      "opacity": 1
+    },
+    "canopy": {
+      "color": "#c4544a",
+      "opacity": 1
+    },
+    "metal": {
+      "color": "#9aa4ad",
+      "opacity": 1
+    },
+    "sandbag": {
+      "color": "#c9b48a",
+      "opacity": 1
+    },
+    "box": {
+      "color": "#b58a62",
+      "opacity": 1
+    },
+    "trunk": {
+      "color": "#7a5a43",
+      "opacity": 1
+    },
+    "leaf": {
+      "color": "#6fa86a",
+      "opacity": 1
+    }
+  },
+  "objects": [
+    {
+      "description": "white oak veneer, 7 ft x 3 ft, centre at 30 in high",
+      "rotation_y": 0,
+      "parent": null,
+      "material": "oak",
+      "tags": [
+        "surface"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-top",
+      "name": "Table top",
+      "type": "box",
+      "dimensions": [
+        84,
+        36,
+        1.5
+      ],
+      "position": [
+        0,
+        0,
+        30
+      ]
+    },
+    {
+      "description": "yellow painted angle iron",
+      "rotation_y": 0,
+      "parent": null,
+      "material": null,
+      "tags": [],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-frame",
+      "name": "Frame",
+      "type": "group",
+      "dimensions": [],
+      "position": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "description": "2 in angle",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-frame",
+      "material": "yellow",
+      "tags": [
+        "frame"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-leg1",
+      "name": "Leg 1",
+      "type": "box",
+      "dimensions": [
+        2,
+        2,
+        29.25
+      ],
+      "position": [
+        -36,
+        -14,
+        14.625
+      ]
+    },
+    {
+      "description": "2 in angle",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-frame",
+      "material": "yellow",
+      "tags": [
+        "frame"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-leg2",
+      "name": "Leg 2",
+      "type": "box",
+      "dimensions": [
+        2,
+        2,
+        29.25
+      ],
+      "position": [
+        -36,
+        14,
+        14.625
+      ]
+    },
+    {
+      "description": "2 in angle",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-frame",
+      "material": "yellow",
+      "tags": [
+        "frame"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-leg3",
+      "name": "Leg 3",
+      "type": "box",
+      "dimensions": [
+        2,
+        2,
+        29.25
+      ],
+      "position": [
+        36,
+        -14,
+        14.625
+      ]
+    },
+    {
+      "description": "2 in angle",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-frame",
+      "material": "yellow",
+      "tags": [
+        "frame"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-leg4",
+      "name": "Leg 4",
+      "type": "box",
+      "dimensions": [
+        2,
+        2,
+        29.25
+      ],
+      "position": [
+        36,
+        14,
+        14.625
+      ]
+    },
+    {
+      "description": "rectangular frame, long side",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-frame",
+      "material": "yellow",
+      "tags": [
+        "frame"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-rail-front",
+      "name": "Rail front",
+      "type": "box",
+      "dimensions": [
+        84,
+        1.5,
+        2
+      ],
+      "position": [
+        0,
+        -14,
+        27.25
+      ]
+    },
+    {
+      "description": "rectangular frame, long side",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-frame",
+      "material": "yellow",
+      "tags": [
+        "frame"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-rail-back",
+      "name": "Rail back",
+      "type": "box",
+      "dimensions": [
+        84,
+        1.5,
+        2
+      ],
+      "position": [
+        0,
+        14,
+        27.25
+      ]
+    },
+    {
+      "description": "rectangular frame, short side",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-frame",
+      "material": "yellow",
+      "tags": [
+        "frame"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-rail-end-l",
+      "name": "Rail end left",
+      "type": "box",
+      "dimensions": [
+        1.5,
+        28,
+        2
+      ],
+      "position": [
+        -36,
+        0,
+        27.25
+      ]
+    },
+    {
+      "description": "rectangular frame, short side",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-frame",
+      "material": "yellow",
+      "tags": [
+        "frame"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-rail-end-r",
+      "name": "Rail end right",
+      "type": "box",
+      "dimensions": [
+        1.5,
+        28,
+        2
+      ],
+      "position": [
+        36,
+        0,
+        27.25
+      ]
+    },
+    {
+      "description": "between the end rails, under the top",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-frame",
+      "material": "yellow",
+      "tags": [
+        "frame"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-centre-beam",
+      "name": "Centre beam",
+      "type": "box",
+      "dimensions": [
+        72,
+        1.5,
+        2
+      ],
+      "position": [
+        0,
+        0,
+        27.25
+      ]
+    },
+    {
+      "description": "about 6 in off the ground, back only, for feet",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-frame",
+      "material": "yellow",
+      "tags": [
+        "frame"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-low-bar",
+      "name": "Low back bar",
+      "type": "box",
+      "dimensions": [
+        84,
+        1.5,
+        1.5
+      ],
+      "position": [
+        0,
+        14,
+        6
+      ]
+    },
+    {
+      "description": "folding, all canopy panels open as one, at the far end",
+      "rotation_y": 0,
+      "parent": null,
+      "material": null,
+      "tags": [
+        "shade"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-parasol",
+      "name": "Parasol",
+      "type": "group",
+      "dimensions": [],
+      "position": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "description": "from the ground to the canopy",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-parasol",
+      "material": "metal",
+      "tags": [
+        "stand"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-pole",
+      "name": "Parasol pole",
+      "type": "cylinder",
+      "dimensions": [
+        0.75,
+        88
+      ],
+      "position": [
+        36,
+        0,
+        52
+      ]
+    },
+    {
+      "description": "24 in square, hides the sandbags",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-parasol",
+      "material": "metal",
+      "tags": [
+        "stand"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-base",
+      "name": "Square base",
+      "type": "box",
+      "dimensions": [
+        24,
+        24,
+        8
+      ],
+      "position": [
+        36,
+        0,
+        4
+      ]
+    },
+    {
+      "description": "inside the base",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-parasol",
+      "material": "sandbag",
+      "tags": [
+        "ballast"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-sandbag-1",
+      "name": "Sandbag 1",
+      "type": "box",
+      "dimensions": [
+        12,
+        6,
+        4
+      ],
+      "position": [
+        36,
+        -6,
+        4
+      ]
+    },
+    {
+      "description": "inside the base",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-parasol",
+      "material": "sandbag",
+      "tags": [
+        "ballast"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-sandbag-2",
+      "name": "Sandbag 2",
+      "type": "box",
+      "dimensions": [
+        12,
+        6,
+        4
+      ],
+      "position": [
+        36,
+        6,
+        4
+      ]
+    },
+    {
+      "description": "one large red canopy, faded a little",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-parasol",
+      "material": "canopy",
+      "tags": [
+        "shade"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-canopy",
+      "name": "Canopy",
+      "type": "cone",
+      "dimensions": [
+        70,
+        16
+      ],
+      "position": [
+        36,
+        0,
+        100
+      ]
+    },
+    {
+      "description": "on the ground, 8 ft from the table end, one main limb",
+      "rotation_y": 0,
+      "parent": null,
+      "material": null,
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-bonsai",
+      "name": "Bonsai tree",
+      "type": "group",
+      "dimensions": [],
+      "position": [
+        -150,
+        0,
+        0
+      ]
+    },
+    {
+      "description": "2 ft x 2 ft x 2 ft, on the ground",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "box",
+      "tags": [
+        "container"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-box",
+      "name": "Bonsai box",
+      "type": "box",
+      "dimensions": [
+        24,
+        24,
+        24
+      ],
+      "position": [
+        -150,
+        0,
+        12
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 15,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-trunk",
+      "name": "Trunk",
+      "type": "cylinder",
+      "dimensions": [
+        1.2,
+        26
+      ],
+      "position": [
+        -146.64,
+        0,
+        36.56
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 78,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-limb",
+      "name": "Main limb",
+      "type": "cylinder",
+      "dimensions": [
+        0.9,
+        70
+      ],
+      "position": [
+        -109.04,
+        0,
+        56.39
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 66,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-1",
+      "name": "Branch 1",
+      "type": "cylinder",
+      "dimensions": [
+        0.7,
+        28
+      ],
+      "position": [
+        -62.01,
+        0,
+        69.36
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 78,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-2",
+      "name": "Branch 2",
+      "type": "cylinder",
+      "dimensions": [
+        0.7,
+        28
+      ],
+      "position": [
+        -61.11,
+        0,
+        66.58
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 90,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-3",
+      "name": "Branch 3",
+      "type": "cylinder",
+      "dimensions": [
+        0.7,
+        28
+      ],
+      "position": [
+        -60.8,
+        0,
+        63.67
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 48,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-1-1",
+      "name": "Branch 1.1",
+      "type": "cylinder",
+      "dimensions": [
+        0.48999999999999994,
+        20.16
+      ],
+      "position": [
+        -41.73,
+        0,
+        81.8
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 84,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-1-2",
+      "name": "Branch 1.2",
+      "type": "cylinder",
+      "dimensions": [
+        0.48999999999999994,
+        20.16
+      ],
+      "position": [
+        -39.2,
+        0,
+        76.11
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 30,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-1-1-1",
+      "name": "Branch 1.1.1",
+      "type": "cylinder",
+      "dimensions": [
+        0.3429999999999999,
+        14.5152
+      ],
+      "position": [
+        -30.61,
+        0,
+        94.83
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 66,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-1-1-2",
+      "name": "Branch 1.1.2",
+      "type": "cylinder",
+      "dimensions": [
+        0.3429999999999999,
+        14.5152
+      ],
+      "position": [
+        -27.61,
+        0,
+        91.5
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 66,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-1-2-1",
+      "name": "Branch 1.2.1",
+      "type": "cylinder",
+      "dimensions": [
+        0.3429999999999999,
+        14.5152
+      ],
+      "position": [
+        -22.54,
+        0,
+        80.12
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 102,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-1-2-2",
+      "name": "Branch 1.2.2",
+      "type": "cylinder",
+      "dimensions": [
+        0.3429999999999999,
+        14.5152
+      ],
+      "position": [
+        -22.07,
+        0,
+        75.65
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 60,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-2-1",
+      "name": "Branch 2.1",
+      "type": "cylinder",
+      "dimensions": [
+        0.48999999999999994,
+        20.16
+      ],
+      "position": [
+        -38.68,
+        0,
+        74.53
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 96,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-2-2",
+      "name": "Branch 2.2",
+      "type": "cylinder",
+      "dimensions": [
+        0.48999999999999994,
+        20.16
+      ],
+      "position": [
+        -37.39,
+        0,
+        68.44
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 42,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-2-1-1",
+      "name": "Branch 2.1.1",
+      "type": "cylinder",
+      "dimensions": [
+        0.3429999999999999,
+        14.5152
+      ],
+      "position": [
+        -25.1,
+        0,
+        84.96
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 78,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-2-1-2",
+      "name": "Branch 2.1.2",
+      "type": "cylinder",
+      "dimensions": [
+        0.3429999999999999,
+        14.5152
+      ],
+      "position": [
+        -22.85,
+        0,
+        81.08
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 78,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-2-2-1",
+      "name": "Branch 2.2.1",
+      "type": "cylinder",
+      "dimensions": [
+        0.3429999999999999,
+        14.5152
+      ],
+      "position": [
+        -20.26,
+        0,
+        68.89
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 114,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-2-2-2",
+      "name": "Branch 2.2.2",
+      "type": "cylinder",
+      "dimensions": [
+        0.3429999999999999,
+        14.5152
+      ],
+      "position": [
+        -20.73,
+        0,
+        64.43
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 72,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-3-1",
+      "name": "Branch 3.1",
+      "type": "cylinder",
+      "dimensions": [
+        0.48999999999999994,
+        20.16
+      ],
+      "position": [
+        -37.21,
+        0,
+        66.78
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 108,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-3-2",
+      "name": "Branch 3.2",
+      "type": "cylinder",
+      "dimensions": [
+        0.48999999999999994,
+        20.16
+      ],
+      "position": [
+        -37.21,
+        0,
+        60.55
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 54,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-3-1-1",
+      "name": "Branch 3.1.1",
+      "type": "cylinder",
+      "dimensions": [
+        0.3429999999999999,
+        14.5152
+      ],
+      "position": [
+        -21.76,
+        0,
+        74.16
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 90,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-3-1-2",
+      "name": "Branch 3.1.2",
+      "type": "cylinder",
+      "dimensions": [
+        0.3429999999999999,
+        14.5152
+      ],
+      "position": [
+        -20.37,
+        0,
+        69.9
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 90,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-3-2-1",
+      "name": "Branch 3.2.1",
+      "type": "cylinder",
+      "dimensions": [
+        0.3429999999999999,
+        14.5152
+      ],
+      "position": [
+        -20.37,
+        0,
+        57.44
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 126,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "trunk",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-fork-3-2-2",
+      "name": "Branch 3.2.2",
+      "type": "cylinder",
+      "dimensions": [
+        0.3429999999999999,
+        14.5152
+      ],
+      "position": [
+        -21.76,
+        0,
+        53.17
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "leaf",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-leaf-1",
+      "name": "Leaf pad 1",
+      "type": "sphere",
+      "dimensions": [
+        2.6
+      ],
+      "position": [
+        -26.98,
+        0,
+        101.12
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "leaf",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-leaf-2",
+      "name": "Leaf pad 2",
+      "type": "sphere",
+      "dimensions": [
+        2.6
+      ],
+      "position": [
+        -15.91,
+        0,
+        83.07
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "leaf",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-leaf-3",
+      "name": "Leaf pad 3",
+      "type": "sphere",
+      "dimensions": [
+        2.6
+      ],
+      "position": [
+        -15.76,
+        0,
+        82.59
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "leaf",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-leaf-4",
+      "name": "Leaf pad 4",
+      "type": "sphere",
+      "dimensions": [
+        2.6
+      ],
+      "position": [
+        -14.1,
+        0,
+        61.48
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "leaf",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-leaf-5",
+      "name": "Leaf pad 5",
+      "type": "sphere",
+      "dimensions": [
+        2.6
+      ],
+      "position": [
+        -13.11,
+        0,
+        69.9
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 0,
+      "parent": "outdoor-table-v2-bonsai",
+      "material": "leaf",
+      "tags": [
+        "plant"
+      ],
+      "allowed_overlap": [],
+      "uuid": "outdoor-table-v2-b-leaf-6",
+      "name": "Leaf pad 6",
+      "type": "sphere",
+      "dimensions": [
+        2.6
+      ],
+      "position": [
+        -15.88,
+        0,
+        48.91
+      ]
+    }
+  ],
+  "version": 49
+}

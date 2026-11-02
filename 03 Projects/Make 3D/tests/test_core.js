@@ -168,5 +168,27 @@ t('samples: garden planter history replays to the saved model.json', () => {
   assert.deepStrictEqual(G.replay(history), saved);
   assert.strictEqual(R.checkModel(saved, world).outcome, 'accept');
 });
+t('tags: vocabulary is fixed and objects keep their tags through replay', () => {
+  assert.deepStrictEqual(Object.keys(S.TAGS).sort(), ['ballast', 'container', 'frame', 'plant', 'shade', 'stand', 'surface']);
+  const o = G.applyOperation(G.emptyModel(header), add(box('a', { tags: ['stand'] })));
+  assert.deepStrictEqual(o.objects[0].tags, ['stand']);
+  const untagged = G.applyOperation(G.emptyModel(header), add(box('b')));
+  assert.deepStrictEqual(untagged.objects[0].tags, []);
+});
+t('samples: outdoor table V2 replays, checks, and uses only known tags', () => {
+  const dir = path.join(root, 'models/outdoor-table-v2');
+  const history = JSON.parse(fs.readFileSync(path.join(dir, 'history.json'), 'utf8'));
+  const saved = JSON.parse(fs.readFileSync(path.join(dir, 'model.json'), 'utf8'));
+  assert.deepStrictEqual(G.replay(history), saved);
+  assert.strictEqual(R.checkModel(saved, world).outcome, 'accept');
+  for (const o of saved.objects) for (const tg of o.tags) assert.ok(tg in S.TAGS, `unknown tag ${tg} on ${o.name}`);
+  const named = (name) => saved.objects.find((o) => o.name === name);
+  assert.deepStrictEqual(named('Parasol pole').tags, ['stand']);
+  assert.deepStrictEqual(named('Sandbag 1').tags, ['ballast']);
+  assert.strictEqual(saved.objects.filter((o) => o.tags.includes('shade')).length, 2);
+  // one canopy, red, and the legs are yellow angle frame
+  assert.strictEqual(saved.objects.filter((o) => o.type === 'cone').length, 1);
+  assert.strictEqual(named('Bonsai box').position[0], -150);
+});
 
 console.log(`\n${n} test groups passed`);

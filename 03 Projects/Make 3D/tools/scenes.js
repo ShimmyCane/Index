@@ -84,6 +84,77 @@ const TABLE = {
   modify: [{ key: 'canopy-mid', set: { dimensions: [38, 12] }, note: 'slightly wider middle canopy' }],
 };
 
+// Outdoor table V2 (convo v0.5): 7 ft x 3 ft white oak top on yellow painted 2 in angle legs, a rectangular
+// frame under the top, a centre beam and a low back bar. A folding red parasol with one large canopy at the far
+// end, on a square base that hides two sandbags. A bonsai in a 2 ft box on the ground, 8 ft from the table end,
+// with one main limb that forks three times and sparse leaves.
+const bonsaiBranches = () => {
+  // Branches grow in the vertical XZ plane (rotation about Y only). Angle is from vertical, toward +X.
+  const defs = [];
+  const at = (x, z, phi, len, rad, key, tags) => {
+    const r = (phi * Math.PI) / 180;
+    const mx = x + (Math.sin(r) * len) / 2, mz = z + (Math.cos(r) * len) / 2;
+    const label = key === 'b-trunk' ? 'Trunk' : key === 'b-limb' ? 'Main limb' : `Branch ${key.replace('b-fork-', '').replace(/-/g, '.')}`;
+    defs.push([key, { name: label, description: '', type: 'cylinder', dimensions: [rad, len],
+      position: [+mx.toFixed(2), 0, +mz.toFixed(2)], rotation_y: phi, material: 'trunk', parent: 'bonsai', tags }]);
+    return { x: x + Math.sin(r) * len, z: z + Math.cos(r) * len, phi };
+  };
+  // trunk leans a little out of the box; one main limb; then forks of 3, 2 and 2 at each step
+  const trunk = at(-150, 24, 15, 26, 1.2, 'b-trunk', ['plant']);
+  const limb = at(trunk.x, trunk.z, 78, 70, 0.9, 'b-limb', ['plant']);
+  const tips = [];
+  const grow = (node, key, depth, n, len, rad, spread) => {
+    const kids = [];
+    for (let i = 0; i < n; i++) kids.push(at(node.x, node.z, node.phi + spread[i], len, rad, `${key}-${i + 1}`, ['plant']));
+    if (depth === 0) { tips.push(...kids); return; }
+    kids.forEach((k, i) => grow(k, `${key}-${i + 1}`, depth - 1, 2, len * 0.72, rad * 0.7, [-18, 18]));
+  };
+  grow(limb, 'b-fork', 2, 3, 28, 0.7, [-12, 0, 12]);
+  // sparse leaves: small pads on six of the twelve tips
+  [0, 2, 5, 7, 9, 11].forEach((i, n) => {
+    const t = tips[i];
+    defs.push([`b-leaf-${n + 1}`, { name: `Leaf pad ${n + 1}`, description: '', type: 'sphere', dimensions: [2.6],
+      position: [+t.x.toFixed(2), 0, +t.z.toFixed(2)], material: 'leaf', parent: 'bonsai', tags: ['plant'] }]);
+  });
+  return defs;
+};
+
+const OUTDOOR_V2 = {
+  id: 'outdoor-table-v2',
+  header: {
+    model_id: 'outdoor-table-v2',
+    name: 'Outdoor table with parasol V2',
+    description: 'A 7 ft x 3 ft white oak top on yellow painted angle-iron legs, with a rectangular frame, a centre beam and a low back bar. A folding red parasol with one large canopy at the far end, on a square base with two sandbags. A bonsai in a 2 ft box on the ground, 8 ft from the table, reaching over it.',
+    units: 'in', up: 'z', world: WORLD_ID,
+    materials: {
+      oak: { color: '#e6d3b3', opacity: 1 }, yellow: { color: '#f2c94c', opacity: 1 },
+      canopy: { color: '#c4544a', opacity: 1 }, metal: { color: '#9aa4ad', opacity: 1 },
+      sandbag: { color: '#c9b48a', opacity: 1 }, box: { color: '#b58a62', opacity: 1 },
+      trunk: { color: '#7a5a43', opacity: 1 }, leaf: { color: '#6fa86a', opacity: 1 },
+    },
+  },
+  defs: [
+    ['top', { name: 'Table top', description: 'white oak veneer, 7 ft x 3 ft, centre at 30 in high', type: 'box', dimensions: [84, 36, 1.5], position: [0, 0, 30], material: 'oak', tags: ['surface'] }],
+    ['frame', { name: 'Frame', description: 'yellow painted angle iron', type: 'group', dimensions: [], position: [0, 0, 0] }],
+    ...[[-36, -14], [-36, 14], [36, -14], [36, 14]].map(([x, y], i) => [`leg${i + 1}`, { name: `Leg ${i + 1}`, description: '2 in angle', type: 'box', dimensions: [2, 2, 29.25], position: [x, y, 14.625], material: 'yellow', parent: 'frame', tags: ['frame'] }]),
+    ['rail-front', { name: 'Rail front', description: 'rectangular frame, long side', type: 'box', dimensions: [84, 1.5, 2], position: [0, -14, 27.25], material: 'yellow', parent: 'frame', tags: ['frame'] }],
+    ['rail-back', { name: 'Rail back', description: 'rectangular frame, long side', type: 'box', dimensions: [84, 1.5, 2], position: [0, 14, 27.25], material: 'yellow', parent: 'frame', tags: ['frame'] }],
+    ['rail-end-l', { name: 'Rail end left', description: 'rectangular frame, short side', type: 'box', dimensions: [1.5, 28, 2], position: [-36, 0, 27.25], material: 'yellow', parent: 'frame', tags: ['frame'] }],
+    ['rail-end-r', { name: 'Rail end right', description: 'rectangular frame, short side', type: 'box', dimensions: [1.5, 28, 2], position: [36, 0, 27.25], material: 'yellow', parent: 'frame', tags: ['frame'] }],
+    ['centre-beam', { name: 'Centre beam', description: 'between the end rails, under the top', type: 'box', dimensions: [72, 1.5, 2], position: [0, 0, 27.25], material: 'yellow', parent: 'frame', tags: ['frame'] }],
+    ['low-bar', { name: 'Low back bar', description: 'about 6 in off the ground, back only, for feet', type: 'box', dimensions: [84, 1.5, 1.5], position: [0, 14, 6], material: 'yellow', parent: 'frame', tags: ['frame'] }],
+    ['parasol', { name: 'Parasol', description: 'folding, all canopy panels open as one, at the far end', type: 'group', dimensions: [], position: [0, 0, 0], tags: ['shade'] }],
+    ['pole', { name: 'Parasol pole', description: 'from the ground to the canopy', type: 'cylinder', dimensions: [0.75, 88], position: [36, 0, 52], material: 'metal', parent: 'parasol', tags: ['stand'] }],
+    ['base', { name: 'Square base', description: '24 in square, hides the sandbags', type: 'box', dimensions: [24, 24, 8], position: [36, 0, 4], material: 'metal', parent: 'parasol', tags: ['stand'] }],
+    ['sandbag-1', { name: 'Sandbag 1', description: 'inside the base', type: 'box', dimensions: [12, 6, 4], position: [36, -6, 4], material: 'sandbag', parent: 'parasol', tags: ['ballast'] }],
+    ['sandbag-2', { name: 'Sandbag 2', description: 'inside the base', type: 'box', dimensions: [12, 6, 4], position: [36, 6, 4], material: 'sandbag', parent: 'parasol', tags: ['ballast'] }],
+    ['canopy', { name: 'Canopy', description: 'one large red canopy, faded a little', type: 'cone', dimensions: [70, 16], position: [36, 0, 100], material: 'canopy', parent: 'parasol', tags: ['shade'] }],
+    ['bonsai', { name: 'Bonsai tree', description: 'on the ground, 8 ft from the table end, one main limb', type: 'group', dimensions: [], position: [-150, 0, 0], tags: ['plant'] }],
+    ['box', { name: 'Bonsai box', description: '2 ft x 2 ft x 2 ft, on the ground', type: 'box', dimensions: [24, 24, 24], position: [-150, 0, 12], material: 'box', parent: 'bonsai', tags: ['container'] }],
+    ...bonsaiBranches(),
+  ],
+};
+
 // Kitchen: a run of cabinets along the back wall, fridge at the left, stove, a sink run with a triple sink
 // and two faucets, a dishwasher, drawers and a door, and upper cabinets with a sliding acrylic cup display.
 // Back wall is y = 0; base cabinets are 24 in deep; counter tops at 36 in.
@@ -139,4 +210,4 @@ const KITCHEN = {
 // the fridge is on your left and the dishwasher and drawers on your right, as described.
 KITCHEN.defs = KITCHEN.defs.map(([k, d]) => [k, { ...d, position: [240 - d.position[0], d.position[1], d.position[2]] }]);
 
-module.exports = { WORLD_ID, SCENES: [PLANTER, TABLE, KITCHEN] };
+module.exports = { WORLD_ID, SCENES: [PLANTER, TABLE, OUTDOOR_V2, KITCHEN] };

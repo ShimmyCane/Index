@@ -1,0 +1,1417 @@
+{
+  "schema": "make3d.history/0.1",
+  "model_id": "outdoor-table-v2",
+  "header": {
+    "model_id": "outdoor-table-v2",
+    "name": "Outdoor table with parasol V2",
+    "description": "A 7 ft x 3 ft white oak top on yellow painted angle-iron legs, with a rectangular frame, a centre beam and a low back bar. A folding red parasol with one large canopy at the far end, on a square base with two sandbags. A bonsai in a 2 ft box on the ground, 8 ft from the table, reaching over it.",
+    "units": "in",
+    "up": "z",
+    "world": "default-world",
+    "materials": {
+      "oak": {
+        "color": "#e6d3b3",
+        "opacity": 1
+      },
+      "yellow": {
+        "color": "#f2c94c",
+        "opacity": 1
+      },
+      "canopy": {
+        "color": "#c4544a",
+        "opacity": 1
+      },
+      "metal": {
+        "color": "#9aa4ad",
+        "opacity": 1
+      },
+      "sandbag": {
+        "color": "#c9b48a",
+        "opacity": 1
+      },
+      "box": {
+        "color": "#b58a62",
+        "opacity": 1
+      },
+      "trunk": {
+        "color": "#7a5a43",
+        "opacity": 1
+      },
+      "leaf": {
+        "color": "#6fa86a",
+        "opacity": 1
+      }
+    }
+  },
+  "operations": [
+    {
+      "seq": 1,
+      "op": "add",
+      "time": "2026-11-01T10:01:00.000Z",
+      "author": "jimmy",
+      "note": "add Table top",
+      "object": {
+        "uuid": "outdoor-table-v2-top",
+        "name": "Table top",
+        "description": "white oak veneer, 7 ft x 3 ft, centre at 30 in high",
+        "type": "box",
+        "dimensions": [
+          84,
+          36,
+          1.5
+        ],
+        "position": [
+          0,
+          0,
+          30
+        ],
+        "rotation_y": 0,
+        "parent": null,
+        "material": "oak",
+        "tags": [
+          "surface"
+        ]
+      }
+    },
+    {
+      "seq": 2,
+      "op": "add",
+      "time": "2026-11-01T10:02:00.000Z",
+      "author": "jimmy",
+      "note": "add Frame",
+      "object": {
+        "uuid": "outdoor-table-v2-frame",
+        "name": "Frame",
+        "description": "yellow painted angle iron",
+        "type": "group",
+        "dimensions": [],
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation_y": 0,
+        "parent": null,
+        "material": null
+      }
+    },
+    {
+      "seq": 3,
+      "op": "add",
+      "time": "2026-11-01T10:03:00.000Z",
+      "author": "jimmy",
+      "note": "add Leg 1",
+      "object": {
+        "uuid": "outdoor-table-v2-leg1",
+        "name": "Leg 1",
+        "description": "2 in angle",
+        "type": "box",
+        "dimensions": [
+          2,
+          2,
+          29.25
+        ],
+        "position": [
+          -36,
+          -14,
+          14.625
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-frame",
+        "material": "yellow",
+        "tags": [
+          "frame"
+        ]
+      }
+    },
+    {
+      "seq": 4,
+      "op": "add",
+      "time": "2026-11-01T10:04:00.000Z",
+      "author": "jimmy",
+      "note": "add Leg 2",
+      "object": {
+        "uuid": "outdoor-table-v2-leg2",
+        "name": "Leg 2",
+        "description": "2 in angle",
+        "type": "box",
+        "dimensions": [
+          2,
+          2,
+          29.25
+        ],
+        "position": [
+          -36,
+          14,
+          14.625
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-frame",
+        "material": "yellow",
+        "tags": [
+          "frame"
+        ]
+      }
+    },
+    {
+      "seq": 5,
+      "op": "add",
+      "time": "2026-11-01T10:05:00.000Z",
+      "author": "jimmy",
+      "note": "add Leg 3",
+      "object": {
+        "uuid": "outdoor-table-v2-leg3",
+        "name": "Leg 3",
+        "description": "2 in angle",
+        "type": "box",
+        "dimensions": [
+          2,
+          2,
+          29.25
+        ],
+        "position": [
+          36,
+          -14,
+          14.625
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-frame",
+        "material": "yellow",
+        "tags": [
+          "frame"
+        ]
+      }
+    },
+    {
+      "seq": 6,
+      "op": "add",
+      "time": "2026-11-01T10:06:00.000Z",
+      "author": "jimmy",
+      "note": "add Leg 4",
+      "object": {
+        "uuid": "outdoor-table-v2-leg4",
+        "name": "Leg 4",
+        "description": "2 in angle",
+        "type": "box",
+        "dimensions": [
+          2,
+          2,
+          29.25
+        ],
+        "position": [
+          36,
+          14,
+          14.625
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-frame",
+        "material": "yellow",
+        "tags": [
+          "frame"
+        ]
+      }
+    },
+    {
+      "seq": 7,
+      "op": "add",
+      "time": "2026-11-01T10:07:00.000Z",
+      "author": "jimmy",
+      "note": "add Rail front",
+      "object": {
+        "uuid": "outdoor-table-v2-rail-front",
+        "name": "Rail front",
+        "description": "rectangular frame, long side",
+        "type": "box",
+        "dimensions": [
+          84,
+          1.5,
+          2
+        ],
+        "position": [
+          0,
+          -14,
+          27.25
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-frame",
+        "material": "yellow",
+        "tags": [
+          "frame"
+        ]
+      }
+    },
+    {
+      "seq": 8,
+      "op": "add",
+      "time": "2026-11-01T10:08:00.000Z",
+      "author": "jimmy",
+      "note": "add Rail back",
+      "object": {
+        "uuid": "outdoor-table-v2-rail-back",
+        "name": "Rail back",
+        "description": "rectangular frame, long side",
+        "type": "box",
+        "dimensions": [
+          84,
+          1.5,
+          2
+        ],
+        "position": [
+          0,
+          14,
+          27.25
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-frame",
+        "material": "yellow",
+        "tags": [
+          "frame"
+        ]
+      }
+    },
+    {
+      "seq": 9,
+      "op": "add",
+      "time": "2026-11-01T10:09:00.000Z",
+      "author": "jimmy",
+      "note": "add Rail end left",
+      "object": {
+        "uuid": "outdoor-table-v2-rail-end-l",
+        "name": "Rail end left",
+        "description": "rectangular frame, short side",
+        "type": "box",
+        "dimensions": [
+          1.5,
+          28,
+          2
+        ],
+        "position": [
+          -36,
+          0,
+          27.25
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-frame",
+        "material": "yellow",
+        "tags": [
+          "frame"
+        ]
+      }
+    },
+    {
+      "seq": 10,
+      "op": "add",
+      "time": "2026-11-01T10:10:00.000Z",
+      "author": "jimmy",
+      "note": "add Rail end right",
+      "object": {
+        "uuid": "outdoor-table-v2-rail-end-r",
+        "name": "Rail end right",
+        "description": "rectangular frame, short side",
+        "type": "box",
+        "dimensions": [
+          1.5,
+          28,
+          2
+        ],
+        "position": [
+          36,
+          0,
+          27.25
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-frame",
+        "material": "yellow",
+        "tags": [
+          "frame"
+        ]
+      }
+    },
+    {
+      "seq": 11,
+      "op": "add",
+      "time": "2026-11-01T10:11:00.000Z",
+      "author": "jimmy",
+      "note": "add Centre beam",
+      "object": {
+        "uuid": "outdoor-table-v2-centre-beam",
+        "name": "Centre beam",
+        "description": "between the end rails, under the top",
+        "type": "box",
+        "dimensions": [
+          72,
+          1.5,
+          2
+        ],
+        "position": [
+          0,
+          0,
+          27.25
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-frame",
+        "material": "yellow",
+        "tags": [
+          "frame"
+        ]
+      }
+    },
+    {
+      "seq": 12,
+      "op": "add",
+      "time": "2026-11-01T10:12:00.000Z",
+      "author": "jimmy",
+      "note": "add Low back bar",
+      "object": {
+        "uuid": "outdoor-table-v2-low-bar",
+        "name": "Low back bar",
+        "description": "about 6 in off the ground, back only, for feet",
+        "type": "box",
+        "dimensions": [
+          84,
+          1.5,
+          1.5
+        ],
+        "position": [
+          0,
+          14,
+          6
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-frame",
+        "material": "yellow",
+        "tags": [
+          "frame"
+        ]
+      }
+    },
+    {
+      "seq": 13,
+      "op": "add",
+      "time": "2026-11-01T10:13:00.000Z",
+      "author": "jimmy",
+      "note": "add Parasol",
+      "object": {
+        "uuid": "outdoor-table-v2-parasol",
+        "name": "Parasol",
+        "description": "folding, all canopy panels open as one, at the far end",
+        "type": "group",
+        "dimensions": [],
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation_y": 0,
+        "parent": null,
+        "material": null,
+        "tags": [
+          "shade"
+        ]
+      }
+    },
+    {
+      "seq": 14,
+      "op": "add",
+      "time": "2026-11-01T10:14:00.000Z",
+      "author": "jimmy",
+      "note": "add Parasol pole",
+      "object": {
+        "uuid": "outdoor-table-v2-pole",
+        "name": "Parasol pole",
+        "description": "from the ground to the canopy",
+        "type": "cylinder",
+        "dimensions": [
+          0.75,
+          88
+        ],
+        "position": [
+          36,
+          0,
+          52
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-parasol",
+        "material": "metal",
+        "tags": [
+          "stand"
+        ]
+      }
+    },
+    {
+      "seq": 15,
+      "op": "add",
+      "time": "2026-11-01T10:15:00.000Z",
+      "author": "jimmy",
+      "note": "add Square base",
+      "object": {
+        "uuid": "outdoor-table-v2-base",
+        "name": "Square base",
+        "description": "24 in square, hides the sandbags",
+        "type": "box",
+        "dimensions": [
+          24,
+          24,
+          8
+        ],
+        "position": [
+          36,
+          0,
+          4
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-parasol",
+        "material": "metal",
+        "tags": [
+          "stand"
+        ]
+      }
+    },
+    {
+      "seq": 16,
+      "op": "add",
+      "time": "2026-11-01T10:16:00.000Z",
+      "author": "jimmy",
+      "note": "add Sandbag 1",
+      "object": {
+        "uuid": "outdoor-table-v2-sandbag-1",
+        "name": "Sandbag 1",
+        "description": "inside the base",
+        "type": "box",
+        "dimensions": [
+          12,
+          6,
+          4
+        ],
+        "position": [
+          36,
+          -6,
+          4
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-parasol",
+        "material": "sandbag",
+        "tags": [
+          "ballast"
+        ]
+      }
+    },
+    {
+      "seq": 17,
+      "op": "add",
+      "time": "2026-11-01T10:17:00.000Z",
+      "author": "jimmy",
+      "note": "add Sandbag 2",
+      "object": {
+        "uuid": "outdoor-table-v2-sandbag-2",
+        "name": "Sandbag 2",
+        "description": "inside the base",
+        "type": "box",
+        "dimensions": [
+          12,
+          6,
+          4
+        ],
+        "position": [
+          36,
+          6,
+          4
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-parasol",
+        "material": "sandbag",
+        "tags": [
+          "ballast"
+        ]
+      }
+    },
+    {
+      "seq": 18,
+      "op": "add",
+      "time": "2026-11-01T10:18:00.000Z",
+      "author": "jimmy",
+      "note": "add Canopy",
+      "object": {
+        "uuid": "outdoor-table-v2-canopy",
+        "name": "Canopy",
+        "description": "one large red canopy, faded a little",
+        "type": "cone",
+        "dimensions": [
+          70,
+          16
+        ],
+        "position": [
+          36,
+          0,
+          100
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-parasol",
+        "material": "canopy",
+        "tags": [
+          "shade"
+        ]
+      }
+    },
+    {
+      "seq": 19,
+      "op": "add",
+      "time": "2026-11-01T10:19:00.000Z",
+      "author": "jimmy",
+      "note": "add Bonsai tree",
+      "object": {
+        "uuid": "outdoor-table-v2-bonsai",
+        "name": "Bonsai tree",
+        "description": "on the ground, 8 ft from the table end, one main limb",
+        "type": "group",
+        "dimensions": [],
+        "position": [
+          -150,
+          0,
+          0
+        ],
+        "rotation_y": 0,
+        "parent": null,
+        "material": null,
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 20,
+      "op": "add",
+      "time": "2026-11-01T10:20:00.000Z",
+      "author": "jimmy",
+      "note": "add Bonsai box",
+      "object": {
+        "uuid": "outdoor-table-v2-box",
+        "name": "Bonsai box",
+        "description": "2 ft x 2 ft x 2 ft, on the ground",
+        "type": "box",
+        "dimensions": [
+          24,
+          24,
+          24
+        ],
+        "position": [
+          -150,
+          0,
+          12
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "box",
+        "tags": [
+          "container"
+        ]
+      }
+    },
+    {
+      "seq": 21,
+      "op": "add",
+      "time": "2026-11-01T10:21:00.000Z",
+      "author": "jimmy",
+      "note": "add Trunk",
+      "object": {
+        "uuid": "outdoor-table-v2-b-trunk",
+        "name": "Trunk",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          1.2,
+          26
+        ],
+        "position": [
+          -146.64,
+          0,
+          36.56
+        ],
+        "rotation_y": 15,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 22,
+      "op": "add",
+      "time": "2026-11-01T10:22:00.000Z",
+      "author": "jimmy",
+      "note": "add Main limb",
+      "object": {
+        "uuid": "outdoor-table-v2-b-limb",
+        "name": "Main limb",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.9,
+          70
+        ],
+        "position": [
+          -109.04,
+          0,
+          56.39
+        ],
+        "rotation_y": 78,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 23,
+      "op": "add",
+      "time": "2026-11-01T10:23:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 1",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-1",
+        "name": "Branch 1",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.7,
+          28
+        ],
+        "position": [
+          -62.01,
+          0,
+          69.36
+        ],
+        "rotation_y": 66,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 24,
+      "op": "add",
+      "time": "2026-11-01T10:24:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 2",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-2",
+        "name": "Branch 2",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.7,
+          28
+        ],
+        "position": [
+          -61.11,
+          0,
+          66.58
+        ],
+        "rotation_y": 78,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 25,
+      "op": "add",
+      "time": "2026-11-01T10:25:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 3",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-3",
+        "name": "Branch 3",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.7,
+          28
+        ],
+        "position": [
+          -60.8,
+          0,
+          63.67
+        ],
+        "rotation_y": 90,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 26,
+      "op": "add",
+      "time": "2026-11-01T10:26:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 1.1",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-1-1",
+        "name": "Branch 1.1",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.48999999999999994,
+          20.16
+        ],
+        "position": [
+          -41.73,
+          0,
+          81.8
+        ],
+        "rotation_y": 48,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 27,
+      "op": "add",
+      "time": "2026-11-01T10:27:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 1.2",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-1-2",
+        "name": "Branch 1.2",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.48999999999999994,
+          20.16
+        ],
+        "position": [
+          -39.2,
+          0,
+          76.11
+        ],
+        "rotation_y": 84,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 28,
+      "op": "add",
+      "time": "2026-11-01T10:28:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 1.1.1",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-1-1-1",
+        "name": "Branch 1.1.1",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.3429999999999999,
+          14.5152
+        ],
+        "position": [
+          -30.61,
+          0,
+          94.83
+        ],
+        "rotation_y": 30,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 29,
+      "op": "add",
+      "time": "2026-11-01T10:29:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 1.1.2",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-1-1-2",
+        "name": "Branch 1.1.2",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.3429999999999999,
+          14.5152
+        ],
+        "position": [
+          -27.61,
+          0,
+          91.5
+        ],
+        "rotation_y": 66,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 30,
+      "op": "add",
+      "time": "2026-11-01T10:30:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 1.2.1",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-1-2-1",
+        "name": "Branch 1.2.1",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.3429999999999999,
+          14.5152
+        ],
+        "position": [
+          -22.54,
+          0,
+          80.12
+        ],
+        "rotation_y": 66,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 31,
+      "op": "add",
+      "time": "2026-11-01T10:31:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 1.2.2",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-1-2-2",
+        "name": "Branch 1.2.2",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.3429999999999999,
+          14.5152
+        ],
+        "position": [
+          -22.07,
+          0,
+          75.65
+        ],
+        "rotation_y": 102,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 32,
+      "op": "add",
+      "time": "2026-11-01T10:32:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 2.1",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-2-1",
+        "name": "Branch 2.1",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.48999999999999994,
+          20.16
+        ],
+        "position": [
+          -38.68,
+          0,
+          74.53
+        ],
+        "rotation_y": 60,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 33,
+      "op": "add",
+      "time": "2026-11-01T10:33:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 2.2",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-2-2",
+        "name": "Branch 2.2",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.48999999999999994,
+          20.16
+        ],
+        "position": [
+          -37.39,
+          0,
+          68.44
+        ],
+        "rotation_y": 96,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 34,
+      "op": "add",
+      "time": "2026-11-01T10:34:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 2.1.1",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-2-1-1",
+        "name": "Branch 2.1.1",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.3429999999999999,
+          14.5152
+        ],
+        "position": [
+          -25.1,
+          0,
+          84.96
+        ],
+        "rotation_y": 42,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 35,
+      "op": "add",
+      "time": "2026-11-01T10:35:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 2.1.2",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-2-1-2",
+        "name": "Branch 2.1.2",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.3429999999999999,
+          14.5152
+        ],
+        "position": [
+          -22.85,
+          0,
+          81.08
+        ],
+        "rotation_y": 78,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 36,
+      "op": "add",
+      "time": "2026-11-01T10:36:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 2.2.1",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-2-2-1",
+        "name": "Branch 2.2.1",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.3429999999999999,
+          14.5152
+        ],
+        "position": [
+          -20.26,
+          0,
+          68.89
+        ],
+        "rotation_y": 78,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 37,
+      "op": "add",
+      "time": "2026-11-01T10:37:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 2.2.2",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-2-2-2",
+        "name": "Branch 2.2.2",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.3429999999999999,
+          14.5152
+        ],
+        "position": [
+          -20.73,
+          0,
+          64.43
+        ],
+        "rotation_y": 114,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 38,
+      "op": "add",
+      "time": "2026-11-01T10:38:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 3.1",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-3-1",
+        "name": "Branch 3.1",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.48999999999999994,
+          20.16
+        ],
+        "position": [
+          -37.21,
+          0,
+          66.78
+        ],
+        "rotation_y": 72,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 39,
+      "op": "add",
+      "time": "2026-11-01T10:39:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 3.2",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-3-2",
+        "name": "Branch 3.2",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.48999999999999994,
+          20.16
+        ],
+        "position": [
+          -37.21,
+          0,
+          60.55
+        ],
+        "rotation_y": 108,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 40,
+      "op": "add",
+      "time": "2026-11-01T10:40:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 3.1.1",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-3-1-1",
+        "name": "Branch 3.1.1",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.3429999999999999,
+          14.5152
+        ],
+        "position": [
+          -21.76,
+          0,
+          74.16
+        ],
+        "rotation_y": 54,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 41,
+      "op": "add",
+      "time": "2026-11-01T10:41:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 3.1.2",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-3-1-2",
+        "name": "Branch 3.1.2",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.3429999999999999,
+          14.5152
+        ],
+        "position": [
+          -20.37,
+          0,
+          69.9
+        ],
+        "rotation_y": 90,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 42,
+      "op": "add",
+      "time": "2026-11-01T10:42:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 3.2.1",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-3-2-1",
+        "name": "Branch 3.2.1",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.3429999999999999,
+          14.5152
+        ],
+        "position": [
+          -20.37,
+          0,
+          57.44
+        ],
+        "rotation_y": 90,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 43,
+      "op": "add",
+      "time": "2026-11-01T10:43:00.000Z",
+      "author": "jimmy",
+      "note": "add Branch 3.2.2",
+      "object": {
+        "uuid": "outdoor-table-v2-b-fork-3-2-2",
+        "name": "Branch 3.2.2",
+        "description": "",
+        "type": "cylinder",
+        "dimensions": [
+          0.3429999999999999,
+          14.5152
+        ],
+        "position": [
+          -21.76,
+          0,
+          53.17
+        ],
+        "rotation_y": 126,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "trunk",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 44,
+      "op": "add",
+      "time": "2026-11-01T10:44:00.000Z",
+      "author": "jimmy",
+      "note": "add Leaf pad 1",
+      "object": {
+        "uuid": "outdoor-table-v2-b-leaf-1",
+        "name": "Leaf pad 1",
+        "description": "",
+        "type": "sphere",
+        "dimensions": [
+          2.6
+        ],
+        "position": [
+          -26.98,
+          0,
+          101.12
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "leaf",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 45,
+      "op": "add",
+      "time": "2026-11-01T10:45:00.000Z",
+      "author": "jimmy",
+      "note": "add Leaf pad 2",
+      "object": {
+        "uuid": "outdoor-table-v2-b-leaf-2",
+        "name": "Leaf pad 2",
+        "description": "",
+        "type": "sphere",
+        "dimensions": [
+          2.6
+        ],
+        "position": [
+          -15.91,
+          0,
+          83.07
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "leaf",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 46,
+      "op": "add",
+      "time": "2026-11-01T10:46:00.000Z",
+      "author": "jimmy",
+      "note": "add Leaf pad 3",
+      "object": {
+        "uuid": "outdoor-table-v2-b-leaf-3",
+        "name": "Leaf pad 3",
+        "description": "",
+        "type": "sphere",
+        "dimensions": [
+          2.6
+        ],
+        "position": [
+          -15.76,
+          0,
+          82.59
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "leaf",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 47,
+      "op": "add",
+      "time": "2026-11-01T10:47:00.000Z",
+      "author": "jimmy",
+      "note": "add Leaf pad 4",
+      "object": {
+        "uuid": "outdoor-table-v2-b-leaf-4",
+        "name": "Leaf pad 4",
+        "description": "",
+        "type": "sphere",
+        "dimensions": [
+          2.6
+        ],
+        "position": [
+          -14.1,
+          0,
+          61.48
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "leaf",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 48,
+      "op": "add",
+      "time": "2026-11-01T10:48:00.000Z",
+      "author": "jimmy",
+      "note": "add Leaf pad 5",
+      "object": {
+        "uuid": "outdoor-table-v2-b-leaf-5",
+        "name": "Leaf pad 5",
+        "description": "",
+        "type": "sphere",
+        "dimensions": [
+          2.6
+        ],
+        "position": [
+          -13.11,
+          0,
+          69.9
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "leaf",
+        "tags": [
+          "plant"
+        ]
+      }
+    },
+    {
+      "seq": 49,
+      "op": "add",
+      "time": "2026-11-01T10:49:00.000Z",
+      "author": "jimmy",
+      "note": "add Leaf pad 6",
+      "object": {
+        "uuid": "outdoor-table-v2-b-leaf-6",
+        "name": "Leaf pad 6",
+        "description": "",
+        "type": "sphere",
+        "dimensions": [
+          2.6
+        ],
+        "position": [
+          -15.88,
+          0,
+          48.91
+        ],
+        "rotation_y": 0,
+        "parent": "outdoor-table-v2-bonsai",
+        "material": "leaf",
+        "tags": [
+          "plant"
+        ]
+      }
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 # Make 3D — AI Brief
 
-**Updated:** 2026-11-01
-**Status:** MVP built (v0.1–v0.6, viewer outlines still open). Three input scenes: garden planter, outdoor table with parasol, kitchen. Library button. Cloud: `m3d_scenes` live in the Architecture project; sign-in by email code. Not yet: GitHub Pages publish, real iPad check, a real sign-in test by Jimmy, Quick Detail details tagged `make 3-D`.
+**Updated:** 2026-11-02
+**Status:** MVP built (v0.1–v0.6, viewer outlines still open). Four input scenes: garden planter, outdoor table with parasol (V1), outdoor table V2 (round 4, with object tags), kitchen. Library button. Cloud: `m3d_scenes` live in the Architecture project; sign-in by email code. Not yet: GitHub Pages publish, real iPad check, a real sign-in test by Jimmy, Quick Detail details tagged `make 3-D`.
 
 ## Goal
 
@@ -31,6 +31,9 @@ Four engines: input, geometry, rules, viewer. The viewer only reads; the engine 
 - Only input scenes for now. LLM and drawn scenes come later, linked in as JSON.
 
 ## Open
+
+- Object tags: a fixed set in `js/core/schema.js`. V2 is tagged; the other scenes are not yet.
+- Bonsai branches are in the vertical plane only (rotation about Y). Sideways branches need rotation about X and Z.
 
 - Confirm convo v0.3 Q1–Q6. Confirm rotation axis. Confirm history-as-truth is in place (done).
 - Cloud copy needs the SQL OK.

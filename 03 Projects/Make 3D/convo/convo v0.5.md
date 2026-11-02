@@ -41,23 +41,21 @@ Answer inline under each number. "Defaults" next to a number means accept my pro
 17. **Name and id.** Proposed: a new scene "Outdoor table with parasol V2" (id `outdoor-table-v2`), listed beside V1 in the Library. V1 is kept unchanged. Confirm, or give a different name.
 18. **Description.** Proposed: a short description that says the parasol is red, sits at one end, has a base with sandbags, and the bonsai is on the ground 8 ft away. OK?
 
-## Answers
+## Answers (given in chat, 2026-11-02)
 
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
-11.
-12.
-13.
-14.
-15.
-16.
-17.
-18.
+Jimmy answered the eight items from the chat summary, in order. Built as follows:
+
+1. **Parasol end.** Far end, away from the bonsai (x = +36 in, pole at the end, inside the end edge).
+2. **Legs and top.** Legs are 2 in x 2 in angle, painted yellow (kept yellow). Top is warm white oak veneer (`#e6d3b3`), not teak.
+3. **Connections.** Rectangular frame under the top (both long rails and both short end rails). Centre beam along the length. Low bar about 6 in off the ground on the back side only; no low bar at the front.
+4. **Parasol.** Folding: the three canopies are one large canopy (radius 70 in) that opens as one. Canopy red is faded: `#c4544a`.
+5. **Base and sandbags.** Right as proposed: 24 in square metal base, pole from the ground to the canopy, two sandbags inside the base.
+6. **Bonsai distance.** Loose is fine. Box about 8 ft from the table end (box centre 150 in from the table centre), on the ground. Best judgment on the exact spot.
+7. **Tree.** One trunk, one main limb, then forks three times, with 3, 2 and 2 branches at each step. Twelve tips. Sparse leaves: six small pads.
+8. **Library.** Four separate entries: garden planter, outdoor table, outdoor table V2, kitchen. V1 kept unchanged.
+
+Also asked for: **object tags** that show a part's purpose. Built as a fixed set (`surface`, `frame`, `stand`, `shade`, `ballast`, `plant`, `container`), shown as chips in the objects panel and as a status line at the bottom, next to Check model.
+
+Notes for Jimmy:
+- The bonsai branches lean in the vertical plane only (rotation about Y is the only rotation the engine has). Branches can't point sideways toward or away from the viewer until rotation about X and Z exists (todo, future).
+- Tags are on the V2 scene only. The planter, V1 table and kitchen have none yet.

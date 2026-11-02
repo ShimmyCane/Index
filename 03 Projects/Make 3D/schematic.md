@@ -120,6 +120,8 @@ The LLM is optional. It may write operations, but nothing needs it to render, in
 | `sphere` | `[radius]` | origin at centre |
 | `cone` | `[radius, height]` | |
 
+**Tags** *(convo v0.5)*: each object may carry `tags`, a list of purposes from a fixed set in `js/core/schema.js` (`surface`, `frame`, `stand`, `shade`, `ballast`, `plant`, `container`). Tags only describe the part: they don't change geometry or rules. The objects panel shows them as chips, and the bottom bar shows the selected part's name, tags and description next to Check model. Unknown tags are kept but not styled.
+
 Later: `extrusion` (profile + path), `boolean` (union / subtract / intersect, needs a kernel), `mesh` (imported STL/OBJ/glTF), architectural components (wall, door, window).
 
 ### 4.3 `history.json`, the source of truth *(Q10)*
@@ -208,7 +210,7 @@ Axis conversion happens in one place (`viewer/axes.js`): model Z-up → Three.js
 - **Reject flow** *(round 2, Q15)*: the editor stays open with the reasons listed. Delete one or more of the offending objects and re-apply, or preview the result without saving.
 - **Files** *(Q17)*: open or save a bundle (`model.json` + `history.json` + `world.json`, or one combined `.make3d.json`). Sample models load from `models/`. The last session autosaves to localStorage.
 - **Cloud** *(round 2, Q17, v0.4)*: `m3d_scenes` in the architecture database (one row per scene: bundle and replayed model), registered in `table_index`, owner only (RLS). Built 2026-11-02.
-- **Library** *(round 3)*: lower-right button. Lists input scenes (built in, and saved in the cloud). Lists Quick Detail details tagged `make 3-D` as read-only future references. Scenes from an LLM or from drawings come later, linked in as JSON input.
+- **Library** *(round 3; four built-in scenes from v0.5: garden planter, outdoor table, outdoor table V2, kitchen)*: lower-right button. Lists input scenes (built in, and saved in the cloud). Lists Quick Detail details tagged `make 3-D` as read-only future references. Scenes from an LLM or from drawings come later, linked in as JSON input.
 - Drawing and component blocks are future (round 2, Q16 and Q14).
 
 ## 8. Page layout (draft)

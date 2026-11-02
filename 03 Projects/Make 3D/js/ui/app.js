@@ -181,15 +181,44 @@
       k.className = 'kind';
       k.textContent = o.type;
       b.appendChild(k);
+      for (const t of o.tags || []) {
+        const tg = document.createElement('span');
+        tg.className = `tag tag-${t}`;
+        tg.textContent = (M.TAGS && M.TAGS[t]) || t;
+        b.appendChild(tg);
+      }
       b.addEventListener('click', () => select(o.uuid));
       li.appendChild(b);
       ul.appendChild(li);
     }
   }
 
+  // Bottom bar, next to Check model: the selected part's purpose and description.
+  function renderStatusLine(o) {
+    const el = $('selInfo');
+    el.innerHTML = '';
+    if (!o) { el.textContent = 'Tap an object to see what it is for.'; return; }
+    const head = document.createElement('strong');
+    head.textContent = o.name;
+    el.appendChild(head);
+    for (const t of o.tags || []) {
+      const tg = document.createElement('span');
+      tg.className = `tag tag-${t}`;
+      tg.textContent = (M.TAGS && M.TAGS[t]) || t;
+      el.appendChild(tg);
+    }
+    if (o.description) {
+      const d = document.createElement('span');
+      d.className = 'selinfo-desc';
+      d.textContent = o.description;
+      el.appendChild(d);
+    }
+  }
+
   function renderSelection(model) {
     const o = st.selected && findObj(model, st.selected);
     $('selCard').hidden = !o;
+    renderStatusLine(o);
     if (!o) return;
     const facts = [
       ['Name', o.name],
@@ -198,6 +227,7 @@
       ['Size', o.dimensions && o.dimensions.length ? o.dimensions.map((d) => len(d)).join(' × ') : '—'],
       ['Centre', o.position ? o.position.map((p) => len(p)).join(', ') : '—'],
       ['Rotation Y', `${o.rotation_y || 0}°`],
+      ['Purpose', (o.tags || []).map((t) => (M.TAGS && M.TAGS[t]) || t).join(', ') || '—'],
       ['Material', o.material || '—'],
       ['Parent', o.parent ? (findObj(model, o.parent) || {}).name || 'missing' : '—'],
       ['uuid', o.uuid],
