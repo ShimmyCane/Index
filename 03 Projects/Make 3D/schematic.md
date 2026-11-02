@@ -411,3 +411,38 @@ Boxes, cylinders, spheres and cones give hard, extruded shapes. For things that 
 **Test scene:** `tools/hawk.js` (V01 to V06), `tests/test_mesh.js`. Render stills and frames with `node tools/render_models.js <dir> hawk-v06@19.4 --follow=hawk --zoom=62`.
 
 **Physical flight (hawk V07).** A path's `profile` can come from energy instead of a chosen speed: along the path, `d(v^2/2)/ds = -g sin(slope) - k v^2 + thrust`, with `k` the drag per inch (wings spread, tucked, or flared open as an air brake), `thrust` only while flapping, and rising air (a thermal, or wind pushed up a bluff) holding the soaring speed. The flap thrust is solved by bisection so the speed at the end of the climb equals the soaring speed, so the lap closes with no jump. `tools/hawk_flight.js` does this and writes the constants into the motion file under `physics`; `tests/test_mesh.js` checks the energy balance back from the profile. The scaled world (about a tenth of real size) uses g = 150 in/s^2, so speeds are scaled with it.
+
+## 16. Linked views (the toolset for moving between 3-D views)
+
+Purpose: a model can hold a link to another model, so a tap on one part opens that model (for example a planet opens its own view, and the planet view links back to the whole system). A tool set, not a one-off: any scene can use it.
+
+**Parts of the toolset**
+- `js/core/linked_views.js` (pure data, no DOM, Node-testable): `parseLinkTag`, `linkOf`, `linksIn`, `transitionFor`, `DURATION_MS`.
+- `js/ui/app.js` (the page): the upper-right button (`#linkBtn`), `goLink()` (the transition and the load), and full screen (`#fullBtn`, `toggleFull()`).
+- `css/app.css`: the fade and zoom states (`.stage.leaving`, `.stage.entering`, `data-transition`), the full-screen fill (`.fake-full`), and reduced motion.
+- `tests/test_linked_views.js`: the tag format, the transition choice, and that every link in the solar scenes points at a scene that exists.
+
+**Link format (a tag on the object, so the model format does not change)**
+- `link:<model_id>` opens the model with a fade.
+- `link:<model_id>:zoom` zooms into the object, then opens the model.
+- `link:<model_id>:fade` is the same as the plain form, written out.
+- Anything else is not a link. A bad link is ignored, not an error.
+
+**Behaviour**
+1. Tap a part. If it has a link, its name appears on the button in the upper right, as "<name> →". Tapping the part does not jump, so an accidental tap is harmless.
+2. Tap the button. The canvas leaves: for a zoom, it scales up to 1.8× and fades (620 ms); for a fade, it fades (380 ms). The target model is loaded (no confirm, since the page is only moving between linked views). The canvas arrives: a zoom starts small and grows; a fade comes up from nothing. Then the page's address changes to `?model=<target>`, so the link can be shared.
+3. Taps during a transition are ignored.
+4. Reduced motion (the system setting) always uses the fade, with no transform.
+5. Full screen: the stage uses the Fullscreen API. Where the browser refuses it (some iPad Safari versions), the stage fills the window with a fixed layer (`.fake-full`). The button says "Full screen" or "Exit full screen" and follows the real state.
+
+**Rules**
+- A link target must be a scene in the library (`SAMPLES`). The test checks this for the solar scenes; a link to a missing scene does nothing (the button stays hidden).
+- Each planet view holds one way back (`link:solar-system-v05:fade`), in a pink marker. The solar system holds one link per planet (`link:planet-<name>:zoom`) on the planet's ball, not on its atmosphere (haze lets taps through).
+- Links are per model, so a view can be shared without the other views in it.
+
+**Use in another scene.** Tag a part with `link:<model_id>` (or with `:zoom`), add a way back in the target, and run `node tests/test_linked_views.js`. Nothing else needs changing.
+
+**Limits (not built yet)**
+- No return history: "back" is a link in the scene, not a browser back button.
+- The link button shows for the selected part only; no hover labels.
+- The transition is a screen-level fade or scale, not a camera fly-through.

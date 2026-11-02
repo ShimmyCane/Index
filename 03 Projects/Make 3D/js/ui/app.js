@@ -153,6 +153,7 @@
     refreshSelectors();
     renderList(model);
     renderSelection(model);
+    renderLink(model);
     renderLast();
     renderReject();
     renderHistory();
@@ -340,6 +341,64 @@
   function select(uuid) {
     st.selected = uuid;
     render();
+  }
+
+  // ---------- linked views (schematic §16): a tagged part opens another model, with a fade or a zoom
+  let hopping = false;
+  function selectedLink(model) {
+    if (!st.selected) return null;
+    const o = model.objects.find((x) => x.uuid === st.selected);
+    const l = o && M.linkOf(o);
+    return l && SAMPLES[l.target] ? { ...l, name: o.name } : null;
+  }
+  function renderLink(model) {
+    const l = selectedLink(model);
+    $('linkBtn').hidden = !l;
+    if (l) $('linkBtn').textContent = `${l.name} →`;
+  }
+  function goLink() {
+    if (hopping) return;
+    const l = selectedLink(shown());
+    if (!l) return;
+    hopping = true;
+    const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const kind = M.transitionFor(l, reduce);
+    const ms = M.DURATION_MS[kind];
+    const stage = document.querySelector('.stage');
+    stage.dataset.transition = kind;
+    stage.classList.add('leaving');
+    setTimeout(() => {
+      setModelUrl(l.target);
+      setState(sampleBundle(l.target));
+      setStatus(`Opened ${l.name}`, '');
+      stage.classList.remove('leaving');
+      stage.classList.add('entering');
+      void stage.offsetWidth;           // paint the start frame, then let the new view arrive
+      stage.classList.remove('entering');
+      setTimeout(() => { hopping = false; }, ms);
+    }, ms);
+  }
+
+  // ---------- full screen: the Fullscreen API, or a fixed fill where the browser refuses it
+  function isFull(el) { return document.fullscreenElement === el || el.classList.contains('fake-full'); }
+  function syncFull() {
+    const el = document.querySelector('.stage');
+    const on = isFull(el);
+    $('fullBtn').textContent = on ? 'Exit full screen' : 'Full screen';
+    $('fullBtn').setAttribute('aria-pressed', String(on));
+    if (st.viewer) st.viewer.resize();
+  }
+  function toggleFull() {
+    const el = document.querySelector('.stage');
+    if (isFull(el)) {
+      el.classList.remove('fake-full');
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    } else if (el.requestFullscreen) {
+      el.requestFullscreen().catch(() => { el.classList.add('fake-full'); syncFull(); });
+    } else {
+      el.classList.add('fake-full');
+    }
+    syncFull();
   }
 
   // ---------- add form
@@ -768,6 +827,9 @@
       $('gearPanel').hidden = true;
     });
     $('resetView').addEventListener('click', () => { st.fit = true; render(); });
+    $('linkBtn').addEventListener('click', goLink);
+    $('fullBtn').addEventListener('click', toggleFull);
+    document.addEventListener('fullscreenchange', syncFull);
 
     $('animPlay').addEventListener('click', () => {
       if (st.viewer.animState().playing) st.viewer.pause(); else st.viewer.play(Infinity);

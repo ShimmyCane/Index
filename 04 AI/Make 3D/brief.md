@@ -263,3 +263,10 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 - **Numbers:** path about 3,430 in, stoop about 240 in/s at the bottom (about 1.9 times soaring speed), 62 wing beats a lap at 2.4 per second, all in the climb; thermal 2.5 turns, 120 in per turn.
 - **Checks:** `tests/test_mesh.js` 26 groups (V06 and V07 rigs; speed constant in rising air; stoop energy balance within 8%; flare sheds speed; arrival at the bluff at soaring speed; flaps only when climbing; lowest point 5.3 in; nose turns under 10 rad/s). Other suites, smoke and anim_check pass.
 - **Open for Jimmy:** (1) Is a tenth-scale world right, or should the hawk be scaled down inside a bigger arena? (2) The air is drawn as ribbons, not simulated. (3) Talons skim 4 in above the mouse. (4) ~~Should the mouse react?~~ Answered: Jimmy said the mouse bolts for a hole, and the hawk size is good. Done: burrow 52 in west of the mouse, bolt at about 160 in/s as the hawk flares in, hides underground, walks home before the wrap (`mouseRun` in `tools/hawk_flight.js`).
+
+## Solar System (2026-11-02)
+
+- Subject: Solar System, not to scale (sun, nine planets, orbit lines, asteroid belt, gas giants with bands and rings, Pluto, moons in planet views). Five increments (`tools/solar_system.js`, `solar-system-v01` to `v05`) and one view per planet (`planet-<name>`). Research note: `04 AI/Make 3D/research/solar-system.md`. Mode: research (NASA fact sheet values and a Pluto/Charon page; the live NASA table was not reachable in search, so re-check before public use).
+- Linked views toolset: `js/core/linked_views.js` with the page button, zoom/fade transitions, and full screen. Schematic §16. Tests: `tests/test_linked_views.js`.
+- Review set: Increment Viewer `?set=solar_system`, renders in `renders/solar-system/`.
+- Open: planet views are V01 only; no retrograde spin; orbits are circles; gas-giant bands look stepped.
