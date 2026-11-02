@@ -59,3 +59,13 @@ E. **Two-finger pinch to zoom in and out on the 3-D canvas.**
 - **Length:** 18 seconds a lap (18 strides of about 22 in). The steps are timed to the walk, the feet turn back at the ankle to stay flat, and the robot dips while its legs are spread, so a foot stays on the ground.
 - **Autoplay:** plays the loop twice, then pauses at the start pose. ▶ then plays on until paused.
 - **Pinch:** two fingers apart zoom in, together zoom out. One finger still orbits, a tap still selects, and the page itself no longer zooms when you pinch the canvas.
+
+## Later in round 7 (Jimmy)
+
+F. **"I don't see the robot on the website."** The live site is published from `main`, and this work is still on the pull request branch, so it appears once the pull request is merged. In the Library it was also last of 42 scenes.
+
+G. **Projects with lots of increments should fold up**, so the list is easy to sort and scroll.
+
+H. **For now, sort by latest created**, so a project jumps to the top when one of its increments changes.
+
+Built: the Library shows one row per project, most recently changed first. The row opens the newest version; a count button (for example "21 ▾") unfolds the older versions, newest first. The ⚙️ Sample list is grouped the same way. Dates live in `models/scene_dates.json`: a new scene takes its dates from git, and the build sets "updated" to now whenever a scene's history or motion changes.

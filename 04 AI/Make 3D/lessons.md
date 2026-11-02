@@ -66,3 +66,5 @@ Appended over time. Promote anything reusable to `04 AI/lessons_pool.md`.
 - **Groups need scene nodes for motion.** With every part loose in the scene, nothing can carry the banana with the hand. Nodes rest at identity, so still scenes render exactly as before.
 - **Pinch on iPad: use touch events and block Safari's gesture events.** Pointer events can be cancelled when Safari takes the pinch for page zoom. Check headless with CDP `Input.dispatchTouchEvent` and two touch points.
 - **A uniform Catmull-Rom curve bulges past sharp corners.** It was fine for an organic path; don't expect the curve's length to equal the polygon's.
+- **"Not on the website" can mean "not merged".** GitHub Pages serves `main`; work on a pull request branch isn't live until it merges. Say so up front.
+- **Sort by a stored date, not by build time.** Keep each scene's created and updated dates plus a content hash in a file the build maintains, so rebuilding changes nothing and only a real change moves a project to the top. Break ties by build order (later scenes are newer), not by name ("V16" sorts above "V2.5").

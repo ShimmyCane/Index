@@ -83,11 +83,30 @@ const url = 'file://' + path.join(__dirname, '..', 'index.html');
 
   // Library: built-in scenes, sign-in box (offline here), Quick Detail references note
   await page.click('#libBtn');
-  console.log('library scenes listed:', await page.locator('#builtinList li').count(), '| sign-in box visible:', await page.isVisible('#signInBox'));
-  if (shotDir) await page.screenshot({ path: path.join(shotDir, '6-library.png') });
-  for (const [i, name] of [[1, 'outdoor table'], [2, 'outdoor table V2'], [3, 'kitchen']]) {
+  console.log('library projects listed:', await page.locator('#builtinList > li.proj').count(),
+    '| scenes:', await page.evaluate(() => Object.keys(window.M3D_SAMPLES).length),
+    '| sign-in box visible:', await page.isVisible('#signInBox'));
+  console.log('library order:', await page.$$eval('#builtinList > li.proj .proj-open', (b) => b.map((x) => x.firstChild.textContent).join(' · ')));
+  // Open a scene from the library: the project's newest version, or an older one after unfolding.
+  const openFromLibrary = async (project, version) => {
     if (await page.isHidden('#libPanel')) await page.click('#libBtn');
-    await page.click(`#builtinList li >> nth=${i} >> button`);
+    const ok = await page.evaluate(([project, version]) => {
+      const li = [...document.querySelectorAll('#builtinList > li.proj')].find((l) => l.querySelector('.proj-open').firstChild.textContent === project);
+      if (!li) return false;
+      if (!version) { li.querySelector('.proj-open').click(); return true; }
+      const more = li.querySelector('.proj-more');
+      if (more && more.getAttribute('aria-expanded') !== 'true') more.click();
+      const li2 = [...document.querySelectorAll('#builtinList > li.proj')].find((l) => l.querySelector('.proj-open').firstChild.textContent === project);
+      const b = [...li2.querySelectorAll('.versions button')].find((x) => x.firstChild.textContent === version);
+      if (!b) return false;
+      b.click(); return true;
+    }, [project, version]);
+    if (!ok) throw new Error(`library: ${project} ${version || ''} not found`);
+  };
+  if (shotDir) await page.screenshot({ path: path.join(shotDir, '6-library.png') });
+  for (const [name, project, version] of [['outdoor table', 'Outdoor table with parasol', 'V1'],
+    ['outdoor table V2', 'Outdoor table with parasol'], ['kitchen', 'Kitchen']]) {
+    await openFromLibrary(project, version);
     await page.waitForTimeout(400);
     console.log(`opened ${name}: ${await page.textContent('#modelTitle')} with ${await page.locator('#objectList li').count()} objects`);
     if (shotDir) await page.screenshot({ path: path.join(shotDir, `7-${name.replace(/ /g, '-')}.png`) });
@@ -100,8 +119,7 @@ const url = 'file://' + path.join(__dirname, '..', 'index.html');
     }
   }
   // back to the planter for the rest of the run
-  if (await page.isHidden('#libPanel')) await page.click('#libBtn');
-  await page.click('#builtinList li >> nth=0 >> button');
+  await openFromLibrary('Garden planter');
 
   console.log('console errors:', errors.length ? errors : 'none');
   await browser.close();

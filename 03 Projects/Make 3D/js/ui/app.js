@@ -531,20 +531,80 @@
     $('libPanel').hidden = true; $('libBtn').setAttribute('aria-expanded', 'false');
   }
 
+  // Built-in scenes grouped by project, the project changed most recently first. Inside a project the
+  // newest version is first; older versions fold away under a "versions" button.
+  function sampleProjects() {
+    const groups = new Map();
+    const order = Object.keys(SAMPLES);   // build order: later scenes are newer
+    for (const id of order) {
+      const b = SAMPLES[id];
+      const name = b.history.header.name || id;
+      const l = b.listing || {};
+      const project = l.project || name.replace(/\s+V\d+(\.\d+)?$/i, '').trim();
+      if (!groups.has(project)) groups.set(project, { project, updated: '', versions: [] });
+      const g = groups.get(project);
+      const updated = l.updated || l.created || '';
+      g.versions.push({ id, bundle: b, name, updated, n: order.indexOf(id) });
+      if (updated > g.updated) g.updated = updated;
+    }
+    const list = [...groups.values()];
+    for (const g of list) g.versions.sort((a, b) => (b.updated > a.updated ? 1 : b.updated < a.updated ? -1 : b.n - a.n));
+    return list.sort((a, b) => (b.updated > a.updated ? 1 : b.updated < a.updated ? -1 : a.project.localeCompare(b.project)));
+  }
+  const versionLabel = (v, project) => (v.name.startsWith(project) ? v.name.slice(project.length).trim() : v.name) || 'V1';
+  const partsOf = (b) => `${b.model ? b.model.objects.length : b.history.operations.length} parts`;
+  const openProjects = new Set();   // projects whose older versions are unfolded (this visit only)
+
   function renderLibrary() {
     const bl = $('builtinList');
     bl.innerHTML = '';
-    Object.keys(SAMPLES).forEach((id) => {
-      const b = SAMPLES[id];
+    for (const g of sampleProjects()) {
+      const latest = g.versions[0];
       const li = document.createElement('li');
+      li.className = 'proj';
+      const row = document.createElement('div');
+      row.className = 'proj-row';
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.textContent = b.history.header.name || id;
-      const k = document.createElement('span'); k.className = 'kind'; k.textContent = `${b.model ? b.model.objects.length : b.history.operations.length} parts`;
+      btn.className = 'proj-open';
+      btn.textContent = g.project;
+      const k = document.createElement('span'); k.className = 'kind';
+      k.textContent = g.versions.length > 1 ? `${versionLabel(latest, g.project)} · ${partsOf(latest.bundle)}` : partsOf(latest.bundle);
       btn.appendChild(k);
-      btn.addEventListener('click', () => openScene(b, b.history.header.name || id));
-      li.appendChild(btn); bl.appendChild(li);
-    });
+      if (latest.bundle.motion) { const m = document.createElement('span'); m.className = 'tag'; m.textContent = 'moves'; btn.appendChild(m); }
+      btn.addEventListener('click', () => openScene(latest.bundle, latest.name));
+      row.appendChild(btn);
+      li.appendChild(row);
+      if (g.versions.length > 1) {
+        const open = openProjects.has(g.project);
+        const more = document.createElement('button');
+        more.type = 'button';
+        more.className = 'proj-more';
+        more.setAttribute('aria-expanded', String(open));
+        more.setAttribute('aria-label', `${g.versions.length} versions of ${g.project}`);
+        more.innerHTML = `${g.versions.length} <span aria-hidden="true">${open ? '▴' : '▾'}</span>`;
+        more.addEventListener('click', () => {
+          if (openProjects.has(g.project)) openProjects.delete(g.project); else openProjects.add(g.project);
+          renderLibrary();
+        });
+        row.appendChild(more);
+        const ul = document.createElement('ul');
+        ul.className = 'objects versions';
+        ul.hidden = !open;
+        for (const v of g.versions) {
+          const vli = document.createElement('li');
+          const vb = document.createElement('button');
+          vb.type = 'button';
+          vb.textContent = versionLabel(v, g.project);
+          const vk = document.createElement('span'); vk.className = 'kind'; vk.textContent = partsOf(v.bundle);
+          vb.appendChild(vk);
+          vb.addEventListener('click', () => openScene(v.bundle, v.name));
+          vli.appendChild(vb); ul.appendChild(vli);
+        }
+        li.appendChild(ul);
+      }
+      bl.appendChild(li);
+    }
 
     const signedIn = !!st.cloudSession;
     $('signInBox').hidden = signedIn;
@@ -753,11 +813,15 @@
   function fillSamples() {
     const sel = $('sampleSel');
     sel.innerHTML = '';
-    Object.keys(SAMPLES).forEach((id) => {
-      const o = document.createElement('option');
-      o.value = id; o.textContent = SAMPLES[id].history.header.name || id;
-      sel.appendChild(o);
-    });
+    for (const g of sampleProjects()) {
+      const parent = g.versions.length > 1 ? document.createElement('optgroup') : sel;
+      if (parent !== sel) { parent.label = g.project; sel.appendChild(parent); }
+      for (const v of g.versions) {
+        const o = document.createElement('option');
+        o.value = v.id; o.textContent = v.name;
+        parent.appendChild(o);
+      }
+    }
   }
 
   // ---------- start

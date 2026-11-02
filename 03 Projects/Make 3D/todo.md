@@ -68,6 +68,8 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - [ ] A7 `render_versions.js` at a time / frame strip for the Increment Viewer.
 - [ ] A8 Update the `make-3d` skill: motion as its own late increment (skill file is Jimmy's; edit when asked).
 - [ ] Motion editing in the page (now motion comes from the scene file only).
+- [x] Library folds each project's versions under one row, most recently changed project first (convo v0.7 G–H). Dates in `models/scene_dates.json`, kept by `tools/build_samples.js`.
+- [ ] Merge the pull request so the robot is on the live site (Jimmy, when happy).
 - [ ] Future: tap a part to start a motion, and chain motions (door opens, then the cuckoo comes out).
 
 ## Future (flat list, round 2)

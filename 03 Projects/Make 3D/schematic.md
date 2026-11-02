@@ -372,4 +372,6 @@ Source: `convo/convo v0.7.md` (answers A–E). Test scene: robot with a banana (
 - Editing pauses playback and shows the rest pose (the first frame of the loop is the rest pose).
 - Bundles (file, browser save, cloud) carry `motion` as an optional fourth part; scenes without it load as before.
 
+**Library order (round 7, G–H).** One row per project (the scene name without its "V…" label, or the scene's `project`), most recently changed first; older versions fold away, newest first. Each sample bundle carries `listing: { project, created, updated }` from `models/scene_dates.json`, which the build keeps: a new scene takes its dates from git, and a changed history or motion sets `updated` to now.
+
 **Tools.** `render_versions.js` takes a time (or a frame count for a strip) for the Increment Viewer. IFC export uses the rest pose.

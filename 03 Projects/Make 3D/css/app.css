@@ -152,6 +152,13 @@ h2 { font-size: 16px; margin: 0 0 8px; }
 #libPanel { right: 100px; }
 #libPanel h3 { font-size: 14px; margin: 14px 0 6px; }
 #libPanel .objects li button .kind { color: var(--muted); }
+/* library: one row per project; older versions fold away */
+#libPanel .proj-row { display: flex; gap: 6px; }
+#libPanel .proj-row .proj-open { flex: 1 1 auto; min-height: 52px; }
+#libPanel .proj-row .proj-more { flex: 0 0 auto; width: auto; min-width: 64px; min-height: 52px; text-align: center; background: var(--sky); }
+#libPanel .proj-row .proj-more[aria-expanded="true"] { background: var(--butter); }
+#libPanel .versions { margin: 6px 0 4px 18px; }
+#libPanel .versions[hidden] { display: none; }
 
 /* gear */
 .gear {
