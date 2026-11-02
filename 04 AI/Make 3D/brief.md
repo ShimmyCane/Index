@@ -198,3 +198,12 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 - **Ladder:** V11 compact footprint (about 300 by 250 ft, was 600 by 400), Thunder Trail lift lowered to 50 ft; V12 Pip and Thunder cars run their tracks; V13 teacups spin, Bumble boats slide, Splash boats bob; V14 Sky Wheel turns (show ride, not counted in capacity), flags wave, balloons bob; V15 plaza fountain wave, so every ride moves.
 - **Motion:** one loop of 24 s per version, autoplay twice. Path motions use the car centre (rail + 2 ft) and `M.pathAt` for the second car's start. Checks: `build_samples` motion check accepts each file, `tests/test_motion.js` passes, poses are finite.
 - **Open for Jimmy:** (1) Does the Sky Wheel count toward capacity? (2) Keep the 50 ft lift, or go back to 60 ft? (3) Cars move on a smoothed curve through the track points, so they can sit a little off the rails; a straight-segment path would fix that but look less smooth. (4) Motion uses the browser's play bar; the Increment Viewer shows renders only, not the motion.
+
+## Curves, physics speeds, shareable model link (2026-11-02)
+
+- **Curves:** the rails and cars follow a Catmull-Rom spline through the plan points (about 10 ft between samples). Rails are short straight pieces, so the curve reads smooth.
+- **Physics (feet, seconds, real time):** the chain lift pulls at 6 ft/s; past the top, energy gives v² = 6² + 2g(zTop − z) − 2·0.015·g·distance (g = 32.2 ft/s², rolling and air resistance 0.015 of g). Thunder Trail: 60 ft lift, top speed about 40 mph, lap about 18 s. Splash Falls boats: lift at 6 ft/s, drop into the pool, top about 28 mph, then a conveyor at 4 ft/s back to the start. Pip runs at a steady speed.
+- **Engine change:** `js/core/motion.js` takes an optional `profile` on a path: [[t, s], …] from [0, 0] to [1, 1], mapping loop time to distance along the path. Validated by `checkMotion`; `warpTime` is exported.
+- **Shareable link:** `index.html?model=<sample id>` loads that model (it wins over the saved copy). Loading a sample from the picker updates the address. Checked in headless Chromium.
+- **Changed in place:** V11 to V15 are rebuilt (60 ft lift, curves, physics). Git keeps the previous merged versions.
+- **Open for Jimmy:** (1) the coaster's 40 mph top speed fits the family-coaster range the traveller guides give; keep it or push the drop higher? (2) Splash boats stay level on the slope (they don't pitch); add pitch? (3) the Sky Wheel is still a show ride, not counted.
