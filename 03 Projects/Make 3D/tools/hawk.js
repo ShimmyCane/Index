@@ -11,10 +11,12 @@
 //   V03 head and feet: beak, eyes, legs and feet, each riding a joint of the body skeleton.
 //   V04 meadow: ground, grass blades and leaves (double-sided sheets), a pennant flag, a mouse.
 //   V05 finish: cream breast, eye ridges, smaller eyes set lower (V03 eyes bulged above the head).
+//   V07 physics flight: a much larger meadow with a bluff and a thermal, faster flight from gravity, drag and flap thrust (tools/hawk_flight.js).
 //   V06 motion: the loop (separate motion.json): circle, stoop, pull out, climb. Wings flap, fold and flare on bends.
 
 const M = require('../js/core/motion.js');
 const MESH = require('../js/core/mesh.js');
+const FL = require('./hawk_flight.js');
 
 const WORLD_ID = 'default-world';
 const HAWK0 = [0, 0, 66];           // the hawk's reference point at rest, and the start of the flight path
@@ -39,6 +41,16 @@ const MATERIALS = {
   ear: { color: '#f4c7c0', opacity: 1 },
 };
 
+// materials added by V07 (the earlier versions keep exactly the list they had)
+const MATERIALS7 = {
+  patch: { color: '#efdcb4', opacity: 1 },
+  rock: { color: '#cfc7bd', opacity: 1 },
+  wind: { color: '#bfe0f2', opacity: 0.4 },
+  airband: { color: '#ffe3a0', opacity: 0.32 },
+  mound: { color: '#d9c4a0', opacity: 1 },
+  hole: { color: '#4a3f36', opacity: 1 },
+};
+
 const round = (x) => Math.round(x * 100) / 100;
 const r5 = (x) => Math.round(x * 1e5) / 1e5;
 const at = (p, o = HAWK0) => [round(p[0] + o[0]), round(p[1] + o[1]), round(p[2] + o[2])];   // hawk-local -> model
@@ -46,6 +58,7 @@ const at = (p, o = HAWK0) => [round(p[0] + o[0]), round(p[1] + o[1]), round(p[2]
 // seeded random, so the meadow is the same every build
 let seed = 7;
 const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+const seeded = (n) => { let q = n; return () => { q = (q * 16807) % 2147483647; return q / 2147483647; }; };
 
 // ---- the flight path (waypoints from the planning sketch, scaled by SC)
 // 0 level start  1-6 circle round the meadow  7-9 stoop  10-11 pull out  12 skim over the mouse  13-15 climb back to 0
@@ -93,11 +106,13 @@ function skin(key, type, name, shape, extra = {}) {
 const shape = (o) => JSON.parse(JSON.stringify(o, (k, v) => (typeof v === 'number' ? round(v) : v)));
 
 function defsFor(v) {
+  const H0 = v >= 7 ? FL.flight().hawk0 : HAWK0;
+  const at = (p, o = H0) => [round(p[0] + o[0]), round(p[1] + o[1]), round(p[2] + o[2])];
   const d = [];
   const add = (k, def) => d.push([k, def]);
   const mesh = (key, type, name, sh, extra) => d.push(skin(key, type, name, shape(sh), extra));
 
-  add('hawk', { name: 'Hawk', description: 'red-tailed hawk; the group that flies the loop', type: 'group', dimensions: [], position: HAWK0 });
+  add('hawk', { name: 'Hawk', description: 'red-tailed hawk; the group that flies the loop', type: 'group', dimensions: [], position: H0 });
 
   // ---- V01 blockout: closed meshes on straight skeleton lines
   const J = (...p) => p.map((q) => at(q));
@@ -147,7 +162,9 @@ function defsFor(v) {
   }
 
   // ---- V04 meadow: ground, grass and leaves (double-sided sheets), a pennant flag, a mouse
-  if (v >= 4) {
+  let meadowParts = null;
+  if (v >= 7) meadowParts = FL.meadow7(add, mesh, seeded(11));   // its own stream, so it is the same on every call
+  if (v >= 4 && v < 7) {
     add('meadow-group', { name: 'Meadow', description: 'ground, grass, leaves, flag post and mouse', type: 'group', dimensions: [], position: [0, 0, 0] });
     add('meadow', { name: 'Meadow ground', type: 'cylinder', dimensions: [120, 1], position: [-15, 35, 0.5], material: 'meadow', parent: 'meadow-group' });
     // grass tufts: five blades each, leaning every way, two greens
@@ -199,6 +216,7 @@ function defsFor(v) {
         rings: [[0, 0.1, 0.22], [0.5, 0.2, 0.3], [1, 0.05, 0.1]] }, { description: 'the brow ridge that gives a hawk its stern look', material: 'brow', parent: 'hawk', attach: { to: 'body', joint: 4 } });
     }
   }
+  d.meadowParts = meadowParts;
   return d;
 }
 
@@ -267,20 +285,20 @@ function motionFor(v, uuid) {
   };
 }
 
-const NAMES = ['', 'blockout', 'wings', 'head and feet', 'meadow', 'finish', 'motion'];
-const HAWK = [1, 2, 3, 4, 5, 6].map((v) => ({
+const NAMES = ['', 'blockout', 'wings', 'head and feet', 'meadow', 'finish', 'motion', 'physics flight'];
+const HAWK = [1, 2, 3, 4, 5, 6, 7].map((v) => ({
   id: `hawk-v0${v}`,
   project: 'Hawk',
   header: {
     model_id: `hawk-v0${v}`,
     name: `Hawk V0${v}`,
     description: `Red-tailed hawk from closed skeleton meshes, V0${v}: ${NAMES[v]}. About 22.5 in long, 50 in wingspan (estimates).`,
-    units: 'in', up: 'z', world: WORLD_ID,
+    units: 'in', up: 'z', world: v >= 7 ? 'hawk-world' : WORLD_ID,
     ...(v >= 4 ? { view: { azimuth_deg: 20 } } : {}),
-    materials: MATERIALS,
+    materials: v >= 7 ? { ...MATERIALS, ...MATERIALS7 } : MATERIALS,
   },
   defs: defsFor(v),
-  ...(v >= 6 ? { motion: (uuid) => motionFor(v, uuid) } : {}),
+  ...(v >= 7 ? { motion: (uuid) => FL.motionFlight(v, uuid, defsFor(v).meadowParts) } : v >= 6 ? { motion: (uuid) => motionFor(v, uuid) } : {}),
 }));
 
 module.exports = { HAWK, defsFor, motionFor, PATH, HAWK0, MOUSE, timing };

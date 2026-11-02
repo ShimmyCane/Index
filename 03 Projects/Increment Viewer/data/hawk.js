@@ -2,8 +2,8 @@
 // on a skeleton line (loft) and double-sided thin sheets, instead of box and cylinder extrusions.
 // Images are read relative to viewer.html, so they go up one folder into the Make 3D project.
 window.REVIEW_DATA = {
-  title: "Hawk: closed meshes on a skeleton line, V01 to V06",
-  subtitle: "A red-tailed hawk (about 22.5 in long, 50 in wingspan, estimates from Cornell Lab figures) that circles a meadow, stoops onto a mouse and climbs out. Bodies are closed meshes on a skeleton line so they bend when they move; leaves, grass, ears and a flag are double-sided sheets. Open the model in Make 3D (index.html?model=hawk-v06) to watch it.",
+  title: "Hawk: closed meshes on a skeleton line, V01 to V07",
+  subtitle: "A red-tailed hawk (about 22.5 in long, 50 in wingspan, estimates from Cornell Lab figures) that circles a meadow, stoops onto a mouse and climbs out. Bodies are closed meshes on a skeleton line so they bend when they move; leaves, grass, ears and a flag are double-sided sheets. Open the model in Make 3D (index.html?model=hawk-v07) to watch it.",
   items: [
     {
       id: "V1", title: "Blockout",
@@ -46,6 +46,13 @@ window.REVIEW_DATA = {
       description: "A 23 s loop (frame shown: halfway down the stoop, feet reaching for the mouse). The hawk circles the meadow, folds its wings and stoops, flares with its tail down, skims the grass with its feet out and flaps back up to where it started. Wings bend at shoulder, elbow and wrist; the head looks down the dive; grass, leaves, flag and the mouse's tail move.",
       changes: ["Flight path with banking and pitch", "Flap, fold and flare on wing bends", "Legs drop, head dips, tail brakes", "Grass, leaves, flag and mouse tail sway"],
       gaps: ["Speeds are stylised (slow)", "The talons come within about 3 in of the mouse; they do not touch it", "The mouse does not react"]
+    },
+    {
+      id: "V7", title: "Physical flight, larger loop",
+      image: "../Make 3D/renders/hawk/v07-bolt.png",
+      description: "Jimmy's note on V06: too slow, too small, too diagrammatic. V07 is a much larger arena (a 720 in meadow, a rock bluff, a warm patch of ground) and the speed now comes from physics. One 26 s lap: the hawk circles 2.5 turns up a thermal (rising warm air, drawn as spinning translucent bands) with no flapping, glides away, stoops onto the mouse at about 240 in/s (the height it lost, less drag), flares with the wings open (the drag slows it), flaps hard to climb (62 beats a lap, only while climbing), then rides the wind pushed up the bluff's face (blue ribbons) back into the thermal. The mouse bolts for its burrow as the hawk flares in (52 in at about 160 in/s), drops out of sight, comes up again later and walks home before the loop wraps. Frame shown: the mouse running for the hole as the hawk skims in (`renders/hawk/v07-bolt.png`). Banking follows the turn (a coordinated turn at g = 150 in/s^2 in this scaled world) and is capped near the ground so a wing tip never digs in. V01 to V06 are unchanged.",
+      changes: ["Meadow 720 in across (was 240), bluff of three rock meshes, warm patch, flag and plant moved to fit", "Speed from gravity, drag (wings spread, tucked, flared) and flap thrust; rising air holds soaring speed; flap thrust solved so the lap closes", "Thermal: 2.5 turns, about 120 in of climb per turn, no flapping, banked about 40 degrees", "Flapping 2.4 beats per second, only on the climb out", "Rising air shown: thermal bands spin, bluff ribbons ripple", "Mouse bolts for a burrow hole, hides underground, then walks home"],
+      gaps: ["The world is about a tenth of real size, so 'real' speeds are scaled (stoop 240 in/s, not 100 mph)", "Thermal and updraft are drawn as ribbons, not simulated air", "The mouse never gets caught: the talons skim 4 in above where it was"]
     }
   ]
 };

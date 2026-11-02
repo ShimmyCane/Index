@@ -124,3 +124,19 @@ Jimmy's direction: the models so far were mostly polygon extrusions (boxes, cyli
 - **Seed every random choice by the object's key.** Then adding objects in a later increment never moves the ones in an earlier one.
 - **Cone points along Z.** To point a cone or cylinder along X, set rotation_y = 90 (then rotation_z for the heading); check one of each animal in a small test scene before building many.
 - **Tall walls hide the inside.** From the front, opaque gallery walls hid the benches and guests. Semi-transparent walls (opacity 0.5) keep them tappable and let the room show.
+
+## Hawk V07: making a flight look real (2026-11-02)
+
+Jimmy's note on V06: too slow, too small, "too diagrammatic and not real enough (gravity, friction, air channel rising, bluff)". He wanted a faster, larger loop, several cycles, and more flapping when climbing.
+
+- **Real means energy, not a chosen speed.** V06 picked a speed from height, which looked like a ride. V07 integrates d(v²/2)/ds = −g sin(slope) − k v² + thrust along the path. Gravity makes the stoop fast, drag caps it, the open wings brake the pull-out, and flapping is the only thing that adds energy on the way up. Each of the four things Jimmy named became a term or a visible object.
+- **Close the loop by solving, not by hand.** Rising air holds the soaring speed; the thrust of the climb is found by bisection so the hawk reaches the bluff at exactly that speed. The lap closes with no speed jump, and a test reads the energy balance back from the saved profile.
+- **Show the air.** Rising air that cannot be seen is invisible physics: thermal as spinning translucent bands over a warm patch, bluff wind as ribbons curling up the rock face. The hawk flaps where there is no lift and rests its wings where there is.
+- **Scale the world, then scale gravity with it.** The arena is about a tenth of real size, so g is 150 in/s², not 386. Bank angle, speeds and the time to fall all use the same g, so a 40° bank at the thermal radius and a stoop of about 240 in/s are consistent.
+- **Bank from the turn, then cap it.** A coordinated turn banked the inside wing tip 10 in below the ground during the skim. A roll cap that shrinks near the ground (`half_span`, `ground_z`) fixed it. The ground test (every vertex, over the loop) found it; a picture did not.
+- **A joint at the rest pose needs a calm start.** The loop starts on a straight glide, so the flight frame at t = 0 (the rest pose) is level. Starting on a banked turn would put the hawk at a tilt in the first frame, or cancel the bank for the whole loop.
+- **Off-by-one in a spline chain.** Two context points before the first control shifted every label by one segment, so the path folded back on itself at the join. The jump in the nose direction (2.3 rad between samples) is what showed it: sample the orientation densely and test the largest step.
+- **Judge a turn rate, not a step.** A fixed limit per sample changes when the sampling does; a limit in rad/s (a pull-out is a few) does not.
+- **Keep older versions byte-identical.** New materials went into a V07-only list, not the shared one, so the V01 to V06 files did not change.
+- **Do not flap near the ground.** A big flap at 13 in altitude put a wing tip 10 in below the ground. Start flapping when the hawk has climbed clear.
+- **Give the prey a story (V07, Jimmy: "let the mouse bolt for a hole").** The mouse is a group on a closed path with a time profile: still until the hawk flares in, a 0.35 s dash, a dive under the ground (z below the meadow top, so the ground hides it, with a dark hole and rim drawn over the entry), a long wait, then a slow walk home. A flat stretch in the profile is how a path motion waits. Keep the start of the path straight and collinear so the heading is exactly the rest pose; a curved start was 0.1 degrees off and failed the first-frame test.

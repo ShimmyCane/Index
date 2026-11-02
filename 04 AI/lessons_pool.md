@@ -170,3 +170,8 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 - **Plan the object budget before the detail.** Count parts per item (a fish is 4 to 10), then choose detail per increment so the counts land near the targets (100, 150, 200, 500, 1,000).
 - **Group many movers.** Move a school or a crowd as one group with one motion and keep each member as a named child, so a thousand parts need only a few hundred motions.
 - **Seed random layout by key.** Seeding each random choice by the object's key keeps earlier increments identical when later ones add objects.
+
+## Making motion look real (Make 3D hawk V07, 2026-11-02)
+
+- If a reviewer calls an animation diagrammatic, replace chosen speeds with energy: gravity, drag and a thrust that is solved so the loop closes. Draw the invisible cause (rising air, wind) so the motion has a reason.
+- Scale gravity with the world. Cap roll and flapping near the ground, and test every vertex over the whole loop against the ground.

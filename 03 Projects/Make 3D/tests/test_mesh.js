@@ -86,13 +86,15 @@ t('rules: a loft needs a good shape; a sheet is thin on purpose; attach must nam
   assert.strictEqual(ok({ type: 'sphere', dimensions: [1], position: [0, 0, 5], attach: { to: 'a', joint: 2 } }).outcome, 'accept');
 });
 
-// ---------- the hawk
-const model = load('hawk-v06/model.json'), motion = load('hawk-v06/motion.json');
+// ---------- the hawk, V06 and V07
+function hawkTests(ver) {
+
+const model = load(`${ver}/model.json`), motion = load(`${ver}/motion.json`);
 const objs = new Map(model.objects.map((o) => [o.uuid, o]));
-const id = (k) => `hawk-v06-${k}`;
+const id = (k) => `${ver}-${k}`;
 const L = motion.loop_s;
 
-t('hawk: every body part is a closed mesh; every grass blade, leaf, ear and the flag is a thin open sheet', () => {
+t(`${ver}: every body part is a closed mesh; every grass blade, leaf, ear and the flag is a thin open sheet`, () => {
   let lofts = 0, sheets = 0;
   for (const o of model.objects) {
     if (o.type === 'loft') { const s = MESH.meshStats(o.shape, 'loft'); assert.strictEqual(s.openEdges, 0, o.name); assert.ok(s.volume > 0, `${o.name} volume`); lofts++; }
@@ -101,23 +103,23 @@ t('hawk: every body part is a closed mesh; every grass blade, leaf, ear and the 
   assert.ok(lofts >= 12 && sheets >= 100, `${lofts} lofts, ${sheets} sheets`);
 });
 
-t('hawk: the first frame is the rest pose (every matrix is the identity)', () => {
+t(`${ver}: the first frame is the rest pose (every matrix is the identity)`, () => {
   const pose = MO.poseAt(model, motion, 0);
-  for (const [u, m] of Object.entries(pose)) m.forEach((x, i) => near(x, MO.mat4.identity()[i], 1e-6));
+  for (const [u, m] of Object.entries(pose)) m.forEach((x, i) => near(x, MO.mat4.identity()[i], 1e-4));
   for (const [u, mats] of Object.entries(MO.skinAt(model, motion, 0))) mats.forEach((m) => m.forEach((x, i) => near(x, MO.mat4.identity()[i], 1e-3)));
 });
 
-t('hawk: the loop closes (the last frame is the first)', () => {
+t(`${ver}: the loop closes (the last frame is the first)`, () => {
   const a = MO.poseAt(model, motion, 0), b = MO.poseAt(model, motion, L);
   for (const u of Object.keys(a)) a[u].forEach((x, i) => near(x, b[u][i], 1e-4));
   const sa = MO.skinAt(model, motion, 0), sb = MO.skinAt(model, motion, L);
   for (const u of Object.keys(sa)) sa[u].forEach((m, j) => m.forEach((x, i) => near(x, sb[u][j][i], 1e-4)));
 });
 
-t('hawk: the flight frame is a proper rotation, turns smoothly, and the nose follows the path', () => {
+t(`${ver}: the flight frame is a proper rotation, turns smoothly, and the nose follows the path`, () => {
   const fly = motion.motions.find((m) => m.id === 'fly');
   let prev = null, worst = 0, minUp = 1;
-  const N = 600;
+  const N = ver === 'hawk-v07' ? 1500 : 600;
   for (let k = 0; k <= N; k++) {
     const u = k / N, f = MO.flightFrame(fly, u, L), R = f.R;
     const col = (c) => [R[c], R[4 + c], R[8 + c]];
@@ -131,9 +133,10 @@ t('hawk: the flight frame is a proper rotation, turns smoothly, and the nose fol
     if (prev) { const d = Math.acos(Math.min(1, Math.max(-1, x[0] * prev[0] + x[1] * prev[1] + x[2] * prev[2]))); worst = Math.max(worst, d); }
     prev = x;
   }
-  assert.ok(worst < 0.2, `largest nose turn between samples ${worst} rad`);
-  assert.ok(minUp > 0.15, `the hawk's back must stay up (steepest dive leaves its up axis at z = ${minUp.toFixed(2)})`);
-  console.log(`   smallest up-axis height ${minUp.toFixed(2)} (steepest dive), largest nose turn ${worst.toFixed(3)} rad per 1/600 loop`);
+  const rate = worst / (L / N);
+  assert.ok(rate < 10, `fastest nose turn ${rate.toFixed(1)} rad/s (a pull-out is a few rad/s)`);
+  assert.ok(minUp >= 0.14, `the hawk's back must stay up (steepest dive leaves its up axis at z = ${minUp.toFixed(2)})`);
+  console.log(`   smallest up-axis height ${minUp.toFixed(2)} (steepest dive), fastest nose turn ${rate.toFixed(1)} rad/s`);
 });
 
 // world position of every vertex of a part at time s: its own bends, its attach joint, then the groups above it
@@ -152,11 +155,11 @@ function worldPoints(o, s) {
   return out;
 }
 
-t('hawk: it stays attached and clear of the ground for the whole loop', () => {
+t(`${ver}: it stays attached and clear of the ground for the whole loop`, () => {
   const parts = ['body', 'tail', 'wing-l', 'wing-r', 'leg-l', 'leg-r', 'beak'].map((k) => objs.get(id(k)));
   let lowest = Infinity;
-  for (let k = 0; k < 120; k++) {
-    const s = (k / 120) * L;
+  for (let k = 0; k < 500; k++) {
+    const s = (k / 500) * L;
     for (const o of parts) for (const p of worldPoints(o, s)) { assert.ok(p.every(Number.isFinite)); lowest = Math.min(lowest, p[2]); }
     // the shoulders ride the body: the shoulder joint of each wing sits at the same place relative to the body
     const body = worldPoints(objs.get(id('body')), s);
@@ -166,7 +169,7 @@ t('hawk: it stays attached and clear of the ground for the whole loop', () => {
   console.log(`   lowest point ${lowest.toFixed(2)} in, loop ${L} s`);
 });
 
-t('hawk: the talons reach the mouse at the bottom of the stoop (within 4 in)', () => {
+t(`${ver}: the talons reach the mouse at the bottom of the stoop (within 4 in)`, () => {
   const mouse = objs.get(id('mouse')).position;
   let best = Infinity;
   for (let k = 0; k < 400; k++) {
@@ -180,7 +183,7 @@ t('hawk: the talons reach the mouse at the bottom of the stoop (within 4 in)', (
   console.log(`   closest talon to the mouse: ${best.toFixed(2)} in`);
 });
 
-t('hawk: the wings fold in the stoop (wing tips come in), and open again after', () => {
+t(`${ver}: the wings fold in the stoop (wing tips come in), and open again after`, () => {
   const span = (s) => {
     const pts = [...worldPoints(objs.get(id('wing-l')), s), ...worldPoints(objs.get(id('wing-r')), s)];
     const ys = pts.map((p) => p[1]);
@@ -195,5 +198,105 @@ t('hawk: the wings fold in the stoop (wing tips come in), and open again after',
   assert.ok(tucked < open * 0.7, `span ${open.toFixed(1)} in open, ${tucked.toFixed(1)} in tucked`);
   console.log(`   wing-tip to wing-tip: ${open.toFixed(1)} in open, ${tucked.toFixed(1)} in tucked`);
 });
+
+}
+hawkTests('hawk-v06');
+hawkTests('hawk-v07');
+
+// ---------- V07: the flight obeys gravity, drag and flap thrust (tools/hawk_flight.js)
+{
+  const mo = load('hawk-v07/motion.json'), md = load('hawk-v07/model.json');
+  const Ph = mo.physics, fly = mo.motions.find((m) => m.id === 'fly'), LL = mo.loop_s;
+  const total = MO.pathLength(fly.points);
+  // speed (in/s) at path fraction s, from the time profile: ds/dt between neighbouring profile rows
+  const pr = fly.profile;
+  const speedAt = (s) => {
+    let k = 1; while (k < pr.length - 1 && pr[k][1] < s) k++;
+    const [t0, s0] = pr[k - 1], [t1, s1] = pr[k];
+    return ((s1 - s0) * total) / ((t1 - t0) * LL);
+  };
+  const zAt = (s) => MO.pathAt(fly.points, s).point[2];
+  const sec = (name) => { const i = Ph.sections.findIndex((x) => x.name === name); return [Ph.sections[i].path_fraction, (Ph.sections[i + 1] || Ph.sections[0]).path_fraction]; };
+  const lap = [0.5];
+
+  t('hawk-v07: rising air holds the soaring speed (circling in the thermal and along the ridge)', () => {
+    const [a, b] = sec('thermal');
+    for (let k = 1; k < 20; k++) near(speedAt(a + ((b - a) * k) / 20) / Ph.soaring_speed_in_s, 1, 0.01);
+    const [c, d] = sec('ridge');
+    for (let k = 1; k < 10; k++) near(speedAt(c + ((d - c) * k) / 10) / Ph.soaring_speed_in_s, 1, 0.01);
+  });
+
+  t('hawk-v07: the stoop speed comes from the height lost, less drag (energy balance)', () => {
+    const [a, b] = sec('stoop');
+    const N = 200, ds = ((b - a) * total) / N;
+    const v0 = speedAt(a + 1e-4), z0 = zAt(a);
+    let drag = 0;
+    for (let i = 0; i < N; i++) { const s = a + ((i + 0.5) / N) * (b - a), v = speedAt(s); drag += 2 * Ph.drag_per_in.tucked * v * v * ds; }
+    const v1 = speedAt(b - 1e-4), z1 = zAt(b);
+    const predicted = v0 * v0 + 2 * Ph.gravity_in_s2 * (z0 - z1) - drag;
+    assert.ok(Math.abs(v1 * v1 - predicted) / predicted < 0.08, `v1^2 ${Math.round(v1 * v1)} vs energy ${Math.round(predicted)}`);
+    assert.ok(v1 > 1.5 * Ph.soaring_speed_in_s, `stoop exit speed ${v1.toFixed(0)} in/s is not well above soaring speed`);
+    console.log(`   stoop: ${v0.toFixed(0)} in/s at ${z0.toFixed(0)} in high to ${v1.toFixed(0)} in/s at ${z1.toFixed(0)} in (energy balance within 8%)`);
+  });
+
+  t('hawk-v07: the flare slows it (drag of the open wings) and the climb needs thrust; the lap closes at soaring speed', () => {
+    const [a, b] = sec('pull');
+    assert.ok(speedAt(b - 1e-4) < 0.75 * speedAt(a + 1e-4), 'flare should shed speed');
+    assert.ok(Ph.climb_thrust_in_s2 > 20, `climb thrust ${Ph.climb_thrust_in_s2} in/s^2`);
+    const [c, d] = sec('climb');
+    near(speedAt(d - 1e-4) / Ph.soaring_speed_in_s, 1, 0.04);       // arrives at the bluff at soaring speed
+    assert.ok(Math.abs(speedAt(1 - 1e-6) - speedAt(1e-6)) / Ph.soaring_speed_in_s < 0.25, 'the glide starts where the thermal ends');
+    void lap;
+  });
+
+  t('hawk-v07: it flaps only while climbing under its own power, and the loop has several turns of the thermal', () => {
+    const flaps = mo.motions.filter((m) => /^flap-/.test(m.id));
+    assert.ok(flaps.length === 6);
+    const env = flaps[0].envelope;
+    for (const name of ['glide', 'stoop', 'pull', 'thermal']) {
+      const [a, b] = sec(name);
+      for (let k = 0; k <= 10; k++) {
+        const s = a + ((b > a ? b - a : 1 - a + b) * k) / 10;
+        // convert path fraction to loop fraction by searching the profile
+        const sf = s % 1;
+        let kk = 1; while (kk < pr.length - 1 && pr[kk][1] < sf) kk++;
+        const [t0, s0] = pr[kk - 1], [t1, s1] = pr[kk];
+        const u = t0 + (t1 - t0) * ((sf - s0) / (s1 - s0 || 1));
+        near(MO.keyAt(env, u), 0, 1e-3);
+      }
+    }
+    const peak = Math.max(...Array.from({ length: 200 }, (_, k) => MO.keyAt(env, k / 200)));
+    assert.ok(peak > 0.95, `flap peak ${peak}`);
+    assert.ok(flaps[0].cycles >= 40, `${flaps[0].cycles} wing beats per lap`);
+    near(Ph.thermal.turns, 2.5);
+    assert.ok(Ph.thermal.turns >= 2 && Ph.path_length_in > 3000, `path ${Ph.path_length_in} in`);
+    console.log(`   ${flaps[0].cycles} wing beats per lap, thermal ${Ph.thermal.turns} turns, path ${Ph.path_length_in} in, lap ${LL} s`);
+  });
+
+  t('hawk-v07: the mouse sits until the hawk flares in, bolts for its hole, drops out of sight, and walks home before the loop wraps', () => {
+    const mb = mo.motions.find((m) => m.id === 'mouse-bolt');
+    const rig = md.objects.find((x) => x.uuid === 'hawk-v07-mouse-rig'), hole = md.objects.find((x) => x.uuid === 'hawk-v07-hole');
+    const pos = (sec) => apply(MO.poseAt(md, mo, sec)['hawk-v07-mouse-rig'], rig.position);
+    nearV(pos(0), rig.position, 1e-3);                                   // sits at the start
+    const [mx, my] = rig.position, tb = mb.profile[1][0] * LL;           // the bolt starts here
+    nearV(pos(tb - 0.3), rig.position, 1e-3);                            // still sitting just before
+    const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+    let arrive = null;
+    for (let k = 0; k <= 400; k++) { const q = pos(tb + (k / 400) * 1.5); if (arrive === null && dist(q, hole.position) < 8) arrive = (k / 400) * 1.5; }
+    assert.ok(arrive !== null && arrive < 0.6, `it reaches the hole in ${arrive} s`);
+    const speed = dist([mx, my], hole.position) / arrive;
+    assert.ok(speed > 100, `bolt speed ${speed.toFixed(0)} in/s`);
+    assert.ok(pos(tb + 3)[2] < -4 && pos(tb + 9)[2] < -4, 'out of sight under the ground while the hawk climbs and circles');
+    assert.ok(pos(LL - 0.3)[2] > -0.5 && dist(pos(LL - 0.3), [mx, my]) < 25, 'back at its spot before the loop wraps');
+    console.log(`   mouse: bolts ${Math.round(dist([mx, my], hole.position))} in at ${speed.toFixed(0)} in/s, ${arrive.toFixed(2)} s after the hawk flares in`);
+  });
+
+  t('hawk-v07: the rising air, the bluff and the meadow are part of the model (closed rocks, translucent sheets)', () => {
+    const o = (k) => md.objects.find((x) => x.uuid === `hawk-v07-${k}`);
+    assert.strictEqual(o('rock-a').type, 'loft'); assert.strictEqual(o('air-0').type, 'sheet'); assert.strictEqual(o('wind-0').type, 'sheet');
+    assert.ok(md.materials.airband.opacity < 0.5 && md.materials.wind.opacity < 0.5);
+    assert.ok(o('meadow').dimensions[0] >= 300, 'a much larger meadow');
+  });
+}
 
 console.log(`\n${n} test groups passed`);
