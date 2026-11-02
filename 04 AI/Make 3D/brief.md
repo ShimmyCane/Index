@@ -137,3 +137,21 @@ Each scene version now lives as a row in `public.m3d_scene_log` (Architecture pr
 - **Not acted on yet:** the viewer "hide walls and ceiling" toggle (a viewer change); moving the owner's email out of the public migrations into a config row; the PR #44 loader, which the log button now makes optional.
 - **Further work is not queued.** Nothing else will be done until Jimmy answers the items above or asks for a change.
 
+## Kitchen mockup from photos (V01 to V10, 2026-11-02)
+
+Two photos of a display kitchen (not committed). `tools/kitchen_mockup.js`, one function `defsFor(v)`, ten increments in the Library as "Kitchen mockup V01" to "V10". Layout: U of runs, back run with the stove between two tiled counters, sink run on the green left wall, return run on the right with a wood bar outside it. Sizes are visual estimates in inches.
+
+| Version | Increment |
+|---|---|
+| V01 | Blockout: room shell, base runs as boxes, wood bar |
+| V02 | Steel counter tops, checkered tile insets, red patches |
+| V03 | Stove: oven door, drawer, handles, knobs, burners |
+| V04 | Doors and drawers; fridge door at the sink run |
+| V05 | Stainless backsplash, upper cabinets, wood top shelf |
+| V06 | Frying pan on the backsplash, hooks |
+| V07 | Wood ledge on the wood bar |
+| V08 | Double sink bowls, two faucets |
+| V09 | Ceiling light, yellow panel above the cabinets |
+| V10 | Final pass, objects grouped into seven groups |
+
+**Known limits:** the tile is a flat colour with a few patches, not a checker pattern (no textures in the model). Cylinders stand vertical only, so the stove knobs are spheres. Pan uses `rotation_x` 90. The sink run's position on the left wall is a reading of the photos, not a measurement.

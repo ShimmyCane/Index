@@ -43,3 +43,9 @@ Appended over time. Promote anything reusable to `04 AI/lessons_pool.md`.
 
 **Consolidated 2026-11-02:** general lessons from this file are in `04 AI/lessons_pool.md` (sections on Make 3D, Supabase and logs). Project detail stays here. The scene log is in Supabase (`m3d_scene_log`), so edit scene notes there.
 
+
+## Kitchen mockup from photos (V01 to V10, 2026-11-02)
+
+- **Thin parts fail the minimum dimension.** A 0.2 in tile patch gave three warnings in every version. Use 0.25 in or more for anything that is meant to read as a surface.
+- **Cylinders are vertical only.** Knobs that face the room need spheres; a rotated cylinder (`rotation_x`) works for a pan, but not for a row of knobs.
+- **Check the handedness against the photo.** Layout in view coordinates, then one mirror at the end, as the living room does. The V10 render has the green wall and wood bar on the photo's sides.
