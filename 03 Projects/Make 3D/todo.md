@@ -111,3 +111,4 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - [x] Each version rendered and reviewed; engine, cloud and smoke tests pass.
 - [ ] Jimmy checks the new sizes (156 × 216 in room, 14 in cubes, 96 in ceiling) against the room.
 - 2026-11-02: kitchen mockup V01 to V10 from two photos (`tools/kitchen_mockup.js`), added to the Library. Build, tests and renders pass. Not committed.
+- 2026-11-02: kitchen mockup V11 (open shelf bay at the left end of the back run). V01 to V10 unchanged. Version log added to `04 AI/Make 3D/brief.md`.

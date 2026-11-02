@@ -155,3 +155,21 @@ Two photos of a display kitchen (not committed). `tools/kitchen_mockup.js`, one 
 | V10 | Final pass, objects grouped into seven groups |
 
 **Known limits:** the tile is a flat colour with a few patches, not a checker pattern (no textures in the model). Cylinders stand vertical only, so the stove knobs are spheres. Pan uses `rotation_x` 90. The sink run's position on the left wall is a reading of the photos, not a measurement.
+
+**Version log (kitchen mockup, V01 to V11)**
+
+| Version | Change |
+|---|---|
+| V01 | Blockout: room shell, base runs as boxes, wood bar |
+| V02 | Steel counter tops, checkered tile insets, red patches |
+| V03 | Stove: oven door, drawer, handles, knobs, burners |
+| V04 | Doors and drawers; fridge door at the sink run |
+| V05 | Stainless backsplash, upper cabinets, wood top shelf |
+| V06 | Frying pan on the backsplash, hooks |
+| V07 | Wood ledge on the wood bar |
+| V08 | Double sink bowls, two faucets |
+| V09 | Ceiling light, yellow panel above the cabinets |
+| V10 | Final pass, objects grouped into seven groups |
+| V11 | Left door of the back run becomes an open bay with two wood shelves (first photo). Layout unchanged |
+
+V01 to V10 are unchanged by V11 (checked: their generated files do not change). The Library lists all eleven. The version log is also in each scene's description.

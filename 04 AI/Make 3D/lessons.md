@@ -49,3 +49,11 @@ Appended over time. Promote anything reusable to `04 AI/lessons_pool.md`.
 - **Thin parts fail the minimum dimension.** A 0.2 in tile patch gave three warnings in every version. Use 0.25 in or more for anything that is meant to read as a surface.
 - **Cylinders are vertical only.** Knobs that face the room need spheres; a rotated cylinder (`rotation_x`) works for a pan, but not for a row of knobs.
 - **Check the handedness against the photo.** Layout in view coordinates, then one mirror at the end, as the living room does. The V10 render has the green wall and wood bar on the photo's sides.
+
+## Kitchen mockup V11, and merging the PR (2026-11-02)
+
+- **Keep old versions reproducible, and prove it.** After V11 was added, the generated files for V01 to V10 were checked with `git diff`. None changed. Do this check after every new version.
+- **Removing a part in a later version:** filter it out by key before the grouping step, and add the replacement parts before grouping too. Otherwise the new parts have no group.
+- **An opening needs the carcass split.** A solid carcass box clashes with anything placed inside it, so an open bay is built from side, top, bottom and back panels.
+- **A draft PR cannot be merged.** Mark it ready for review first, then merge with the head SHA that was checked (`expectedHeadSha`), so a late push cannot slip in.
+- **`mergeable_state: dirty` means a conflict.** Merge the base into the branch, keep both sides when both added a section, and commit the merge. Do not rebase a branch that has a PR open.

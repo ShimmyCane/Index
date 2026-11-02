@@ -63,3 +63,9 @@ Patterns that repeat often enough to become a template in `02 Refs/Templates/` o
 2. **Supabase static-app starter:** `config.js`, `db.js` with 3-tier fallback and `_logError`, `schema.sql` with RLS template, diagnostics panel. Sources: Moment, Family Habits, Allowances.
 3. **Question bank JSON + schema:** from `03 Projects/Test Bank/schema for test bank json.md`.
 4. **Project brief template:** goal and boundaries · current implementation · data facts · validation (verified/unverified) · next steps. Source: Allowances and Family Accounting briefs.
+
+## Versioned increments (2026-11-02, from Make 3D)
+
+- **One function, numbered versions.** `defsFor(v)` builds each version from the same code. Each review adds an `if (v >= N)` block, so older versions can be rebuilt. A later version removes a part by key, not by deleting the code that built it.
+- **Check that old versions do not change** after each new version (a diff of the generated files).
+- **Each increment is one visible step** (shell, then counters, then stove, and so on), so a review can say what changed and why.
