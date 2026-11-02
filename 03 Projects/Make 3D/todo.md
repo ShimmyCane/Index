@@ -53,7 +53,6 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - [ ] Walk mode, section box, measure, PNG export (viewer).
 - [ ] Gizmo editing (drag handles).
 - [ ] Textures on/off toggle (the model never stores images).
-- [ ] Rotation about X and Z.
 - [ ] Per-operation author and note.
 - [ ] Blocks: link models; import a rebuilt component as a block.
 - [ ] Material list beyond colour.

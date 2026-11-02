@@ -17,7 +17,9 @@
     valid_coordinates(o, model, world, rule) {
       const out = [];
       if (!numArr(o.position, 3)) out.push('position must be three finite numbers');
-      if (!isNum(o.rotation_y ?? 0)) out.push('rotation_y must be a finite number');
+      for (const k of ['rotation_x', 'rotation_y', 'rotation_z']) {
+        if (!isNum(o[k] ?? 0)) out.push(`${k} must be a finite number`);
+      }
       return out.map((message) => ({ message }));
     },
     valid_geometry(o, model, world, rule) {

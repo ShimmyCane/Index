@@ -190,5 +190,24 @@ t('samples: outdoor table V2 replays, checks, and uses only known tags', () => {
   assert.strictEqual(saved.objects.filter((o) => o.type === 'cone').length, 1);
   assert.strictEqual(named('Bonsai box').position[0], -150);
 });
+t('rotation: spin about Z (up), tilt about Y, turn about X, applied X then Y then Z', () => {
+  const close = (a, b) => a.every((v, i) => Math.abs(v - b[i]) < 1e-9);
+  assert.ok(close(O.rotateVector([1, 0, 0], 0, 0, 90), [0, 1, 0]), 'spin: x to y');
+  assert.ok(close(O.rotateVector([0, 0, 1], 0, 90, 0), [1, 0, 0]), 'tilt: z to x (matches the old rotation_y)');
+  assert.ok(close(O.rotateVector([0, 1, 0], 90, 0, 0), [0, 0, 1]), 'turn: y to z');
+  assert.ok(close(O.rotateVector([1, 0, 0], 90, 90, 0), [0, 0, -1]), 'X first: x stays, then Y sends it to -z');
+});
+t('rotation: a long box spun about Z has its long side along Y', () => {
+  const b = O.objectBox({ uuid: 'r', type: 'box', dimensions: [10, 2, 2], position: [0, 0, 0], rotation_z: 90 }, 'z');
+  const size = b.max.map((v, i) => +(v - b.min[i]).toFixed(6));
+  assert.deepStrictEqual(size, [2, 10, 2]);
+  const flat = O.objectBox({ uuid: 'r', type: 'box', dimensions: [10, 2, 2], position: [0, 0, 0] }, 'z');
+  assert.deepStrictEqual(flat.max.map((v, i) => +(v - flat.min[i]).toFixed(6)), [10, 2, 2]);
+});
+t('rules: a non-numeric rotation_z is rejected', () => {
+  const r = R.checkOperation(G.emptyModel(header), add(box('spin', { rotation_z: 'fast' })), world);
+  assert.strictEqual(r.outcome, 'reject');
+  assert.ok(r.issues.some((i) => /rotation_z/.test(i.message)));
+});
 
 console.log(`\n${n} test groups passed`);

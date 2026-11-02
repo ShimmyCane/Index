@@ -33,7 +33,7 @@ Four engines: input, geometry, rules, viewer. The viewer only reads; the engine 
 ## Open
 
 - Object tags: a fixed set in `js/core/schema.js`. V2 is tagged; the other scenes are not yet.
-- Bonsai branches are in the vertical plane only (rotation about Y). Sideways branches need rotation about X and Z.
+- Rotation is about X, Y and Z (Z up). The V2 bonsai branches are still in one vertical plane; a 3-D tree would be a new scene edit.
 
 - Confirm convo v0.3 Q1–Q6. Confirm rotation axis. Confirm history-as-truth is in place (done).
 - Cloud copy needs the SQL OK.

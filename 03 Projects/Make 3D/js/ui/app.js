@@ -215,6 +215,16 @@
     }
   }
 
+  // Only non-zero angles are written, so existing objects and history stay as they are.
+  function rotationFields() {
+    const out = {};
+    for (const [key, id] of [['rotation_x', 'fRotX'], ['rotation_y', 'fRot'], ['rotation_z', 'fRotZ']]) {
+      const v = Number($(id).value) || 0;
+      if (v) out[key] = v;
+    }
+    return out;
+  }
+
   function renderSelection(model) {
     const o = st.selected && findObj(model, st.selected);
     $('selCard').hidden = !o;
@@ -226,7 +236,7 @@
       ['Type', o.type],
       ['Size', o.dimensions && o.dimensions.length ? o.dimensions.map((d) => len(d)).join(' × ') : '—'],
       ['Centre', o.position ? o.position.map((p) => len(p)).join(', ') : '—'],
-      ['Rotation Y', `${o.rotation_y || 0}°`],
+      ['Rotation', `X ${o.rotation_x || 0}°, Y ${o.rotation_y || 0}°, Z ${o.rotation_z || 0}°`],
       ['Purpose', (o.tags || []).map((t) => (M.TAGS && M.TAGS[t]) || t).join(', ') || '—'],
       ['Material', o.material || '—'],
       ['Parent', o.parent ? (findObj(model, o.parent) || {}).name || 'missing' : '—'],
@@ -377,7 +387,7 @@
       type,
       dimensions: dims,
       position: pos,
-      rotation_y: Number($('fRot').value) || 0,
+      ...rotationFields(),
       parent: $('fParent').value || null,
       material: $('fMat').value || null,
     };
