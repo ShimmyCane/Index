@@ -88,3 +88,10 @@ Appended over time. Promote anything reusable to `04 AI/lessons_pool.md`.
 - **Closed splines pull their neighbours.** A closed Catmull-Rom through a lift top dragged the return leg underground. For a path with a straight return, use an open spline with doubled ends, then a straight line back.
 - **Physics speed needs a time profile, not a speed.** The motion engine walks a path at constant speed by distance; a profile [[t, s]] maps loop time to distance, so a coaster can speed up on a drop and slow up a hill. The profile is checked by `checkMotion` like the rest of the file.
 - **Let the loop length come from the ride.** Setting the loop to one real lap of the coaster keeps the speeds physical, and other rides can take their speed from it (Pip runs one lap per loop).
+
+## Cars on the slope, faster rides, life in the park (2026-11-02)
+
+- **A car that stays flat on a slope looks like it is flying.** Turning it only about Z is right on the flat, wrong on a drop. Give the path a 3-D tangent (yaw and pitch), and check the car's forward direction against the track tangent at many points.
+- **Keep the crowd's loop, change the ride's share of it.** Other motions must share one loop, so make the ride a fraction of it and let it wait at the station for the rest. That gives a faster ride without changing the loop.
+- **Check the rest pose is the identity.** If a motion's pose at its start is not the identity, the object jumps when the motion plays. Check it numerically.
+- **Bounds checks need absolute positions.** A pose's translation is an offset from rest, so checking it against the world bounds gives false alarms. Use the pivot transformed by the pose.

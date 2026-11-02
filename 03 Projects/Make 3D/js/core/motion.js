@@ -101,6 +101,20 @@
     return whole + s0 + (s1 - s0) * k;
   }
 
+  // 3-D tangent of a closed path at fraction u, from a short chord. Used to pitch things along a slope.
+  function tangentAt(points, u) {
+    const { total } = samplePath(points);
+    const h = Math.min(1, total / 1000) / total;
+    const a = pathAt(points, u - h).point, b = pathAt(points, u + h).point;
+    return [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+  }
+  // Rotation part of a 4x4 matrix, transposed (its inverse, since it is a rotation).
+  function transposeRot(m) {
+    const o = I();
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) o[r * 4 + c] = m[c * 4 + r];
+    return o;
+  }
+
   // ---------- one motion -> matrix at loop fraction u (0..1)
   const deg = (d) => (d * Math.PI) / 180;
   function matrixFor(m, u) {
@@ -118,6 +132,19 @@
       case 'bob': { const a = (m.amount || 0) * rise; return translate(axis[0] * a, axis[1] * a, axis[2] * a); }
       case 'slide': { const a = (m.distance || 0) * rise; return translate(axis[0] * a, axis[1] * a, axis[2] * a); }
       case 'path': {
+        if (m.face === 'tangent3d') {
+          // Yaw and pitch: the target turns to the 3-D direction of travel (a car climbs with the track).
+          // rest_yaw_deg and rest_pitch_deg are the orientation it has in the model (its rest pose), so the pose is the
+          // difference from that. Pitch is positive uphill; the model's rotation_y is -pitch.
+          const w = warpTime(m.profile, c * u + ph);
+          const { point } = pathAt(m.points, w);
+          const [dx, dy, dz] = tangentAt(m.points, w);
+          const yaw = Math.atan2(dy, dx), pitch = Math.atan2(dz, Math.hypot(dx, dy));
+          const R0 = mul(rotate(AXES.z, deg(m.rest_yaw_deg || 0)), rotate(AXES.y, -deg(m.rest_pitch_deg || 0)));
+          const Rt = mul(rotate(AXES.z, yaw), rotate(AXES.y, -pitch));
+          return mul(translate(point[0], point[1], point[2]),
+            mul(mul(Rt, transposeRot(R0)), translate(-pivot[0], -pivot[1], -pivot[2])));
+        }
         // The target's pivot travels along the path. Facing 'tangent' turns it to face the way it goes;
         // rest_heading_deg is the way it faces in the model (0 = +X).
         const { point, heading } = pathAt(m.points, warpTime(m.profile, c * u + ph));
@@ -196,6 +223,7 @@
         if (!Array.isArray(m.points) || m.points.length < 3 || !m.points.every((p) => Array.isArray(p) && p.length >= 2 && p.every(finite))) {
           bad('path needs 3 or more points [x, y] or [x, y, z]; the path always closes on itself', id);
         }
+        if (m.face !== undefined && !['tangent', 'tangent3d'].includes(m.face)) bad('face must be "tangent", "tangent3d" or left out', id);
         if (m.profile !== undefined) {
           const pr = m.profile;
           const okPair = (q) => Array.isArray(q) && q.length === 2 && q.every((v) => finite(v) && v >= 0 && v <= 1);
@@ -213,7 +241,7 @@
 
   return {
     MOTION_SCHEMA: SCHEMA, MOTION_KINDS: KINDS,
-    poseAt, checkMotion, pathAt, pathLength, motionBox, warpTime,
+    poseAt, checkMotion, pathAt, pathLength, motionBox, warpTime, tangentAt,
     mat4: { identity: I, mul, translate, rotate, about, apply },
   };
 });

@@ -207,3 +207,11 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 - **Shareable link:** `index.html?model=<sample id>` loads that model (it wins over the saved copy). Loading a sample from the picker updates the address. Checked in headless Chromium.
 - **Changed in place:** V11 to V15 are rebuilt (60 ft lift, curves, physics). Git keeps the previous merged versions.
 - **Open for Jimmy:** (1) the coaster's 40 mph top speed fits the family-coaster range the traveller guides give; keep it or push the drop higher? (2) Splash boats stay level on the slope (they don't pitch); add pitch? (3) the Sky Wheel is still a show ride, not counted.
+
+## Cars on the slope, faster rides, life in the park (V11 to V16, 2026-11-02)
+
+- **Cars flying off the track:** cars turned only in the flat plane, so on the steep drops they stuck out into the air. Now they pitch with the slope: the motion engine has `face: "tangent3d"` (yaw about Z, pitch about Y) with `rest_yaw_deg` and `rest_pitch_deg`. Checked: the car's forward direction matches the track tangent at every point (0° error); the rest pose is the identity at the start.
+- **Speed:** the people's loop stays at about 18 s. The rides run for 80% of it and wait at the station for the last 20% (`RIDE_FRAC = 0.8`). That is 1.25× faster than the physical ride (top speed about 40 mph in real time, about 50 mph in the animation). Pip uses the same timing.
+- **Steepest slope:** about 80° on the coaster's first drop. Steeper than typical family coasters; open for Jimmy whether to soften it.
+- **V16 life in the park:** visitors in and out of the gate (80 ft loop, about 4.4 ft/s) and round the plaza (14 ft ring, about 4.9 ft/s), four vendor stalls with keepers, five birds on a 3-D loop (about 31 ft/s) with a wing-beat bob, three free balloons.
+- **Open:** (1) keep the 80° drop, or soften it? (2) keep the ride speed at 1.25× or go back to real time?

@@ -1,7 +1,7 @@
 {
   "model_id": "adventure-park-v14",
   "name": "Adventure park V14",
-  "description": "Adventure Coaster Park, compact, curved and animated, increment 14 of 15. Capacity 1000 persons per hour. Estimated from published figures, in inches.",
+  "description": "Adventure Coaster Park, compact, curved and animated, increment 14 of 16. Capacity 1000 persons per hour. Estimated from published figures, in inches.",
   "units": "in",
   "up": "z",
   "world": "adventure-park-world",
@@ -93,6 +93,10 @@
     "sky": {
       "color": "#bfe3f7",
       "opacity": 0.85
+    },
+    "skin": {
+      "color": "#ffd9b8",
+      "opacity": 1
     }
   },
   "objects": [
@@ -1588,7 +1592,7 @@
     },
     {
       "description": "a seat car, five seats",
-      "rotation_y": 0,
+      "rotation_y": -8.95,
       "parent": "adventure-park-v14-pip",
       "material": "car",
       "tags": [],
@@ -1610,7 +1614,7 @@
     },
     {
       "description": "a seat car, five seats",
-      "rotation_y": 0,
+      "rotation_y": 0.961,
       "parent": "adventure-park-v14-pip",
       "material": "car",
       "tags": [],
@@ -1624,11 +1628,11 @@
         30
       ],
       "position": [
-        -1536,
-        -480,
-        96
+        -1378.754,
+        -701.759,
+        119.095
       ],
-      "rotation_z": -90
+      "rotation_z": -29.247
     },
     {
       "description": "low station beside the oval",
@@ -3836,7 +3840,7 @@
     },
     {
       "description": "a seat car, five seats",
-      "rotation_y": 0,
+      "rotation_y": -49.678,
       "parent": "adventure-park-v14-thunder",
       "material": "car",
       "tags": [],
@@ -3858,7 +3862,7 @@
     },
     {
       "description": "a seat car, five seats",
-      "rotation_y": 0,
+      "rotation_y": 79.964,
       "parent": "adventure-park-v14-thunder",
       "material": "car",
       "tags": [],
@@ -3872,10 +3876,11 @@
         30
       ],
       "position": [
-        573.136,
-        513,
-        691.133
-      ]
+        695.753,
+        517.517,
+        397.102
+      ],
+      "rotation_z": 2.437
     },
     {
       "description": "boarding hall",
@@ -4693,7 +4698,7 @@
     },
     {
       "description": "rides the lift, drops into the pool; two seats",
-      "rotation_y": 0,
+      "rotation_y": -44.2,
       "parent": "adventure-park-v14-splash",
       "material": "wood",
       "tags": [],
@@ -4715,7 +4720,7 @@
     },
     {
       "description": "rides the lift, drops into the pool; two seats",
-      "rotation_y": 0,
+      "rotation_y": 0.007,
       "parent": "adventure-park-v14-splash",
       "material": "wood",
       "tags": [],
@@ -4729,15 +4734,15 @@
         24
       ],
       "position": [
-        -846.72,
+        -943.609,
         1200,
-        30.655
+        30.817
       ],
       "rotation_z": 180
     },
     {
       "description": "rides the lift, drops into the pool; two seats",
-      "rotation_y": 0,
+      "rotation_y": -0.421,
       "parent": "adventure-park-v14-splash",
       "material": "wood",
       "tags": [],
@@ -4751,9 +4756,9 @@
         24
       ],
       "position": [
-        -1234.282,
+        -1428.07,
         1200,
-        32.899
+        34.324
       ],
       "rotation_z": 180
     },
