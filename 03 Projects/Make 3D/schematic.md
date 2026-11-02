@@ -1,6 +1,6 @@
 # Make 3D — MVP Schematic
 
-**Status:** idea, round 2 answered · **Updated:** 2026-11-01
+**Status:** idea, round 2 answered · **Updated:** 2026-11-02
 **Based on:** Jimmy's brief, `convo/convo v0.1.md` and `convo/convo v0.2.md`. Where v0.2 differs from the first draft, v0.2 wins (listed in §0). Items marked 🚩 are still open.
 
 ## 0. What changed in round 2
@@ -309,6 +309,6 @@ Source: `convo/convo v0.4.md`. Open questions there. Nothing here is built yet.
 - **Autosave:** each annotation edit is saved to the cloud on its own. Offline edits queue and send when back online (A6).
 - **Groups:** moving an object into a group sets its `parent` (an operation). Nesting to be decided (G1).
 - **Visibility:** `hidden` flag on objects and groups. Hiding a group hides its children. Image export leaves hidden items out. 3-D export keeps them, flagged hidden (proposed, G2–G4).
-- **Exports:** a PNG of one view, for a background in Quick Detail (E3). A 3-D file for Revit or other software (E1–E2). The format is still open.
+- **Exports:** a PNG of one view, for a background in Quick Detail (E3). A 3-D file for Revit: **IFC** (convo v0.6), built in `js/core/export_ifc.js` and downloaded from the gear panel. Up stays Z (up is up in Revit); units are handled inside the exporter so the model lands at real scale. Imports into Revit as placeable elements, not editable `.rfa` families (editable and parametric families are future).
 - **Future:** scene tags (S2); read-only share link (S1).
 

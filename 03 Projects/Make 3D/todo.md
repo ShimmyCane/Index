@@ -30,7 +30,8 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - [ ] Groups: drag an object into a group, recorded as an operation (G1).
 - [ ] Visibility: hide a group or object; image export leaves hidden items out; 3-D export keeps them flagged hidden (G2–G4). Final choice still to make.
 - [ ] Export a PNG of one view as a background for Quick Detail (E3).
-- [ ] Export a 3-D file for Revit or other software: target software still open (E1–E2).
+- [x] Export IFC for Revit (convo v0.6): `js/core/export_ifc.js` (IFC4, metres, Z up, one `IfcBuildingElementProxy` per object with tessellated shape and colour). Button: Export IFC (Revit) in the gear panel. Tests: `node tests/test_ifc.js`. Checked with IfcOpenShell 0.9 on all sample scenes (bounding boxes within 5 mm of the engine).
+- [?] Jimmy imports an exported `.ifc` into Revit and confirms scale and up.
 - [ ] Tag scenes like Quick Detail details (S2).
 - [ ] Read-only share link for presenting (S1).
 
@@ -55,6 +56,7 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - [ ] Tag filter in the objects panel (not asked yet).
 
 ## Future (flat list, round 2)
+- [ ] Editable, resizable and parametric families in Revit (Dynamo or Revit API, `.rfa`). Not needed for the first IFC import.
 - [ ] Walk mode, section box, measure, PNG export (viewer).
 - [ ] Gizmo editing (drag handles).
 - [ ] Textures on/off toggle (the model never stores images).
