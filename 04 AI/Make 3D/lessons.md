@@ -95,3 +95,14 @@ Appended over time. Promote anything reusable to `04 AI/lessons_pool.md`.
 - **Keep the crowd's loop, change the ride's share of it.** Other motions must share one loop, so make the ride a fraction of it and let it wait at the station for the rest. That gives a faster ride without changing the loop.
 - **Check the rest pose is the identity.** If a motion's pose at its start is not the identity, the object jumps when the motion plays. Check it numerically.
 - **Bounds checks need absolute positions.** A pose's translation is an offset from rest, so checking it against the world bounds gives false alarms. Use the pivot transformed by the pose.
+
+## Grand Ocean Aquarium (2026-11-02)
+
+- **Glass blocks taps.** The picker used the nearest hit, so a glass wall in front of a fish selected the glass. Picking now skips anything with opacity under 0.4. Make see-through surfaces below that and anything meant to be selected above it.
+- **Count objects early.** A fish with eyes, fins and a tail is 6 to 10 objects, so ten animals were already 100. Set the count per increment first, then choose how much detail each fish gets (detail level by version). Drop parts (a stalk, one eye) before dropping animals.
+- **Moving thousands of parts cheaply.** A school is one group with a path motion, and its fish are plain children (a body and a tail). Each fish stays named and tappable, but only one motion runs per school.
+- **First frame is the rest pose for every kind.** A swing starts mid-angle only at phase 0 or 0.5; a bob starts at 0 only at phase 0. Use phase 0 or 0.5 and vary the cycle count instead.
+- **Compute the heading from the same points you write.** A rest heading worked out from feet, then rounded, left a 0.06 in jump at the first frame; take it from the inch points.
+- **Seed every random choice by the object's key.** Then adding objects in a later increment never moves the ones in an earlier one.
+- **Cone points along Z.** To point a cone or cylinder along X, set rotation_y = 90 (then rotation_z for the heading); check one of each animal in a small test scene before building many.
+- **Tall walls hide the inside.** From the front, opaque gallery walls hid the benches and guests. Semi-transparent walls (opacity 0.5) keep them tappable and let the room show.

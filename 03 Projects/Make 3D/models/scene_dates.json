@@ -79,6 +79,31 @@
     "updated": "2026-11-02T18:43:02Z",
     "hash": "3839197fac3e9fd8"
   },
+  "aquarium-v01": {
+    "created": "2026-11-02T19:22:49Z",
+    "updated": "2026-11-02T19:30:26Z",
+    "hash": "2b8d6b04bc54190b"
+  },
+  "aquarium-v02": {
+    "created": "2026-11-02T19:22:49Z",
+    "updated": "2026-11-02T19:30:26Z",
+    "hash": "6a223b9d284585b2"
+  },
+  "aquarium-v03": {
+    "created": "2026-11-02T19:22:49Z",
+    "updated": "2026-11-02T19:30:26Z",
+    "hash": "9a01c5e5a49feb66"
+  },
+  "aquarium-v04": {
+    "created": "2026-11-02T19:22:49Z",
+    "updated": "2026-11-02T19:30:26Z",
+    "hash": "b04a0ad9e1b31642"
+  },
+  "aquarium-v05": {
+    "created": "2026-11-02T19:22:49Z",
+    "updated": "2026-11-02T19:30:26Z",
+    "hash": "5b4dbeabd3838a4f"
+  },
   "garden-planter": {
     "created": "2026-11-01T18:54:45Z",
     "updated": "2026-11-02T04:13:47Z",
