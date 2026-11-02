@@ -521,3 +521,16 @@ Source: research `04 AI/Make 3D/research/earth-scale.md`. Request: fix the float
 - **Tests:** `node tests/test_earth_v22.js`.
 - **Limits:** James Webb is not drawn; the mountains (V12) are still large cones; the Moon's distance is not to scale.
 
+## 21. Earth V23: launches, deployment, large satellites, mountain ranges (built)
+
+Source: research `04 AI/Make 3D/research/earth-launches.md`. Request: clearer launch sites and launch-and-return, deployment of new satellites, fewer satellites (large units only), mountains that read as mountains.
+
+- **Sites:** six real sites (Kennedy, Baikonur, Kourou, Jiuquan, Vandenberg, Wenchang), each with a pad disc on land (`pad23-N`).
+- **Rockets:** `rocket23-N` groups with a stage (0.6 in), nose and flame (0.25 in). Each has a `path` motion along the ground normal: four pad returns (points pad, up, top, up), or for the two sea sites six points (pad, up, top, over the sea, the splash just under the surface, the centre of the planet). The profile holds on the pad, climbs, and returns.
+- **Deployment:** each launch releases `sat23-N` (0.25 in sphere). Its path (rest on the nose, top, release sideways, the centre of the planet) closes through the planet, so the satellite drops out of sight and is hoisted back to the nose before the loop ends.
+- **Satellites:** kept large: ISS (`arm22-iss`), Hubble (`arm22-hubble`), Tiangong (`arm23-tiangong`, new), a geostationary weather satellite (`arm23-goes`, new, turns 32 times per loop). The constellation, navigation ring, geostationary comsats and polar satellite are dropped.
+- **Mountains:** the V12 cones (`mtn-`) are dropped. Small peaks (`andes-`, `rockies-`, `alps-`, `himalaya-`): base 0.25 in, 0.35 to 0.6 in tall, placed along four real ranges.
+- **Rules:** every part is at least 0.25 in in each dimension; the build has 0 warnings.
+- **Tests:** `node tests/test_earth_v23.js`.
+- **Limits:** the deployed satellite does not stay in orbit; the first stages do not break up; sizes are exaggerated.
+
