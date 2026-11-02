@@ -173,3 +173,13 @@ Two photos of a display kitchen (not committed). `tools/kitchen_mockup.js`, one 
 | V11 | Left door of the back run becomes an open bay with two wood shelves (first photo). Layout unchanged |
 
 V01 to V10 are unchanged by V11 (checked: their generated files do not change). The Library lists all eleven. The version log is also in each scene's description.
+
+## Adventure Coaster Park (2026-11-02, research mode)
+
+- **Subject:** a family theme park with one adventure roller coaster. Ten increments, V01 to V10, capacity from 250 to 1,000 persons an hour.
+- **Mode:** research (outside spec figures and capacity formula). Sources and disagreements: `research/adventure_park.md`.
+- **Build:** `03 Projects/Make 3D/tools/adventure_park.js`, one `defsFor(v)`, feet converted to inches. World: `worlds/adventure-park-world.json` (bounds ±360 by ±240 ft, 120 ft high), because the default world is only 40 ft across.
+- **Ladder:** V01 250 (Pip's kiddie coaster), V02 350 (Bumble River), V03 450 (teacups), V04 450 safety, V05 850 (Thunder Trail), V06 850 safety, V07 1,000 (Splash Falls), V08 to V10 1,000 (fineness, safety check, finish).
+- **Checks run:** build: 10 scenes accept with 0 issues; `tests/test_core.js` passes; ten renders checked (V01, V05, V07, V10 by eye in detail).
+- **Viewer:** `Increment Viewer/data/adventure_park.js`, in the drop-down.
+- **Open for Jimmy:** (1) Thunder's 60 ft lift is above the traveller-guide examples; 50 ft would fit. (2) Keep the step-by-step ladder, or spread the 1,000 target over V05 to V10. (3) The default camera does not frame the whole park; a fit-to-park view is needed. (4) Is a real ASTM or EN review wanted before any figure is treated as a design?
