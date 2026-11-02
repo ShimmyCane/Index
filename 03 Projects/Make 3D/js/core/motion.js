@@ -12,7 +12,7 @@
   else root.M3D = Object.assign(root.M3D || {}, api);
 })(typeof self !== 'undefined' ? self : globalThis, function () {
   const SCHEMA = 'make3d.motion/0.1';
-  const KINDS = ['path', 'swing', 'bob', 'slide', 'spin'];
+  const KINDS = ['path', 'swing', 'bob', 'slide', 'spin', 'bend'];
   const AXES = { x: [1, 0, 0], y: [0, 1, 0], z: [0, 0, 1] };
   const TAU = Math.PI * 2;
 
@@ -115,9 +115,56 @@
     return o;
   }
 
+  // Distance fraction (0..1) at which each waypoint of a closed path sits.
+  function pathMarks(points) {
+    const { len, total } = samplePath(points);
+    return points.map((_, i) => len[i * 64] / total);
+  }
+
+  // ---------- keyframes (optional): [[t, value], ...] with t from 0 up to (not including) 1. The list closes on
+  // itself: after the last key the value eases back to the first key's value at t = 1. Eased, so it rests at each key.
+  function keyAt(keys, u) {
+    const n = keys.length;
+    const f = ((u % 1) + 1) % 1;
+    let i = n - 1;
+    for (let k = 0; k < n; k++) if (keys[k][0] <= f) i = k;
+    const t0 = keys[i][0], v0 = keys[i][1];
+    const nxt = keys[(i + 1) % n], t1 = i + 1 < n ? nxt[0] : 1 + nxt[0], v1 = nxt[1];
+    const x = (f < t0 ? f + 1 : f), s = t1 > t0 ? (x - t0) / (t1 - t0) : 0;
+    return v0 + (v1 - v0) * s * s * (3 - 2 * s);
+  }
+  // Angle (degrees) of a swing or bend at loop fraction u: keyframes if given, else a sine between from and to.
+  // `envelope` (keyframes, 0..1) scales the whole angle, so a flap can start, build and stop.
+  function angleOf(m, u) {
+    if (m.keys) return keyAt(m.keys, u);
+    const c = m.cycles || 1, ph = m.phase || 0;
+    const wave = Math.sin(TAU * (c * u + ph));
+    const mid = ((m.from || 0) + (m.to || 0)) / 2, amp = ((m.to || 0) - (m.from || 0)) / 2;
+    return (mid + amp * wave) * (m.envelope ? keyAt(m.envelope, u) : 1);
+  }
+
+  // Flight frame for a path: x along the way of travel, z toward the lift (up, leaning into turns and pulls),
+  // so a bird banks in a turn and pitches with the climb and dive. u is the loop fraction, L the loop in seconds.
+  function flightFrame(m, u, L) {
+    const c = m.cycles || 1, ph = m.phase || 0;
+    const at = (x) => pathAt(m.points, warpTime(m.profile, c * x + ph)).point;
+    const h = Math.min(0.004, 0.5 / (c * 60));
+    const a = at(u - h), b = at(u), d = at(u + h);
+    const T = norm3([d[0] - a[0], d[1] - a[1], d[2] - a[2]]);
+    const dt = (h * L) * (h * L), G = 386.1, k = m.bank_gain === undefined ? 4 : m.bank_gain;
+    const acc = [0, 1, 2].map((i) => (a[i] - 2 * b[i] + d[i]) / dt);
+    // lift = up plus the pull of the turn; the up part is kept above 0.4 so the bird never rolls onto its back
+    let lift = [k * acc[0] / G, k * acc[1] / G, 1 + Math.max(k * acc[2] / G, -0.6)];
+    const dd = lift[0] * T[0] + lift[1] * T[1] + lift[2] * T[2];
+    lift = norm3([lift[0] - dd * T[0], lift[1] - dd * T[1], lift[2] - dd * T[2]]);
+    const Y = [lift[1] * T[2] - lift[2] * T[1], lift[2] * T[0] - lift[0] * T[2], lift[0] * T[1] - lift[1] * T[0]];
+    return { point: b, R: [T[0], Y[0], lift[0], 0, T[1], Y[1], lift[1], 0, T[2], Y[2], lift[2], 0, 0, 0, 0, 1] };
+  }
+  const norm3 = (v) => { const l = Math.hypot(v[0], v[1], v[2]) || 1; return [v[0] / l, v[1] / l, v[2] / l]; };
+
   // ---------- one motion -> matrix at loop fraction u (0..1)
   const deg = (d) => (d * Math.PI) / 180;
-  function matrixFor(m, u) {
+  function matrixFor(m, u, L) {
     const c = m.cycles || 1, ph = m.phase || 0;
     const wave = Math.sin(TAU * (c * u + ph));                  // -1..1, smooth
     const rise = (1 - Math.cos(TAU * (c * u + ph))) / 2;        // 0..1, smooth
@@ -125,13 +172,18 @@
     const pivot = m.pivot || [0, 0, 0];
     switch (m.kind) {
       case 'swing': {
-        const mid = ((m.from || 0) + (m.to || 0)) / 2, amp = ((m.to || 0) - (m.from || 0)) / 2;
-        return about(pivot, axis, deg(mid + amp * wave));
+        return about(pivot, axis, deg(angleOf(m, u)));
       }
       case 'spin': return about(pivot, axis, TAU * c * u + deg(m.start_deg || 0));
       case 'bob': { const a = (m.amount || 0) * rise; return translate(axis[0] * a, axis[1] * a, axis[2] * a); }
       case 'slide': { const a = (m.distance || 0) * rise; return translate(axis[0] * a, axis[1] * a, axis[2] * a); }
       case 'path': {
+        if (m.face === 'flight') {
+          // The frame at the start of the path is the rest pose, so the first frame is the identity.
+          const now = flightFrame(m, u, L), start = flightFrame(m, 0, L);
+          return mul(translate(now.point[0], now.point[1], now.point[2]),
+            mul(mul(now.R, transposeRot(start.R)), translate(-pivot[0], -pivot[1], -pivot[2])));
+        }
         if (m.face === 'tangent3d') {
           // Yaw and pitch: the target turns to the 3-D direction of travel (a car climbs with the track).
           // rest_yaw_deg and rest_pitch_deg are the orientation it has in the model (its rest pose), so the pose is the
@@ -165,9 +217,47 @@
     const L = motion.loop_s > 0 ? motion.loop_s : 1;
     const u = (((t / L) % 1) + 1) % 1;
     for (const m of motion.motions) {
-      if (!have.has(m.target) || !KINDS.includes(m.kind)) continue;
+      if (!have.has(m.target) || !KINDS.includes(m.kind) || m.kind === 'bend') continue;
       if (m.start && m.start !== 'auto') continue; // tap and chained starts are future
-      out[m.target] = mul(matrixFor(m, u), out[m.target] || I());
+      out[m.target] = mul(matrixFor(m, u, L), out[m.target] || I());
+    }
+    // A part attached to a joint of a skeleton mesh rides that joint (eyes on a head, a tail on a rump).
+    const skins = skinAt(model, motion, t);
+    for (const o of (model && model.objects) || []) {
+      if (!o.attach || !skins[o.attach.to]) continue;
+      const G = skins[o.attach.to][o.attach.joint];
+      if (G) out[o.uuid] = mul(G, out[o.uuid] || I());
+    }
+    return out;
+  }
+
+  // Joint matrices for every skeleton mesh that bends: { [uuid]: [4x4 per joint] }. Bends apply down the chain:
+  // joint k turns everything after it about joint k's rest position, in the frame of the joints before it.
+  function skinAt(model, motion, t) {
+    const out = {};
+    if (!motion || !Array.isArray(motion.motions)) return out;
+    const L = motion.loop_s > 0 ? motion.loop_s : 1;
+    const u = (((t / L) % 1) + 1) % 1;
+    const byId = new Map(((model && model.objects) || []).map((o) => [o.uuid, o]));
+    const bends = {};
+    for (const m of motion.motions) {
+      if (m.kind !== 'bend' || !byId.has(m.target) || (m.start && m.start !== 'auto')) continue;
+      (bends[m.target] = bends[m.target] || []).push(m);
+    }
+    for (const uuid of Object.keys(bends)) {
+      const o = byId.get(uuid);
+      const J = o.shape && o.shape.joints;
+      if (!J) continue;
+      let G = I();
+      const mats = [];
+      for (let k = 0; k < J.length; k++) {
+        for (const m of bends[uuid]) {
+          if ((m.joint || 0) !== k) continue;
+          G = mul(G, about(J[k], AXES[m.axis || 'z'], deg(angleOf(m, u))));
+        }
+        mats.push(G);
+      }
+      out[uuid] = mats;
     }
     return out;
   }
@@ -216,14 +306,24 @@
       if (m.axis !== undefined && !AXES[m.axis]) bad('axis must be x, y or z', id);
       if (m.pivot !== undefined && !vec(m.pivot)) bad('pivot must be [x, y, z] in inches', id);
       if (m.phase !== undefined && !finite(m.phase)) bad('phase must be a number', id);
-      if (m.kind === 'swing' && !(finite(m.from) && finite(m.to))) bad('swing needs from and to, in degrees', id);
+      const keyed = (kk) => Array.isArray(kk) && kk.length >= 2 && kk.every((q, i) => Array.isArray(q) && q.length === 2 && q.every(finite) && q[0] >= 0 && q[0] < 1 && (i === 0 ? q[0] === 0 : q[0] > kk[i - 1][0]));
+      if (m.keys !== undefined && !keyed(m.keys)) bad('keys must be [[t, value], ...] with t rising from 0 and below 1; the list closes back to the first value', id);
+      if (m.envelope !== undefined && !keyed(m.envelope)) bad('envelope must be [[t, 0..1], ...] with t rising from 0 and below 1', id);
+      if ((m.kind === 'swing' || m.kind === 'bend') && m.keys === undefined && !(finite(m.from) && finite(m.to))) bad(`${m.kind} needs from and to, or keys, in degrees`, id);
+      if (m.kind === 'bend') {
+        const tgt = objects.get(m.target);
+        const nj = tgt && tgt.shape && Array.isArray(tgt.shape.joints) ? tgt.shape.joints.length : 0;
+        if (tgt && !nj) bad('bend needs a target with a skeleton (a loft or a sheet)', id);
+        else if (tgt && !(Number.isInteger(m.joint) && m.joint >= 0 && m.joint < nj)) bad(`bend joint must be a whole number from 0 to ${nj - 1}`, id);
+        if (m.axis === undefined) warn('bend has no axis; z is used', id);
+      }
       if (m.kind === 'bob' && !finite(m.amount)) bad('bob needs amount, in inches', id);
       if (m.kind === 'slide' && !finite(m.distance)) bad('slide needs distance, in inches', id);
       if (m.kind === 'path') {
         if (!Array.isArray(m.points) || m.points.length < 3 || !m.points.every((p) => Array.isArray(p) && p.length >= 2 && p.every(finite))) {
           bad('path needs 3 or more points [x, y] or [x, y, z]; the path always closes on itself', id);
         }
-        if (m.face !== undefined && !['tangent', 'tangent3d'].includes(m.face)) bad('face must be "tangent", "tangent3d" or left out', id);
+        if (m.face !== undefined && !['tangent', 'tangent3d', 'flight'].includes(m.face)) bad('face must be "tangent", "tangent3d", "flight" or left out', id);
         if (m.profile !== undefined) {
           const pr = m.profile;
           const okPair = (q) => Array.isArray(q) && q.length === 2 && q.every((v) => finite(v) && v >= 0 && v <= 1);
@@ -241,7 +341,7 @@
 
   return {
     MOTION_SCHEMA: SCHEMA, MOTION_KINDS: KINDS,
-    poseAt, checkMotion, pathAt, pathLength, motionBox, warpTime, tangentAt,
+    poseAt, skinAt, checkMotion, pathAt, pathLength, pathMarks, motionBox, warpTime, tangentAt, keyAt, flightFrame,
     mat4: { identity: I, mul, translate, rotate, about, apply },
   };
 });

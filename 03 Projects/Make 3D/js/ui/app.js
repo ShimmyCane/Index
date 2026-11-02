@@ -346,7 +346,7 @@
   function buildTypeControls() {
     const sel = $('fType');
     sel.innerHTML = '';
-    for (const t of M.TYPES) {
+    for (const t of M.TYPES.filter((x) => !M.SHAPE_TYPES.includes(x))) {   // lofts and sheets come from a shape, not a form
       const o = document.createElement('option');
       o.value = t; o.textContent = t === 'box' ? 'Box' : t === 'group' ? 'Group (holds other objects)' : t[0].toUpperCase() + t.slice(1);
       sel.appendChild(o);

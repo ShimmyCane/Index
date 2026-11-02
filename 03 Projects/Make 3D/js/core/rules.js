@@ -6,7 +6,7 @@
   else root.M3D = Object.assign(root.M3D || {}, api);
 })(typeof self !== 'undefined' ? self : globalThis, function () {
   const G = (typeof module !== 'undefined' && module.exports)
-    ? { ...require('./schema.js'), ...require('./geometry.js'), ...require('./origin.js') }
+    ? { ...require('./schema.js'), ...require('./geometry.js'), ...require('./origin.js'), ...require('./mesh.js') }
     : (typeof self !== 'undefined' ? self : globalThis).M3D;
 
   const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -30,6 +30,15 @@
         if (!Array.isArray(o.dimensions) || o.dimensions.length !== n) out.push(`${o.type} needs ${n} dimension(s)`);
         else if (!o.dimensions.every((d) => isNum(d) && d > 0)) out.push('dimensions must be positive numbers');
       }
+      if (G.SHAPE_TYPES.includes(o.type)) {
+        out.push(...G.shapeIssues(o));
+      }
+      if (o.attach) {
+        const t = model.objects.find((x) => x.uuid === o.attach.to);
+        if (!t || !t.shape) out.push('attach.to must be a loft or sheet');
+        else if (!(Number.isInteger(o.attach.joint) && o.attach.joint >= 0 && o.attach.joint < t.shape.joints.length)) out.push('attach.joint is not a joint of that skeleton');
+        else if ((t.parent || null) !== (o.parent || null)) out.push('an attached part must sit in the same group as its skeleton');
+      }
       if (o.parent) {
         const p = model.objects.find((x) => x.uuid === o.parent);
         if (!p) out.push('parent does not exist');
@@ -38,6 +47,7 @@
       return out.map((message) => ({ message }));
     },
     minimum_dimension(o, model, world, rule) {
+      if (o.type === 'sheet') return [];   // a sheet is thin on purpose
       const d = Array.isArray(o.dimensions) ? o.dimensions : [];
       const min = rule.value ?? 1;
       if (!d.every((x) => isNum(x) && x >= min)) return [{ message: `every dimension must be at least ${min} in` }];

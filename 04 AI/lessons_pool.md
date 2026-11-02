@@ -158,6 +158,12 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 - **Keep both sides of a documentation conflict.** When both branches add a new section to the same notes file, keep both sections, one after the other.
 - **Merge with the head SHA you checked** (`expectedHeadSha`). A draft must be marked ready for review before it can merge.
 
+## Skeleton meshes (Make 3D hawk, 2026-11-02)
+
+- For anything that bends, build a closed mesh on a skeleton line (smooth tube, capped, watertight) instead of stacking extruded boxes; keep a separate open, double-sided type for truly thin things (leaves, grass, flags). Prove closure by counting: every edge in exactly two triangles, positive signed volume.
+- Let separate parts ride a joint (`attach`) instead of copying motions; use eased, closed keyframes for one-off beats in a loop; derive banking and pitch from the path.
+- Test a rig by sampling every vertex over the whole loop (ground clearance, reach, fold), not by looking at one frame.
+
 ## From Grand Ocean Aquarium (Make 3D, 2026-11-02)
 
 - **See-through surfaces must not block taps.** In a 3-D viewer, make glass and water ignore picks (opacity under 0.4) so the object behind can be selected.

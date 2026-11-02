@@ -375,3 +375,36 @@ Source: `convo/convo v0.7.md` (answers A–E). Test scene: robot with a banana (
 **Library order (round 7, G–H).** One row per project (the scene name without its "V…" label, or the scene's `project`), most recently changed first; older versions fold away, newest first. Each sample bundle carries `listing: { project, created, updated }` from `models/scene_dates.json`, which the build keeps: a new scene takes its dates from git, and a changed history or motion sets `updated` to now.
 
 **Tools.** `render_versions.js` takes a time (or a frame count for a strip) for the Increment Viewer. IFC export uses the rest pose.
+
+
+## 15. Skeleton meshes: closed lofts and thin sheets (round 8: built, from the hawk)
+
+Boxes, cylinders, spheres and cones give hard, extruded shapes. For things that bend (a wing, a tail, a neck, a blade of grass, a flag) there are two more types. Both are built on a **skeleton line**: a chain of joints that the motion file can bend.
+
+| Type | What it is | Drawn |
+|---|---|---|
+| `loft` | a **closed** mesh: a smooth tube along the skeleton with end caps. Solid, watertight, outward faces. Bodies, wings, tails, beaks, legs, a mouse. | one side |
+| `sheet` | an **open** thin surface along the skeleton. Leaves, blades of grass, flags, ears. | **double sided** |
+
+```json
+{ "type": "loft", "dimensions": [..], "position": [..],
+  "shape": { "joints": [[x,y,z], ...],   // the skeleton line at rest, absolute model coordinates, 2 or more
+             "facing": [0,1,0],          // which way the wide side of the cross-section points
+             "rings": [[t, w, h], ...],  // loft: t 0..1 along the line, w half width, h half height (sheet: [t, w])
+             "samples": 14, "sides": 12, // cross-sections along the line; points round each (sheet: across, odd)
+             "cup": 0.3 } }              // sheet only: how far the middle lifts, as a fraction of the half width
+```
+
+- `dimensions` and `position` are the box around the rest mesh, written by the scene tool, so the rules, bounds and origin work as for any part. Lofts and sheets are never rotated (`rotation_*` stay 0); orient them through `joints` and `facing`.
+- `sheet` is exempt from the minimum-dimension rule (thin on purpose). The clash check skips lofts and sheets (no volume test yet).
+- `attach: { "to": "<loft uuid>", "joint": k }` on any part makes it **ride that joint** of another loft's skeleton: eyes on the head joint, a tail on the rump joint. Same group as the skeleton's owner.
+- Motion kind **`bend`**: `{ target: <loft or sheet>, kind: "bend", joint: k, axis: "x|y|z", ... }` turns everything after joint `k` about joint `k`'s rest position, in the frame of the joints before it (so a wing's elbow bends with its shoulder). Angle: `from`/`to`/`cycles`/`phase` (a sine, as `swing`), or `keys: [[t, deg], ...]`. `envelope: [[t, 0..1], ...]` scales the whole angle (a flap that starts and stops).
+- `keys` is a closed list: `t` rises from 0 and stays below 1, and after the last key the value eases back to the first key's value at t = 1. `swing` accepts `keys` too.
+- A `path` can use **`face: "flight"`**: the nose follows the path, and the up axis leans into turns and pulls (`bank_gain`), so a bird banks and pitches without any roll keys. The up axis keeps a floor so the bird never rolls onto its back; the frame at the start is the rest pose.
+- Several `bend`s on one joint add up. For the first frame to be the rest pose, each bend must be 0 at t = 0 (use phase 0, or an offset that cancels it; the envelope multiplies the whole angle).
+
+**Engine.** `js/core/mesh.js` builds the vertices and triangles (the vertex layout depends on the shape only, so a viewer builds triangles once and moves vertices), `meshStats` checks a loft is closed, `shapeIssues` is the rules check. `js/core/motion.js` adds `skinAt` (a matrix per joint), `keyAt`, `flightFrame`, `pathMarks`. The viewer builds one `BufferGeometry` per part, rewrites its vertices each frame only for parts whose joints move, and draws sheets with `DoubleSide`.
+
+**Not yet:** IFC export skips lofts and sheets; the clash check ignores them; no way to add one from the form (they come from a scene tool); a bend's frame is the chain's, so a twist about the line itself is not available.
+
+**Test scene:** `tools/hawk.js` (V01 to V06), `tests/test_mesh.js`. Render stills and frames with `node tools/render_models.js <dir> hawk-v06@19.4 --follow=hawk --zoom=62`.

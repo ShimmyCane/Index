@@ -5,5 +5,6 @@ window.REVIEW_SETS = [
   { id: "honda_crv", label: "Honda CR-V test model: V01 to V05" },
   { id: "adventure_park", label: "Adventure Coaster Park: V01 to V10" },
   { id: "adventure_park_compact", label: "Adventure Coaster Park: compact and animated, V11 to V15" },
-  { id: "aquarium", label: "Grand Ocean Aquarium: V01 to V05" }
+  { id: "aquarium", label: "Grand Ocean Aquarium: V01 to V05" },
+  { id: "hawk", label: "Hawk: closed meshes on a skeleton line, V01 to V06" }
 ];

@@ -26,6 +26,8 @@
       case 'cylinder':
       case 'cone': { const h = [d[0], d[0], d[0]]; h[v] = d[1] / 2; return h; }
       case 'sphere': return [d[0], d[0], d[0]];
+      case 'loft':
+      case 'sheet': return [d[0] / 2, d[1] / 2, d[2] / 2]; // box around the rest mesh; never rotated
       default: return null; // group
     }
   }
