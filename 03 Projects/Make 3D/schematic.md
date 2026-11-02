@@ -293,3 +293,16 @@ details/detail-0001/
 - `node tools/test_geometry.js`: apply/replay, modify only listed fields, delete with children, unknown fields kept.
 - `node tools/test_rules.js`: one passing and one failing case per rule, plus the Lego overlap exception.
 - `node tools/smoke.js`: headless Chromium (pre-installed Playwright) loads each sample, toggles views, saves a PNG outside the repo.
+
+## 13. Annotation, groups, visibility, export (round 4: designed, not built)
+
+Source: `convo/convo v0.4.md`. Open questions there. Nothing here is built yet.
+
+- **Annotations:** anchored to a surface point (click snaps to the first surface the camera sees). A leader line runs to a label that the user drags out to a distance. The label is screen-facing, with a paper backing and a fixed screen size, so it stays legible as the scene rotates. Kinds: free-floating, attached to an object, or both. Stored in the model as operations (`annotation_add`, `annotation_edit`, `annotation_delete`), so history and undo stay consistent.
+- **Undo:** session only, and separate from the model history (proposed, A5).
+- **Autosave:** each annotation edit is saved to the cloud on its own. Offline edits queue and send when back online (A6).
+- **Groups:** moving an object into a group sets its `parent` (an operation). Nesting to be decided (G1).
+- **Visibility:** `hidden` flag on objects and groups. Hiding a group hides its children. Image export leaves hidden items out. 3-D export keeps them, flagged hidden (proposed, G2–G4).
+- **Exports:** a PNG of one view, for a background in Quick Detail (E3). A 3-D file for Revit or other software (E1–E2). The format is still open.
+- **Future:** scene tags (S2); read-only share link (S1).
+
