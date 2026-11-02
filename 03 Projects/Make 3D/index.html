@@ -11,10 +11,6 @@
   <div class="brand">Make 3D</div>
   <div class="model-title" id="modelTitle">…</div>
   <span class="pill" id="status">Saved on this device</span>
-  <div class="groupctl" id="groupCtl" hidden>
-    <button type="button" class="groupbtn" id="groupBtn" aria-haspopup="true" aria-expanded="false" aria-controls="groupPanel">Parts <span aria-hidden="true">▾</span></button>
-    <div class="grouppanel" id="groupPanel" role="group" aria-label="Show or hide parts" hidden></div>
-  </div>
 </header>
 
 <main class="layout">
@@ -137,6 +133,10 @@
     <div class="stage-top-right">
       <button class="btn small link-btn" id="linkBtn" type="button" hidden>Open</button>
       <button class="btn small" id="fullBtn" type="button" aria-pressed="false">Full screen</button>
+      <div class="groupctl" id="groupCtl" hidden>
+        <button type="button" class="btn small groupbtn" id="groupBtn" aria-haspopup="true" aria-expanded="false" aria-controls="groupPanel">Parts <span aria-hidden="true">▾</span></button>
+        <div class="grouppanel" id="groupPanel" role="group" aria-label="Show or hide parts" hidden></div>
+      </div>
     </div>
     <div class="anim-bar" id="animBar" hidden>
       <button class="btn small anim-btn" id="animPlay" type="button" aria-label="Play"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></button>

@@ -303,3 +303,12 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 - **Checks:** `tests/test_earth_land.js` (6 tests), `tests/test_core.js`, and the other Make 3D suites pass. Renders checked at the default camera and four azimuths (`renders/earth/v21.png`).
 - **Review:** Increment Viewer `?set=earth_views_v21`.
 - **Open for Jimmy:** (1) Is 5 degrees precise enough, or do you want a finer map (for example 2.5 degrees, which means 4x again)? (2) Coastal cities sit a cell off (Sydney, Tokyo); do you want the city lights (V15) moved onto the new grid? (3) Deserts are rough boxes; do you want a real desert map?
+## Robot cape and the Parts control (2026-11-02, round 2)
+
+- **Quick Detail "Robot Cape"** (`sketch_details` f3e32d04-…, tag `make3d`): a closed outline (ink), a yellow border, six brown tassels at the bottom, nine circles in the middle (four red, five blue). Its notes say the holes should show the circles, the tassels should be brown, and the cape should move like fabric with a sheen.
+- **Built:** `tools/robot_cape.js`, used by Robot loop V05 (`robot-loop-v05`). The outline is a sheet on a 7-joint skeleton down the back; the border is 24 beads on the outline; tassels are brown cylinders; the circles are coloured discs on the back.
+- **Motion:** a wave runs down the cape all the time (joints 1 to 6, 3 cycles per loop). The lower cape swings sideways on turns. Both follow the walk's turn rate (computed from the path), so tight turns flow more. Every key list starts at 0, so the first frame is the rest pose.
+- **Scale decision:** the cape is 22 in from the shoulders to near the ground, with the drawing's proportions. The drawn 7'-10" is not used, because it does not fit a 3 ft robot.
+- **Frisbee:** V05 moves it to the banana's right hand. V02 to V04 keep their history (the frisbee stays left there).
+- **Parts control:** now under Full screen in the stage's upper right, not in the header.
+- **Known limits:** a sheet cannot have holes (discs stand in), the border is beads, no sheen (flat colour), and the cape does not collide with the robot.

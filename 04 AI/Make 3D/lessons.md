@@ -180,3 +180,6 @@ Jimmy's note on V06: too slow, too small, "too diagrammatic and not real enough 
 - **Antarctica needs a rule, not a polygon.** The outline did not fill the last rows over the pole; forcing latitudes below -80 to land (and to ice) was simpler and checked.
 - **Azimuth sweeps beat the target aim.** `--target` did not aim at the land; a sweep of azimuths at the default framing showed the continents.
 
+- A sheet cannot be cut, so holes in fabric are discs laid on the surface. Say so in the notes, not as holes.
+- Keep bends as keyed angles that start at 0, shifted by the first key. A sine with a phase offset breaks the rest pose at the start of the loop.
+- A "mean" check is needed when a motion's keys are offset: compare each key with the mean, not with the start.

@@ -25,6 +25,13 @@ window.REVIEW_DATA = {
       description: "A black top hat with a coral band, sitting on the head. It rides the upper body, so it sways with the walk.",
       changes: ["Top hat group on the head: brim, crown and band", "Hat is a visibility group"],
       gaps: ["The antenna passes through the crown (the antenna was not moved)", "The hat sits flat, not tilted"]
+    },
+    {
+      id: "V5", title: "Frisbee in the banana hand, and the cape",
+      image: "../Make 3D/renders/robot-loop/v05.png",
+      description: "The frisbee moves to the right hand, with the banana. The cape (from the Quick Detail \"Robot Cape\") hangs from the shoulders: a double-sided sheet with a yellow border, brown tassels and round holes. A wave runs down it all the time, and the lower cape swings out in tight turns.",
+      changes: ["Frisbee moved to the right hand, beside the banana", "Cape: a sheet on a 7-joint skeleton, 22 in tall, about 8 to 11 in wide", "Cape motion: a wave down the cape (always) and a sideways swing on the turns, scaled by how sharply the walk turns", "Cape is a visibility group"],
+      gaps: ["Sized to the robot (22 in), not to the drawn 7'-10\"; the proportions are the sketch's", "The holes are coloured discs on the back, not cut-outs (a sheet cannot have holes)", "The border is a row of small beads, not a continuous trim", "No sheen: the material is a flat colour", "The cape is a sheet, not a cloth: it does not collide with the robot"]
     }
   ]
 };
