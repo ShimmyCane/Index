@@ -311,7 +311,8 @@
       const r = canvas.getBoundingClientRect();
       const ndc = new THREE.Vector2(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
       raycaster.setFromCamera(ndc, camera);
-      const hit = raycaster.intersectObjects(meshes, false)[0];
+      // Glass and water (opacity under 0.4) are see-through: a tap goes through them to the object behind.
+      const hit = raycaster.intersectObjects(meshes, false).find((h) => !(h.object.material && h.object.material.transparent && h.object.material.opacity < 0.4));
       onSelect(hit ? hit.object.userData.uuid : null);
     }
 

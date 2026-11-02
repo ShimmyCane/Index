@@ -157,3 +157,10 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 - **Check mergeability before every merge.** A PR can show `dirty` (conflict) or `unknown` (not yet recomputed) after a push. Read it again before merging. Fetch the base and merge it into the branch. Do not rebase a shared branch.
 - **Keep both sides of a documentation conflict.** When both branches add a new section to the same notes file, keep both sections, one after the other.
 - **Merge with the head SHA you checked** (`expectedHeadSha`). A draft must be marked ready for review before it can merge.
+
+## From Grand Ocean Aquarium (Make 3D, 2026-11-02)
+
+- **See-through surfaces must not block taps.** In a 3-D viewer, make glass and water ignore picks (opacity under 0.4) so the object behind can be selected.
+- **Plan the object budget before the detail.** Count parts per item (a fish is 4 to 10), then choose detail per increment so the counts land near the targets (100, 150, 200, 500, 1,000).
+- **Group many movers.** Move a school or a crowd as one group with one motion and keep each member as a named child, so a thousand parts need only a few hundred motions.
+- **Seed random layout by key.** Seeding each random choice by the object's key keeps earlier increments identical when later ones add objects.

@@ -322,5 +322,6 @@ const { HONDA_CRV } = require('./honda_crv.js');
 const { ROBOT_BANANA } = require('./robot_banana.js');
 const { ADVENTURE_PARK } = require('./adventure_park.js');
 const { ADVENTURE_PARK_COMPACT } = require('./adventure_park_compact.js');
+const { AQUARIUM } = require('./aquarium.js');
 
-module.exports = { WORLD_ID, SCENES: [PLANTER, TABLE, OUTDOOR_V2, KITCHEN, ...LIVING_ROOM, ...KITCHEN_MOCKUP, ...HONDA_CRV, ...ADVENTURE_PARK, ...ADVENTURE_PARK_COMPACT, ROBOT_BANANA] };
+module.exports = { WORLD_ID, SCENES: [PLANTER, TABLE, OUTDOOR_V2, KITCHEN, ...LIVING_ROOM, ...KITCHEN_MOCKUP, ...HONDA_CRV, ...ADVENTURE_PARK, ...ADVENTURE_PARK_COMPACT, ...AQUARIUM, ROBOT_BANANA] };

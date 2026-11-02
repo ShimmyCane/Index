@@ -4,5 +4,6 @@ window.REVIEW_SETS = [
   { id: "living_room", label: "Living Room Scene: V1 to V10" },
   { id: "honda_crv", label: "Honda CR-V test model: V01 to V05" },
   { id: "adventure_park", label: "Adventure Coaster Park: V01 to V10" },
-  { id: "adventure_park_compact", label: "Adventure Coaster Park: compact and animated, V11 to V15" }
+  { id: "adventure_park_compact", label: "Adventure Coaster Park: compact and animated, V11 to V15" },
+  { id: "aquarium", label: "Grand Ocean Aquarium: V01 to V05" }
 ];

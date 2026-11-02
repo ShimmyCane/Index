@@ -215,3 +215,22 @@ V01 to V10 are unchanged by V11 (checked: their generated files do not change). 
 - **Steepest slope:** about 80° on the coaster's first drop. Steeper than typical family coasters; open for Jimmy whether to soften it.
 - **V16 life in the park:** visitors in and out of the gate (80 ft loop, about 4.4 ft/s) and round the plaza (14 ft ring, about 4.9 ft/s), four vendor stalls with keepers, five birds on a 3-D loop (about 31 ft/s) with a wing-beat bob, three free balloons.
 - **Open:** (1) keep the 80° drop, or soften it? (2) keep the ride speed at 1.25× or go back to real time?
+
+## Grand Ocean Aquarium (2026-11-02)
+
+- **Subject:** a large imagined public aquarium, in the style of the California Science Center kelp tank (Los Angeles): 100 x 60 ft tank, 28 ft deep, a 100 ft round acrylic walk-through tunnel along the floor, a front viewing gallery, entry lobby, exit hall and a pool deck. Sharks, large fish, schools of small fish, kelp and reef plants. Tap an animal to read its name and description.
+- **Mode:** research. Sources and estimates in `04 AI/Make 3D/research/aquarium.md` (CSC kelp tank about 188,000 gallons and a 24 ft tunnel; Georgia Aquarium 100 ft tunnel; sand tiger, zebra and bonnethead shark sizes). Our tank is larger than the CSC tank and its layout is an estimate. Manta ray wingspan sources disagree (26 versus 29 ft); not used.
+- **Build:** `03 Projects/Make 3D/tools/aquarium.js`, one `defsFor(v)` that returns the objects and the motions. World `worlds/aquarium-world.json` (bounds ±100 by ±75 ft). Test: `tests/test_aquarium.js`. Review: Increment Viewer `?set=aquarium`.
+
+| Version | Objects | Change |
+|---|---|---|
+| V01 | 102 | Blockout: tank, tunnel, lobby, exit, gallery, deck; 8 animals; 4 kelp; rocks. Still |
+| V02 | 159 | Animated: swim loops, tail beats, kelp sway; 8 more animals; fins |
+| V03 | 215 | Guest spaces: tunnel ribs, benches, piers, lamps, signs, rails |
+| V04 | 525 | Schools (3), kelp forest, reef, moray, 12 more animals, eyes, guests walking the tunnel |
+| V05 | 1,028 | 8 schools, 8 jellyfish, a diver, bubble vents, eelgrass, anemones with clownfish, urchins, stars, a crowd, deck lamps |
+
+- **Motion:** one 60 s loop (autoplays twice), 44 motions in V02 up to 150 in V05. Swimmers follow closed organic loops that stay in the water and out of the tunnel (tested at 90 times per loop).
+- **Viewer change:** taps now pass through anything with opacity under 0.4 (glass and water), so fish behind a glass wall can be picked. Other scenes are unaffected.
+
+**Open for Jimmy:** the tunnel ribs are straight chords, not a smooth arch; rays, turtles and eels do not beat wings or flippers; fish are boxes and cones; a "hide walls" toggle would help view the gallery; tap-to-start and chained motions are still future.
