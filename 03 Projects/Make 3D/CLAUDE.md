@@ -10,6 +10,7 @@ Purpose: a browser-based 3D sandbox where the **JSON file is the model**. Object
 
 How to run: open `index.html` in a browser (no server or build). Also works from GitHub Pages.
 
+- True orbits and the one-shot timeline: `tools/solar_true.js` (solar V06), `js/core/motion.js` (kind `orbit`, `loop: false`), tests `node tests/test_orbits.js`, schematic §17. Planet and Earth views: `tools/planet_views.js` (planet-<name>-v02/v03, planet-earth-v02…v10).
 - Linked views: `js/core/linked_views.js` (tags `link:<model_id>[:zoom|:fade]`, schematic §16), test `node tests/test_linked_views.js`.
 - Solar System: `tools/solar_system.js` (V01–V05, planet views `planet-<name>`), world `worlds/solar-system-world.json`. Not to scale. Review: Increment Viewer `?set=solar_system`.
 - Tests: `node tests/test_core.js` (engine, plain Node), `node tests/test_ifc.js` (IFC export), `node tests/test_motion.js` (motion and the robot walk), `node tests/test_mesh.js` (skeleton meshes, bends and the hawk).

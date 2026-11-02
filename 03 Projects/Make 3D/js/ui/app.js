@@ -154,6 +154,7 @@
     renderList(model);
     renderSelection(model);
     renderLink(model);
+    renderHome();
     renderLast();
     renderReject();
     renderHistory();
@@ -357,26 +358,98 @@
     if (l) $('linkBtn').textContent = `${l.name} →`;
   }
   function goLink() {
-    if (hopping) return;
     const l = selectedLink(shown());
     if (!l) return;
-    hopping = true;
     const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const kind = M.transitionFor(l, reduce);
+    hop(l.target, M.transitionFor(l, reduce), l.name);
+  }
+  // The page's own button (header.links): back to the Solar System, and any other linked view.
+  function renderHome() {
+    const links = (st.history && st.history.header && st.history.header.links) || [];
+    const l = links.find((x) => x && SAMPLES[x.target]) || null;
+    st.homeLink = l;
+    $('homeBtn').hidden = !l;
+    if (l) $('homeBtn').textContent = `← ${l.label || 'Back'}`;
+  }
+  function hop(target, kind, label) {
+    if (hopping || !SAMPLES[target]) return;
+    hopping = true;
     const ms = M.DURATION_MS[kind];
     const stage = document.querySelector('.stage');
     stage.dataset.transition = kind;
     stage.classList.add('leaving');
     setTimeout(() => {
-      setModelUrl(l.target);
-      setState(sampleBundle(l.target));
-      setStatus(`Opened ${l.name}`, '');
+      setModelUrl(target);
+      setState(sampleBundle(target));
+      setStatus(`Opened ${label}`, '');
       stage.classList.remove('leaving');
       stage.classList.add('entering');
       void stage.offsetWidth;           // paint the start frame, then let the new view arrive
       stage.classList.remove('entering');
       setTimeout(() => { hopping = false; }, ms);
     }, ms);
+  }
+
+  // ---------- one-shot timeline: a month and year tracker (lower right). Scroll or drag to move through time.
+  // Scrolling moves one month a notch (hold Shift for a year); dragging moves about one month per 10 px.
+  const track = { start: null, span: 0, months: 0, idx: 0, acc: 0, drag: null };
+  const trackOn = () => !!(st.motion && st.motion.timeline && st.motion.loop === false);
+  const monthLabel = (d) => d.toLocaleString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+  function setupTrack() {
+    $('dateTrack').hidden = !trackOn();
+    if (!trackOn()) return;
+    const tl = st.motion.timeline;
+    track.start = new Date(tl.start_date + 'T00:00:00Z');
+    track.span = tl.span_days;
+    track.months = Math.floor(tl.span_days / 30.436875);
+    track.idx = 0;
+    drawTrack();
+  }
+  function dateAt(idx) { const d = new Date(track.start.getTime()); d.setUTCMonth(d.getUTCMonth() + idx); return d; }
+  function monthAt(u) {
+    const d = new Date(track.start.getTime() + u * track.span * 86400000);
+    return (d.getUTCFullYear() - track.start.getUTCFullYear()) * 12 + (d.getUTCMonth() - track.start.getUTCMonth());
+  }
+  function drawTrack() {
+    const drum = $('drum');
+    drum.innerHTML = '';
+    for (let k = -2; k <= 2; k++) {
+      const i = track.idx + k, row = document.createElement('div');
+      row.className = 'drum-row' + (k === 0 ? ' now' : '');
+      row.textContent = i >= 0 && i <= track.months ? monthLabel(dateAt(i)) : '';
+      drum.appendChild(row);
+    }
+    $('dateTrack').setAttribute('aria-valuetext', monthLabel(dateAt(track.idx)));
+  }
+  function goMonth(i) {
+    track.idx = Math.max(0, Math.min(track.months, i));
+    const u = Math.min(1, Math.max(0, (dateAt(track.idx) - track.start) / 86400000 / track.span));
+    st.viewer.seek(u * st.motion.loop_s);
+    drawTrack();
+  }
+  // called on every animation tick: the tracker follows the playing timeline (unless the user is dragging it)
+  function onTrackTick(a) {
+    if (!trackOn() || !a.has || track.drag) return;
+    const i = Math.max(0, Math.min(track.months, monthAt(a.t / a.loop_s)));
+    if (i !== track.idx) { track.idx = i; drawTrack(); }
+  }
+  function bindTrack() {
+    const el = $('dateTrack');
+    el.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      track.acc += e.deltaY;
+      const step = e.shiftKey ? 12 : 1;
+      const notches = Math.trunc(track.acc / 40);
+      if (notches) { track.acc -= notches * 40; goMonth(track.idx + notches * step); }
+    }, { passive: false });
+    el.addEventListener('pointerdown', (e) => { track.drag = { y: e.clientY, base: track.idx }; el.setPointerCapture(e.pointerId); });
+    el.addEventListener('pointermove', (e) => {
+      if (!track.drag) return;
+      goMonth(track.drag.base + Math.round((track.drag.y - e.clientY) / 10));
+    });
+    const end = () => { track.drag = null; };
+    el.addEventListener('pointerup', end);
+    el.addEventListener('pointercancel', end);
   }
 
   // ---------- full screen: the Fullscreen API, or a fixed fill where the browser refuses it
@@ -549,6 +622,7 @@
   }
   function setState({ history, world, motion }) {
     st.history = history; st.world = world; st.motion = motion || null;
+    setupTrack();
     st.cursor = history.operations.length;
     st.selected = null; st.rejected = null; st.preview = null; st.last = null; st.check = null;
     st.fit = true; st.groundZ = null;
@@ -578,6 +652,7 @@
     $('animBar').hidden = !a.has;
     $('animSettings').hidden = !a.has;
     if (!a.has) return;
+    onTrackTick(a);
     const btn = $('animPlay');
     btn.innerHTML = a.playing ? ICON_PAUSE : ICON_PLAY;
     btn.setAttribute('aria-label', a.playing ? 'Pause' : 'Play');
@@ -828,11 +903,15 @@
     });
     $('resetView').addEventListener('click', () => { st.fit = true; render(); });
     $('linkBtn').addEventListener('click', goLink);
+    $('homeBtn').addEventListener('click', () => { const l = st.homeLink; if (l) hop(l.target, l.transition || 'fade', l.label); });
+    bindTrack();
     $('fullBtn').addEventListener('click', toggleFull);
     document.addEventListener('fullscreenchange', syncFull);
 
     $('animPlay').addEventListener('click', () => {
-      if (st.viewer.animState().playing) st.viewer.pause(); else st.viewer.play(Infinity);
+      const a = st.viewer.animState();
+      if (a.playing) st.viewer.pause();
+      else { if (a.has && a.t >= a.loop_s) st.viewer.seek(0); st.viewer.play(Infinity); }
     });
     $('animReset').addEventListener('click', () => { st.viewer.pause(); st.viewer.seek(0); });
     $('animTime').addEventListener('input', (e) => {
@@ -921,6 +1000,7 @@
     bind();
     setupCloud();
     render();
+    setupTrack();
     save();
     startMotion();
     renderLibrary();

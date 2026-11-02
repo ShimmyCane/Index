@@ -12,7 +12,7 @@
   else root.M3D = Object.assign(root.M3D || {}, api);
 })(typeof self !== 'undefined' ? self : globalThis, function () {
   const SCHEMA = 'make3d.motion/0.1';
-  const KINDS = ['path', 'swing', 'bob', 'slide', 'spin', 'bend'];
+  const KINDS = ['path', 'swing', 'bob', 'slide', 'spin', 'bend', 'orbit'];
   const AXES = { x: [1, 0, 0], y: [0, 1, 0], z: [0, 0, 1] };
   const TAU = Math.PI * 2;
 
@@ -179,6 +179,25 @@
   }
   const norm3 = (v) => { const l = Math.hypot(v[0], v[1], v[2]) || 1; return [v[0] / l, v[1] / l, v[2] / l]; };
 
+  // ---------- Keplerian orbit: where a body is, from its elements (degrees, inches, z up = orbit normal).
+  // m: { a, e, inc_deg, node_deg, peri_deg, M0_deg, period_days, span_days }. days = u * span_days from the start.
+  // Standard two-body formulas; M0 is the mean anomaly at the start of the timeline.
+  function orbitPosition(m, u) {
+    const days = u * m.span_days;
+    const M = (((m.M0_deg + (360 * days) / m.period_days) % 360) + 360) % 360 * Math.PI / 180;
+    const e = m.e;
+    let E = e > 0.8 ? Math.PI : M;
+    for (let k = 0; k < 50; k++) { const d = (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E)); E -= d; if (Math.abs(d) < 1e-12) break; }
+    const xp = m.a * (Math.cos(E) - e), yp = m.a * Math.sqrt(1 - e * e) * Math.sin(E);
+    const O = m.node_deg * Math.PI / 180, w = m.peri_deg * Math.PI / 180, i = m.inc_deg * Math.PI / 180;
+    const cO = Math.cos(O), sO = Math.sin(O), cw = Math.cos(w), sw = Math.sin(w), ci = Math.cos(i), si = Math.sin(i);
+    return [
+      (cO * cw - sO * sw * ci) * xp + (-cO * sw - sO * cw * ci) * yp,
+      (sO * cw + cO * sw * ci) * xp + (-sO * sw + cO * cw * ci) * yp,
+      (sw * si) * xp + (cw * si) * yp,
+    ];
+  }
+
   // ---------- one motion -> matrix at loop fraction u (0..1)
   const deg = (d) => (d * Math.PI) / 180;
   function matrixFor(m, u, L) {
@@ -192,6 +211,10 @@
         return about(pivot, axis, deg(angleOf(m, u)));
       }
       case 'spin': return about(pivot, axis, TAU * c * u + deg(m.start_deg || 0));
+      case 'orbit': {
+        const p = orbitPosition(m, u), p0 = orbitPosition(m, 0);
+        return translate(p[0] - p0[0], p[1] - p0[1], p[2] - p0[2]);
+      }
       case 'bob': { const a = (m.amount || 0) * rise; return translate(axis[0] * a, axis[1] * a, axis[2] * a); }
       case 'slide': { const a = (m.distance || 0) * rise; return translate(axis[0] * a, axis[1] * a, axis[2] * a); }
       case 'path': {
@@ -232,7 +255,7 @@
     if (!motion || !Array.isArray(motion.motions)) return out;
     const have = new Set((model && model.objects || []).map((o) => o.uuid));
     const L = motion.loop_s > 0 ? motion.loop_s : 1;
-    const u = (((t / L) % 1) + 1) % 1;
+    const u = motion.loop === false ? Math.max(0, Math.min(1, t / L)) : (((t / L) % 1) + 1) % 1;
     for (const m of motion.motions) {
       if (!have.has(m.target) || !KINDS.includes(m.kind) || m.kind === 'bend') continue;
       if (m.start && m.start !== 'auto') continue; // tap and chained starts are future
@@ -254,7 +277,7 @@
     const out = {};
     if (!motion || !Array.isArray(motion.motions)) return out;
     const L = motion.loop_s > 0 ? motion.loop_s : 1;
-    const u = (((t / L) % 1) + 1) % 1;
+    const u = motion.loop === false ? Math.max(0, Math.min(1, t / L)) : (((t / L) % 1) + 1) % 1;
     const byId = new Map(((model && model.objects) || []).map((o) => [o.uuid, o]));
     const bends = {};
     for (const m of motion.motions) {
@@ -319,7 +342,15 @@
       ids.add(id);
       if (!KINDS.includes(m.kind)) { bad(`unknown kind "${m.kind}"`, id); continue; }
       if (!objects.has(m.target)) warn(`target ${m.target} is not in the model, so it will not move`, id);
-      if (m.cycles !== undefined && !(Number.isInteger(m.cycles) && m.cycles >= 1)) bad('cycles must be a whole number, 1 or more, so the loop closes', id);
+      if (m.cycles !== undefined && motion.loop !== false && !(Number.isInteger(m.cycles) && m.cycles >= 1)) bad('cycles must be a whole number, 1 or more, so the loop closes', id);
+      if (m.cycles !== undefined && motion.loop === false && !(Number.isFinite(m.cycles) && m.cycles !== 0)) bad('cycles must be a number other than 0 (negative turns the other way)', id);
+      if (m.kind === 'orbit') {
+        if (!(finite(m.a) && m.a > 0)) bad('orbit needs a above 0, in inches', id);
+        if (!(finite(m.e) && m.e >= 0 && m.e < 1)) bad('orbit e must be from 0 up to below 1', id);
+        if (!(finite(m.period_days) && m.period_days > 0 && finite(m.span_days) && m.span_days > 0)) bad('orbit needs period_days and span_days above 0', id);
+        if (!(finite(m.M0_deg) && finite(m.inc_deg) && finite(m.node_deg) && finite(m.peri_deg))) bad('orbit needs M0_deg, inc_deg, node_deg and peri_deg', id);
+        if (motion.loop !== false) bad('orbit needs a one-shot timeline (loop: false)', id);
+      }
       if (m.axis !== undefined && !AXES[m.axis]) bad('axis must be x, y or z', id);
       if (m.pivot !== undefined && !vec(m.pivot)) bad('pivot must be [x, y, z] in inches', id);
       if (m.phase !== undefined && !finite(m.phase)) bad('phase must be a number', id);
@@ -358,7 +389,7 @@
 
   return {
     MOTION_SCHEMA: SCHEMA, MOTION_KINDS: KINDS,
-    poseAt, skinAt, checkMotion, pathAt, pathLength, pathMarks, motionBox, warpTime, tangentAt, keyAt, flightFrame,
+    poseAt, skinAt, checkMotion, orbitPosition, pathAt, pathLength, pathMarks, motionBox, warpTime, tangentAt, keyAt, flightFrame,
     mat4: { identity: I, mul, translate, rotate, about, apply },
   };
 });

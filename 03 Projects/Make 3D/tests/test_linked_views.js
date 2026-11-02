@@ -46,7 +46,8 @@ t('zoom only when asked, and never with reduced motion', () => {
 });
 t('every link in the solar scenes points at a scene that exists', () => {
   const ids = new Set(SCENES.map((s) => s.id));
-  const scenes = [...SOLAR_SYSTEM, ...PLANET_VIEWS];
+  const TV = require(path.join(__dirname, '..', 'tools/solar_true.js')), PV2 = require(path.join(__dirname, '..', 'tools/planet_views.js'));
+  const scenes = [...SOLAR_SYSTEM, ...PLANET_VIEWS, TV.SOLAR_TRUE, ...PV2.PLANET_VIEWS_V2V3, ...PV2.EARTH_VIEWS];
   let links = 0;
   for (const s of scenes) {
     for (const d of s.defs) {
@@ -55,15 +56,19 @@ t('every link in the solar scenes points at a scene that exists', () => {
       if (l) { links++; assert.ok(ids.has(l.target), `${s.id}: ${obj.name} links to missing ${l.target}`); }
     }
   }
-  assert.ok(links >= 9 + 1, `expected planet links and a way back, got ${links}`);
+  assert.ok(links >= 9 + 9 + 1, `expected planet links and a way back, got ${links}`);
 });
-t('the solar system links every planet, and every planet view links back', () => {
-  const s5 = SOLAR_SYSTEM[4];
-  const toPlanets = s5.defs.map((d) => LV.linkOf({ tags: d[1].tags || [] })).filter(Boolean).map((l) => l.target);
-  assert.deepStrictEqual(toPlanets.sort(), ['planet-earth', 'planet-jupiter', 'planet-mars', 'planet-mercury', 'planet-neptune', 'planet-pluto', 'planet-saturn', 'planet-uranus', 'planet-venus'].sort());
-  for (const p of PLANET_VIEWS) {
-    const back = p.defs.map((d) => LV.linkOf({ tags: d[1].tags || [] })).filter(Boolean);
-    assert.deepStrictEqual(back.map((l) => l.target), ['solar-system-v05'], p.id);
+t('the true solar system links every planet to its newest view, and the planet views link back by a button', () => {
+  const s6 = require(path.join(__dirname, '..', 'tools/solar_true.js')).SOLAR_TRUE;
+  const toPlanets = s6.defs.map((d) => LV.linkOf({ tags: d[1].tags || [] })).filter(Boolean).map((l) => l.target);
+  const want = ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+  assert.deepStrictEqual(toPlanets.sort(), want.map((k) => (k === 'earth' ? 'planet-earth-v10' : `planet-${k}-v03`)).sort());
+  // the way back is a page button (header.links), not an object in 3-D space
+  const { EARTH_VIEWS, PLANET_VIEWS_V2V3 } = require(path.join(__dirname, '..', 'tools/planet_views.js'));
+  for (const sc of [...EARTH_VIEWS, ...PLANET_VIEWS_V2V3]) {
+    const objectBack = sc.defs.map((d) => LV.linkOf({ tags: d[1].tags || [] })).filter(Boolean);
+    assert.strictEqual(objectBack.length, 0, `${sc.id} has no 3-D link back`);
+    assert.strictEqual(sc.header.links[0].target, 'solar-system-v06', sc.id);
   }
 });
 t('a linked object is picked from the built model (uuid in the replayed model)', () => {

@@ -7,5 +7,7 @@ window.REVIEW_SETS = [
   { id: "adventure_park_compact", label: "Adventure Coaster Park: compact and animated, V11 to V15" },
   { id: "aquarium", label: "Grand Ocean Aquarium: V01 to V05" },
   { id: "hawk", label: "Hawk: closed meshes on a skeleton line, V01 to V07" },
-  { id: "solar_system", label: "Solar System: V01 to V05, not to scale" }
+  { id: "solar_system", label: "Solar System: V01 to V06, true orbits from V06" },
+  { id: "planet_views", label: "Planet views: V02 and V03, eight planets" },
+  { id: "earth_views", label: "Earth view: V02 to V10" }
 ];

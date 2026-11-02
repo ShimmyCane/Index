@@ -446,3 +446,31 @@ Purpose: a model can hold a link to another model, so a tap on one part opens th
 - No return history: "back" is a link in the scene, not a browser back button.
 - The link button shows for the selected part only; no hover labels.
 - The transition is a screen-level fade or scale, not a camera fly-through.
+
+## 17. True orbits, one-shot timelines, the date tracker, and page buttons (round 9: built)
+
+Purpose: the solar system (V06) follows real orbits from a real date; the animation plays one lap of the slowest body; the page shows the date and offers a way back.
+
+**Motion engine (`js/core/motion.js`)**
+- New kind `orbit`: `{ a, e, inc_deg, node_deg, peri_deg, M0_deg, period_days, span_days }`. `orbitPosition(m, u)` solves Kepler's equation (Newton) for the body's position at timeline fraction u, in inches, z up. The motion is the move from its rest pose: `translate(p(u) - p(0))`. Only an orbit's own parent moves, so a body's spin stays about its own centre.
+- New top-level flag `loop: false` (a one-shot timeline): `u = t / loop_s`, clamped to 0..1, no wrap. `cycles` may then be fractional and negative (a retrograde spin); integer cycles are still required for a loop.
+- `timeline: { start_date, span_days }` (metadata for the page) and `autoplay.plays` as before.
+- Tests: `tests/test_orbits.js` (circle radius, ellipse peri/aphelion, inclination height, node and peri, one period closes, one-shot rules, the start longitude of Earth, the scale of the orbits).
+
+**Viewer (`js/viewer/viewer.js`)**: a one-shot motion stops at its end and holds the last frame (no wrap).
+
+**Page (`js/ui/app.js`, `index.html`, `css/app.css`)**
+- **Date tracker** (lower right, `#dateTrack`): shown when the motion is a one-shot timeline with `timeline`. It shows the month and year (drum of five rows, the middle one highlighted). Scroll moves one month a notch (Shift: one year). Drag moves about one month per 10 px. Moving it seeks the animation to that date; while the animation plays, the tracker follows it.
+- **Back button** (top left, `#homeBtn`): shown when the header has `links: [{ label, target, transition }]`. It is a page button, not an object in 3-D space. Planet and Earth views use it.
+- **Object links** (`link:` tags, §16) still open a linked view from a tapped object, with the zoom or fade transition.
+- **Replay**: the play button restarts a finished one-shot from the start.
+
+**Scenes**
+- `tools/solar_true.js`: solar system V06, true orbits from the JPL approximate elements for 2026-11-02 (`research/solar-system-true.md`). Orbits are scaled by 120 / sqrt(a). Each belt rock has its own orbit (fixed pattern). Each planet's ball links to its newest view.
+- `tools/planet_views.js`: planet views V02 and V03 (textures, extra moons; Venus bands from V02); Earth V02 to V10 (continents, deserts, ice caps, clouds, a station, a launch, a storm, a polar satellite, city lights, a second launch and storm). Earth V10 loop is 480 s (twice the others). Versions are cumulative; V01 views (`planet-<name>`, `planet-earth`) are unchanged.
+- World: `worlds/solar-system-world.json` (bounds ±1000 in across, ±400 in up, to cover Pluto's aphelion and tilt).
+
+**Limits**
+- Positions beyond 2050 are extrapolated (JPL's table is fit for 1800 to 2050).
+- At one lap per 240 s, the fast spins (Jupiter, Earth) alias to flicker. This is expected.
+- Textures are rough discs, spheres and cones; they are not survey data.
