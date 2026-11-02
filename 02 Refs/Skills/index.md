@@ -11,6 +11,7 @@ Skills:
 - claude_review_project: Brings an existing project up to current conventions (project CLAUDE.md, convo/ folder, brief, lessons) and extracts reusable patterns.
 - supabase_project: Sets up or changes a Supabase project: inspects the live schema, prefixes and registers tables, enables RLS, and tests in a rolled-back transaction. Conventions in `04 AI/Supabase/`.
 - fix_puzzles: Reviews puzzles flagged for rework (and ones the generator left unfinished): another seed, another setting, a root fix, or a replacement; re-checks them and closes the flags in the database. Run now and then.
+- make_3d: Builds a 3-D test model from a concept, a photo or other assets, in five increments, and sets up a review in the Increment Viewer. Asks for research mode (outside sources, recorded) or assets-only mode (only what is provided). Photos of real places or people stay in `private/`.
 
 Claude Code:
 - These files are the source of truth. Each one has a thin wrapper in `.claude/skills/<name-with-hyphens>/SKILL.md`, so it can be run as `/start-project`, `/ai-consolidate`, etc.
