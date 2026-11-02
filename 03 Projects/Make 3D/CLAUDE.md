@@ -10,7 +10,7 @@ Purpose: a browser-based 3D sandbox where the **JSON file is the model**. Object
 
 How to run: open `index.html` in a browser (no server or build). Also works from GitHub Pages.
 
-- Tests: `node tests/test_core.js` (engine, plain Node).
+- Tests: `node tests/test_core.js` (engine, plain Node), `node tests/test_ifc.js` (IFC export).
 - Sample: the planter is generated. Edit the operation list in `tools/build_samples.js`, then run `node tools/build_samples.js`. Never hand-edit `model.json` or `js/samples.bundle.js`.
 - Browser check: `node tools/smoke.js <screenshotDir>` (headless Chromium via pre-installed Playwright; save screenshots outside the repo).
 - Cloud client test: `node tests/test_cloud.js` (fake Supabase, no network).

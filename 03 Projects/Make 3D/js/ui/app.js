@@ -430,6 +430,22 @@
     download(`${st.history.model_id}.make3d.json`, bundle);
     setStatus('Saved file downloaded', '');
   }
+  // IFC4 for Revit: the model as it is shown now (the replayed step, or the preview)
+  function exportIfc() {
+    try {
+      const model = shown();
+      const { text, elements, skipped } = M.exportIFC(model, { filename: st.history.model_id });
+      const blob = new Blob([text], { type: 'application/x-step' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${st.history.model_id}.ifc`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      setStatus(`IFC downloaded: ${elements} objects${skipped.length ? `, ${skipped.length} skipped` : ''}`, '');
+    } catch (err) {
+      setStatus(`IFC export failed: ${err.message}`, 'error');
+    }
+  }
   function openFile(file) {
     const reader = new FileReader();
     reader.onload = () => {
@@ -600,6 +616,7 @@
     $('checkBtn').addEventListener('click', () => { st.check = M.checkModel(shown(), st.world); render(); });
     $('rulesChip').addEventListener('click', () => { st.check = M.checkModel(shown(), st.world); st.showErrors = true; $('showErrors').checked = true; render(); });
     $('saveBtn').addEventListener('click', saveFile);
+    $('exportIfcBtn').addEventListener('click', exportIfc);
     $('openFile').addEventListener('change', (e) => { if (e.target.files[0]) openFile(e.target.files[0]); e.target.value = ''; });
     $('loadSample').addEventListener('click', () => {
       if (!confirm('Replace the current model with the sample? Save a file first to keep it.')) return;

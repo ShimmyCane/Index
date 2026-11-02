@@ -309,6 +309,6 @@ Source: `convo/convo v0.4.md`. Open questions there. Nothing here is built yet.
 - **Autosave:** each annotation edit is saved to the cloud on its own. Offline edits queue and send when back online (A6).
 - **Groups:** moving an object into a group sets its `parent` (an operation). Nesting to be decided (G1).
 - **Visibility:** `hidden` flag on objects and groups. Hiding a group hides its children. Image export leaves hidden items out. 3-D export keeps them, flagged hidden (proposed, G2–G4).
-- **Exports:** a PNG of one view, for a background in Quick Detail (E3). A 3-D file for Revit: **IFC** (convo v0.6). Up stays Z (up is up in Revit); units are handled inside the exporter so the model lands at real scale. Imports into Revit as placeable elements, not editable `.rfa` families (editable and parametric families are future).
+- **Exports:** a PNG of one view, for a background in Quick Detail (E3). A 3-D file for Revit: **IFC** (convo v0.6), built in `js/core/export_ifc.js` and downloaded from the gear panel. Up stays Z (up is up in Revit); units are handled inside the exporter so the model lands at real scale. Imports into Revit as placeable elements, not editable `.rfa` families (editable and parametric families are future).
 - **Future:** scene tags (S2); read-only share link (S1).
 
