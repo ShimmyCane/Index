@@ -1,63 +1,59 @@
 # Make 3D — Convo v0.4
 
 **Project:** Make 3D
-**Round:** 4. Questions before building the **outdoor table V2** scene. Earlier rounds are kept unchanged. The V1 scene stays as it is.
+**Round:** 4. Jimmy's notes after opening the MVP on iPad. Designs only, nothing built yet. `convo v0.3.md` is still open.
 
-Answer inline under each number. "Defaults" next to a number means accept my proposal. Leave one blank if you don't know yet. Reply "all defaults" to accept every proposal.
+Keep real project names, clients and addresses out of this file (public repo).
 
-## A. What we found in V1 (please check)
+## What you said
 
-- **Bonsai position.** In V1 the bonsai pot sits on the table top (z 30.75–34.75 in), not on the ground as you described. Confirm the V2 bonsai is on the ground.
-- **Parasol pole.** In V1 the pole starts at the top of the table (z 30 in) and does not reach the ground. Confirm the V2 pole goes to the ground.
-- **Top material.** The table top is teak-coloured wood. The frame is yellow. Your note says the legs are metal, so the table reads as wood. Confirm what should change (see B4).
+- Keep: the title, the three panels (model, objects, view), add-or-paste, the library, the settings button. Three scenes are fine.
+- Done in this round: paste is now the left tab and the default. The step counter (`v26 / 27`) is gone; the model check is what is useful. The settings button is one gear, not a circle with a gear inside.
+- Future: tag scenes the way Quick Detail details are tagged.
+- Use: a quick image of a scene as a background to sketch over in Quick Detail. Export into a 3D format you can bring into Revit or other 3D software as a family or block. Annotate and send to someone as a concept, a grasp of an idea in 3D.
+- Annotation, the way Sketchfab does it: pick a point on an object, a dot appears there, and a text label with an arrow floats in space. The text stays legible as the scene rotates.
+- Panels can be minimised (model, objects).
+- The save should be automatic, to the cloud, so the file is always there. Undo lasts only for the session. Delete an annotation as you delete an object.
+- Part annotations, too.
+- Groups: drag objects into groups. Keep it as an option, even if it can break things.
+- Visibility for presenting: turning a group off hides its contents. An image export leaves hidden things out. A 3D export keeps them but flags them as hidden, or leaves them out. You haven't decided which.
 
-## B. Table
+## Questions
 
-1. **Which end is the parasol at?** Proposed: the end of the 7 ft length away from the bonsai. Or name the end.
-2. **Pole position at that end.** Proposed: centred across the 3 ft width, at the end edge of the top (so the canopy shades the end, not the middle). Or offset?
-3. **Legs and frame look.** Proposed: metal legs and rails in a grey metal (like the pole colour), not yellow. Keep the yellow, or another colour?
-4. **Top material.** Proposed: keep the teak top, since you only mentioned the legs. Or make the top metal too?
-5. **Leg shape.** Proposed: square 2 in metal legs, as now. Or round tube?
-6. **Cross-connections in the short direction.** Proposed: two metal cross-bars across the 3 ft width, one at each end of the 7 ft length, joining the two legs on each end at rail height (27 in). Add a second, low bar at 6 in as well? (Yes / no)
+**Annotations**
 
-## C. Parasol
+A1. **Anchor.** Click a surface and the anchor snaps to the first surface the camera sees (recommended), with the option to pick a different face? Or the centre of the nearest object?
 
-7. **Canopies.** Proposed: one canopy on the pole, plus the side arms and side canopies kept as they are, all in red. Or a single canopy only?
-8. **Red.** Proposed: a warm red, `#c8102e`. Or a different red (coral, brick, deep red)?
-9. **Pole to the ground.** Proposed: the pole runs from the ground to the top, 96 in tall, a 1.5 in diameter metal pole. Confirm the height.
-10. **Square base.** Proposed: a 24 in square base, 8 in high, grey metal, with the pole rising from its centre. Confirm the size.
-11. **Sandbags hidden in the base.** Proposed: two sandbag boxes (about 12 × 6 × 4 in each) inside the base footprint, not visible from outside. They are in the file, so the rules can see them. Confirm.
+A2. **Label placement.** Drag the label out to a distance, then the label stays screen-facing (always readable) and the leader line runs back to the anchor. Is that what you picture? (Recommended.)
 
-## D. Bonsai tree
+A3. **Text legibility.** Labels get a paper-coloured backing and a fixed screen size, so they stay readable when the model is far away. Agree?
 
-12. **Box.** Proposed: a 24 × 24 × 24 in square wooden box, on the ground. (Not the round pot from V1.) Wood colour: same as the table top, or a different wood?
-13. **Distance to the table.** Proposed: the box sits about 8 ft (96 in) from the nearest end of the table, on the ground, on the parasol's opposite end. Is 8 ft to the box edge or the box centre? Which end of the table?
-14. **Tree height.** Proposed: about 5 ft from the ground to the top of the crown. Confirm.
-15. **Branching.** Proposed: one trunk leaning toward the table, one main limb reaching over the table edge, then the limb forks two or three times into smaller branches that spread out. Confirm, or describe the shape you want.
-16. **Leaves.** Proposed: sparse, as a few small leaf clusters (about 8–12 in total) at the ends of the branches, not dense balls. Or more or fewer?
+A4. **Kinds of annotation.** Free-floating (a note in space), attached to an object (follows it when it moves), or both?
 
-## E. Saving
+A5. **Undo.** Session only. Does it cover annotation edits only, or also model edits? (Recommended: annotation edits only, since model edits already have history.)
 
-17. **Name and id.** Proposed: a new scene "Outdoor table with parasol V2" (id `outdoor-table-v2`), listed beside V1 in the Library. V1 is kept unchanged. Confirm, or give a different name.
-18. **Description.** Proposed: a short description that says the parasol is red, sits at one end, has a base with sandbags, and the bonsai is on the ground 8 ft away. OK?
+A6. **Autosave.** Each annotation saves to the cloud on its own, so you never press save. Offline edits wait and send when you're back online. Agree?
 
-## Answers
+**Groups and visibility**
 
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
-11.
-12.
-13.
-14.
-15.
-16.
-17.
-18.
+G1. **Moving into groups.** Dragging an object onto a group sets its parent in history, so the move is recorded and can be undone like any other change. Agree? Are groups allowed inside groups?
+
+G2. **Hidden groups.** Hiding a group hides everything inside it. Recommended: a hidden flag, not deletion, so you can show it again.
+
+G3. **Image export.** Excludes anything hidden. Agree?
+
+G4. **3-D export.** Hidden items: (a) included, marked hidden; (b) left out. Recommended: (a), so the file keeps the whole model and whoever opens it can see what was hidden.
+
+**Export targets**
+
+E1. **Which software is the first target?** Revit, SketchUp, or a general format that most tools open (glTF / OBJ)?
+
+E2. **Revit specifics.** Revit doesn't import a plain 3D mesh as a family. Families are built inside Revit, so the realistic route is a DWG or DXF import, or an FBX or OBJ file that you then model over. Is that enough, or do you want the family built properly with real parameters later?
+
+E3. **Background image for Quick Detail.** A PNG of one view, at the paper size and scale you set? With or without the grid and ground?
+
+**Sharing**
+
+S1. **Presenting.** Do you want a link to a read-only view of a scene (like a Sketchfab page) later? Or only files?
+
+S2. **Tags on scenes** (future, as you said). What would the tags do: filter the library only, or also control which scenes appear in the Quick Detail background list?

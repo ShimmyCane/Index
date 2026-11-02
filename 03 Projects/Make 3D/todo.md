@@ -25,6 +25,15 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - [ ] Publish on GitHub Pages and check online on iPad and iPhone. (Headless iPad-size screenshot checked; not on a real device.)
 - [ ] `/summarize-code` on `index.html`.
 
+## Round 4 (designed in convo v0.4, not built)
+- [ ] Annotations in 3-D: click a surface to anchor, drag out a label with a leader line, screen-facing and legible. Autosave to the cloud. Session undo. Delete. Free and part annotations (A1–A6).
+- [ ] Groups: drag an object into a group, recorded as an operation (G1).
+- [ ] Visibility: hide a group or object; image export leaves hidden items out; 3-D export keeps them flagged hidden (G2–G4). Final choice still to make.
+- [ ] Export a PNG of one view as a background for Quick Detail (E3).
+- [ ] Export a 3-D file for Revit or other software: target software still open (E1–E2).
+- [ ] Tag scenes like Quick Detail details (S2).
+- [ ] Read-only share link for presenting (S1).
+
 ## Scenes and library (round 3)
 - [x] Outdoor table with parasol: 3 ft × 7 ft top on a yellow metal frame, bonsai-style tree, parasol with three canopies (one on the pole, one on each side arm). Table length (7 ft) still to confirm (v0.3 Q6).
 - [x] Kitchen: fridge, counter and stove on the left; sink run with a triple sink and two faucets; dishwasher, drawers and a door on the right; upper cabinets with a sliding acrylic cup display.
@@ -71,3 +80,4 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - 2026-11-01: round 2 inline answers recorded in v0.2; convo v0.3 opened with origin, units and table-length questions.
 - 2026-11-01: MVP built (v0.1–v0.6 except cloud copy and outlines): engine, viewer, UI, planter sample, 19 test groups, headless smoke run.
 - 2026-11-02: outdoor table and kitchen samples; Library button; cloud client (`m3d_scenes`, read-only `sketch_details` by tag); migration applied after a rolled-back test; 8 cloud test groups; smoke run covers the library.
+- 2026-11-02: round 4 notes (iPad): paste is the default tab, step counter removed, one gear icon, panels collapse. Annotation, groups, visibility and export designed in convo v0.4 and the schematic §13; not built.

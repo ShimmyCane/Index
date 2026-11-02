@@ -26,15 +26,17 @@ const url = 'file://' + path.join(__dirname, '..', 'index.html');
   await page.click('#objectList li >> nth=0');
   console.log('selected:', await page.textContent('#selFacts'));
 
-  // a valid add through the form
+  // a valid add through the form (Add tab; paste is the default now)
+  await page.click('#tabAdd');
   await page.fill('#fName', 'Stone marker');
   await page.fill('#fX', "2' 6\"");
   await page.fill('#fZ', '6');
   await page.selectOption('#fType', 'box');
   await page.click('#addForm button[type=submit]');
   const after = await page.locator('#objectList li').count();
-  console.log(`after add: ${after} objects, step ${await page.textContent('#stepLabel')}`);
+  console.log(`after add: ${after} objects, scrubber at ${await page.inputValue('#scrub')} of ${await page.getAttribute('#scrub', 'max')}`);
 
+  await page.click('#tabPaste');
   // a paste that the rules reject (bad coordinates), then preview it
   await page.click('#tabPaste');
   await page.fill('#pasteBox', JSON.stringify({ op: 'add', object: { name: 'Bad', type: 'box', dimensions: [4, 4, 4], position: ['x', 0, 0] } }));
@@ -60,9 +62,9 @@ const url = 'file://' + path.join(__dirname, '..', 'index.html');
   // history scrubber back to step 0, then back to latest
   await page.fill('#scrub', '0');
   await page.dispatchEvent('#scrub', 'input');
-  console.log('scrubbed to:', await page.textContent('#stepLabel'), 'objects shown:', await page.locator('#objectList li').count());
+  console.log('scrubbed to:', await page.inputValue('#scrub'), 'objects shown:', await page.locator('#objectList li').count());
   await page.click('#latestBtn');
-  console.log('back at:', await page.textContent('#stepLabel'));
+  console.log('back at:', await page.inputValue('#scrub'));
   if (shotDir) await page.screenshot({ path: path.join(shotDir, '4-latest.png') });
 
   // view interaction: drag to orbit, wheel to zoom, no crash
