@@ -82,3 +82,9 @@ Appended over time. Promote anything reusable to `04 AI/lessons_pool.md`.
 - **A rotating part needs a visible feature.** A flagpole spinning about its own axis shows nothing; the flag box has to hang off the pole and be the target.
 - **Check motion numbers, not just the rest pose.** Run `poseAt` at a few times and check the values are finite and the targets move. A rest-pose render cannot show a path or a loop.
 - **Units twice is a bug.** Dividing a path by 12 and then multiplying by 12 again leaves it in feet; check the first point of each path is in inches.
+
+## Curves, physics speeds, shareable link (2026-11-02)
+
+- **Closed splines pull their neighbours.** A closed Catmull-Rom through a lift top dragged the return leg underground. For a path with a straight return, use an open spline with doubled ends, then a straight line back.
+- **Physics speed needs a time profile, not a speed.** The motion engine walks a path at constant speed by distance; a profile [[t, s]] maps loop time to distance, so a coaster can speed up on a drop and slow up a hill. The profile is checked by `checkMotion` like the rest of the file.
+- **Let the loop length come from the ride.** Setting the loop to one real lap of the coaster keeps the speeds physical, and other rides can take their speed from it (Pip runs one lap per loop).

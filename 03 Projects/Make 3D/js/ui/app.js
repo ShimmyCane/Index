@@ -37,7 +37,23 @@
   };
 
   // ---------- storage
+  // A shared link names its model: ?model=<sample id>. It wins over the saved copy in this browser.
+  function modelFromUrl() {
+    try {
+      const id = new URLSearchParams(location.search).get('model');
+      return id && SAMPLES[id] ? id : null;
+    } catch (e) { return null; }
+  }
+  function setModelUrl(id) {
+    try {
+      const u = new URL(location.href);
+      if (id) u.searchParams.set('model', id); else u.searchParams.delete('model');
+      history.replaceState(null, '', u.pathname + u.search + u.hash);
+    } catch (e) { /* file:// or blocked history: the model still loads, the link just stays plain */ }
+  }
   function loadInitial() {
+    const fromUrl = modelFromUrl();
+    if (fromUrl) return sampleBundle(fromUrl);
     try {
       const raw = localStorage.getItem(STORE_KEY);
       if (raw) {
@@ -745,7 +761,9 @@
     $('openFile').addEventListener('change', (e) => { if (e.target.files[0]) openFile(e.target.files[0]); e.target.value = ''; });
     $('loadSample').addEventListener('click', () => {
       if (!confirm('Replace the current model with the sample? Save a file first to keep it.')) return;
-      const b = sampleBundle($('sampleSel').value);
+      const id = $('sampleSel').value;
+      const b = sampleBundle(id);
+      setModelUrl(id);
       setState(b);
       $('gearPanel').hidden = true;
     });
@@ -837,6 +855,7 @@
     st.viewer.setOptions({ speed: st.animSpeed });
     buildTypeControls();
     fillSamples();
+    if (modelFromUrl()) $('sampleSel').value = modelFromUrl();
     bind();
     setupCloud();
     render();

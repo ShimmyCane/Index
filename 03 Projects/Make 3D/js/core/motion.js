@@ -88,6 +88,19 @@
   }
   const pathLength = (points) => samplePath(points).total;
 
+  // ---------- time profile (optional): maps loop time to distance along a path.
+  // profile = [[t, s], ...] from [0, 0] to [1, 1], both non-decreasing. t is the fraction of the loop, s the fraction
+  // of the path's length. Missing profile = constant speed. Lets a path speed up and slow down (gravity, drag).
+  function warpTime(profile, x) {
+    if (!Array.isArray(profile) || profile.length < 2) return x;
+    const whole = Math.floor(x), f = x - whole;
+    let i = 0;
+    while (i < profile.length - 2 && profile[i + 1][0] < f) i++;
+    const [t0, s0] = profile[i], [t1, s1] = profile[i + 1];
+    const k = t1 > t0 ? (f - t0) / (t1 - t0) : 0;
+    return whole + s0 + (s1 - s0) * k;
+  }
+
   // ---------- one motion -> matrix at loop fraction u (0..1)
   const deg = (d) => (d * Math.PI) / 180;
   function matrixFor(m, u) {
@@ -107,7 +120,7 @@
       case 'path': {
         // The target's pivot travels along the path. Facing 'tangent' turns it to face the way it goes;
         // rest_heading_deg is the way it faces in the model (0 = +X).
-        const { point, heading } = pathAt(m.points, c * u + ph);
+        const { point, heading } = pathAt(m.points, warpTime(m.profile, c * u + ph));
         const turn = m.face === 'tangent' ? heading - deg(m.rest_heading_deg || 0) : 0;
         return mul(translate(point[0], point[1], point[2]),
           mul(rotate(AXES.z, turn), translate(-pivot[0], -pivot[1], -pivot[2])));
@@ -183,6 +196,14 @@
         if (!Array.isArray(m.points) || m.points.length < 3 || !m.points.every((p) => Array.isArray(p) && p.length >= 2 && p.every(finite))) {
           bad('path needs 3 or more points [x, y] or [x, y, z]; the path always closes on itself', id);
         }
+        if (m.profile !== undefined) {
+          const pr = m.profile;
+          const okPair = (q) => Array.isArray(q) && q.length === 2 && q.every((v) => finite(v) && v >= 0 && v <= 1);
+          const mono = Array.isArray(pr) && pr.every((q, i) => okPair(q) && (i === 0 || (q[0] >= pr[i - 1][0] && q[1] >= pr[i - 1][1])));
+          if (!mono || pr.length < 2 || pr[0][0] !== 0 || pr[0][1] !== 0 || pr[pr.length - 1][0] !== 1 || pr[pr.length - 1][1] !== 1) {
+            bad('profile must be [[t, s], ...] from [0, 0] to [1, 1], both values non-decreasing', id);
+          }
+        }
       }
       if (m.start && m.start !== 'auto') warn(`start "${m.start}" is not built yet; this motion does not play`, id);
     }
@@ -192,7 +213,7 @@
 
   return {
     MOTION_SCHEMA: SCHEMA, MOTION_KINDS: KINDS,
-    poseAt, checkMotion, pathAt, pathLength, motionBox,
+    poseAt, checkMotion, pathAt, pathLength, motionBox, warpTime,
     mat4: { identity: I, mul, translate, rotate, about, apply },
   };
 });
