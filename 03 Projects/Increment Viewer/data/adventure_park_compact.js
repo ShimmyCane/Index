@@ -2,7 +2,7 @@
 // Each version has a motion file (models/adventure-park-vNN/motion.json), played in the Make 3D viewer's play bar.
 window.REVIEW_DATA = {
   title: "Adventure Coaster Park: compact and animated, V11 to V15",
-  subtitle: "The park shrinks to about half its footprint, then each ride gets motion in turn. Every motion loops every 24 s. Capacity stays at 1,000 an hour.",
+  subtitle: "The park shrinks to about half its footprint, then each ride gets motion in turn. Each loop is one real lap of Thunder Trail, about 18 s. Capacity stays at 1,000 an hour.",
   items: [
     {
       id: "V11", title: "Compact footprint",
