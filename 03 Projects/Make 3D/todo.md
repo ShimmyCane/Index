@@ -94,3 +94,17 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - 2026-11-02: round 4 outdoor table V2 and object tags built (convo v0.5 answers); smoke run covers four library scenes.
 - 2026-11-02: outdoor table and kitchen samples; Library button; cloud client (`m3d_scenes`, read-only `sketch_details` by tag); migration applied after a rolled-back test; 8 cloud test groups; smoke run covers the library.
 - 2026-11-02: round 4 notes (iPad): paste is the default tab, step counter removed, one gear icon, panels collapse. Annotation, groups, visibility and export designed in convo v0.4 and the schematic §13; not built.
+
+## Living room from a photo (2026-11-02)
+- [x] Process logged in `04 AI/Make 3D/lessons.md` before modelling.
+- [x] V01 blockout, then V02 to V10 by review of each render against the photo (`tools/living_room.js`, one function, `defsFor(v)`).
+- [x] Browser check of each version (`node tools/render_versions.js <dir> "Living room V01" ...`), plus smoke and engine tests.
+- [ ] Jimmy checks the sizes against the room (estimates, not measured). Questions in `04 AI/Make 3D/brief.md`.
+- [ ] Viewer: a "hide walls" toggle, so the door and the far walls can be checked from any side.
+- [ ] Commit and publish when Jimmy agrees (not committed yet).
+
+## Living room, second look (2026-11-02)
+- [x] V11 re-layout from the two new photos (`tools/living_room_second_look.js`).
+- [x] V12 ceiling, V13 decor and see-through ceiling, V14 bookcase contents and near chair, V15 final grouping and leaf clusters.
+- [x] Each version rendered and reviewed; engine, cloud and smoke tests pass.
+- [ ] Jimmy checks the new sizes (156 × 216 in room, 14 in cubes, 96 in ceiling) against the room.

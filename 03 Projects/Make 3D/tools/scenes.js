@@ -315,4 +315,6 @@ const KITCHEN = {
 // the fridge is on your left and the dishwasher and drawers on your right, as described.
 KITCHEN.defs = KITCHEN.defs.map(([k, d]) => [k, { ...d, position: [240 - d.position[0], d.position[1], d.position[2]] }]);
 
-module.exports = { WORLD_ID, SCENES: [PLANTER, TABLE, OUTDOOR_V2, KITCHEN] };
+const { LIVING_ROOM } = require('./living_room.js');
+
+module.exports = { WORLD_ID, SCENES: [PLANTER, TABLE, OUTDOOR_V2, KITCHEN, ...LIVING_ROOM] };

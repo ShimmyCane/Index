@@ -255,6 +255,9 @@ Axis conversion happens in one place (`viewer/axes.js`): model Z-up → Three.js
   worlds/default-world.json
   tools/build_samples.js   builds the planter from its operation list
   tools/smoke.js           headless Chromium run of index.html
+  tools/living_room.js     living room versions V01–V10 from a photo (inches, one function, defsFor(v))
+  tools/render_versions.js headless render of named library scenes to PNG (outside the repo)
+  private/                 git-ignored: the source photo (not committed)
   tests/test_core.js       Node tests for the engine
   schematic.md · todo.md · CLAUDE.md · convo/
 ```
