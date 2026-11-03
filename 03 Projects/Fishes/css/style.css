@@ -394,3 +394,21 @@ textarea {
 /* Version label and the sign-in shortcut on the title screen */
 .version { margin: 14px 0 0; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
 .family-link { margin-top: 12px; width: 100%; background: var(--peach); min-height: 56px; font-size: 1.05rem; }
+
+/* Collapsible settings sections (closed by default) */
+.fold > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  font-weight: 900;
+  font-size: 1.2rem;
+  padding: 6px 2px;
+}
+.fold > summary::-webkit-details-marker { display: none; }
+.fold > summary::after { content: "＋"; font-size: 1.3rem; margin-left: 12px; }
+.fold[open] > summary::after { content: "−"; }
+.fold > .row:first-of-type { margin-top: 4px; }
+.fold.note-box > summary { margin: -4px -4px 4px; }
