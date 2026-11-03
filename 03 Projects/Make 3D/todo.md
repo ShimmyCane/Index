@@ -6,6 +6,8 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 
 ## V2 (engine upgrade; UI stays as V1)
 
+Change log: `changelog.md`.
+
 Plan and research: `04 AI/Make 3D/research/v2_plan.md` and `trellis2_notes.md`. V1 is the frozen copy in `V1/`.
 
 - [x] Archive V1 (`V1/`, frozen app), Settings > Versions links both ways, separate `make3d.v2.*` storage keys.
@@ -39,8 +41,8 @@ Plan and research: `04 AI/Make 3D/research/v2_plan.md` and `trellis2_notes.md`. 
 - [x] **v0.5** Rules engine: five rules, accept / warn / reject, overlap `mode` (allow by default, flag on model check), results panel. Outlines in the viewer: not done (the selection box only).
 - [x] **v0.6** History: replay, scrubber (back to any step, editing only at the latest step). Author and note per operation: author is recorded; the note field is not yet in the UI.
 - [x] Node tests (`node tests/test_core.js`, 19 groups) and the browser smoke run (`node tools/smoke.js`, no console errors) pass.
-- [ ] Publish on GitHub Pages and check online on iPad and iPhone. (Headless iPad-size screenshot checked; not on a real device.)
-- [ ] `/summarize-code` on `index.html`.
+- [?] Publish on GitHub Pages and check online on iPad and iPhone. Blocked here: enabling Pages is a repo setting this session cannot change, and the page would be served at `/03%20Projects/Make%203D/`. Headless iPad-size screenshot checked; not on a real device.
+- [x] `/summarize-code` on `index.html`: `index_summary.html` (line map, script order, CSS and JS variables to tweak).
 
 ## Round 4 (designed in convo v0.4, not built)
 - [ ] Annotations in 3-D: click a surface to anchor, drag out a label with a leader line, screen-facing and legible. Autosave to the cloud. Session undo. Delete. Free and part annotations (A1–A6).
