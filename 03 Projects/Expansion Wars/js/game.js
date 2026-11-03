@@ -1,5 +1,5 @@
 // Expansion Wars — screens, game rules, computer players, drawing, input,
-// progression, scoring, notes and the saved-maps list.
+// progression, scoring, notes, the family sync panel and the saved-maps list.
 (function () {
   'use strict';
 
@@ -7,9 +7,11 @@
   var S = window.XWStore;
   var SPEED = 120;   // map units per second for marching soldiers
   var HIT = 46;      // tap radius around a spot (map units)
+  var SEND_STEPS = [0.1, 0.25, 0.5, 1];   // share of a spot's soldiers sent per drop
   var LEVELS_AI = {
-    easy:   { every: 3.0, fraction: 0.4, threshold: 10 },
-    normal: { every: 1.8, fraction: 0.6, threshold: 7 }
+    easy:   { every: 3.0, fraction: 0.4, threshold: 10, perMinute: 6 },
+    normal: { every: 1.8, fraction: 0.6, threshold: 7,  perMinute: 10 },
+    hard:   { every: 1.0, fraction: 0.7, threshold: 5,  perMinute: 16 }
   };
   var ICON = { factory: '🍄', city: '🏰' };
   var SVG_NS = 'http://www.w3.org/2000/svg';
@@ -19,6 +21,8 @@
     { name: 'Lakes 💧', desc: 'Water that soldiers cannot cross. Found from Level 2.', status: 'in' },
     { name: 'Voronoi maps', desc: 'Every map is a new layout of regions.', status: 'in' },
     { name: 'Saved maps, notes and stars', desc: 'Every map is kept, with notes and a 1 to 5 star rating.', status: 'in' },
+    { name: 'Send 10 to 100%', desc: 'Choose how much of a spot sends at once.', status: 'in' },
+    { name: 'Fights on the road', desc: 'Soldiers marching toward each other fight when they meet.', status: 'in' },
     { name: 'Speed boosts', desc: 'Regions that send soldiers faster.', status: 'soon' },
     { name: 'Defense boosts', desc: 'Regions with stronger garrisons.', status: 'soon' },
     { name: 'Towers that shoot', desc: 'Defenders that hit marching soldiers.', status: 'soon' },
@@ -38,7 +42,11 @@
     openMaps: $('open-maps'), maps: $('maps'), mapsList: $('maps-list'), mapsClose: $('maps-close'),
     btnPlay: $('btn-play'), btnMap: $('btn-map'), btnShop: $('btn-shop'), btnScores: $('btn-scores'),
     btnHome: $('btn-home'), path: $('path'), mapNote: $('map-note'),
-    shopList: $('shop-list'), bestLevels: $('best-levels'), scoreList: $('score-list')
+    shopList: $('shop-list'), bestLevels: $('best-levels'), scoreList: $('score-list'),
+    syncPill: $('sync-pill'), syncMsg: $('sync-msg'), familyForm: $('family-form'),
+    familyEmail: $('family-email'), familyPass: $('family-pass'), familySync: $('family-sync'),
+    familyCheck: $('family-check'), familySignout: $('family-signout'), familyResult: $('family-result'),
+    pctBtn: $('pct-btn'), popBar: $('pop-bar')
   };
 
   var g = {
@@ -48,16 +56,19 @@
     screen: 'home',
     nodes: [],
     armies: [],
-    drag: null,      // { from: node }
-    pointer: null,   // { x, y } in map units
-    target: null,    // land spot under the pointer during a drag
+    drag: null,        // { sources: [spot, ...], pointer: {x, y}, target: spot | null }
+    dragLines: [],
+    sendPct: 0.25,     // share of a spot's soldiers sent per drop (10, 25, 50 or 100%)
     over: false,
     paused: true,
-    elapsed: 0,      // seconds of play in this game
+    elapsed: 0,        // seconds of play in this game
     aiClock: 0,
-    recordId: null,  // saved map record for the current game
+    aiLog: {},         // per computer player: game times of its recent moves
+    recordId: null,    // saved map record for the current game
     statusTimer: null
   };
+
+  var popKey = '';
 
   // ---------- helpers ----------
 
@@ -139,6 +150,32 @@
     return best;
   }
 
+  // Point-in-polygon (ray casting), used to find the region under a drop.
+  function inPoly(p, poly) {
+    var inside = false;
+    for (var i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      var xi = poly[i].x, yi = poly[i].y, xj = poly[j].x, yj = poly[j].y;
+      if (((yi > p.y) !== (yj > p.y)) && (p.x < (xj - xi) * (p.y - yi) / (yj - yi) + xi)) inside = !inside;
+    }
+    return inside;
+  }
+
+  // The land region (Voronoi cell) under a point. A drop anywhere inside a region counts.
+  function regionAt(p) {
+    for (var i = 0; i < g.nodes.length; i++) {
+      var n = g.nodes[i];
+      if (n.type !== 'lake' && inPoly(p, n.poly)) return n;
+    }
+    return null;
+  }
+
+  // How many soldiers a spot sends in one drop: a share of its soldiers, at least two when it has them.
+  function amountFor(s) {
+    var c = Math.floor(s.count);
+    if (c < 1) return 0;
+    return Math.min(c, Math.max(2, Math.floor(c * g.sendPct)));
+  }
+
   // ---------- screens ----------
 
   function show(name) {
@@ -168,6 +205,7 @@
     els.nodes.innerHTML = '';
     els.roads.innerHTML = '';
     els.armies.innerHTML = '';
+    g.dragLines = [];
 
     // Regions (Voronoi cells). Lakes are drawn as water.
     g.nodes.forEach(function (n) {
@@ -187,11 +225,6 @@
         els.roads.appendChild(svgEl('line', { x1: a.x, y1: a.y, x2: b.x, y2: b.y, 'class': 'road' }));
       });
     });
-
-    // Drag line (hidden until a drag starts)
-    g.dragLine = svgEl('line', { 'class': 'drag', x1: 0, y1: 0, x2: 0, y2: 0 });
-    g.dragLine.style.display = 'none';
-    els.armies.appendChild(g.dragLine);
 
     // Spot labels (land only)
     g.nodes.forEach(function (n) {
@@ -248,11 +281,12 @@
     g.nodes = map.nodes;
     g.armies = [];
     g.drag = null;
-    g.target = null;
+    g.aiLog = {};
     g.over = false;
     g.paused = false;
     g.elapsed = 0;
     g.aiClock = 0;
+    popKey = '';
     els.overlay.hidden = true;
     buildBoard();
     restoreStatus();
@@ -285,6 +319,30 @@
     return true;
   }
 
+  function setArmyCount(a, c) {
+    a.count = c;
+    var t = a.el && a.el.querySelector('text');
+    if (t) t.textContent = String(c);
+  }
+
+  // Soldiers marching toward each other on the same road fight when they meet.
+  // The larger force survives with the difference.
+  function clashOnRoads() {
+    var live = g.armies.filter(function (a) { return !a.done; });
+    for (var i = 0; i < live.length; i++) {
+      for (var j = i + 1; j < live.length; j++) {
+        var a = live[i], b = live[j];
+        if (a.done || b.done || a.owner === b.owner) continue;
+        if (a.from !== b.to || a.to !== b.from) continue;   // must be on the same road, facing each other
+        if (a.p + b.p < 1) continue;                         // not met yet
+        var diff = a.count - b.count;
+        if (diff > 0) { setArmyCount(a, diff); b.done = true; }
+        else if (diff < 0) { setArmyCount(b, -diff); a.done = true; }
+        else { a.done = true; b.done = true; }
+      }
+    }
+  }
+
   function arrive(a) {
     var n = a.to;
     a.done = true;
@@ -313,7 +371,10 @@
     g.armies.forEach(function (a) {
       if (a.done) return;
       a.p += SPEED * dt / a.len;
-      if (a.p >= 1) arrive(a);
+    });
+    clashOnRoads();
+    g.armies.forEach(function (a) {
+      if (!a.done && a.p >= 1) arrive(a);
     });
     g.armies = g.armies.filter(function (a) {
       if (a.done) {
@@ -325,38 +386,56 @@
 
     g.aiClock -= dt;
     if (g.aiClock <= 0) {
-      aiThink(LEVELS_AI[g.ai]);
+      for (var p = 1; p < g.players; p++) aiThink(LEVELS_AI[g.ai], p);
       g.aiClock = LEVELS_AI[g.ai].every;
     }
 
     checkWin();
   }
 
-  // Computer players send part of their soldiers to the best linked neighbour.
-  function aiThink(level) {
-    for (var p = 1; p < g.players; p++) {
-      var ready = g.nodes.filter(function (n) {
-        return n.owner === p && n.count >= level.threshold;
-      });
-      ready.forEach(function (n) {
-        var best = null, bestScore = Infinity;
+  // True when a spot touches an enemy spot (a computer's front line).
+  function borders(n, p) {
+    return n.links.some(function (id) {
+      var t = g.nodes[id];
+      return t.owner >= 0 && t.owner !== p;
+    });
+  }
+
+  // Computer players: spots away from the front send reinforcements to the front;
+  // spots on the front attack the best linked neighbour. Moves per minute are capped by level.
+  function aiThink(level, p) {
+    var log = (g.aiLog[p] || []).filter(function (t) { return g.elapsed - t < 60; });
+    g.aiLog[p] = log;
+    var ready = g.nodes.filter(function (n) {
+      return n.type !== 'lake' && n.owner === p && n.count >= level.threshold;
+    });
+    ready.forEach(function (n) {
+      if (log.length >= level.perMinute) return;
+      var target = null;
+      if (!borders(n, p)) {
+        n.links.forEach(function (id) {
+          var t = g.nodes[id];
+          if (t.owner === p && borders(t, p) && (!target || t.count < target.count)) target = t;
+        });
+      }
+      if (!target) {
+        var bestScore = Infinity;
         n.links.forEach(function (id) {
           var t = g.nodes[id];
           if (t.owner === p) return;
           var score = t.count + M.dist(n, t) / 40;
-          if (score < bestScore) { bestScore = score; best = t; }
+          if (score < bestScore) { bestScore = score; target = t; }
         });
-        if (best) launch(n, best, Math.floor(n.count * level.fraction), p);
-      });
-    }
+      }
+      if (target && launch(n, target, Math.floor(n.count * level.fraction), p)) log.push(g.elapsed);
+    });
   }
 
+  // The game is won as soon as only one player is left with spots or soldiers.
+  // Neutral spots may remain.
   function checkWin() {
-    var land = g.nodes.filter(function (n) { return n.type !== 'lake'; });
-    if (land.some(function (n) { return n.owner === -1; })) return;
-
     var owners = {};
-    land.forEach(function (n) { if (n.owner >= 0) owners[n.owner] = true; });
+    g.nodes.forEach(function (n) { if (n.type !== 'lake' && n.owner >= 0) owners[n.owner] = true; });
     g.armies.forEach(function (a) { if (!a.done) owners[a.owner] = true; });
     var list = Object.keys(owners).map(Number);
 
@@ -368,7 +447,6 @@
     if (g.over) return;
     g.over = true;
     g.drag = null;
-    g.dragLine.style.display = 'none';
     if (won) Sound.win(); else Sound.lost();
 
     var secs = Math.round(g.elapsed);
@@ -404,6 +482,55 @@
 
   // ---------- drawing ----------
 
+  // Lines from each dragged spot to the pointer, or to the target region when over one.
+  function renderDrag() {
+    var d = g.drag;
+    var want = d ? d.sources.length : 0;
+    while (g.dragLines.length < want) {
+      var ln = svgEl('line', { 'class': 'drag' });
+      els.armies.insertBefore(ln, els.armies.firstChild);
+      g.dragLines.push(ln);
+    }
+    while (g.dragLines.length > want) {
+      var old = g.dragLines.pop();
+      if (old.parentNode) old.parentNode.removeChild(old);
+    }
+    var end = d && (d.target || d.pointer);
+    g.dragLines.forEach(function (ln, i) {
+      if (!end) { ln.style.display = 'none'; return; }
+      var s = d.sources[i];
+      var ok = d.target && linked(s, d.target);
+      ln.setAttribute('x1', s.x);
+      ln.setAttribute('y1', s.y);
+      ln.setAttribute('x2', end.x);
+      ln.setAttribute('y2', end.y);
+      ln.setAttribute('class', 'drag' + (d.target ? (ok ? ' ok' : ' bad') : ''));
+      ln.style.display = '';
+    });
+  }
+
+  // Shares of all soldiers on the board, as a line across the top.
+  function renderPop() {
+    var totals = [];
+    for (var p = 0; p < g.players; p++) totals[p] = 0;
+    g.nodes.forEach(function (n) { if (n.owner >= 0) totals[n.owner] += Math.floor(n.count); });
+    g.armies.forEach(function (a) { if (!a.done) totals[a.owner] += a.count; });
+    var key = totals.join(',');
+    if (key === popKey) return;
+    popKey = key;
+    var sum = totals.reduce(function (x, y) { return x + y; }, 0);
+    els.popBar.innerHTML = '';
+    if (!sum) return;
+    totals.forEach(function (t, owner) {
+      if (!t) return;
+      var share = t / sum * 100;
+      var seg = el('div', 'pop-seg o' + owner, share > 14 ? (owner === 0 ? 'You ' : 'AI ' + owner + ' ') + Math.round(share) + '%' : '');
+      seg.style.width = share + '%';
+      seg.title = (owner === 0 ? 'You' : 'AI ' + owner) + ': ' + t + ' soldiers';
+      els.popBar.appendChild(seg);
+    });
+  }
+
   function render() {
     g.nodes.forEach(function (n) {
       if (n.polyEl && n.shownOwner !== n.owner) {
@@ -414,8 +541,8 @@
 
       var label = Math.floor(n.count);
       var cls = 'node' + (n.type === 'city' ? ' city' : '') + ' ' + ownerClass(n.owner);
-      if (g.drag && g.drag.from === n) cls += ' source';
-      if (g.target === n) cls += ' target';
+      if (g.drag && g.drag.sources.indexOf(n) !== -1) cls += ' source';
+      if (g.drag && g.drag.target === n) cls += ' target';
       n.el.className = cls;
       if (n.shownCount !== label) {
         n.num.textContent = String(label);
@@ -429,18 +556,9 @@
       a.el.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ')');
     });
 
-    if (g.drag && g.pointer && g.dragLine) {
-      var end = g.target || g.pointer;
-      var ok = g.target && linked(g.drag.from, g.target);
-      g.dragLine.setAttribute('x1', g.drag.from.x);
-      g.dragLine.setAttribute('y1', g.drag.from.y);
-      g.dragLine.setAttribute('x2', end.x);
-      g.dragLine.setAttribute('y2', end.y);
-      g.dragLine.setAttribute('class', 'drag' + (g.target ? (ok ? ' ok' : ' bad') : ''));
-      g.dragLine.style.display = '';
-    } else if (g.dragLine) {
-      g.dragLine.style.display = 'none';
-    }
+    renderDrag();
+    renderPop();
+    els.pctBtn.textContent = 'Send ' + Math.round(g.sendPct * 100) + '%';
   }
 
   // ---------- input ----------
@@ -452,42 +570,45 @@
     if (!n || n.owner !== 0 || n.count < 1) return;
     e.preventDefault();
     els.board.setPointerCapture(e.pointerId);
-    g.drag = { from: n };
-    g.pointer = p;
-    g.target = null;
+    g.drag = { sources: [n], pointer: p, target: null };
     Sound.tap();
   });
 
+  // Moving over your own regions adds them to the group; moving over another region targets it.
   els.board.addEventListener('pointermove', function (e) {
     if (!g.drag) return;
     var p = toMap(e);
-    g.pointer = p;
-    var t = hit(p);
-    g.target = (t && t !== g.drag.from) ? t : null;
+    var d = g.drag;
+    d.pointer = p;
+    var r = regionAt(p) || hit(p);
+    if (r && r.owner === 0 && r.count >= 1 && d.sources.indexOf(r) === -1) d.sources.push(r);
+    d.target = (r && r.owner !== 0 && r.type !== 'lake') ? r : null;
   });
 
+  // Release over a region: every dragged spot with a road to it sends its share.
   function endDrag(e) {
-    if (!g.drag) return;
-    var from = g.drag.from;
-    var to = hit(toMap(e));
+    var d = g.drag;
+    if (!d) return;
     g.drag = null;
-    g.target = null;
-    g.pointer = null;
-    if (!to || to === from) return;
-    if (!linked(from, to)) {
-      setStatus('Not connected. Try a nearby mushroom.', true);
-      return;
-    }
-    if (launch(from, to, Math.max(1, Math.floor(from.count / 2)), 0)) {
-      setStatus('Sent soldiers!', true);
-    }
+    var t = regionAt(toMap(e)) || hit(toMap(e));
+    if (!t || d.sources.indexOf(t) !== -1) return;
+    var sent = 0, blocked = 0;
+    d.sources.forEach(function (s) {
+      if (!linked(s, t)) { blocked++; return; }
+      var amt = amountFor(s);
+      if (amt > 0 && launch(s, t, amt, 0)) sent++;
+    });
+    if (sent) setStatus(sent === 1 ? 'Sent soldiers!' : 'Sent from ' + sent + ' spots!', true);
+    else if (blocked) setStatus('Not connected. Try a nearby mushroom.', true);
   }
 
   els.board.addEventListener('pointerup', endDrag);
-  els.board.addEventListener('pointercancel', function () {
-    g.drag = null;
-    g.target = null;
-    g.pointer = null;
+  els.board.addEventListener('pointercancel', function () { g.drag = null; });
+
+  els.pctBtn.addEventListener('click', function () {
+    var i = SEND_STEPS.indexOf(g.sendPct);
+    g.sendPct = SEND_STEPS[(i + 1) % SEND_STEPS.length];
+    els.pctBtn.textContent = 'Send ' + Math.round(g.sendPct * 100) + '%';
   });
 
   // ---------- home, progress, shop, scores ----------
@@ -678,8 +799,23 @@
       }
       row.appendChild(stars);
 
-      (r.notes || []).slice(-3).forEach(function (note) {
-        row.appendChild(el('p', 'note', '📝 ' + note.text));
+      // Every note, with its status. "Mark done" moves it between open and done.
+      (r.notes || []).forEach(function (note) {
+        var box = el('div', 'note-row ' + (note.status === 'done' ? 'done' : 'open'));
+        box.appendChild(el('p', 'note', '📝 ' + note.text));
+        box.appendChild(el('span', 'chip', note.status === 'done' ? 'done' : 'open'));
+        if (note.id) {
+          var next = note.status === 'done' ? 'open' : 'done';
+          var nb = el('button', 'note-toggle', next === 'done' ? 'Mark done' : 'Reopen');
+          nb.addEventListener('click', (function (mapId, noteId, status) {
+            return function () {
+              S.setNoteStatus(mapId, noteId, status);
+              renderMaps();
+            };
+          })(r.id, note.id, next));
+          box.appendChild(nb);
+        }
+        row.appendChild(box);
       });
 
       els.mapsList.appendChild(row);
@@ -691,6 +827,65 @@
     els.maps.hidden = false;
   });
   els.mapsClose.addEventListener('click', function () { els.maps.hidden = true; });
+
+  // ---------- family database: sync pill, ⚙️ Family section ----------
+
+  function renderCloud(s) {
+    var label = s.state === 'busy' ? '☁️ …' : s.state === 'ok' ? '☁️ synced' : s.state === 'error' ? '⚠️ sync' : '💾 device';
+    els.syncPill.textContent = label;
+    els.syncPill.classList.toggle('mint', s.state === 'ok');
+    els.syncPill.classList.toggle('warn', s.state === 'error');
+    els.syncMsg.textContent = s.message;
+    els.familyForm.hidden = s.signedIn;
+    els.familySignout.hidden = !s.signedIn;
+  }
+
+  els.syncPill.addEventListener('click', function () { els.panel.hidden = false; });
+
+  els.familyForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = els.familyEmail.value.trim();
+    var pass = els.familyPass.value;
+    if (!email || !pass) {
+      els.familyResult.textContent = 'Enter the family email and password.';
+      return;
+    }
+    els.familyResult.textContent = 'Signing in…';
+    XWCloud.signIn(S, email, pass).then(function () {
+      els.familyPass.value = '';
+      els.familyResult.textContent = 'Signed in. Maps and notes are synced.';
+    }).catch(function () {
+      els.familyResult.textContent = 'Could not sign in. Check the email and password.';
+    });
+  });
+
+  els.familySync.addEventListener('click', function () {
+    if (!XWCloud.isSignedIn()) {
+      els.familyResult.textContent = 'Sign in first, then the maps and notes can be sent.';
+      return;
+    }
+    var count = S.list().length;
+    XWCloud.syncAll(S).then(function () {
+      els.familyResult.textContent = 'Sent ' + count + (count === 1 ? ' map' : ' maps') + ' with their notes.';
+    }).catch(function () {
+      els.familyResult.textContent = 'Not sent. See the sync message, or turn on Show errors.';
+    });
+  });
+
+  els.familyCheck.addEventListener('click', function () {
+    els.familyResult.textContent = 'Checking…';
+    XWCloud.dbCheck().then(function (text) {
+      els.familyResult.textContent = text;
+    }).catch(function () {
+      els.familyResult.textContent = '❌ Database check failed. Turn on Show errors for details.';
+    });
+  });
+
+  els.familySignout.addEventListener('click', function () {
+    XWCloud.signOut().then(function () {
+      els.familyResult.textContent = 'Signed out. Maps stay on this device.';
+    });
+  });
 
   // Errors are logged quietly; they only show when "Show errors" is on.
   window.addEventListener('error', function (e) { logError(e.message || e.error); });
@@ -712,6 +907,9 @@
   }
 
   // Start-up: the landing page is shown; the game starts when Play is tapped.
+  XWCloud.onState(renderCloud);
+  XWCloud.init(S, logError);
+
   markSeg(els.segAi, 'ai', g.ai);
   show('home');
   requestAnimationFrame(frame);
