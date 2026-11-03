@@ -26,6 +26,11 @@
 
 ## Next steps
 
-1. Jimmy answers `convo/convo v0.3.md` (round 4: five more maps, castles, city upgrade unlocks, team setup, avatars, zoom).
-2. Build the five-map set once density and scrolling are answered; then confirm the round 3 notes as done.
-3. Play a few games on iPad; note what feels slow, fiddly or unfair. Balance pass stays on the todo.
+1. Jimmy answers `convo/convo v0.4.md` (round 5: upgrades for every spot, mushrooms as villages, surrender, slower upgrades with dust, zoom out to fit). Round 4 items are built and merged (PR #93).
+2. Build the round 5 items once answered. The Level 5 notes are the first real play on the new maps.
+3. Play a few games on iPad, including Levels 5 to 9 with panning. Balance pass stays on the todo.
+
+## Working rules (from Jimmy's notes)
+
+- Tick todo items in the same change that builds them. Mark notes done only after Jimmy confirms (skill rule).
+- Each round starts a new branch from `main`. The round 4 PR was merged.

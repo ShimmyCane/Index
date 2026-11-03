@@ -48,8 +48,22 @@ Built from convo v0.3 answers. The defaults I picked are listed in convo v0.3 fo
 - [ ] **Zoom.** Inward zoom at level 10. Not built: Jimmy said he is still planning it.
 - [ ] **Test note** (`Test note 1`, Level 4 Valley). Nothing to build. Mark done when Jimmy confirms.
 
+## Round 5: notes read 2026-11-03 (9 open notes, 6 of them on Level 5)
+
+Checked against `js/game.js` on `main`. Notes stay `open` in the table until Jimmy confirms which are handled (convo v0.4). The app had already marked the round 3 notes `Done- `.
+
+- [x] **Soldiers fight when they collide en route** (Level 2, note `31eec771`). Built: `clashOnRoads`. Roads only meet at spots, so armies can only meet head-on on one road.
+- [x] **Race-track countdown on every start** (Level 4, note `4e91a3a2`). Built in round 3 (3, 2, 1, Go).
+- [x] **Assistant marks tasks done** (Level 5, note `f1f02147`). Process note, not a game feature. Done when built: todo items are ticked in the same change, and notes are marked done after Jimmy confirms. Recorded in the brief.
+- [ ] **All territories can be upgraded; capture drops the grade** (Level 5, note `598aba02`). Not built: only cities upgrade, and capture resets a city to village. Question 1.
+- [ ] **Simple mushrooms are villages** (Level 5, note `bed5a34f`). Not built: factories have no tier, cap or upgrade. Question 2.
+- [ ] **Surrender for AI and user, with a toggle in settings** (Level 5, note `62214856`). Not built. Question 3.
+- [ ] **Upgrades take longer each tier, pause army growth, and show dust** (Level 5, note `ca529eea`). Not built. Question 4.
+- [ ] **Zoom out to fit a bigger map, spots keep their size** (Level 5, note `ee7f`). Not built. Overlaps the zoom item below. Question 5.
+- [ ] **Test note** (`4a1aa905`, Level 4 Valley). Nothing to build. Mark done when Jimmy confirms.
+
 ## Later
 
-- [ ] **Village and country zoom.** Inward zoom at level 10 (see round 4). Outward country view is still unplanned.
+- [ ] **Village and country zoom.** Inward zoom at level 10 (see round 4). Outward country view is still unplanned. Round 5 note `ee7f` asks for zoom out to fit; see convo v0.4.
 - [ ] **Balance pass.** Hard mode beat a player who did nothing in about 20 seconds in testing. Play a few full games and tune the rates, garrisons and move caps.
 - [ ] **Speed and defense boosts, towers, spells, Quick Game** (already listed on the Shop page as coming soon).
