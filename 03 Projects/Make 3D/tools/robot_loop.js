@@ -104,10 +104,13 @@ function smoothClosed(P, sigma) {
   }
   return out;
 }
+// The walk for any closed sketch stroke: sketch points, inches per unit, and the smoothing sigma.
 function loopPath() {
   const e = sketchExtent();
-  const k = LABEL_IN / Math.max(e.w, e.h);
-  const raw = smoothClosed(SKETCH_PTS.map(([x, y]) => [x * k, y * k, 0]), SEAM_SIGMA);
+  return loopFrom(SKETCH_PTS, LABEL_IN / Math.max(e.w, e.h), SEAM_SIGMA);
+}
+function loopFrom(sketch, k, sigma) {
+  const raw = smoothClosed(sketch.map(([x, y]) => [x * k, y * k, 0]), sigma);
   const s = M.pathAt(raw, 0).point;
   const pts = [];
   for (let i = 0; i < LOOP_POINTS; i++) {
@@ -123,6 +126,18 @@ function loopPath() {
 const round = (x) => Math.round(x * 100) / 100;
 
 const PATH = loopPath();
+
+// Robot Path (Quick Detail eec507d8-9272-457b-a84e-d39f378ef324, tags make3d): a closed figure-eight, 3.5 in per
+// unit. The stroke below is the same formula the Quick Detail row was written from (x = 12 sin t, y = 12 sin t cos t).
+const ROBOT_PATH_ID = 'eec507d8-9272-457b-a84e-d39f378ef324';
+const ROBOT_PATH_IN_PER_UNIT = 3.5;
+const ROBOT_PATH_PTS = Array.from({ length: 80 }, (_, i) => {
+  const t = (2 * Math.PI * i) / 80;
+  return [round(12 * Math.sin(t)), round(12 * Math.sin(t) * Math.cos(t))];
+});
+const PATH_V6 = loopFrom(ROBOT_PATH_PTS, ROBOT_PATH_IN_PER_UNIT, 1.0);
+// The walk for each version: V02 to V05 use the sketched loop; V06 uses the Robot Path.
+const pathFor = (v) => (v === 6 ? PATH_V6 : PATH);
 
 // Frisbee: a flat disc with a rim, held in the left hand (the hand is at x 0, y 6.8, z 16.5 in the robot).
 function addFrisbee(add) {
@@ -154,7 +169,7 @@ function addHat(add) {
 // increment is never rebuilt with newer parts (V03 and V04 keep the frisbee in the left hand).
 function defsFor(v) {
   const add = (() => { const d = []; const f = (key, o) => d.push([key, o]); f.list = d; return f; })();
-  const base = RB.defs(PATH, { tagged: true });
+  const base = RB.defs(pathFor(v), { tagged: true });
   for (const [key, o] of base) add(key, o);
   if (v >= 3 && v < 5) addFrisbee(add);
   if (v >= 4) addHat(add);
@@ -167,13 +182,14 @@ const NOTES = {
   3: 'Adds a frisbee held in the left hand. Frisbee is a visibility group.',
   4: 'Adds a top hat on the head. Hat is a visibility group.',
   5: 'The frisbee moves to the banana hand. Adds the robot cape (Quick Detail "Robot Cape"): a sheet that ripples down its length, and flows more in tight turns. Cape is a visibility group.',
+  6: 'Walks the Quick Detail "Robot Path" (a figure-eight) instead of the sketched loop. Same parts as V05: frisbee, hat and cape.',
 };
 
-// Motion for version v. V05 adds the cape's wave and sway to the walk.
+// Motion for version v. V05 and up add the cape's wave and sway to the walk.
 function motionFor(v, uuid) {
-  const base = RB.motionFor(uuid, PATH);
+  const base = RB.motionFor(uuid, pathFor(v));
   if (v < 5) return base;
-  const path3 = PATH.map((p) => [p[0], p[1], 0]);
+  const path3 = pathFor(v).map((p) => [p[0], p[1], 0]);
   return { ...base, description: `${base.description} The cape ripples down its length and sways in turns.`,
     motions: [...base.motions, ...CAPE.capeMotions(uuid('cape'), path3)] };
 }
@@ -187,7 +203,7 @@ function sceneFor(v) {
     header: {
       model_id: id,
       name: `${RB.ROBOT_PROJECT} V0${v}`,
-      description: `${NOTES[v]} Walks the loop from Quick Detail "Robot Loop" (${SKETCH_ID}).`,
+      description: `${NOTES[v]} ${v === 6 ? `Path from Quick Detail "Robot Path" (${ROBOT_PATH_ID}).` : `Walks the loop from Quick Detail "Robot Loop" (${SKETCH_ID}).`}`,
       units: 'in', up: 'z', world: WORLD_ID,
       materials: v >= 5 ? { ...RB.MATERIALS, cape: { color: '#bcd9f2', opacity: 1 } } : RB.MATERIALS,
     },
@@ -196,6 +212,6 @@ function sceneFor(v) {
   };
 }
 
-const ROBOT_LOOP = [2, 3, 4, 5].map(sceneFor);
+const ROBOT_LOOP = [2, 3, 4, 5, 6].map(sceneFor);
 
-module.exports = { ROBOT_LOOP, defsFor, loopPath, PATH, SKETCH_ID, SKETCH_PTS, LABEL_IN };
+module.exports = { ROBOT_LOOP, defsFor, loopPath, PATH, PATH_V6, SKETCH_ID, SKETCH_PTS, LABEL_IN, ROBOT_PATH_ID };
