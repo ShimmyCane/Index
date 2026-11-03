@@ -9,7 +9,7 @@ Input
 
 Actions
 1. Read the project's `schematic.md` and `04 AI/Supabase/brief.md`.
-2. Inspect the live project before writing SQL. Use the Supabase tools if connected (`list_tables`, `list_migrations`, `execute_sql` on `information_schema` and `pg_policies`). If they aren't connected, ask Jimmy for the current table list. Never trust a schema file alone.
+2. Inspect the live project before writing SQL. Use the Supabase tools if connected (`list_tables`, `list_migrations`, `execute_sql` on `information_schema` and `pg_policies`). If they aren't connected, ask Jimmy for the current table list, or accept a manual run (see Rules). Never trust a schema file alone.
 3. If the project is new, run `04 AI/Supabase/supabase_registry_template.sql` once to create the registry.
 4. Design the tables:
    - Prefix every table with the app slug (`athena_`, `<app>_`) unless it is deliberately shared.
@@ -17,8 +17,9 @@ Actions
    - Revoke default grants from `anon` on every new table.
 5. Put the SQL in the project's `supabase/` folder, as a migration file. Add the registry rows in the same file, using the pattern at the bottom of the template.
 6. Before applying, re-list migrations and tables. Another session may have changed the project since you last looked. Never touch objects you did not create.
-7. Test inside a rolled-back transaction. Fake the role and user id, and return results in an error message so nothing persists. Confirm with a count query afterwards.
+7. Test inside a rolled-back transaction. Fake the role and user id, and return results in an error message so nothing persists. Confirm with a count query afterwards. Save the test as `supabase/test_<migration>_rollback.sql` so it can be run by hand.
 8. Check `select * from public.app_table_unregistered;`. It must be empty, or list only other apps' objects.
+8a. Manual runs: when the Supabase tools are not connected, or a call times out, write the migration and its rollback test as files in `supabase/` and hand Jimmy the paths. Tell him the order: run the test first (it ends with a RESULT message and rolls back), then the migration, then the check in step 8. Ask him to paste back the RESULT message and the check output, and mark the project as "not verified" until he does.
 9. Frontend rules: publishable key only in browser code, never the service-role key. Use the three-tier fallback (live with timeout, then local cache, then bundled JSON) and a visible error panel.
 10. Report: what was created, the registry rows added, what was verified against the live project, and what was not verified (for example, a real login).
 
@@ -26,4 +27,6 @@ Rules
 - Add and migrate only. Don't drop tables, policies or data without asking.
 - Never put keys, project refs or personal data in this repo. Use placeholders such as `<project-ref>`.
 - After a timeout, check what was created before retrying. Nothing may have been applied.
+- Manual requests are accepted. Jimmy may run the SQL himself in the Supabase SQL editor when the tools are unavailable. Migrations must be safe to re-run (`create table if not exists`, `drop policy if exists`, `on conflict do nothing`), so a manual run after a failed tool call is fine.
+- Never ask Jimmy to run SQL that has not been written to a file in the repo first.
 - Keep the full SQL in the repo. The migration history alone is not enough.

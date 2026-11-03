@@ -26,6 +26,7 @@ Rules:
 4. Before changing or dropping a table, check who depends on it in `app_table_registry`.
 5. Keep the SQL in the app's repo (`supabase/` folder). The database is the index; the repo is the history.
 6. For a new Supabase project, run the template once, then seed the first app.
+7. Manual runs are accepted. When the Supabase tools are unavailable, write the migration and its rollback test to the app's `supabase/` folder and hand Jimmy the paths, in the order test, migration, check. Mark the table "not verified" until he pastes back the results. Migrations stay re-runnable.
 
 ## Current state
 
