@@ -4,7 +4,7 @@
   const M = window.M3D;
   const $ = (id) => document.getElementById(id);
   const clone = (x) => JSON.parse(JSON.stringify(x));
-  const STORE_KEY = 'make3d.v1.current';
+  const STORE_KEY = 'make3d.v2.current';
   const SAMPLES = window.M3D_SAMPLES || {};
   const SAMPLE_ID = 'garden-planter';
 
@@ -712,7 +712,7 @@
   }
   function loadPrefs() {
     try {
-      const p = JSON.parse(localStorage.getItem('make3d.v1.prefs') || '{}');
+      const p = JSON.parse(localStorage.getItem('make3d.v2.prefs') || '{}');
       if (p.animSpeed) st.animSpeed = p.animSpeed;
       if (typeof p.animAuto === 'boolean') st.animAuto = p.animAuto;
     } catch (e) { /* storage blocked: defaults */ }
@@ -720,7 +720,7 @@
     $('animAuto').checked = st.animAuto;
   }
   function savePrefs() {
-    try { localStorage.setItem('make3d.v1.prefs', JSON.stringify({ animSpeed: st.animSpeed, animAuto: st.animAuto })); } catch (e) { /* ignore */ }
+    try { localStorage.setItem('make3d.v2.prefs', JSON.stringify({ animSpeed: st.animSpeed, animAuto: st.animAuto })); } catch (e) { /* ignore */ }
   }
 
   // ---------- library (scenes, cloud, Quick Detail references)

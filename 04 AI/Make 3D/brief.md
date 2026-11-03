@@ -390,3 +390,11 @@ Jimmy: the tank is not a vertical extrusion; some portions should be shallow wit
 - **Sketch:** Quick Detail "Profile for Cornice", `sketch_details` row `5b87bdcb-9cac-452b-b70d-1fb0e0031e9f`, tag `make3d`, scale 3"=1'-0", updated 2026-11-03 05:12 UTC.
 - **Where found:** Supabase project `xabgankckrcuhcgdolrg` (Architecture), table `sketch_details`, query: tag `make3d` (case-insensitive) with `deleted_at is null`. The name was "Profile for corners" in the request; the row is named "Profile for Cornice".
 - **Used by:** `tools/cornice.js` (V01 blockout, V02 traced profile). Its outline numbers were read by a summary query, not copied point by point.
+
+## V1 archive and V2 start (2026-11-03)
+
+- **V1** is a frozen copy of the app in `03 Projects/Make 3D/V1/` (index, css, js, vendor). Models, renders, drawings, worlds, tools and tests stay at the root. Settings → Versions opens V1 from V2 and V2 from V1.
+- **V2** is the live app at the root. Storage keys moved to `make3d.v2.*` so the two versions do not share a saved model.
+- **Research:** `04 AI/Make 3D/research/trellis2_notes.md`. TRELLIS.2 uses nvdiffrast, not Three.js, and needs a 24 GB GPU; V2 borrows its staged passes and PBR material model, not the model. The arXiv paper was not readable from this session.
+- **Plan:** `04 AI/Make 3D/research/v2_plan.md` (material layer, canvas textures, PBR viewer, staged passes, GLB export, optional generator slot off by default).
+- Not done: no V2 engine work beyond the storage split; the V2 skill is unchanged pending Jimmy's decision.
