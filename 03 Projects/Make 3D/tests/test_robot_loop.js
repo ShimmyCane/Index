@@ -114,7 +114,7 @@ t("V06 path: the Robot Path (figure-eight) closes, starts at the origin facing +
   assert.ok(Math.hypot(a[0] - b[0], a[1] - b[1]) < 0.5, "closure gap");
   assert.ok(Math.abs(MO.pathAt(P, 0).heading) < 0.5 * Math.PI / 180, "rest heading");
   nearV(RL.PATH_V6[0], [0, 0], 1e-9);
-  assert.strictEqual(RL.ROBOT_PATH_ID, "eec507d8-9272-457b-a84e-d39f378ef324");
+  assert.strictEqual(RL.ROBOT_PATH_ID, "fd1878e1-ac12-4355-afee-3ebeeb07d4d9");
   const dir = path.join(root, "models", "robot-loop-v06");
   const model = G.replay(JSON.parse(fs.readFileSync(path.join(dir, "history.json"), "utf8")));
   const motion = JSON.parse(fs.readFileSync(path.join(dir, "motion.json"), "utf8"));
