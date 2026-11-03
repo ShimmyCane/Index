@@ -2,7 +2,12 @@
 
 Every version the team can open, newest first. The version shows on the title screen and at the top of ⚙️ Settings. If you see a different version there than below, you are looking at an older copy.
 
-## 0.2 — 2026-11-03 (PR #90)
+## 0.3 — 2026-11-03 (not yet merged)
+- Family sign-in is in ⚙️ only; removed from the front page.
+- Settings sections (sound and errors, family database, notes) start collapsed; tap to open.
+- Notes go to the cloud database: each note is kept on the device with an unsent flag, sent when you save while signed in, and sent automatically when you sign in. ⚙️ and the title screen show how many notes are still only on the device.
+
+## 0.2 — 2026-11-03 (PR #90, merged)
 - 20 tiers, now 88 species (3–8 per tier, food included). Each tier mixes docile, wary and aggressive fish.
 - The player evolves into its tier's lead species.
 - Fish eat fish: a non-docile fish ≥1.25× bigger eats a smaller fish it touches.

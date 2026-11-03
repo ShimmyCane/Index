@@ -71,8 +71,7 @@
       </div>
       <p id="title-best" class="muted">No best score yet</p>
       <p id="title-db" class="db-line" data-state="off"></p>
-      <p id="title-version" class="version">Fishes v0.2 · 2026-11-03</p>
-      <button id="title-family" class="big family-link">🔐 Family database sign-in</button>
+      <p id="title-version" class="version">Fishes v0.3 · 2026-11-03</p>
     </div>
     <p class="foot">Made for iPad. Notes for feedback are under ⚙️.</p>
   </section>
@@ -94,18 +93,21 @@
   <section id="panel" class="overlay panel" hidden aria-label="Settings">
     <div class="panel-card">
       <h2>Settings</h2>
-      <p class="version" id="panel-version">Fishes v0.2 · 2026-11-03</p>
-      <div class="row">
-        <span>Sound</span>
-        <button id="sound-toggle" class="toggle" aria-pressed="true">On</button>
-      </div>
-      <div class="row">
-        <span>Show errors</span>
-        <button id="errors-toggle" class="toggle" aria-pressed="false">Off</button>
-      </div>
+      <p class="version" id="panel-version">Fishes v0.3 · 2026-11-03</p>
+      <details class="fold">
+        <summary><span>Sound and errors</span></summary>
+        <div class="row">
+          <span>Sound</span>
+          <button id="sound-toggle" class="toggle" aria-pressed="true">On</button>
+        </div>
+        <div class="row">
+          <span>Show errors</span>
+          <button id="errors-toggle" class="toggle" aria-pressed="false">Off</button>
+        </div>
+      </details>
 
-      <div class="note-box">
-        <h3>Family database</h3>
+      <details class="fold note-box">
+        <summary><span>Family database</span></summary>
         <p class="muted">Sign in with the family account (the same one Expansion Wars uses). Notes then go to the family table. The password is not kept on this device.</p>
         <label for="family-email" class="muted">Email</label>
         <input id="family-email" class="field" type="email" autocomplete="username" autocapitalize="off">
@@ -114,17 +116,17 @@
         <button id="family-in" class="big hero">Sign in</button>
         <button id="family-out" class="big">Sign out</button>
         <p id="family-status" class="muted" aria-live="polite">Not signed in.</p>
-      </div>
+      </details>
 
-      <div class="note-box">
-        <h3>Notes for Jimmy</h3>
+      <details class="fold note-box">
+        <summary><span>Notes for Jimmy</span></summary>
         <label for="note-text" class="muted">What felt slow, fiddly, unfair or fun? The level and size are saved with it.</label>
         <textarea id="note-text" rows="3" maxlength="300" placeholder="For example: the sharks lock on too fast on level 9"></textarea>
         <button id="note-save" class="big">Save note</button>
         <p id="note-status" class="muted" aria-live="polite"></p>
         <p id="db-status" class="db-line" data-state="off">Database: checking…</p>
         <div id="note-list" class="note-list"></div>
-      </div>
+      </details>
 
       <div class="panel-buttons">
         <button id="panel-close" class="big hero">▶ Back to the sea</button>

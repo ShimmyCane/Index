@@ -973,18 +973,22 @@
   function refreshDbStatus() {
     var s = FishNotes.status();
     var labels = {
-      off: 'Database: not connected yet (keys not set in js/species.js)',
+      off: 'Database: not connected',
       ready: 'Database: ready',
       saving: 'Database: saving…',
       saved: 'Database: saved',
-      'sign-in needed': 'Database: needs family sign-in',
+      'sign-in needed': 'Database: sign in to send notes',
       failed: 'Database: failed'
     };
+    var text = labels[s.state] || 'Database: ' + s.state;
+    if (s.pending > 0 && s.state !== 'saved') {
+      text = s.pending + (s.pending === 1 ? ' note' : ' notes') + ' on this device, not yet in the cloud. ' + (s.state === 'saving' ? 'Sending…' : 'Sign in to send them.');
+    }
     var el = $('db-status');
-    el.textContent = labels[s.state] || 'Database: ' + s.state;
+    el.textContent = text;
     el.setAttribute('data-state', s.state);
     if (s.message) el.title = s.message;
-    $('title-db').textContent = labels[s.state] || '';
+    $('title-db').textContent = text;
     $('title-db').setAttribute('data-state', s.state);
   }
 
@@ -1004,6 +1008,7 @@
       item.className = 'note-item';
       var meta = document.createElement('small');
       meta.textContent = 'Level ' + n.level + ' · size ' + Number(n.size).toFixed(1) + ' · ' + mmss(n.seconds || 0);
+      meta.textContent += n.sent ? ' · in the cloud' : ' · on this device only';
       var text = document.createElement('p');
       text.textContent = n.text;
       item.appendChild(meta);
@@ -1021,7 +1026,9 @@
     FishNotes.add(text, info).then(function (res) {
       if (res && res.ok) {
         $('note-text').value = '';
-        status.textContent = 'Saved in this browser (cookie).';
+        status.textContent = res.sent
+          ? 'Saved to the family database.'
+          : 'Saved on this device. It will go to the cloud once you sign in.';
       } else {
         status.textContent = 'Not saved. Write a note first.';
       }
@@ -1098,7 +1105,6 @@
   $('card-again').addEventListener('click', startRun);
   $('card-title-btn').addEventListener('click', showTitle);
   $('card-note').addEventListener('click', function () { hideCard(); openPanel(); });
-  $('title-family').addEventListener('click', function () { openPanel(); $('family-email').focus(); });
   $('gear').addEventListener('click', function () { if ($('panel').hidden) openPanel(); else closePanel(); });
   $('panel-close').addEventListener('click', closePanel);
   $('panel-title').addEventListener('click', function () { closePanel(); showTitle(); });
@@ -1141,6 +1147,9 @@
     $('family-status').textContent = s.signedIn ? 'Signed in as ' + s.email + '.' : 'Not signed in.';
     $('family-out').hidden = !s.signedIn;
     $('family-in').hidden = s.signedIn;
+    if (s.signedIn) {
+      FishNotes.sendPending().then(function () { refreshNotes(); refreshDbStatus(); });
+    }
   });
 
   window.addEventListener('resize', resize);

@@ -1,19 +1,21 @@
 /* Fishes — notes for feedback.
-   Every note is saved in a cookie (and localStorage if cookies are blocked).
-   When the database is configured in js/species.js, the note is also sent to
-   the fish_notes table. Failures are shown on the page, never hidden. */
+   Every note is kept on this device first (localStorage, with a cookie backup).
+   A note is marked sent once the family database (fish_notes) has accepted it.
+   Unsent notes go up on each new note and automatically when the family account
+   signs in. Failures are shown on the page, never hidden. */
 (function () {
   'use strict';
 
   var CFG = window.FishData.CONFIG;
   var COOKIE = 'fish_notes';
   var LS_KEY = 'fish_notes_v1';
-  var MAX_NOTES = 25;       // keeps the cookie well under the ~4 KB limit
+  var MAX_NOTES = 50;        // on this device
+  var COOKIE_NOTES = 8;      // backup copy in the cookie (cookies hold about 4 KB)
   var MAX_TEXT = 300;
 
   var db = {
     configured: !!(CFG.supabaseUrl && CFG.supabaseKey),
-    state: 'off',           // off | ready | saving | saved | sign-in needed | failed
+    state: 'off',            // off | ready | saving | saved | sign-in needed | failed
     message: ''
   };
   db.state = db.configured ? 'ready' : 'off';
@@ -26,37 +28,50 @@
           return JSON.parse(decodeURIComponent(parts[i].slice(COOKIE.length + 1)));
         }
       }
-    } catch (e) { /* bad cookie: start again */ }
+    } catch (e) { /* bad cookie: ignore */ }
     return null;
   }
 
   function writeCookie(list) {
-    var value = encodeURIComponent(JSON.stringify(list));
+    var value = encodeURIComponent(JSON.stringify(list.slice(0, COOKIE_NOTES)));
     document.cookie = COOKIE + '=' + value + '; max-age=31536000; path=/; SameSite=Lax';
   }
 
+  // localStorage is the main copy; the cookie is only used if localStorage is empty or blocked.
   function load() {
-    var list = readCookie();
-    if (!Array.isArray(list)) {
-      try { list = JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch (e) { list = []; }
-    }
+    var list = null;
+    try { list = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch (e) { list = null; }
+    if (!Array.isArray(list)) list = readCookie();
     return Array.isArray(list) ? list : [];
   }
 
   function save(list) {
-    try { writeCookie(list); } catch (e) { /* cookie blocked */ }
     try { localStorage.setItem(LS_KEY, JSON.stringify(list)); } catch (e) { /* private mode */ }
+    try { writeCookie(list); } catch (e) { /* cookie blocked */ }
   }
 
   function clip(text) {
     return String(text || '').replace(/\s+/g, ' ').trim().slice(0, MAX_TEXT);
   }
 
-  function signInNeeded() {
-    db.state = 'sign-in needed';
-    db.message = 'Sign in to the family database in ⚙️ to save notes there. This note is kept in the cookie.';
+  function pending() {
+    return load().filter(function (n) { return !n.sent; }).length;
   }
 
+  function markSent(at) {
+    var list = load();
+    list.forEach(function (n) { if (n.at === at) n.sent = true; });
+    save(list);
+  }
+
+  function signInNeeded() {
+    var waiting = pending();
+    db.state = 'sign-in needed';
+    db.message = waiting + (waiting === 1 ? ' note is' : ' notes are') +
+      ' on this device. Sign in to the family database in ⚙️ to send them.';
+  }
+
+  // Sends one note. Resolves true when the database accepted it.
   function post(token, note, canRetry) {
     var url = CFG.supabaseUrl.replace(/\/+$/, '') + '/rest/v1/' + CFG.notesTable;
     db.state = 'saving';
@@ -76,34 +91,55 @@
         seconds: note.seconds
       })
     }).then(function (res) {
-      if (res.ok) { db.state = 'saved'; db.message = 'Saved to the family database.'; return; }
+      if (res.ok) {
+        markSent(note.at);
+        db.state = 'saved';
+        db.message = 'Saved to the family database.';
+        return true;
+      }
       if ((res.status === 401 || res.status === 403) && canRetry) {
         return window.FishFamily.refresh().then(function (fresh) {
           if (fresh) return post(fresh, note, false);
           signInNeeded();
+          return false;
         });
       }
-      if (res.status === 401 || res.status === 403) { signInNeeded(); return; }
+      if (res.status === 401 || res.status === 403) { signInNeeded(); return false; }
       db.state = 'failed';
-      db.message = 'Database returned ' + res.status + '. The note is in the cookie.';
+      db.message = 'Database returned ' + res.status + '. The note is kept on this device and will be sent again.';
+      return false;
     }).catch(function (err) {
       db.state = 'failed';
-      db.message = 'Could not reach the database (' + (err && err.message || 'network') + '). The note is in the cookie.';
+      db.message = 'Could not reach the database (' + (err && err.message || 'network') + '). The note is kept on this device and will be sent again.';
+      return false;
     });
   }
 
-  function sendToDatabase(note) {
-    if (!db.configured) return Promise.resolve();
+  // Sends every unsent note, oldest first. Resolves with how many were sent.
+  function sendPending() {
+    if (!db.configured) return Promise.resolve(0);
+    var unsent = load().filter(function (n) { return !n.sent; })
+      .sort(function (a, b) { return a.at < b.at ? -1 : a.at > b.at ? 1 : 0; });
+    if (!unsent.length) {
+      if (db.state !== 'failed') db.state = db.configured ? 'ready' : 'off';
+      return Promise.resolve(0);
+    }
     return window.FishFamily.token().then(function (token) {
-      if (!token) { signInNeeded(); return; }
-      return post(token, note, true);
+      if (!token) { signInNeeded(); return 0; }
+      return unsent.reduce(function (chain, note) {
+        return chain.then(function (count) {
+          return post(token, note, true).then(function (ok) { return count + (ok ? 1 : 0); });
+        });
+      }, Promise.resolve(0));
     });
   }
 
   window.FishNotes = {
     list: load,
+    pending: pending,
+    sendPending: sendPending,
 
-    // info: { level, size, seconds }
+    // info: { level, size, seconds }. The note is saved on this device first, then sent if signed in.
     add: function (text, info) {
       var clean = clip(text);
       if (!clean) return Promise.resolve({ ok: false, reason: 'empty' });
@@ -112,16 +148,19 @@
         text: clean,
         level: info.level,
         size: info.size,
-        seconds: Math.round(info.seconds)
+        seconds: Math.round(info.seconds),
+        sent: false
       };
       var list = load();
       list.unshift(note);
-      list = list.slice(0, MAX_NOTES);
-      save(list);
-      return sendToDatabase(note).then(function () { return { ok: true, db: db.state }; });
+      save(list.slice(0, MAX_NOTES));
+      return sendPending().then(function () {
+        var stillUnsent = pending();
+        return { ok: true, sent: !stillUnsent || (db.state === 'saved'), db: db.state, pending: stillUnsent };
+      });
     },
 
-    status: function () { return { state: db.state, message: db.message, configured: db.configured }; },
+    status: function () { return { state: db.state, message: db.message, configured: db.configured, pending: pending() }; },
     clip: clip
   };
 })();
