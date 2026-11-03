@@ -38,7 +38,10 @@
     openMaps: $('open-maps'), maps: $('maps'), mapsList: $('maps-list'), mapsClose: $('maps-close'),
     btnPlay: $('btn-play'), btnMap: $('btn-map'), btnShop: $('btn-shop'), btnScores: $('btn-scores'),
     btnHome: $('btn-home'), path: $('path'), mapNote: $('map-note'),
-    shopList: $('shop-list'), bestLevels: $('best-levels'), scoreList: $('score-list')
+    shopList: $('shop-list'), bestLevels: $('best-levels'), scoreList: $('score-list'),
+    syncPill: $('sync-pill'), syncMsg: $('sync-msg'), familyForm: $('family-form'),
+    familyEmail: $('family-email'), familyPass: $('family-pass'), familySync: $('family-sync'),
+    familyCheck: $('family-check'), familySignout: $('family-signout'), familyResult: $('family-result')
   };
 
   var g = {
@@ -678,8 +681,23 @@
       }
       row.appendChild(stars);
 
-      (r.notes || []).slice(-3).forEach(function (note) {
-        row.appendChild(el('p', 'note', '📝 ' + note.text));
+      // Every note, with its status. "Mark done" moves it between open and done.
+      (r.notes || []).forEach(function (note) {
+        var box = el('div', 'note-row ' + (note.status === 'done' ? 'done' : 'open'));
+        box.appendChild(el('p', 'note', '📝 ' + note.text));
+        box.appendChild(el('span', 'chip', note.status === 'done' ? 'done' : 'open'));
+        if (note.id) {
+          var next = note.status === 'done' ? 'open' : 'done';
+          var b = el('button', 'note-toggle', next === 'done' ? 'Mark done' : 'Reopen');
+          b.addEventListener('click', (function (mapId, noteId, status) {
+            return function () {
+              S.setNoteStatus(mapId, noteId, status);
+              renderMaps();
+            };
+          })(r.id, note.id, next));
+          box.appendChild(b);
+        }
+        row.appendChild(box);
       });
 
       els.mapsList.appendChild(row);
@@ -712,6 +730,68 @@
   }
 
   // Start-up: the landing page is shown; the game starts when Play is tapped.
+  // ---------- family database: sync pill, ⚙️ Family section ----------
+
+  function renderCloud(s) {
+    var label = s.state === 'busy' ? '☁️ …' : s.state === 'ok' ? '☁️ synced' : s.state === 'error' ? '⚠️ sync' : '💾 device';
+    els.syncPill.textContent = label;
+    els.syncPill.classList.toggle('mint', s.state === 'ok');
+    els.syncPill.classList.toggle('warn', s.state === 'error');
+    els.syncMsg.textContent = s.message;
+    els.familyForm.hidden = s.signedIn;
+    els.familySignout.hidden = !s.signedIn;
+  }
+
+  els.syncPill.addEventListener('click', function () { els.panel.hidden = false; });
+
+  els.familyForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = els.familyEmail.value.trim();
+    var pass = els.familyPass.value;
+    if (!email || !pass) {
+      els.familyResult.textContent = 'Enter the family email and password.';
+      return;
+    }
+    els.familyResult.textContent = 'Signing in…';
+    XWCloud.signIn(S, email, pass).then(function () {
+      els.familyPass.value = '';
+      els.familyResult.textContent = 'Signed in. Maps and notes are synced.';
+    }).catch(function () {
+      els.familyResult.textContent = 'Could not sign in. Check the email and password.';
+    });
+  });
+
+  els.familySync.addEventListener('click', function () {
+    if (!XWCloud.isSignedIn()) {
+      els.familyResult.textContent = 'Sign in first, then the maps and notes can be sent.';
+      return;
+    }
+    var count = S.list().length;
+    XWCloud.syncAll(S).then(function () {
+      els.familyResult.textContent = 'Sent ' + count + (count === 1 ? ' map' : ' maps') + ' with their notes.';
+    }).catch(function () {
+      els.familyResult.textContent = 'Not sent. See the sync message, or turn on Show errors.';
+    });
+  });
+
+  els.familyCheck.addEventListener('click', function () {
+    els.familyResult.textContent = 'Checking…';
+    XWCloud.dbCheck().then(function (text) {
+      els.familyResult.textContent = text;
+    }).catch(function () {
+      els.familyResult.textContent = '❌ Database check failed. Turn on Show errors for details.';
+    });
+  });
+
+  els.familySignout.addEventListener('click', function () {
+    XWCloud.signOut().then(function () {
+      els.familyResult.textContent = 'Signed out. Maps stay on this device.';
+    });
+  });
+
+  XWCloud.onState(renderCloud);
+  XWCloud.init(S, logError);
+
   markSeg(els.segAi, 'ai', g.ai);
   show('home');
   requestAnimationFrame(frame);
