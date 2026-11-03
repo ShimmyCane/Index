@@ -86,14 +86,35 @@
     }
   `;
 
+  // P3: lighting for standard (PBR) materials from a generated room, not an image file or an addon.
+  // A warm grey room with two soft light panels; PMREM turns it into the environment map that
+  // roughness and metalness read. Nothing is loaded, so it works offline on the iPad.
+  function makeRoomEnvironment(renderer, THREE) {
+    const env = new THREE.Scene();
+    env.add(new THREE.Mesh(new THREE.BoxGeometry(20, 20, 20),
+      new THREE.MeshBasicMaterial({ color: 0x5c5850, side: THREE.BackSide })));
+    const panelMat = new THREE.MeshBasicMaterial({ color: 0x9a9a9a });
+    const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(9, 9), panelMat);   // faces down into the room
+    ceiling.position.set(0, 9.5, 0); ceiling.rotation.x = Math.PI / 2;
+    env.add(ceiling);
+    const wall = new THREE.Mesh(new THREE.PlaneGeometry(6, 9), panelMat);      // faces into the room from the -X wall
+    wall.position.set(-9.5, 0, 0); wall.rotation.y = Math.PI / 2;
+    env.add(wall);
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const tex = pmrem.fromScene(env, 0.04).texture;
+    pmrem.dispose();
+    return tex;
+  }
+
   function createViewer(canvas) {
     const THREE = root.THREE;
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setPixelRatio(Math.min(root.devicePixelRatio || 1, 2));
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(CANVAS_BG);
+    scene.environment = makeRoomEnvironment(renderer, THREE);
     const camera = new THREE.PerspectiveCamera(35, 1, 0.5, 5000);
-    scene.add(new THREE.HemisphereLight(0xffffff, 0xd9d2c0, 0.95));
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xd9d2c0, 0.7));   // lower than before: the room environment adds light (P3)
     const sun = new THREE.DirectionalLight(0xffffff, 0.8);
     sun.position.set(-1, 2, 1.2);
     scene.add(sun);

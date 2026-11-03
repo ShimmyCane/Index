@@ -13,7 +13,7 @@ Plan and research: `04 AI/Make 3D/research/v2_plan.md` and `trellis2_notes.md`. 
 - [x] P2 canvas-free patterns: wood, tile, stripe as pixel tiles (`js/core/patterns.js`, `tests/test_patterns.js`). Set with a `set_material` operation for now.
 - [ ] P2b: material controls in the gear panel or the Add form (sliders for roughness and metalness, pattern picker, pattern colour and scale). Design to match V1 panels.
 - [ ] P2c: leaf pattern (from the plan). Check the wood and tile looks on iPad before tuning.
-- [ ] P3 PBR viewer: generated room environment for lighting. Vendor `RoomEnvironment` from three r160 (not in the vendored build yet). Check on the planter and kitchen.
+- [x] P3 PBR viewer: lighting from a generated room (PMREM from a small scene in `js/viewer/viewer.js`, no addon). Hemisphere light lowered to 0.7 to keep the scene's brightness. Checked on the planter in headless Chromium. [ ] Still to check: the kitchen, and on iPad.
 - [ ] P4 staged passes: structure, shape and material as cached stages keyed by a hash of the history prefix. Test that an edit reruns only the later stages.
 - [ ] P5 GLB export: vendor `GLTFExporter` and write textures and decimated meshes. Test by loading the GLB back with `GLTFLoader`. IFC export unchanged.
 - [?] P6 optional generator slot (load a GLB from an outside service). Off by default; no keys in the repo. Jimmy decides whether it is wanted (it breaks the client-side rule in the Make 3D preferences).
