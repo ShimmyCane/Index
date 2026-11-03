@@ -70,10 +70,14 @@
       <button id="sync-pill" class="sync-pill" type="button" aria-live="polite">💾 device</button>
     </div>
     <main class="stage">
-      <div id="board" class="board">
-        <svg id="roads" class="layer" viewBox="0 0 1000 640"></svg>
-        <div id="nodes" class="layer"></div>
-        <svg id="armies" class="layer" viewBox="0 0 1000 640"></svg>
+      <div id="pop-bar" class="pop-bar" role="img" aria-label="Share of soldiers per player"></div>
+      <div class="board-wrap">
+        <button id="pct-btn" class="pct-btn" type="button">Send 25%</button>
+        <div id="board" class="board">
+          <svg id="roads" class="layer" viewBox="0 0 1000 640"></svg>
+          <div id="nodes" class="layer"></div>
+          <svg id="armies" class="layer" viewBox="0 0 1000 640"></svg>
+        </div>
       </div>
     </main>
     <p class="rotate-hint">Turn your phone sideways for a bigger board.</p>
@@ -85,6 +89,7 @@
         <div class="seg" id="seg-ai">
           <button data-ai="easy" aria-pressed="false">Easy</button>
           <button data-ai="normal" aria-pressed="true">Normal</button>
+          <button data-ai="hard" aria-pressed="false">Hard</button>
         </div>
       </div>
       <div class="row">
