@@ -3,7 +3,7 @@
   "model_id": "robot-loop-v02",
   "header": {
     "model_id": "robot-loop-v02",
-    "name": "Robot loop V02",
+    "name": "Robot going for a stroll V02",
     "description": "The sketched loop, smoothed into a closed curve: the robot walks it with the banana. Banana is a visibility group. Walks the loop from Quick Detail \"Robot Loop\" (3c4c380d-7901-4944-8929-d74e92903789).",
     "units": "in",
     "up": "z",
