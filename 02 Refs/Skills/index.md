@@ -16,3 +16,4 @@ Skills:
 Claude Code:
 - These files are the source of truth. Each one has a thin wrapper in `.claude/skills/<name-with-hyphens>/SKILL.md`, so it can be run as `/start-project`, `/ai-consolidate`, etc.
 - When adding a skill here, also add its wrapper (or ask Claude to).
+- simulate_decay: Builds a physics-based model of an object that changes over increments (folds, tears, damp, mould, dirt, burns), from research and a story, with a 3-D page and Increment Viewer review. Asks questions first.
