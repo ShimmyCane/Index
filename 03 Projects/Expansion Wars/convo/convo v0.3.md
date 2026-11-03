@@ -45,6 +45,18 @@ Everything else in the notes is built and checked in the code. Notes marked `Don
 
    > **Jimmy:** Zoom inward at level 10. Still planning in my head.
 
+## Built in this round: defaults I picked
+
+These are built. Please check them and say what to change.
+
+- **Maps 5 to 9:** 12, 14, 16, 18 and 20 spots. Each field is 1.5 screens wide and pans (drag on empty ground, or the mouse wheel). Pan, not shrink, because the note said scrollable.
+- **Fortresses:** neutral garrison 18 to 22, grows 0.5 a second once owned, stops growing at 40. They can be reinforced like any spot.
+- **City tiers:** village 20, town 40, city 60, metropolis 80. Upgrade costs 20, 30 and 40 soldiers. Growth rates 1.5, 2.0, 2.6 and 3.2 a second (3.2 is my pick).
+- **Teams:** Levels 4, 6 and 8 always have teams: 2 teams of 2 on Levels 4 and 6, 3 teams of 2 on Level 8. The Teams setting in ⚙️ is gone. Each team shares one colour.
+- **Zoom at level 10:** not built, since you said you are still planning it.
+
+Still open for you: what each city tier unlocks, what a fortress does beyond being reinforced, and whether teams should be assigned differently from the fixed pairs.
+
 ---
 
 _Answers go in `convo/convo v0.4.md` once this round is complete._

@@ -70,6 +70,7 @@ html, body {
   border-radius: 28px;
   box-shadow: 0 6px 0 var(--ink);
   overflow: hidden;
+  touch-action: none;   /* dragging sends soldiers or pans the field; the page must not scroll */
 }
 
 .layer {
@@ -129,7 +130,7 @@ html, body {
 .node {
   position: absolute;
   transform: translate(-50%, -50%);
-  width: max(6.8%, 44px);   /* never smaller than a 44 px touch target */
+  width: max(calc(6.8% / var(--scale, 1)), 44px);   /* never smaller than a 44 px touch target; same size on any field */
   aspect-ratio: 1;
   min-height: 0;
   min-width: 0;
@@ -147,7 +148,7 @@ html, body {
   background: var(--neutral);
   transition: transform 0.1s ease;
 }
-.node.city { border-radius: 24%; width: max(7.6%, 48px); }
+.node.city { border-radius: 24%; width: max(calc(7.6% / var(--scale, 1)), 48px); }
 .node .ico { font-size: clamp(14px, 2.6vw, 24px); }
 .node .num { font-size: clamp(12px, 2vw, 18px); margin-top: 1px; }
 
@@ -499,8 +500,26 @@ button {
   font-size: clamp(13px, 2.2vw, 17px);
 }
 .game .stage { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.board-wrap { position: relative; width: min(96vw, calc((100vh - 200px) * 1.5625)); }
-.game .board { width: 100%; }
+/* The window onto the field. The field (.board) can be wider than this window and is panned inside it. */
+.board-wrap {
+  position: relative;
+  width: min(96vw, calc((100vh - 200px) * 1.5625));
+  aspect-ratio: 1000 / 640;
+  overflow: hidden;
+  border: 3px solid var(--ink);
+  border-radius: 28px;
+  box-shadow: 0 6px 0 var(--ink);
+}
+/* --scale is the field's size compared with one screen (1 on most levels, 1.5 on the bigger ones) */
+.game .board {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(var(--scale, 1) * 100%);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
 
 /* Send amount, top-left corner of the board */
 .top-row {
@@ -664,3 +683,28 @@ button {
   .gear { width: 60px; height: 60px; right: 12px; bottom: 12px; }
   .panel { right: 12px; bottom: 90px; }
 }
+
+/* Colours for up to six players (o0-o5) and up to five teams (t0-t4) */
+:root { --peach: #ffc9a8; --pink: #f7b6d2; }
+.cell.o4 { fill: var(--peach); }
+.cell.o5 { fill: var(--pink); }
+.node.o4 { background: var(--peach); }
+.node.o5 { background: var(--pink); }
+.army.o4 circle { fill: var(--peach); }
+.army.o5 circle { fill: var(--pink); }
+.pop-seg.o4 { background: var(--peach); }
+.pop-seg.o5 { background: var(--pink); }
+.cell.t2 { fill: var(--sun); }
+.cell.t3 { fill: var(--lavender); }
+.cell.t4 { fill: var(--peach); }
+.node.t2 { background: var(--sun); }
+.node.t3 { background: var(--lavender); }
+.node.t4 { background: var(--peach); }
+.army.t2 circle { fill: var(--sun); }
+.army.t3 circle { fill: var(--lavender); }
+.army.t4 circle { fill: var(--peach); }
+.pop-seg.t0 { background: var(--mint); }
+.pop-seg.t1 { background: var(--coral); }
+.pop-seg.t2 { background: var(--sun); }
+.pop-seg.t3 { background: var(--lavender); }
+.pop-seg.t4 { background: var(--peach); }

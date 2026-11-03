@@ -27,8 +27,8 @@ Built from the feedback notes (round 2). Each item says whether it is done, and 
 
 ## Needs a decision first (see convo v0.2 and v0.3)
 
-- [ ] **Cities: tiers and unlocks.** Tiers are set (round 4 below). Still open: what each tier unlocks beyond growth and the cap.
-- [ ] **Team mode.** Teams are set up by level, fair, up to 5 teams (round 4 below). Still open: team colours and team badges.
+- [x] **Cities: tiers.** Built: village 20, town 40, city 60, metropolis 80 (round 4 below). Still open: what each tier unlocks beyond growth and the cap.
+- [x] **Team mode by level.** Built: Levels 4, 6 and 8 have fair teams, up to 3 here (round 4 below). Each team shares one colour.
 - [ ] **Baby-animal avatars** instead of the fungi for each team. Decide: which animals, and whether the avatars replace the map icons or appear only on the team card.
 - [x] **Dragon drop through unlinked spots.** Decided yes: a drop routes along roads through your own spots. Built, and Jimmy confirmed it works well (2026-11-03).
 - [ ] **AI strategy in team games.** Decide after team mode exists.
@@ -39,13 +39,13 @@ Checked against `js/game.js` and `js/store.js`. Notes stay `open` in the table u
 
 Built in round 3 and confirmed in code: drop anywhere on a region, multi-drag, routes through own spots, reinforce, the 3-2-1-Go countdown, the population line with send %, team mode with a red divider, hard level and move caps, the Done- prefix.
 
-Decisions from convo v0.3 (not built yet):
+Built from convo v0.3 answers. The defaults I picked are listed in convo v0.3 for Jimmy to check.
 
-- [ ] **Five more maps.** Levels 5 to 9, with more spots and cities each step; scrollable on the field. Still open: spot counts (example 12, 14, 16, 18, 20), and whether the field pans or shrinks. The level list in `js/map.js` stops at level 4.
-- [ ] **Fortresses.** A new spot type, the "castle" in the reinforce note. Players can reinforce it. Still open: what it does beyond that.
-- [ ] **City tiers.** Village 20, town 40, city 60, metropolis 80 garrison caps. Each upgrade costs 50% of the next tier's cap (my reading: 20, 30, 40 soldiers). Please confirm the cost reading.
-- [ ] **Teams by level.** Some levels give teams. Teams are fair, up to 5 teams. Still open: colours and badges, and how the teams are made (assumed balanced and automatic).
-- [ ] **Zoom.** Inward zoom at level 10. Still planning.
+- [x] **Five more maps.** Levels 5 to 9: 12, 14, 16, 18 and 20 spots, with 3 to 5 cities and 1 to 3 fortresses. Each field is 1.5 screens wide and pans (drag on empty ground, or the mouse wheel). Level list in `js/map.js`.
+- [x] **Fortresses.** New spot type (🏯). Neutral garrison 18 to 22, grows 0.5 a second once owned, stops at 40. Players reinforce them like any spot.
+- [x] **City tiers.** Village 20, town 40, city 60, metropolis 80 garrison caps. Upgrade costs 50% of the next tier's cap: 20, 30 and 40 soldiers. Rates 1.5, 2.0, 2.6 and 3.2 a second (3.2 is my pick). Capture resets a city to village.
+- [x] **Teams by level.** Level 4 and Level 6: 4 players in 2 teams of 2. Level 8: 6 players in 3 teams of 2. Each team shares one colour; no badges. The Teams setting is gone.
+- [ ] **Zoom.** Inward zoom at level 10. Not built: Jimmy said he is still planning it.
 - [ ] **Test note** (`Test note 1`, Level 4 Valley). Nothing to build. Mark done when Jimmy confirms.
 
 ## Later
