@@ -183,10 +183,10 @@ function sceneFor(v) {
   return {
     id,
     builtin: true,
-    project: 'Robot loop',
+    project: RB.ROBOT_PROJECT,
     header: {
       model_id: id,
-      name: `Robot loop V0${v}`,
+      name: `${RB.ROBOT_PROJECT} V0${v}`,
       description: `${NOTES[v]} Walks the loop from Quick Detail "Robot Loop" (${SKETCH_ID}).`,
       units: 'in', up: 'z', world: WORLD_ID,
       materials: v >= 5 ? { ...RB.MATERIALS, cape: { color: '#bcd9f2', opacity: 1 } } : RB.MATERIALS,
