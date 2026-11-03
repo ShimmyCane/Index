@@ -365,3 +365,9 @@ Jimmy: the tank is not a vertical extrusion; some portions should be shallow wit
 - All robots are one Library project, "Robot going for a stroll": V01 (`robot-banana`, was "Robot with a banana") and V02 to V05 (`robot-loop-v02` to `v05`, was "Robot loop"). Scene ids are unchanged, so existing links (`?model=robot-loop-v04`) still work.
 - The name lives in one constant, `ROBOT_PROJECT` in `tools/robot_banana.js`. The Increment Viewer set is "Robot going for a stroll: V02 to V05".
 - Only names and headers changed. Motions and geometry are the same.
+
+## Robot Path (2026-11-03)
+
+- **Quick Detail "Robot Path"** (`sketch_details` eec507d8-9272-457b-a84e-d39f378ef324, tag `make3d`): one closed figure-eight stroke (x = 12 sin t, y = 12 sin t cos t, 80 points). I created it because no path had been drawn. Redraw it in Quick Detail to change the shape; the robot code uses its own copy of the formula, so update `tools/robot_loop.js` too.
+- **Built:** `robot-loop-v06` ("Robot going for a stroll V06") walks it at 3.5 in per unit, with the same parts as V05 (frisbee, hat, cape). V02 to V05 are unchanged.
+- The library lists the detail only when signed in (the page reads `sketch_details` with owner access).
