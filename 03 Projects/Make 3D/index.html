@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Make 3D</title>
+<title>Make 3D V2</title>
 <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
 <header class="topbar">
-  <div class="brand">Make 3D</div>
+  <div class="brand">Make 3D <span class="ver">V2</span></div>
   <div class="model-title" id="modelTitle">…</div>
   <span class="pill" id="status">Saved on this device</span>
 </header>
@@ -202,6 +202,12 @@
 
 <div class="drawer" id="gearPanel" hidden>
   <h2>Settings</h2>
+
+  <h3>Versions</h3>
+  <p class="hint">V2 is the current engine. V1 is the archived first version, kept to run as it was.</p>
+  <div class="btn-row">
+    <a class="btn" href="V1/index.html">Open V1 (archived)</a>
+  </div>
 
   <label class="field">Up axis of the file
     <select id="upSel">
