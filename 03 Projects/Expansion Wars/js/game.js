@@ -1,4 +1,5 @@
-// Expansion Wars — game rules, computer players, drawing, input, notes and map list.
+// Expansion Wars — screens, game rules, computer players, drawing, input,
+// progression, scoring, notes and the saved-maps list.
 (function () {
   'use strict';
 
@@ -13,28 +14,46 @@
   var ICON = { factory: '🍄', city: '🏰' };
   var SVG_NS = 'http://www.w3.org/2000/svg';
 
+  var SHOP = [
+    { name: 'Cities 🏰', desc: 'Bigger garrisons and faster soldiers. Found from Level 1.', status: 'in' },
+    { name: 'Lakes 💧', desc: 'Water that soldiers cannot cross. Found from Level 2.', status: 'in' },
+    { name: 'Voronoi maps', desc: 'Every map is a new layout of regions.', status: 'in' },
+    { name: 'Saved maps, notes and stars', desc: 'Every map is kept, with notes and a 1 to 5 star rating.', status: 'in' },
+    { name: 'Speed boosts', desc: 'Regions that send soldiers faster.', status: 'soon' },
+    { name: 'Defense boosts', desc: 'Regions with stronger garrisons.', status: 'soon' },
+    { name: 'Towers that shoot', desc: 'Defenders that hit marching soldiers.', status: 'soon' },
+    { name: 'Spells', desc: 'One-time powers for a sudden push.', status: 'soon' },
+    { name: 'Quick Game', desc: 'A smaller map for a short game.', status: 'soon' }
+  ];
+
   function $(id) { return document.getElementById(id); }
 
   var els = {
     board: $('board'), roads: $('roads'), nodes: $('nodes'), armies: $('armies'),
     status: $('status'), overlay: $('overlay'), winTitle: $('win-title'), winText: $('win-text'),
+    winStars: $('win-stars'), winNext: $('win-next'), winRetry: $('win-retry'), winMap: $('win-map'),
     panel: $('panel'), gear: $('gear'), errors: $('errors'), errorsToggle: $('errors-toggle'),
-    sound: $('sound'), newmap: $('newmap'), again: $('again'),
-    segLevel: $('seg-level'), segAi: $('seg-ai'),
+    sound: $('sound'), newmap: $('newmap'), segAi: $('seg-ai'),
     noteText: $('note-text'), noteSave: $('note-save'), noteStatus: $('note-status'),
-    openMaps: $('open-maps'), maps: $('maps'), mapsList: $('maps-list'), mapsClose: $('maps-close')
+    openMaps: $('open-maps'), maps: $('maps'), mapsList: $('maps-list'), mapsClose: $('maps-close'),
+    btnPlay: $('btn-play'), btnMap: $('btn-map'), btnShop: $('btn-shop'), btnScores: $('btn-scores'),
+    btnHome: $('btn-home'), path: $('path'), mapNote: $('map-note'),
+    shopList: $('shop-list'), bestLevels: $('best-levels'), scoreList: $('score-list')
   };
 
   var g = {
     level: 1,
     ai: 'normal',
     players: 2,
+    screen: 'home',
     nodes: [],
     armies: [],
     drag: null,      // { from: node }
     pointer: null,   // { x, y } in map units
     target: null,    // land spot under the pointer during a drag
     over: false,
+    paused: true,
+    elapsed: 0,      // seconds of play in this game
     aiClock: 0,
     recordId: null,  // saved map record for the current game
     statusTimer: null
@@ -48,6 +67,13 @@
     return el;
   }
 
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+
   function ownerClass(owner) {
     if (owner === -2) return 'lake';
     return owner < 0 ? 'neutral' : 'o' + owner;
@@ -55,18 +81,30 @@
 
   function linked(a, b) { return a.links.indexOf(b.id) !== -1; }
 
+  function mmss(sec) {
+    var s = Math.max(0, Math.round(sec));
+    return Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60);
+  }
+
+  function starText(n) { return '★'.repeat(n) + '☆'.repeat(3 - n); }
+
+  function starsFor(seconds) {
+    if (seconds <= 90) return 3;
+    if (seconds <= 180) return 2;
+    return 1;
+  }
+
   function setStatus(msg, temp) {
     els.status.textContent = msg;
     clearTimeout(g.statusTimer);
-    if (temp) {
-      g.statusTimer = setTimeout(function () { restoreStatus(); }, 1800);
-    }
+    if (temp) g.statusTimer = setTimeout(restoreStatus, 1800);
   }
 
   function restoreStatus() {
     var rec = currentRecord();
-    els.status.textContent = rec ? rec.title + ' · up to ' + rec.max_opponents +
-      (rec.max_opponents === 1 ? ' opponent' : ' opponents') : 'Drag from your mushroom to a connected one';
+    els.status.textContent = rec
+      ? rec.title + ' · up to ' + rec.max_opponents + (rec.max_opponents === 1 ? ' opponent' : ' opponents')
+      : 'Drag from your mushroom to a connected one';
   }
 
   function currentRecord() {
@@ -78,9 +116,7 @@
 
   // Errors are shown only when "Show errors" is on (see the ⚙️ panel).
   function logError(msg) {
-    var row = document.createElement('div');
-    row.textContent = String(msg);
-    els.errors.appendChild(row);
+    els.errors.appendChild(el('div', '', String(msg)));
     while (els.errors.children.length > 20) els.errors.removeChild(els.errors.firstChild);
   }
 
@@ -101,6 +137,29 @@
       if (d < bestD) { bestD = d; best = n; }
     });
     return best;
+  }
+
+  // ---------- screens ----------
+
+  function show(name) {
+    g.screen = name;
+    ['home', 'map', 'shop', 'scores', 'game'].forEach(function (s) {
+      $('screen-' + s).hidden = (s !== name);
+    });
+    g.paused = name !== 'game';
+    els.overlay.hidden = true;
+    els.maps.hidden = true;
+    if (name !== 'game') els.panel.hidden = true;
+    if (name === 'map') renderPath();
+    if (name === 'shop') renderShop();
+    if (name === 'scores') renderScores();
+    window.scrollTo(0, 0);
+  }
+
+  function startLevel(n) {
+    g.level = n;
+    show('game');
+    newGame();
   }
 
   // ---------- building the board ----------
@@ -137,16 +196,11 @@
     // Spot labels (land only)
     g.nodes.forEach(function (n) {
       if (n.type === 'lake') return;
-      var d = document.createElement('div');
-      d.className = 'node';
+      var d = el('div', 'node');
       d.style.left = (n.x / M.W * 100) + '%';
       d.style.top = (n.y / M.H * 100) + '%';
-      var ico = document.createElement('span');
-      ico.className = 'ico';
-      ico.textContent = ICON[n.type];
-      var num = document.createElement('span');
-      num.className = 'num';
-      d.appendChild(ico);
+      var num = el('span', 'num');
+      d.appendChild(el('span', 'ico', ICON[n.type]));
       d.appendChild(num);
       n.el = d;
       n.num = num;
@@ -164,7 +218,7 @@
       map = M.generate(g.level);
     } catch (err) {
       logError(err.message);
-      setStatus('Could not make a map. Try New map.');
+      setStatus('Could not make a map. Try again.');
       return;
     }
 
@@ -196,6 +250,8 @@
     g.drag = null;
     g.target = null;
     g.over = false;
+    g.paused = false;
+    g.elapsed = 0;
     g.aiClock = 0;
     els.overlay.hidden = true;
     buildBoard();
@@ -247,7 +303,8 @@
   }
 
   function step(dt) {
-    if (g.over) return;
+    if (g.over || g.paused || !g.nodes.length) return;
+    g.elapsed += dt;
 
     g.nodes.forEach(function (n) {
       if (n.owner >= 0) n.count += n.rate * dt;
@@ -314,13 +371,34 @@
     g.dragLine.style.display = 'none';
     if (won) Sound.win(); else Sound.lost();
 
+    var secs = Math.round(g.elapsed);
+    var mine = g.nodes.filter(function (n) { return n.type !== 'lake' && n.owner === 0; });
+    var soldiers = 0;
+    mine.forEach(function (n) { soldiers += Math.floor(n.count); });
+    var score = won ? Math.round(1000 + Math.max(0, 600 - secs) * 2 + mine.length * 50 + soldiers) : 0;
+
     var rec = S.recordGame(g.recordId, won);
     if (S.lastError()) logError(S.lastError());
     var rate = rec ? S.winRate(rec) : null;
-    var stats = rec ? 'Played ' + rec.times_played + ' · win rate ' + (rate === null ? '—' : rate + '%') : '';
+    var mapStats = rec ? 'Map played ' + rec.times_played + ' · win rate ' + (rate === null ? '—' : rate + '%') : '';
 
-    els.winTitle.textContent = won ? 'You grew the whole meadow! 🎉' : 'The other mushrooms won this time 🍄';
-    els.winText.textContent = (won ? 'Ready for another map? ' : 'Want to try again? ') + stats;
+    var stars = 0;
+    var hasNext = g.level < S.LEVEL_COUNT;
+    if (won) {
+      stars = starsFor(secs);
+      S.completeLevel(g.level, secs, score);
+      S.addScore({ score: score, level: g.level, seconds: secs });
+      if (S.lastError()) logError(S.lastError());
+      els.winTitle.textContent = hasNext ? 'You grew the whole meadow! 🎉' : 'All four levels done! 🏆';
+      els.winText.textContent = 'Time ' + mmss(secs) + ' · Score ' + score + '. ' + mapStats;
+      els.winStars.textContent = starText(stars);
+    } else {
+      els.winTitle.textContent = 'The other mushrooms won this time 🍄';
+      els.winText.textContent = 'Try again, you can do it! ' + mapStats;
+      els.winStars.textContent = '';
+    }
+    els.winNext.hidden = !(won && hasNext);
+    els.winRetry.textContent = won ? 'Play again' : 'Try again';
     els.overlay.hidden = false;
   }
 
@@ -351,7 +429,7 @@
       a.el.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ')');
     });
 
-    if (g.drag && g.pointer) {
+    if (g.drag && g.pointer && g.dragLine) {
       var end = g.target || g.pointer;
       var ok = g.target && linked(g.drag.from, g.target);
       g.dragLine.setAttribute('x1', g.drag.from.x);
@@ -360,7 +438,7 @@
       g.dragLine.setAttribute('y2', end.y);
       g.dragLine.setAttribute('class', 'drag' + (g.target ? (ok ? ' ok' : ' bad') : ''));
       g.dragLine.style.display = '';
-    } else {
+    } else if (g.dragLine) {
       g.dragLine.style.display = 'none';
     }
   }
@@ -368,7 +446,7 @@
   // ---------- input ----------
 
   els.board.addEventListener('pointerdown', function (e) {
-    if (g.over) return;
+    if (g.over || g.paused) return;
     var p = toMap(e);
     var n = hit(p);
     if (!n || n.owner !== 0 || n.count < 1) return;
@@ -412,7 +490,7 @@
     g.pointer = null;
   });
 
-  // ---------- settings (⚙️) ----------
+  // ---------- home, progress, shop, scores ----------
 
   function markSeg(container, attr, value) {
     container.querySelectorAll('button').forEach(function (b) {
@@ -420,16 +498,97 @@
     });
   }
 
+  $('btn-play').addEventListener('click', function () { startLevel(S.highestOpen()); });
+  $('btn-map').addEventListener('click', function () { show('map'); });
+  $('btn-shop').addEventListener('click', function () { show('shop'); });
+  $('btn-scores').addEventListener('click', function () { show('scores'); });
+  document.querySelectorAll('[data-go]').forEach(function (b) {
+    b.addEventListener('click', function () { show(b.dataset.go); });
+  });
+  els.btnHome.addEventListener('click', function () { show('map'); });
+
+  function renderPath() {
+    els.path.innerHTML = '';
+    var prog = S.progress();
+    M.LEVELS.forEach(function (cfg) {
+      if (cfg.level > S.LEVEL_COUNT) return;
+      var status = S.levelStatus(cfg.level);
+      var entry = prog.completed[String(cfg.level)];
+      var btn = el('button', 'lvl-node ' + status);
+      btn.appendChild(el('span', 'lvl-num', String(cfg.level)));
+      btn.appendChild(el('span', 'lvl-name', cfg.name));
+      var state;
+      if (status === 'locked') state = '🔒 Win level ' + (cfg.level - 1) + ' to unlock';
+      else if (status === 'done') state = starText(entry.stars) + ' · best ' + entry.bestScore;
+      else state = 'Tap to play';
+      btn.appendChild(el('span', 'lvl-state', state));
+      btn.disabled = status === 'locked';
+      btn.addEventListener('click', function () { startLevel(cfg.level); });
+      els.path.appendChild(btn);
+      els.path.appendChild(el('div', 'lvl-link'));
+    });
+    var soon = el('div', 'lvl-node soon');
+    soon.appendChild(el('span', 'lvl-num', '🌱'));
+    soon.appendChild(el('span', 'lvl-name', 'More levels'));
+    soon.appendChild(el('span', 'lvl-state', 'Coming soon'));
+    els.path.appendChild(soon);
+
+    var done = Object.keys(prog.completed).length;
+    els.mapNote.textContent = done + ' of ' + S.LEVEL_COUNT + ' levels won.';
+  }
+
+  function renderShop() {
+    els.shopList.innerHTML = '';
+    SHOP.forEach(function (item) {
+      var li = el('li', 'card-item ' + item.status);
+      var head = el('div', 'card-head');
+      head.appendChild(el('h3', '', item.name));
+      head.appendChild(el('span', 'tag-pill ' + item.status, item.status === 'in' ? 'In game' : 'Coming soon'));
+      li.appendChild(head);
+      li.appendChild(el('p', '', item.desc));
+      els.shopList.appendChild(li);
+    });
+  }
+
+  function renderScores() {
+    var prog = S.progress();
+    els.bestLevels.innerHTML = '';
+    M.LEVELS.forEach(function (cfg) {
+      if (cfg.level > S.LEVEL_COUNT) return;
+      var entry = prog.completed[String(cfg.level)];
+      var card = el('div', 'card-item ' + (entry ? 'in' : 'soon'));
+      var head = el('div', 'card-head');
+      head.appendChild(el('h3', '', 'Level ' + cfg.level + ' · ' + cfg.name));
+      head.appendChild(el('span', 'tag-pill ' + (entry ? 'in' : 'soon'), entry ? starText(entry.stars) : 'Not won'));
+      card.appendChild(head);
+      card.appendChild(el('p', '', entry ? 'Best score ' + entry.bestScore + ' · best time ' + mmss(entry.bestSeconds) : 'Win this level to set a score.'));
+      els.bestLevels.appendChild(card);
+    });
+
+    els.scoreList.innerHTML = '';
+    var top = S.scores();
+    if (!top.length) {
+      els.scoreList.appendChild(el('li', 'muted', 'No wins yet.'));
+      return;
+    }
+    top.forEach(function (s) {
+      var li = el('li', 'score-row');
+      li.appendChild(el('span', 'score-num', String(s.score)));
+      li.appendChild(el('span', '', 'Level ' + s.level + ' · ' + mmss(s.seconds)));
+      els.scoreList.appendChild(li);
+    });
+  }
+
+  // ---------- win / lose buttons ----------
+
+  els.winNext.addEventListener('click', function () { startLevel(g.level + 1); });
+  els.winRetry.addEventListener('click', function () { startLevel(g.level); });
+  els.winMap.addEventListener('click', function () { show('map'); });
+
+  // ---------- settings (⚙️) ----------
+
   els.gear.addEventListener('click', function () {
     els.panel.hidden = !els.panel.hidden;
-  });
-
-  els.segLevel.addEventListener('click', function (e) {
-    var b = e.target.closest('button');
-    if (!b) return;
-    g.level = Number(b.dataset.level);
-    markSeg(els.segLevel, 'level', g.level);
-    newGame();
   });
 
   els.segAi.addEventListener('click', function (e) {
@@ -470,17 +629,9 @@
     els.noteStatus.textContent = 'Note saved for this map.';
   });
 
-  els.newmap.addEventListener('click', newGame);
-  els.again.addEventListener('click', newGame);
+  els.newmap.addEventListener('click', function () { newGame(); });
 
-  // ---------- maps list (description, features, ranking, win rate, notes) ----------
-
-  function el(tag, cls, text) {
-    var n = document.createElement(tag);
-    if (cls) n.className = cls;
-    if (text !== undefined) n.textContent = text;
-    return n;
-  }
+  // ---------- saved maps list (description, features, ranking, win rate, notes) ----------
 
   function renderMaps() {
     var list = S.list().slice().sort(function (a, b) {
@@ -515,7 +666,6 @@
       var stars = el('div', 'stars');
       for (var s = 1; s <= 5; s++) {
         var b = el('button', 'star', s <= (r.rank || 0) ? '★' : '☆');
-        b.setAttribute('data-stars', String(s));
         b.setAttribute('aria-label', 'Rate ' + s + ' star' + (s > 1 ? 's' : ''));
         b.addEventListener('click', (function (id, n) {
           return function () {
@@ -540,9 +690,7 @@
     renderMaps();
     els.maps.hidden = false;
   });
-  els.mapsClose.addEventListener('click', function () {
-    els.maps.hidden = true;
-  });
+  els.mapsClose.addEventListener('click', function () { els.maps.hidden = true; });
 
   // Errors are logged quietly; they only show when "Show errors" is on.
   window.addEventListener('error', function (e) { logError(e.message || e.error); });
@@ -563,9 +711,8 @@
     requestAnimationFrame(frame);
   }
 
-  // Start-up: mark the default level, then play.
-  markSeg(els.segLevel, 'level', g.level);
+  // Start-up: the landing page is shown; the game starts when Play is tapped.
   markSeg(els.segAi, 'ai', g.ai);
-  newGame();
+  show('home');
   requestAnimationFrame(frame);
 })();
