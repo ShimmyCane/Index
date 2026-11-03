@@ -1,6 +1,6 @@
 # Growth: schematic
 
-Status: MVP. Started 2026-11-03 with `/start-project growth`. Ten-step paper story as a 3-D replay (`paper3d.html`) and in the Increment Viewer (`?set=growth_paper`). Questions are in `convo/convo v0.1.md`.
+Status: MVP (first attempt; its 3-D version is superseded by Paper Again, 2026-11-03). Started 2026-11-03 with `/start-project growth`. Ten-step paper story as a 3-D replay (`paper3d.html`) and in the Increment Viewer (`?set=growth_paper`). Questions are in `convo/convo v0.1.md`.
 
 ## Purpose
 

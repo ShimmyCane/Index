@@ -23,6 +23,7 @@ Projects with notes:
 - Living Room Scene/ — scene built from a photo over ten versions (V1–V10), render-and-compare loop. `brief.md` (version log), `lessons.md`.
 - Shimmy Specs/ — spec-writing process app; MVP planned (`mvp schematic.md`, `mvp tasks.md`). `brief.md`, `lessons.md`.
 - Growth/ — algorithmic ageing of a model (first subject: white paper). MVP: ten-step paper story replayed in 3-D (`paper3d.html`, engine and tests in `js/` and `tests/`) and in the Increment Viewer; convo v0.1 answered in part. `brief.md`.
+- Paper Again/ — particle model of one sheet of paper over ten increments (folds, crumpling, tears, damp, mould, cuts, burns). MVP. Research in `research/paper_behaviour.md`. `brief.md`.
 
 Notes:
 - Lessons in this folder come from the private ShimmyAI repo's `04 AI/`. Only generic lessons were carried over. Family and personal details were not.
