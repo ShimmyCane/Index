@@ -388,6 +388,17 @@
   function isThreat(o, P) { return canHurt(o.sp) && o.size >= P * 1.1; }
   function isEdible(o, P) { return o.sp.kind !== 'harmless' && o.sp.kind !== 'food' && o.size <= P * 0.87; }
 
+  // Fish by tier relative to you: below (prey side), same, above (predator side).
+  function spread() {
+    var t = run.info.n, out = { below: 0, same: 0, above: 0 };
+    run.npcs.forEach(function (o) {
+      if (o.dead || o.sp.kind === 'food') return;
+      var d = o.sp.tier - t;
+      if (d < 0) out.below++; else if (d === 0) out.same++; else out.above++;
+    });
+    return out;
+  }
+
   function census() {
     var P = run.size, c = { fish: 0, threat: 0, edible: 0, harmless: 0, food: 0 };
     run.npcs.forEach(function (o) {
@@ -407,14 +418,23 @@
     return Math.min(0.7, base * (1 + 0.5 * run.tension));
   }
 
-  // Pick a species that fits the size band for this role, relative to the player's size.
+  // Pick a species for a role. Predators come from 1–3 tiers above you, prey from 0–3 tiers below.
+  // Size still decides who is a threat or edible. If nothing fits that window, any size-fitting species is used.
   function pickSpecies(role, P) {
-    var pool = SPECIES.filter(function (sp) {
+    var t = run.info.n;
+    var inTiers = function (sp) {
+      if (role === 'threat') return sp.tier > t && sp.tier <= t + 3;
+      if (role === 'harmless') return sp.tier >= t && sp.tier <= t + 3;
+      return sp.tier <= t && sp.tier >= t - 3;
+    };
+    var fits = function (sp) {
       if (sp.kind === 'food') return false;
       if (role === 'threat') return canHurt(sp) && sp.size >= P * 1.15 && sp.size <= P * 1.9;
       if (role === 'harmless') return sp.kind === 'harmless' && sp.size <= P * 1.6;
       return sp.kind !== 'harmless' && sp.size >= P * 0.25 && sp.size <= P * 0.85;
-    });
+    };
+    var pool = SPECIES.filter(function (sp) { return fits(sp) && inTiers(sp); });
+    if (!pool.length) pool = SPECIES.filter(fits);
     return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
   }
 
@@ -1095,6 +1115,31 @@
   });
   $('note-save').addEventListener('click', saveNote);
 
+  $('family-in').addEventListener('click', function () {
+    var email = $('family-email').value.trim(), pass = $('family-pass').value;
+    var line = $('family-status');
+    if (!email || !pass) { line.textContent = 'Enter the family email and password.'; return; }
+    line.textContent = 'Signing in…';
+    window.FishFamily.signIn(email, pass).then(function () {
+      $('family-pass').value = '';
+      line.textContent = 'Signed in. Notes now go to the family database.';
+      refreshDbStatus();
+    }).catch(function (err) {
+      $('family-pass').value = '';
+      line.textContent = err.message;
+      reportError('Family sign-in: ' + err.message);
+    });
+  });
+  $('family-out').addEventListener('click', function () {
+    window.FishFamily.signOut();
+    refreshDbStatus();
+  });
+  window.FishFamily.onChange(function (s) {
+    $('family-status').textContent = s.signedIn ? 'Signed in as ' + s.email + '.' : 'Not signed in.';
+    $('family-out').hidden = !s.signedIn;
+    $('family-in').hidden = s.signedIn;
+  });
+
   window.addEventListener('resize', resize);
 
   // ---------- main loop ----------
@@ -1131,7 +1176,7 @@
         mode: mode, level: run && run.level, size: run && run.size, npcs: run ? run.npcs.length : 0,
         locks: run ? run.lockedCount : 0, lives: run && run.lives,
         npcEaten: run && run.npcEaten, difficulty: run && run.difficulty, form: run && run.form && run.form.id,
-        census: run ? census() : null,
+        census: run ? census() : null, spread: run ? spread() : null,
         player: run && { x: run.x, y: run.y }, cam: { x: cam.x, y: cam.y, scale: cam.scale },
         hunters: run ? run.npcs.filter(function (o) { return o.sp.kind === 'hunter'; }).map(function (o) { return { x: o.x, y: o.y, size: o.size, locked: o.locked }; }) : []
       };

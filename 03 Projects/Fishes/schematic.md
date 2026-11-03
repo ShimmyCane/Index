@@ -38,7 +38,7 @@ A game inside a fish tank that becomes the ocean. You start as a baby fish eatin
 Twenty tiers (one per level), in five depth zones. The play area grows with each tier, from 1600 × 1000 to 6540 × 4040. The camera zooms out as you grow.
 
 - **Evolution:** each tier has a lead species. On reaching a tier you take its form (banner: "Evolved into …"). Tier 1 is a guppy; tier 20 is a basking shark.
-- **Several species per tier**, each with a temper:
+- **3–8 species per tier** (88 in total, food included), each with a temper:
   - **docile** never attacks and never locks on. It flees bigger fish. (Guppy, herring, angelfish, sunfish.)
   - **wary** hunts smaller fish, ignores you when you are smaller, and flees when you are bigger. It does not lock on. (Dottyback, cleaner wrasse, sailfish, goblin shark.)
   - **aggressive** hunts smaller fish and locks on to you when you are smaller. (Bonito, barracuda, bluefin tuna, reef shark, great white, blue marlin.)
@@ -46,26 +46,26 @@ Twenty tiers (one per level), in five depth zones. The play area grows with each
 
 | Tier | Zone | Size to leave | Species (temper) |
 |---|---|---|---|
-| 1 Sunny Cove | Shallows | 2 | guppy (docile) · neon tetra (docile) · plankton (food) |
-| 2 Sea-grass Flats | Shallows | 3 | clownfish (docile) · goby (docile) · dottyback (wary hunter) · krill (food) |
-| 3 Rock Pool Edge | Shallows | 4 | cleaner wrasse (wary) · herring (docile) |
-| 4 Sandy Shelf | Shallows | 5 | anchovy (docile) · pufferfish (docile, spiny) · butterflyfish (docile) |
-| 5 Coral Gardens | Reef | 7 | parrotfish (docile) · blue damselfish (wary) · moray eel (aggressive ambusher) |
-| 6 Anemone Bay | Reef | 9 | angelfish (docile) · blue tang (docile) · lionfish (wary, spiny) |
-| 7 Reef Wall | Reef | 11 | mackerel (wary) · triggerfish (docile) · bonito (aggressive hunter) |
-| 8 Parrot Lagoon | Reef | 14 | grey mullet (docile) · red snapper (wary) · grouper (wary ambusher) |
-| 9 Open Blue | Open Blue | 17 | jack (wary) · trevally (wary hunter) · barracuda (aggressive hunter) |
-| 10 Tuna Run | Open Blue | 21 | mahi-mahi (wary) · bluefin tuna (aggressive hunter) |
-| 11 Shark Lane | Open Blue | 25 | rainbow runner (docile) · reef shark (aggressive) · sailfish (wary) |
-| 12 Wide Water | Open Blue | 30 | sea bream (docile) · wahoo (aggressive) · striped marlin (wary) |
-| 13 Twilight Shoal | Twilight | 36 | lanternfish (docile) · hatchetfish (wary) · opah (docile) |
-| 14 Lantern Drift | Twilight | 43 | escolar (wary hunter) · ocean sunfish (docile, harmless) · anglerfish (aggressive ambusher) |
-| 15 Angler Shelf | Twilight | 50 | pomfret (docile) · swordfish (aggressive) |
-| 16 Slope Edge | Twilight | 58 | oilfish (docile) · gulper eel (aggressive) |
-| 17 Deep Trench | Deep | 67 | viperfish (wary) · coelacanth (docile, harmless) · oarfish (docile, harmless) |
-| 18 Abyss Mouth | Deep | 77 | goblin shark (wary) · megamouth (docile, harmless) · great white (aggressive) |
-| 19 Whale Ocean | Deep | 88 | greenland shark (wary) · blue marlin (aggressive) |
-| 20 Whale Ocean | Deep | 100 | basking shark (docile, harmless) · whale shark (docile, harmless, the goal) |
+| 1 Sunny Cove | Sunny Shallows | 2 | Guppy (docile) · Neon tetra (docile) · Zebrafish (docile) · Plankton (food) |
+| 2 Sea-grass Flats | Sunny Shallows | 3 | Clownfish (docile) · Goby (docile) · Blenny (docile) · Dottyback (wary) · Krill (food) |
+| 3 Rock Pool Edge | Sunny Shallows | 4 | Cleaner wrasse (wary) · Herring (docile) · Sardine (docile) · Hawkfish (wary) |
+| 4 Sandy Shelf | Sunny Shallows | 5 | Anchovy (docile) · Pufferfish (docile) · Butterflyfish (docile) · Sergeant major (docile) · Cardinalfish (docile) |
+| 5 Coral Gardens | Coral Reef | 7 | Parrotfish (docile) · Blue damselfish (wary) · Moray eel (aggressive) · Scorpionfish (wary) · Sea chub (docile) |
+| 6 Anemone Bay | Coral Reef | 9 | Angelfish (docile) · Blue tang (docile) · Lionfish (wary) · Trumpetfish (wary) · Porcupinefish (docile) |
+| 7 Reef Wall | Coral Reef | 11 | Mackerel (wary) · Triggerfish (docile) · Bonito (aggressive) · Sweetlips (docile) · Snook (wary) |
+| 8 Parrot Lagoon | Coral Reef | 14 | Grey mullet (docile) · Rockfish (docile) · Red snapper (wary) · Bluefish (aggressive) · Grouper (wary) |
+| 9 Open Blue | Open Blue | 17 | Jack (wary) · Pompano (docile) · Amberjack (wary) · Trevally (wary) · Barracuda (aggressive) |
+| 10 Tuna Run | Open Blue | 21 | Mahi-mahi (wary) · Bonefish (docile) · Yellowfin tuna (wary) · Bluefin tuna (aggressive) |
+| 11 Shark Lane | Open Blue | 25 | Rainbow runner (docile) · Cobia (docile) · Dogtooth tuna (wary) · Sailfish (wary) · Reef shark (aggressive) |
+| 12 Wide Water | Open Blue | 30 | Sea bream (docile) · Permit (docile) · Wahoo (aggressive) · Striped marlin (wary) |
+| 13 Twilight Shoal | Twilight | 36 | Lanternfish (docile) · Hatchetfish (wary) · Lookdown (docile) · Opah (docile) · Snake mackerel (wary) |
+| 14 Lantern Drift | Twilight | 43 | Escolar (wary) · Ocean sunfish (docile, harmless) · Anglerfish (aggressive) · Lancetfish (wary) |
+| 15 Angler Shelf | Twilight | 50 | Pomfret (docile) · Sablefish (docile) · Thresher shark (wary) · Swordfish (aggressive) |
+| 16 Slope Edge | Twilight | 58 | Oilfish (docile) · Cusk eel (docile) · Hammerhead (wary) · Gulper eel (aggressive) |
+| 17 Deep Trench | Deep Trench | 67 | Viperfish (wary) · Tripodfish (docile) · Coelacanth (docile, harmless) · Oarfish (docile, harmless) · Frilled shark (wary) |
+| 18 Oar Valley | Deep Trench | 77 | Goblin shark (wary) · Megamouth shark (docile, harmless) · Sixgill shark (wary) · Great white (aggressive) |
+| 19 Abyss Mouth | Deep Trench | 88 | Greenland shark (wary) · Blue marlin (aggressive) · Sand tiger shark (docile) |
+| 20 Whale Ocean | Deep Trench | 100 | Basking shark (docile, harmless) · Whale shark (docile, harmless) · Giant sunfish (docile, harmless) |
 
 Each species' real-fish note is in `js/species.js`.
 
@@ -74,6 +74,7 @@ Each species' real-fish note is in `js/species.js`.
 The sea adapts to your size. Each new fish is sized against you:
 - **Predator** = a non-docile hunter or ambusher at least 1.1× your size (it can eat you).
 - **Prey** = a fish at most 0.87× your size (you can eat it).
+- **Where they come from:** predators are drawn from 1–3 tiers above you, and prey from 0–3 tiers below (or your own tier). Size still decides who is a threat or edible. If no species fits that window, any species that fits the size is used.
 - Threats spawn at 1.15–1.9× your size. Edible fish at 0.25–0.85× your size. Harmless fish are a small share.
 
 | Setting | Ratio (predator : prey) | Share of new fish that are predators |
@@ -90,20 +91,20 @@ From 2:30 the predator share rises by up to 50% (capped at 70%) as the game gets
 - `css/style.css`: pastel look, bold outlines, offset shadows, big targets.
 - `js/species.js`: 20 tiers and their species (`SPECIES` with `tier`, `temper`), zones, `GOALS`, `DIFFICULTY`, `leadOf()`, config (lives, time limit, tension, database keys).
 - `js/game.js`: simulation (player, AI, eating, lock-on, levels), drawing and input. Test hook: `window.FishGame` (`state()`, `debugSetSize()`).
-- `js/notes.js`: notes. Saved to a cookie (last 25 notes), then to the database when configured.
+- `js/notes.js`: notes. Saved to a cookie (last 25 notes), then to the family database when signed in.
+- `js/family.js`: family sign-in (`FishFamily`): the shared Family project, same account as Expansion Wars.
 - `js/sound.js`: Web Audio tones, created on the first touch.
-- `supabase/001_fish_notes.sql` and `supabase/test_001_fish_notes_rollback.sql`: the notes table (not yet applied).
+- `supabase/001_fish_notes.sql` and `supabase/test_001_fish_notes_rollback.sql`: the notes table (applied to the Family project).
 
 ## Notes and database
 
 - Every note is saved in a cookie straight away (`fish_notes`, up to 25, 300 characters each), with the level, size and seconds into the run.
-- The database table is `fish_notes` (Family project, app `fishes`, registered). It is **not connected yet**: `supabaseUrl` and `supabaseKey` in `js/species.js` are blank.
-- The table allows only signed-in family members. The page has no sign-in yet, so writes will show "needs family sign-in" until that is added. The status shows in ⚙️ and on the title screen.
+- **Live** in the shared Family project (applied 2026-11-03, after its rolled-back test passed; RLS on, `anon` has no access, `authenticated` can only insert and read; registered as app `fishes`).
+- Signing in: ⚙️ → Family database, with the family account (the same as Expansion Wars). The password is not stored. The session tokens stay on the device so it stays signed in until you sign out. Without a sign-in, notes stay in the cookie and the status says "needs family sign-in".
 - Failures show on the page (the status line, and the error strip at the bottom when "Show errors" is on).
 
 ## Not in MVP
 
-- Family sign-in and database writes.
 - Saved progress across visits (only the best score on this device).
 - Sound files, music, story, Quick Game, and a high-score list.
 

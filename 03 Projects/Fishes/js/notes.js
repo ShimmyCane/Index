@@ -52,16 +52,20 @@
     return String(text || '').replace(/\s+/g, ' ').trim().slice(0, MAX_TEXT);
   }
 
-  function sendToDatabase(note) {
-    if (!db.configured) return Promise.resolve();
+  function signInNeeded() {
+    db.state = 'sign-in needed';
+    db.message = 'Sign in to the family database in ⚙️ to save notes there. This note is kept in the cookie.';
+  }
+
+  function post(token, note, canRetry) {
+    var url = CFG.supabaseUrl.replace(/\/+$/, '') + '/rest/v1/' + CFG.notesTable;
     db.state = 'saving';
     db.message = '';
-    var url = CFG.supabaseUrl.replace(/\/+$/, '') + '/rest/v1/' + CFG.notesTable;
     return fetch(url, {
       method: 'POST',
       headers: {
         'apikey': CFG.supabaseKey,
-        'Authorization': 'Bearer ' + CFG.supabaseKey,
+        'Authorization': 'Bearer ' + token,
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal'
       },
@@ -72,17 +76,27 @@
         seconds: note.seconds
       })
     }).then(function (res) {
-      if (res.ok) { db.state = 'saved'; db.message = 'Saved to the database.'; return; }
-      if (res.status === 401 || res.status === 403) {
-        db.state = 'sign-in needed';
-        db.message = 'The database needs a family sign-in before it accepts notes (' + res.status + '). The note is in the cookie.';
-        return;
+      if (res.ok) { db.state = 'saved'; db.message = 'Saved to the family database.'; return; }
+      if ((res.status === 401 || res.status === 403) && canRetry) {
+        return window.FishFamily.refresh().then(function (fresh) {
+          if (fresh) return post(fresh, note, false);
+          signInNeeded();
+        });
       }
+      if (res.status === 401 || res.status === 403) { signInNeeded(); return; }
       db.state = 'failed';
       db.message = 'Database returned ' + res.status + '. The note is in the cookie.';
     }).catch(function (err) {
       db.state = 'failed';
       db.message = 'Could not reach the database (' + (err && err.message || 'network') + '). The note is in the cookie.';
+    });
+  }
+
+  function sendToDatabase(note) {
+    if (!db.configured) return Promise.resolve();
+    return window.FishFamily.token().then(function (token) {
+      if (!token) { signInNeeded(); return; }
+      return post(token, note, true);
     });
   }
 

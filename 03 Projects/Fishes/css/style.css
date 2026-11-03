@@ -375,3 +375,18 @@ textarea {
 .diff .big { min-height: 56px; font-size: 1.05rem; }
 .diff .big[aria-pressed="true"] { background: var(--sun); }
 .diff-ratio { margin: 8px 0 0; font-weight: 700; font-size: 0.95rem; }
+
+/* Family sign-in fields */
+.field {
+  width: 100%;
+  min-height: 48px;
+  border: 2.5px solid var(--ink);
+  border-radius: 14px;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 1.05rem;
+  margin: 4px 0 10px;
+  background: #ffffff;
+  user-select: text;
+  -webkit-user-select: text;
+}

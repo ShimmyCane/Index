@@ -31,3 +31,8 @@
 ---
 
 _Answers go in `convo/convo v0.3.md` once this round is complete._
+
+## Answers (2026-11-03)
+
+- **Family database (v0.1 Q10–12):** yes, Fishes may borrow the family right to add to the Family database. It uses the same family account as Expansion Wars. The `fish_notes` table is applied (after the rolled-back test). Sign-in is in ⚙️ → Family database.
+- **Species:** each tier now has 3–8 species (88 in total). Predators come from 1–3 tiers above the player, and prey from 0–3 tiers below. The difficulty ratio still decides the mix.

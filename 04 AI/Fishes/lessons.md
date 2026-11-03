@@ -7,3 +7,6 @@
 - Only fish that can actually hurt the player should count as threats. A wary prey fish that is bigger than you does not hurt you; counting it as a threat made the ratio lie.
 - Headless checks: drive with `window.FishGame.debugSetSize` and the state hook, and read the census from the hook, rather than waiting for random encounters.
 - A `file://` page can't store cookies in headless Chromium. Serve the folder over HTTP to test cookie notes.
+- Test a spawn rule by counting what it produced, not by reading it. A "threat" that can't hurt the player (a wary prey fish that is bigger than you) made the ratio read wrong until it was classified by what it can do.
+- The Family database is reached through a sandbox proxy that may block `supabase.co` from the browser. Verify access rules through the Supabase tools (grants, RLS policies) and leave the live sign-in to a device test.
+- Take the species table in the schematic from the data (a short node script), not by hand, so the design doc can't drift from `js/species.js`.
