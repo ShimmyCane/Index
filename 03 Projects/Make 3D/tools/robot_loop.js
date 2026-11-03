@@ -130,9 +130,9 @@ const PATH = loopPath();
 
 // Robot Path 2 (Quick Detail fd1878e1-ac12-4355-afee-3ebeeb07d4d9, tags make3d): Jimmy's sketch, one closed stroke
 // that crosses itself. Every 6th point of the stroke (139 points). The sketch has no dimension label, so it is sized
-// to the built V06 (about 76 in across, 9.09 in per unit). Estimate; confirm with Jimmy.
+// to 10 times the first size (about 760 in across, 90.9 in per unit). Estimate; confirm with Jimmy.
 const ROBOT_PATH_ID = 'fd1878e1-ac12-4355-afee-3ebeeb07d4d9';
-const ROBOT_PATH_IN_PER_UNIT = 9.09;
+const ROBOT_PATH_IN_PER_UNIT = 90.9;
 const ROBOT_PATH_PTS = [
   [-3.76, -0.96], [-3.73, -1.21], [-3.68, -1.40], [-3.55, -1.60], [-3.41, -1.82], [-3.22, -2.03], [-3.04, -2.19], [-2.86, -2.32], [-2.63, -2.45], [-2.37, -2.59],
   [-2.02, -2.76], [-1.62, -2.93], [-1.23, -3.02], [-0.90, -3.03], [-0.61, -3.03], [-0.34, -3.02], [-0.06, -2.97], [0.26, -2.92], [0.52, -2.81], [0.74, -2.68],
@@ -218,7 +218,7 @@ function sceneFor(v) {
       model_id: id,
       name: `${RB.ROBOT_PROJECT} V0${v}`,
       description: `${NOTES[v]} ${v === 6 ? `Path from Quick Detail "Robot Path 2" (${ROBOT_PATH_ID}).` : `Walks the loop from Quick Detail "Robot Loop" (${SKETCH_ID}).`}`,
-      units: 'in', up: 'z', world: WORLD_ID,
+      units: 'in', up: 'z', world: v === 6 ? 'robot-path-world' : WORLD_ID,
       materials: v >= 5 ? { ...RB.MATERIALS, cape: { color: '#bcd9f2', opacity: 1 } } : RB.MATERIALS,
     },
     defs: defsFor(v),

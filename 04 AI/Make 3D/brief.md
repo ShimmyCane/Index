@@ -380,6 +380,11 @@ Jimmy: the tank is not a vertical extrusion; some portions should be shallow wit
 - The "Robot Path" row I inserted (`eec507d8-…`) is still in the database. It isn't used now; it can be soft-deleted if Jimmy wants.
 - QC: the plan-view comparison (sketch against the built stones) is in the scratchpad (`qc-compare-v06.png`).
 
+## Robot Path 2 at 10 times the size (2026-11-03)
+
+- V06 walks Robot Path 2 at 90.9 in per unit (10 times the earlier 9.09), about 760 in across. Estimate; the sketch has no label.
+- The lap is now 178 s (same walking speed, longer path), with 240 stones. V06 has its own world, `worlds/robot-path-world.json` (±1200 in), because the default world (±240 in) is too small.
+- V02 to V05 are unchanged.
 ## Cornice sketch source (2026-11-03)
 
 - **Sketch:** Quick Detail "Profile for Cornice", `sketch_details` row `5b87bdcb-9cac-452b-b70d-1fb0e0031e9f`, tag `make3d`, scale 3"=1'-0", updated 2026-11-03 05:12 UTC.
