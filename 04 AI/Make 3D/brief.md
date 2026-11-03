@@ -371,3 +371,11 @@ Jimmy: the tank is not a vertical extrusion; some portions should be shallow wit
 - **Quick Detail "Robot Path"** (`sketch_details` eec507d8-9272-457b-a84e-d39f378ef324, tag `make3d`): one closed figure-eight stroke (x = 12 sin t, y = 12 sin t cos t, 80 points). I created it because no path had been drawn. Redraw it in Quick Detail to change the shape; the robot code uses its own copy of the formula, so update `tools/robot_loop.js` too.
 - **Built:** `robot-loop-v06` ("Robot going for a stroll V06") walks it at 3.5 in per unit, with the same parts as V05 (frisbee, hat, cape). V02 to V05 are unchanged.
 - The library lists the detail only when signed in (the page reads `sketch_details` with owner access).
+
+## Robot Path 2 replaces the figure-eight (2026-11-03)
+
+- V06 now walks Jimmy's sketch, Quick Detail "Robot Path 2" (`fd1878e1-ac12-4355-afee-3ebeeb07d4d9`, one stroke that crosses itself). The figure-eight from earlier was my draft; it's no longer used.
+- Sized to the built V06 (9.09 in per unit, about 76 in across). The sketch has no dimension label, so this is an estimate. Confirm with Jimmy.
+- Sampled at 120 points (about 3 in apart): 48 was too coarse for the inner loop and made the path angular.
+- The "Robot Path" row I inserted (`eec507d8-…`) is still in the database. It isn't used now; it can be soft-deleted if Jimmy wants.
+- QC: the plan-view comparison (sketch against the built stones) is in the scratchpad (`qc-compare-v06.png`).

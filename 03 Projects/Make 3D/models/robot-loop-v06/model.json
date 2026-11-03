@@ -1,7 +1,7 @@
 {
   "model_id": "robot-loop-v06",
   "name": "Robot going for a stroll V06",
-  "description": "Walks the Quick Detail \"Robot Path\" (a figure-eight) instead of the sketched loop. Same parts as V05: frisbee, hat and cape. Path from Quick Detail \"Robot Path\" (eec507d8-9272-457b-a84e-d39f378ef324).",
+  "description": "Walks the sketch Quick Detail \"Robot Path 2\" (one stroke that crosses itself). Same parts as V05: frisbee, hat and cape. Path from Quick Detail \"Robot Path 2\" (fd1878e1-ac12-4355-afee-3ebeeb07d4d9).",
   "units": "in",
   "up": "z",
   "world": "default-world",
@@ -795,8 +795,8 @@
         0.25
       ],
       "position": [
-        15.88,
-        -0.28,
+        14.49,
+        5.89,
         0.125
       ]
     },
@@ -815,8 +815,8 @@
         0.25
       ],
       "position": [
-        31.4,
-        -3.23,
+        23.83,
+        19.08,
         0.125
       ]
     },
@@ -835,8 +835,8 @@
         0.25
       ],
       "position": [
-        38.03,
-        -16.02,
+        25.09,
+        35.1,
         0.125
       ]
     },
@@ -855,8 +855,8 @@
         0.25
       ],
       "position": [
-        29.81,
-        -29.4,
+        17.23,
+        48.86,
         0.125
       ]
     },
@@ -875,8 +875,8 @@
         0.25
       ],
       "position": [
-        16.55,
-        -37.8,
+        2,
+        54.58,
         0.125
       ]
     },
@@ -895,8 +895,8 @@
         0.25
       ],
       "position": [
-        3.67,
-        -31.35,
+        -0.83,
+        68.26,
         0.125
       ]
     },
@@ -915,8 +915,8 @@
         0.25
       ],
       "position": [
-        0.5,
-        -15.87,
+        14.18,
+        72.44,
         0.125
       ]
     },
@@ -935,8 +935,8 @@
         0.25
       ],
       "position": [
-        0,
-        0,
+        19.04,
+        57.56,
         0.125
       ]
     },
@@ -955,8 +955,8 @@
         0.25
       ],
       "position": [
-        -0.5,
-        15.87,
+        15.59,
+        41.73,
         0.125
       ]
     },
@@ -975,8 +975,8 @@
         0.25
       ],
       "position": [
-        -3.67,
-        31.35,
+        3.24,
+        33.11,
         0.125
       ]
     },
@@ -995,8 +995,8 @@
         0.25
       ],
       "position": [
-        -16.55,
-        37.8,
+        -4.89,
+        43.1,
         0.125
       ]
     },
@@ -1015,8 +1015,8 @@
         0.25
       ],
       "position": [
-        -29.81,
-        29.4,
+        9.52,
+        40.95,
         0.125
       ]
     },
@@ -1035,8 +1035,8 @@
         0.25
       ],
       "position": [
-        -38.03,
-        16.02,
+        10.96,
+        25.32,
         0.125
       ]
     },
@@ -1055,8 +1055,8 @@
         0.25
       ],
       "position": [
-        -31.4,
-        3.23,
+        0.63,
+        13.32,
         0.125
       ]
     },
@@ -1075,8 +1075,168 @@
         0.25
       ],
       "position": [
-        -15.88,
-        0.28,
+        -14.97,
+        15.22,
+        0.125
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 0,
+      "parent": "robot-loop-v06-stones",
+      "material": "stone",
+      "tags": [],
+      "allowed_overlap": [],
+      "uuid": "robot-loop-v06-stone-17",
+      "name": "Stone 17",
+      "type": "cylinder",
+      "dimensions": [
+        3.6,
+        0.25
+      ],
+      "position": [
+        -21.65,
+        29.47,
+        0.125
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 0,
+      "parent": "robot-loop-v06-stones",
+      "material": "stone",
+      "tags": [],
+      "allowed_overlap": [],
+      "uuid": "robot-loop-v06-stone-18",
+      "name": "Stone 18",
+      "type": "cylinder",
+      "dimensions": [
+        4,
+        0.25
+      ],
+      "position": [
+        -15.82,
+        44.4,
+        0.125
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 0,
+      "parent": "robot-loop-v06-stones",
+      "material": "stone",
+      "tags": [],
+      "allowed_overlap": [],
+      "uuid": "robot-loop-v06-stone-19",
+      "name": "Stone 19",
+      "type": "cylinder",
+      "dimensions": [
+        3.2,
+        0.25
+      ],
+      "position": [
+        -9.18,
+        59.04,
+        0.125
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 0,
+      "parent": "robot-loop-v06-stones",
+      "material": "stone",
+      "tags": [],
+      "allowed_overlap": [],
+      "uuid": "robot-loop-v06-stone-20",
+      "name": "Stone 20",
+      "type": "cylinder",
+      "dimensions": [
+        3.6,
+        0.25
+      ],
+      "position": [
+        -18.13,
+        63.86,
+        0.125
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 0,
+      "parent": "robot-loop-v06-stones",
+      "material": "stone",
+      "tags": [],
+      "allowed_overlap": [],
+      "uuid": "robot-loop-v06-stone-21",
+      "name": "Stone 21",
+      "type": "cylinder",
+      "dimensions": [
+        4,
+        0.25
+      ],
+      "position": [
+        -25.28,
+        49.3,
+        0.125
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 0,
+      "parent": "robot-loop-v06-stones",
+      "material": "stone",
+      "tags": [],
+      "allowed_overlap": [],
+      "uuid": "robot-loop-v06-stone-22",
+      "name": "Stone 22",
+      "type": "cylinder",
+      "dimensions": [
+        3.2,
+        0.25
+      ],
+      "position": [
+        -26.56,
+        33.12,
+        0.125
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 0,
+      "parent": "robot-loop-v06-stones",
+      "material": "stone",
+      "tags": [],
+      "allowed_overlap": [],
+      "uuid": "robot-loop-v06-stone-23",
+      "name": "Stone 23",
+      "type": "cylinder",
+      "dimensions": [
+        3.6,
+        0.25
+      ],
+      "position": [
+        -24.59,
+        16.96,
+        0.125
+      ]
+    },
+    {
+      "description": "",
+      "rotation_y": 0,
+      "parent": "robot-loop-v06-stones",
+      "material": "stone",
+      "tags": [],
+      "allowed_overlap": [],
+      "uuid": "robot-loop-v06-stone-24",
+      "name": "Stone 24",
+      "type": "cylinder",
+      "dimensions": [
+        4,
+        0.25
+      ],
+      "position": [
+        -15.42,
+        3.86,
         0.125
       ]
     },
@@ -2256,5 +2416,5 @@
       }
     }
   ],
-  "version": 101
+  "version": 109
 }
