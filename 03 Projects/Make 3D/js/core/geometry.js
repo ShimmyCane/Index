@@ -53,6 +53,15 @@
         for (const k of ['name', 'description']) if (k in (op.set || {})) m[k] = op.set[k];
         break;
       }
+      case 'set_material': {
+        // Changes one entry of the material table. Creates the entry from the defaults if it is new.
+        const bad = S.materialSetProblems(op.set);
+        if (!op.material || typeof op.material !== 'string') throw new Error('set_material: missing material id');
+        if (bad.length) throw new Error(`set_material: ${bad.join('; ')}`);
+        m.materials = Object.assign({}, m.materials || {});
+        m.materials[op.material] = Object.assign({}, S.MATERIAL_DEFAULTS, m.materials[op.material] || {}, clone(op.set));
+        break;
+      }
       case 'delete': {
         if (!m.objects.some((o) => o.uuid === op.uuid)) throw new Error(`delete: unknown uuid ${op.uuid}`);
         const gone = descendants(m.objects, op.uuid);
