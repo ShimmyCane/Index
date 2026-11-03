@@ -390,3 +390,7 @@ textarea {
   user-select: text;
   -webkit-user-select: text;
 }
+
+/* Version label and the sign-in shortcut on the title screen */
+.version { margin: 14px 0 0; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
+.family-link { margin-top: 12px; width: 100%; background: var(--peach); min-height: 56px; font-size: 1.05rem; }

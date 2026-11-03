@@ -913,6 +913,8 @@
 
   function showTitle() {
     mode = 'title';
+    $('title-version').textContent = 'Fishes v' + CFG.VERSION + ' · ' + CFG.VERSION_DATE;
+    $('panel-version').textContent = 'Fishes v' + CFG.VERSION + ' · ' + CFG.VERSION_DATE;
     run = null;
     paused = false;
     hideCard();
@@ -1096,6 +1098,7 @@
   $('card-again').addEventListener('click', startRun);
   $('card-title-btn').addEventListener('click', showTitle);
   $('card-note').addEventListener('click', function () { hideCard(); openPanel(); });
+  $('title-family').addEventListener('click', function () { openPanel(); $('family-email').focus(); });
   $('gear').addEventListener('click', function () { if ($('panel').hidden) openPanel(); else closePanel(); });
   $('panel-close').addEventListener('click', closePanel);
   $('panel-title').addEventListener('click', function () { closePanel(); showTitle(); });
