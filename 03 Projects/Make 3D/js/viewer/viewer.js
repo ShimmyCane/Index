@@ -86,14 +86,35 @@
     }
   `;
 
+  // P3: lighting for standard (PBR) materials from a generated room, not an image file or an addon.
+  // A warm grey room with two soft light panels; PMREM turns it into the environment map that
+  // roughness and metalness read. Nothing is loaded, so it works offline on the iPad.
+  function makeRoomEnvironment(renderer, THREE) {
+    const env = new THREE.Scene();
+    env.add(new THREE.Mesh(new THREE.BoxGeometry(20, 20, 20),
+      new THREE.MeshBasicMaterial({ color: 0x5c5850, side: THREE.BackSide })));
+    const panelMat = new THREE.MeshBasicMaterial({ color: 0x9a9a9a });
+    const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(9, 9), panelMat);   // faces down into the room
+    ceiling.position.set(0, 9.5, 0); ceiling.rotation.x = Math.PI / 2;
+    env.add(ceiling);
+    const wall = new THREE.Mesh(new THREE.PlaneGeometry(6, 9), panelMat);      // faces into the room from the -X wall
+    wall.position.set(-9.5, 0, 0); wall.rotation.y = Math.PI / 2;
+    env.add(wall);
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const tex = pmrem.fromScene(env, 0.04).texture;
+    pmrem.dispose();
+    return tex;
+  }
+
   function createViewer(canvas) {
     const THREE = root.THREE;
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setPixelRatio(Math.min(root.devicePixelRatio || 1, 2));
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(CANVAS_BG);
+    scene.environment = makeRoomEnvironment(renderer, THREE);
     const camera = new THREE.PerspectiveCamera(35, 1, 0.5, 5000);
-    scene.add(new THREE.HemisphereLight(0xffffff, 0xd9d2c0, 0.95));
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xd9d2c0, 0.7));   // lower than before: the room environment adds light (P3)
     const sun = new THREE.DirectionalLight(0xffffff, 0.8);
     sun.position.set(-1, 2, 1.2);
     scene.add(sun);
@@ -520,6 +541,41 @@
       setMotion, play, pause, seek,
       onTick(fn) { anim.onTick = fn || (() => {}); tick(); },
       animState: () => ({ t: anim.t, loop_s: loopS(), playing: anim.playing, has: !!anim.motion, playsLeft: anim.playsLeft }),
+      // P5: the shown meshes baked to world (scene) axes, for the GLB writer (js/core/glb.js). Hidden parts are left out.
+      exportParts() {
+        scene.updateMatrixWorld(true);
+        const parts = [];
+        let skipped = 0;
+        for (const mesh of meshes) {
+          const g = mesh.geometry, mat = mesh.material;
+          if (!mesh.visible || !g || !g.attributes.position) continue;
+          if (!(mat && mat.isMeshStandardMaterial) || mat.wireframe) { skipped++; continue; }
+          const count = g.attributes.position.count;
+          const m = mesh.matrixWorld, nm = new THREE.Matrix3().getNormalMatrix(m);
+          const positions = new Float32Array(count * 3), normals = new Float32Array(count * 3);
+          const uvs = g.attributes.uv ? new Float32Array(count * 2) : null;
+          const v = new THREE.Vector3(), nv = new THREE.Vector3();
+          const rep = mat.map ? mat.map.repeat : null;
+          for (let i = 0; i < count; i++) {
+            v.fromBufferAttribute(g.attributes.position, i).applyMatrix4(m);
+            positions.set([v.x, v.y, v.z], i * 3);
+            if (g.attributes.normal) nv.fromBufferAttribute(g.attributes.normal, i).applyMatrix3(nm).normalize();
+            else nv.set(0, 1, 0);
+            normals.set([nv.x, nv.y, nv.z], i * 3);
+            if (uvs) uvs.set([g.attributes.uv.getX(i) * (rep ? rep.x : 1), g.attributes.uv.getY(i) * (rep ? rep.y : 1)], i * 2);
+          }
+          const indices = g.index ? Uint32Array.from(g.index.array) : Uint32Array.from({ length: count }, (_, i) => i);
+          const part = { name: mesh.userData.uuid || 'part', positions, normals, indices,
+            material: { color: [mat.color.r, mat.color.g, mat.color.b], opacity: mat.opacity, metallic: mat.metalness, roughness: mat.roughness } };
+          if (uvs) part.uvs = uvs;
+          const img = mat.map && mat.map.image;
+          if (img && img.data && img.width) part.material.texture = { width: img.width, height: img.height, rgba: img.data };
+          parts.push(part);
+        }
+        return { parts, skipped };
+      },
+      // measurement (V2): what the last frame drew
+      stats: () => ({ triangles: renderer.info.render.triangles, draws: renderer.info.render.calls, meshes: meshes.length }),
       viewState: () => ({ radius, theta, phi }),
       setView(v) { if (v.target) target.set(...toScene(v.target)); if (v.radius) radius = v.radius; if (v.theta !== undefined) theta = v.theta; if (v.phi !== undefined) phi = v.phi; requestRender(); },
     };

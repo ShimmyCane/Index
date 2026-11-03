@@ -236,6 +236,32 @@
       <option value="in">Inches</option>
     </select>
   </label>
+  <h3>Material</h3>
+  <label class="field">Material
+    <select id="matSel"></select>
+  </label>
+  <label class="field">Colour <input id="matColor" type="color"></label>
+  <label class="field">Roughness <span id="matRoughRead"></span>
+    <input id="matRough" type="range" min="0" max="1" step="0.05">
+  </label>
+  <label class="field">Metalness <span id="matMetalRead"></span>
+    <input id="matMetal" type="range" min="0" max="1" step="0.05">
+  </label>
+  <label class="field">Pattern
+    <select id="matPattern">
+      <option value="none">None (flat colour)</option>
+      <option value="wood">Wood</option>
+      <option value="tile">Tile</option>
+      <option value="stripe">Stripes</option>
+      <option value="leaf">Leaf</option>
+    </select>
+  </label>
+  <label class="field">Pattern colour <input id="matPatColor" type="color"></label>
+  <label class="field">Repeats across each face
+    <select id="matScale"></select>
+  </label>
+  <p class="hint">Each change is a Set material step in the history, so it can be undone.</p>
+
   <div class="field-row">
     <label class="toggle"><input id="showErrors" type="checkbox"> Show errors</label>
   </div>
@@ -257,6 +283,7 @@
     <button class="btn" id="checkBtn" type="button">Check model</button>
     <button class="btn" id="saveBtn" type="button">Save file</button>
     <button class="btn" id="exportIfcBtn" type="button">Export IFC (Revit)</button>
+    <button class="btn" id="exportGlbBtn" type="button">Export GLB (3-D)</button>
   </div>
   <label class="field">Open a file
     <input id="openFile" type="file" accept="application/json,.json">
@@ -284,6 +311,7 @@
 <script src="js/core/linked_views.js"></script>
 <script src="js/core/visibility.js"></script>
 <script src="js/core/patterns.js"></script>
+<script src="js/core/glb.js"></script>
 <script src="vendor/supabase/supabase.js"></script>
 <script src="js/cloud/cloud.js"></script>
 <script src="js/viewer/viewer.js"></script>
