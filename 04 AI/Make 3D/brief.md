@@ -365,3 +365,36 @@ Jimmy: the tank is not a vertical extrusion; some portions should be shallow wit
 - All robots are one Library project, "Robot going for a stroll": V01 (`robot-banana`, was "Robot with a banana") and V02 to V05 (`robot-loop-v02` to `v05`, was "Robot loop"). Scene ids are unchanged, so existing links (`?model=robot-loop-v04`) still work.
 - The name lives in one constant, `ROBOT_PROJECT` in `tools/robot_banana.js`. The Increment Viewer set is "Robot going for a stroll: V02 to V05".
 - Only names and headers changed. Motions and geometry are the same.
+
+## Robot Path (2026-11-03)
+
+- **Quick Detail "Robot Path"** (`sketch_details` eec507d8-9272-457b-a84e-d39f378ef324, tag `make3d`): one closed figure-eight stroke (x = 12 sin t, y = 12 sin t cos t, 80 points). I created it because no path had been drawn. Redraw it in Quick Detail to change the shape; the robot code uses its own copy of the formula, so update `tools/robot_loop.js` too.
+- **Built:** `robot-loop-v06` ("Robot going for a stroll V06") walks it at 3.5 in per unit, with the same parts as V05 (frisbee, hat, cape). V02 to V05 are unchanged.
+- The library lists the detail only when signed in (the page reads `sketch_details` with owner access).
+
+## Robot Path 2 replaces the figure-eight (2026-11-03)
+
+- V06 now walks Jimmy's sketch, Quick Detail "Robot Path 2" (`fd1878e1-ac12-4355-afee-3ebeeb07d4d9`, one stroke that crosses itself). The figure-eight from earlier was my draft; it's no longer used.
+- Sized to the built V06 (9.09 in per unit, about 76 in across). The sketch has no dimension label, so this is an estimate. Confirm with Jimmy.
+- Sampled at 120 points (about 3 in apart): 48 was too coarse for the inner loop and made the path angular.
+- The "Robot Path" row I inserted (`eec507d8-…`) is still in the database. It isn't used now; it can be soft-deleted if Jimmy wants.
+- QC: the plan-view comparison (sketch against the built stones) is in the scratchpad (`qc-compare-v06.png`).
+
+## Robot Path 2 at 10 times the size (2026-11-03)
+
+- V06 walks Robot Path 2 at 90.9 in per unit (10 times the earlier 9.09), about 760 in across. Estimate; the sketch has no label.
+- The lap is now 178 s (same walking speed, longer path), with 240 stones. V06 has its own world, `worlds/robot-path-world.json` (±1200 in), because the default world (±240 in) is too small.
+- V02 to V05 are unchanged.
+## Cornice sketch source (2026-11-03)
+
+- **Sketch:** Quick Detail "Profile for Cornice", `sketch_details` row `5b87bdcb-9cac-452b-b70d-1fb0e0031e9f`, tag `make3d`, scale 3"=1'-0", updated 2026-11-03 05:12 UTC.
+- **Where found:** Supabase project `xabgankckrcuhcgdolrg` (Architecture), table `sketch_details`, query: tag `make3d` (case-insensitive) with `deleted_at is null`. The name was "Profile for corners" in the request; the row is named "Profile for Cornice".
+- **Used by:** `tools/cornice.js` (V01 blockout, V02 traced profile). Its outline numbers were read by a summary query, not copied point by point.
+
+## V1 archive and V2 start (2026-11-03)
+
+- **V1** is a frozen copy of the app in `03 Projects/Make 3D/V1/` (index, css, js, vendor). Models, renders, drawings, worlds, tools and tests stay at the root. Settings → Versions opens V1 from V2 and V2 from V1.
+- **V2** is the live app at the root. Storage keys moved to `make3d.v2.*` so the two versions do not share a saved model.
+- **Research:** `04 AI/Make 3D/research/trellis2_notes.md`. TRELLIS.2 uses nvdiffrast, not Three.js, and needs a 24 GB GPU; V2 borrows its staged passes and PBR material model, not the model. The arXiv paper was not readable from this session.
+- **Plan:** `04 AI/Make 3D/research/v2_plan.md` (material layer, canvas textures, PBR viewer, staged passes, GLB export, optional generator slot off by default).
+- Not done: no V2 engine work beyond the storage split; the V2 skill is unchanged pending Jimmy's decision.

@@ -193,3 +193,14 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 - **Hash the old increments before changing a generator** and compare after, to prove the old versions did not change.
 - **Test a group's spread, not only its centre path.** A school passed the centre check but its members crossed an obstacle.
 - **Keep a cutaway scene for review** when opaque parts hide the structure.
+
+## Physics-based decay models (Paper Again, 2026-11-03)
+
+- Ask for the target look in a short round of questions before building. Growth was built from hand-placed shapes and looked like a mesh with pieces falling out; the fix was the target, not more detail.
+- A particle-spring model needs plastic bend springs (creases stay), self-contact with friction (layers hold), and a stand-in shell for shapes that must stay together. Self-contact alone let a ball spread flat within a second of release.
+- Define cuts on the material's own (flat) coordinates, and break every spring that crosses the line, including two-cell bend springs. A world-space cut missed the layers and bend springs reconnected the pieces.
+- Count pieces by faces, not loose particles, or every cut looks like many pieces.
+- Re-centre the object after each step, or it drifts off screen.
+- Bake the frames once. A replay that takes 40 s cannot load on a page. A `<script>`-tag cache works from `file://`; check it against a fingerprint of the story.
+- Smoke-test (settle, NaN check, timing, one frame) before writing the story, and record each tuned constant with its reason.
+- Say what a result is not. Show limits next to every result.

@@ -104,14 +104,18 @@ function smoothClosed(P, sigma) {
   }
   return out;
 }
+// The walk for any closed sketch stroke: sketch points, inches per unit, and the smoothing sigma.
 function loopPath() {
   const e = sketchExtent();
-  const k = LABEL_IN / Math.max(e.w, e.h);
-  const raw = smoothClosed(SKETCH_PTS.map(([x, y]) => [x * k, y * k, 0]), SEAM_SIGMA);
+  return loopFrom(SKETCH_PTS, LABEL_IN / Math.max(e.w, e.h), SEAM_SIGMA);
+}
+// n: points the walk path is sampled at. Tight curves need more (Robot Path 2 uses 120, about 3 in apart).
+function loopFrom(sketch, k, sigma, n = LOOP_POINTS) {
+  const raw = smoothClosed(sketch.map(([x, y]) => [x * k, y * k, 0]), sigma);
   const s = M.pathAt(raw, 0).point;
   const pts = [];
-  for (let i = 0; i < LOOP_POINTS; i++) {
-    const p = M.pathAt(raw, i / LOOP_POINTS).point;
+  for (let i = 0; i < n; i++) {
+    const p = M.pathAt(raw, i / n).point;
     pts.push([p[0] - s[0], p[1] - s[1]]);
   }
   // Turn the loop so the walk's heading at the start is exactly +X. The walk reads its heading from these
@@ -123,6 +127,31 @@ function loopPath() {
 const round = (x) => Math.round(x * 100) / 100;
 
 const PATH = loopPath();
+
+// Robot Path 2 (Quick Detail fd1878e1-ac12-4355-afee-3ebeeb07d4d9, tags make3d): Jimmy's sketch, one closed stroke
+// that crosses itself. Every 6th point of the stroke (139 points). The sketch has no dimension label, so it is sized
+// to 10 times the first size (about 760 in across, 90.9 in per unit). Estimate; confirm with Jimmy.
+const ROBOT_PATH_ID = 'fd1878e1-ac12-4355-afee-3ebeeb07d4d9';
+const ROBOT_PATH_IN_PER_UNIT = 90.9;
+const ROBOT_PATH_PTS = [
+  [-3.76, -0.96], [-3.73, -1.21], [-3.68, -1.40], [-3.55, -1.60], [-3.41, -1.82], [-3.22, -2.03], [-3.04, -2.19], [-2.86, -2.32], [-2.63, -2.45], [-2.37, -2.59],
+  [-2.02, -2.76], [-1.62, -2.93], [-1.23, -3.02], [-0.90, -3.03], [-0.61, -3.03], [-0.34, -3.02], [-0.06, -2.97], [0.26, -2.92], [0.52, -2.81], [0.74, -2.68],
+  [0.96, -2.55], [1.14, -2.47], [1.29, -2.38], [1.45, -2.25], [1.59, -2.11], [1.71, -1.93], [1.84, -1.75], [1.93, -1.57], [2.00, -1.42], [2.05, -1.27],
+  [2.06, -1.12], [2.06, -0.97], [2.06, -0.77], [2.06, -0.53], [2.06, -0.25], [2.06, 0.02], [2.09, 0.25], [2.13, 0.50], [2.19, 0.73], [2.31, 0.93],
+  [2.49, 1.10], [2.70, 1.20], [2.96, 1.25], [3.24, 1.25], [3.52, 1.19], [3.81, 0.96], [4.08, 0.61], [4.32, 0.24], [4.44, -0.07], [4.45, -0.35],
+  [4.33, -0.59], [4.08, -0.80], [3.78, -0.98], [3.44, -1.15], [3.06, -1.29], [2.63, -1.40], [2.16, -1.48], [1.63, -1.49], [1.11, -1.46], [0.66, -1.34],
+  [0.34, -1.20], [0.11, -1.00], [-0.02, -0.74], [-0.12, -0.41], [-0.18, -0.07], [-0.18, 0.22], [-0.11, 0.48], [0.05, 0.68], [0.24, 0.82], [0.47, 0.87],
+  [0.73, 0.84], [0.98, 0.60], [1.16, 0.29], [1.20, -0.10], [1.15, -0.50], [0.98, -0.83], [0.75, -1.07], [0.47, -1.25], [0.15, -1.39], [-0.25, -1.46],
+  [-0.66, -1.49], [-1.09, -1.49], [-1.55, -1.33], [-1.97, -1.10], [-2.31, -0.79], [-2.52, -0.47], [-2.62, -0.11], [-2.65, 0.29], [-2.65, 0.67], [-2.60, 1.00],
+  [-2.42, 1.34], [-2.14, 1.64], [-1.82, 1.88], [-1.51, 2.04], [-1.21, 2.14], [-0.94, 2.19], [-0.67, 2.20], [-0.37, 2.20], [-0.06, 2.12], [0.28, 2.03],
+  [0.61, 1.93], [0.93, 1.80], [1.26, 1.70], [1.59, 1.67], [1.90, 1.66], [2.22, 1.69], [2.51, 1.79], [2.78, 1.93], [2.95, 2.10], [3.02, 2.27],
+  [3.04, 2.43], [2.92, 2.60], [2.69, 2.75], [2.41, 2.86], [2.10, 2.95], [1.79, 3.02], [1.46, 3.08], [1.10, 3.12], [0.72, 3.12], [0.36, 3.12],
+  [0.03, 3.06], [-0.27, 2.97], [-0.61, 2.88], [-0.92, 2.78], [-1.23, 2.67], [-1.54, 2.56], [-1.87, 2.42], [-2.20, 2.27], [-2.56, 2.12], [-2.89, 1.91],
+  [-3.20, 1.62], [-3.47, 1.31], [-3.70, 0.94], [-3.85, 0.51], [-3.91, 0.07], [-3.92, -0.33], [-3.89, -0.69], [-3.80, -0.94], [-3.70, -1.10], [-3.53, -1.22],
+];
+const PATH_V6 = loopFrom(ROBOT_PATH_PTS, ROBOT_PATH_IN_PER_UNIT, 1.0, 120);
+// The walk for each version: V02 to V05 use the sketched loop; V06 uses the Robot Path.
+const pathFor = (v) => (v === 6 ? PATH_V6 : PATH);
 
 // Frisbee: a flat disc with a rim, held in the left hand (the hand is at x 0, y 6.8, z 16.5 in the robot).
 function addFrisbee(add) {
@@ -154,7 +183,7 @@ function addHat(add) {
 // increment is never rebuilt with newer parts (V03 and V04 keep the frisbee in the left hand).
 function defsFor(v) {
   const add = (() => { const d = []; const f = (key, o) => d.push([key, o]); f.list = d; return f; })();
-  const base = RB.defs(PATH, { tagged: true });
+  const base = RB.defs(pathFor(v), { tagged: true });
   for (const [key, o] of base) add(key, o);
   if (v >= 3 && v < 5) addFrisbee(add);
   if (v >= 4) addHat(add);
@@ -167,13 +196,14 @@ const NOTES = {
   3: 'Adds a frisbee held in the left hand. Frisbee is a visibility group.',
   4: 'Adds a top hat on the head. Hat is a visibility group.',
   5: 'The frisbee moves to the banana hand. Adds the robot cape (Quick Detail "Robot Cape"): a sheet that ripples down its length, and flows more in tight turns. Cape is a visibility group.',
+  6: 'Walks the sketch Quick Detail "Robot Path 2" (one stroke that crosses itself). Same parts as V05: frisbee, hat and cape.',
 };
 
-// Motion for version v. V05 adds the cape's wave and sway to the walk.
+// Motion for version v. V05 and up add the cape's wave and sway to the walk.
 function motionFor(v, uuid) {
-  const base = RB.motionFor(uuid, PATH);
+  const base = RB.motionFor(uuid, pathFor(v));
   if (v < 5) return base;
-  const path3 = PATH.map((p) => [p[0], p[1], 0]);
+  const path3 = pathFor(v).map((p) => [p[0], p[1], 0]);
   return { ...base, description: `${base.description} The cape ripples down its length and sways in turns.`,
     motions: [...base.motions, ...CAPE.capeMotions(uuid('cape'), path3)] };
 }
@@ -187,8 +217,8 @@ function sceneFor(v) {
     header: {
       model_id: id,
       name: `${RB.ROBOT_PROJECT} V0${v}`,
-      description: `${NOTES[v]} Walks the loop from Quick Detail "Robot Loop" (${SKETCH_ID}).`,
-      units: 'in', up: 'z', world: WORLD_ID,
+      description: `${NOTES[v]} ${v === 6 ? `Path from Quick Detail "Robot Path 2" (${ROBOT_PATH_ID}).` : `Walks the loop from Quick Detail "Robot Loop" (${SKETCH_ID}).`}`,
+      units: 'in', up: 'z', world: v === 6 ? 'robot-path-world' : WORLD_ID,
       materials: v >= 5 ? { ...RB.MATERIALS, cape: { color: '#bcd9f2', opacity: 1 } } : RB.MATERIALS,
     },
     defs: defsFor(v),
@@ -196,6 +226,6 @@ function sceneFor(v) {
   };
 }
 
-const ROBOT_LOOP = [2, 3, 4, 5].map(sceneFor);
+const ROBOT_LOOP = [2, 3, 4, 5, 6].map(sceneFor);
 
-module.exports = { ROBOT_LOOP, defsFor, loopPath, PATH, SKETCH_ID, SKETCH_PTS, LABEL_IN };
+module.exports = { ROBOT_LOOP, defsFor, loopPath, PATH, PATH_V6, SKETCH_ID, SKETCH_PTS, LABEL_IN, ROBOT_PATH_ID };

@@ -10,5 +10,7 @@ window.REVIEW_SETS = [
   { id: "solar_system", label: "Solar System: V01 to V07, comets and the 1958 start from V07" },
   { id: "planet_views", label: "Planet views: V02 to V06, textured then shaded" },
   { id: "earth_views", label: "Earth view: V02 to V23" },
-  { id: "robot_loop", label: "Robot going for a stroll: V02 to V05" }
+  { id: "robot_loop", label: "Robot going for a stroll: V02 to V05" },
+  { id: "growth_paper", label: "Growth: white paper, ten steps (test story)" },
+  { id: "paper_again", label: "Paper Again: one sheet, ten increments (particle model)" }
 ];

@@ -82,3 +82,12 @@ Patterns that repeat often enough to become a template in `02 Refs/Templates/` o
 - **Test one part alone.** A scratch scene with one of each part, at two headings, finds orientation and attachment mistakes before a thousand copies exist.
 - **Several views of the whole.** Render the full scene from the front, behind and the side, zoomed and dragged by a small script, and review each view. Put the scratch scripts in the scratchpad, not the repo.
 - **Then put them together.** The final increment image is chosen from these views; the review page says which view it is.
+
+## Physics replay for objects that change over time (Paper Again)
+
+- **The record is the story, not the shape.** An ordered list of operations plus a seed; every frame is replayed from it. Deterministic seeded random numbers only. _(Paper Again, Growth)_
+- **Plastic memory:** bend springs with a yield, whose rest length follows the bent shape, keep creases after the force is gone. _(Paper Again)_
+- **Cuts and tears on the material's coordinates,** breaking every spring that crosses the line. _(Paper Again)_
+- **Contact friction and a stand-in hold** for shapes that must stay together, listed as a known limit. _(Paper Again)_
+- **Baked cache with a fingerprint,** loaded by a script tag, with live fallback and progress. _(Paper Again)_
+- **Template candidate:** `02 Refs/Skills/simulate_decay.md` (run as `/simulate-decay`).

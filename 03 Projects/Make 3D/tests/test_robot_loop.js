@@ -51,8 +51,8 @@ t('path: the rest pose faces +X from the origin (heading 0)', () => {
 const scenes = RL.ROBOT_LOOP;
 const byVersion = Object.fromEntries(scenes.map((s) => [s.header.model_id, s]));
 
-t('scenes: V02 to V05 exist; each adds to the one before (older parts kept, V05 moves the frisbee)', () => {
-  assert.deepStrictEqual(scenes.map((s) => s.header.model_id), ['robot-loop-v02', 'robot-loop-v03', 'robot-loop-v04', 'robot-loop-v05']);
+t('scenes: V02 to V06 exist; each adds to the one before (older parts kept, V05 moves the frisbee)', () => {
+  assert.deepStrictEqual(scenes.map((s) => s.header.model_id), ['robot-loop-v02', 'robot-loop-v03', 'robot-loop-v04', 'robot-loop-v05', 'robot-loop-v06']);
   const keys = (v) => RL.defsFor(v).map(([k]) => k);
   const v2 = keys(2), v3 = keys(3), v4 = keys(4);
   for (const k of v2) assert.ok(v3.includes(k), `v3 keeps ${k}`);
@@ -106,6 +106,19 @@ t('robot: the frisbee and hat move with the parts they are attached to', () => {
   const find = (name) => model.objects.find((o) => o.name === name);
   assert.strictEqual(find('Frisbee').parent, find('Left arm').uuid);
   assert.strictEqual(find('Top hat').parent, find('Upper body').uuid);
+});
+
+t("V06 path: the Robot Path (figure-eight) closes, starts at the origin facing +X, and V06 passes its motion check", () => {
+  const P = RL.PATH_V6.map((p) => [p[0], p[1], 0]);
+  const a = MO.pathAt(P, 0).point, b = MO.pathAt(P, 0.9999).point;
+  assert.ok(Math.hypot(a[0] - b[0], a[1] - b[1]) < 0.5, "closure gap");
+  assert.ok(Math.abs(MO.pathAt(P, 0).heading) < 0.5 * Math.PI / 180, "rest heading");
+  nearV(RL.PATH_V6[0], [0, 0], 1e-9);
+  assert.strictEqual(RL.ROBOT_PATH_ID, "fd1878e1-ac12-4355-afee-3ebeeb07d4d9");
+  const dir = path.join(root, "models", "robot-loop-v06");
+  const model = G.replay(JSON.parse(fs.readFileSync(path.join(dir, "history.json"), "utf8")));
+  const motion = JSON.parse(fs.readFileSync(path.join(dir, "motion.json"), "utf8"));
+  assert.strictEqual(MO.checkMotion(model, motion).outcome, "accept");
 });
 
 console.log(`\n${n} robot loop tests passed`);

@@ -534,3 +534,10 @@ Source: research `04 AI/Make 3D/research/earth-launches.md`. Request: clearer la
 - **Tests:** `node tests/test_earth_v23.js`.
 - **Limits:** the deployed satellite does not stay in orbit; the first stages do not break up; sizes are exaggerated.
 
+
+## §21 Versions (2026-11-03)
+
+- `index.html`, `css/`, `js/`, `vendor/` at the root: **V2**, the live app (`make3d.v2.*` storage).
+- `V1/`: frozen copy of the first app (`make3d.v1.*` storage). Settings → Versions links between them.
+- Projects stay at the root: `models/`, `renders/`, `drawings/`, `worlds/`, `convo/`, `supabase/`, `tools/`, `tests/`.
+- V2 plan and TRELLIS.2 notes: `04 AI/Make 3D/research/`.

@@ -74,3 +74,8 @@
 * **Reuse the Family Habits look** for any new family app: Quicksand, Orbitron and Patrick Hand; ink, paper and sun palette; offset shadows; asymmetric radii; polka dots.
 * **Visible failures on the page** for any app that talks to a database: an error panel, a header status pill and a database check in ⚙️. Don't rely on DevTools.
 * **Publish the family apps where they actually run.** Artifacts can't run the microphone or the database, so use GitHub Pages for those.
+
+## 6. Realism studies (2026-11-03, from Paper Again)
+* **When Jimmy asks for realism, he means physical, not cartoon.** Ask for the target look before building. Pastel stays for kids' games.
+* **Show the limits with the result.** Jimmy values a result that says what it is not.
+* **He wants to see it, then decide.** Merge when asked, not before.
