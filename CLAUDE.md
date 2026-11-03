@@ -17,7 +17,9 @@ Its private counterpart is `ShimmyAI`, a private repo where family and personal 
 | `04 AI/` | Claude's working folder: `lessons_pool.md` (consolidated lessons), `patterns.md`, preferences, tools notes, per-project `brief.md` + `lessons.md` | Claude |
 | `.claude/skills/` | Thin wrappers pointing to `02 Refs/Skills/*.md`, so skills run as `/name` | Claude, when a skill is added in 02 |
 
-`readme.md` and `index.html` are human-only. Never edit them.
+`readme.md` is human-only. Never edit it.
+
+`index.html` (the nursery home page) is human-only, with one exception: adding a new project link to its Nursery list. Before adding one, confirm once with Jimmy. Never make any other change to it.
 
 ## Before starting work on a project
 

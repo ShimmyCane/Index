@@ -36,6 +36,7 @@ Rules:
 - Architecture project registry: this project uses `public.table_index` (table_name, project, purpose), not `app_table_registry`. Check the live project before using the template.
 - Unregistered as of 2026-11-02: `sketch_versions` (Quick Detail). Not ours to change; flag to its owner.
 - Make 3D (Architecture project, not Family): `m3d_scenes` is **live** (applied 2026-11-02 as migration `m3d_scenes` after a rolled-back test; RLS on, anon revoked, owner-only policy, registered in `table_index`; SQL in `03 Projects/Make 3D/supabase/001_m3d_scenes.sql`). Reads Quick Detail's `sketch_details` by tag `make 3-D`, read only.
+- Expansion Wars: `xw_maps` is **live** in Family (applied 2026-11-03 as a manual run of `03 Projects/Expansion Wars/supabase/001_xw_maps.sql`, after its rolled-back test passed). RLS on, anon revoked, family-only policies, registered under app `expansion-wars`. The page is not wired to it yet.
 - Athena's world has no database need yet.
 - Private family projects live in ShimmyAI. Their project references and table state are not recorded here.
 
