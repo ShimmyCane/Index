@@ -17,5 +17,6 @@ window.REVIEW_SETS = [
   { id: "earth_views_v22", label: "Earth view: V22, satellites on faded orbits, storms and rockets to scale" },
   { id: "earth_views_v23", label: "Earth view: V23, launch sites, a deployed satellite each, large satellites only, mountain ranges" },
   { id: "robot_loop", label: "Robot going for a stroll: V02 to V05" },
-  { id: "growth_paper", label: "Growth: white paper, ten steps (test story)" }
+  { id: "growth_paper", label: "Growth: white paper, ten steps (test story)" },
+  { id: "paper_again", label: "Paper Again: one sheet, ten increments (particle model)" }
 ];
