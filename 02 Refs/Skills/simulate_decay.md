@@ -5,6 +5,11 @@ Build a small physical model of an object (a sheet of paper, a leaf, a piece of 
 
 Use this when the look needs to come from the material (folds, tears, damp, mould, dirt, burns), not from hand-placed shapes. For a model built from primitives, use `make_3d.md` instead.
 
+Trigger
+Jimmy can start it with a shorthand line, for example:
+"Simulate. Growth/decay/collaboration. Object. Environment. Possible actions. Number of increments."
+Map the words to the input below: Growth, decay or collaboration sets the kind of change (collaboration means objects affecting each other, to be confirmed); Object is the subject; Environment is the place and its rules; Possible actions are the decay types and events; Number of increments is the count (default 10).
+
 Input
 - Subject name and a one-line description (for example "one sheet of white paper").
 - Number of increments (default 10).
@@ -14,7 +19,8 @@ Input
 
 Process
 
-1. **Ask first.** Put four or five questions to Jimmy in one round before building: how the object moves between increments (tumble, fixed pose, both), the look (realistic or stylised), the method (simulation or hand-authored operations), the story (keep or re-plan), and which decay types. Record the answers in `03 Projects/<Project>/convo/convo v0.1.md`.
+1. **Ask first.** Before the questions, check the shorthand: if "collaboration" is used, ask whether it means objects affecting each other or several things happening at once. Always ask for a realism target (reference photos, or "physical, not cartoon"). Ask whether the Make 3D version lives in the Make 3D project's viewer or stays a standalone page opened from the Increment Viewer. Then ask the rest. Put four or five questions to Jimmy in one round before building: how the object moves between increments (tumble, fixed pose, both), the look (realistic or stylised), the method (simulation or hand-authored operations), the story (keep or re-plan), and which decay types. Record the answers in `03 Projects/<Project>/convo/convo v0.1.md`.
+1b. **Sign-off on the rules.** Write the rules as understood in one short page in the convo file: the environment rules, what each increment does, how the object moves, what counts as done, and the known limits. Jimmy approves it before any building starts. If he changes something, update the page and ask again only for what changed.
 2. **Research the real behaviour.** Web search for how the material folds, tears, takes water and grows mould. Write `04 AI/<Project>/research/<topic>.md` with the source for each fact. Mark design judgement separately from sourced facts.
 3. **Model it** (`js/<name>_sim.js`, no DOM, Node-testable):
    - Particles on a grid at real size (inches). Springs: structural, shear, and bend (two cells apart).

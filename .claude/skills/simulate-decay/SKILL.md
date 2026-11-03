@@ -1,6 +1,6 @@
 ---
 name: simulate-decay
-description: "Build a physics-based model of an object that changes over increments of time (folds, tears, damp, mould, dirt, burns, cuts), from research and a story, and review it in the 3-D viewer and the Increment Viewer. Asks four or five questions first. Use when asked to simulate decay, aging, wear, crumpling, tearing, weathering or any object that changes over time from physics, not hand-placed shapes."
+description: "Triggered by \"Simulate\" followed by growth, decay or collaboration, an object, an environment, possible actions and a number of increments. Build a physics-based model of an object that changes over increments of time (folds, tears, damp, mould, dirt, burns, cuts), from research and a story, and review it in the 3-D viewer and the Increment Viewer. Asks four or five questions first. Use when asked to simulate decay, aging, wear, crumpling, tearing, weathering or any object that changes over time from physics, not hand-placed shapes."
 argument-hint: "[subject name, optional]"
 ---
 
