@@ -9,6 +9,7 @@ Input
   - **Research mode:** use outside sources (web search) for published sizes and proportions, plus anything given. Every figure is recorded with its source.
   - **Assets-only mode:** use only what is provided: photos, sketches, measurements, notes. No outside research. Anything not given is an estimate, labelled as one.
 - Optional assets: photos, sketches, dimensions, reference links. Note what each one is for.
+- Sketches are looked up in Quick Detail on every run (step 1). The source of each sketch used is recorded: project id, table, row id and name, and the query.
 - Number of increments (default 5).
 - Whether it moves: what moves, how (walk a path, swing, slide, spin, bob), and from where (hinge, hip, axle). Default: no motion.
 
@@ -24,7 +25,12 @@ Rules that always apply
 - Motion (optional) is a separate file, `motion.json` (`make3d.motion/0.1`), never part of the model. Every animation is a loop: one `loop_s`, each motion a whole number of `cycles` per loop, and paths close on themselves. The first frame is the rest pose. Autoplay runs the loop twice, then pauses.
 
 Steps
-1. **Intake.** Write the subject, mode, assets and privacy notes into `04 AI/Make 3D/brief.md` (create the subject section if needed). Put any private asset in `private/`.
+1. **Intake.** First, look for a sketch in Quick Detail, every time, even when the request doesn't mention one:
+   - Query the Architecture Supabase project (`xabgankckrcuhcgdolrg`), table `sketch_details`, for rows with the tag `make3d` (any letter case; the old `make 3-D` tag is retired) and `deleted_at is null`. Match the subject by name, and list the other matches so none is missed.
+   - Record in the brief, under the subject: the sketch's name, its `sketch_details` id, the project id and table it came from, its `updated_at`, and how it was found (the query used). If nothing matches, say so in the brief and in the report, and ask for the sketch rather than inventing its shape.
+   - If the sketch is stored in the database and the build needs its points, note the rows read, not the full point data, unless you copy them into the project's source (for example a `tools/<subject>.js` header), with the id in a comment.
+   
+   Then write the subject, mode, assets and privacy notes into `04 AI/Make 3D/brief.md` (create the subject section if needed). Put any private asset in `private/`.
 2. **Research (research mode only).** Search for the official spec sheet first, then reviews or dimension sites to check it. Save the figures and sources to `04 AI/Make 3D/research/<subject-slug>.md`. For assets-only mode, write down the list of assets and what they give.
 3. **Plan the increments.** Five by default, each with one goal:
    - V01 blockout: the overall envelope and the main sizes (length, width, height, positions of the big parts).

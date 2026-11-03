@@ -379,3 +379,9 @@ Jimmy: the tank is not a vertical extrusion; some portions should be shallow wit
 - Sampled at 120 points (about 3 in apart): 48 was too coarse for the inner loop and made the path angular.
 - The "Robot Path" row I inserted (`eec507d8-…`) is still in the database. It isn't used now; it can be soft-deleted if Jimmy wants.
 - QC: the plan-view comparison (sketch against the built stones) is in the scratchpad (`qc-compare-v06.png`).
+
+## Cornice sketch source (2026-11-03)
+
+- **Sketch:** Quick Detail "Profile for Cornice", `sketch_details` row `5b87bdcb-9cac-452b-b70d-1fb0e0031e9f`, tag `make3d`, scale 3"=1'-0", updated 2026-11-03 05:12 UTC.
+- **Where found:** Supabase project `xabgankckrcuhcgdolrg` (Architecture), table `sketch_details`, query: tag `make3d` (case-insensitive) with `deleted_at is null`. The name was "Profile for corners" in the request; the row is named "Profile for Cornice".
+- **Used by:** `tools/cornice.js` (V01 blockout, V02 traced profile). Its outline numbers were read by a summary query, not copied point by point.
