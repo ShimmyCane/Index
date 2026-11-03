@@ -4,6 +4,23 @@
 
 Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Jimmy
 
+## V2 (engine upgrade; UI stays as V1)
+
+Plan and research: `04 AI/Make 3D/research/v2_plan.md` and `trellis2_notes.md`. V1 is the frozen copy in `V1/`.
+
+- [x] Archive V1 (`V1/`, frozen app), Settings > Versions links both ways, separate `make3d.v2.*` storage keys.
+- [x] P1 material spec: `roughness` and `metalness` in the material table; `set_material` operation (history, validated); viewer uses them (`tests/test_materials.js`).
+- [x] P2 canvas-free patterns: wood, tile, stripe as pixel tiles (`js/core/patterns.js`, `tests/test_patterns.js`). Set with a `set_material` operation for now.
+- [ ] P2b: material controls in the gear panel or the Add form (sliders for roughness and metalness, pattern picker, pattern colour and scale). Design to match V1 panels.
+- [ ] P2c: leaf pattern (from the plan). Check the wood and tile looks on iPad before tuning.
+- [ ] P3 PBR viewer: generated room environment for lighting. Vendor `RoomEnvironment` from three r160 (not in the vendored build yet). Check on the planter and kitchen.
+- [ ] P4 staged passes: structure, shape and material as cached stages keyed by a hash of the history prefix. Test that an edit reruns only the later stages.
+- [ ] P5 GLB export: vendor `GLTFExporter` and write textures and decimated meshes. Test by loading the GLB back with `GLTFLoader`. IFC export unchanged.
+- [?] P6 optional generator slot (load a GLB from an outside service). Off by default; no keys in the repo. Jimmy decides whether it is wanted (it breaks the client-side rule in the Make 3D preferences).
+- [ ] Measure triangle counts and frame times on the planter, kitchen and outdoor table in the headless browser; then check on a real iPad.
+- [?] The V2 skill (`02 Refs/Skills/make_3d.md`) is unchanged. Jimmy says whether to draft `make_3d_v2` for review.
+- [?] TRELLIS.2 paper: arXiv was blocked from this session. Read it from a connected session before relying on paper-level claims.
+
 ## Now
 - [x] Set up the project folders, `CLAUDE.md`, `schematic.md`, `convo/convo v0.1.md`, `todo.md`.
 - [x] Draft the MVP schematic from Jimmy's brief (proposed defaults marked *(Q#)*).
