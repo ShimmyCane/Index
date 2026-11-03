@@ -1,7 +1,7 @@
-// Expansion Wars — saved maps, progress and high scores.
-// Everything lives in this browser's localStorage for now. The Family Supabase
-// table (xw_maps, see supabase/001_xw_maps.sql) replaces the map records later,
-// behind the same functions.
+// Expansion Wars — saved maps, notes, progress and high scores.
+// Maps and notes are kept on this device first, then written to the Family
+// table (xw_maps, see supabase/001_xw_maps.sql) by cloud.js when signed in.
+// Progress and high scores stay on this device.
 window.XWStore = (function () {
   'use strict';
 
@@ -31,26 +31,47 @@ window.XWStore = (function () {
     }
   }
 
+  // A UUID, because the table's id column is uuid.
   function uid() {
     if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
-    return 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
+
+  // Every change to a map is queued for the family table once signed in.
+  function queueCloud(id) {
+    if (window.XWCloud) window.XWCloud.queue(api, id);
   }
 
   // ---------- saved maps ----------
 
   function list() { return readJSON(MAPS_KEY, []); }
 
-  function add(rec) {
+  // fromCloud: the record came from the family table, so it is not sent back.
+  function add(rec, fromCloud) {
     var maps = list();
     rec.id = rec.id || uid();
     rec.created_at = rec.created_at || new Date().toISOString();
-    rec.updated_at = rec.created_at;
+    rec.updated_at = rec.updated_at || rec.created_at;
     maps.push(rec);
+    writeJSON(MAPS_KEY, maps);
+    if (!fromCloud) queueCloud(rec.id);
+    return rec;
+  }
+
+  // Replace a record with a newer copy (used when pulling from the family table).
+  function replace(rec) {
+    var maps = list();
+    for (var i = 0; i < maps.length; i++) {
+      if (maps[i].id === rec.id) { maps[i] = rec; break; }
+    }
     writeJSON(MAPS_KEY, maps);
     return rec;
   }
 
-  // Apply fn to one record and save it. Returns the updated record or null.
+  // Apply fn to one record, save it and queue it. Returns the updated record or null.
   function update(id, fn) {
     var maps = list();
     for (var i = 0; i < maps.length; i++) {
@@ -58,6 +79,7 @@ window.XWStore = (function () {
         fn(maps[i]);
         maps[i].updated_at = new Date().toISOString();
         writeJSON(MAPS_KEY, maps);
+        queueCloud(id);
         return maps[i];
       }
     }
@@ -72,10 +94,25 @@ window.XWStore = (function () {
     });
   }
 
+  // A note is stored inside its map's notes list: { id, at, text, status }.
+  // status: 'open' (new feedback) or 'done' (handled).
   function addNote(id, text) {
     return update(id, function (r) {
       r.notes = r.notes || [];
-      r.notes.push({ at: new Date().toISOString(), text: String(text).slice(0, 500) });
+      r.notes.push({
+        id: uid(),
+        at: new Date().toISOString(),
+        text: String(text).slice(0, 500),
+        status: 'open'
+      });
+    });
+  }
+
+  function setNoteStatus(mapId, noteId, status) {
+    return update(mapId, function (r) {
+      (r.notes || []).forEach(function (n) {
+        if (n.id === noteId) n.status = status;
+      });
     });
   }
 
@@ -87,7 +124,7 @@ window.XWStore = (function () {
     return r.times_played ? Math.round(100 * r.wins / r.times_played) : null;
   }
 
-  // ---------- progression ----------
+  // ---------- progression (device only) ----------
   // progress = { completed: { "1": { stars, bestScore, bestSeconds, wins } } }
 
   function progress() { return readJSON(PROGRESS_KEY, { completed: {} }); }
@@ -130,7 +167,7 @@ window.XWStore = (function () {
     return p.completed[key];
   }
 
-  // ---------- high scores ----------
+  // ---------- high scores (device only) ----------
 
   function scores() { return readJSON(SCORES_KEY, []); }
 
@@ -145,22 +182,41 @@ window.XWStore = (function () {
 
   function lastErr() { return lastError; }
 
-  return {
+  // Notes written before ids and statuses existed get them once, so they can be marked done.
+  function fixOldNotes() {
+    var maps = readJSON(MAPS_KEY, null);
+    if (!maps) return;
+    var changed = false;
+    maps.forEach(function (r) {
+      (r.notes || []).forEach(function (n) {
+        if (!n.id) { n.id = uid(); changed = true; }
+        if (!n.status) { n.status = 'open'; changed = true; }
+      });
+    });
+    if (changed) writeJSON(MAPS_KEY, maps);
+  }
+
+  var api = {
     LEVEL_COUNT: LEVEL_COUNT,
     list: list,
     add: add,
+    replace: replace,
     update: update,
     recordGame: recordGame,
     addNote: addNote,
+    setNoteStatus: setNoteStatus,
     setRank: setRank,
     winRate: winRate,
     uid: uid,
     progress: progress,
     levelStatus: levelStatus,
     highestOpen: highestOpen,
+    starsFor: starsFor,
     completeLevel: completeLevel,
     scores: scores,
     addScore: addScore,
     lastError: lastErr
   };
+  fixOldNotes();
+  return api;
 })();

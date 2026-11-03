@@ -204,3 +204,15 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 - Bake the frames once. A replay that takes 40 s cannot load on a page. A `<script>`-tag cache works from `file://`; check it against a fingerprint of the story.
 - Smoke-test (settle, NaN check, timing, one frame) before writing the story, and record each tuned constant with its reason.
 - Say what a result is not. Show limits next to every result.
+
+## Planning pages and world formats (Growth, 2026-11-03)
+
+- When Jimmy says a page "looks just like" another, ask what he wants to do on it. A viewer and an authoring page are different tools.
+- One generic world format (seed, environment, time rules, steps, outputs) plus a time model per world. A computed model and a recorded one both fit.
+- Put `{tokens}` in story text so it stays true when a number changes. Leave unknown tokens visible.
+- Run a simulation's model on its own and tune it before writing the story. Add the damping a real system has (reserves, refuges, other food) before a boom-and-bust model collapses to zero.
+- An AI loop without a server: build the prompt, copy it, paste the JSON reply back, validate before applying.
+- A link can carry a draft in `#draft=…`. Treat it as untrusted: text only, no images, checked colours.
+- Show the readable result first and fold the editing UI away. Measure the page height.
+- Test the page at phone width and measure which element overflows.
+- When a shared page changes, load every existing item once.
