@@ -359,3 +359,9 @@ Jimmy: the tank is not a vertical extrusion; some portions should be shallow wit
 - **Review:** Increment Viewer `?set=earth_views_v23`.
 - **Open for Jimmy:** (1) the deployed satellite drops into the planet instead of staying in orbit; OK for now? (2) the first stages do not break up; add a break-up? (3) the rockets are still much bigger than to scale.
 
+
+## One name for the robots (2026-11-03)
+
+- All robots are one Library project, "Robot going for a stroll": V01 (`robot-banana`, was "Robot with a banana") and V02 to V05 (`robot-loop-v02` to `v05`, was "Robot loop"). Scene ids are unchanged, so existing links (`?model=robot-loop-v04`) still work.
+- The name lives in one constant, `ROBOT_PROJECT` in `tools/robot_banana.js`. The Increment Viewer set is "Robot going for a stroll: V02 to V05".
+- Only names and headers changed. Motions and geometry are the same.

@@ -13,6 +13,8 @@
 const M = require('../js/core/motion.js');
 
 const WORLD_ID = 'default-world';
+// One name in the Library for every robot: this scene (V01) and the robot-loop scenes (V02 to V05) are its versions.
+const ROBOT_PROJECT = 'Robot going for a stroll';
 
 const MATERIALS = {
   body: { color: '#a8e0c8', opacity: 1 },   // mint
@@ -129,7 +131,7 @@ const ROBOT_BANANA = {
   builtin: true,
   header: {
     model_id: 'robot-banana',
-    name: 'Robot with a banana',
+    name: `${ROBOT_PROJECT} V01`,
     description: 'A toy robot holding a banana walks round a winding loop of stepping stones. The first animation test.',
     units: 'in', up: 'z', world: WORLD_ID,
     materials: MATERIALS,
@@ -178,4 +180,4 @@ function motionFor(uuid, path = PATH) {
 
 ROBOT_BANANA.motion = motionFor;
 
-module.exports = { ROBOT_BANANA, motionFor, defs, MATERIALS, PATH, HAND_R };
+module.exports = { ROBOT_BANANA, motionFor, defs, MATERIALS, PATH, HAND_R, ROBOT_PROJECT };

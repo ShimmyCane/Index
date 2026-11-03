@@ -3,7 +3,7 @@
   "model_id": "robot-loop-v04",
   "header": {
     "model_id": "robot-loop-v04",
-    "name": "Robot loop V04",
+    "name": "Robot going for a stroll V04",
     "description": "Adds a top hat on the head. Hat is a visibility group. Walks the loop from Quick Detail \"Robot Loop\" (3c4c380d-7901-4944-8929-d74e92903789).",
     "units": "in",
     "up": "z",

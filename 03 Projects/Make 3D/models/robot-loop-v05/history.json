@@ -3,7 +3,7 @@
   "model_id": "robot-loop-v05",
   "header": {
     "model_id": "robot-loop-v05",
-    "name": "Robot loop V05",
+    "name": "Robot going for a stroll V05",
     "description": "The frisbee moves to the banana hand. Adds the robot cape (Quick Detail \"Robot Cape\"): a sheet that ripples down its length, and flows more in tight turns. Cape is a visibility group. Walks the loop from Quick Detail \"Robot Loop\" (3c4c380d-7901-4944-8929-d74e92903789).",
     "units": "in",
     "up": "z",

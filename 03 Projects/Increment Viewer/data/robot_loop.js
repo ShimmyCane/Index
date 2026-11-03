@@ -2,7 +2,7 @@
 // now walks the loop from the Quick Detail "Robot Loop", and gets a frisbee and a top hat, each a visibility group
 // (the Parts dropdown, upper right). Images are read relative to viewer.html, so they go up one folder into the Make 3D project.
 window.REVIEW_DATA = {
-  title: "Robot loop: the sketched walk, frisbee and top hat, V02 to V04",
+  title: "Robot going for a stroll: V02 to V05, the sketched walk, frisbee, top hat and cape",
   subtitle: "A toy robot about 3 ft tall walks the loop from the Quick Detail \"Robot Loop\" (about 14 ft by 20 ft, about 70 ft round, estimated from the sketch's 19'-7\" label). Build on V01 (robot with a banana, Make 3D). Open the model in Make 3D (index.html?model=robot-loop-v04) to watch it and use the Parts dropdown.",
   items: [
     {

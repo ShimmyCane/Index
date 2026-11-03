@@ -3,7 +3,7 @@
   "model_id": "robot-banana",
   "header": {
     "model_id": "robot-banana",
-    "name": "Robot with a banana",
+    "name": "Robot going for a stroll V01",
     "description": "A toy robot holding a banana walks round a winding loop of stepping stones. The first animation test.",
     "units": "in",
     "up": "z",

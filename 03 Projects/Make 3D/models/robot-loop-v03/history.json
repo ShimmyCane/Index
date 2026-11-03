@@ -3,7 +3,7 @@
   "model_id": "robot-loop-v03",
   "header": {
     "model_id": "robot-loop-v03",
-    "name": "Robot loop V03",
+    "name": "Robot going for a stroll V03",
     "description": "Adds a frisbee held in the left hand. Frisbee is a visibility group. Walks the loop from Quick Detail \"Robot Loop\" (3c4c380d-7901-4944-8929-d74e92903789).",
     "units": "in",
     "up": "z",
