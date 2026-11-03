@@ -108,10 +108,13 @@ window.XWStore = (function () {
     });
   }
 
+  // A note marked done gets the "Done- " prefix on its text, so it is not read again.
   function setNoteStatus(mapId, noteId, status) {
     return update(mapId, function (r) {
       (r.notes || []).forEach(function (n) {
-        if (n.id === noteId) n.status = status;
+        if (n.id !== noteId) return;
+        n.status = status;
+        if (status === 'done' && n.text.indexOf('Done- ') !== 0) n.text = 'Done- ' + n.text;
       });
     });
   }
