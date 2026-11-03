@@ -412,3 +412,7 @@ textarea {
 .fold[open] > summary::after { content: "−"; }
 .fold > .row:first-of-type { margin-top: 4px; }
 .fold.note-box > summary { margin: -4px -4px 4px; }
+
+/* Fish health in the HUD */
+.hp-bar { margin-top: 6px; height: 10px; }
+#hp-fill { background: linear-gradient(90deg, #8fe0b5, #bfeedd) !important; }

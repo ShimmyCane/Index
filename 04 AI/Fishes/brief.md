@@ -11,6 +11,8 @@
 - **Adaptive sea:** predators come from 1–3 tiers above the player, prey from 0–3 tiers below (or the same tier). Size still decides who is a threat (≥1.1× you, non-docile, can hurt you) or edible (≤0.87× you). Fallback to any size-fitting species if the window is empty.
 - **Difficulty = predator:prey ratio** (title screen): Easy 1:4 (20% predators), Medium 1:2 (33%), Hard 1:1 (50%). Up to +50% from 2:30 (capped at 70%).
 - Win at size 100 on tier 20. Ends on three lives lost, win, or 15:00. The end card says what ate you.
+- **Combat (v0.4):** bites with a per-attacker pause. Attack = 1 + floor(size/8); fish health = max(1, round(size/3)); player health = 10 + floor(size/2), regenerating after 4 s without a hit. Player bite pause 0.6 s, fish 0.9 s. Losing all health costs a life, as before. Chum: 25 s, dropped by fish of size ≥4 when they die. Tests: small fish go in one bite, large fish take several, chum seen in play (max 19 in a headless run), no page errors.
+- **Notes to the cloud (v0.3):** each note is kept on the device with an unsent flag and sent when saved while signed in; unsent notes go up at sign-in. v0.4 sends one batch at a time so a note cannot be posted twice.
 - **Family database:** `fish_notes` is live in the Family project (migration `fishes_fish_notes`). Sign-in is the same family account as Expansion Wars, via ⚙️ → Family database. Session tokens are kept on the device; the password is not. Notes always save to the cookie first (25 kept), then to the family table when signed in.
 
 ## Architecture

@@ -116,7 +116,16 @@
   }
 
   // Sends every unsent note, oldest first. Resolves with how many were sent.
+  // One send at a time: a second call while one is running shares its result, so no note is posted twice.
+  var sending = null;
   function sendPending() {
+    if (sending) return sending;
+    sending = sendPendingOnce().then(function (n) { sending = null; return n; },
+      function (err) { sending = null; throw err; });
+    return sending;
+  }
+
+  function sendPendingOnce() {
     if (!db.configured) return Promise.resolve(0);
     var unsent = load().filter(function (n) { return !n.sent; })
       .sort(function (a, b) { return a.at < b.at ? -1 : a.at > b.at ? 1 : 0; });

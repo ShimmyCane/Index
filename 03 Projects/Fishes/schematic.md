@@ -69,6 +69,16 @@ Twenty tiers (one per level), in five depth zones. The play area grows with each
 
 Each species' real-fish note is in `js/species.js`.
 
+## Combat, health and chum (v0.4)
+
+- **Bites:** a fish is removed when its health reaches zero. A bite takes off the attacker's attack value. The player bites every 0.6 s; fish bite every 0.9 s.
+- **Attack:** 1 + floor(size / 8). A size-1 fish does 1; a size-100 fish does 13.
+- **Health:** fish max(1, round(size / 3)). Small fish die in one bite; bigger fish take several.
+- **Your health:** 10 + floor(size / 2). Regenerates 3 per second after 4 seconds without a hit. Running out costs a life, as before.
+- **Danger readability:** coral dot = can hurt you, mint dot = you can eat it. Health bars can be hidden in ⚙️ → Sound, errors and display.
+- **Chum:** a fish of size 4 or more leaves up to 6 pieces of chum when it dies (size / 5). Chum lasts 25 seconds. Prey fish that see chum or plankton within range go to feed, so schools form around it.
+- **Active sea:** small fish and hunters with nothing to chase go after plankton and krill.
+
 ## Difficulty: the predator:prey ratio
 
 The sea adapts to your size. Each new fish is sized against you:
