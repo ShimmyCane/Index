@@ -1,0 +1,40 @@
+# Fishes — Brief (AI notes)
+
+**Updated:** 2026-11-03
+
+## Current state
+
+- Plain HTML/CSS/JS canvas game in `03 Projects/Fishes/`. No build step. Not device-tested on iPad.
+- **20 tiers** (one per level, five depth zones), **88 species** (3–8 per tier, food included). Each species has a **temper**: docile (never attacks or locks on), wary (hunts smaller fish, ignores you when smaller, no lock-on), aggressive (hunts smaller fish, locks on to you when smaller).
+- **Evolution:** the player takes its tier's lead species (first listed for the tier). Banner "Evolved into …".
+- **Fish eat fish:** a non-docile fish ≥1.25× bigger eats a smaller fish it touches, and hunters hunt smaller fish nearby.
+- **Adaptive sea:** predators come from 1–3 tiers above the player, prey from 0–3 tiers below (or the same tier). Size still decides who is a threat (≥1.1× you, non-docile, can hurt you) or edible (≤0.87× you). Fallback to any size-fitting species if the window is empty.
+- **Difficulty = predator:prey ratio** (title screen): Easy 1:4 (20% predators), Medium 1:2 (33%), Hard 1:1 (50%). Up to +50% from 2:30 (capped at 70%).
+- Win at size 100 on tier 20. Ends on three lives lost, win, or 15:00. The end card says what ate you.
+- **Family database:** `fish_notes` is live in the Family project (migration `fishes_fish_notes`). Sign-in is the same family account as Expansion Wars, via ⚙️ → Family database. Session tokens are kept on the device; the password is not. Notes always save to the cookie first (25 kept), then to the family table when signed in.
+
+## Architecture
+
+- `js/species.js`: `FishData` (SPECIES with `tier`/`temper`/`kind`, ZONES, GOALS, LEVEL_NAMES, DIFFICULTY, levelInfo, leadOf, CONFIG incl. the Family URL and publishable key).
+- `js/game.js`: simulation (`fillPopulations`, `census`, `spread`, `pickSpecies` with tier windows, `pickRole`, `canHurt`, `isThreat`, `isEdible`), NPC AI in `updateNPC` with `findPrey`, fish-eat-fish in `update`, drawing, input, panel. Test hook `window.FishGame.state()` (census, spread, npcEaten, form, difficulty) and `debugSetSize(n)`.
+- `js/family.js`: `FishFamily` (signIn, signOut, token with refresh, onChange). Password is sent to Supabase only.
+- `js/notes.js`: `FishNotes`. Cookie plus localStorage fallback; sends with the family token, refreshing once on 401/403.
+- `js/sound.js`: `FishSound`. Created on first touch.
+
+## Verified vs. unverified
+
+- Verified (headless Chromium, served over HTTP, no page errors):
+  - Species per tier: 4,5,4,5,5,5,5,5,5,4,5,4,5,4,4,4,5,4,3,3 (total 88).
+  - Predator share at tier 5 / tier 10: easy 0.22 / 0.22, medium 0.34 / 0.33, hard 0.46 / 0.49.
+  - Spawn spread at tier 10 (medium): 24 below, 3 same, 13 above. The prey and predator windows are working.
+  - Fish eat fish, evolution, level jumps and the win state (earlier round).
+  - Family panel: a wrong password is refused and shown on the page; the note is kept in the cookie and the status reads "needs family sign-in".
+- Live database checks (Supabase MCP, not the browser): rolled-back test returned `note_saved=t bad_row_rejected=t delete_denied=t anon_denied=t`; the real migration applied; RLS on; `anon` has no grants; `authenticated` has INSERT and SELECT.
+- **Not verified:** a successful family sign-in and a note landing in the table. The sandbox cannot reach `supabase.co` from the browser, so this must be done on the iPad by Jimmy.
+- Unverified: run length (8–15 minutes); balance of predator sizes per tier; iPad touch feel; how docile fish read on screen.
+
+## Next steps
+
+1. Jimmy signs in on the iPad (⚙️ → Family database) and saves a test note. Check it in the family table.
+2. Play one full run per difficulty; time it against 8–15 minutes and note unfair moments in ⚙️.
+3. Tune: prey gain (0.4 of prey size), tier windows (currently 1–3 tiers), fish target (22 + 2×tier), threat cap (70%).

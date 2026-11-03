@@ -95,3 +95,13 @@ Patterns that repeat often enough to become a template in `02 Refs/Templates/` o
 ## Sweep a profile without a sweep object (Cornice, Make 3D)
 
 - **Slice the outline into horizontal bands,** each as wide as the outline is at that height. Place each band along the path: straights as single boxes, arcs as short boxes rotated about Z so their local x runs along the inward normal. Use it when the engine has no sweep and the piece must turn corners. _(Cornice)_
+
+## Prompt-style planning page for a simulation (Growth)
+
+- **Sections written as "Here is…":** the start, the environment and its variables, how time works, what happens, ask the AI, then (look, keep, run). The page edits one world object; the numbers recalculate as you type. _(Growth)_
+- **World format plus time models:** one JSON-like world, a model per world (`ecosystem` computed, `recorded` from a run) chosen by `time.model.type`. _(Growth)_
+- **Story tokens** (`{rabbits}`), resolved from each step's state. _(Growth)_
+- **Copy-and-paste AI loop** and a tolerant reply reader. _(Growth)_
+- **Open by link:** `?world=<id>&step=<n>`, and `#draft=` for unsaved edits (untrusted data). _(Growth, Increment Viewer)_
+- **State card** for a step that has no picture: bars scaled to each series' highest value. _(Increment Viewer)_
+- **Template candidate:** a skill that starts from this page (the `/simulate-decay` questions and sign-off are sections 1 to 3). Not written; needs Jimmy's go-ahead to edit `02 Refs/Skills/`.

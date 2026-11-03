@@ -67,13 +67,20 @@
     <div class="gamebar">
       <button id="btn-home" class="back">🏠 Map</button>
       <p id="status" class="pill">Drag from your mushroom to a connected one</p>
-      <span class="bar-spacer"></span>
+      <button id="sync-pill" class="sync-pill" type="button" aria-live="polite">💾 device</button>
     </div>
     <main class="stage">
-      <div id="board" class="board">
-        <svg id="roads" class="layer" viewBox="0 0 1000 640"></svg>
-        <div id="nodes" class="layer"></div>
-        <svg id="armies" class="layer" viewBox="0 0 1000 640"></svg>
+      <div class="top-row">
+        <button id="pct-btn" class="pct-btn" type="button">Send 25%</button>
+        <div id="pop-bar" class="pop-bar" role="img" aria-label="Territories and soldiers per player"></div>
+      </div>
+      <div class="board-wrap">
+        <div id="board" class="board">
+          <svg id="roads" class="layer" viewBox="0 0 1000 640"></svg>
+          <div id="nodes" class="layer"></div>
+          <svg id="armies" class="layer" viewBox="0 0 1000 640"></svg>
+        </div>
+        <div id="countdown" class="countdown" hidden></div>
       </div>
     </main>
     <p class="rotate-hint">Turn your phone sideways for a bigger board.</p>
@@ -85,7 +92,12 @@
         <div class="seg" id="seg-ai">
           <button data-ai="easy" aria-pressed="false">Easy</button>
           <button data-ai="normal" aria-pressed="true">Normal</button>
+          <button data-ai="hard" aria-pressed="false">Hard</button>
         </div>
+      </div>
+      <div class="row">
+        <span>Teams (Level 4)</span>
+        <button id="teams-toggle" class="toggle" aria-pressed="false">Off</button>
       </div>
       <div class="row">
         <span>Sound</span>
@@ -98,6 +110,19 @@
         <textarea id="note-text" rows="2" maxlength="500" placeholder="What could be better on this map?"></textarea>
         <button id="note-save" class="big">Save note</button>
         <p id="note-status" class="muted" aria-live="polite"></p>
+      </div>
+      <div class="family">
+        <h3>Family database</h3>
+        <p id="sync-msg" class="muted" aria-live="polite">Saved on this device.</p>
+        <form id="family-form" class="family-form" hidden>
+          <input id="family-email" type="email" autocomplete="username" placeholder="Family email">
+          <input id="family-pass" type="password" autocomplete="current-password" placeholder="Password">
+          <button id="family-signin" class="big" type="submit">Sign in</button>
+        </form>
+        <button id="family-sync" class="big" type="button">☁️ Send my maps and notes</button>
+        <button id="family-check" class="big" type="button">Check database</button>
+        <button id="family-signout" class="big" type="button" hidden>Sign out</button>
+        <p id="family-result" class="muted" aria-live="polite"></p>
       </div>
       <div class="row">
         <span>Show errors</span>
@@ -132,6 +157,8 @@
 
   <script src="js/sound.js"></script>
   <script src="js/map.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/cloud.js"></script>
   <script src="js/store.js"></script>
   <script src="js/game.js"></script>
 </body>

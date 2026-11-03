@@ -50,7 +50,7 @@
   // roughness and metalness are the PBR channels (TRELLIS.2 uses the same four: base colour, roughness, metallic, opacity).
   const MATERIAL_DEFAULTS = { color: '#c9c3b5', opacity: 1, roughness: 0.75, metalness: 0 };
   // Canvas-free patterns (js/core/patterns.js). 'none' keeps the flat colour.
-  const PATTERN_NAMES = ['none', 'wood', 'tile', 'stripe'];
+  const PATTERN_NAMES = ['none', 'wood', 'tile', 'stripe', 'leaf'];
   const MATERIAL_FIELDS = {
     color: (v) => typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v),
     opacity: (v) => typeof v === 'number' && v >= 0 && v <= 1,

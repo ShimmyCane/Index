@@ -32,8 +32,19 @@ window.REVIEW_DATA = {
 
 Images are read relative to `viewer.html`. The Living Room data reaches its renders with `../Living Room Scene/renders/`.
 
+## Open a project by link (like Make 3D's ?model=)
+- `viewer.html?set=<name>`: a data file in this folder (`data/<name>.js`).
+- `viewer.html?world=<id>`: a Growth world, loaded from `../Growth/worlds/<id>.js` and turned into items by `../Growth/js/growth_model.js` (`toReview`). Only letters, digits and underscores are allowed in `<id>`.
+- `&step=<n>` on either: open on step n (1-based). The slideshow then waits for Play. As you step, the address changes to the step you are on, so the link can be shared.
+- `#draft=<base64 of a world>`: an unsaved world sent from the Growth page. It is data, shown only as text. Pictures in a draft are ignored, so a link cannot pull images from elsewhere.
+- Items with no `image` but a `card` (`kicker`, `bars` of label, value, max, colour, and a `note`) show a state card. Without either, the frame says "No picture for this step."
+
 ## Scene drop-down
-`data/sets.js` lists every review for the drop-down in the header: `window.REVIEW_SETS = [{ id, label }]`. `id` is the data file name without `.js`; `label` is what the drop-down shows. Add one line per new data file. If `sets.js` is missing, the drop-down is hidden and `?set=` still works.
+`data/sets.js` lists every review for the drop-down in the header (the Growth worlds from `../Growth/worlds/index.js` are added to it as "Growth: …"): `window.REVIEW_SETS = [{ id, label }]`. `id` is the data file name without `.js`; `label` is what the drop-down shows. If `sets.js` is missing, the drop-down is hidden and `?set=` still works.
+
+**One data file per project.** Each project appears once in the drop-down, and its full run (all versions, in order) lives in that one file. When a project gets new versions, add their items to its existing file and update the title and label. Do not start a new file for a later time span. Add a new file only for a new project.
+
+**Archive.** `data/archive/` keeps the old split pieces (for example the pre-merge `earth_views_v11.js`). They are not in the drop-down and cannot be opened with `?set=`, because set names may not contain folders.
 
 ## Behaviour
 - Slideshow: all views are stacked in one box and cross-fade. Back, Play/Pause and Next buttons. Dots jump to a view. Arrow keys work too. Auto-advance every 4 seconds.

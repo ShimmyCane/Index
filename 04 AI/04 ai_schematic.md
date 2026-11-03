@@ -22,8 +22,9 @@ Projects with notes:
 - Increment Viewer/ — subject-neutral slideshow and running log for reviewing increments. `brief.md`.
 - Living Room Scene/ — scene built from a photo over ten versions (V1–V10), render-and-compare loop. `brief.md` (version log), `lessons.md`.
 - Shimmy Specs/ — spec-writing process app; MVP planned (`mvp schematic.md`, `mvp tasks.md`). `brief.md`, `lessons.md`.
-- Growth/ — algorithmic ageing of a model (first subject: white paper). MVP: ten-step paper story replayed in 3-D (`paper3d.html`, engine and tests in `js/` and `tests/`) and in the Increment Viewer; convo v0.1 answered in part. `brief.md`.
+- Growth/ — world simulator in planning mode (prompt-style page, world format, rabbits and paper worlds, `?world=` links in the Increment Viewer). `brief.md`, `lessons.md`.
 - Expansion Wars/ — expansion game MVP (spots, soldiers, roads, lakes, computer players, 2–4 flags). Plain HTML/CSS/JS. Convo v0.1 open (defaults built in). `brief.md`, `lessons.md`, `interests.md` (public, simplified design interests). The full interests dossier is private, in `03 Projects/Expansion Wars/private/` (gitignored).
+- Fishes/ — fish-tank game MVP (20 levels, five zones, lock-on hunters, notes in a cookie, database SQL written but not applied). Plain canvas. `brief.md`, `lessons.md`.
 - Paper Again/ — particle model of one sheet of paper over ten increments (folds, crumpling, tears, damp, mould, cuts, burns). MVP. Research in `research/paper_behaviour.md`. `brief.md`.
 
 Notes:

@@ -42,7 +42,7 @@ t('pixels: RGBA, full alpha, right size; same spec gives identical bytes', () =>
 });
 
 t('pixels: each pattern is seamless (the wrap-around step is no bigger than the steps inside the tile)', () => {
-  for (const name of ['wood', 'tile', 'stripe']) {
+  for (const name of ['wood', 'tile', 'stripe', 'leaf']) {
     const s = P.patternSpec({ pattern: name, color: '#8b5a2b' });
     const size = P.TILE, bytes = P.patternPixels(s);
     const step = (ax, ay, bx, by) => Math.max(...[0, 1, 2].map((c) => Math.abs(px(bytes, ax, ay, size)[c] - px(bytes, bx, by, size)[c])));
@@ -67,6 +67,19 @@ t('pixels: stripe pattern alternates between the two colours', () => {
   const bytes = P.patternPixels(s), size = P.TILE;
   assert.deepStrictEqual(px(bytes, 0, 5, size), [255, 255, 255]);
   assert.deepStrictEqual(px(bytes, 8, 5, size), [0, 0, 0]);
+});
+
+t('pixels: leaf pattern has veins in the pattern colour and shading in between', () => {
+  const s = P.patternSpec({ pattern: 'leaf', color: '#ffffff', pattern_color: '#000000' });
+  const bytes = P.patternPixels(s), size = P.TILE;
+  let dark = 0, light = 0;
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const r = px(bytes, x, y, size)[0];
+    if (r === 0) dark++; else light++;
+  }
+  assert.ok(dark > 0 && light > dark, `veins ${dark}, other ${light}`);
+  const tones = new Set(); for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) tones.add(px(bytes, x, y, size)[0]);
+  assert.ok(tones.size > 2, `shading varies (${tones.size} tones)`);
 });
 
 t('materials: pattern fields are validated by set_material and kept in the table', () => {

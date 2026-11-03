@@ -57,6 +57,11 @@
         } else if (spec.pattern === 'stripe') {
           // stripes running along v: eight bands per tile
           c = (Math.floor(x / (size / 8)) % 2) ? second : base;
+        } else if (spec.pattern === 'leaf') {
+          // thin veins on a diagonal (abs of a whole-period sine is seamless), with soft shading from a 6 by 6 grid
+          const vein = Math.abs(Math.sin(Math.PI * (4 * u + v)));
+          const spot = 0.5 + 0.5 * Math.sin(TAU * 6 * u) * Math.sin(TAU * 6 * v);
+          c = vein < 0.12 ? second : mix(second, base, 0.55 + 0.45 * spot);
         } else {
           c = base;
         }
