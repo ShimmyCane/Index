@@ -398,3 +398,11 @@ Jimmy: the tank is not a vertical extrusion; some portions should be shallow wit
 - **Research:** `04 AI/Make 3D/research/trellis2_notes.md`. TRELLIS.2 uses nvdiffrast, not Three.js, and needs a 24 GB GPU; V2 borrows its staged passes and PBR material model, not the model. The arXiv paper was not readable from this session.
 - **Plan:** `04 AI/Make 3D/research/v2_plan.md` (material layer, canvas textures, PBR viewer, staged passes, GLB export, optional generator slot off by default).
 - Not done: no V2 engine work beyond the storage split; the V2 skill is unchanged pending Jimmy's decision.
+
+## Cornice V04: half scale, swept with arcs (2026-11-03)
+
+- **Request (Jimmy):** the cornice is too large, reduce it by 50%; the walls should run up from the floor to the cornice; the cornice should have arcs and curves, built as a sweep.
+- **Built:** `tools/cornice.js` V04 (`defsFor(4)`). Scale is half the V01 to V03 scale (about 1.9 in per sketch unit, so the cornice is about 48 in tall). The same profile is swept along the three walls of each room, with inside corner arcs (radius 24 in, six pieces each). Walls run from the floor to the cornice top, so nothing floats. Cutaway and flipped profile as in V03. Lamps moved under the shelf.
+- **Sweep, honestly:** the engine has no sweep object (its only skeleton shapes are ellipse rings). V04 is a sweep built from boxes: 1,175 objects, arc pieces rotated about Z. The profile is still stepped (one sketch unit per band, about 1.9 in), so the curves come from the corners, not from the outline.
+- **Checks:** V01 to V03 unchanged in git. Build passes (166 scenes, world-bounds warnings only).
+- **Open:** scale still an estimate (Jimmy to confirm); a real sweep object in the engine needs a schema and rules change (next step if wanted); the outline's freehand curves are still not modelled.

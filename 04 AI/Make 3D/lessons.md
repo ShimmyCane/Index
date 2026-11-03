@@ -232,3 +232,11 @@ Jimmy's note on V06: too slow, too small, "too diagrammatic and not real enough 
 - **Remove what the regex does not match.** A regex for the satellite bodies missed the new ones; checking the keys by name is simpler.
 - **A stash can conflict with a moved main.** Resolve the generated bundle by rebuilding, and keep both sides of the scene list.
 
+
+## Cornice, V01 to V04 (2026-11-03)
+
+- **Look at a 3-D model from several sides.** The default camera looks down and hid the walls and the projection. A few orbit angles showed the sweep and the room layout at once.
+- **Check the PR number before subscribing.** Subscribed to #82 when the new PR was #84, then had to undo it. Take the number from the create result.
+- **Version guards keep old increments reproducible.** Blocks that a later increment replaces are `v >= N && v < M`, not deleted. Only the description of V02 changed, and it was reworded on purpose.
+- **Sweep without a sweep object.** The engine has none. Straight pieces are single boxes; arc pieces are short boxes rotated about Z so their local x runs along the inward normal. `rotateVector` applies X, then Y, then Z, so a plan angle belongs in `rotation_z`.
+- **Half scale is one number.** Change the scale constant and derive every height from it (profile height, envelope, zBase), and the walls stay put.

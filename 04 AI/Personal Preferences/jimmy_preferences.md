@@ -81,3 +81,8 @@
 * **He wants to see it, then decide.** Merge when asked, not before.
 * **Plan the story in words and numbers first,** look at it, then run it in 3-D. He wants a page that reads like the prompt he would say: here is the thing, here is the environment, here are the steps the AI imagines.
 * **A page should do something new,** not repeat a viewer he already has.
+
+## 7. Reviewing 3-D (from Cornice, 2026-11-03)
+* **Rotate the view.** Show a 3-D model from several angles, not only the default camera. The first look can hide the layout.
+* **Sweep when he asks for curves.** Arcs and curves on a moulding are a sweep along the path, not stepped slices.
+* **Walls meet the floor and the ceiling line.** Nothing should float under a cornice; if he says it looks off, check for a gap first.

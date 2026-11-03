@@ -127,6 +127,86 @@ function cornice(add, key, label, wall) {
   ]) add(k, o);
 }
 
+// ---- V04: a sweep. The profile is swept along the path of the room's three walls, with arcs at both corners.
+// Half scale: the same outline at S / 2 (about 48 in tall instead of 97).
+const S_HALF = S / 2;
+const PROFILE_H_HALF = (PROFILE.ymax - PROFILE.ymin) * S_HALF;   // about 48.5 in
+const ARC_R = 24;        // inside corner radius of the sweep path (inches, centre line on the wall faces)
+const ARC_SEGS = 6;      // straight pieces per arc
+
+// The sweep path, in plan (x, y), on the wall faces. Each straight is { a, b, n } with n the inward normal.
+// Each arc is { c, r, a0, a1 } in degrees, with n = -(cos, sin) pointing into the room.
+function museumPath() {
+  const R = ARC_R;
+  return [
+    { kind: 'line', a: [0, 120], b: [0, -120 + R], n: [-1, 0] },              // shared wall, x = 0
+    { kind: 'arc', c: [-R, -120 + R], r: R, a0: 0, a1: -90 },                // corner, shared/left
+    { kind: 'line', a: [-R, -120], b: [-360 + R, -120], n: [0, 1] },         // left wall, y = -120
+    { kind: 'arc', c: [-360 + R, -120 + R], r: R, a0: -90, a1: -180 },       // corner, left/back
+    { kind: 'line', a: [-360, -120 + R], b: [-360, 120], n: [1, 0] },        // back wall, x = -360
+  ];
+}
+function homePath() {
+  const R = ARC_R;
+  return [
+    { kind: 'line', a: [6, 120], b: [6, -120 + R], n: [1, 0] },              // shared wall, x = 6
+    { kind: 'arc', c: [6 + R, -120 + R], r: R, a0: 180, a1: 270 },           // corner, shared/left
+    { kind: 'line', a: [6 + R, -120], b: [180 - R, -120], n: [0, 1] },       // left wall, y = -120
+    { kind: 'arc', c: [180 - R, -120 + R], r: R, a0: -90, a1: 0 },           // corner, left/far
+    { kind: 'line', a: [180, -120 + R], b: [180, 120], n: [-1, 0] },         // far wall, x = 180
+  ];
+}
+
+// Emits the sweep: each profile band, along each piece of the path. Straights are single boxes (no rotation).
+// Arcs are split into ARC_SEGS pieces, each rotated about Z so its local x runs along the inward normal.
+function sweepSlices(shape, prefix, label, mat, path, zBase, group) {
+  const out = [];
+  const bands = shape.rows.map(([b, xmin, xmax]) => {
+    const lo = Math.max(b, shape.ymin), hi = Math.min(b + 1, shape.ymax);
+    const h = (hi - lo) * S_HALF;
+    if (h < 1) return null;
+    const yc = (lo + hi) / 2;
+    const zc = (PROFILE.ymax - yc) * S_HALF;                  // flipped: shelf at the top
+    const u0 = Math.max(0, (xmin - REF_X) * S_HALF);
+    const u1 = Math.max((xmax - REF_X) * S_HALF, u0 + 1.2);
+    return { b, h, zc, u0, u1 };
+  }).filter(Boolean);
+
+  path.forEach((piece, pi) => {
+    const pieces = [];
+    if (piece.kind === 'line') {
+      const { a, b, n } = piece;
+      const L = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+      const alongX = Math.abs(b[0] - a[0]) > 0;
+      bands.forEach((g) => {
+        const uc = (g.u0 + g.u1) / 2, w = g.u1 - g.u0;
+        const pos = [mid[0] + n[0] * uc, mid[1] + n[1] * uc, zBase + g.zc];
+        pieces.push([`${prefix}-s${pi}-${g.b}`, { name: `${label} slice ${g.b}`, type: 'box',
+          dimensions: alongX ? [L, w, g.h] : [w, L, g.h], position: pos, material: mat, parent: group }]);
+      });
+    } else {
+      const { c, r, a0, a1 } = piece;
+      for (let k = 0; k < ARC_SEGS; k++) {
+        const t0 = a0 + ((a1 - a0) * k) / ARC_SEGS, t1 = a0 + ((a1 - a0) * (k + 1)) / ARC_SEGS;
+        const tm = ((t0 + t1) / 2) * Math.PI / 180;
+        const P = [c[0] + r * Math.cos(tm), c[1] + r * Math.sin(tm)];
+        const N = [-Math.cos(tm), -Math.sin(tm)];                 // into the room
+        const seg = r * Math.abs(t1 - t0) * Math.PI / 180 + 0.6;  // small overlap so the pieces meet
+        const rz = Math.atan2(N[1], N[0]) * 180 / Math.PI;
+        bands.forEach((g) => {
+          const uc = (g.u0 + g.u1) / 2, w = g.u1 - g.u0;
+          const pos = [P[0] + N[0] * uc, P[1] + N[1] * uc, zBase + g.zc];
+          pieces.push([`${prefix}-s${pi}-${k}-${g.b}`, { name: `${label} arc slice ${g.b}`, type: 'box',
+            dimensions: [w, seg, g.h], position: pos, rotation_z: rz, material: mat, parent: group }]);
+        });
+      }
+    }
+    out.push(...pieces);
+  });
+  return out;
+}
+
 function defsFor(v) {
   const d = [];
   const add = (k, o) => d.push([k, o]);
@@ -145,8 +225,10 @@ function defsFor(v) {
   add('frame', { name: 'Picture frame', description: '14 ft by 10 ft', type: 'box', dimensions: [2, 124, 172], position: [-359, 0, 96], material: 'frame' });
   add('canvas', { name: 'Picture', description: 'canvas', type: 'box', dimensions: [0.6, 112, 160], position: [-357.7, 0, 96], material: 'canvas' });
 
-  // Lamps under the cornice, aimed at the picture
-  [-80, -40, 0, 40, 80].forEach((y, i) => add(`lamp-${i + 1}`, { name: `Lamp ${i + 1}`, description: 'picture light', type: 'sphere', dimensions: [3], position: [-300, y, 186], material: 'lamp' }));
+  // Lamps aimed at the picture: under the shelf from V04 (half-scale cornice), before that under the full cornice
+  [-80, -40, 0, 40, 80].forEach((y, i) => add(`lamp-${i + 1}`, v >= 4
+    ? { name: `Lamp ${i + 1}`, description: 'picture light, under the shelf', type: 'sphere', dimensions: [3], position: [-340, y, 280], material: 'lamp' }
+    : { name: `Lamp ${i + 1}`, description: 'picture light', type: 'sphere', dimensions: [3], position: [-300, y, 186], material: 'lamp' }));
 
   // People, back to back across the shared wall
   d.push(...person('p-museum', 'Museum', -8, -1));
@@ -165,8 +247,8 @@ function defsFor(v) {
     cornice(add, 'ph', 'Home', back(HOME));
   }
 
-  // V03 (v >= 3): cornice on three walls per room, flipped so the shelf projects into the room from the top.
-  if (v >= 3) {
+  // V03 (v >= 3 and < 4): cornice on three walls per room, flipped so the shelf projects into the room from the top.
+  if (v >= 3 && v < 4) {
     const wallsOf = (zBase) => ({
       museum: [
         ['pm-back', 'Museum back', { axis: 'x', pos: -360, dir: 1, along: 0, len: 240 }],
@@ -182,6 +264,24 @@ function defsFor(v) {
     const { museum, home } = wallsOf();
     for (const [key, label, w] of museum) cornice(add, key, label, { ...w, zBase: MUSEUM.zBase, flip: true });
     for (const [key, label, w] of home) cornice(add, key, label, { ...w, zBase: HOME.zBase, flip: true });
+  }
+
+  // V04 (v >= 4): half-scale cornice swept along each room's three walls, with arcs at the corners.
+  // The walls run from the floor up to the top of the cornice, so there is no gap under it.
+  if (v >= 4) {
+    const ZB_M = MUSEUM.top - PROFILE_H_HALF;
+    const ZB_H = HOME.top - PROFILE_H_HALF;
+    const sweep = (key, label, path, zBase) => {
+      const gid = `${key}-sweep`;
+      add(gid, { name: `${label} cornice (sweep)`, description: 'the profile swept along the three walls, arcs at the corners', type: 'group', dimensions: [], position: [0, 0, 0] });
+      for (const [k, o] of [
+        ...sweepSlices(PROFILE, key, 'Profile', 'cornice', path, zBase, gid),
+        ...sweepSlices(STEP_A, `${key}-a`, 'Step', 'step', path, zBase, gid),
+        ...sweepSlices(STEP_B, `${key}-b`, 'Step', 'step', path, zBase, gid),
+      ]) add(k, o);
+    };
+    sweep('mv4', 'Museum', museumPath(), ZB_M);
+    sweep('hv4', 'Home', homePath(), ZB_H);
   }
 
   return d;
@@ -220,4 +320,15 @@ const CORNICE_V03 = {
   defs: defsFor(3),
 };
 
-module.exports = { CORNICE: [CORNICE_V01, CORNICE_V02, CORNICE_V03], PROFILE_H, S };
+const CORNICE_V04 = {
+  id: 'cornice-v04',
+  header: {
+    model_id: 'cornice-v04',
+    name: 'Cornice V04',
+    description: 'Half-scale cornice (about 48 in tall) swept along the three walls of each room, with arcs at the corners. Cutaway, profile flipped into the rooms.',
+    units: 'in', up: 'z', world: WORLD_ID, materials: MATERIALS,
+  },
+  defs: defsFor(4),
+};
+
+module.exports = { CORNICE: [CORNICE_V01, CORNICE_V02, CORNICE_V03, CORNICE_V04], PROFILE_H, S };
