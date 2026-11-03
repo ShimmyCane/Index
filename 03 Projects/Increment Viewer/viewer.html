@@ -85,6 +85,16 @@
   }
   .dot.on { background: var(--sun); }
 
+  /* State card: a step that has no picture shows its numbers as bars (Growth worlds) */
+  .card { width: 100%; height: 100%; overflow: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; justify-content: center; }
+  .card .kicker { font-weight: bold; font-size: 1.2rem; }
+  .card .bar { display: grid; grid-template-columns: minmax(110px, 1.2fr) 3fr minmax(3ch, auto); gap: 10px; align-items: center; }
+  .card .track { height: 24px; border: 3px solid var(--ink); border-radius: 12px; background: var(--paper); overflow: hidden; }
+  .card .fill { height: 100%; background: var(--c, var(--mint)); border-right: 3px solid var(--ink); }
+  .card .val { font-weight: bold; text-align: right; }
+  .card .note { margin: 0; font-style: italic; }
+  .frame .none { opacity: 0.7; }
+
   /* Side panel: running log, scrolls on its own */
   .log {
     position: relative;
@@ -150,9 +160,18 @@
 (function () {
   // Template: pick a data file with ?set=<name>. It loads data/<name>.js,
   // which sets window.REVIEW_DATA (see schematic.md for the format).
+  // A Growth world can also be opened by its name: ?world=<id> loads ../Growth/worlds/<id>.js.
+  // Add &step=<n> to open on one step (the slideshow then waits for you to press Play).
+  // A draft from the Growth page arrives in the address after # (#draft=...); it is data and is only shown as text.
   var params = new URLSearchParams(location.search);
   var set = params.get('set') || 'living_room';
   if (!/^[a-z0-9_]+$/i.test(set)) set = 'living_room';
+  var worldId = params.get('world');
+  if (worldId !== null && !/^[a-z0-9_]+$/i.test(worldId)) worldId = null;
+  var stepParam = parseInt(params.get('step'), 10);
+  var draftMatch = /(?:^|[#&])draft=([^&]+)/.exec(location.hash || '');
+  var draftText = draftMatch ? draftMatch[1] : null;
+  var worldMode = !!(worldId || draftText);
 
   var el = function (id) { return document.getElementById(id); };
   var state = { index: 0, timer: null, playing: true, items: [] };
@@ -174,20 +193,72 @@
     buildDots(data.items);
     buildLog(data.items);
 
-    el('prev').onclick = function () { show(state.index - 1); restartTimer(); };
-    el('next').onclick = function () { show(state.index + 1); restartTimer(); };
+    el('prev').onclick = function () { go(state.index - 1); };
+    el('next').onclick = function () { go(state.index + 1); };
     el('play').onclick = function () {
       state.playing = !state.playing;
       setText(el('play'), state.playing ? '⏸ Pause' : '▶ Play');
       if (state.playing) restartTimer(); else stopTimer();
     };
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'ArrowRight') { show(state.index + 1); restartTimer(); }
-      if (e.key === 'ArrowLeft') { show(state.index - 1); restartTimer(); }
+      if (e.key === 'ArrowRight') { go(state.index + 1); }
+      if (e.key === 'ArrowLeft') { go(state.index - 1); }
     });
 
-    show(0);
+    var first = (stepParam >= 1 && stepParam <= data.items.length) ? stepParam - 1 : 0;
+    if (stepParam >= 1) { state.playing = false; setText(el('play'), '▶ Play'); }
+    show(first);
     restartTimer();
+  }
+
+  // Keep the address on the step you are looking at, so the link can be shared (like Make 3D's ?model=).
+  function setStepUrl() {
+    try {
+      var u = new URL(location.href);
+      u.searchParams.set('step', String(state.index + 1));
+      history.replaceState(null, '', u.pathname + u.search + u.hash);
+    } catch (e) { /* file:// or blocked history: the viewer works, the link just stays as it was */ }
+  }
+  function go(i) { show(i); restartTimer(); setStepUrl(); }
+
+  function safeColor(c) { return /^#[0-9a-f]{3,8}$/i.test(String(c || '')) ? c : null; }
+
+  function buildCard(card) {
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    if (card.kicker) {
+      var k = document.createElement('div');
+      k.className = 'kicker';
+      setText(k, card.kicker);
+      wrap.appendChild(k);
+    }
+    (card.bars || []).forEach(function (b) {
+      var row = document.createElement('div');
+      row.className = 'bar';
+      var lab = document.createElement('span');
+      setText(lab, b.label);
+      var track = document.createElement('div');
+      track.className = 'track';
+      var fill = document.createElement('div');
+      fill.className = 'fill';
+      var pct = b.max > 0 ? Math.max(0, Math.min(100, 100 * Number(b.value) / b.max)) : 0;
+      fill.style.width = pct + '%';
+      var col = safeColor(b.color);
+      if (col) fill.style.setProperty('--c', col);
+      track.appendChild(fill);
+      var val = document.createElement('span');
+      val.className = 'val';
+      setText(val, String(b.value));
+      row.appendChild(lab); row.appendChild(track); row.appendChild(val);
+      wrap.appendChild(row);
+    });
+    if (card.note) {
+      var n = document.createElement('p');
+      n.className = 'note';
+      setText(n, card.note);
+      wrap.appendChild(n);
+    }
+    return wrap;
   }
 
   function buildFrames(items) {
@@ -195,16 +266,25 @@
     items.forEach(function (item, i) {
       var fig = document.createElement('figure');
       fig.className = 'frame';
-      var img = document.createElement('img');
-      img.alt = (item.id || ('View ' + (i + 1))) + ': ' + (item.title || '');
-      img.src = item.image;
-      img.onerror = function () {
-        var p = document.createElement('p');
-        p.className = 'missing';
-        setText(p, 'Image not found: ' + item.image);
-        fig.replaceChildren(p);
-      };
-      fig.appendChild(img);
+      if (item.image) {
+        var img = document.createElement('img');
+        img.alt = (item.id || ('View ' + (i + 1))) + ': ' + (item.title || '');
+        img.src = item.image;
+        img.onerror = function () {
+          var p = document.createElement('p');
+          p.className = 'missing';
+          setText(p, 'Image not found: ' + item.image);
+          fig.replaceChildren(p);
+        };
+        fig.appendChild(img);
+      } else if (item.card) {
+        fig.appendChild(buildCard(item.card));
+      } else {
+        var none = document.createElement('p');
+        none.className = 'none';
+        setText(none, 'No picture for this step.');
+        fig.appendChild(none);
+      }
       box.appendChild(fig);
     });
   }
@@ -216,7 +296,7 @@
       b.className = 'dot';
       setText(b, String(i + 1));
       b.setAttribute('aria-label', 'Show ' + (item.id || ('view ' + (i + 1))));
-      b.onclick = function () { show(i); restartTimer(); };
+      b.onclick = function () { go(i); };
       row.appendChild(b);
     });
   }
@@ -261,7 +341,7 @@
       var gaps = listBlock('Still to fix', item.gaps);
       if (gaps) btn.appendChild(gaps);
 
-      btn.onclick = function () { show(i); restartTimer(); };
+      btn.onclick = function () { go(i); };
       li.appendChild(btn);
       list.appendChild(li);
     });
@@ -303,20 +383,29 @@
     }
   }
 
-  // Scene drop-down: the list comes from data/sets.js. If that file is missing, the drop-down stays hidden.
+  // Scene drop-down: the list comes from data/sets.js, plus the Growth worlds from ../Growth/worlds/index.js.
+  // If both are missing, the drop-down stays hidden. A world is shown as "world:<id>".
+  var pickerPending = 2;
+  function pickerPartDone() { pickerPending -= 1; if (pickerPending === 0) buildPicker(); }
+
   function buildPicker() {
     var sel = el('picker');
-    var sets = window.REVIEW_SETS || [];
-    if (!sets.length) { sel.hidden = true; return; }
-    if (sets.every(function (x) { return x.id !== set; })) sets = sets.concat([{ id: set, label: set }]);
-    sets.forEach(function (x) {
+    var entries = (window.REVIEW_SETS || []).slice();
+    (window.GROWTH_WORLD_LIST || []).forEach(function (w) { entries.push({ id: 'world:' + w.id, label: 'Growth: ' + w.label }); });
+    if (!entries.length) { sel.hidden = true; return; }
+    var current = worldMode ? 'world:' + (worldId || 'draft') : set;
+    if (entries.every(function (x) { return x.id !== current; })) entries.push({ id: current, label: worldMode && !worldId ? 'Draft from the Growth page' : current.replace('world:', '') });
+    entries.forEach(function (x) {
       var o = document.createElement('option');
       o.value = x.id;
       setText(o, x.label || x.id);
-      if (x.id === set) o.selected = true;
+      if (x.id === current) o.selected = true;
       sel.appendChild(o);
     });
-    sel.onchange = function () { location.search = '?set=' + encodeURIComponent(sel.value); };
+    sel.onchange = function () {
+      var v = sel.value;
+      location.href = location.pathname + (v.indexOf('world:') === 0 ? '?world=' + encodeURIComponent(v.slice(6)) : '?set=' + encodeURIComponent(v));
+    };
   }
 
   function loadScript(src, onload, onerror) {
@@ -327,8 +416,38 @@
     document.head.appendChild(s);
   }
 
-  loadScript('data/sets.js', buildPicker, function () { el('picker').hidden = true; });
-  loadScript('data/' + set + '.js',
+  // A Growth world becomes a review: one item per step, with a state card when there is no picture.
+  function startWorld(world, isDraft) {
+    var M = window.GrowthModel;
+    var problems = M.validate(world);
+    if (problems.length) { setText(el('subtitle'), 'This world cannot be shown: ' + problems[0]); return; }
+    var review = M.toReview(world);
+    if (isDraft) review.items.forEach(function (it) { delete it.image; });   // a link must not pull pictures from elsewhere
+    start(review);
+  }
+
+  function loadWorldMode() {
+    loadScript('../Growth/js/growth_model.js', function () {
+      if (draftText) {
+        try {
+          var world = JSON.parse(decodeURIComponent(escape(atob(draftText))));
+          startWorld(world, true);
+        } catch (e) { setText(el('subtitle'), 'The draft in this link could not be read.'); }
+        return;
+      }
+      loadScript('../Growth/worlds/' + worldId + '.js',
+        function () {
+          var w = window.GROWTH_WORLDS && window.GROWTH_WORLDS[worldId];
+          if (w) startWorld(w, false); else setText(el('subtitle'), 'The file ../Growth/worlds/' + worldId + '.js did not define that world.');
+        },
+        function () { setText(el('subtitle'), 'Could not load ../Growth/worlds/' + worldId + '.js. Check the ?world= name.'); });
+    }, function () { setText(el('subtitle'), 'Could not load ../Growth/js/growth_model.js.'); });
+  }
+
+  loadScript('data/sets.js', pickerPartDone, pickerPartDone);
+  loadScript('../Growth/worlds/index.js', pickerPartDone, pickerPartDone);
+  if (worldMode) loadWorldMode();
+  else loadScript('data/' + set + '.js',
     function () { start(window.REVIEW_DATA); },
     function () { setText(el('subtitle'), 'Could not load data/' + set + '.js. Check the ?set= name.'); });
 })();

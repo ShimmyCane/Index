@@ -1,17 +1,22 @@
 # Growth: Claude Code pointer
 
-Purpose: an algorithmic way to age a model over time. A subject (first: a white paper sheet) carries a history of steps. Rules and the environment turn the history into a believable state at each age. Reviewed in the Increment Viewer, opened in the 3-D viewer, saved as JSON in the database.
+Purpose: a world simulator planned in words and numbers first. A page written like a prompt: the starting object or place, the environment and its variables, how time works, and the steps that happen (written by the AI or by hand). Open it in the Increment Viewer by link; later run it in 3-D, animate it and save it to the cloud. First worlds: rabbits on a hillside (computed) and paper decay (recorded from Paper Again).
 
-- Design: `schematic.md`
-- 3-D page: `paper3d.html` (open in a browser; no server or build). Engine `js/paper_engine.js` (replays steps 1..n from a clean sheet), story `js/paper_story.js` (the record), Three.js r160 in `vendor/`.
-- Tests: `node tests/test_paper_engine.js` (plain Node).
-- Review in the Increment Viewer: `viewer.html?set=growth_paper` (frames `renders/growth_3d_XX.png`).
-- Q&A history: `convo/` (never compact; start a new version instead). Open questions: `convo/convo v0.1.md`
-- AI notes: `04 AI/Growth/brief.md`, `lessons.md` (when created)
+- Design: `schematic.md`. To-do: `todo.md`.
+- Q&A history: `convo/` (never compact; start a new version). Latest: `convo/convo v0.2.md`.
+- AI notes: `04 AI/Growth/brief.md`, `lessons.md`
 - Shared conventions: root `CLAUDE.md` (public repo, privacy)
 
+How to run:
+- Open `index.html` in a browser (no server or build). `index.html?world=<id>` picks a world.
+- Tests: `node tests/test_growth_model.js` (the model) and `node tests/test_paper_engine.js` (the first attempt).
+- Browser check: `node tools/check_pages.js <screenshotDir>` (page and viewer links, headless Chromium).
+- Increment Viewer links: `../Increment Viewer/viewer.html?world=<id>&step=<n>`.
+
 Rules:
-- The history (steps, seed) is the source of truth. Derived shapes are replayed from it, never hand-edited.
-- Same inputs and seed must give the same result.
-- Public repo: sample stories use synthetic subjects only. No family photos or private data.
-- Database work goes through `/supabase-project`, with a rolled-back test first.
+- A world is one object (schema 2, see `schematic.md`). Add a world as `worlds/<id>.js` and one line in `worlds/index.js`.
+- Numbers come from a time model, never from the words. Time models live in `MODELS` in `js/growth_model.js` and are deterministic (no random numbers).
+- Tokens like `{rabbits}` keep the story true when a variable changes. An unknown token is left as written.
+- The database tables are drafted in `supabase/001_grw_worlds.sql` and NOT applied. Apply only after Jimmy says go, with `/supabase-project` (live schema first, rolled-back test first).
+- Public repo: synthetic worlds only.
+- The first attempt (`paper3d.html`, `js/paper_engine.js`, `js/paper_story.js`) is kept; the 3-D paper is now Paper Again.
