@@ -6,10 +6,10 @@
 ## What is still unbuilt
 
 - Five more maps with increasing density and more cities, scrollable on the field (question 1).
-- "Castles" in the reinforce note (question 2).
-- City upgrades: what each level unlocks (question 3).
+- "Castles" in the reinforce note, now confirmed as fortresses (question 2).
+- City upgrades: tiers and what each unlocks (question 3).
 - Team setup: how teams are picked, and team colours (question 4).
-- Village and country zoom (question 5).
+- Village and country zoom, at level 10 (question 5).
 
 Everything else in the notes is built and checked in the code. Notes marked `Done- ` are skipped.
 
@@ -17,13 +17,33 @@ Everything else in the notes is built and checked in the code. Notes marked `Don
 
 1. **Five more maps.** Should they be Levels 5 to 9, with more spots and cities each time? What spot counts do you want (for example 12, 14, 16, 18, 20)? Should the field be a bigger map you pan around, or should it stay one screen and shrink the spots?
 
+   > **Jimmy:** Yes.
+   >
+   > **Still open:** the spot counts, and whether the field pans or shrinks.
+
 2. **Castles.** Your note says to reinforce "cities and castles". The game has no castle yet. Is a castle a new spot type (for example, a tougher stone spot that does not grow), or do you mean cities? If a new type, what does it do?
+
+   > **Jimmy:** Those were the fortresses.
+   >
+   > **Still open:** what a fortress does besides being reinforced.
 
 3. **City upgrades: what each level unlocks.** Levels 2 and 3 now raise growth and the garrison cap (cost 15 and 30 soldiers). What should the extra functionality be, if anything? Options: a stronger defence, faster sending, or nothing beyond growth.
 
+   > **Jimmy:** Start like this: village 20, town 40, city 60, metropolis 80. Each upgrade costs 50% of the next level's max.
+   >
+   > **My reading:** the four tiers are the garrison caps. Upgrade costs would be 20, 30 and 40 soldiers (50% of 40, 60 and 80). Please confirm.
+   >
+   > **Still open:** what each tier unlocks beyond growth and the cap.
+
 4. **Team setup.** Teams are fixed now: players 1 and 2 against players 3 and 4. Should they be picked before a game, or assigned at random? Should teammates share one colour, or keep their own colour with a team badge?
 
+   > **Jimmy:** Some levels will give you teams. Fair teams. Up to 5 teams.
+   >
+   > **Still open:** how the fair teams are made (I will assume balanced, automatic teams unless you say otherwise), and whether teammates share a colour.
+
 5. **Zoom.** Village and country zoom is still on the todo list. Should it come after the five new maps, or wait until you have played them?
+
+   > **Jimmy:** Zoom inward at level 10. Still planning in my head.
 
 ---
 

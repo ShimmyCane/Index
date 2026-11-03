@@ -18,34 +18,38 @@ Built from the feedback notes (round 2). Each item says whether it is done, and 
 
 - Routes: a drop on a region without a direct road sends soldiers through your own spots, one hop at a time. Soldiers pass through without joining the garrison.
 - Reinforce: a drop on one of your own spots moves the dragged soldiers there, by road or through your spots.
-- City upgrades: tap your city to upgrade. Level 2 costs 15 soldiers (growth 2.0/s, cap 30); level 3 costs 30 (growth 2.6/s, cap 45). Cities stop growing at their cap. Stars show the level. Taking a city resets it to level 1. The "new functionality" a level unlocks is not decided yet.
+- City upgrades: tap your city to upgrade. Level 2 costs 15 soldiers (growth 2.0/s, cap 30); level 3 costs 30 (growth 2.6/s, cap 45). Cities stop growing at their cap. Stars show the level. Taking a city resets it to level 1. The tier ladder and unlocks are set in round 4 below.
 - Countdown: 3, 2, 1, Go before soldiers move.
 - Population line: territories:soldiers per player (per team in team mode), with the send % button above it.
 - Team mode: Level 4 with Teams on. Players 0 and 1 are one team, 2 and 3 the other. A red divider separates them. The win is for the last team standing. Computers never attack their teammates and gang up on a player with more than half the soldiers.
 - Avatars: 🐥 🦆 🐻 🐿️ 🐭 🦡 for the players, shown on the population line. Map icons are unchanged.
 - "Mark done" in the game adds the `Done- ` prefix, as the skill does.
 
-Still open after round 3: city upgrade functionality, team setup choices (convo v0.2 questions 1, 2 and 4), and zoom (todo).
+## Needs a decision first (see convo v0.2 and v0.3)
 
-## Needs a decision first (see convo v0.2)
-
-- [ ] **Cities: size cap and upgrades.** Notes ask for a cap on how big cities get, and upgrades that raise growth rate. Decide: what the cap limits (soldiers stored, or the number of upgrades), what an upgrade costs, and what it unlocks.
-- [ ] **Team mode.** Teams, team colours, a taller red line between teams, and team AI that gangs up on the leader. Decide: how teams are set up, and whether team members share a colour.
+- [ ] **Cities: tiers and unlocks.** Tiers are set (round 4 below). Still open: what each tier unlocks beyond growth and the cap.
+- [ ] **Team mode.** Teams are set up by level, fair, up to 5 teams (round 4 below). Still open: team colours and team badges.
 - [ ] **Baby-animal avatars** instead of the fungi for each team. Decide: which animals, and whether the avatars replace the map icons or appear only on the team card.
-- [ ] **Dragon drop through unlinked spots.** Notes say a drop should work without landing on the city. Decide: when a region is not directly linked, should soldiers route along roads through your own spots? (Current behaviour: only directly linked regions take the drop.)
+- [x] **Dragon drop through unlinked spots.** Decided yes: a drop routes along roads through your own spots. Built, and Jimmy confirmed it works well (2026-11-03).
 - [ ] **AI strategy in team games.** Decide after team mode exists.
 
 ## Round 4: notes read 2026-11-03 (18 open notes on 13 map records)
 
 Checked against `js/game.js` and `js/store.js`. Notes stay `open` in the table until Jimmy confirms which are handled (convo v0.3).
 
-- [x] Built in round 3 and confirmed in code: drop anywhere on a region, multi-drag, routes through own spots, reinforce, the 3-2-1-Go countdown, the population line with send %, team mode with a red divider, hard level and move caps, the Done- prefix.
-- [ ] **Five more maps, increasing density and more cities, scrollable on the field.** Not built. The level list in `js/map.js` stops at level 4. Needs answers in convo v0.3 (question 1) before building.
-- [ ] **"Castles" in the reinforce note.** No castle type exists. Question 2 in convo v0.3.
+Built in round 3 and confirmed in code: drop anywhere on a region, multi-drag, routes through own spots, reinforce, the 3-2-1-Go countdown, the population line with send %, team mode with a red divider, hard level and move caps, the Done- prefix.
+
+Decisions from convo v0.3 (not built yet):
+
+- [ ] **Five more maps.** Levels 5 to 9, with more spots and cities each step; scrollable on the field. Still open: spot counts (example 12, 14, 16, 18, 20), and whether the field pans or shrinks. The level list in `js/map.js` stops at level 4.
+- [ ] **Fortresses.** A new spot type, the "castle" in the reinforce note. Players can reinforce it. Still open: what it does beyond that.
+- [ ] **City tiers.** Village 20, town 40, city 60, metropolis 80 garrison caps. Each upgrade costs 50% of the next tier's cap (my reading: 20, 30, 40 soldiers). Please confirm the cost reading.
+- [ ] **Teams by level.** Some levels give teams. Teams are fair, up to 5 teams. Still open: colours and badges, and how the teams are made (assumed balanced and automatic).
+- [ ] **Zoom.** Inward zoom at level 10. Still planning.
 - [ ] **Test note** (`Test note 1`, Level 4 Valley). Nothing to build. Mark done when Jimmy confirms.
 
 ## Later
 
-- [ ] **Village and country zoom.** As maps get larger, zoom into a village view and out to a country view. (Added to the todo list at your request.)
+- [ ] **Village and country zoom.** Inward zoom at level 10 (see round 4). Outward country view is still unplanned.
 - [ ] **Balance pass.** Hard mode beat a player who did nothing in about 20 seconds in testing. Play a few full games and tune the rates, garrisons and move caps.
 - [ ] **Speed and defense boosts, towers, spells, Quick Game** (already listed on the Shop page as coming soon).
