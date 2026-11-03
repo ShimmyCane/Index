@@ -13,16 +13,25 @@
     normal: { every: 1.8, fraction: 0.6, threshold: 7,  perMinute: 10 },
     hard:   { every: 1.0, fraction: 0.7, threshold: 5,  perMinute: 16 }
   };
+  // City levels: growth rate (soldiers per second), garrison cap, and the soldiers needed to reach the level.
+  var CITY_LEVELS = [
+    { rate: 1.5, cap: 16, cost: 0 },
+    { rate: 2.0, cap: 30, cost: 15 },
+    { rate: 2.6, cap: 45, cost: 30 }
+  ];
+  var AVATARS = ['🐥', '🦆', '🐻', '🐿️', '🐭', '🦡'];   // one per player: chick, duckling, bear, gopher, mouse, badger
   var ICON = { factory: '🍄', city: '🏰' };
   var SVG_NS = 'http://www.w3.org/2000/svg';
 
   var SHOP = [
     { name: 'Cities 🏰', desc: 'Bigger garrisons and faster soldiers. Found from Level 1.', status: 'in' },
+    { name: 'City upgrades', desc: 'Tap your city to upgrade it: faster growth and a bigger garrison cap.', status: 'in' },
     { name: 'Lakes 💧', desc: 'Water that soldiers cannot cross. Found from Level 2.', status: 'in' },
     { name: 'Voronoi maps', desc: 'Every map is a new layout of regions.', status: 'in' },
-    { name: 'Saved maps, notes and stars', desc: 'Every map is kept, with notes and a 1 to 5 star rating.', status: 'in' },
     { name: 'Send 10 to 100%', desc: 'Choose how much of a spot sends at once.', status: 'in' },
+    { name: 'Routes through your own spots', desc: 'Soldiers march through your spots to reach a far target or reinforce one.', status: 'in' },
     { name: 'Fights on the road', desc: 'Soldiers marching toward each other fight when they meet.', status: 'in' },
+    { name: 'Team mode', desc: 'Level 4 with Teams on: two teams of two.', status: 'in' },
     { name: 'Speed boosts', desc: 'Regions that send soldiers faster.', status: 'soon' },
     { name: 'Defense boosts', desc: 'Regions with stronger garrisons.', status: 'soon' },
     { name: 'Towers that shoot', desc: 'Defenders that hit marching soldiers.', status: 'soon' },
@@ -37,7 +46,7 @@
     status: $('status'), overlay: $('overlay'), winTitle: $('win-title'), winText: $('win-text'),
     winStars: $('win-stars'), winNext: $('win-next'), winRetry: $('win-retry'), winMap: $('win-map'),
     panel: $('panel'), gear: $('gear'), errors: $('errors'), errorsToggle: $('errors-toggle'),
-    sound: $('sound'), newmap: $('newmap'), segAi: $('seg-ai'),
+    sound: $('sound'), newmap: $('newmap'), segAi: $('seg-ai'), teamsToggle: $('teams-toggle'),
     noteText: $('note-text'), noteSave: $('note-save'), noteStatus: $('note-status'),
     openMaps: $('open-maps'), maps: $('maps'), mapsList: $('maps-list'), mapsClose: $('maps-close'),
     btnPlay: $('btn-play'), btnMap: $('btn-map'), btnShop: $('btn-shop'), btnScores: $('btn-scores'),
@@ -46,22 +55,27 @@
     syncPill: $('sync-pill'), syncMsg: $('sync-msg'), familyForm: $('family-form'),
     familyEmail: $('family-email'), familyPass: $('family-pass'), familySync: $('family-sync'),
     familyCheck: $('family-check'), familySignout: $('family-signout'), familyResult: $('family-result'),
-    pctBtn: $('pct-btn'), popBar: $('pop-bar')
+    pctBtn: $('pct-btn'), popBar: $('pop-bar'), countdown: $('countdown')
   };
 
   var g = {
     level: 1,
     ai: 'normal',
+    teams: false,      // the Teams setting (used on Level 4, with four players)
+    teamMode: false,   // on for the current game
     players: 2,
     screen: 'home',
     nodes: [],
     armies: [],
-    drag: null,        // { sources: [spot, ...], pointer: {x, y}, target: spot | null }
+    drag: null,        // { sources: [spot, ...], start, pointer, target, moved }
     dragLines: [],
     sendPct: 0.25,     // share of a spot's soldiers sent per drop (10, 25, 50 or 100%)
     over: false,
     paused: true,
     elapsed: 0,        // seconds of play in this game
+    countdown: 0,      // 3, 2, 1 before the soldiers move
+    goT: 0,            // time the countdown reached zero (for the "Go!" flash)
+    cdText: '',
     aiClock: 0,
     aiLog: {},         // per computer player: game times of its recent moves
     recordId: null,    // saved map record for the current game
@@ -85,9 +99,17 @@
     return n;
   }
 
-  function ownerClass(owner) {
+  // Team of a player. Without team mode every player is their own team.
+  function teamOf(owner) {
+    if (!g.teamMode) return owner;
+    return owner < 2 ? 0 : 1;
+  }
+
+  // Colour class for a spot or army: per player, or per team in team mode.
+  function colourClass(owner) {
     if (owner === -2) return 'lake';
-    return owner < 0 ? 'neutral' : 'o' + owner;
+    if (owner < 0) return 'neutral';
+    return g.teamMode ? 't' + teamOf(owner) : 'o' + owner;
   }
 
   function linked(a, b) { return a.links.indexOf(b.id) !== -1; }
@@ -176,6 +198,32 @@
     return Math.min(c, Math.max(2, Math.floor(c * g.sendPct)));
   }
 
+  // Shortest route from one spot to another through your own spots. Returns the spots
+  // after `from`, ending with `to`, or null when there is no such route.
+  function routeTo(from, to) {
+    if (from === to) return null;
+    var prev = {};
+    prev[from.id] = null;
+    var queue = [from];
+    var found = false;
+    while (queue.length && !found) {
+      var n = queue.shift();
+      n.links.forEach(function (id) {
+        if (found) return;
+        var t = g.nodes[id];
+        if (prev[t.id] !== undefined) return;
+        if (t !== to && t.owner !== 0) return;   // a route may pass only through your own spots
+        prev[t.id] = n;
+        if (t === to) { found = true; return; }
+        queue.push(t);
+      });
+    }
+    if (!found) return null;
+    var path = [];
+    for (var c = to; c !== from; c = prev[c.id]) path.unshift(c);
+    return path;
+  }
+
   // ---------- screens ----------
 
   function show(name) {
@@ -226,7 +274,7 @@
       });
     });
 
-    // Spot labels (land only)
+    // Spot labels (land only). Cities also show their level as stars.
     g.nodes.forEach(function (n) {
       if (n.type === 'lake') return;
       var d = el('div', 'node');
@@ -235,9 +283,12 @@
       var num = el('span', 'num');
       d.appendChild(el('span', 'ico', ICON[n.type]));
       d.appendChild(num);
+      n.lvlEl = el('span', 'lvl', '');
+      d.appendChild(n.lvlEl);
       n.el = d;
       n.num = num;
       n.shownCount = null;
+      n.shownLevel = null;
       if (n.type === 'city') d.classList.add('city');
       els.nodes.appendChild(d);
     });
@@ -276,8 +327,20 @@
     });
     if (S.lastError()) logError(S.lastError());
 
+    map.nodes.forEach(function (n) {
+      if (n.type === 'city') {
+        n.level = 1;
+        n.rate = CITY_LEVELS[0].rate;
+        n.cap = CITY_LEVELS[0].cap;
+      } else {
+        n.level = 0;
+        n.cap = Infinity;
+      }
+    });
+
     g.recordId = rec.id;
     g.players = map.players;
+    g.teamMode = g.teams && map.players === 4;
     g.nodes = map.nodes;
     g.armies = [];
     g.drag = null;
@@ -286,6 +349,9 @@
     g.paused = false;
     g.elapsed = 0;
     g.aiClock = 0;
+    g.countdown = 3;
+    g.goT = 0;
+    g.cdText = '';
     popKey = '';
     els.overlay.hidden = true;
     buildBoard();
@@ -294,10 +360,8 @@
 
   // ---------- the rules ----------
 
-  function launch(from, to, count, owner) {
-    count = Math.min(Math.floor(count), Math.floor(from.count));
-    if (count <= 0) return false;
-    from.count -= count;
+  // Create a marching army. Soldiers do not leave `from` (used for passing through your own spots).
+  function spawn(from, to, count, owner) {
     var a = {
       from: from,
       to: to,
@@ -306,16 +370,33 @@
       len: Math.max(1, Math.hypot(to.x - from.x, to.y - from.y)),
       p: 0,
       done: false,
+      route: null,   // spots still to pass through, for a longer march
       el: null
     };
-    a.el = svgEl('g', { 'class': 'army o' + owner });
+    a.el = svgEl('g', { 'class': 'army ' + colourClass(owner) });
     a.el.appendChild(svgEl('circle', { r: 13 }));
     var label = svgEl('text', { 'text-anchor': 'middle', 'dominant-baseline': 'central' });
     label.textContent = String(count);
     a.el.appendChild(label);
     els.armies.appendChild(a.el);
     g.armies.push(a);
+    return a;
+  }
+
+  function launch(from, to, count, owner) {
+    count = Math.min(Math.floor(count), Math.floor(from.count));
+    if (count <= 0) return null;
+    from.count -= count;
+    var a = spawn(from, to, count, owner);
     if (owner === 0) Sound.send();
+    return a;
+  }
+
+  // Send soldiers along a route of your spots, ending at path[last].
+  function sendAlong(from, path, count) {
+    var a = launch(from, path[0], count, 0);
+    if (!a) return false;
+    a.route = path.slice(1);
     return true;
   }
 
@@ -346,6 +427,12 @@
   function arrive(a) {
     var n = a.to;
     a.done = true;
+    // Passing through one of your own spots on a longer march: keep going, the garrison is unchanged.
+    if (a.route && a.route.length && n.owner === a.owner) {
+      var next = spawn(n, a.route[0], a.count, a.owner);
+      next.route = a.route.slice(1);
+      return;
+    }
     if (n.owner === a.owner) {
       n.count += a.count;
       return;
@@ -355,17 +442,45 @@
       var before = n.owner;
       n.owner = a.owner;
       n.count = -n.count;
+      if (n.type === 'city') { n.level = 1; n.rate = CITY_LEVELS[0].rate; n.cap = CITY_LEVELS[0].cap; }
       if (a.owner === 0) Sound.capture();
       else if (before === 0) Sound.lost();
     }
   }
 
+  // Spend soldiers to raise a city's level: faster growth, a bigger garrison cap.
+  function tryUpgrade(city) {
+    if (city.owner !== 0 || city.type !== 'city') return;
+    var lvl = city.level || 1;
+    if (lvl >= CITY_LEVELS.length) { setStatus('This city is fully upgraded.', true); return; }
+    var cost = CITY_LEVELS[lvl].cost;
+    if (Math.floor(city.count) < cost) {
+      setStatus('Upgrading needs ' + cost + ' soldiers in the city.', true);
+      return;
+    }
+    city.count -= cost;
+    city.level = lvl + 1;
+    city.rate = CITY_LEVELS[lvl].rate;
+    city.cap = CITY_LEVELS[lvl].cap;
+    Sound.tap();
+    setStatus('City upgraded to level ' + city.level + '.', true);
+  }
+
   function step(dt) {
     if (g.over || g.paused || !g.nodes.length) return;
+
+    if (g.countdown > 0) {
+      g.countdown -= dt;
+      if (g.countdown <= 0) { g.countdown = 0; g.goT = performance.now(); }
+      return;
+    }
     g.elapsed += dt;
 
     g.nodes.forEach(function (n) {
-      if (n.owner >= 0) n.count += n.rate * dt;
+      if (n.owner < 0) return;
+      if (n.count >= n.cap) return;   // cities stop growing at their garrison cap
+      n.count += n.rate * dt;
+      if (n.count > n.cap) n.count = n.cap;
     });
 
     g.armies.forEach(function (a) {
@@ -393,19 +508,39 @@
     checkWin();
   }
 
-  // True when a spot touches an enemy spot (a computer's front line).
+  // Soldiers and spots per player, with armies in flight counted as soldiers.
+  function totals() {
+    var t = [];
+    for (var p = 0; p < g.players; p++) t[p] = { spots: 0, soldiers: 0 };
+    g.nodes.forEach(function (n) {
+      if (n.owner >= 0) { t[n.owner].spots++; t[n.owner].soldiers += Math.floor(n.count); }
+    });
+    g.armies.forEach(function (a) { if (!a.done) t[a.owner].soldiers += a.count; });
+    return t;
+  }
+
+  // True when a spot touches a spot of another team (a front line).
   function borders(n, p) {
     return n.links.some(function (id) {
       var t = g.nodes[id];
-      return t.owner >= 0 && t.owner !== p;
+      return t.owner >= 0 && teamOf(t.owner) !== teamOf(p);
     });
   }
 
   // Computer players: spots away from the front send reinforcements to the front;
-  // spots on the front attack the best linked neighbour. Moves per minute are capped by level.
+  // spots on the front attack the best linked neighbour from another team.
+  // A player with more than half the soldiers is ganged up on. Moves per minute are capped by level.
   function aiThink(level, p) {
     var log = (g.aiLog[p] || []).filter(function (t) { return g.elapsed - t < 60; });
     g.aiLog[p] = log;
+
+    var tot = totals();
+    var sum = tot.reduce(function (x, t) { return x + t.soldiers; }, 0);
+    var leaderTeam = -1;
+    tot.forEach(function (t, o) {
+      if (sum && t.soldiers / sum > 0.5 && teamOf(o) !== teamOf(p)) leaderTeam = teamOf(o);
+    });
+
     var ready = g.nodes.filter(function (n) {
       return n.type !== 'lake' && n.owner === p && n.count >= level.threshold;
     });
@@ -422,8 +557,9 @@
         var bestScore = Infinity;
         n.links.forEach(function (id) {
           var t = g.nodes[id];
-          if (t.owner === p) return;
+          if (t.owner >= 0 && teamOf(t.owner) === teamOf(p)) return;   // never attack a teammate
           var score = t.count + M.dist(n, t) / 40;
+          if (leaderTeam !== -1 && t.owner >= 0 && teamOf(t.owner) === leaderTeam) score -= 8;
           if (score < bestScore) { bestScore = score; target = t; }
         });
       }
@@ -431,16 +567,14 @@
     });
   }
 
-  // The game is won as soon as only one player is left with spots or soldiers.
-  // Neutral spots may remain.
+  // The game is won when only one team is left with spots or soldiers. Neutral spots may remain.
   function checkWin() {
-    var owners = {};
-    g.nodes.forEach(function (n) { if (n.type !== 'lake' && n.owner >= 0) owners[n.owner] = true; });
-    g.armies.forEach(function (a) { if (!a.done) owners[a.owner] = true; });
-    var list = Object.keys(owners).map(Number);
+    var alive = {};
+    g.nodes.forEach(function (n) { if (n.type !== 'lake' && n.owner >= 0) alive[teamOf(n.owner)] = true; });
+    g.armies.forEach(function (a) { if (!a.done) alive[teamOf(a.owner)] = true; });
 
-    if (!owners[0]) return endGame(false);
-    if (list.length === 1) endGame(true);
+    if (!alive[teamOf(0)]) return endGame(false);
+    if (Object.keys(alive).length === 1) endGame(true);
   }
 
   function endGame(won) {
@@ -499,7 +633,7 @@
     g.dragLines.forEach(function (ln, i) {
       if (!end) { ln.style.display = 'none'; return; }
       var s = d.sources[i];
-      var ok = d.target && linked(s, d.target);
+      var ok = d.target && routeTo(s, d.target);
       ln.setAttribute('x1', s.x);
       ln.setAttribute('y1', s.y);
       ln.setAttribute('x2', end.x);
@@ -509,44 +643,71 @@
     });
   }
 
-  // Shares of all soldiers on the board, as a line across the top.
+  // The population line: territories:soldiers for each player, or for each team in team mode.
+  // A red divider separates the two teams.
   function renderPop() {
-    var totals = [];
-    for (var p = 0; p < g.players; p++) totals[p] = 0;
-    g.nodes.forEach(function (n) { if (n.owner >= 0) totals[n.owner] += Math.floor(n.count); });
-    g.armies.forEach(function (a) { if (!a.done) totals[a.owner] += a.count; });
-    var key = totals.join(',');
+    var tot = totals();
+    var groups = g.teamMode ? [[0, 1], [2, 3]] : [];
+    if (!g.teamMode) for (var p = 0; p < g.players; p++) groups.push([p]);
+    var stats = groups.map(function (members) {
+      var s = { members: members, spots: 0, soldiers: 0 };
+      members.forEach(function (m) {
+        if (m < g.players) { s.spots += tot[m].spots; s.soldiers += tot[m].soldiers; }
+      });
+      return s;
+    });
+
+    var key = stats.map(function (s) { return s.spots + ':' + s.soldiers; }).join('|');
     if (key === popKey) return;
     popKey = key;
-    var sum = totals.reduce(function (x, y) { return x + y; }, 0);
+
+    var sum = stats.reduce(function (x, s) { return x + s.soldiers; }, 0);
     els.popBar.innerHTML = '';
-    if (!sum) return;
-    totals.forEach(function (t, owner) {
-      if (!t) return;
-      var share = t / sum * 100;
-      var seg = el('div', 'pop-seg o' + owner, share > 14 ? (owner === 0 ? 'You ' : 'AI ' + owner + ' ') + Math.round(share) + '%' : '');
+    stats.forEach(function (s, i) {
+      if (g.teamMode && i === 1) els.popBar.appendChild(el('div', 'pop-div'));
+      if (!s.spots && !s.soldiers) return;
+      var share = sum ? s.soldiers / sum * 100 : 100 / stats.length;
+      var label = s.members.map(function (m) { return AVATARS[m]; }).join('') + ' ' + s.spots + ':' + s.soldiers;
+      var seg = el('div', 'pop-seg ' + (g.teamMode ? 't' + i : 'o' + s.members[0]), label);
       seg.style.width = share + '%';
-      seg.title = (owner === 0 ? 'You' : 'AI ' + owner) + ': ' + t + ' soldiers';
+      seg.title = (g.teamMode ? (i === 0 ? 'Your team' : 'Other team') : (s.members[0] === 0 ? 'You' : 'Player ' + (s.members[0] + 1))) +
+        ': ' + s.spots + ' territories, ' + s.soldiers + ' soldiers';
       els.popBar.appendChild(seg);
     });
+  }
+
+  // The "Go!" countdown in the middle of the board.
+  function renderCountdown() {
+    var txt = '';
+    if (g.countdown > 0) txt = String(Math.ceil(g.countdown));
+    else if (g.goT && performance.now() - g.goT < 700) txt = 'Go!';
+    if (txt !== g.cdText) {
+      g.cdText = txt;
+      els.countdown.textContent = txt;
+      els.countdown.hidden = !txt;
+    }
   }
 
   function render() {
     g.nodes.forEach(function (n) {
       if (n.polyEl && n.shownOwner !== n.owner) {
-        n.polyEl.setAttribute('class', 'cell ' + ownerClass(n.owner));
+        n.polyEl.setAttribute('class', 'cell ' + colourClass(n.owner));
         n.shownOwner = n.owner;
       }
       if (n.type === 'lake' || !n.el) return;
 
       var label = Math.floor(n.count);
-      var cls = 'node' + (n.type === 'city' ? ' city' : '') + ' ' + ownerClass(n.owner);
+      var cls = 'node' + (n.type === 'city' ? ' city' : '') + ' ' + colourClass(n.owner);
       if (g.drag && g.drag.sources.indexOf(n) !== -1) cls += ' source';
       if (g.drag && g.drag.target === n) cls += ' target';
       n.el.className = cls;
       if (n.shownCount !== label) {
         n.num.textContent = String(label);
         n.shownCount = label;
+      }
+      if (n.type === 'city' && n.shownLevel !== n.level) {
+        n.lvlEl.textContent = n.level > 1 ? '★'.repeat(n.level - 1) : '';
+        n.shownLevel = n.level;
       }
     });
 
@@ -558,48 +719,63 @@
 
     renderDrag();
     renderPop();
+    renderCountdown();
     els.pctBtn.textContent = 'Send ' + Math.round(g.sendPct * 100) + '%';
   }
 
   // ---------- input ----------
 
   els.board.addEventListener('pointerdown', function (e) {
-    if (g.over || g.paused) return;
+    if (g.over || g.paused || g.countdown > 0) return;
     var p = toMap(e);
     var n = hit(p);
     if (!n || n.owner !== 0 || n.count < 1) return;
     e.preventDefault();
     els.board.setPointerCapture(e.pointerId);
-    g.drag = { sources: [n], pointer: p, target: null };
+    g.drag = { sources: [n], start: p, pointer: p, target: null, moved: false };
     Sound.tap();
   });
 
-  // Moving over your own regions adds them to the group; moving over another region targets it.
+  // Moving over your own regions adds them to the group; over another region it targets it.
   els.board.addEventListener('pointermove', function (e) {
     if (!g.drag) return;
     var p = toMap(e);
     var d = g.drag;
     d.pointer = p;
+    if (Math.hypot(p.x - d.start.x, p.y - d.start.y) > 12) d.moved = true;
     var r = regionAt(p) || hit(p);
     if (r && r.owner === 0 && r.count >= 1 && d.sources.indexOf(r) === -1) d.sources.push(r);
-    d.target = (r && r.owner !== 0 && r.type !== 'lake') ? r : null;
+    d.target = (r && d.sources.indexOf(r) === -1 && r.type !== 'lake') ? r : null;
   });
 
-  // Release over a region: every dragged spot with a road to it sends its share.
+  // Release: a tap on a city upgrades it. A drop on a region sends every dragged spot that can
+  // reach it, by road or through your own spots. A drop on your own spot reinforces it.
   function endDrag(e) {
     var d = g.drag;
     if (!d) return;
     g.drag = null;
-    var t = regionAt(toMap(e)) || hit(toMap(e));
-    if (!t || d.sources.indexOf(t) !== -1) return;
+    var p = toMap(e);
+    if (!d.moved && d.sources.length === 1 && d.sources[0].type === 'city') {
+      tryUpgrade(d.sources[0]);
+      return;
+    }
+    var t = regionAt(p) || hit(p);
+    if (!t) return;
+    var group = d.sources.filter(function (s) { return s !== t; });
     var sent = 0, blocked = 0;
-    d.sources.forEach(function (s) {
-      if (!linked(s, t)) { blocked++; return; }
+    group.forEach(function (s) {
+      var path = routeTo(s, t);
+      if (!path) { blocked++; return; }
       var amt = amountFor(s);
-      if (amt > 0 && launch(s, t, amt, 0)) sent++;
+      if (amt > 0 && sendAlong(s, path, amt)) sent++;
     });
-    if (sent) setStatus(sent === 1 ? 'Sent soldiers!' : 'Sent from ' + sent + ' spots!', true);
-    else if (blocked) setStatus('Not connected. Try a nearby mushroom.', true);
+    if (!group.length) return;
+    if (sent) {
+      var reinforce = t.owner === 0;
+      setStatus(reinforce ? 'Reinforcements sent.' : (sent === 1 ? 'Sent soldiers!' : 'Sent from ' + sent + ' spots!'), true);
+    } else if (blocked) {
+      setStatus('No route. Your spots must be connected by roads.', true);
+    }
   }
 
   els.board.addEventListener('pointerup', endDrag);
@@ -717,6 +893,14 @@
     if (!b) return;
     g.ai = b.dataset.ai;
     markSeg(els.segAi, 'ai', g.ai);
+  });
+
+  els.teamsToggle.addEventListener('click', function () {
+    var on = els.teamsToggle.getAttribute('aria-pressed') !== 'true';
+    els.teamsToggle.setAttribute('aria-pressed', String(on));
+    els.teamsToggle.textContent = on ? 'On' : 'Off';
+    g.teams = on;
+    setStatus(on ? 'Teams apply on Level 4.' : 'Teams off.', true);
   });
 
   els.sound.addEventListener('click', function () {

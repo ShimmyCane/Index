@@ -14,6 +14,19 @@ Built from the feedback notes (round 2). Each item says whether it is done, and 
 - [x] Computers move reinforcements from spots away from the front to their front line.
 - [x] Feedback notes sync to the family table once signed in (see PR notes).
 
+## Built in round 3 (from all open notes), with the decisions taken
+
+- Routes: a drop on a region without a direct road sends soldiers through your own spots, one hop at a time. Soldiers pass through without joining the garrison.
+- Reinforce: a drop on one of your own spots moves the dragged soldiers there, by road or through your spots.
+- City upgrades: tap your city to upgrade. Level 2 costs 15 soldiers (growth 2.0/s, cap 30); level 3 costs 30 (growth 2.6/s, cap 45). Cities stop growing at their cap. Stars show the level. Taking a city resets it to level 1. The "new functionality" a level unlocks is not decided yet.
+- Countdown: 3, 2, 1, Go before soldiers move.
+- Population line: territories:soldiers per player (per team in team mode), with the send % button above it.
+- Team mode: Level 4 with Teams on. Players 0 and 1 are one team, 2 and 3 the other. A red divider separates them. The win is for the last team standing. Computers never attack their teammates and gang up on a player with more than half the soldiers.
+- Avatars: 🐥 🦆 🐻 🐿️ 🐭 🦡 for the players, shown on the population line. Map icons are unchanged.
+- "Mark done" in the game adds the `Done- ` prefix, as the skill does.
+
+Still open after round 3: city upgrade functionality, team setup choices (convo v0.2 questions 1, 2 and 4), and zoom (todo).
+
 ## Needs a decision first (see convo v0.2)
 
 - [ ] **Cities: size cap and upgrades.** Notes ask for a cap on how big cities get, and upgrades that raise growth rate. Decide: what the cap limits (soldiers stored, or the number of upgrades), what an upgrade costs, and what it unlocks.

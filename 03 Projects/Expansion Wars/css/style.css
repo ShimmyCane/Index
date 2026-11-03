@@ -503,11 +503,16 @@ button {
 .game .board { width: 100%; }
 
 /* Send amount, top-left corner of the board */
+.top-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(96vw, calc((100vh - 200px) * 1.5625));
+  margin-bottom: 8px;
+}
 .pct-btn {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 5;
+  position: relative;
+  flex: 0 0 auto;
   min-height: 44px;
   padding: 0 12px;
   border: 3px solid var(--ink);
@@ -523,14 +528,49 @@ button {
 
 /* Share of soldiers per player, a line across the top */
 .pop-bar {
+  position: relative;
   display: flex;
-  width: min(96vw, calc((100vh - 200px) * 1.5625));
-  height: 22px;
-  margin: 0 0 8px;
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  margin: 0;
   border: 3px solid var(--ink);
   border-radius: 999px;
   overflow: hidden;
   background: #fff;
+}
+/* Red divider between the two teams in team mode, taller than the bar */
+.pop-div {
+  flex: 0 0 6px;
+  align-self: stretch;
+  margin: -6px 0;
+  background: #d1495b;
+  border-radius: 3px;
+  z-index: 1;
+}
+.pop-seg.t0 { background: var(--mint); }
+.pop-seg.t1 { background: var(--coral); }
+.cell.t0 { fill: var(--mint); }
+.cell.t1 { fill: var(--coral); }
+.node.t0 { background: var(--mint); }
+.node.t1 { background: var(--coral); }
+.army.t0 circle { fill: var(--mint); }
+.army.t1 circle { fill: var(--coral); }
+.node .lvl { position: absolute; top: -10px; font-size: 12px; color: #b07d00; text-shadow: 0 1px 0 #fff; }
+
+/* The "Go!" countdown over the board */
+.countdown {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(64px, 16vw, 150px);
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 5px 0 var(--ink), 0 -2px 0 var(--ink), 2px 0 0 var(--ink), -2px 0 0 var(--ink);
+  pointer-events: none;
+  z-index: 6;
 }
 .pop-seg {
   height: 100%;
