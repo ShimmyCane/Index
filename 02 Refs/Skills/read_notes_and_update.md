@@ -15,6 +15,7 @@ Actions
           n->>'at' as at, n->>'text' as text
    from public.xw_maps m, jsonb_array_elements(m.notes) n
    where coalesce(n->>'status', 'open') = 'open'
+     and n->>'text' not like 'Done- %'
    order by m.title, n->>'at';
    ```
    If the Supabase tools are not connected, ask Jimmy to run that query in the SQL editor and paste the result, and carry on from the pasted rows.
@@ -48,6 +49,7 @@ Actions
    Replace the map id and note ids. Marking a note done sets its status to `done` and prefixes its text with `Done- ` (the owner's convention: "When notes are addressed, prefix them with Done-"). The time and id stay the same. A note already prefixed is left as it is.
 
 Rules
+- Notes whose text starts with `Done- ` are handled and are skipped, even if their status is still `open`.
 - Read is free; update needs Jimmy's yes each time. Keep an update to the notes listed in the confirmation.
 - Never delete notes. Never edit a note's `at` or `id`. The only text change is the `Done- ` prefix when a note is marked done.
 - Don't put keys, project refs or personal data in the repo. Note text is the owner's feedback: copy it into convo or todo only as written, and leave out anything that looks personal.
