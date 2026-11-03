@@ -1,11 +1,12 @@
-// Expansion Wars — game rules, computer players, drawing and input.
+// Expansion Wars — game rules, computer players, drawing, input, notes and map list.
 (function () {
   'use strict';
 
   var M = window.ExpansionMap;
+  var S = window.XWStore;
   var SPEED = 120;   // map units per second for marching soldiers
-  var HIT = 46;      // how close a tap must be to a spot (map units)
-  var LEVELS = {
+  var HIT = 46;      // tap radius around a spot (map units)
+  var LEVELS_AI = {
     easy:   { every: 3.0, fraction: 0.4, threshold: 10 },
     normal: { every: 1.8, fraction: 0.6, threshold: 7 }
   };
@@ -15,35 +16,27 @@
   function $(id) { return document.getElementById(id); }
 
   var els = {
-    board: $('board'),
-    roads: $('roads'),
-    nodes: $('nodes'),
-    armies: $('armies'),
-    status: $('status'),
-    overlay: $('overlay'),
-    winTitle: $('win-title'),
-    winText: $('win-text'),
-    panel: $('panel'),
-    gear: $('gear'),
-    errors: $('errors'),
-    errorsToggle: $('errors-toggle'),
-    sound: $('sound'),
-    newmap: $('newmap'),
-    again: $('again')
+    board: $('board'), roads: $('roads'), nodes: $('nodes'), armies: $('armies'),
+    status: $('status'), overlay: $('overlay'), winTitle: $('win-title'), winText: $('win-text'),
+    panel: $('panel'), gear: $('gear'), errors: $('errors'), errorsToggle: $('errors-toggle'),
+    sound: $('sound'), newmap: $('newmap'), again: $('again'),
+    segLevel: $('seg-level'), segAi: $('seg-ai'),
+    noteText: $('note-text'), noteSave: $('note-save'), noteStatus: $('note-status'),
+    openMaps: $('open-maps'), maps: $('maps'), mapsList: $('maps-list'), mapsClose: $('maps-close')
   };
 
   var g = {
-    players: 2,
+    level: 1,
     ai: 'normal',
-    map: null,
+    players: 2,
     nodes: [],
-    lakes: [],
     armies: [],
-    drag: null,     // { from: node }
-    pointer: null,  // { x, y } in map units
-    target: null,   // node under the pointer during a drag
+    drag: null,      // { from: node }
+    pointer: null,   // { x, y } in map units
+    target: null,    // land spot under the pointer during a drag
     over: false,
     aiClock: 0,
+    recordId: null,  // saved map record for the current game
     statusTimer: null
   };
 
@@ -55,7 +48,10 @@
     return el;
   }
 
-  function ownerClass(owner) { return owner < 0 ? 'neutral' : 'o' + owner; }
+  function ownerClass(owner) {
+    if (owner === -2) return 'lake';
+    return owner < 0 ? 'neutral' : 'o' + owner;
+  }
 
   function linked(a, b) { return a.links.indexOf(b.id) !== -1; }
 
@@ -63,12 +59,24 @@
     els.status.textContent = msg;
     clearTimeout(g.statusTimer);
     if (temp) {
-      g.statusTimer = setTimeout(function () {
-        els.status.textContent = 'Drag from your mushroom to a connected one';
-      }, 1800);
+      g.statusTimer = setTimeout(function () { restoreStatus(); }, 1800);
     }
   }
 
+  function restoreStatus() {
+    var rec = currentRecord();
+    els.status.textContent = rec ? rec.title + ' · up to ' + rec.max_opponents +
+      (rec.max_opponents === 1 ? ' opponent' : ' opponents') : 'Drag from your mushroom to a connected one';
+  }
+
+  function currentRecord() {
+    if (!g.recordId) return null;
+    var list = S.list();
+    for (var i = 0; i < list.length; i++) if (list[i].id === g.recordId) return list[i];
+    return null;
+  }
+
+  // Errors are shown only when "Show errors" is on (see the ⚙️ panel).
   function logError(msg) {
     var row = document.createElement('div');
     row.textContent = String(msg);
@@ -84,10 +92,11 @@
     };
   }
 
-  // Nearest spot within the tap radius.
+  // Nearest land spot within the tap radius (lakes cannot be tapped).
   function hit(p) {
     var best = null, bestD = HIT;
     g.nodes.forEach(function (n) {
+      if (n.type === 'lake') return;
       var d = Math.hypot(n.x - p.x, n.y - p.y);
       if (d < bestD) { bestD = d; best = n; }
     });
@@ -101,23 +110,22 @@
     els.roads.innerHTML = '';
     els.armies.innerHTML = '';
 
-    // Lakes
-    g.lakes.forEach(function (l) {
-      var d = document.createElement('div');
-      d.className = 'lake';
-      d.style.left = (l.x / M.W * 100) + '%';
-      d.style.top = (l.y / M.H * 100) + '%';
-      els.nodes.appendChild(d);
+    // Regions (Voronoi cells). Lakes are drawn as water.
+    g.nodes.forEach(function (n) {
+      n.polyEl = svgEl('polygon', {
+        points: n.poly.map(function (p) { return p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ')
+      });
+      n.shownOwner = undefined;
+      els.roads.appendChild(n.polyEl);
     });
 
-    // Roads (each pair once)
+    // Roads between neighbouring land spots (each pair once)
     g.nodes.forEach(function (a) {
+      if (a.type === 'lake') return;
       a.links.forEach(function (id) {
         if (id <= a.id) return;
         var b = g.nodes[id];
-        els.roads.appendChild(svgEl('line', {
-          x1: a.x, y1: a.y, x2: b.x, y2: b.y, 'class': 'road'
-        }));
+        els.roads.appendChild(svgEl('line', { x1: a.x, y1: a.y, x2: b.x, y2: b.y, 'class': 'road' }));
       });
     });
 
@@ -126,15 +134,22 @@
     g.dragLine.style.display = 'none';
     els.armies.appendChild(g.dragLine);
 
-    // Spots
+    // Spot labels (land only)
     g.nodes.forEach(function (n) {
+      if (n.type === 'lake') return;
       var d = document.createElement('div');
       d.className = 'node';
       d.style.left = (n.x / M.W * 100) + '%';
       d.style.top = (n.y / M.H * 100) + '%';
-      d.innerHTML = '<span class="ico">' + ICON[n.type] + '</span><span class="num"></span>';
+      var ico = document.createElement('span');
+      ico.className = 'ico';
+      ico.textContent = ICON[n.type];
+      var num = document.createElement('span');
+      num.className = 'num';
+      d.appendChild(ico);
+      d.appendChild(num);
       n.el = d;
-      n.num = d.querySelector('.num');
+      n.num = num;
       n.shownCount = null;
       if (n.type === 'city') d.classList.add('city');
       els.nodes.appendChild(d);
@@ -144,15 +159,39 @@
   // ---------- starting a game ----------
 
   function newGame() {
+    var map;
     try {
-      g.map = M.generate(g.players);
+      map = M.generate(g.level);
     } catch (err) {
       logError(err.message);
       setStatus('Could not make a map. Try New map.');
       return;
     }
-    g.nodes = g.map.nodes;
-    g.lakes = g.map.lakes;
+
+    // Save every generated map, with its features and description.
+    var rec = S.add({
+      level: map.level,
+      players: map.players,
+      max_opponents: map.maxOpponents,
+      title: map.title,
+      description: map.description,
+      features: map.features,
+      rank: null,
+      notes: [],
+      times_played: 0,
+      wins: 0,
+      losses: 0,
+      map: {
+        nodes: map.nodes.map(function (n) {
+          return { id: n.id, x: n.x, y: n.y, type: n.type, links: n.links, poly: n.poly };
+        })
+      }
+    });
+    if (S.lastError()) logError(S.lastError());
+
+    g.recordId = rec.id;
+    g.players = map.players;
+    g.nodes = map.nodes;
     g.armies = [];
     g.drag = null;
     g.target = null;
@@ -160,12 +199,11 @@
     g.aiClock = 0;
     els.overlay.hidden = true;
     buildBoard();
-    setStatus('Drag from your mushroom to a connected one');
+    restoreStatus();
   }
 
   // ---------- the rules ----------
 
-  // Send soldiers from one spot to another along a road.
   function launch(from, to, count, owner) {
     count = Math.min(Math.floor(count), Math.floor(from.count));
     if (count <= 0) return false;
@@ -180,7 +218,7 @@
       done: false,
       el: null
     };
-    a.el = svgEl('g', { 'class': 'army ' + ownerClass(owner) });
+    a.el = svgEl('g', { 'class': 'army o' + owner });
     a.el.appendChild(svgEl('circle', { r: 13 }));
     var label = svgEl('text', { 'text-anchor': 'middle', 'dominant-baseline': 'central' });
     label.textContent = String(count);
@@ -191,7 +229,6 @@
     return true;
   }
 
-  // Soldiers reach a spot: friends join, enemies fight.
   function arrive(a) {
     var n = a.to;
     a.done = true;
@@ -222,21 +259,23 @@
       if (a.p >= 1) arrive(a);
     });
     g.armies = g.armies.filter(function (a) {
-      if (a.done) { a.el.parentNode && a.el.parentNode.removeChild(a.el); return false; }
+      if (a.done) {
+        if (a.el.parentNode) a.el.parentNode.removeChild(a.el);
+        return false;
+      }
       return true;
     });
 
     g.aiClock -= dt;
     if (g.aiClock <= 0) {
-      aiThink(LEVELS[g.ai]);
-      g.aiClock = LEVELS[g.ai].every;
+      aiThink(LEVELS_AI[g.ai]);
+      g.aiClock = LEVELS_AI[g.ai].every;
     }
 
     checkWin();
   }
 
-  // Computer players: each spot with enough soldiers sends part of them
-  // to the best linked neighbour (low garrison, short road).
+  // Computer players send part of their soldiers to the best linked neighbour.
   function aiThink(level) {
     for (var p = 1; p < g.players; p++) {
       var ready = g.nodes.filter(function (n) {
@@ -256,15 +295,14 @@
   }
 
   function checkWin() {
-    // Neutral spots still left: the game goes on.
-    if (g.nodes.some(function (n) { return n.owner === -1; })) return;
+    var land = g.nodes.filter(function (n) { return n.type !== 'lake'; });
+    if (land.some(function (n) { return n.owner === -1; })) return;
 
     var owners = {};
-    g.nodes.forEach(function (n) { if (n.owner >= 0) owners[n.owner] = true; });
+    land.forEach(function (n) { if (n.owner >= 0) owners[n.owner] = true; });
     g.armies.forEach(function (a) { if (!a.done) owners[a.owner] = true; });
     var list = Object.keys(owners).map(Number);
 
-    // You are out when you hold nothing and nothing is marching.
     if (!owners[0]) return endGame(false);
     if (list.length === 1) endGame(true);
   }
@@ -275,8 +313,14 @@
     g.drag = null;
     g.dragLine.style.display = 'none';
     if (won) Sound.win(); else Sound.lost();
+
+    var rec = S.recordGame(g.recordId, won);
+    if (S.lastError()) logError(S.lastError());
+    var rate = rec ? S.winRate(rec) : null;
+    var stats = rec ? 'Played ' + rec.times_played + ' · win rate ' + (rate === null ? '—' : rate + '%') : '';
+
     els.winTitle.textContent = won ? 'You grew the whole meadow! 🎉' : 'The other mushrooms won this time 🍄';
-    els.winText.textContent = won ? 'Ready for another map?' : 'Want to try again?';
+    els.winText.textContent = (won ? 'Ready for another map? ' : 'Want to try again? ') + stats;
     els.overlay.hidden = false;
   }
 
@@ -284,6 +328,12 @@
 
   function render() {
     g.nodes.forEach(function (n) {
+      if (n.polyEl && n.shownOwner !== n.owner) {
+        n.polyEl.setAttribute('class', 'cell ' + ownerClass(n.owner));
+        n.shownOwner = n.owner;
+      }
+      if (n.type === 'lake' || !n.el) return;
+
       var label = Math.floor(n.count);
       var cls = 'node' + (n.type === 'city' ? ' city' : '') + ' ' + ownerClass(n.owner);
       if (g.drag && g.drag.from === n) cls += ' source';
@@ -350,8 +400,9 @@
       setStatus('Not connected. Try a nearby mushroom.', true);
       return;
     }
-    var sent = launch(from, to, Math.max(1, Math.floor(from.count / 2)), 0);
-    if (sent) setStatus('Sent soldiers!', true);
+    if (launch(from, to, Math.max(1, Math.floor(from.count / 2)), 0)) {
+      setStatus('Sent soldiers!', true);
+    }
   }
 
   els.board.addEventListener('pointerup', endDrag);
@@ -373,19 +424,19 @@
     els.panel.hidden = !els.panel.hidden;
   });
 
-  $('seg-players').addEventListener('click', function (e) {
+  els.segLevel.addEventListener('click', function (e) {
     var b = e.target.closest('button');
     if (!b) return;
-    g.players = Number(b.dataset.players);
-    markSeg($('seg-players'), 'players', g.players);
+    g.level = Number(b.dataset.level);
+    markSeg(els.segLevel, 'level', g.level);
     newGame();
   });
 
-  $('seg-ai').addEventListener('click', function (e) {
+  els.segAi.addEventListener('click', function (e) {
     var b = e.target.closest('button');
     if (!b) return;
     g.ai = b.dataset.ai;
-    markSeg($('seg-ai'), 'ai', g.ai);
+    markSeg(els.segAi, 'ai', g.ai);
   });
 
   els.sound.addEventListener('click', function () {
@@ -402,8 +453,96 @@
     els.errors.hidden = !on;
   });
 
+  els.noteSave.addEventListener('click', function () {
+    var text = els.noteText.value.trim();
+    if (!g.recordId) return;
+    if (!text) {
+      els.noteStatus.textContent = 'Write a note first.';
+      return;
+    }
+    var rec = S.addNote(g.recordId, text);
+    if (!rec) {
+      els.noteStatus.textContent = 'Could not save the note.';
+      logError(S.lastError() || 'Note not saved');
+      return;
+    }
+    els.noteText.value = '';
+    els.noteStatus.textContent = 'Note saved for this map.';
+  });
+
   els.newmap.addEventListener('click', newGame);
   els.again.addEventListener('click', newGame);
+
+  // ---------- maps list (description, features, ranking, win rate, notes) ----------
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+
+  function renderMaps() {
+    var list = S.list().slice().sort(function (a, b) {
+      var ra = a.rank || 0, rb = b.rank || 0;
+      if (rb !== ra) return rb - ra;
+      var wa = S.winRate(a) || 0, wb = S.winRate(b) || 0;
+      if (wb !== wa) return wb - wa;
+      return (b.times_played || 0) - (a.times_played || 0);
+    });
+
+    els.mapsList.innerHTML = '';
+    if (!list.length) {
+      els.mapsList.appendChild(el('p', 'muted', 'No maps yet.'));
+      return;
+    }
+
+    list.forEach(function (r) {
+      var row = el('div', 'map-row');
+      row.appendChild(el('h3', '', r.title));
+      row.appendChild(el('p', 'desc', r.description || ''));
+
+      var chips = el('div', 'chips');
+      (r.features || []).forEach(function (f) { chips.appendChild(el('span', 'chip', f)); });
+      row.appendChild(chips);
+
+      var rate = S.winRate(r);
+      row.appendChild(el('p', 'stats',
+        'Played ' + (r.times_played || 0) + ' · wins ' + (r.wins || 0) +
+        ' · win rate ' + (rate === null ? '—' : rate + '%') +
+        ' · opponents ' + r.max_opponents));
+
+      var stars = el('div', 'stars');
+      for (var s = 1; s <= 5; s++) {
+        var b = el('button', 'star', s <= (r.rank || 0) ? '★' : '☆');
+        b.setAttribute('data-stars', String(s));
+        b.setAttribute('aria-label', 'Rate ' + s + ' star' + (s > 1 ? 's' : ''));
+        b.addEventListener('click', (function (id, n) {
+          return function () {
+            S.setRank(id, n);
+            if (S.lastError()) logError(S.lastError());
+            renderMaps();
+          };
+        })(r.id, s));
+        stars.appendChild(b);
+      }
+      row.appendChild(stars);
+
+      (r.notes || []).slice(-3).forEach(function (note) {
+        row.appendChild(el('p', 'note', '📝 ' + note.text));
+      });
+
+      els.mapsList.appendChild(row);
+    });
+  }
+
+  els.openMaps.addEventListener('click', function () {
+    renderMaps();
+    els.maps.hidden = false;
+  });
+  els.mapsClose.addEventListener('click', function () {
+    els.maps.hidden = true;
+  });
 
   // Errors are logged quietly; they only show when "Show errors" is on.
   window.addEventListener('error', function (e) { logError(e.message || e.error); });
@@ -424,6 +563,9 @@
     requestAnimationFrame(frame);
   }
 
+  // Start-up: mark the default level, then play.
+  markSeg(els.segLevel, 'level', g.level);
+  markSeg(els.segAi, 'ai', g.ai);
   newGame();
   requestAnimationFrame(frame);
 })();

@@ -271,6 +271,70 @@ button {
 }
 .errors div { padding: 4px 0; border-bottom: 1px dashed var(--ink); }
 
+/* Regions (Voronoi cells) */
+.cell {
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+.cell.neutral { fill: var(--neutral); }
+.cell.o0 { fill: var(--mint); }
+.cell.o1 { fill: var(--coral); }
+.cell.o2 { fill: var(--sun); }
+.cell.o3 { fill: var(--lavender); }
+.cell.lake { fill: var(--lake); }
+
+/* Settings panel: keep it on screen on short iPads */
+.panel { max-height: calc(100vh - 130px); overflow-y: auto; }
+.muted { margin: 0; font-size: 14px; opacity: 0.8; }
+.note-box { display: flex; flex-direction: column; gap: 8px; }
+.note-box label { font-weight: 700; font-size: 17px; }
+.note-box textarea {
+  font-family: inherit;
+  font-size: 16px;
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  padding: 8px 10px;
+  background: #fff;
+  resize: vertical;
+}
+.note-box .big { width: 100%; }
+
+/* Saved maps list */
+.maps-card { text-align: left; width: min(560px, 92vw); }
+.maps-card h2 { text-align: center; }
+.maps-list { max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; }
+.map-row {
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  padding: 10px 14px;
+  background: #fff;
+  box-shadow: 0 3px 0 var(--ink);
+}
+.map-row h3 { margin: 0 0 4px; font-size: 18px; }
+.map-row p { margin: 4px 0; font-size: 15px; }
+.map-row .stats { font-weight: 700; }
+.map-row .note { font-style: italic; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  padding: 3px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--meadow);
+  font-size: 13px;
+  font-weight: 700;
+}
+.stars { display: flex; gap: 4px; margin-top: 6px; }
+.star {
+  min-width: 44px;
+  min-height: 44px;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  background: var(--sun);
+  font-size: 22px;
+  box-shadow: 0 3px 0 var(--ink);
+}
+
 @media (max-width: 500px) {
   .top { height: 80px; }
   .gear { width: 60px; height: 60px; right: 12px; bottom: 12px; }

@@ -3,13 +3,16 @@
 ## Current state
 
 - MVP built as a plain HTML/CSS/JS page in `03 Projects/Expansion Wars/`. No build step, no server, no database.
-- Map: grid of about 27 spots (factories and cities) with lakes. Two to four flags start on spread-out factories. Each map is checked for connectivity before use.
+- Map: Voronoi regions. Each spot is a seed point; its region is the cell around it. Land regions that share an edge are linked by a road. Lakes are regions with no roads. Four early levels: 4, 6, 8, 10 elements (lakes included), 2 to 4 flags. Each map is checked for land connectivity before use.
+- Every generated map is saved as a record (level, title, description, features, rating 1–5, plays, wins, losses, improvement notes, map geometry). Notes are logged from ⚙️ during play; saved maps are listed from ⚙️ → Saved maps.
+- Storage: `js/store.js` keeps records in localStorage for now. The Family Supabase table `xw_maps` (SQL in `supabase/001_xw_maps.sql`) is written but NOT yet applied; the page is not wired to it yet.
 - Rules: owned spots produce soldiers; sending half from a spot along a road; fights resolve on arrival; win by owning every spot.
 - Computer players: Easy and Normal, both "send half of the strongest spot to the weakest linked neighbor" on a timer.
 
 ## Architecture
 
-- `js/map.js` builds the map and exposes `window.ExpansionMap` (generation, distance, road checks).
+- `js/map.js` builds Voronoi maps and exposes `window.ExpansionMap` (levels, generation, distance).
+- `js/store.js` exposes `window.XWStore` (saved maps: add, update, game result, note, rating).
 - `js/game.js` holds the state, the frame loop (`step` then `render`), input (pointer events on the board), computer players and the win check.
 - `js/sound.js` synthesizes tones with Web Audio. No sound files.
 - Board uses a 1000 × 640 map coordinate space. Nodes are HTML divs, roads and soldier markers are SVG on the same coordinates, so the board scales with the screen.
