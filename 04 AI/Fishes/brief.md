@@ -4,30 +4,36 @@
 
 ## Current state
 
-- MVP built in `03 Projects/Fishes/`: plain HTML/CSS/JS, canvas 2D, no build step. Not device-tested on iPad.
-- Twenty levels in five zones (Sunny Shallows, Coral Reef, Open Blue, Twilight, Deep Trench). Win at size 100 on level 20 (whale shark). Ends on three lives lost, win, or 15:00.
-- Species (22 incl. food) are inspired by real fish, each with a one-line real-fish note in `js/species.js`.
-- Hunters and ambushers lock on (red ring and a warning pill). Tension rises from 2:30 to 5:00.
-- Notes: cookie first (25 kept, `fish_notes`), database when `supabaseUrl`/`supabaseKey` are set. Status shows in ⚙️ and the title screen.
-- Database: `supabase/001_fish_notes.sql` written for the Family project (app `fishes`, registered in the same migration). **Not applied.** The page has no family sign-in, so writes will be refused (401/403) until sign-in exists. The page reports "needs family sign-in" in that case.
+- Plain HTML/CSS/JS canvas game in `03 Projects/Fishes/`. No build step. Not device-tested on iPad.
+- **20 tiers** (one per level, five depth zones). Each tier has 2–3 species, each with a **temper**: docile (never attacks or locks on), wary (hunts smaller fish, ignores you when smaller, no lock-on), aggressive (hunts smaller fish, locks on to you when smaller). 58 species in total, including food and harmless giants.
+- **Evolution:** the player takes its tier's lead species (first listed for that tier). Banner "Evolved into …" on reaching a tier.
+- **Fish eat fish:** a non-docile fish ≥1.25× bigger eats a smaller fish it touches, and hunters actively hunt smaller fish nearby.
+- **Adaptive sea:** populations are sized against the player. Threats spawn at 1.15–1.9× your size, edible prey at 0.25–0.85×, harmless fish are a small share.
+- **Difficulty = predator:prey ratio** (set on the title screen): Easy 1:4 (20% predators), Medium 1:2 (33%), Hard 1:1 (50%). Rises by up to 50% from 2:30 (capped at 70%).
+- Win at size 100 on tier 20. Ends on three lives lost, win, or 15:00. The end card says what ate you.
+- Notes: cookie first (25 kept), database when `supabaseUrl`/`supabaseKey` are set. Status in ⚙️ and on the title screen.
+- Database: `supabase/001_fish_notes.sql` written (app `fishes`, registered). **Not applied.** No family sign-in on the page yet, so writes will be refused (401/403) until sign-in exists.
 
 ## Architecture
 
-- `js/species.js`: `FishData` (SPECIES, ZONES, GOALS, LEVEL_NAMES, levelInfo, CONFIG).
-- `js/game.js`: simulation, drawing and input. Test hook `window.FishGame.state()` and `debugSetSize(n)`.
-- `js/notes.js`: `FishNotes` (add, list, status). Cookie plus localStorage fallback.
-- `js/sound.js`: `FishSound` (play, unlock, enabled/setEnabled). Created on the first touch.
+- `js/species.js`: `FishData` (SPECIES with `tier`/`temper`/`kind`, ZONES, GOALS, LEVEL_NAMES, DIFFICULTY, levelInfo, leadOf, CONFIG).
+- `js/game.js`: simulation (player, populations `fillPopulations`/`census`/`pickSpecies`/`pickRole`, NPC AI in `updateNPC`, `findPrey`, fish-eat-fish in `update`), drawing, input, panel. Test hook `window.FishGame.state()` (includes `census`, `npcEaten`, `form`, `difficulty`) and `debugSetSize(n)`.
+- `js/notes.js`: `FishNotes`. Cookie plus localStorage fallback.
+- `js/sound.js`: `FishSound`. Created on first touch.
 
 ## Verified vs. unverified
 
-- Verified (headless Chromium, 1194 × 834, served over HTTP): page loads; title → play; growth from pointer input; no page errors after the fix below; level jumps (size 20 → level 10; size 100 → level 20 win); level 9 locks on and a hit costs a life; cookie notes saved over HTTP; deep-level screenshots show the species drawn.
-- Bug caught and fixed during testing: NPCs were drawn with `desc` instead of `sp`, so every NPC threw each frame (the loop caught it, so the page kept running). Errors now show only when "Show errors" is on, and this one showed up there.
-- Unverified: pacing (the 8–15 minute target has not been measured; no full-run bot yet); difficulty and hit balance (three hits in a few seconds is harsh); touch feel on iPad; the SQL test (not run against Supabase); the database write path (keys blank).
+- Verified (headless Chromium, 1194 × 834, served over HTTP, no page errors):
+  - Predator share matches the setting at tier 10: easy 0.23, medium 0.32, hard 0.51 (target 0.20 / 0.33 / 0.50).
+  - Fish eat fish in play: 54 eaten in 25 seconds at medium (plankton included).
+  - Evolution: forms change per tier (clownfish, wrasse, parrotfish, mackerel, mahi, lanternfish, greenland, basking). Size 100 ends the run as a win.
+  - Earlier: level jumps, lock-on, a hit costs a life, cookie notes.
+- Unverified: pacing (the 8–15 minute target is still unmeasured); balance of predator sizes per tier; whether docile fish are readable as docile on iPad; touch feel; the SQL test; the database write path.
+- Not tested: the lock-on by aggressive fish specifically at each tier. The code path is the same as before, now gated to aggressive temper.
 
 ## Next steps
 
-1. Jimmy answers `convo/convo v0.1.md`.
-2. Play on iPad; note slow, fiddly or unfair moments with the ⚙️ notes.
-3. Run the rolled-back test in the Family project, then apply `001_fish_notes.sql` by hand. Add the family sign-in before filling in the keys.
-4. Measure the run length with a simple bot or by timed play; tune GOALS, prey gain (0.4) and hunter sizes.
-5. Look at hit rules (one life per contact vs. a 3-second window).
+1. Jimmy answers `convo/convo v0.2.md`.
+2. Play one full run per difficulty on iPad; time it against 8–15 minutes and note where it feels unfair.
+3. Tune: prey gain (0.4 of prey size), predator size bands (1.15–1.9×), fish target (22 + 2×tier), threat cap (70%).
+4. Run the rolled-back test in the Family project, then apply `001_fish_notes.sql` by hand. Add family sign-in before filling in the keys.

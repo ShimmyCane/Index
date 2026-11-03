@@ -364,3 +364,14 @@ textarea {
 @media (prefers-reduced-motion: reduce) {
   .size-bar span { transition: none; }
 }
+
+/* Difficulty choice on the title screen */
+.diff {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+.diff .big { min-height: 56px; font-size: 1.05rem; }
+.diff .big[aria-pressed="true"] { background: var(--sun); }
+.diff-ratio { margin: 8px 0 0; font-weight: 700; font-size: 0.95rem; }
