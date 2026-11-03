@@ -656,6 +656,23 @@
       setStatus(`IFC export failed: ${err.message}`, 'error');
     }
   }
+  // P5: GLB (binary glTF 2.0) of the shown meshes, with pattern textures and PBR factors
+  function exportGlb() {
+    try {
+      const { parts, skipped } = st.viewer.exportParts();
+      if (!parts.length) throw new Error('nothing to export');
+      const bytes = M.buildGlb(parts, { generator: 'Make 3D V2' });
+      const blob = new Blob([bytes], { type: 'model/gltf-binary' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${st.history.model_id}.glb`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      setStatus(`GLB downloaded: ${parts.length} parts${skipped ? `, ${skipped} skipped (procedural or wire)` : ''}`, '');
+    } catch (err) {
+      setStatus(`GLB export failed: ${err.message}`, 'error');
+    }
+  }
   function openFile(file) {
     const reader = new FileReader();
     reader.onload = () => {
@@ -943,6 +960,7 @@
     $('rulesChip').addEventListener('click', () => { st.check = M.checkModel(shown(), st.world); st.showErrors = true; $('showErrors').checked = true; render(); });
     $('saveBtn').addEventListener('click', saveFile);
     $('exportIfcBtn').addEventListener('click', exportIfc);
+    $('exportGlbBtn').addEventListener('click', exportGlb);
     $('openFile').addEventListener('change', (e) => { if (e.target.files[0]) openFile(e.target.files[0]); e.target.value = ''; });
     $('loadSample').addEventListener('click', () => {
       if (!confirm('Replace the current model with the sample? Save a file first to keep it.')) return;

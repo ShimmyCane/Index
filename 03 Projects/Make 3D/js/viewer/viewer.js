@@ -541,6 +541,39 @@
       setMotion, play, pause, seek,
       onTick(fn) { anim.onTick = fn || (() => {}); tick(); },
       animState: () => ({ t: anim.t, loop_s: loopS(), playing: anim.playing, has: !!anim.motion, playsLeft: anim.playsLeft }),
+      // P5: the shown meshes baked to world (scene) axes, for the GLB writer (js/core/glb.js). Hidden parts are left out.
+      exportParts() {
+        scene.updateMatrixWorld(true);
+        const parts = [];
+        let skipped = 0;
+        for (const mesh of meshes) {
+          const g = mesh.geometry, mat = mesh.material;
+          if (!mesh.visible || !g || !g.attributes.position) continue;
+          if (!(mat && mat.isMeshStandardMaterial) || mat.wireframe) { skipped++; continue; }
+          const count = g.attributes.position.count;
+          const m = mesh.matrixWorld, nm = new THREE.Matrix3().getNormalMatrix(m);
+          const positions = new Float32Array(count * 3), normals = new Float32Array(count * 3);
+          const uvs = g.attributes.uv ? new Float32Array(count * 2) : null;
+          const v = new THREE.Vector3(), nv = new THREE.Vector3();
+          const rep = mat.map ? mat.map.repeat : null;
+          for (let i = 0; i < count; i++) {
+            v.fromBufferAttribute(g.attributes.position, i).applyMatrix4(m);
+            positions.set([v.x, v.y, v.z], i * 3);
+            if (g.attributes.normal) nv.fromBufferAttribute(g.attributes.normal, i).applyMatrix3(nm).normalize();
+            else nv.set(0, 1, 0);
+            normals.set([nv.x, nv.y, nv.z], i * 3);
+            if (uvs) uvs.set([g.attributes.uv.getX(i) * (rep ? rep.x : 1), g.attributes.uv.getY(i) * (rep ? rep.y : 1)], i * 2);
+          }
+          const indices = g.index ? Uint32Array.from(g.index.array) : Uint32Array.from({ length: count }, (_, i) => i);
+          const part = { name: mesh.userData.uuid || 'part', positions, normals, indices,
+            material: { color: [mat.color.r, mat.color.g, mat.color.b], opacity: mat.opacity, metallic: mat.metalness, roughness: mat.roughness } };
+          if (uvs) part.uvs = uvs;
+          const img = mat.map && mat.map.image;
+          if (img && img.data && img.width) part.material.texture = { width: img.width, height: img.height, rgba: img.data };
+          parts.push(part);
+        }
+        return { parts, skipped };
+      },
       viewState: () => ({ radius, theta, phi }),
       setView(v) { if (v.target) target.set(...toScene(v.target)); if (v.radius) radius = v.radius; if (v.theta !== undefined) theta = v.theta; if (v.phi !== undefined) phi = v.phi; requestRender(); },
     };
