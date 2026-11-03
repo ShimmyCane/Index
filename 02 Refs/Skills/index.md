@@ -4,6 +4,7 @@ Purpose
 Skills:
 - start_project: Initializes a new project by setting up project folders, creating a schematic, and building an MVP.
 - ipad_website: Guides the design of kid-friendly iPad web apps with light pastel colors, bold graphics, large touch targets, and minimal menus.
+- settings_gear: One consistent ⚙️ button and drawer for kids' iPad and web apps: lower-right gear, segmented options, opt-in errors at the bottom, database check, hidden in print. Used by start_project.
 - summarize_code: Generates a visual summary file that maps out the main code structure and explains key variables.
 - update_lessons_learned: Reviews and logs lessons learned across projects, personal preferences, and tools.
 - simplify_code: Breaks large files into separate css/js/html and simplifies logic, then runs summarize_code.
