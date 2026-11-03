@@ -35,6 +35,15 @@ Still open after round 3: city upgrade functionality, team setup choices (convo 
 - [ ] **Dragon drop through unlinked spots.** Notes say a drop should work without landing on the city. Decide: when a region is not directly linked, should soldiers route along roads through your own spots? (Current behaviour: only directly linked regions take the drop.)
 - [ ] **AI strategy in team games.** Decide after team mode exists.
 
+## Round 4: notes read 2026-11-03 (18 open notes on 13 map records)
+
+Checked against `js/game.js` and `js/store.js`. Notes stay `open` in the table until Jimmy confirms which are handled (convo v0.3).
+
+- [x] Built in round 3 and confirmed in code: drop anywhere on a region, multi-drag, routes through own spots, reinforce, the 3-2-1-Go countdown, the population line with send %, team mode with a red divider, hard level and move caps, the Done- prefix.
+- [ ] **Five more maps, increasing density and more cities, scrollable on the field.** Not built. The level list in `js/map.js` stops at level 4. Needs answers in convo v0.3 (question 1) before building.
+- [ ] **"Castles" in the reinforce note.** No castle type exists. Question 2 in convo v0.3.
+- [ ] **Test note** (`Test note 1`, Level 4 Valley). Nothing to build. Mark done when Jimmy confirms.
+
 ## Later
 
 - [ ] **Village and country zoom.** As maps get larger, zoom into a village view and out to a country view. (Added to the todo list at your request.)
