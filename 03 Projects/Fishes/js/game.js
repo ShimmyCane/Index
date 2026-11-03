@@ -378,8 +378,48 @@
       size: sp.kind === 'food' ? sp.size : sp.size * rand(0.9, 1.12),
       spd: rand(0.9, 1.1), facing: Math.random() < 0.5 ? 1 : -1,
       t: rand(0, 6), anchor: { x: x, y: y }, tgt: null, tT: 0,
-      cool: rand(0, 2), lunge: 0, lx: 0, ly: 0, locked: false, lockT: 0, dead: false
+      cool: rand(0, 2), lunge: 0, lx: 0, ly: 0, locked: false, lockT: 0, dead: false,
+      hp: maxHpOf(sp.size), maxHp: maxHpOf(sp.size), biteT: 0
     });
+  }
+
+  // ---------- combat: health, bites and chum ----------
+  // A bite takes off the attacker's attack value. Small fish have 1 health, so one bite is enough;
+  // bigger fish take several bites, with a pause between bites (player 0.6 s, fish 0.9 s).
+  var BITE_S = 0.6, STRIKE_S = 0.9;
+  function maxHpOf(size) { return Math.max(1, Math.round(size / 3)); }
+  function atkOf(size) { return 1 + Math.floor(size / 8); }
+  function playerMaxHp(size) { return 10 + Math.floor(size / 2); }
+  var CHUM = { id: 'chum', name: 'Chum', kind: 'food', temper: 'docile', shape: 'plankton', size: 0.6, speed: 20, col: '#ffb4a2' };
+
+  // A fish of size 4 or more leaves chum behind when it dies. Chum draws small fish in to feed and school.
+  function dropChum(n) {
+    if (n.sp.kind === 'food' || n.size < 4) return;
+    var count = Math.min(6, Math.round(n.size / 5));
+    for (var i = 0; i < count; i++) {
+      run.npcs.push({
+        sp: CHUM, x: n.x + rand(-40, 40), y: n.y + rand(-40, 40), vx: 0, vy: 0, size: CHUM.size,
+        spd: 1, facing: 1, t: rand(0, 6), anchor: { x: n.x, y: n.y }, tgt: null, tT: 0, cool: 0,
+        lunge: 0, lx: 0, ly: 0, locked: false, lockT: 0, dead: false, hp: 1, maxHp: 1, biteT: 0, life: 25
+      });
+    }
+  }
+
+  function findNear(n, rad, test) {
+    var best = null, bd = rad;
+    for (var i = 0; i < run.npcs.length; i++) {
+      var o = run.npcs[i];
+      if (o === n || o.dead || !test(o)) continue;
+      var d = Math.hypot(o.x - n.x, o.y - n.y);
+      if (d < bd) { bd = d; best = o; }
+    }
+    return best;
+  }
+
+  // Food close by: chum first, then plankton and krill.
+  function findFeed(n) {
+    return findNear(n, 260, function (o) { return o.sp === CHUM; }) ||
+      findNear(n, 180, function (o) { return o.sp.kind === 'food'; });
   }
 
   // ---------- populations: the sea adapts to your size ----------
@@ -482,6 +522,11 @@
 
   function updatePlayer(dt) {
     var r = run, dx = 0, dy = 0;
+    r.biteT = Math.max(0, (r.biteT || 0) - dt);
+    r.maxHp = playerMaxHp(r.size);
+    r.hp = Math.min(r.hp, r.maxHp);
+    r.quietT = (r.quietT || 0) + dt;
+    if (r.quietT > 4 && r.hp < r.maxHp) r.hp = Math.min(r.maxHp, r.hp + 3 * dt);
     if (ptr.down) {
       var w = toWorld(ptr.x, ptr.y);
       var ex = w.x - r.x, ey = w.y - r.y, dist = Math.hypot(ex, ey);
@@ -542,6 +587,8 @@
 
   function updateNPC(n, dt, predators) {
     var sp = n.sp, r = run;
+    n.biteT = Math.max(0, (n.biteT || 0) - dt);
+    if (n.life !== undefined) { n.life -= dt; if (n.life <= 0) { n.dead = true; return; } }
     n.t += dt;
     n.cool = Math.max(0, n.cool - dt);
     n.tT -= dt;
@@ -564,6 +611,8 @@
       if (threat) {
         var fl = Math.hypot(fx, fy) || 1;
         tx = n.x + fx / fl * 400; ty = n.y + fy / fl * 400; s = speed * 1.7; k = 6;
+      } else if (findFeed(n)) {
+        var fd = findFeed(n); tx = fd.x; ty = fd.y; s = speed * 0.7;
       } else if (sp.school) {
         var cx = 0, cy = 0, c = 0, j;
         for (j = 0; j < r.npcs.length; j++) {
@@ -614,7 +663,9 @@
           tx = r.x; ty = r.y; s = sp.speed * (1.1 + 0.3 * r.tension) * n.spd; k = 4;
         } else {
           var hunted = sp.temper !== 'docile' ? findPrey(n) : null;
+          var food = !hunted && sp.temper !== 'docile' ? findNear(n, 260, function (o) { return o.sp.kind === 'food'; }) : null;
           if (hunted) { tx = hunted.x; ty = hunted.y; s = speed * 1.1; k = 3; }
+          else if (food) { tx = food.x; ty = food.y; s = speed * 0.6; }
           else { var hw = wander(n, 900); tx = hw.x; ty = hw.y; s = speed * 0.6; }
         }
       }
@@ -679,16 +730,21 @@
     }
     r.eaten++;
     burst(n.x, n.y, n.sp.col || '#ffffff', 6);
+    dropChum(n);
     checkGrowth();
   }
 
-  function hurt(n) {
+  function hurt(n, dmg) {
     var r = run;
     r.hitBy = n.sp.name;
     if (r.inv > 0) return;
+    r.quietT = 0;
+    r.hp = Math.max(0, r.hp - dmg);
+    if (r.hp > 0) { floatText(r.x, r.y, '-' + dmg); return; }
     r.lives--;
     FishSound.play('hurt');
     r.size = Math.max(r.info.enterSize, r.size * 0.75);
+    r.hp = playerMaxHp(r.size);
     if (r.lives <= 0) { r.lives = 0; endRun('eaten'); return; }
     r.x = r.info.W / 2;
     r.y = r.info.H / 2;
@@ -707,8 +763,15 @@
     var d = Math.hypot(n.x - r.x, n.y - r.y);
     var reach = (lenFor(r.size, 'round') + lenFor(n.size, sp.shape)) * 0.36;
     if (d > reach) return;
-    if (canHurt(sp) && n.size >= r.size * 1.1) { hurt(n); return; }
-    if (r.size >= n.size * 1.15) eatNPC(n);
+    if (canHurt(sp) && n.size >= r.size * 1.1) {
+      if (n.biteT <= 0) { n.biteT = STRIKE_S; hurt(n, atkOf(n.size)); }
+      return;
+    }
+    if (r.size >= n.size * 1.15 && r.biteT <= 0) {
+      r.biteT = BITE_S;
+      n.hp -= atkOf(r.size);
+      if (n.hp <= 0) eatNPC(n);
+    }
   }
 
   // ---------- rules, timing, ending ----------
@@ -759,18 +822,25 @@
       if (!r.npcs[i].dead) updateNPC(r.npcs[i], dt, predators);
     }
 
-    // Fish eat fish: a non-docile fish at least 1.25x bigger eats a smaller fish it touches.
+    // Fish eat fish: a non-docile fish at least 1.25x bigger bites a smaller fish it touches.
+    // Each bite takes off its attack value; the meal is gone when its health reaches zero.
     for (i = 0; i < r.npcs.length; i++) {
       var eater = r.npcs[i];
-      if (eater.dead || eater.sp.kind === 'food' || eater.sp.kind === 'harmless' || eater.sp.temper === 'docile') continue;
+      if (eater.dead || eater.biteT > 0 || eater.sp.kind === 'food' || eater.sp.kind === 'harmless' || eater.sp.temper === 'docile') continue;
       for (var j = 0; j < r.npcs.length; j++) {
         var meal = r.npcs[j];
         if (meal === eater || meal.dead || eater.size < meal.size * 1.25) continue;
         var md = Math.hypot(eater.x - meal.x, eater.y - meal.y);
         if (md < (lenFor(eater.size, eater.sp.shape) + lenFor(meal.size, meal.sp.shape)) * 0.36) {
-          meal.dead = true;
-          r.npcEaten++;
-          burst(meal.x, meal.y, meal.sp.col || '#ffffff', 4);
+          eater.biteT = meal.sp.kind === 'food' ? BITE_S : STRIKE_S;
+          meal.hp -= atkOf(eater.size);
+          if (meal.hp <= 0) {
+            meal.dead = true;
+            r.npcEaten++;
+            burst(meal.x, meal.y, meal.sp.col || '#ffffff', 4);
+            dropChum(meal);
+          }
+          break;
         }
       }
     }
@@ -816,10 +886,25 @@
     var list = run.npcs.slice();
     var playerVisible = !(run.inv > 0 && Math.floor(t * 10) % 2 === 0);
     if (playerVisible) {
-      list.push({ x: run.x, y: run.y, vy: run.vy, facing: run.facing, size: run.size, desc: playerDesc(), isPlayer: true });
+      list.push({ x: run.x, y: run.y, vy: run.vy, facing: run.facing, size: run.size, desc: playerDesc(), isPlayer: true, hp: run.hp, maxHp: run.maxHp });
     }
     list.sort(function (a, b) { return a.size - b.size; });
     list.forEach(function (e) { drawEntity(e, t + (e.t || 0)); });
+
+    list.forEach(function (e) {
+      var shape = e.isPlayer ? e.desc.shape : e.sp.shape;
+      var len = lenFor(e.size, shape);
+      if (healthBarsOn() && e.maxHp > 1) drawHealthBar(e, len);
+      if (e.isPlayer || e.sp.kind === 'food' || e.sp.kind === 'harmless') return;
+      // Readable at a glance: coral = can hurt you, mint = you can eat it.
+      var danger = canHurt(e.sp) && e.size >= run.size * 1.1;
+      var edible = !danger && run.size >= e.size * 1.15;
+      if (!danger && !edible) return;
+      ctx.fillStyle = danger ? '#ff7a6b' : '#7fd8a8';
+      ctx.beginPath();
+      ctx.arc(e.x, e.y - len * 0.65 - 22 / cam.scale, 4 / cam.scale, 0, Math.PI * 2);
+      ctx.fill();
+    });
 
     run.npcs.forEach(function (n) {
       if (!n.locked) return;
@@ -854,6 +939,22 @@
     ctx.restore();
   }
 
+  function healthBarsOn() {
+    try { return localStorage.getItem('fish_healthbars') !== 'off'; } catch (e) { return true; }
+  }
+
+  function drawHealthBar(e, len) {
+    var w = Math.max(18, len * 0.9), h = 5 / cam.scale;
+    var x = e.x - w / 2, y = e.y - len * 0.65 - 10 / cam.scale;
+    ctx.lineWidth = 1.5 / cam.scale;
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.strokeStyle = OUT;
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeRect(x, y, w, h);
+    ctx.fillStyle = e.isPlayer ? '#8fe0b5' : '#ff9a8a';
+    ctx.fillRect(x, y, w * clamp(e.hp / e.maxHp, 0, 1), h);
+  }
+
   function updateCamera(dt) {
     var r = run;
     var viewW = 900 + r.size * 10, viewH = 560 + r.size * 6;
@@ -886,6 +987,7 @@
     $('hud-lives').textContent = '❤️'.repeat(r.lives) || '—';
     $('hud-time').textContent = mmss(r.t) + ' / 15:00';
     $('sprint').style.setProperty('--stam', Math.round(r.stamina) + '%');
+    $('hp-fill').style.width = (clamp(r.hp / r.maxHp, 0, 1) * 100).toFixed(0) + '%';
     $('lock-pill').hidden = !(r.lockedCount > 0);
   }
 
@@ -939,7 +1041,8 @@
       x: 0, y: 0, vx: 0, vy: 0, facing: 1,
       stamina: 100, sprintCd: 0, sprinting: false, inv: 2.5,
       npcs: [], parts: [], spawnT: 0, bannerT: 0, lockedCount: 0, score: 0,
-      difficulty: getDifficulty(), form: D.leadOf(1), npcEaten: 0, hitBy: ''
+      difficulty: getDifficulty(), form: D.leadOf(1), npcEaten: 0, hitBy: '',
+      hp: playerMaxHp(1), maxHp: playerMaxHp(1), biteT: 0, quietT: 0
     };
     run.x = run.info.W / 2;
     run.y = run.info.H / 2;
@@ -961,6 +1064,8 @@
     $('sound-toggle').textContent = FishSound.enabled() ? 'On' : 'Off';
     $('errors-toggle').setAttribute('aria-pressed', String(showErrors));
     $('errors-toggle').textContent = showErrors ? 'On' : 'Off';
+    $('hp-toggle').setAttribute('aria-pressed', String(healthBarsOn()));
+    $('hp-toggle').textContent = healthBarsOn() ? 'On' : 'Off';
     refreshNotes();
     refreshDbStatus();
   }
@@ -1123,6 +1228,12 @@
     renderErrors();
   });
   $('note-save').addEventListener('click', saveNote);
+  $('hp-toggle').addEventListener('click', function () {
+    var on = !healthBarsOn();
+    try { localStorage.setItem('fish_healthbars', on ? 'on' : 'off'); } catch (e) { /* private mode */ }
+    $('hp-toggle').setAttribute('aria-pressed', String(on));
+    $('hp-toggle').textContent = on ? 'On' : 'Off';
+  });
 
   $('family-in').addEventListener('click', function () {
     var email = $('family-email').value.trim(), pass = $('family-pass').value;
@@ -1189,6 +1300,7 @@
         locks: run ? run.lockedCount : 0, lives: run && run.lives,
         npcEaten: run && run.npcEaten, difficulty: run && run.difficulty, form: run && run.form && run.form.id,
         census: run ? census() : null, spread: run ? spread() : null,
+        chum: run ? run.npcs.filter(function (o) { return o.sp === CHUM; }).length : 0, hp: run && run.hp, maxHp: run && run.maxHp,
         player: run && { x: run.x, y: run.y }, cam: { x: cam.x, y: cam.y, scale: cam.scale },
         hunters: run ? run.npcs.filter(function (o) { return o.sp.kind === 'hunter'; }).map(function (o) { return { x: o.x, y: o.y, size: o.size, locked: o.locked }; }) : []
       };

@@ -289,7 +289,7 @@
   }
 
   var CONFIG = {
-    VERSION: '0.3',                     // see CHANGELOG.md
+    VERSION: '0.4',                     // see CHANGELOG.md
     VERSION_DATE: '2026-11-03',
     TIME_LIMIT: 900,                    // hard stop at 15 minutes
     LIVES: 3,
