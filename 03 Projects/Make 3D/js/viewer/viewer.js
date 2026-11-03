@@ -177,6 +177,24 @@
         uniforms: { uA: { value: col(m.a) }, uB: { value: col(m.b) }, uC: { value: col(m.c || m.b) }, uFreq: { value: m.freq ?? 10 }, uSeed: { value: m.seed ?? 1 } } });
       return null;
     }
+    // pattern textures (js/core/patterns.js): one DataTexture per distinct spec, kept for the page's life
+    const patternCache = new Map();
+    function patternTexture(m) {
+      const P = root.M3D;
+      const spec = P && P.patternSpec(m);
+      if (!spec) return null;
+      const key = P.patternKey(spec);
+      if (!patternCache.has(key)) {
+        const tex = new THREE.DataTexture(P.patternPixels(spec), P.TILE, P.TILE, THREE.RGBAFormat);
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(spec.scale, spec.scale);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.needsUpdate = true;
+        patternCache.set(key, tex);
+      }
+      return patternCache.get(key);
+    }
+
     function materialFor(o, model) {
       const m = (model.materials || {})[o.material] || { color: '#c9c3b5', opacity: 1 };
       const sh = m.kind ? shaderFor(m) : null;
@@ -184,7 +202,10 @@
       const opts = { color: m.color, transparent: m.opacity < 1, opacity: m.opacity };
       if (o.type === 'sheet') opts.side = THREE.DoubleSide;   // leaves, grass and flags show from both sides
       if (display === 'wire') return new THREE.MeshBasicMaterial({ ...opts, wireframe: true });
-      return new THREE.MeshStandardMaterial({ ...opts, roughness: m.roughness ?? 0.75, metalness: m.metalness ?? 0 });
+      const std = { ...opts, roughness: m.roughness ?? 0.75, metalness: m.metalness ?? 0 };
+      const map = patternTexture(m);
+      if (map) { std.map = map; std.color = 0xffffff; }   // the pixels already carry the colours
+      return new THREE.MeshStandardMaterial(std);
     }
 
     function buildModel(model) {

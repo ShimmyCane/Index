@@ -49,11 +49,16 @@
   // Material table entries (model.materials[id]). Colour and opacity were already used by the viewer;
   // roughness and metalness are the PBR channels (TRELLIS.2 uses the same four: base colour, roughness, metallic, opacity).
   const MATERIAL_DEFAULTS = { color: '#c9c3b5', opacity: 1, roughness: 0.75, metalness: 0 };
+  // Canvas-free patterns (js/core/patterns.js). 'none' keeps the flat colour.
+  const PATTERN_NAMES = ['none', 'wood', 'tile', 'stripe'];
   const MATERIAL_FIELDS = {
     color: (v) => typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v),
     opacity: (v) => typeof v === 'number' && v >= 0 && v <= 1,
     roughness: (v) => typeof v === 'number' && v >= 0 && v <= 1,
     metalness: (v) => typeof v === 'number' && v >= 0 && v <= 1,
+    pattern: (v) => PATTERN_NAMES.includes(v),
+    pattern_color: (v) => typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v),
+    pattern_scale: (v) => Number.isInteger(v) && v >= 1 && v <= 8, // repeats of the pattern across each face
   };
   // Returns a list of problems with a set_material payload (empty when it is valid).
   function materialSetProblems(set) {
@@ -72,5 +77,5 @@
     return header;
   }
 
-  return { SCHEMA, TYPES, SHAPE_TYPES, DIM_COUNT, TAGS, MATERIAL_DEFAULTS, materialSetProblems, newUuid, normaliseObject, headerFromModel };
+  return { SCHEMA, TYPES, SHAPE_TYPES, DIM_COUNT, TAGS, MATERIAL_DEFAULTS, PATTERN_NAMES, materialSetProblems, newUuid, normaliseObject, headerFromModel };
 });
