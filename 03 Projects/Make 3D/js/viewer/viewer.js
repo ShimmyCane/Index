@@ -184,7 +184,7 @@
       const opts = { color: m.color, transparent: m.opacity < 1, opacity: m.opacity };
       if (o.type === 'sheet') opts.side = THREE.DoubleSide;   // leaves, grass and flags show from both sides
       if (display === 'wire') return new THREE.MeshBasicMaterial({ ...opts, wireframe: true });
-      return new THREE.MeshStandardMaterial({ ...opts, roughness: 0.75, metalness: 0 });
+      return new THREE.MeshStandardMaterial({ ...opts, roughness: m.roughness ?? 0.75, metalness: m.metalness ?? 0 });
     }
 
     function buildModel(model) {

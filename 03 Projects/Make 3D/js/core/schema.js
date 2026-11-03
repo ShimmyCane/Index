@@ -46,11 +46,31 @@
     }, o);
   }
 
+  // Material table entries (model.materials[id]). Colour and opacity were already used by the viewer;
+  // roughness and metalness are the PBR channels (TRELLIS.2 uses the same four: base colour, roughness, metallic, opacity).
+  const MATERIAL_DEFAULTS = { color: '#c9c3b5', opacity: 1, roughness: 0.75, metalness: 0 };
+  const MATERIAL_FIELDS = {
+    color: (v) => typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v),
+    opacity: (v) => typeof v === 'number' && v >= 0 && v <= 1,
+    roughness: (v) => typeof v === 'number' && v >= 0 && v <= 1,
+    metalness: (v) => typeof v === 'number' && v >= 0 && v <= 1,
+  };
+  // Returns a list of problems with a set_material payload (empty when it is valid).
+  function materialSetProblems(set) {
+    if (!set || typeof set !== 'object') return ['set must be an object'];
+    const bad = [];
+    for (const [k, v] of Object.entries(set)) {
+      if (!(k in MATERIAL_FIELDS)) bad.push(`unknown material field "${k}"`);
+      else if (!MATERIAL_FIELDS[k](v)) bad.push(`${k} is not valid (${JSON.stringify(v)})`);
+    }
+    return bad;
+  }
+
   // Header fields that are not objects. Kept on history.header and copied into each model.
   function headerFromModel(model) {
     const { objects, version, ...header } = model; // eslint-disable-line no-unused-vars
     return header;
   }
 
-  return { SCHEMA, TYPES, SHAPE_TYPES, DIM_COUNT, TAGS, newUuid, normaliseObject, headerFromModel };
+  return { SCHEMA, TYPES, SHAPE_TYPES, DIM_COUNT, TAGS, MATERIAL_DEFAULTS, materialSetProblems, newUuid, normaliseObject, headerFromModel };
 });

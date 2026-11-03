@@ -82,6 +82,12 @@
           return [{ message: 'set_header may only change name and description' }];
         }
         return [];
+      case 'set_material': {
+        // A material entry is not an object, so only its values are checked here.
+        const bad = G.materialSetProblems(op.set);
+        if (!op.material || typeof op.material !== 'string') return [{ message: 'set_material needs a material id' }];
+        return bad.map((message) => ({ message }));
+      }
       default:
         return [{ message: `unknown operation "${op.op}"` }];
     }
