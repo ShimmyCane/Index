@@ -1,77 +1,84 @@
 # Growth: schematic
 
-Status: MVP (first attempt; its 3-D version is superseded by Paper Again, 2026-11-03). Started 2026-11-03 with `/start-project growth`. Ten-step paper story as a 3-D replay (`paper3d.html`) and in the Increment Viewer (`?set=growth_paper`). Questions are in `convo/convo v0.1.md`.
+Status: MVP, planning mode (2026-11-03). The Growth page writes a world like a prompt; the Increment Viewer opens it by link. The 3-D run, the animation and the cloud save are next (see `todo.md`).
 
 ## Purpose
 
-An algorithmic way to age a model. Instead of scaling a young model up to look old, a **subject** carries a history of **steps** (time). Each step applies rules to the model and the environment, so the model changes in a believable way over time. The first subject is a sheet of white paper that is stepped on, blown, torn, wet, cut and nested in.
+A world simulator, planned in words and numbers first. Jimmy states a starting object or place, the environment and its rules, how time works, and the AI proposes the steps that happen. It can be one object (a sheet of paper decaying) or a whole ecosystem (a hillside, a river, a pair of rabbits that multiply while hawks and coyotes arrive). The environment can be anything: a hillside, a city, a lake, a stomach.
 
-The project links the other nursery tools into one loop:
+The page is for understanding and tweaking the story. Once the story is right, it is saved and run in the viewers.
 
-- **Growth engine** (this project): the rules and the history. The source of truth.
-- **Increment Viewer**: reviews the steps in order, as a slideshow and running log. Fast overview.
-- **3-D viewer (Make 3D)**: opens one step as a live model. Snapshot in time.
-- **Database (Supabase)**: stores the history as JSON, so no merge step is needed.
+## The pipeline
 
-## Core idea: history, then replay
+1. **Plan** (this project's page): seed, environment, time rules, steps. Edit anything. Ask the AI to write or revise the steps.
+2. **Look** (Increment Viewer): `viewer.html?world=<id>` shows each step as a state card with the story beside it.
+3. **Keep**: download the JSON (today), save to the cloud (drafted, not applied).
+4. **Run** (later): 3-D scenes per step, then animation.
 
-Same pattern as Make 3D (`history.json` is the source, `model.json` is the replayed result):
+## The page (`index.html`, `js/app.js`)
 
-1. **Base**: the starting subject (a flat white sheet, dimensions, colour).
-2. **Environment**: where it lives (outdoors, subway, damp, indoors). A set of rules: wind strength, wetness, traffic, pests.
-3. **Steps**: `age 1..N`. Each step lists events. An event is a named operation with parameters, for example `crease`, `stamp`, `wind`, `tear`, `wet`, `pick_up`, `cut`, `nest`.
-4. **Replay**: base + steps, in order, gives the state at any age. Same inputs and seed always give the same result.
+Written like a prompt, top to bottom. Each section is "Here is…":
 
-Nothing is stored as a derived shape alone. The steps and seed are the record. Snapshots can be cached later, but they can always be rebuilt.
+1. **Start with**: name, kind (growth, decay or collaboration), the starting object or place, the things in it with starting amounts, scenery.
+2. **The place and its rules**: the environment in a sentence, and the environmental variables (name, value, unit, what it does). Each has a token, like `{hawk_start}`.
+3. **How time works**: the unit (season, day, year), the number of increments, a calendar if it has one, the rules in plain words (tokens show the current numbers), and what is not modelled yet.
+4. **What happens**: a chart of the numbers (each line scaled to its own highest point, with a plain-words reading), then one story card per step: the story with numbers put in, the landscape, the numbers, and "Edit this step" folded away.
+5. **Ask the AI**: a prompt built from sections 1 to 3 and the numbers for every step. Copy it into Claude, paste the JSON reply back, and "Use these steps".
+6. **Then**: open in the Increment Viewer (a saved world, or the current draft), download or copy the JSON, save to the cloud (not yet), run in 3-D, animate.
 
-## Draft data shape (not final, to confirm in convo v0.1)
+Also: a world picker (rabbits, paper decay, a blank world), edits saved on this device, and a ⚙️ drawer lower right (show errors, reset to the example, import a world). Errors stay hidden until asked for. Deep link: `index.html?world=<id>`.
 
-```json
-{
-  "schema": 1,
-  "subject": { "id": "paper-sheet", "name": "White paper", "base": { "w": 8.5, "h": 11, "unit": "in" } },
-  "environment": { "id": "outdoor", "rules": { "wind": 0.6, "wet": 0.2, "traffic": 0.5 } },
-  "seed": 1234,
-  "steps": [
-    { "age": 1, "label": "Floating in the air", "events": [ { "op": "float", "params": {} } ] },
-    { "age": 2, "label": "Stepped on", "events": [ { "op": "stamp", "params": { "shape": "boot" } } ] }
-  ]
-}
-```
+## The world (schema 2)
 
-## Stages (from Jimmy's first narrative, to confirm)
+One JSON-like object, in `worlds/<id>.js`:
 
-| Steps | Stage | Events |
-|---|---|---|
-| 1–2 | Arrival | Floating in the air, a stamp (boot), a truck, a big crease |
-| 3–4 | Weather | Blown by wind, a tear |
-| 5+ | Life | Picks up junk, gets wet and fluffy, cut into two or more pieces, a nest with insects and animals |
+| Part | Holds |
+|---|---|
+| `kind` | growth, decay or collaboration |
+| `seed` | `prompt`, `scene` (list), `entities` (id, name, start, unit, note) |
+| `environment` | `prompt`, `variables` (id, name, value, unit, note) |
+| `time` | `unit`, `increments`, `perStep`, `calendar` (optional), `rules` (text with `{tokens}`), `notModelled`, `model: { type }` |
+| `chart` | which numbers to plot (key, name, colour) |
+| `steps` | per step: `label`, `narrative`, `landscape`, `events`, `open`, and `state` for recorded worlds |
+| `outputs` | where to look: `viewer` (`{ world }` or `{ set }`), `model3d` |
 
-Environment can be given by Jimmy or proposed by Claude from a place (outdoor, subway).
+Tokens: `{rabbits}`, `{hawks}`, `{plants_pct}`, `{season}`, `{year}`, `{landscape}` and so on are replaced by the step's numbers, so the story stays true when a variable changes. An unknown token is left as written, so a typo shows.
 
-## Views
+## Time models (`js/growth_model.js`)
 
-Built (MVP):
-- `paper3d.html`: the replayed sheet in 3-D (orbit, pinch and scroll zoom, step slider, back, play once through, next). Engine `js/paper_engine.js`, story `js/paper_story.js`, tests `tests/test_paper_engine.js` (plain Node).
-- Increment Viewer story (`growth_paper`), with 3-D renders in `renders/growth_3d_01..10.png`.
+A time model turns the world into a state for every increment. New ones are added to `MODELS`.
 
-- **Increment Viewer**: one data file per story (`data/<name>.js`, `?set=<name>`). Each step has a render image, a description and the changes. Reuse the existing format.
-- **3-D viewer**: one step opened as a model. Renders per step are made from the 3-D viewer and saved to `renders/`.
-- **Quick view (⚙️ or a control)**: a time slider over the steps, so Jimmy can scrub. Layout follows the nursery iPad rules.
+- **ecosystem** (rabbits): plants regrow by season and keep their roots when grazed; rabbits eat, breed when fed, and starve when not; a hawk settles above a rabbit count and a coyote above a higher one; predators follow last season's rabbits; a few rabbits always survive in deep burrows. Every number comes from the variables and the calendar. Fixed formulas, no random numbers, so the same settings always give the same story.
+- **recorded**: the numbers come from a run (Paper Again's pieces, triangles and tallest point) and are shown as they were.
 
-## Database (proposed, not built)
+## Increment Viewer links
 
-- Store the whole story as one `jsonb` row (history and environment), like `m3d_scenes`. The row is the record, so no merge.
-- Table prefix `grw_` in the Architecture Supabase project, the same project Make 3D uses. Owner-only RLS, anon revoked, registered in `table_index`.
-- Apply only after a rolled-back test, following `/supabase-project`.
-- The public repo holds the rules and sample stories with synthetic data. The database holds the live story.
+- `viewer.html?world=<id>`: a world from `Growth/worlds/<id>.js`.
+- `&step=<n>`: open on one step (the slideshow waits for Play). The address follows the step you are on.
+- `#draft=<base64>`: an unsaved world from the Growth page. It is data and shown only as text; pictures in a draft are ignored.
+- Steps with no picture show a state card (bars scaled to each series' highest value). `?set=<name>` still works as before.
+
+## Cloud (drafted, not applied)
+
+`supabase/001_grw_worlds.sql`: `grw_worlds` (current world as jsonb) and `grw_world_versions` (every saved version), owner-only RLS, anon revoked, registered in `table_index`. Test in a rolled-back transaction first, then apply with `/supabase-project`. The live Architecture project was listed read-only on 2026-11-03: no `grw_` tables yet.
+
+## Files
+
+- `index.html`, `js/app.js`: the page. `js/growth_model.js`: the world, the time models, the prompt and the reply reader (no DOM).
+- `worlds/`: `rabbits_hillside.js`, `paper_decay.js`, `index.js` (the list).
+- `tests/test_growth_model.js`: validation, the rabbit model (boom, predators, landscape, determinism, variable changes), text tokens, the AI loop, the review the viewer reads.
+- `tools/check_pages.js`: browser check of the page and the viewer links (`node tools/check_pages.js <screenshotDir>`).
+- `supabase/`, `todo.md`, `convo/`.
+- First attempt, kept: `paper3d.html`, `js/paper_engine.js`, `js/paper_story.js`, `tests/test_paper_engine.js`, `renders/` (superseded by Paper Again for the 3-D version).
+
+## Known limits
+
+- The rabbit model is a simple discrete model, tuned by hand to give a believable arc. It is not fitted to real rabbit data.
+- The river and the slope are in the story, not in the numbers. Weather is not modelled.
+- The story's words were written for the numbers as they stand; a large change to a variable may need a rewrite (section 5).
+- The AI loop is copy and paste; the page never calls a model.
+- Ten steps is too short to see whether the rabbit cycle settles.
 
 ## Open decisions
 
-See `convo/convo v0.1.md`. Current questions: total number of steps, the base sheet and its size, the environment, the 3-D look (mesh or flat with bends), whether each step gets a render, the database choice, and whether the engine should be general (for trees and objects later) or paper only at first.
-
-## Out of scope (for now)
-
-- Real physics or simulation.
-- Any private family data or photos.
-- Multiple subjects in one page.
+See `convo/convo v0.2.md`.
