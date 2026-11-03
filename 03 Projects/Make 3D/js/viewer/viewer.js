@@ -574,6 +574,8 @@
         }
         return { parts, skipped };
       },
+      // measurement (V2): what the last frame drew
+      stats: () => ({ triangles: renderer.info.render.triangles, draws: renderer.info.render.calls, meshes: meshes.length }),
       viewState: () => ({ radius, theta, phi }),
       setView(v) { if (v.target) target.set(...toScene(v.target)); if (v.radius) radius = v.radius; if (v.theta !== undefined) theta = v.theta; if (v.phi !== undefined) phi = v.phi; requestRender(); },
     };

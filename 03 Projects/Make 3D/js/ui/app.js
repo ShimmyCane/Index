@@ -1090,6 +1090,7 @@
     st.history = b.history; st.world = b.world; st.motion = b.motion || null;
     st.cursor = st.history.operations.length;
     st.viewer = M.createViewer($('view'));
+    window.M3D_viewer = st.viewer;   // for the headless measurement checks (tools outside the page read it)
     st.viewer.onSelect(select);
     st.viewer.onTick(renderAnim);
     window.__m3dViewer = st.viewer;   // for the headless checks (tools/anim_check.js)

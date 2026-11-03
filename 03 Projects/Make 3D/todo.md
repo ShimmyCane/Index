@@ -11,13 +11,13 @@ Plan and research: `04 AI/Make 3D/research/v2_plan.md` and `trellis2_notes.md`. 
 - [x] Archive V1 (`V1/`, frozen app), Settings > Versions links both ways, separate `make3d.v2.*` storage keys.
 - [x] P1 material spec: `roughness` and `metalness` in the material table; `set_material` operation (history, validated); viewer uses them (`tests/test_materials.js`).
 - [x] P2 canvas-free patterns: wood, tile, stripe as pixel tiles (`js/core/patterns.js`, `tests/test_patterns.js`). Set with a `set_material` operation for now.
-- [ ] P2b: material controls in the gear panel or the Add form (sliders for roughness and metalness, pattern picker, pattern colour and scale). Design to match V1 panels.
-- [ ] P2c: leaf pattern (from the plan). Check the wood and tile looks on iPad before tuning.
-- [x] P3 PBR viewer: lighting from a generated room (PMREM from a small scene in `js/viewer/viewer.js`, no addon). Hemisphere light lowered to 0.7 to keep the scene's brightness. Checked on the planter in headless Chromium. [ ] Still to check: the kitchen, and on iPad.
-- [ ] P4 staged passes: structure, shape and material as cached stages keyed by a hash of the history prefix. Test that an edit reruns only the later stages.
-- [ ] P5 GLB export: vendor `GLTFExporter` and write textures and decimated meshes. Test by loading the GLB back with `GLTFLoader`. IFC export unchanged.
+- [x] P2b material controls in Settings: material, colour, roughness, metalness, pattern, pattern colour, repeats. Each change is a set_material step (checked headless).
+- [x] P2c leaf pattern: veins and shading (`tests/test_patterns.js`).
+- [x] P3 PBR viewer: lighting from a generated room (PMREM from a small scene in `js/viewer/viewer.js`, no addon). Hemisphere light lowered to 0.7 to keep the scene's brightness. Checked on the planter and kitchen in headless Chromium. [ ] Still to check: on iPad.
+- [x] P4 staged passes: `js/core/stages.js` (structure, shape, material), each cached by a hash of the history it reads. A material edit reruns only the material stage (`tests/test_stages.js`). The viewer still uses the full replay; wiring it in is a later step.
+- [x] P5 GLB export: `js/core/glb.js` writes glTF 2.0 from baked meshes, with PBR factors and pattern textures as PNG (`tests/test_glb.js`). Export GLB (3-D) button in Settings; the planter downloads as valid GLB in headless Chromium. Not done: decimation (not needed yet: planter about 5,000 triangles) and a check in a third-party glTF viewer.
 - [?] P6 optional generator slot (load a GLB from an outside service). Off by default; no keys in the repo. Jimmy decides whether it is wanted (it breaks the client-side rule in the Make 3D preferences).
-- [ ] Measure triangle counts and frame times on the planter, kitchen and outdoor table in the headless browser; then check on a real iPad.
+- [x] Measured in headless Chromium (software GL, so frame times are only a rough guide): planter 4,956 triangles, 20 meshes, about 28 ms a frame; outdoor table V2 44,280 triangles, 197 meshes, about 97 ms; kitchen 876 triangles, 24 meshes, about 50 ms. [ ] Still to check on a real iPad.
 - [?] The V2 skill (`02 Refs/Skills/make_3d.md`) is unchanged. Jimmy says whether to draft `make_3d_v2` for review.
 - [?] TRELLIS.2 paper: arXiv was blocked from this session. Read it from a connected session before relying on paper-level claims.
 
