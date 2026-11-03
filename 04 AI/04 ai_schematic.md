@@ -22,7 +22,7 @@ Projects with notes:
 - Increment Viewer/ — subject-neutral slideshow and running log for reviewing increments. `brief.md`.
 - Living Room Scene/ — scene built from a photo over ten versions (V1–V10), render-and-compare loop. `brief.md` (version log), `lessons.md`.
 - Shimmy Specs/ — spec-writing process app; MVP planned (`mvp schematic.md`, `mvp tasks.md`). `brief.md`, `lessons.md`.
-- Growth/ — algorithmic ageing of a model (first subject: white paper). MVP: ten-step test story in the Increment Viewer; convo v0.1 answered in part. `brief.md`.
+- Growth/ — algorithmic ageing of a model (first subject: white paper). MVP: ten-step paper story replayed in 3-D (`paper3d.html`, engine and tests in `js/` and `tests/`) and in the Increment Viewer; convo v0.1 answered in part. `brief.md`.
 
 Notes:
 - Lessons in this folder come from the private ShimmyAI repo's `04 AI/`. Only generic lessons were carried over. Family and personal details were not.

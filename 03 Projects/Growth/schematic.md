@@ -1,6 +1,6 @@
 # Growth: schematic
 
-Status: idea. Started 2026-11-03 with `/start-project growth`. Questions are in `convo/convo v0.1.md`.
+Status: MVP. Started 2026-11-03 with `/start-project growth`. Ten-step paper story as a 3-D replay (`paper3d.html`) and in the Increment Viewer (`?set=growth_paper`). Questions are in `convo/convo v0.1.md`.
 
 ## Purpose
 
@@ -50,6 +50,10 @@ Nothing is stored as a derived shape alone. The steps and seed are the record. S
 Environment can be given by Jimmy or proposed by Claude from a place (outdoor, subway).
 
 ## Views
+
+Built (MVP):
+- `paper3d.html`: the replayed sheet in 3-D (orbit, pinch and scroll zoom, step slider, back, play once through, next). Engine `js/paper_engine.js`, story `js/paper_story.js`, tests `tests/test_paper_engine.js` (plain Node).
+- Increment Viewer story (`growth_paper`), with 3-D renders in `renders/growth_3d_01..10.png`.
 
 - **Increment Viewer**: one data file per story (`data/<name>.js`, `?set=<name>`). Each step has a render image, a description and the changes. Reuse the existing format.
 - **3-D viewer**: one step opened as a model. Renders per step are made from the 3-D viewer and saved to `renders/`.
