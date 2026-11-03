@@ -79,3 +79,8 @@
 * **When Jimmy asks for realism, he means physical, not cartoon.** Ask for the target look before building. Pastel stays for kids' games.
 * **Show the limits with the result.** Jimmy values a result that says what it is not.
 * **He wants to see it, then decide.** Merge when asked, not before.
+
+## 7. Reviewing 3-D (from Cornice, 2026-11-03)
+* **Rotate the view.** Show a 3-D model from several angles, not only the default camera. The first look can hide the layout.
+* **Sweep when he asks for curves.** Arcs and curves on a moulding are a sweep along the path, not stepped slices.
+* **Walls meet the floor and the ceiling line.** Nothing should float under a cornice; if he says it looks off, check for a gap first.

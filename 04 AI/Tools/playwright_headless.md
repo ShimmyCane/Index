@@ -8,3 +8,5 @@
 3. **`selectOption` and `click` wait for visibility.** A control inside a closed drawer times out. Set the value with `page.evaluate`, or open the drawer first.
 4. **Emoji symbols may not render.** Headless fonts show ⏸ as a box. Use small inline SVG icons for buttons that must read on every device.
 5. **Save screenshots outside the repo** (the scratchpad), and look at them before calling a visual change done.
+6. **Orbit a Make 3D scene by dragging.** The viewer orbits on pointer drag (about 0.008 radians per pixel). Move the mouse in steps while the button is down to reach a fixed angle, then screenshot.
+7. **The library shows only the latest version of a project.** Older versions sit behind the `proj-more` toggle, which closes when clicked again. Open it only when `ul.versions` is hidden.
