@@ -1,0 +1,278 @@
+:root {
+  --ink: #3d3434;
+  --paper: #fbf6e9;
+  --meadow: #dff0d8;
+  --neutral: #efe3c4;
+  --mint: #8fe0bd;
+  --coral: #ff9e87;
+  --sun: #ffd966;
+  --lavender: #c3adf0;
+  --lake: #a9d8ea;
+  --road: #b9a98f;
+  --red-soft: #ffd3cc;
+}
+
+[hidden] { display: none !important; }
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--paper);
+  background-image: radial-gradient(var(--meadow) 2px, transparent 2.5px);
+  background-size: 28px 28px;
+  color: var(--ink);
+  font-family: "Trebuchet MS", "Avenir Next Rounded", system-ui, sans-serif;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.top {
+  height: 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.top h1 {
+  margin: 0;
+  font-size: clamp(24px, 4vw, 34px);
+  letter-spacing: 0.5px;
+}
+.pill {
+  margin: 0;
+  padding: 6px 16px;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  background: var(--sun);
+  box-shadow: 0 3px 0 var(--ink);
+  font-size: clamp(14px, 2.2vw, 18px);
+  font-weight: 700;
+}
+
+.stage {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0 12px;
+}
+
+.board {
+  position: relative;
+  width: min(96vw, calc((100vh - 140px) * 1.5625));
+  aspect-ratio: 1000 / 640;
+  background: var(--meadow);
+  border: 3px solid var(--ink);
+  border-radius: 28px;
+  box-shadow: 0 6px 0 var(--ink);
+  overflow: hidden;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+#armies, #roads { overflow: visible; }
+
+.road {
+  stroke: var(--road);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 2 14;
+  opacity: 0.8;
+}
+.drag {
+  stroke: var(--ink);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 2 14;
+}
+.drag.ok { stroke: #2f9e6a; }
+.drag.bad { stroke: #d1495b; }
+
+/* Soldiers on the march */
+.army circle {
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+.army text {
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--ink);
+  font-family: inherit;
+}
+.army.o0 circle { fill: var(--mint); }
+.army.o1 circle { fill: var(--coral); }
+.army.o2 circle { fill: var(--sun); }
+.army.o3 circle { fill: var(--lavender); }
+
+/* Lakes */
+.lake {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 8%;
+  aspect-ratio: 1;
+  border-radius: 46%;
+  background: var(--lake);
+  border: 3px solid var(--ink);
+  box-shadow: 0 4px 0 var(--ink);
+}
+
+/* Spots (fabrication centers and cities) */
+.node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 6.8%;
+  aspect-ratio: 1;
+  border: 3px solid var(--ink);
+  box-shadow: 0 4px 0 var(--ink);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+  font-weight: 700;
+  line-height: 1;
+  background: var(--neutral);
+  transition: transform 0.1s ease;
+}
+.node.city { border-radius: 24%; width: 7.6%; }
+.node .ico { font-size: clamp(14px, 2.6vw, 24px); }
+.node .num { font-size: clamp(12px, 2vw, 18px); margin-top: 1px; }
+
+.node.neutral { background: var(--neutral); }
+.node.o0 { background: var(--mint); }
+.node.o1 { background: var(--coral); }
+.node.o2 { background: var(--sun); }
+.node.o3 { background: var(--lavender); }
+.node.source { transform: translate(-50%, -50%) scale(1.12); }
+.node.target { outline: 4px dashed var(--ink); outline-offset: 4px; }
+
+/* Overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(251, 246, 233, 0.82);
+  z-index: 10;
+}
+.card {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 24px;
+  box-shadow: 0 6px 0 var(--ink);
+  padding: 24px 28px;
+  text-align: center;
+  max-width: 90vw;
+}
+.card h2 { margin: 0 0 8px; font-size: clamp(22px, 4vw, 32px); }
+.card p { margin: 0 0 16px; font-size: 18px; }
+
+/* Big buttons */
+button {
+  font-family: inherit;
+  color: var(--ink);
+  cursor: pointer;
+}
+.big {
+  min-height: 56px;
+  padding: 0 22px;
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  background: var(--sun);
+  box-shadow: 0 4px 0 var(--ink);
+  font-size: 18px;
+  font-weight: 700;
+}
+.big:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+
+/* Gear (lower right) and panel */
+.gear {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: 3px solid var(--ink);
+  background: var(--coral);
+  box-shadow: 0 5px 0 var(--ink);
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+.gear:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--ink); }
+
+.panel {
+  position: fixed;
+  right: 20px;
+  bottom: 104px;
+  width: min(340px, 92vw);
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 22px;
+  box-shadow: 0 5px 0 var(--ink);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 20;
+}
+.panel h2 { margin: 0; font-size: 22px; }
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 17px;
+  font-weight: 700;
+}
+.seg { display: flex; gap: 6px; }
+.seg button,
+.toggle {
+  min-width: 56px;
+  min-height: 48px;
+  padding: 0 12px;
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  background: var(--neutral);
+  box-shadow: 0 3px 0 var(--ink);
+  font-size: 17px;
+  font-weight: 700;
+}
+.seg button[aria-pressed="true"],
+.toggle[aria-pressed="true"] { background: var(--mint); }
+
+/* Errors live at the bottom and only show when opted in */
+.errors {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 28vh;
+  overflow: auto;
+  background: var(--red-soft);
+  border-top: 3px solid var(--ink);
+  padding: 8px 16px;
+  font-size: 14px;
+  z-index: 15;
+}
+.errors div { padding: 4px 0; border-bottom: 1px dashed var(--ink); }
+
+@media (max-width: 500px) {
+  .top { height: 80px; }
+  .gear { width: 60px; height: 60px; right: 12px; bottom: 12px; }
+  .panel { right: 12px; bottom: 90px; }
+}
