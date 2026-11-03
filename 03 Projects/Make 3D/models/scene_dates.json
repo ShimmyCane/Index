@@ -116,8 +116,13 @@
   },
   "cornice-v02": {
     "created": "2026-11-03T05:18:07Z",
-    "updated": "2026-11-03T05:18:07Z",
-    "hash": "9346a67d8544debc"
+    "updated": "2026-11-03T17:51:20Z",
+    "hash": "a3300875fcbdd203"
+  },
+  "cornice-v03": {
+    "created": "2026-11-03T17:51:20Z",
+    "updated": "2026-11-03T17:51:20Z",
+    "hash": "b1d0f41cf9bff096"
   },
   "garden-planter": {
     "created": "2026-11-01T18:54:45Z",

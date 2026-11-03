@@ -1,7 +1,7 @@
 {
   "model_id": "cornice-v02",
   "name": "Cornice V02",
-  "description": "Same two rooms. V02: the cornice from the traced profile (slices of its outline, with the two steps).",
+  "description": "Same two rooms. V02: the cornice from the traced profile (slices of its outline, with the two steps) on the back wall of each room.",
   "units": "in",
   "up": "z",
   "world": "default-world",

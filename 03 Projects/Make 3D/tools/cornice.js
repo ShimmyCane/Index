@@ -5,7 +5,7 @@
 //
 // Sizes in inches, Z up, ground z = 0. Walls are 6 in thick. The two rooms share one wall (x = 0 to 6).
 //   Museum: x -360 to 0 (30 ft), y -120 to 120 (20 ft), walls to 288 in (24 ft). Picture on the far wall.
-//   Home:   x 6 to 180 (about 14 ft 6 in), y -120 to 120, walls to 108 in (9 ft).
+//   Home:   x 6 to 180, y -120 to 120, walls to 108 in (9 ft).
 // Each room has one person. They stand back to back across the shared wall, each facing away from it.
 //
 // Scale (estimate): one sketch unit = S inches. S is set by the labelled 8'-1" outline: 97 in over its
@@ -13,19 +13,22 @@
 // different scale (about 4 in per unit), so this is an estimate. Confirm with Jimmy.
 //
 // How the profile becomes solid: the schema has boxes, cylinders, spheres, cones and skeleton meshes, but no
-// extruded outline. Each closed outline is therefore cut into horizontal slices, one sketch unit tall. Each
-// slice is a box as wide as the outline is at that height (its leftmost and rightmost points). Concave
-// notches are filled in, so the slices show the outline's envelope, not its exact shape. The profile is
-// extruded along the whole wall (240 in). Freehand curves and the line are not included.
+// extruded outline. Each closed outline is cut into horizontal slices, one sketch unit tall. Each slice is a
+// box as wide as the outline is at that height (its leftmost and rightmost points). Concave notches are
+// filled in. The profile is extruded along each wall. Freehand curves and the line are not included.
 //
 // Increments (defsFor(v)):
-//   V01 blockout: rooms, people, picture, lights, and the cornice as one box (its bounding box).
-//   V02 profile:  the cornice as slices of the traced outlines. The box is removed (v < 2).
+//   V01 blockout: rooms, people, picture, lamps, and the cornice as one box (its bounding box). v < 2.
+//   V02 profile:  the traced profile on the back wall of each room, base down, projecting into the room. v === 2.
+//   V03 cutaway:  the near side walls (y = +120) are cut away so the rooms can be seen inside. Each room
+//                 has the cornice on three walls: the back wall (picture wall or far wall), the left side wall
+//                 (y = -120) and the shared wall. The profile is flipped, shelf at the top of the wall, so it
+//                 projects into the room and the thin fin hangs down the wall. v >= 3.
 
 const WORLD_ID = 'default-world';
 const S = 3.79;          // inches per sketch unit (estimate, see above)
 const REF_X = 1.53;      // sketch x at the wall face (the thin fin sits on the wall)
-const LEN = 240;         // cornice length along the wall (20 ft, the room depth)
+const LEN = 240;         // cornice length along a 20 ft wall
 
 // Outline slices from the sketch: [band, xmin, xmax], band = floor(y), in sketch units.
 const PROFILE = { ymin: -13.5483, ymax: 12.0457, rows: [
@@ -50,8 +53,8 @@ const PROFILE_H = (PROFILE.ymax - PROFILE.ymin) * S;   // 97 in
 const ENVELOPE_W = (23.23 - REF_X) * S;                // 82 in out from the wall
 
 // Room geometry (absolute)
-const MUSEUM = { wallX: -360, dir: 1, top: 288, zBase: 288 - PROFILE_H };   // wall face at x = -360, cornice grows toward +x
-const HOME = { wallX: 180, dir: -1, top: 108, zBase: 108 - PROFILE_H };     // wall face at x = 180, cornice grows toward -x
+const MUSEUM = { wallX: -360, dir: 1, top: 288, zBase: 288 - PROFILE_H };   // wall face at x = -360
+const HOME = { wallX: 180, dir: -1, top: 108, zBase: 108 - PROFILE_H };     // wall face at x = 180
 
 const MATERIALS = {
   wall: { color: '#f4efe4', opacity: 1 },
@@ -68,8 +71,7 @@ const MATERIALS = {
   ink: { color: '#2d2a26', opacity: 1 },
 };
 
-// One person, 6 ft tall, facing +X (facing = 1) or -X (facing = -1). Parts are absolute positions, as in the
-// other scenes.
+// One person, 6 ft tall, facing +X (facing = 1) or -X (facing = -1). Parts are absolute positions.
 function person(tag, label, xc, facing) {
   const e = xc + facing * 5.2; // eyes on the front of the head
   return [
@@ -86,37 +88,58 @@ function person(tag, label, xc, facing) {
   ];
 }
 
-// Horizontal slices of one outline, as boxes. Each slice is one sketch unit tall (or what the outline
-// takes up at its ends). Slices narrower than 1.2 in are widened to 1.2 in (the minimum-dimension rule).
-function slices(shape, prefix, mat, room, group) {
+// Horizontal slices of one outline, as boxes, on one wall.
+//   wall: { axis: 'x' (wall runs along y, at x = pos) or 'y' (wall runs along x, at y = pos),
+//           pos, dir (+1 or -1: the room side), along (centre of the cornice along the wall), len (its length),
+//           zBase (height of the profile's bottom), flip (true: shelf up) }
+//   prefix: key prefix; label: the name shown; group: parent group id.
+// Each slice is one sketch unit tall (or what the outline takes up at its ends). Slices narrower than 1.2 in
+// are widened to 1.2 in (the minimum-dimension rule).
+function slices(shape, prefix, label, mat, wall, group) {
   const out = [];
   shape.rows.forEach(([b, xmin, xmax]) => {
     const lo = Math.max(b, shape.ymin), hi = Math.min(b + 1, shape.ymax);
     const h = (hi - lo) * S;
     if (h < 1) return; // too thin to model; the outline's top sliver
-    const zc = ((lo + hi) / 2 - PROFILE.ymin) * S;   // height above the profile base
+    const yc = (lo + hi) / 2;
+    const zc = wall.flip ? (PROFILE.ymax - yc) * S : (yc - PROFILE.ymin) * S; // height above the profile's bottom
     const u0 = Math.max(0, (xmin - REF_X) * S);      // distance out from the wall
     const u1 = Math.max((xmax - REF_X) * S, u0 + 1.2);
-    out.push([`${prefix}-${b}`, { name: `${prefix === 'pm' || prefix === 'ph' ? 'Profile' : 'Step'} slice ${b}`, type: 'box', dimensions: [u1 - u0, LEN, h],
-      position: [room.wallX + room.dir * (u0 + u1) / 2, 0, room.zBase + zc], material: mat, parent: group }]);
+    const uc = (u0 + u1) / 2, w = u1 - u0;
+    const z = wall.zBase + zc;
+    const pos = wall.axis === 'x'
+      ? [wall.pos + wall.dir * uc, wall.along, z]
+      : [wall.along, wall.pos + wall.dir * uc, z];
+    const dims = wall.axis === 'x' ? [w, wall.len, h] : [wall.len, w, h];
+    out.push([`${prefix}-${b}`, { name: `${label} slice ${b}`, type: 'box', dimensions: dims, position: pos, material: mat, parent: group }]);
   });
   return out;
 }
 
-// v >= 1: rooms, people, picture, lamps; v < 2: the cornice as one box (blockout); v >= 2: the traced profile.
+// Adds one wall's cornice (profile plus two steps) as a group of slices.
+function cornice(add, key, label, wall) {
+  const gid = `${key}-cornice`;
+  add(gid, { name: `${label} cornice`, description: 'the traced profile, with its two steps', type: 'group', dimensions: [], position: [0, 0, 0] });
+  for (const [k, o] of [
+    ...slices(PROFILE, key, 'Profile', 'cornice', wall, gid),
+    ...slices(STEP_A, `${key}-a`, 'Step', 'step', wall, gid),
+    ...slices(STEP_B, `${key}-b`, 'Step', 'step', wall, gid),
+  ]) add(k, o);
+}
+
 function defsFor(v) {
   const d = [];
   const add = (k, o) => d.push([k, o]);
 
-  // Rooms
+  // Rooms. From V03 the near side walls (y = +120) are cut away.
   add('ground', { name: 'Floor', description: 'both rooms', type: 'box', dimensions: [372, 252, 1], position: [-90, 0, -0.5], material: 'floor' });
   add('wall-museum-back', { name: 'Museum picture wall', type: 'box', dimensions: [6, 252, 288], position: [-363, 0, 144], material: 'wall' });
   add('wall-museum-left', { name: 'Museum side wall (left)', type: 'box', dimensions: [372, 6, 288], position: [-180, -123, 144], material: 'wall' });
-  add('wall-museum-right', { name: 'Museum side wall (right)', type: 'box', dimensions: [372, 6, 288], position: [-180, 123, 144], material: 'wall' });
+  if (v < 3) add('wall-museum-right', { name: 'Museum side wall (right)', type: 'box', dimensions: [372, 6, 288], position: [-180, 123, 144], material: 'wall' });
   add('wall-shared', { name: 'Shared wall', description: 'between the two rooms', type: 'box', dimensions: [6, 252, 288], position: [3, 0, 144], material: 'wall' });
   add('wall-home-far', { name: 'Home far wall', type: 'box', dimensions: [6, 252, 108], position: [183, 0, 54], material: 'wall' });
   add('wall-home-left', { name: 'Home side wall (left)', type: 'box', dimensions: [174, 6, 108], position: [93, -123, 54], material: 'wall' });
-  add('wall-home-right', { name: 'Home side wall (right)', type: 'box', dimensions: [174, 6, 108], position: [93, 123, 54], material: 'wall' });
+  if (v < 3) add('wall-home-right', { name: 'Home side wall (right)', type: 'box', dimensions: [174, 6, 108], position: [93, 123, 54], material: 'wall' });
 
   // Picture: 14 ft tall, 10 ft wide, under the cornice
   add('frame', { name: 'Picture frame', description: '14 ft by 10 ft', type: 'box', dimensions: [2, 124, 172], position: [-359, 0, 96], material: 'frame' });
@@ -129,24 +152,36 @@ function defsFor(v) {
   d.push(...person('p-museum', 'Museum', -8, -1));
   d.push(...person('p-home', 'Home', 14, 1));
 
-  // v < 2: blockout box for each cornice
+  // V01: blockout box for each cornice (v < 2)
   if (v < 2) {
     add('env-museum', { name: 'Museum cornice (blockout)', description: 'bounding box of the profile', type: 'box', dimensions: [ENVELOPE_W, LEN, PROFILE_H], position: [MUSEUM.wallX + ENVELOPE_W / 2, 0, MUSEUM.zBase + PROFILE_H / 2], material: 'envelope' });
     add('env-home', { name: 'Home cornice (blockout)', description: 'bounding box of the profile', type: 'box', dimensions: [ENVELOPE_W, LEN, PROFILE_H], position: [HOME.wallX - ENVELOPE_W / 2, 0, HOME.zBase + PROFILE_H / 2], material: 'envelope' });
   }
 
-  // v >= 2: the traced profile in each room, with its two steps
-  if (v >= 2) {
-    for (const [room, tag, label] of [[MUSEUM, 'pm', 'Museum'], [HOME, 'ph', 'Home']]) {
-      const gid = `${tag}-cornice`;
-      add(gid, { name: `${label} cornice`, description: 'the traced profile, with its two steps', type: 'group', dimensions: [], position: [0, 0, 0] });
-      const sliceDefs = [
-        ...slices(PROFILE, tag, 'cornice', room, gid),
-        ...slices(STEP_A, `${tag}-a`, 'step', room, gid),
-        ...slices(STEP_B, `${tag}-b`, 'step', room, gid),
-      ];
-      for (const [k, o] of sliceDefs) add(k, o);
-    }
+  // V02: the traced profile on the back wall of each room, base down (v === 2). Kept as it was.
+  if (v === 2) {
+    const back = (room) => ({ axis: 'x', pos: room.wallX, dir: room.dir, along: 0, len: LEN, zBase: room.zBase, flip: false });
+    cornice(add, 'pm', 'Museum', back(MUSEUM));
+    cornice(add, 'ph', 'Home', back(HOME));
+  }
+
+  // V03 (v >= 3): cornice on three walls per room, flipped so the shelf projects into the room from the top.
+  if (v >= 3) {
+    const wallsOf = (zBase) => ({
+      museum: [
+        ['pm-back', 'Museum back', { axis: 'x', pos: -360, dir: 1, along: 0, len: 240 }],
+        ['pm-left', 'Museum left', { axis: 'y', pos: -120, dir: 1, along: -180, len: 360 }],
+        ['pm-shared', 'Museum shared', { axis: 'x', pos: 0, dir: -1, along: 0, len: 240 }],
+      ],
+      home: [
+        ['ph-far', 'Home far', { axis: 'x', pos: 180, dir: -1, along: 0, len: 240 }],
+        ['ph-left', 'Home left', { axis: 'y', pos: -120, dir: 1, along: 93, len: 174 }],
+        ['ph-shared', 'Home shared', { axis: 'x', pos: 6, dir: 1, along: 0, len: 240 }],
+      ],
+    });
+    const { museum, home } = wallsOf();
+    for (const [key, label, w] of museum) cornice(add, key, label, { ...w, zBase: MUSEUM.zBase, flip: true });
+    for (const [key, label, w] of home) cornice(add, key, label, { ...w, zBase: HOME.zBase, flip: true });
   }
 
   return d;
@@ -168,10 +203,21 @@ const CORNICE_V02 = {
   header: {
     model_id: 'cornice-v02',
     name: 'Cornice V02',
-    description: 'Same two rooms. V02: the cornice from the traced profile (slices of its outline, with the two steps).',
+    description: 'Same two rooms. V02: the cornice from the traced profile (slices of its outline, with the two steps) on the back wall of each room.',
     units: 'in', up: 'z', world: WORLD_ID, materials: MATERIALS,
   },
   defs: defsFor(2),
 };
 
-module.exports = { CORNICE: [CORNICE_V01, CORNICE_V02], PROFILE_H, S };
+const CORNICE_V03 = {
+  id: 'cornice-v03',
+  header: {
+    model_id: 'cornice-v03',
+    name: 'Cornice V03',
+    description: 'Cutaway: the near side walls are removed. Cornice on three walls per room (back, left side, shared), flipped so the profile projects into each room from the top of the wall.',
+    units: 'in', up: 'z', world: WORLD_ID, materials: MATERIALS,
+  },
+  defs: defsFor(3),
+};
+
+module.exports = { CORNICE: [CORNICE_V01, CORNICE_V02, CORNICE_V03], PROFILE_H, S };
