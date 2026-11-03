@@ -54,6 +54,12 @@
         <button id="btn-play" class="big hero">▶ Play</button>
         <button id="btn-howto" class="big">📖 How to play</button>
       </div>
+      <div class="diff" role="group" aria-label="Difficulty">
+        <button class="big diff-btn" data-diff="easy" aria-pressed="false">Easy</button>
+        <button class="big diff-btn" data-diff="medium" aria-pressed="false">Medium</button>
+        <button class="big diff-btn" data-diff="hard" aria-pressed="false">Hard</button>
+      </div>
+      <p id="diff-ratio" class="muted diff-ratio"></p>
       <div id="howto" class="howto" hidden>
         <ul>
           <li>Hold your finger on the sea to swim toward it. (Arrow keys work on a computer.)</li>
@@ -65,6 +71,8 @@
       </div>
       <p id="title-best" class="muted">No best score yet</p>
       <p id="title-db" class="db-line" data-state="off"></p>
+      <p id="title-version" class="version">Fishes v0.2 · 2026-11-03</p>
+      <button id="title-family" class="big family-link">🔐 Family database sign-in</button>
     </div>
     <p class="foot">Made for iPad. Notes for feedback are under ⚙️.</p>
   </section>
@@ -86,6 +94,7 @@
   <section id="panel" class="overlay panel" hidden aria-label="Settings">
     <div class="panel-card">
       <h2>Settings</h2>
+      <p class="version" id="panel-version">Fishes v0.2 · 2026-11-03</p>
       <div class="row">
         <span>Sound</span>
         <button id="sound-toggle" class="toggle" aria-pressed="true">On</button>
@@ -93,6 +102,18 @@
       <div class="row">
         <span>Show errors</span>
         <button id="errors-toggle" class="toggle" aria-pressed="false">Off</button>
+      </div>
+
+      <div class="note-box">
+        <h3>Family database</h3>
+        <p class="muted">Sign in with the family account (the same one Expansion Wars uses). Notes then go to the family table. The password is not kept on this device.</p>
+        <label for="family-email" class="muted">Email</label>
+        <input id="family-email" class="field" type="email" autocomplete="username" autocapitalize="off">
+        <label for="family-pass" class="muted">Password</label>
+        <input id="family-pass" class="field" type="password" autocomplete="current-password">
+        <button id="family-in" class="big hero">Sign in</button>
+        <button id="family-out" class="big">Sign out</button>
+        <p id="family-status" class="muted" aria-live="polite">Not signed in.</p>
       </div>
 
       <div class="note-box">
@@ -116,6 +137,7 @@
 
   <script src="js/species.js"></script>
   <script src="js/sound.js"></script>
+  <script src="js/family.js"></script>
   <script src="js/notes.js"></script>
   <script src="js/game.js"></script>
 </body>

@@ -49,24 +49,8 @@
     return '#' + ((1 << 24) | (r << 16) | (g << 8) | bl).toString(16).slice(1);
   }
 
-  // Colour and shape of the player change as it grows: baby clownfish, then a
-  // blue torpedo, then a whale shark at the top.
-  function playerDesc(size) {
-    var t = clamp((size - 1) / 99, 0, 1);
-    var col = hexMix('#ffb27a', '#8fb8e8', t);
-    var big = size >= 75;
-    return {
-      col: col,
-      fin: hexMix(col, '#ffffff', 0.3),
-      shape: big ? 'whale' : size >= 18 ? 'torpedo' : 'round',
-      hr: big ? 0.3 : size >= 18 ? 0.36 : 0.6,
-      bands: size < 6 ? [-0.35, 0.4] : null,
-      bandCol: '#ffffff',
-      spots: big,
-      spotCol: '#ffffff',
-      belly: size < 6 ? null : '#f7fbff'
-    };
-  }
+  // The player takes the form of its tier's lead species (evolution).
+  function playerDesc() { return run ? D.leadOf(run.level) : D.leadOf(1); }
 
   // ---------- canvas setup and background ----------
   function resize() {
@@ -376,7 +360,10 @@
     cam.x = r.x;
     cam.y = r.y;
     fillPopulations(true);
-    showBanner('Level ' + n + ': ' + r.info.name, r.info.zone.name + '. Goal: size ' + r.info.goal, 3200);
+    var lead = D.leadOf(n), evolved = !!r.form && r.form.id !== lead.id;
+    r.form = lead;
+    showBanner(evolved ? 'Evolved into ' + lead.name + '!' : 'Level ' + n + ': ' + r.info.name,
+      (evolved ? 'Level ' + n + ': ' + r.info.name + '. ' : '') + r.info.zone.name + '. Goal: size ' + r.info.goal, 3200);
   }
 
   function spawnNPC(sp, initial) {
@@ -395,17 +382,95 @@
     });
   }
 
-  function fillPopulations(initial) {
-    var r = run, n = r.info.n, counts = {};
-    r.npcs.forEach(function (o) { counts[o.sp.id] = (counts[o.sp.id] || 0) + 1; });
-    SPECIES.forEach(function (sp) {
-      if (sp.minL > n) return;
-      var target = sp.base * (1 + 0.06 * (n - 1));
-      if (sp.kind === 'hunter' || sp.kind === 'ambush') target *= (1 + 0.9 * r.tension);
-      target = Math.round(target);
-      var add = Math.min(target - (counts[sp.id] || 0), initial ? target : 2);
-      for (var i = 0; i < add; i++) spawnNPC(sp, initial);
+  // ---------- populations: the sea adapts to your size ----------
+  // Only a non-docile fish with a damaging temper (hunter or ambusher) can hurt you.
+  function canHurt(sp) { return (sp.kind === 'hunter' || sp.kind === 'ambush') && sp.temper !== 'docile'; }
+  function isThreat(o, P) { return canHurt(o.sp) && o.size >= P * 1.1; }
+  function isEdible(o, P) { return o.sp.kind !== 'harmless' && o.sp.kind !== 'food' && o.size <= P * 0.87; }
+
+  // Fish by tier relative to you: below (prey side), same, above (predator side).
+  function spread() {
+    var t = run.info.n, out = { below: 0, same: 0, above: 0 };
+    run.npcs.forEach(function (o) {
+      if (o.dead || o.sp.kind === 'food') return;
+      var d = o.sp.tier - t;
+      if (d < 0) out.below++; else if (d === 0) out.same++; else out.above++;
     });
+    return out;
+  }
+
+  function census() {
+    var P = run.size, c = { fish: 0, threat: 0, edible: 0, harmless: 0, food: 0 };
+    run.npcs.forEach(function (o) {
+      if (o.dead) return;
+      if (o.sp.kind === 'food') { c.food++; return; }
+      c.fish++;
+      if (o.sp.kind === 'harmless') c.harmless++;
+      if (isThreat(o, P)) c.threat++;
+      if (isEdible(o, P)) c.edible++;
+    });
+    return c;
+  }
+
+  // Share of new fish that are threats: the difficulty ratio, raised by up to 50% as time passes.
+  function threatShare() {
+    var base = D.DIFFICULTY[run.difficulty].share;
+    return Math.min(0.7, base * (1 + 0.5 * run.tension));
+  }
+
+  // Pick a species for a role. Predators come from 1–3 tiers above you, prey from 0–3 tiers below.
+  // Size still decides who is a threat or edible. If nothing fits that window, any size-fitting species is used.
+  function pickSpecies(role, P) {
+    var t = run.info.n;
+    var inTiers = function (sp) {
+      if (role === 'threat') return sp.tier > t && sp.tier <= t + 3;
+      if (role === 'harmless') return sp.tier >= t && sp.tier <= t + 3;
+      return sp.tier <= t && sp.tier >= t - 3;
+    };
+    var fits = function (sp) {
+      if (sp.kind === 'food') return false;
+      if (role === 'threat') return canHurt(sp) && sp.size >= P * 1.15 && sp.size <= P * 1.9;
+      if (role === 'harmless') return sp.kind === 'harmless' && sp.size <= P * 1.6;
+      return sp.kind !== 'harmless' && sp.size >= P * 0.25 && sp.size <= P * 0.85;
+    };
+    var pool = SPECIES.filter(function (sp) { return fits(sp) && inTiers(sp); });
+    if (!pool.length) pool = SPECIES.filter(fits);
+    return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+  }
+
+  function pickRole(c) {
+    if (c.harmless < 1 + Math.floor(run.info.n / 3) && Math.random() < 0.08) return 'harmless';
+    var total = c.threat + c.edible;
+    return (total === 0 || c.threat / total < threatShare()) ? 'threat' : 'edible';
+  }
+
+  function fillPopulations(initial) {
+    var r = run, n = r.info.n, counts = {}, i;
+    // Food first: plankton from tier 1, krill from tier 2.
+    r.npcs.forEach(function (o) { if (!o.dead) counts[o.sp.id] = (counts[o.sp.id] || 0) + 1; });
+    SPECIES.forEach(function (sp) {
+      if (sp.kind !== 'food' || sp.tier > n) return;
+      var target = Math.round(sp.base * (1 + 0.05 * (n - 1)));
+      var add = Math.min(target - (counts[sp.id] || 0), initial ? target : 4);
+      for (i = 0; i < add; i++) spawnNPC(sp, initial);
+    });
+    // Fish: a tier-sized population, split into threats and edible fish by the ratio.
+    var c = census();
+    var need = Math.round(22 + 2 * n) - c.fish;
+    var budget = initial ? 999 : 2;
+    while (need > 0 && budget > 0) {
+      var role = pickRole(c), actual = role;
+      var sp = pickSpecies(role, r.size);
+      if (!sp) { actual = 'edible'; sp = pickSpecies('edible', r.size); }
+      if (!sp) break;
+      spawnNPC(sp, initial);
+      c.fish++;
+      if (actual === 'threat') c.threat++;
+      else if (actual === 'harmless') c.harmless++;
+      else c.edible++;
+      need--;
+      budget--;
+    }
   }
 
   // ---------- player ----------
@@ -462,6 +527,19 @@
     return n.tgt;
   }
 
+  // Nearest fish this predator can eat (at least 1.25x smaller), within 240 units.
+  function findPrey(n) {
+    var r = run, best = null, bd = 240;
+    for (var i = 0; i < r.npcs.length; i++) {
+      var o = r.npcs[i];
+      if (o === n || o.dead || o.sp.kind === 'food' || o.sp.kind === 'harmless') continue;
+      if (o.size * 1.25 > n.size) continue;
+      var d = Math.hypot(o.x - n.x, o.y - n.y);
+      if (d < bd) { bd = d; best = o; }
+    }
+    return best;
+  }
+
   function updateNPC(n, dt, predators) {
     var sp = n.sp, r = run;
     n.t += dt;
@@ -502,12 +580,18 @@
       if (n.lunge > 0) {
         n.lunge -= dt;
         tx = n.lx; ty = n.ly; s = speed * 3.2; k = 8;
-      } else if (n.cool <= 0 && r.size * 1.1 < n.size && dp < range + n.size * 2) {
+      } else if (sp.temper === 'aggressive' && n.cool <= 0 && r.size * 1.1 < n.size && dp < range + n.size * 2) {
         n.lunge = 0.9; n.cool = 3.5;
         n.lx = r.x; n.ly = r.y;
         tx = n.lx; ty = n.ly; s = speed * 3.2; k = 8;
       } else {
-        tx = n.anchor.x + Math.sin(n.t * 0.6) * 30; ty = n.anchor.y + Math.cos(n.t * 0.5) * 20; s = speed * 0.35;
+        var ambushPrey = n.cool <= 0 ? findPrey(n) : null;
+        if (ambushPrey) {
+          n.lunge = 0.9; n.cool = 3.5; n.lx = ambushPrey.x; n.ly = ambushPrey.y;
+          tx = n.lx; ty = n.ly; s = speed * 3.2; k = 8;
+        } else {
+          tx = n.anchor.x + Math.sin(n.t * 0.6) * 30; ty = n.anchor.y + Math.cos(n.t * 0.5) * 20; s = speed * 0.35;
+        }
       }
     } else if (sp.kind === 'hunter') {
       var canEat = r.size * 1.1 < n.size;      // the player is prey to this fish
@@ -524,13 +608,14 @@
       if (!n.locked) {
         if (playerBig && dp < 220) {
           tx = n.x - dxp / dp * 400; ty = n.y - dyp / dp * 400; s = speed * 1.2; k = 5;
-        } else if (canEat && n.cool <= 0 && dp < sp.sense && Math.random() < (0.4 + 0.6 * r.tension) * dt) {
+        } else if (sp.temper === 'aggressive' && canEat && n.cool <= 0 && dp < sp.sense && Math.random() < (0.4 + 0.6 * r.tension) * dt) {
           n.locked = true;
           n.lockT = 7 + 2 * r.tension;
           tx = r.x; ty = r.y; s = sp.speed * (1.1 + 0.3 * r.tension) * n.spd; k = 4;
         } else {
-          var hw = wander(n, 900);
-          tx = hw.x; ty = hw.y; s = speed * 0.6;
+          var hunted = sp.temper !== 'docile' ? findPrey(n) : null;
+          if (hunted) { tx = hunted.x; ty = hunted.y; s = speed * 1.1; k = 3; }
+          else { var hw = wander(n, 900); tx = hw.x; ty = hw.y; s = speed * 0.6; }
         }
       }
     } else { // harmless
@@ -597,8 +682,9 @@
     checkGrowth();
   }
 
-  function hurt() {
+  function hurt(n) {
     var r = run;
+    r.hitBy = n.sp.name;
     if (r.inv > 0) return;
     r.lives--;
     FishSound.play('hurt');
@@ -621,8 +707,7 @@
     var d = Math.hypot(n.x - r.x, n.y - r.y);
     var reach = (lenFor(r.size, 'round') + lenFor(n.size, sp.shape)) * 0.36;
     if (d > reach) return;
-    var dangerous = sp.kind === 'hunter' || sp.kind === 'ambush';
-    if (dangerous && n.size >= r.size * 1.1) { hurt(); return; }
+    if (canHurt(sp) && n.size >= r.size * 1.1) { hurt(n); return; }
     if (r.size >= n.size * 1.15) eatNPC(n);
   }
 
@@ -644,7 +729,7 @@
       FishSound.play('win');
     } else if (reason === 'eaten') {
       title = 'Eaten!';
-      text = 'You reached level ' + r.level + ' (' + r.info.name + ') at size ' + r.size.toFixed(1) + '.';
+      text = 'Eaten by a ' + (r.hitBy || 'bigger fish') + '. You reached level ' + r.level + ' (' + r.info.name + ') at size ' + r.size.toFixed(1) + '.';
       FishSound.play('lose');
     } else {
       title = "Time's up";
@@ -672,6 +757,22 @@
     var i;
     for (i = 0; i < r.npcs.length; i++) {
       if (!r.npcs[i].dead) updateNPC(r.npcs[i], dt, predators);
+    }
+
+    // Fish eat fish: a non-docile fish at least 1.25x bigger eats a smaller fish it touches.
+    for (i = 0; i < r.npcs.length; i++) {
+      var eater = r.npcs[i];
+      if (eater.dead || eater.sp.kind === 'food' || eater.sp.kind === 'harmless' || eater.sp.temper === 'docile') continue;
+      for (var j = 0; j < r.npcs.length; j++) {
+        var meal = r.npcs[j];
+        if (meal === eater || meal.dead || eater.size < meal.size * 1.25) continue;
+        var md = Math.hypot(eater.x - meal.x, eater.y - meal.y);
+        if (md < (lenFor(eater.size, eater.sp.shape) + lenFor(meal.size, meal.sp.shape)) * 0.36) {
+          meal.dead = true;
+          r.npcEaten++;
+          burst(meal.x, meal.y, meal.sp.col || '#ffffff', 4);
+        }
+      }
     }
 
     var locks = 0;
@@ -715,7 +816,7 @@
     var list = run.npcs.slice();
     var playerVisible = !(run.inv > 0 && Math.floor(t * 10) % 2 === 0);
     if (playerVisible) {
-      list.push({ x: run.x, y: run.y, vy: run.vy, facing: run.facing, size: run.size, desc: playerDesc(run.size), isPlayer: true });
+      list.push({ x: run.x, y: run.y, vy: run.vy, facing: run.facing, size: run.size, desc: playerDesc(), isPlayer: true });
     }
     list.sort(function (a, b) { return a.size - b.size; });
     list.forEach(function (e) { drawEntity(e, t + (e.t || 0)); });
@@ -779,7 +880,7 @@
     var span = Math.max(1, r.info.goal - r.info.enterSize);
     var pct = clamp((r.size - r.info.enterSize) / span, 0, 1);
     $('hud-level').textContent = 'Level ' + r.level + ' · ' + r.info.name;
-    $('hud-zone').textContent = r.info.zone.name;
+    $('hud-zone').textContent = r.info.zone.name + ' · ' + D.DIFFICULTY[r.difficulty].label;
     $('size-fill').style.width = (pct * 100).toFixed(1) + '%';
     $('size-text').textContent = 'Size ' + r.size.toFixed(1) + ' / ' + r.info.goal;
     $('hud-lives').textContent = '❤️'.repeat(r.lives) || '—';
@@ -797,8 +898,23 @@
 
   function hideCard() { $('card').hidden = true; }
 
+  var DIFF_KEY = 'fish_difficulty';
+  function getDifficulty() {
+    try { var d = localStorage.getItem(DIFF_KEY); if (D.DIFFICULTY[d]) return d; } catch (e) { /* private mode */ }
+    return 'medium';
+  }
+  function refreshDiff() {
+    var cur = getDifficulty(), info = D.DIFFICULTY[cur];
+    document.querySelectorAll('[data-diff]').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-diff') === cur));
+    });
+    $('diff-ratio').textContent = info.label + ': ' + info.ratio + '. It gets harder after 2:30.';
+  }
+
   function showTitle() {
     mode = 'title';
+    $('title-version').textContent = 'Fishes v' + CFG.VERSION + ' · ' + CFG.VERSION_DATE;
+    $('panel-version').textContent = 'Fishes v' + CFG.VERSION + ' · ' + CFG.VERSION_DATE;
     run = null;
     paused = false;
     hideCard();
@@ -809,6 +925,7 @@
     $('panel').hidden = true;
     document.body.setAttribute('data-mode', 'title');
     refreshDbStatus();
+    refreshDiff();
   }
 
   function startRun() {
@@ -821,7 +938,8 @@
       lives: CFG.LIVES, eaten: 0, size: 1,
       x: 0, y: 0, vx: 0, vy: 0, facing: 1,
       stamina: 100, sprintCd: 0, sprinting: false, inv: 2.5,
-      npcs: [], parts: [], spawnT: 0, bannerT: 0, lockedCount: 0, score: 0
+      npcs: [], parts: [], spawnT: 0, bannerT: 0, lockedCount: 0, score: 0,
+      difficulty: getDifficulty(), form: D.leadOf(1), npcEaten: 0, hitBy: ''
     };
     run.x = run.info.W / 2;
     run.y = run.info.H / 2;
@@ -970,10 +1088,17 @@
 
   // Buttons
   $('btn-play').addEventListener('click', startRun);
+  document.querySelectorAll('[data-diff]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      try { localStorage.setItem(DIFF_KEY, b.getAttribute('data-diff')); } catch (e) { /* private mode */ }
+      refreshDiff();
+    });
+  });
   $('btn-howto').addEventListener('click', function () { $('howto').hidden = !$('howto').hidden; });
   $('card-again').addEventListener('click', startRun);
   $('card-title-btn').addEventListener('click', showTitle);
   $('card-note').addEventListener('click', function () { hideCard(); openPanel(); });
+  $('title-family').addEventListener('click', function () { openPanel(); $('family-email').focus(); });
   $('gear').addEventListener('click', function () { if ($('panel').hidden) openPanel(); else closePanel(); });
   $('panel-close').addEventListener('click', closePanel);
   $('panel-title').addEventListener('click', function () { closePanel(); showTitle(); });
@@ -992,6 +1117,31 @@
     renderErrors();
   });
   $('note-save').addEventListener('click', saveNote);
+
+  $('family-in').addEventListener('click', function () {
+    var email = $('family-email').value.trim(), pass = $('family-pass').value;
+    var line = $('family-status');
+    if (!email || !pass) { line.textContent = 'Enter the family email and password.'; return; }
+    line.textContent = 'Signing in…';
+    window.FishFamily.signIn(email, pass).then(function () {
+      $('family-pass').value = '';
+      line.textContent = 'Signed in. Notes now go to the family database.';
+      refreshDbStatus();
+    }).catch(function (err) {
+      $('family-pass').value = '';
+      line.textContent = err.message;
+      reportError('Family sign-in: ' + err.message);
+    });
+  });
+  $('family-out').addEventListener('click', function () {
+    window.FishFamily.signOut();
+    refreshDbStatus();
+  });
+  window.FishFamily.onChange(function (s) {
+    $('family-status').textContent = s.signedIn ? 'Signed in as ' + s.email + '.' : 'Not signed in.';
+    $('family-out').hidden = !s.signedIn;
+    $('family-in').hidden = s.signedIn;
+  });
 
   window.addEventListener('resize', resize);
 
@@ -1028,6 +1178,8 @@
       return {
         mode: mode, level: run && run.level, size: run && run.size, npcs: run ? run.npcs.length : 0,
         locks: run ? run.lockedCount : 0, lives: run && run.lives,
+        npcEaten: run && run.npcEaten, difficulty: run && run.difficulty, form: run && run.form && run.form.id,
+        census: run ? census() : null, spread: run ? spread() : null,
         player: run && { x: run.x, y: run.y }, cam: { x: cam.x, y: cam.y, scale: cam.scale },
         hunters: run ? run.npcs.filter(function (o) { return o.sp.kind === 'hunter'; }).map(function (o) { return { x: o.x, y: o.y, size: o.size, locked: o.locked }; }) : []
       };

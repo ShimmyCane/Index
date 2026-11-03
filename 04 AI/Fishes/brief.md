@@ -4,30 +4,37 @@
 
 ## Current state
 
-- MVP built in `03 Projects/Fishes/`: plain HTML/CSS/JS, canvas 2D, no build step. Not device-tested on iPad.
-- Twenty levels in five zones (Sunny Shallows, Coral Reef, Open Blue, Twilight, Deep Trench). Win at size 100 on level 20 (whale shark). Ends on three lives lost, win, or 15:00.
-- Species (22 incl. food) are inspired by real fish, each with a one-line real-fish note in `js/species.js`.
-- Hunters and ambushers lock on (red ring and a warning pill). Tension rises from 2:30 to 5:00.
-- Notes: cookie first (25 kept, `fish_notes`), database when `supabaseUrl`/`supabaseKey` are set. Status shows in ⚙️ and the title screen.
-- Database: `supabase/001_fish_notes.sql` written for the Family project (app `fishes`, registered in the same migration). **Not applied.** The page has no family sign-in, so writes will be refused (401/403) until sign-in exists. The page reports "needs family sign-in" in that case.
+- Plain HTML/CSS/JS canvas game in `03 Projects/Fishes/`. No build step. Not device-tested on iPad.
+- **20 tiers** (one per level, five depth zones), **88 species** (3–8 per tier, food included). Each species has a **temper**: docile (never attacks or locks on), wary (hunts smaller fish, ignores you when smaller, no lock-on), aggressive (hunts smaller fish, locks on to you when smaller).
+- **Evolution:** the player takes its tier's lead species (first listed for the tier). Banner "Evolved into …".
+- **Fish eat fish:** a non-docile fish ≥1.25× bigger eats a smaller fish it touches, and hunters hunt smaller fish nearby.
+- **Adaptive sea:** predators come from 1–3 tiers above the player, prey from 0–3 tiers below (or the same tier). Size still decides who is a threat (≥1.1× you, non-docile, can hurt you) or edible (≤0.87× you). Fallback to any size-fitting species if the window is empty.
+- **Difficulty = predator:prey ratio** (title screen): Easy 1:4 (20% predators), Medium 1:2 (33%), Hard 1:1 (50%). Up to +50% from 2:30 (capped at 70%).
+- Win at size 100 on tier 20. Ends on three lives lost, win, or 15:00. The end card says what ate you.
+- **Family database:** `fish_notes` is live in the Family project (migration `fishes_fish_notes`). Sign-in is the same family account as Expansion Wars, via ⚙️ → Family database. Session tokens are kept on the device; the password is not. Notes always save to the cookie first (25 kept), then to the family table when signed in.
 
 ## Architecture
 
-- `js/species.js`: `FishData` (SPECIES, ZONES, GOALS, LEVEL_NAMES, levelInfo, CONFIG).
-- `js/game.js`: simulation, drawing and input. Test hook `window.FishGame.state()` and `debugSetSize(n)`.
-- `js/notes.js`: `FishNotes` (add, list, status). Cookie plus localStorage fallback.
-- `js/sound.js`: `FishSound` (play, unlock, enabled/setEnabled). Created on the first touch.
+- `js/species.js`: `FishData` (SPECIES with `tier`/`temper`/`kind`, ZONES, GOALS, LEVEL_NAMES, DIFFICULTY, levelInfo, leadOf, CONFIG incl. the Family URL and publishable key).
+- `js/game.js`: simulation (`fillPopulations`, `census`, `spread`, `pickSpecies` with tier windows, `pickRole`, `canHurt`, `isThreat`, `isEdible`), NPC AI in `updateNPC` with `findPrey`, fish-eat-fish in `update`, drawing, input, panel. Test hook `window.FishGame.state()` (census, spread, npcEaten, form, difficulty) and `debugSetSize(n)`.
+- `js/family.js`: `FishFamily` (signIn, signOut, token with refresh, onChange). Password is sent to Supabase only.
+- `js/notes.js`: `FishNotes`. Cookie plus localStorage fallback; sends with the family token, refreshing once on 401/403.
+- `js/sound.js`: `FishSound`. Created on first touch.
 
 ## Verified vs. unverified
 
-- Verified (headless Chromium, 1194 × 834, served over HTTP): page loads; title → play; growth from pointer input; no page errors after the fix below; level jumps (size 20 → level 10; size 100 → level 20 win); level 9 locks on and a hit costs a life; cookie notes saved over HTTP; deep-level screenshots show the species drawn.
-- Bug caught and fixed during testing: NPCs were drawn with `desc` instead of `sp`, so every NPC threw each frame (the loop caught it, so the page kept running). Errors now show only when "Show errors" is on, and this one showed up there.
-- Unverified: pacing (the 8–15 minute target has not been measured; no full-run bot yet); difficulty and hit balance (three hits in a few seconds is harsh); touch feel on iPad; the SQL test (not run against Supabase); the database write path (keys blank).
+- Verified (headless Chromium, served over HTTP, no page errors):
+  - Species per tier: 4,5,4,5,5,5,5,5,5,4,5,4,5,4,4,4,5,4,3,3 (total 88).
+  - Predator share at tier 5 / tier 10: easy 0.22 / 0.22, medium 0.34 / 0.33, hard 0.46 / 0.49.
+  - Spawn spread at tier 10 (medium): 24 below, 3 same, 13 above. The prey and predator windows are working.
+  - Fish eat fish, evolution, level jumps and the win state (earlier round).
+  - Family panel: a wrong password is refused and shown on the page; the note is kept in the cookie and the status reads "needs family sign-in".
+- Live database checks (Supabase MCP, not the browser): rolled-back test returned `note_saved=t bad_row_rejected=t delete_denied=t anon_denied=t`; the real migration applied; RLS on; `anon` has no grants; `authenticated` has INSERT and SELECT.
+- **Not verified:** a successful family sign-in and a note landing in the table. The sandbox cannot reach `supabase.co` from the browser, so this must be done on the iPad by Jimmy.
+- Unverified: run length (8–15 minutes); balance of predator sizes per tier; iPad touch feel; how docile fish read on screen.
 
 ## Next steps
 
-1. Jimmy answers `convo/convo v0.1.md`.
-2. Play on iPad; note slow, fiddly or unfair moments with the ⚙️ notes.
-3. Run the rolled-back test in the Family project, then apply `001_fish_notes.sql` by hand. Add the family sign-in before filling in the keys.
-4. Measure the run length with a simple bot or by timed play; tune GOALS, prey gain (0.4) and hunter sizes.
-5. Look at hit rules (one life per contact vs. a 3-second window).
+1. Jimmy signs in on the iPad (⚙️ → Family database) and saves a test note. Check it in the family table.
+2. Play one full run per difficulty; time it against 8–15 minutes and note unfair moments in ⚙️.
+3. Tune: prey gain (0.4 of prey size), tier windows (currently 1–3 tiers), fish target (22 + 2×tier), threat cap (70%).
