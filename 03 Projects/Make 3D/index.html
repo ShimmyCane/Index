@@ -236,6 +236,32 @@
       <option value="in">Inches</option>
     </select>
   </label>
+  <h3>Material</h3>
+  <label class="field">Material
+    <select id="matSel"></select>
+  </label>
+  <label class="field">Colour <input id="matColor" type="color"></label>
+  <label class="field">Roughness <span id="matRoughRead"></span>
+    <input id="matRough" type="range" min="0" max="1" step="0.05">
+  </label>
+  <label class="field">Metalness <span id="matMetalRead"></span>
+    <input id="matMetal" type="range" min="0" max="1" step="0.05">
+  </label>
+  <label class="field">Pattern
+    <select id="matPattern">
+      <option value="none">None (flat colour)</option>
+      <option value="wood">Wood</option>
+      <option value="tile">Tile</option>
+      <option value="stripe">Stripes</option>
+      <option value="leaf">Leaf</option>
+    </select>
+  </label>
+  <label class="field">Pattern colour <input id="matPatColor" type="color"></label>
+  <label class="field">Repeats across each face
+    <select id="matScale"></select>
+  </label>
+  <p class="hint">Each change is a Set material step in the history, so it can be undone.</p>
+
   <div class="field-row">
     <label class="toggle"><input id="showErrors" type="checkbox"> Show errors</label>
   </div>

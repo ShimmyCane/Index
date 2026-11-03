@@ -1008,6 +1008,38 @@
     $('scrub').addEventListener('input', (e) => { st.cursor = Number(e.target.value); st.preview = null; st.rejected = null; render(); });
     $('latestBtn').addEventListener('click', () => { st.cursor = st.history.operations.length; render(); });
 
+    // P2b: material controls. Each change is a set_material operation, so it is in the history and replays.
+    const MAT_DEFAULT = { color: '#c9c3b5', opacity: 1, roughness: 0.75, metalness: 0, pattern: 'none', pattern_scale: 1 };
+    for (let k = 1; k <= 8; k++) { const o = document.createElement('option'); o.value = String(k); o.textContent = `${k}×`; $('matScale').appendChild(o); }
+    function refreshMatControls() {
+      const sel = $('matSel'), keep = sel.value;
+      const model = shown(), table = model.materials || {}, names = Object.keys(table);
+      sel.innerHTML = '';
+      names.forEach((k) => { const o = document.createElement('option'); o.value = k; o.textContent = k; sel.appendChild(o); });
+      if (!names.length) return;
+      sel.value = names.includes(keep) ? keep : names[0];
+      const e = Object.assign({}, MAT_DEFAULT, table[sel.value]);
+      $('matColor').value = e.color;
+      $('matRough').value = e.roughness; $('matRoughRead').textContent = Number(e.roughness).toFixed(2);
+      $('matMetal').value = e.metalness; $('matMetalRead').textContent = Number(e.metalness).toFixed(2);
+      $('matPattern').value = e.pattern || 'none';
+      $('matPatColor').value = e.pattern_color || e.color;
+      $('matScale').value = String(e.pattern_scale || 1);
+    }
+    function matChange(set) {
+      const id = $('matSel').value;
+      if (id) applyOp({ op: 'set_material', material: id, set });
+    }
+    $('gearBtn').addEventListener('click', refreshMatControls);
+    $('matSel').addEventListener('change', refreshMatControls);
+    $('matColor').addEventListener('change', (e) => matChange({ color: e.target.value }));
+    $('matRough').addEventListener('input', (e) => { $('matRoughRead').textContent = Number(e.target.value).toFixed(2); });
+    $('matRough').addEventListener('change', (e) => matChange({ roughness: Number(e.target.value) }));
+    $('matMetal').addEventListener('input', (e) => { $('matMetalRead').textContent = Number(e.target.value).toFixed(2); });
+    $('matMetal').addEventListener('change', (e) => matChange({ metalness: Number(e.target.value) }));
+    $('matPattern').addEventListener('change', (e) => matChange({ pattern: e.target.value }));
+    $('matPatColor').addEventListener('change', (e) => matChange({ pattern_color: e.target.value }));
+    $('matScale').addEventListener('change', (e) => matChange({ pattern_scale: Number(e.target.value) }));
     $('modelName').addEventListener('change', (e) => applyOp({ op: 'set_header', set: { name: e.target.value.trim() || st.history.model_id } }));
     $('modelDesc').addEventListener('change', (e) => applyOp({ op: 'set_header', set: { description: e.target.value.trim() } }));
 
