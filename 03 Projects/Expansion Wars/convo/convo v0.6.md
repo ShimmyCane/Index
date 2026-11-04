@@ -45,7 +45,9 @@
    >
    > **Jimmy (later):** The fortress goes from 120 to 160 and then to 200.
    >
-   > **Still open:** is 120 → 160 → 200 the range in map units (the base range is 120, so the steps add 40 each, not 20), or the soldier cap (the base cap is 40)? Please say which, and the cost of each step.
+   > **Jimmy (confirmed):** They are soldiers. Cap 100, then 160, then 200. Range 120, +20 a step. Shooting 2, +2 a step.
+   >
+   > **Built, with my defaults to check:** three fortress levels. Level 2 costs 80 soldiers and takes 10 seconds; level 3 costs 100 and takes 10 seconds (each cost is 50% of the next cap). Converting a metropolis costs 50 (50% of 100). A captured fortress drops one level. Stars show the level.
 
 ---
 
