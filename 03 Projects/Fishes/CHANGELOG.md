@@ -2,6 +2,11 @@
 
 Every version the team can open, newest first. The version shows on the title screen and at the top of ⚙️ Settings. If you see a different version there than below, you are looking at an older copy.
 
+## 0.7 — 2026-11-04 (feedback round 5)
+- Growth: each level takes about nine fish meals at most. Each meal gives at least a ninth of the level's size range (the 1/10 slowdown is gone). Plankton and chum keep their rate.
+- Your school (from level 10): a pod of your own species follows you, bites smaller fish, and grows with you. There are 2 at level 10, up to 12 by level 20.
+- Feeding chum near the pod gives a 50% chance of a new member (up to 12).
+
 ## 0.6 — 2026-11-04 (feedback round 4)
 - Level up keeps the fish around you. Background colours fade to the new zone over two seconds. No new species swap in next to you; new species appear far away, gradually.
 - Growth from fish meals is 1/10 as fast from level 2 on. Level 1 keeps its pace, with more plankton to find.

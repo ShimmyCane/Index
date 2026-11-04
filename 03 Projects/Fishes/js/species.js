@@ -289,8 +289,7 @@
   }
 
   var CONFIG = {
-    VERSION: '0.6',
-    EXP_FACTOR: 0.1,                   // growth from fish meals (tier 2 on) is 1/10 as fast as before                     // see CHANGELOG.md
+    VERSION: '0.7',                     // see CHANGELOG.md
     VERSION_DATE: '2026-11-03',
     TIME_LIMIT: 900,                    // hard stop at 15 minutes
     LIVES: 3,
