@@ -42,6 +42,10 @@
    > **My reading:** a fortress grows in steps, up to a cap of 200 soldiers. Each step adds 2 to its damage a second and 20 to its range. Proposed: four steps, cap 40, 80, 120, 160, 200, each step costing 40 soldiers. Base fortress: 2 damage a second, 120 range.
    >
    > **Still open:** confirm the four steps and the 40-soldier cost, and whether "two more" means damage a second.
+   >
+   > **Jimmy (later):** The fortress goes from 120 to 160 and then to 200.
+   >
+   > **Still open:** is 120 → 160 → 200 the range in map units (the base range is 120, so the steps add 40 each, not 20), or the soldier cap (the base cap is 40)? Please say which, and the cost of each step.
 
 ---
 
