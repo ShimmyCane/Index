@@ -257,3 +257,14 @@ Full build rules: `02 Refs/Skills/settings_gear.md` (run as `/settings-gear`).
 - Show the readable result first and fold the editing UI away. Measure the page height.
 - Test the page at phone width and measure which element overflows.
 - When a shared page changes, load every existing item once.
+
+## Privacy, owner access and checks (2026-11-04)
+
+- **Never put a sign-in email in a public migration.** A repo file is public forever, and rewriting history is disruptive and rarely removes every copy. Identify the owner by auth user id in an owner table that is filled by hand, and check policies with `public.platform_is_owner()`. _(Growth, Make 3D; `04 AI/Supabase/platform_owner.sql`)_
+- **Check the live policies before deciding a repo fix is enough.** The repo copy and the live database can differ. The Architecture project had email-based policies live on eleven tables that the repo files didn't cover. _(Architecture, 2026-11-04)_
+- **Read every result set of a multi-statement query.** Some clients show only the last result, so an empty-looking check can hide a live policy. _(Architecture, 2026-11-04)_
+- **Test an owner rule in a rolled-back block** that returns the owner and non-owner results in the raise message. Create the table, function and policy inside the block, so the rollback removes all of them. _(Architecture, 2026-11-04)_
+- **A pattern that starts with a dash needs `grep -e`.** Otherwise grep reads it as an option and reports nothing, so a scanner can pass with a real problem in place. Test every scanner on a fixture with planted problems. _(Privacy scan, 2026-11-04)_
+- **Sandbox proxy errors are not app errors.** A `net::ERR_TUNNEL_CONNECTION_FAILED` to an outside host means the sandbox blocked it. Name the host and check the page still works without it. _(Expansion Wars smoke run, 2026-11-04)_
+- **Feedback notes belong on the item, not in the page's head.** Save each note with the map, level or screen it is about, the page and the time, so the owner can act on it later without asking what it meant. _(Expansion Wars, Fishes, Felix Maze)_
+- **A starter that hides its own box fails the first test.** Put the box inside the panel that opens it, and let the panel do the hiding. _(feedback_notes starter, 2026-11-04)_

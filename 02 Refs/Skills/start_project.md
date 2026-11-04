@@ -19,7 +19,7 @@ When the user asks to initialize a project:
    - A notes box in the settings (⚙️) panel, labelled "Notes for improvement". Each note is saved with the item it is about (a map, a level, a screen) and the time.
    - A way to read the notes back, in the same panel or on a saved-items page, so the user can review them.
    - Notes are stored with the project's other data (device storage first; a database table only when the data must persist). Notes are never sent anywhere else.
-   Add the feedback feature to the project's first increment, so feedback can start on the first build.
+   Add the feedback feature to the project's first increment, so feedback can start on the first build. Build it from `02 Refs/Skills/feedback_notes.md`.
 
 Rules:
 - Do not explain your reasoning.
