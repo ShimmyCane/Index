@@ -19,6 +19,9 @@
   var paused = false;
   var cam = { x: 0, y: 0, scale: 1 };
   var keys = {};
+  var control = 'tap';                       // 'tap' (finger/mouse moves you) or 'joystick' (bottom-left stick)
+  var joy = { id: null, cx: 0, cy: 0, dx: 0, dy: 0 };
+  var infiniteOn = false;
   var ptr = { down: false, x: 0, y: 0 };
   var sprintHeld = false;
   var bubbles = [];
@@ -29,6 +32,8 @@
 
   try { best = Number(localStorage.getItem('fish_best')) || 0; } catch (e) { best = 0; }
   try { showErrors = localStorage.getItem('fish_show_errors') === 'on'; } catch (e) { showErrors = false; }
+  try { control = localStorage.getItem('fish_control') === 'joystick' ? 'joystick' : 'tap'; } catch (e) { control = 'tap'; }
+  try { infiniteOn = localStorage.getItem('fish_infinite') === 'on'; } catch (e) { infiniteOn = false; }
 
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
   function rand(a, b) { return a + Math.random() * (b - a); }
@@ -108,7 +113,7 @@
     var L = len / 2, Hh = len * hr / 2;
     var col = d.col, fin = d.fin || col, tail = d.tail || fin;
     var fh = d.finH || 1;
-    var wig = Math.sin(t * 9) * Hh * 0.22;
+    var wig = Math.sin(t * 13) * Hh * 0.35;
 
     ctx.lineWidth = lw;
     ctx.strokeStyle = OUT;
@@ -177,7 +182,7 @@
 
     ctx.fillStyle = fin;
     ctx.beginPath();
-    ctx.ellipse(L * 0.1, Hh * 0.35, L * 0.22, Hh * 0.28, 0.5, 0, Math.PI * 2);
+    ctx.ellipse(L * 0.1, Hh * 0.35, L * 0.22, Hh * 0.28, 0.5 + Math.sin(t * 9) * 0.45, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
@@ -350,8 +355,7 @@
     var r = run;
     r.info = D.levelInfo(n);
     r.level = n;
-    r.npcs = [];
-    r.parts = [];
+    r.goal = r.info.goal;
     r.x = r.info.W / 2;
     r.y = r.info.H / 2;
     r.vx = 0;
@@ -359,7 +363,9 @@
     r.inv = 2.5;
     cam.x = r.x;
     cam.y = r.y;
+    r.arriving = true;      // new fish swim in from the edges over a few seconds
     fillPopulations(true);
+    r.arriving = false;
     var lead = D.leadOf(n), evolved = !!r.form && r.form.id !== lead.id;
     r.form = lead;
     showBanner(evolved ? 'Evolved into ' + lead.name + '!' : 'Level ' + n + ': ' + r.info.name,
@@ -368,18 +374,25 @@
 
   function spawnNPC(sp, initial) {
     var r = run, W = r.info.W, H = r.info.H, x = 0, y = 0, tries = 0;
-    do {
-      x = rand(60, W - 60);
-      y = rand(60, H - 60);
-      tries++;
-    } while (Math.hypot(x - r.x, y - r.y) < (initial ? 380 : 520) && tries < 12);
+    if (r.arriving) {
+      var side = Math.floor(Math.random() * 4);
+      x = side === 0 ? 40 : side === 1 ? W - 40 : rand(60, W - 60);
+      y = side === 2 ? 40 : side === 3 ? H - 40 : rand(60, H - 60);
+    } else {
+      do {
+        x = rand(60, W - 60);
+        y = rand(60, H - 60);
+        tries++;
+      } while (Math.hypot(x - r.x, y - r.y) < (initial ? 380 : 520) && tries < 12);
+    }
     r.npcs.push({
       sp: sp, x: x, y: y, vx: 0, vy: 0,
       size: sp.kind === 'food' ? sp.size : sp.size * rand(0.9, 1.12),
       spd: rand(0.9, 1.1), facing: Math.random() < 0.5 ? 1 : -1,
       t: rand(0, 6), anchor: { x: x, y: y }, tgt: null, tT: 0,
       cool: rand(0, 2), lunge: 0, lx: 0, ly: 0, locked: false, lockT: 0, dead: false,
-      hp: maxHpOf(sp.size), maxHp: maxHpOf(sp.size), biteT: 0
+      hp: maxHpOf(sp.size), maxHp: maxHpOf(sp.size), biteT: 0,
+      arrive: r.arriving ? 6 : 0
     });
   }
 
@@ -496,7 +509,7 @@
     });
     // Fish: a tier-sized population, split into threats and edible fish by the ratio.
     var c = census();
-    var need = Math.round(22 + 2 * n) - c.fish;
+    var need = Math.round(22 + 3 * n) - c.fish;
     var budget = initial ? 999 : 2;
     while (need > 0 && budget > 0) {
       var role = pickRole(c), actual = role;
@@ -527,7 +540,11 @@
     r.hp = Math.min(r.hp, r.maxHp);
     r.quietT = (r.quietT || 0) + dt;
     if (r.quietT > 4 && r.hp < r.maxHp) r.hp = Math.min(r.maxHp, r.hp + 3 * dt);
-    if (ptr.down) {
+    if (control === 'joystick' && Math.hypot(joy.dx, joy.dy) > 0.15) {
+      dx = joy.dx; dy = joy.dy;
+      var jm = Math.hypot(dx, dy);
+      if (jm > 1) { dx /= jm; dy /= jm; }
+    } else if (control === 'tap' && ptr.down) {
       var w = toWorld(ptr.x, ptr.y);
       var ex = w.x - r.x, ey = w.y - r.y, dist = Math.hypot(ex, ey);
       if (dist > 14) { dx = ex / dist; dy = ey / dist; }
@@ -580,6 +597,7 @@
       if (o === n || o.dead || o.sp.kind === 'food' || o.sp.kind === 'harmless') continue;
       if (o.size * 1.25 > n.size) continue;
       var d = Math.hypot(o.x - n.x, o.y - n.y);
+      if (o.hp < o.maxHp) d *= 0.5;   // once a fish is hurt, others go for it
       if (d < bd) { bd = d; best = o; }
     }
     return best;
@@ -593,7 +611,7 @@
     n.cool = Math.max(0, n.cool - dt);
     n.tT -= dt;
     var dxp = r.x - n.x, dyp = r.y - n.y, dp = Math.hypot(dxp, dyp) || 1;
-    var speed = sp.speed * n.spd;
+    var speed = sp.speed * n.spd * (1 + 0.03 * (r.info.n - 1));
     var tx = null, ty = null, s = 0, k = 2.5;
 
     if (sp.kind === 'food') {
@@ -674,6 +692,7 @@
       tx = bw.x; ty = bw.y + Math.sin(n.t * 0.7) * 40; s = speed * 0.5;
     }
 
+    if (n.arrive > 0) { n.arrive -= dt; tx = r.x; ty = r.y; s = speed * 0.7; }
     var dvx = 0, dvy = 0;
     if (tx !== null) {
       var ddx2 = tx - n.x, ddy2 = ty - n.y, dd2 = Math.hypot(ddx2, ddy2);
@@ -708,8 +727,14 @@
   }
 
   function checkGrowth() {
-    while (run && mode === 'play' && run.size >= run.info.goal) {
-      if (run.info.n >= 20) { endRun('win'); return; }
+    while (run && mode === 'play' && run.size >= run.goal) {
+      if (run.info.n >= 20) {
+        if (!run.infinite) { endRun('win'); return; }
+        run.goal = run.goal * 1.25;   // infinite mode: the goal rises 25% each time and the sea goes on
+        FishSound.play('levelup');
+        showBanner('Infinite!', 'Next goal: size ' + run.goal.toFixed(0), 2500);
+        continue;
+      }
       FishSound.play('levelup');
       enterLevel(run.info.n + 1);
     }
@@ -723,7 +748,7 @@
       floatText(n.x, n.y, 'Spines! -2');
       FishSound.play('hurt');
     } else {
-      gain = n.size * 0.4;
+      gain = n.size * 0.25;
       r.size += gain;
       floatText(n.x, n.y, '+' + gain.toFixed(1));
       FishSound.play('eat');
@@ -740,6 +765,7 @@
     if (r.inv > 0) return;
     r.quietT = 0;
     r.hp = Math.max(0, r.hp - dmg);
+    burst(r.x, r.y, '#d9473a', 6 + dmg);
     if (r.hp > 0) { floatText(r.x, r.y, '-' + dmg); return; }
     r.lives--;
     FishSound.play('hurt');
@@ -760,6 +786,7 @@
 
   function checkContact(n) {
     var r = run, sp = n.sp;
+    if (n.arrive > 0) return;   // arriving fish do not touch you until they have settled
     var d = Math.hypot(n.x - r.x, n.y - r.y);
     var reach = (lenFor(r.size, 'round') + lenFor(n.size, sp.shape)) * 0.36;
     if (d > reach) return;
@@ -770,6 +797,7 @@
     if (r.size >= n.size * 1.15 && r.biteT <= 0) {
       r.biteT = BITE_S;
       n.hp -= atkOf(r.size);
+      burst(n.x, n.y, '#d9473a', 5);
       if (n.hp <= 0) eatNPC(n);
     }
   }
@@ -790,6 +818,9 @@
       title = 'You are the largest fish ever!';
       text = 'From a baby fish to a whale shark in ' + mmss(r.t) + '. Plankton, to the very top.';
       FishSound.play('win');
+    } else if (reason === 'quit') {
+      title = 'Game ended';
+      text = 'You reached level ' + r.level + ' (' + r.info.name + ') at size ' + r.size.toFixed(1) + '.';
     } else if (reason === 'eaten') {
       title = 'Eaten!';
       text = 'Eaten by a ' + (r.hitBy || 'bigger fish') + '. You reached level ' + r.level + ' (' + r.info.name + ') at size ' + r.size.toFixed(1) + '.';
@@ -799,7 +830,7 @@
       text = 'Fifteen minutes in the sea. You reached level ' + r.level + ' (' + r.info.name + ').';
       FishSound.play('lose');
     }
-    text += ' Score ' + score + '.';
+    text += ' Score ' + score + '. Best ' + best + '.';
     showCard(title, text);
   }
 
@@ -807,7 +838,7 @@
     var r = run;
     r.t += dt;
     r.tension = clamp((r.t - CFG.TENSION.start) / (CFG.TENSION.full - CFG.TENSION.start), 0, 1);
-    if (r.t >= CFG.TIME_LIMIT) { endRun('time'); return; }
+    if (r.t >= CFG.TIME_LIMIT && !r.infinite) { endRun('time'); return; }
 
     updatePlayer(dt);
 
@@ -834,6 +865,7 @@
         if (md < (lenFor(eater.size, eater.sp.shape) + lenFor(meal.size, meal.sp.shape)) * 0.36) {
           eater.biteT = meal.sp.kind === 'food' ? BITE_S : STRIKE_S;
           meal.hp -= atkOf(eater.size);
+          burst(meal.x, meal.y, '#d9473a', 4);
           if (meal.hp <= 0) {
             meal.dead = true;
             r.npcEaten++;
@@ -906,6 +938,15 @@
       ctx.fill();
     });
 
+    // Bite timer: a ring round you that fills up as your next bite comes ready.
+    var ready = 1 - clamp(run.biteT / BITE_S, 0, 1);
+    var plen = lenFor(run.size, playerDesc().shape);
+    ctx.lineWidth = 3 / cam.scale;
+    ctx.strokeStyle = 'rgba(45,58,74,0.25)';
+    ctx.beginPath(); ctx.arc(run.x, run.y, plen * 0.75, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = ready >= 1 ? '#8fe0b5' : '#ffb27a';
+    ctx.beginPath(); ctx.arc(run.x, run.y, plen * 0.75, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * ready); ctx.stroke();
+
     run.npcs.forEach(function (n) {
       if (!n.locked) return;
       var rad = lenFor(n.size, n.sp.shape) * 0.75 + 6 / cam.scale;
@@ -957,8 +998,9 @@
 
   function updateCamera(dt) {
     var r = run;
+    var phone = Math.min(CW, CH) < 600 ? 2.5 : 1;   // phones: everything in play is 2.5x larger
     var viewW = 900 + r.size * 10, viewH = 560 + r.size * 6;
-    cam.scale = Math.min(CW / viewW, CH / viewH);
+    cam.scale = Math.min(CW / viewW, CH / viewH) * phone;
     var k = Math.min(1, dt * 4);
     cam.x += (r.x - cam.x) * k;
     cam.y += (r.y - cam.y) * k;
@@ -978,12 +1020,12 @@
   function updateHUD() {
     var r = run;
     if (!r) return;
-    var span = Math.max(1, r.info.goal - r.info.enterSize);
+    var span = Math.max(1, r.goal - r.info.enterSize);
     var pct = clamp((r.size - r.info.enterSize) / span, 0, 1);
     $('hud-level').textContent = 'Level ' + r.level + ' · ' + r.info.name;
     $('hud-zone').textContent = r.info.zone.name + ' · ' + D.DIFFICULTY[r.difficulty].label;
     $('size-fill').style.width = (pct * 100).toFixed(1) + '%';
-    $('size-text').textContent = 'Size ' + r.size.toFixed(1) + ' / ' + r.info.goal;
+    $('size-text').textContent = 'Size ' + r.size.toFixed(1) + ' / ' + Math.round(r.goal);
     $('hud-lives').textContent = '❤️'.repeat(r.lives) || '—';
     $('hud-time').textContent = mmss(r.t) + ' / 15:00';
     $('sprint').style.setProperty('--stam', Math.round(r.stamina) + '%');
@@ -1013,6 +1055,17 @@
     $('diff-ratio').textContent = info.label + ': ' + info.ratio + '. It gets harder after 2:30.';
   }
 
+  function refreshInfinite() {
+    $('infinite-toggle').textContent = 'Infinite mode: ' + (infiniteOn ? 'On' : 'Off');
+    $('infinite-toggle').setAttribute('aria-pressed', String(infiniteOn));
+  }
+
+  function refreshControl() {
+    $('control-toggle').textContent = control === 'joystick' ? 'Joystick' : 'Tap and move';
+    $('control-toggle').setAttribute('aria-pressed', String(control === 'joystick'));
+    $('joy').hidden = control !== 'joystick';
+  }
+
   function showTitle() {
     mode = 'title';
     $('title-version').textContent = 'Fishes v' + CFG.VERSION + ' · ' + CFG.VERSION_DATE;
@@ -1028,6 +1081,8 @@
     document.body.setAttribute('data-mode', 'title');
     refreshDbStatus();
     refreshDiff();
+    refreshInfinite();
+    refreshControl();
   }
 
   function startRun() {
@@ -1041,7 +1096,7 @@
       x: 0, y: 0, vx: 0, vy: 0, facing: 1,
       stamina: 100, sprintCd: 0, sprinting: false, inv: 2.5,
       npcs: [], parts: [], spawnT: 0, bannerT: 0, lockedCount: 0, score: 0,
-      difficulty: getDifficulty(), form: D.leadOf(1), npcEaten: 0, hitBy: '',
+      difficulty: getDifficulty(), form: D.leadOf(1), npcEaten: 0, hitBy: '', infinite: infiniteOn, goal: 2,
       hp: playerMaxHp(1), maxHp: playerMaxHp(1), biteT: 0, quietT: 0
     };
     run.x = run.info.W / 2;
@@ -1059,6 +1114,7 @@
   // ---------- panel (⚙️) and notes ----------
   function openPanel() {
     $('panel').hidden = false;
+    $('control-toggle').textContent = control === 'joystick' ? 'Joystick' : 'Tap and move';
     paused = true;
     $('sound-toggle').setAttribute('aria-pressed', String(FishSound.enabled()));
     $('sound-toggle').textContent = FishSound.enabled() ? 'On' : 'Off';
@@ -1200,6 +1256,17 @@
 
   // Buttons
   $('btn-play').addEventListener('click', startRun);
+  $('infinite-toggle').addEventListener('click', function () {
+    infiniteOn = !infiniteOn;
+    try { localStorage.setItem('fish_infinite', infiniteOn ? 'on' : 'off'); } catch (e) { /* private mode */ }
+    refreshInfinite();
+  });
+  $('control-toggle').addEventListener('click', function () {
+    control = control === 'tap' ? 'joystick' : 'tap';
+    try { localStorage.setItem('fish_control', control); } catch (e) { /* private mode */ }
+    refreshControl();
+  });
+  $('panel-end').addEventListener('click', function () { closePanel(); endRun('quit'); });
   document.querySelectorAll('[data-diff]').forEach(function (b) {
     b.addEventListener('click', function () {
       try { localStorage.setItem(DIFF_KEY, b.getAttribute('data-diff')); } catch (e) { /* private mode */ }
@@ -1265,6 +1332,39 @@
 
   window.addEventListener('resize', resize);
 
+  // Joystick (bottom-left, when Controls is set to Joystick in ⚙️).
+  var joyEl = $('joy'), knob = $('joy-knob');
+  function joyMove(ev) {
+    var max = 50, x = ev.clientX - joy.cx, y = ev.clientY - joy.cy, d = Math.hypot(x, y);
+    if (d > max) { x = x / d * max; y = y / d * max; }
+    joy.dx = x / max; joy.dy = y / max;
+    knob.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+  }
+  joyEl.addEventListener('pointerdown', function (ev) {
+    FishSound.unlock();
+    joy.id = ev.pointerId;
+    var b = joyEl.getBoundingClientRect();
+    joy.cx = b.left + b.width / 2; joy.cy = b.top + b.height / 2;
+    try { joyEl.setPointerCapture(ev.pointerId); } catch (e) { /* not supported */ }
+    joyMove(ev);
+    ev.preventDefault();
+  });
+  joyEl.addEventListener('pointermove', function (ev) { if (ev.pointerId === joy.id) joyMove(ev); });
+  function joyEnd(ev) {
+    if (ev.pointerId !== joy.id) return;
+    joy.id = null; joy.dx = 0; joy.dy = 0;
+    knob.style.transform = 'translate(0px, 0px)';
+  }
+  joyEl.addEventListener('pointerup', joyEnd);
+  joyEl.addEventListener('pointercancel', joyEnd);
+
+  // No pinch or double-tap zoom on this page: the whole screen has to stay in view.
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (name) {
+    document.addEventListener(name, function (e) { e.preventDefault(); }, { passive: false });
+  });
+  document.addEventListener('touchmove', function (e) { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  document.addEventListener('dblclick', function (e) { e.preventDefault(); });
+
   // ---------- main loop ----------
   var last = 0;
   function frame(ts) {
@@ -1300,6 +1400,7 @@
         locks: run ? run.lockedCount : 0, lives: run && run.lives,
         npcEaten: run && run.npcEaten, difficulty: run && run.difficulty, form: run && run.form && run.form.id,
         census: run ? census() : null, spread: run ? spread() : null,
+        arriving: run ? run.npcs.filter(function (o) { return o.arrive > 0; }).length : 0,
         chum: run ? run.npcs.filter(function (o) { return o.sp === CHUM; }).length : 0, hp: run && run.hp, maxHp: run && run.maxHp,
         player: run && { x: run.x, y: run.y }, cam: { x: cam.x, y: cam.y, scale: cam.scale },
         hunters: run ? run.npcs.filter(function (o) { return o.sp.kind === 'hunter'; }).map(function (o) { return { x: o.x, y: o.y, size: o.size, locked: o.locked }; }) : []

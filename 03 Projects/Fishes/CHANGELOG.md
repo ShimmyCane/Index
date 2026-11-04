@@ -2,7 +2,20 @@
 
 Every version the team can open, newest first. The version shows on the title screen and at the top of ⚙️ Settings. If you see a different version there than below, you are looking at an older copy.
 
-## 0.4 — 2026-11-03 (not yet merged)
+## 0.5 — 2026-11-04 (feedback round 3, part 2)
+- Phones: the play view is 2.5× larger, so fish are bigger on iPhone. Pinch and double-tap zoom are turned off on this page.
+- Controls: Tap and move (default) or a joystick at the lower left. Choose in ⚙️ → Sound, errors, display and controls.
+- Sprint is now in the lower-right action column, just above ⚙️.
+- Bite timer: a ring round you fills up as your next bite comes ready.
+- Blood and violence: bites splash red. Once a fish is hurt, other fish go for it first.
+- Swimming looks livelier: stronger tail wiggle and a flapping fin.
+- Fish gain 25% of prey size per meal (was 40%), so levels take longer.
+- Bigger levels: the world grows faster, fish speed up with each tier, and the sea holds more fish.
+- Level up: the old fish stay, and new fish swim in from the edges for about six seconds. They can't touch you until they've settled.
+- ⚙️ End game shows your score and the best score.
+- Infinite mode (title screen): after tier 20 the goal rises 25% each time, with no time cap and no win.
+
+## 0.4 — 2026-11-03 (PR #96, merged)
 - Combat: fish have health. Small fish go in one bite; bigger fish take several bites with a pause between them. Attack is 1 + size/8, health is size/3 (at least 1). You have a health bar too; losing it costs a life. Health regenerates after 4 seconds without a hit.
 - Health bars on fish and on you, hidden from ⚙️ → Sound, errors and display.
 - Danger at a glance: a coral dot over fish that can hurt you, a mint dot over fish you can eat.

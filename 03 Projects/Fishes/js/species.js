@@ -275,8 +275,8 @@
       name: LEVEL_NAMES[n - 1],
       zone: ZONES[zoneIndex(n)],
       zoneIndex: zoneIndex(n),
-      W: 1600 + (n - 1) * 260,       // the water world scales out as you go deeper
-      H: 1000 + (n - 1) * 160,
+      W: 1600 + (n - 1) * 420,       // the water world scales out as you go deeper
+      H: 1000 + (n - 1) * 260,
       goal: GOALS[n - 1],
       enterSize: n === 1 ? 1 : GOALS[n - 2]
     };
@@ -289,7 +289,7 @@
   }
 
   var CONFIG = {
-    VERSION: '0.4',                     // see CHANGELOG.md
+    VERSION: '0.5',                     // see CHANGELOG.md
     VERSION_DATE: '2026-11-03',
     TIME_LIMIT: 900,                    // hard stop at 15 minutes
     LIVES: 3,
