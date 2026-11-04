@@ -2,7 +2,7 @@
 // Images are read relative to viewer.html, so they go up one folder into the Make 3D project.
 // Not to scale: sizes and distances are compressed so every body can be seen. Estimates from NASA fact sheets.
 window.REVIEW_DATA = {
-  title: "Solar System: V01 to V06",
+  title: "Solar System: V01 to V08",
   subtitle: "The Sun and nine planets, now with true orbits (V06). The Sun and nine planets on their orbits, with a 160-rock asteroid belt, banded gas giants with rings, and one 240 s loop of orbits and spins. Not to scale. Tap a planet in Make 3D to open its own view; each planet view has a pink marker to fly back. Sizes and distances are estimates.",
   items: [
     {
@@ -53,6 +53,13 @@ window.REVIEW_DATA = {
       description: "The timeline now starts on 31 January 1958, when Explorer 1, the first US satellite, launched. The planets are placed on that day. Halley's Comet, Encke and Tempel 1 are added on their true orbits. Halley's real perihelion is inside Mercury's orbit, so in this view it dips inside the drawn Sun. The tracker steps by year when far out, and by day when close in; zoomed in, the animation slows down so the Earth moves smoothly.",
       changes: ["Start on 31 January 1958 (Explorer 1)", "Halley's Comet, Encke and Tempel 1 on true orbits", "Tracker steps by year, month, week or day, following the zoom", "Playback slows as you zoom in (about 0.1 times at close range)"],
       gaps: ["Halley's perihelion is inside the drawn Sun", "Hale-Bopp is not added (its orbit is too far for this scale)", "Comet elements are approximate and must be checked against the JPL Small-Body Database", "Comets have no tails"]
+    },
+    {
+      id: "V08", title: "The five dwarf planets",
+      image: "../Make 3D/renders/solar-system/v08.png",
+      description: "Pluto is one of five dwarf planets. The other four are added on their own orbits: Ceres, in the asteroid belt between Mars and Jupiter; Haumea, a stretched, fast-spinning body far out past Neptune; Makemake, a reddish icy body a little farther out; and Eris, the most distant of the five, on a very tilted, stretched orbit. Eris takes about 560 years to go round, so in the 240 s loop it does not finish one lap. How to read this: the outer ellipses are the dwarf planets' orbits; the bodies are not to scale.",
+      changes: ["Ceres, Haumea, Makemake and Eris added, each with its own true-shaped orbit line and spin", "Pluto's five-dwarf-planet family complete: Ceres, Pluto, Haumea, Makemake, Eris", "Sizes from published diameters: Ceres about 940 km, Haumea about 1,400 km, Makemake about 1,430 km, Eris about 2,330 km"],
+      gaps: ["Starting places of the four new dwarfs are a placeholder (each starts at perihelion on J2000), not their true place on 31 January 1958", "Inclination, node and perihelion for Ceres, Haumea, Makemake and Eris are from memory of the JPL Small-Body Database and must be checked there", "Haumea is drawn as a sphere, though it is elongated", "Eris's and Makemake's diameters differ between sources (Makemake 1,430 vs 1,500 km)"]
     }
   ]
 };
