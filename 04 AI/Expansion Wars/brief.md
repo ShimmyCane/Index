@@ -26,7 +26,7 @@
 
 ## Next steps
 
-1. Jimmy answers `convo/convo v0.4.md` (round 5: upgrades for every spot, mushrooms as villages, surrender, slower upgrades with dust, zoom out to fit). Round 4 items are built and merged (PR #93).
+1. Round 5 (`convo/convo v0.4.md`): question 1 and the fortress answers are built with defaults to check (mushroom to town, metropolis to fortress, fortress range 120 and 2 a second, capture drops one grade). Still open: surrender, upgrade durations and dust, zoom out to fit, and the test note. Round 4 is merged (PR #93).
 2. Build the round 5 items once answered. The Level 5 notes are the first real play on the new maps.
 3. Play a few games on iPad, including Levels 5 to 9 with panning. Balance pass stays on the todo.
 

@@ -708,3 +708,7 @@ button {
 .pop-seg.t2 { background: var(--sun); }
 .pop-seg.t3 { background: var(--lavender); }
 .pop-seg.t4 { background: var(--peach); }
+
+/* A fortress's range: a dashed ring, shown while you own the fortress */
+.fort-range { display: none; fill: rgba(61, 52, 52, 0.07); stroke: var(--ink); stroke-width: 3; stroke-dasharray: 10 10; pointer-events: none; }
+.fort-range.on { display: inline; }

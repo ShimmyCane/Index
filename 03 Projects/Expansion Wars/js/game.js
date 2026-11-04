@@ -22,6 +22,10 @@
     { name: 'metropolis', rate: 3.2, cap: 80, cost: 40 }
   ];
   var FORT_CAP = 40;   // a fortress grows slowly up to this garrison; it does not grow beyond it
+  var MUSH_CAP = 20;   // a mushroom is the smallest village: it stops growing at this garrison
+  var FORT_CONVERT_COST = 40;   // soldiers to turn a metropolis into a fortress
+  var FORT_RANGE = 120;         // a fortress shoots enemy soldiers within this many map units
+  var FORT_DAMAGE = 2;          // soldiers lost per second to a fortress, and they stop while in range
   var AVATARS = ['🐥', '🦆', '🐻', '🐿️', '🐭', '🦡'];   // one per player: chick, duckling, bear, gopher, mouse, badger
   var ICON = { factory: '🍄', city: '🏰', fortress: '🏯' };
   var SVG_NS = 'http://www.w3.org/2000/svg';
@@ -292,6 +296,8 @@
         points: n.poly.map(function (p) { return p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ')
       });
       n.shownOwner = undefined;
+      n.rangeEl = null;
+      n.shownType = undefined;
       els.roads.appendChild(n.polyEl);
     });
 
@@ -367,7 +373,7 @@
         n.cap = CITY_LEVELS[0].cap;
       } else {
         n.level = 0;
-        n.cap = n.type === 'fortress' ? FORT_CAP : Infinity;
+        n.cap = n.type === 'fortress' ? FORT_CAP : n.type === 'factory' ? MUSH_CAP : Infinity;
       }
     });
 
@@ -480,29 +486,74 @@
       var before = n.owner;
       n.owner = a.owner;
       n.count = -n.count;
-      if (n.type === 'city') { n.level = 1; n.rate = CITY_LEVELS[0].rate; n.cap = CITY_LEVELS[0].cap; }
+      // A captured city drops one grade (never below village).
+      if (n.type === 'city') {
+        var lv = Math.max(1, (n.level || 1) - 1);
+        n.level = lv; n.rate = CITY_LEVELS[lv - 1].rate; n.cap = CITY_LEVELS[lv - 1].cap;
+      }
       if (n.type === 'fortress') n.cap = FORT_CAP;
+      if (n.type === 'factory') n.cap = MUSH_CAP;
       if (a.owner === 0) Sound.capture();
       else if (before === 0) Sound.lost();
     }
   }
 
-  // Spend soldiers to raise a city's level: faster growth, a bigger garrison cap.
-  function tryUpgrade(city) {
-    if (city.owner !== 0 || city.type !== 'city') return;
-    var lvl = city.level || 1;
-    if (lvl >= CITY_LEVELS.length) { setStatus('This city is fully upgraded.', true); return; }
+  // Spend soldiers to grow one of your spots. A mushroom becomes a town-tier city. A city goes up one
+  // tier, and a metropolis becomes a fortress.
+  function tryUpgrade(n) {
+    if (n.owner !== 0 || (n.type !== 'city' && n.type !== 'factory')) return;
+    var have = Math.floor(n.count);
+    if (n.type === 'factory') {
+      var town = CITY_LEVELS[1];
+      if (have < town.cost) {
+        setStatus('Upgrading to a ' + town.name + ' needs ' + town.cost + ' soldiers in the mushroom.', true);
+        return;
+      }
+      n.count -= town.cost;
+      n.type = 'city'; n.level = 2; n.rate = town.rate; n.cap = town.cap;
+      Sound.tap();
+      setStatus('Your mushroom is now a town!', true);
+      return;
+    }
+    var lvl = n.level || 1;
+    if (lvl >= CITY_LEVELS.length) {
+      if (have < FORT_CONVERT_COST) {
+        setStatus('Becoming a fortress needs ' + FORT_CONVERT_COST + ' soldiers in the city.', true);
+        return;
+      }
+      n.count -= FORT_CONVERT_COST;
+      n.type = 'fortress'; n.level = 0; n.rate = M.TYPES.fortress.rate; n.cap = FORT_CAP;
+      Sound.tap();
+      setStatus('Your city is now a fortress!', true);
+      return;
+    }
     var next = CITY_LEVELS[lvl];
-    if (Math.floor(city.count) < next.cost) {
+    if (have < next.cost) {
       setStatus('Upgrading to a ' + next.name + ' needs ' + next.cost + ' soldiers in the city.', true);
       return;
     }
-    city.count -= next.cost;
-    city.level = lvl + 1;
-    city.rate = next.rate;
-    city.cap = next.cap;
+    n.count -= next.cost;
+    n.level = lvl + 1;
+    n.rate = next.rate;
+    n.cap = next.cap;
     Sound.tap();
     setStatus('Your city is now a ' + next.name + '!', true);
+  }
+
+  // Enemy soldiers inside a fortress's range stop and lose soldiers each second.
+  // Returns true when the army is stopped there this frame.
+  function underFire(a, dt) {
+    var x = a.from.x + (a.to.x - a.from.x) * a.p;
+    var y = a.from.y + (a.to.y - a.from.y) * a.p;
+    var inRange = g.nodes.some(function (f) {
+      return f.type === 'fortress' && f.owner >= 0 && teamOf(f.owner) !== teamOf(a.owner) &&
+        Math.hypot(f.x - x, f.y - y) <= FORT_RANGE;
+    });
+    if (!inRange) return false;
+    a.count -= FORT_DAMAGE * dt;
+    if (a.count <= 0) { a.done = true; return true; }
+    setArmyCount(a, Math.ceil(a.count));
+    return true;
   }
 
   function step(dt) {
@@ -524,6 +575,7 @@
 
     g.armies.forEach(function (a) {
       if (a.done) return;
+      if (underFire(a, dt)) return;   // a fortress stops enemy soldiers and shoots them
       a.p += SPEED * dt / a.len;
     });
     clashOnRoads();
@@ -743,6 +795,22 @@
       }
       if (n.type === 'lake' || !n.el) return;
 
+      // A spot that changed type (mushroom to city, city to fortress) gets its new icon.
+      if (n.shownType !== n.type) {
+        n.el.querySelector('.ico').textContent = ICON[n.type];
+        if (n.type !== 'city') n.lvlEl.textContent = '';
+        n.shownType = n.type;
+        n.shownLevel = null;
+      }
+      // A fortress shows its range as a ring while it is yours.
+      if (n.type === 'fortress') {
+        if (!n.rangeEl) {
+          n.rangeEl = svgEl('circle', { 'class': 'fort-range', cx: n.x, cy: n.y, r: FORT_RANGE });
+          els.roads.appendChild(n.rangeEl);
+        }
+        n.rangeEl.setAttribute('class', 'fort-range' + (n.owner >= 0 ? ' on' : ''));
+      }
+
       var label = Math.floor(n.count);
       var cls = 'node' + (n.type === 'city' ? ' city' : '') + ' ' + colourClass(n.owner);
       if (g.drag && g.drag.sources.indexOf(n) !== -1) cls += ' source';
@@ -817,7 +885,7 @@
     if (!d) return;
     g.drag = null;
     var p = toMap(e);
-    if (!d.moved && d.sources.length === 1 && d.sources[0].type === 'city') {
+    if (!d.moved && d.sources.length === 1 && (d.sources[0].type === 'city' || d.sources[0].type === 'factory')) {
       tryUpgrade(d.sources[0]);
       return;
     }

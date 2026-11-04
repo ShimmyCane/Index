@@ -55,8 +55,9 @@ Checked against `js/game.js` on `main`. Notes stay `open` in the table until Jim
 - [x] **Soldiers fight when they collide en route** (Level 2, note `31eec771`). Built: `clashOnRoads`. Roads only meet at spots, so armies can only meet head-on on one road.
 - [x] **Race-track countdown on every start** (Level 4, note `4e91a3a2`). Built in round 3 (3, 2, 1, Go).
 - [x] **Assistant marks tasks done** (Level 5, note `f1f02147`). Process note, not a game feature. Done when built: todo items are ticked in the same change, and notes are marked done after Jimmy confirms. Recorded in the brief.
-- [ ] **All territories can be upgraded; capture drops the grade** (Level 5, note `598aba02`). Not built: only cities upgrade, and capture resets a city to village. Question 1.
-- [ ] **Simple mushrooms are villages** (Level 5, note `bed5a34f`). Not built: factories have no tier, cap or upgrade. Question 2.
+- [x] **All territories can be upgraded; capture drops the grade** (Level 5, note `598aba02`). Built with my defaults: a mushroom upgrades to a town-tier city (20 soldiers); a metropolis becomes a fortress (40 soldiers); a captured city drops one grade. Question 1 in convo v0.4 has the defaults to check.
+- [x] **Fortresses shoot** (from convo v0.4, question 1). Built: enemy soldiers inside 120 map units of an owned fortress stop and lose 2 a second. The ring shows while you own it. Range and damage are my defaults, to check.
+- [x] **Simple mushrooms are villages** (Level 5, note `bed5a34f`). Built: mushrooms are the smallest village, capped at 20. Upgrading one makes it a town-tier city.
 - [ ] **Surrender for AI and user, with a toggle in settings** (Level 5, note `62214856`). Not built. Question 3.
 - [ ] **Upgrades take longer each tier, pause army growth, and show dust** (Level 5, note `ca529eea`). Not built. Question 4.
 - [ ] **Zoom out to fit a bigger map, spots keep their size** (Level 5, note `ee7f`). Not built. Overlaps the zoom item below. Question 5.

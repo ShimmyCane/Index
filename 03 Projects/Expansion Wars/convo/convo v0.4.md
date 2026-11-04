@@ -11,7 +11,9 @@ Built, checked in the code:
 
 Process note, adopted: "LLM should mark tasks done by themselves." Todo items are ticked in the same change that builds them. Notes are marked done after Jimmy confirms, using the skill's update.
 
-Not built yet: the five Level 5 notes below, and the test note.
+Answered in this round and being built: question 1 (upgrades for every spot, capture drops one grade), question 2 (mushrooms are the smallest villages), and the fortress part of question 1 (metropolis becomes fortress, fortresses shoot).
+
+Not answered yet: questions 3, 4, 5 and 6 below.
 
 ## Questions
 
@@ -20,13 +22,19 @@ Not built yet: the five Level 5 notes below, and the test note.
    - When a spot is captured, should it drop one grade (metropolis to city, city to town, and so on), or reset to village as now?
    - What does a fortress upgrade do? It has no tiers yet.
 
-   > **Jimmy:**
+   > **Jimmy:** The mushrooms should be the very smallest villages and capped. When they upgrade, they become cities. Yes, a captured spot drops one grade. When cities fully upgrade they become fortresses, and fortresses shoot within a small radius around their territory and prevent enemy movement.
+
+   > **Built, with my defaults (check these):**
+   > - Mushroom: village tier, cap 20, rate 1.0 a second. Upgrading one costs 20 soldiers and turns it into a city at town tier (cap 40, rate 2.0).
+   > - Capture drops one grade: metropolis to city, city to town, town to village. A village stays a village.
+   > - Metropolis to fortress: a second upgrade costs 40 soldiers. The fortress has cap 40, grows at 0.5 a second, and does not upgrade further.
+   > - Fortress range: 120 map units (about a third of a screen). Enemy armies that enter the range stop and lose 2 soldiers a second. Not yet confirmed: the range, the damage, and whether a fortress should also stop its own team's armies (it does not).
 
 2. **The simple mushrooms are villages.** Your note says: "The simple mushrooms are villages." So the mushroom factories would join the same tier ladder as cities, starting at village.
    - Should mushrooms get the same caps (20, 40, 60, 80)? Today they grow without a cap.
    - Should the ladder be the same for mushrooms and cities, with the same costs and rates?
 
-   > **Jimmy:**
+   > **Jimmy:** The mushrooms should be the very smallest villages and capped. (See the built defaults under question 1: capped at 20, and an upgrade turns the mushroom into a city at town tier.)
 
 3. **Surrender.** Your note says: "AI will surrender when they are beyond saving. User too. Toggle to allow surrender should be in settings."
    - What does "beyond saving" mean? Proposed default: a player with no spots, or with fewer soldiers than the spots they hold would need to defend, and no way back. Give me your rule.
