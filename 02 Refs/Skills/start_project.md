@@ -21,6 +21,8 @@ When the user asks to initialize a project:
    - Notes are stored with the project's other data (device storage first; a database table only when the data must persist). Notes are never sent anywhere else.
    Add the feedback feature to the project's first increment, so feedback can start on the first build. Build it from `02 Refs/Skills/feedback_notes.md`.
 
+8. Version log: if the project has any page, build the version panel inside ⚙️ from `02 Refs/Skills/settings_gear.md` §9 from the first build. Create `js/version.js` with `APP_VERSION` set to `0.1.0` and one `APP_CHANGELOG` entry for the first build (newest first). The panel is closed by default and shows the version in its header. Every later change bumps the version in the same commit.
+
 Rules:
 - Do not explain your reasoning.
 - Do not infer a project name.
