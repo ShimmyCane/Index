@@ -28,7 +28,7 @@
       real: 'Neon tetra: a glowing blue stripe over a red one.' },
     { id: 'zebrafish', name: 'Zebrafish', tier: 1, kind: 'prey', temper: 'docile', shape: 'round', hr: 0.4, size: 1.2, speed: 90, col: '#e8e8e8', stripe: '#2f5fd0', school: true,
       real: 'Zebrafish: striped, lively shoaling fish from streams in South Asia.' },
-    { id: 'plankton', name: 'Plankton', tier: 1, kind: 'food', temper: 'docile', shape: 'plankton', size: 0.25, speed: 14, col: '#fff3b0', base: 40,
+    { id: 'plankton', name: 'Plankton', tier: 1, kind: 'food', temper: 'docile', shape: 'plankton', size: 0.25, speed: 14, col: '#fff3b0', base: 70,
       real: 'Copepods and other drifting animals. Most of the sea starts here.' },
 
     // Tier 2 — Sea-grass Flats
@@ -289,7 +289,8 @@
   }
 
   var CONFIG = {
-    VERSION: '0.5',                     // see CHANGELOG.md
+    VERSION: '0.6',
+    EXP_FACTOR: 0.1,                   // growth from fish meals (tier 2 on) is 1/10 as fast as before                     // see CHANGELOG.md
     VERSION_DATE: '2026-11-03',
     TIME_LIMIT: 900,                    // hard stop at 15 minutes
     LIVES: 3,

@@ -69,6 +69,15 @@ Twenty tiers (one per level), in five depth zones. The play area grows with each
 
 Each species' real-fish note is in `js/species.js`.
 
+## Round 4 rules (v0.6)
+
+- **Level up:** the fish around you stay. The background fades to the new zone over two seconds. New species appear far away, gradually.
+- **Growth:** from level 2, a fish meal gives 0.25 × 0.1 = 0.025 of the prey's size (was 0.25). Level 1 keeps 0.4 of the prey's size, and plankton is plentiful.
+- **Hit points:** fish of size 4 or more have max(2, round(size/2)) health, so 2 to 5 bites. Smaller fish have max(1, round(size/3)).
+- **Schools:** a bitten school fish calls on its schoolmates within 220 units. They bite back at the attacker (the player included) when their bite is ready.
+- **Scatter:** a predator 2.5× a fish's size makes it flee from 420 units, at 2.2× speed.
+- **Chum:** predators within 300 units go to chum. A dead fish of size 4 or more breaks into up to 12 pieces (size / 4), lasting 25 seconds.
+
 ## Controls, screen and modes (v0.5)
 
 - **Controls:** Tap and move (default), or a joystick at the lower left. The joystick is set in ⚙️ → Sound, errors, display and controls.
