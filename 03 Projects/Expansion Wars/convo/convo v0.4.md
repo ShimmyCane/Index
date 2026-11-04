@@ -41,20 +41,28 @@ Not answered yet: questions 3, 4, 5 and 6 below.
    - Should the surrender toggle be on or off by default?
    - When a player surrenders, what happens to their spots: they go neutral, or to the player who took the most?
 
-   > **Jimmy:**
+   > **Jimmy:** Surrendering means being outnumbered 10 to one.
+   >
+   > **Built:** a team outnumbered 10 to 1 by the other teams gives up, when the Surrender setting is on (⚙️, off by default). Its spots go neutral with their soldiers, and its soldiers on the march are lost. Applies to the computers and to you. Still open: whether the toggle should default on, and whether the spots should go neutral or to the strongest rival.
 
 4. **Upgrades take longer each tier.** Your note says: "It takes progressively longer to upgrade. During which it does not increase their army, making them vulnerable. Animate dust to visually suggest the upgrade."
    - How long should each upgrade take? Proposed default: town 3 seconds, city 6 seconds, metropolis 10 seconds.
    - During an upgrade, the city stops growing but keeps its soldiers. If the city is attacked and captured mid-upgrade, should the upgrade be cancelled and the soldiers kept?
    - Should the dust be a puff of dust at the city's foot, or something else?
 
-   > **Jimmy:**
+   > **Jimmy:** Yes, I agree with your times, we can always double on them later.
+   >
+   > **Built:** town 3 seconds, city 6, metropolis 10 (the metropolis-to-fortress step is 10 too). The spot's army does not grow meanwhile. The cost is paid when the upgrade starts. A capture mid-upgrade cancels it, and the cost is lost. A pulsing dust puff shows the upgrade.
 
 5. **Zoom out to fit.** Your note says: "For levels that map expands beyond the screen. Allow ability to zoom out to fit all. The elements should stay Same size."
    - Zooming out with spots the same size means the spots will overlap on a wide field. Is that acceptable, or should spots shrink when you zoom out?
    - Is this the same zoom as the level 10 zoom in the todo, or a separate control?
 
-   > **Jimmy:**
+   > **Jimmy:** Level 10 to level 15 will be all multiplayer. The maps will be more dense so more things are going to be visible. I don't want to scroll too far. That's too much work. When zoomed in and there is scrolling, introduce a mini map.
+   >
+   > **Built:** Levels 10 to 15 are multiplayer, with 4 to 6 flags and 30 to 52 spots on a field two screens wide. There are + and − buttons, a Fit button, and two-finger pinch. The minimap appears when the zoomed view scrolls; tap or drag on it to move the view.
+   >
+   > **Still open:** the spot sizes when you zoom out (question 5), since spots shrink with zoom and stop at a 44-pixel minimum.
 
 6. **Test note.** The note "Test note 1" (Level 4 Valley) is a test. Mark it done, or keep it open?
 

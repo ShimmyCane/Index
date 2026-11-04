@@ -26,7 +26,7 @@
 
 ## Next steps
 
-1. Round 5 (`convo/convo v0.4.md`): question 1 and the fortress answers are built with defaults to check (mushroom to town, metropolis to fortress, fortress range 120 and 2 a second, capture drops one grade). Still open: surrender, upgrade durations and dust, zoom out to fit, and the test note. Round 4 is merged (PR #93).
+1. Round 6 (`convo/convo v0.5.md`): built with defaults to check: surrender (10 to 1, off by default), upgrade times (3, 6, 10 s) with dust, levels 10 to 15 (multiplayer, denser, two screens wide), zoom buttons, pinch and minimap. Still open: surrender default and neutral spots, spot size when zoomed out (spots shrink to a 44 px minimum, so they overlap on dense maps), capture mid-upgrade, fortress numbers, and the test note.
 2. Build the round 5 items once answered. The Level 5 notes are the first real play on the new maps.
 3. Play a few games on iPad, including Levels 5 to 9 with panning. Balance pass stays on the todo.
 

@@ -58,13 +58,15 @@ Checked against `js/game.js` on `main`. Notes stay `open` in the table until Jim
 - [x] **All territories can be upgraded; capture drops the grade** (Level 5, note `598aba02`). Built with my defaults: a mushroom upgrades to a town-tier city (20 soldiers); a metropolis becomes a fortress (40 soldiers); a captured city drops one grade. Question 1 in convo v0.4 has the defaults to check.
 - [x] **Fortresses shoot** (from convo v0.4, question 1). Built: enemy soldiers inside 120 map units of an owned fortress stop and lose 2 a second. The ring shows while you own it. Range and damage are my defaults, to check.
 - [x] **Simple mushrooms are villages** (Level 5, note `bed5a34f`). Built: mushrooms are the smallest village, capped at 20. Upgrading one makes it a town-tier city.
-- [ ] **Surrender for AI and user, with a toggle in settings** (Level 5, note `62214856`). Not built. Question 3.
-- [ ] **Upgrades take longer each tier, pause army growth, and show dust** (Level 5, note `ca529eea`). Not built. Question 4.
-- [ ] **Zoom out to fit a bigger map, spots keep their size** (Level 5, note `ee7f`). Not built. Overlaps the zoom item below. Question 5.
+- [x] **Surrender for AI and user, with a toggle in settings** (Level 5, note `62214856`). Built: outnumbered 10 to 1 gives up, when Surrender is on in ⚙️ (off by default). Spots go neutral with their soldiers. Still open: default on or off, and neutral versus strongest rival.
+- [x] **Upgrades take longer each tier, pause army growth, and show dust** (Level 5, note `ca529eea`). Built: town 3 s, city 6 s, metropolis 10 s (fortress 10 s). No army growth meanwhile. Cost paid at the start; capture cancels. A dust puff shows the upgrade.
+- [x] **Levels 10 to 15: multiplayer, denser maps** (Jimmy, convo v0.4). Built: 4 to 6 flags, 30 to 52 spots, on a field two screens wide.
+- [x] **Zoom and minimap** (Jimmy, convo v0.4; round 4 zoom item). Built: + and − buttons, Fit, two-finger pinch. The minimap appears when the zoomed view scrolls; tap or drag it to move the view.
+- [ ] **Zoom out to fit a bigger map, spots keep their size** (Level 5, note `ee7f`). Partly built: Fit shows the whole field. Open: spots shrink with zoom (44 px minimum), so they overlap on dense maps. Question 5.
 - [ ] **Test note** (`4a1aa905`, Level 4 Valley). Nothing to build. Mark done when Jimmy confirms.
 
 ## Later
 
-- [ ] **Village and country zoom.** Inward zoom at level 10 (see round 4). Outward country view is still unplanned. Round 5 note `ee7f` asks for zoom out to fit; see convo v0.4.
+- [ ] **Village and country zoom.** Zoom and minimap are built (round 5). The country view beyond Fit is unplanned.
 - [ ] **Balance pass.** Hard mode beat a player who did nothing in about 20 seconds in testing. Play a few full games and tune the rates, garrisons and move caps.
 - [ ] **Speed and defense boosts, towers, spells, Quick Game** (already listed on the Shop page as coming soon).

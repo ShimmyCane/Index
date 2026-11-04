@@ -15,12 +15,17 @@
   };
   // City tiers: growth rate (soldiers per second), garrison cap, and the soldiers it costs to reach the tier.
   // Each cost is 50% of that tier's cap.
+  // secs = how long the upgrade to this tier takes. The spot's army does not grow meanwhile.
   var CITY_LEVELS = [
-    { name: 'village',    rate: 1.5, cap: 20, cost: 0 },
-    { name: 'town',       rate: 2.0, cap: 40, cost: 20 },
-    { name: 'city',       rate: 2.6, cap: 60, cost: 30 },
-    { name: 'metropolis', rate: 3.2, cap: 80, cost: 40 }
+    { name: 'village',    rate: 1.5, cap: 20, cost: 0,  secs: 0 },
+    { name: 'town',       rate: 2.0, cap: 40, cost: 20, secs: 3 },
+    { name: 'city',       rate: 2.6, cap: 60, cost: 30, secs: 6 },
+    { name: 'metropolis', rate: 3.2, cap: 80, cost: 40, secs: 10 }
   ];
+  var FORT_CONVERT_SECS = 10;   // a metropolis takes this long to become a fortress
+  var SURRENDER_RATIO = 10;     // outnumbered this many to one, a team gives up (when Surrender is on)
+  var MAX_ZOOM = 2.5;
+  var ZOOM_STEP = 1.25;
   var FORT_CAP = 40;   // a fortress grows slowly up to this garrison; it does not grow beyond it
   var MUSH_CAP = 20;   // a mushroom is the smallest village: it stops growing at this garrison
   var FORT_CONVERT_COST = 40;   // soldiers to turn a metropolis into a fortress
@@ -35,6 +40,9 @@
     { name: 'City upgrades', desc: 'Tap your city to upgrade it: village, town, city, metropolis. Each tier grows faster and holds more.', status: 'in' },
     { name: 'Fortresses 🏯', desc: 'Strong stone spots. Reinforce them from your other spots.', status: 'in' },
     { name: 'Five more maps', desc: 'Levels 5 to 9: bigger fields you scroll over, with more spots and cities.', status: 'in' },
+    { name: 'Levels 10 to 15', desc: 'Multiplayer only: 4 to 6 flags on denser maps, with zoom and a minimap.', status: 'in' },
+    { name: 'Zoom and minimap', desc: 'Zoom with + and −, Fit, or two fingers. The minimap shows where you are when the field scrolls.', status: 'in' },
+    { name: 'Surrender', desc: 'Turn it on in ⚙️. A side outnumbered 10 to 1 gives up.', status: 'in' },
     { name: 'Lakes 💧', desc: 'Water that soldiers cannot cross. Found from Level 2.', status: 'in' },
     { name: 'Voronoi maps', desc: 'Every map is a new layout of regions.', status: 'in' },
     { name: 'Send 10 to 100%', desc: 'Choose how much of a spot sends at once.', status: 'in' },
@@ -64,7 +72,8 @@
     syncPill: $('sync-pill'), syncMsg: $('sync-msg'), familyForm: $('family-form'),
     familyEmail: $('family-email'), familyPass: $('family-pass'), familySync: $('family-sync'),
     familyCheck: $('family-check'), familySignout: $('family-signout'), familyResult: $('family-result'),
-    pctBtn: $('pct-btn'), popBar: $('pop-bar'), countdown: $('countdown')
+    pctBtn: $('pct-btn'), popBar: $('pop-bar'), countdown: $('countdown'),
+    minimap: $('minimap'), mmSvg: $('mm-svg'), mmView: $('mm-view'), surrenderToggle: $('surrender-toggle')
   };
 
   var g = {
@@ -76,6 +85,12 @@
     W: M.W, H: M.H,    // size of the field in map units (bigger on the scrolling levels)
     cam: { x: 0, y: 0 },   // how far the field is panned, in screen pixels
     pan: null,         // a pan in progress: where the finger started
+    touches: {},       // pointers on the board, by id, with their screen positions
+    pinch: null,       // a two-finger zoom in progress
+    zoom: 1,           // zoom of the field (1 = the field at the screen's scale; bigger zooms in)
+    scale: 1,          // size of the field compared with one screen
+    surrenderOn: false,   // the Surrender setting (⚙️)
+    surrendered: {},   // players who have given up in this game
     players: 2,
     screen: 'home',
     nodes: [],
@@ -286,6 +301,7 @@
 
     // The field may be bigger than one screen: the board is that many screens wide.
     var scale = g.W / M.W;
+    g.scale = scale;
     els.board.style.setProperty('--scale', String(scale));
     els.roads.setAttribute('viewBox', '0 0 ' + g.W + ' ' + g.H);
     els.armies.setAttribute('viewBox', '0 0 ' + g.W + ' ' + g.H);
@@ -398,6 +414,12 @@
     popKey = '';
     els.overlay.hidden = true;
     buildBoard();
+    buildMinimap();
+    g.surrendered = {};
+    g.touches = {};
+    g.pinch = null;
+    g.zoom = 1;
+    els.board.style.setProperty('--zoom', '1');
     centreCam();
     restoreStatus();
   }
@@ -486,6 +508,7 @@
       var before = n.owner;
       n.owner = a.owner;
       n.count = -n.count;
+      n.upgrade = null;   // a spot taken mid-upgrade loses the upgrade
       // A captured city drops one grade (never below village).
       if (n.type === 'city') {
         var lv = Math.max(1, (n.level || 1) - 1);
@@ -498,46 +521,48 @@
     }
   }
 
-  // Spend soldiers to grow one of your spots. A mushroom becomes a town-tier city. A city goes up one
-  // tier, and a metropolis becomes a fortress.
+  // Finish an upgrade: the spot takes its new type, level, rate and cap.
+  function applyUpgrade(n, u) {
+    if (u.kind === 'mush') {
+      var t = CITY_LEVELS[1];
+      n.type = 'city'; n.level = 2; n.rate = t.rate; n.cap = t.cap;
+    } else if (u.kind === 'city') {
+      var c = CITY_LEVELS[u.to - 1];
+      n.level = u.to; n.rate = c.rate; n.cap = c.cap;
+    } else {
+      n.type = 'fortress'; n.level = 0; n.rate = M.TYPES.fortress.rate; n.cap = FORT_CAP;
+    }
+    n.upgrade = null;
+    if (n.owner === 0) setStatus('Your spot grew into ' + u.label + '!', true);
+  }
+
+  // Spend soldiers to start growing one of your spots. A mushroom becomes a town-tier city. A city goes up
+  // one tier, and a metropolis becomes a fortress. The spot does not grow its army while it upgrades.
   function tryUpgrade(n) {
     if (n.owner !== 0 || (n.type !== 'city' && n.type !== 'factory')) return;
-    var have = Math.floor(n.count);
+    if (n.upgrade) { setStatus('This spot is already growing.', true); return; }
+    var have = Math.floor(n.count), u, cost, secs, label;
     if (n.type === 'factory') {
-      var town = CITY_LEVELS[1];
-      if (have < town.cost) {
-        setStatus('Upgrading to a ' + town.name + ' needs ' + town.cost + ' soldiers in the mushroom.', true);
-        return;
-      }
-      n.count -= town.cost;
-      n.type = 'city'; n.level = 2; n.rate = town.rate; n.cap = town.cap;
-      Sound.tap();
-      setStatus('Your mushroom is now a town!', true);
+      u = { kind: 'mush' };
+      cost = CITY_LEVELS[1].cost; secs = CITY_LEVELS[1].secs; label = 'a town';
+    } else if ((n.level || 1) >= CITY_LEVELS.length) {
+      u = { kind: 'fort' };
+      cost = FORT_CONVERT_COST; secs = FORT_CONVERT_SECS; label = 'a fortress';
+    } else {
+      var lvl = n.level || 1;
+      u = { kind: 'city', to: lvl + 1 };
+      cost = CITY_LEVELS[lvl].cost; secs = CITY_LEVELS[lvl].secs; label = 'a ' + CITY_LEVELS[lvl].name;
+    }
+    if (have < cost) {
+      setStatus('Growing into ' + label + ' needs ' + cost + ' soldiers in the spot.', true);
       return;
     }
-    var lvl = n.level || 1;
-    if (lvl >= CITY_LEVELS.length) {
-      if (have < FORT_CONVERT_COST) {
-        setStatus('Becoming a fortress needs ' + FORT_CONVERT_COST + ' soldiers in the city.', true);
-        return;
-      }
-      n.count -= FORT_CONVERT_COST;
-      n.type = 'fortress'; n.level = 0; n.rate = M.TYPES.fortress.rate; n.cap = FORT_CAP;
-      Sound.tap();
-      setStatus('Your city is now a fortress!', true);
-      return;
-    }
-    var next = CITY_LEVELS[lvl];
-    if (have < next.cost) {
-      setStatus('Upgrading to a ' + next.name + ' needs ' + next.cost + ' soldiers in the city.', true);
-      return;
-    }
-    n.count -= next.cost;
-    n.level = lvl + 1;
-    n.rate = next.rate;
-    n.cap = next.cap;
+    n.count -= cost;
+    u.label = label;
+    u.until = g.elapsed + secs;
+    n.upgrade = u;
     Sound.tap();
-    setStatus('Your city is now a ' + next.name + '!', true);
+    setStatus('Growing into ' + label + '...', true);
   }
 
   // Enemy soldiers inside a fortress's range stop and lose soldiers each second.
@@ -567,7 +592,9 @@
     g.elapsed += dt;
 
     g.nodes.forEach(function (n) {
+      if (n.upgrade && g.elapsed >= n.upgrade.until) applyUpgrade(n, n.upgrade);
       if (n.owner < 0) return;
+      if (n.upgrade) return;          // a spot growing into a new tier keeps its army as it is
       if (n.count >= n.cap) return;   // cities stop growing at their garrison cap
       n.count += n.rate * dt;
       if (n.count > n.cap) n.count = n.cap;
@@ -596,6 +623,7 @@
       g.aiClock = LEVELS_AI[g.ai].every;
     }
 
+    checkSurrender();
     checkWin();
   }
 
@@ -622,6 +650,7 @@
   // spots on the front attack the best linked neighbour from another team.
   // A player with more than half the soldiers is ganged up on. Moves per minute are capped by level.
   function aiThink(level, p) {
+    if (g.surrendered[p]) return;
     var log = (g.aiLog[p] || []).filter(function (t) { return g.elapsed - t < 60; });
     g.aiLog[p] = log;
 
@@ -656,6 +685,37 @@
       }
       if (target && launch(n, target, Math.floor(n.count * level.fraction), p)) log.push(g.elapsed);
     });
+  }
+
+  // A team outnumbered 10 to 1 by the other teams gives up. Only when Surrender is on in ⚙️.
+  function checkSurrender() {
+    if (!g.surrenderOn) return;
+    var tot = totals();
+    var teams = [];
+    for (var p = 0; p < g.players; p++) {
+      var k = teamOf(p);
+      if (!teams[k]) teams[k] = { members: [], soldiers: 0 };
+      teams[k].members.push(p);
+      if (!g.surrendered[p]) teams[k].soldiers += tot[p].soldiers;
+    }
+    var sum = 0;
+    teams.forEach(function (t) { sum += t.soldiers; });
+    teams.forEach(function (t) {
+      if (t.members.every(function (m) { return g.surrendered[m]; })) return;
+      var others = sum - t.soldiers;
+      if (others > 0 && others >= SURRENDER_RATIO * t.soldiers) surrender(t.members);
+    });
+  }
+
+  // Give up: the side's spots go neutral with their soldiers, and its soldiers on the march are lost.
+  function surrender(members) {
+    members.forEach(function (m) { g.surrendered[m] = true; });
+    g.nodes.forEach(function (n) {
+      if (n.owner >= 0 && members.indexOf(n.owner) !== -1) { n.owner = -1; n.upgrade = null; }
+    });
+    g.armies.forEach(function (a) { if (members.indexOf(a.owner) !== -1) a.done = true; });
+    var me = members.indexOf(0) !== -1;
+    setStatus(me ? 'You surrendered.' : 'A rival gave up!', true);
   }
 
   // The game is won when only one team is left with spots or soldiers. Neutral spots may remain.
@@ -815,6 +875,7 @@
       var cls = 'node' + (n.type === 'city' ? ' city' : '') + ' ' + colourClass(n.owner);
       if (g.drag && g.drag.sources.indexOf(n) !== -1) cls += ' source';
       if (g.drag && g.drag.target === n) cls += ' target';
+      if (n.upgrade) cls += ' upgrading';   // dust while the spot grows
       n.el.className = cls;
       if (n.shownCount !== label) {
         n.num.textContent = String(label);
@@ -834,18 +895,104 @@
 
     renderDrag();
     renderPop();
+    renderMinimap();
     renderCountdown();
     els.pctBtn.textContent = 'Send ' + Math.round(g.sendPct * 100) + '%';
   }
+
+  // ---------- zoom, pinch and the minimap ----------
+
+  // Zoom the field. The point at (ax, ay) in the window stays where it is. Default: the middle of the window.
+  function setZoom(z, ax, ay) {
+    var wrap = els.board.parentElement;
+    z = Math.max(1 / g.scale, Math.min(MAX_ZOOM, z));   // 1 / scale: the whole field fits the window
+    if (ax === undefined) { ax = wrap.clientWidth / 2; ay = wrap.clientHeight / 2; }
+    var fx = (ax - g.cam.x) / els.board.clientWidth;
+    var fy = (ay - g.cam.y) / els.board.clientHeight;
+    g.zoom = z;
+    els.board.style.setProperty('--zoom', String(z));
+    setCam(ax - fx * els.board.clientWidth, ay - fy * els.board.clientHeight);
+  }
+
+  function startPinch() {
+    var ids = Object.keys(g.touches);
+    var a = g.touches[ids[0]], b = g.touches[ids[1]];
+    g.drag = null;
+    g.pan = null;
+    g.pinch = { d0: Math.hypot(a.x - b.x, a.y - b.y) || 1, z0: g.zoom };
+  }
+
+  function pinchMove() {
+    var ids = Object.keys(g.touches);
+    if (ids.length < 2) return;
+    var a = g.touches[ids[0]], b = g.touches[ids[1]];
+    var r = els.board.parentElement.getBoundingClientRect();
+    var d = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+    setZoom(g.pinch.z0 * d / g.pinch.d0, (a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top);
+  }
+
+  // The minimap: the whole field, each spot as a dot, and a frame for what is on screen.
+  function buildMinimap() {
+    els.mmSvg.setAttribute('viewBox', '0 0 ' + g.W + ' ' + g.H);
+    els.mmSvg.innerHTML = '';
+    els.minimap.style.aspectRatio = g.W + ' / ' + g.H;
+    g.nodes.forEach(function (n) {
+      n.mmEl = svgEl('circle', { cx: n.x, cy: n.y, r: n.type === 'fortress' ? 46 : (n.type === 'city' ? 40 : 30) });
+      n.shownMm = undefined;
+      els.mmSvg.appendChild(n.mmEl);
+    });
+  }
+
+  // Show the minimap only when the field scrolls, and move its frame with the view.
+  function renderMinimap() {
+    var wrap = els.board.parentElement;
+    var bw = els.board.clientWidth, bh = els.board.clientHeight;
+    var scrolls = g.zoom * g.scale > 1.01;   // the field is bigger than the window
+    els.minimap.hidden = !scrolls;
+    if (!scrolls) return;
+    els.mmView.style.left = (-g.cam.x / bw * 100) + '%';
+    els.mmView.style.top = (-g.cam.y / bh * 100) + '%';
+    els.mmView.style.width = (wrap.clientWidth / bw * 100) + '%';
+    els.mmView.style.height = (wrap.clientHeight / bh * 100) + '%';
+    g.nodes.forEach(function (n) {
+      if (!n.mmEl || n.shownMm === n.owner) return;
+      n.mmEl.setAttribute('class', colourClass(n.owner));
+      n.shownMm = n.owner;
+    });
+  }
+
+  // A tap or drag on the minimap moves the view there.
+  function panToMini(e) {
+    var r = els.minimap.getBoundingClientRect();
+    var fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
+    var wrap = els.board.parentElement;
+    setCam(wrap.clientWidth / 2 - fx * els.board.clientWidth, wrap.clientHeight / 2 - fy * els.board.clientHeight);
+  }
+
+  els.minimap.addEventListener('pointerdown', function (e) {
+    els.minimap.setPointerCapture(e.pointerId);
+    g.miniDrag = true;
+    panToMini(e);
+  });
+  els.minimap.addEventListener('pointermove', function (e) { if (g.miniDrag) panToMini(e); });
+  els.minimap.addEventListener('pointerup', function () { g.miniDrag = false; });
+  els.minimap.addEventListener('pointercancel', function () { g.miniDrag = false; });
+
+  $('zoom-in').addEventListener('click', function () { setZoom(g.zoom * ZOOM_STEP); });
+  $('zoom-out').addEventListener('click', function () { setZoom(g.zoom / ZOOM_STEP); });
+  $('zoom-fit').addEventListener('click', function () { setZoom(1 / g.scale); centreCam(); });
 
   // ---------- input ----------
 
   els.board.addEventListener('pointerdown', function (e) {
     if (g.over || g.paused) return;
-    var p = toMap(e);
-    var n = hit(p);
     e.preventDefault();
     els.board.setPointerCapture(e.pointerId);
+    g.touches[e.pointerId] = { x: e.clientX, y: e.clientY };
+    if (Object.keys(g.touches).length === 2) { startPinch(); return; }   // two fingers: zoom
+    if (Object.keys(g.touches).length > 2) return;
+    var p = toMap(e);
+    var n = hit(p);
     if (n && n.owner === 0 && n.count >= 1 && g.countdown <= 0) {
       g.drag = { sources: [n], start: p, pointer: p, target: null, moved: false };
       Sound.tap();
@@ -863,6 +1010,8 @@
 
   // Moving over your own regions adds them to the group; over another region it targets it.
   els.board.addEventListener('pointermove', function (e) {
+    if (g.touches[e.pointerId]) g.touches[e.pointerId] = { x: e.clientX, y: e.clientY };
+    if (g.pinch) { pinchMove(); return; }
     if (g.pan && !g.drag) {
       setCam(g.pan.camX + e.clientX - g.pan.x, g.pan.camY + e.clientY - g.pan.y);
       return;
@@ -880,6 +1029,12 @@
   // Release: a tap on a city upgrades it. A drop on a region sends every dragged spot that can
   // reach it, by road or through your own spots. A drop on your own spot reinforces it.
   function endDrag(e) {
+    delete g.touches[e.pointerId];
+    if (g.pinch) {
+      if (Object.keys(g.touches).length < 2) g.pinch = null;
+      g.pan = null;
+      return;
+    }
     g.pan = null;
     var d = g.drag;
     if (!d) return;
@@ -909,7 +1064,18 @@
   }
 
   els.board.addEventListener('pointerup', endDrag);
-  els.board.addEventListener('pointercancel', function () { g.drag = null; g.pan = null; });
+  els.board.addEventListener('pointercancel', function (e) {
+    delete g.touches[e.pointerId];
+    g.drag = null; g.pan = null; g.pinch = null;
+  });
+
+  els.surrenderToggle.addEventListener('click', function () {
+    var on = els.surrenderToggle.getAttribute('aria-pressed') !== 'true';
+    els.surrenderToggle.setAttribute('aria-pressed', String(on));
+    els.surrenderToggle.textContent = on ? 'On' : 'Off';
+    g.surrenderOn = on;
+    setStatus(on ? 'Surrender is on: outnumbered 10 to 1 means giving up.' : 'Surrender is off.', true);
+  });
 
   els.pctBtn.addEventListener('click', function () {
     var i = SEND_STEPS.indexOf(g.sendPct);
