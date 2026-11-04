@@ -8,7 +8,7 @@ window.XWStore = (function () {
   var MAPS_KEY = 'xw_maps_v1';
   var PROGRESS_KEY = 'xw_progress_v1';
   var SCORES_KEY = 'xw_scores_v1';
-  var LEVEL_COUNT = 9;
+  var LEVEL_COUNT = 15;
   var lastError = null;
 
   function readJSON(key, fallback) {

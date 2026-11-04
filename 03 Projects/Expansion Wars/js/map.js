@@ -29,7 +29,14 @@
     { level: 6, name: 'Forest',    spots: 14, players: 4, teams: 2, lakes: 2, cities: 4, forts: 1, scale: 1.5 },
     { level: 7, name: 'Marsh',     spots: 16, players: 4, teams: 0, lakes: 2, cities: 4, forts: 2, scale: 1.5 },
     { level: 8, name: 'Canyon',    spots: 18, players: 6, teams: 3, lakes: 2, cities: 5, forts: 2, scale: 1.5 },
-    { level: 9, name: 'Highlands', spots: 20, players: 6, teams: 0, lakes: 3, cities: 5, forts: 3, scale: 1.5 }
+    { level: 9, name: 'Highlands', spots: 20, players: 6, teams: 0, lakes: 3, cities: 5, forts: 3, scale: 1.5 },
+    // Levels 10 to 15: multiplayer only, denser maps on a field two screens wide.
+    { level: 10, name: 'Lagoon', spots: 30, players: 4, teams: 0, lakes: 3, cities: 5,  forts: 2, scale: 2 },
+    { level: 11, name: 'Tundra', spots: 34, players: 6, teams: 3, lakes: 3, cities: 6,  forts: 3, scale: 2 },
+    { level: 12, name: 'Jungle', spots: 38, players: 4, teams: 2, lakes: 4, cities: 7,  forts: 3, scale: 2 },
+    { level: 13, name: 'Desert', spots: 42, players: 6, teams: 0, lakes: 4, cities: 8,  forts: 4, scale: 2 },
+    { level: 14, name: 'Island', spots: 46, players: 6, teams: 3, lakes: 5, cities: 9,  forts: 4, scale: 2 },
+    { level: 15, name: 'Kingdom', spots: 52, players: 6, teams: 2, lakes: 6, cities: 10, forts: 5, scale: 2 }
   ];
 
   function rnd(a, b) { return a + Math.random() * (b - a); }
