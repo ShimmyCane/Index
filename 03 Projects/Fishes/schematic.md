@@ -69,6 +69,15 @@ Twenty tiers (one per level), in five depth zones. The play area grows with each
 
 Each species' real-fish note is in `js/species.js`.
 
+## Controls, screen and modes (v0.5)
+
+- **Controls:** Tap and move (default), or a joystick at the lower left. The joystick is set in ⚙️ → Sound, errors, display and controls.
+- **Sprint:** lower-right action column, just above ⚙️.
+- **Phones:** the play view is 2.5× larger (screens narrower than 600 px). Pinch and double-tap zoom are off on this page.
+- **Infinite mode:** on the title screen. After tier 20 the size goal rises 25% each time; there is no 15-minute cap and no win. Score still counts.
+- **End game:** ⚙️ → End game shows your score and the best score.
+- **Level up:** the old fish stay. New fish swim in from the edges for six seconds and can't touch you until they've settled.
+
 ## Combat, health and chum (v0.4)
 
 - **Bites:** a fish is removed when its health reaches zero. A bite takes off the attacker's attack value. The player bites every 0.6 s; fish bite every 0.9 s.
