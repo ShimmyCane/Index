@@ -21,6 +21,8 @@ Companion files: `patterns.md` (reusable patterns and template candidates), `Per
 11. **Ask "What should never happen in this tool?"** in every first convo round. It surfaces privacy and IP limits early. _(Shimmy Specs)_
 12. **Lessons from past work, never the past work.** When Jimmy draws on an old or office project, commit only the general lesson. Nothing that identifies the project goes in text, scripts, GitHub or a database. Sketch/test projects and Jimmy's own projects are the exception. _(Shimmy Specs)_
 13. **Hand-off lists for a smaller model.** When a cheaper model will build from a plan, split it into a design file plus an ordered task list with a check per task, rules up front, a "don't invent content" line, and a place to park questions. _(Shimmy Specs)_
+14. **Keep a disliked mechanic, and add alternatives behind a switch.** The first one stays, and Jimmy can compare. _(Chinese Character Sudoku)_
+15. **Ask which unit the user means before building a bias.** "Recently learned" meant the last 60 characters, not words. _(Chinese Character Sudoku)_
 
 ## 2. Designing for kids on iPad
 
@@ -40,6 +42,9 @@ Companion files: `patterns.md` (reusable patterns and template candidates), `Per
 14. **Use the right layout for the device.** Vertical river flow gave a boat more horizontal room; a 70–75% stage width kept multi-seat puzzles from feeling cramped. _(Row Boat)_
 15. **Balance mechanics symmetrically.** When adding a special piece to one side, give the other side a matching piece in a rotated position. _(Felix Checkers)_
 16. **Keep the answer visible** after a game ends, and give a clear "Try again". _(Row Boat, Felix Checkers)_
+17. **Keep the controls sticky in a two-column layout.** Auto-scrolling a column to the bottom pushed the character buttons out of view. Make the controls sticky and scroll only the new item into view. _(Adventure)_
+18. **Use pointer events, not HTML5 drag-and-drop, on iPad.** A ghost tile follows the finger, `elementFromPoint` finds the drop cell, and a small threshold separates a tap from a drag. _(Chinese Character Sudoku)_
+19. **Update a status in place.** Re-drawing a whole panel on each save drops focus from text being typed; update only the status light. _(Shimmy Specs)_
 
 ## 3. Layout, SVG and CSS
 
@@ -54,6 +59,9 @@ Companion files: `patterns.md` (reusable patterns and template candidates), `Per
 9. **Hide controls with `[hidden]{display:none}`** too, because `display:flex` overrides the `hidden` attribute. _(Coin Club in Coins)_
 10. **Hand-written SVG charts are enough** for dependency-free dashboards. Check both empty and non-empty data in a browser. _(Family Accounting)_
 11. **Draw all faces of 3D canvas shapes**, tinting back faces, instead of culling. Culling leaves holes in spiky shapes. _(Coins)_
+12. **Check the whole page, not just the picture.** Start and finish marks outside a maze pushed into the title and footer. Run a layout check in the generator. _(Felix Maze)_
+13. **In a fixed-height flex column, set `flex-shrink: 0`** on children or text boxes, or they clip. _(Felix Maze)_
+14. **Decode hash routes.** A route with spaces arrives percent-encoded (`%20`); decode it in the router. _(Shimmy Specs)_
 
 ## 4. Structure and content
 
@@ -70,6 +78,8 @@ Companion files: `patterns.md` (reusable patterns and template candidates), `Per
 11. **Pick the chart for the question.** A pie answers "what made up this year?"; grouped bars or lines answer "how did it change?" _(Family Accounting)_
 12. **Make decisions on a single source of truth.** A PDF or DXF writer or other output should come from one primitive list in real units, so every output matches. _(Quick Detail)_
 13. **Record relationships when they're created**, not guessed later. A leader tip that records its exact target beats a proximity guess. _(Quick Detail)_
+14. **Create the shared namespace in every file that uses it** (`NS = NS || {}`). A file that copies a namespace at load time sees `undefined` if it loads first. Browser smoke tests catch it; Node tests do not. _(Shimmy Specs)_
+15. **Store the data version with saved state.** A restored game can hold items no longer in the data; drop the save on a version mismatch. _(Chinese Character Sudoku)_
 
 ## 5. Errors, offline and data
 
@@ -80,6 +90,8 @@ Companion files: `patterns.md` (reusable patterns and template candidates), `Per
 5. **A form option implies a database rule.** "Adjustment (+/−)" means negative amounts are valid. Read what the UI promises before writing constraints. _(Allowances)_
 6. **Client-side scheduled work depends on someone opening the app.** A database function or scheduled job is the robust follow-up. _(Allowances)_
 7. **Test a changed front end with a stand-in client that enforces the real schema**, in a headless browser. Say that a real login was not tested. _(Allowances)_
+8. **Offline is not an error.** A page that can't reach the database should say "this device only", not add an error on every load. _(Felix Maze)_
+9. **Keep AI keys out of the browser.** Run storyteller or model calls as a background job between sessions, not in the page. The output was also steadier. _(Adventure)_
 
 ## 6. Supabase (any static app with a database)
 
@@ -97,12 +109,15 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 10. **Shared logins are a hidden dependency.** Check which account an app actually signs in with before switching it over. _(Supabase Registry)_
 11. **Use a shared project with prefixed tables** when several apps share a database. Register which app owns which table. _(Supabase Registry)_
 12. **Only the publishable key goes in browser code.** Never put a service-role key in a static app. _(Moment, Allowances)_
+13. **Log every change with one generic trigger, and roll back with one function.** A trigger copies `to_jsonb(old)` and `to_jsonb(new)` into a history table; a restore uses `jsonb_populate_record` with `on conflict (id) do update`. No per-table code. _(Adventure)_
+14. **Custom sign-in: let the database refuse everything except named functions.** RLS on with no policies, plus security-definer functions with a fixed `search_path`. Test the refusals (wrong password, injection-shaped name, another user's data, expired session) in a rolled-back block. _(Shimmy Specs)_
 
 ## 7. Hosting
 
 1. **Use GitHub Pages for anything that needs the microphone, a database, or downloads.** Artifact previews can't do these. _(Speech Therapy)_
 2. **Artifact limits:** no microphone, no outside fetches beyond the page's own files, inert download links, and full HTML documents get nested in the wrapper. Supporting files can be published alongside. _(Speech Therapy)_
 3. **Publish from a single place.** Keep the public site root separate from working folders so they don't collide. _(Index)_
+4. **Keep a bundled data copy for double-click use.** `fetch` fails from `file://`. A generated script with the same data lets the app run from a double-click, and a validator fails when it goes stale. _(Shimmy Specs, Make 3D)_
 
 ## 8. Environment and tools
 
@@ -113,16 +128,42 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 5. **Hand-written PDF and DXF are viable offline.** Helvetica with computed byte offsets, and R12 DXF with layer colors standing in for lineweights. Validate outputs with an external reader. _(Quick Detail)_
 6. **Keep helper functions reachable.** When splitting code, re-run every panel renderer to catch missing helpers. _(Coins)_
 7. **Deliver a verifiable result.** If a build or device test can't run here, make the change, say what was verified by reading, and say what remains.
+8. **Check the date from the session, not from habit.** A change-log entry was labelled with tomorrow's date. _(Chinese Character Sudoku)_
+9. **Try the package registry before calling a package unreachable.** One allowlist blocked the CDN but allowed the npm registry. Academic hosts can be blocked too; ask for the file. _(Chinese Character Sudoku, Felix Maze)_
+10. **Subset an offline font to the characters used, and keep its licence.** 359 glyphs came to 78 KB as woff2. SIL OFL means keeping the licence and not claiming a reserved name. _(Chinese Character Sudoku)_
+11. **Test touch with real touch events** (CDP `Input.dispatchTouchEvent`), not only the mouse, and check that the page doesn't scroll while drawing. _(Chinese Character Sudoku)_
+12. **Headless WebGL needs flags.** Use `--no-sandbox --use-gl=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist` with the pre-installed Chromium. _(Make 3D)_
 
 ## 9. Open questions to revisit
 
 - Should convo files ever be private? Right now they are public in this repo.
 - When a project leaves the nursery, what goes with it: the lessons, the convo files, or only the code?
+- Which projects hold family data and belong in a private repo rather than this public one? (Adventure, Shimmy Specs)
+
+## 10. Settings button (⚙️)
+
+Full build rules: `02 Refs/Skills/settings_gear.md` (run as `/settings-gear`).
+
+1. **One gear everywhere.** Lower right, the same drawer in every app: options, page links, database check, Show errors last. _(Adventure, Felix Maze, Make 3D, Chinese Character Sudoku)_
+2. **Hidden is not removed.** Anything taken off the screen to save room stays reachable in ⚙️. _(Chinese Character Sudoku, `ipad_website.md`)_
+3. **Errors are opt-in, at the bottom, behind ⚙️.** Log them always, so turning the toggle on shows earlier ones. _(Felix Maze, Adventure)_
+4. **Build every option from one settings object.** Render each segmented control from it, and save it in a try/catch. _(Chinese Character Sudoku)_
+5. **Keep the gear clear of content.** Reserve footer padding, keep the error panel off the gear's corner, and hide the gear in print. _(Make 3D, Felix Maze)_
+6. **Switch modes by hash link** (`#v1`, `#v2`), so a mode can be bookmarked. _(Chinese Character Sudoku)_
 
 ## Generated puzzles (Felix Maze)
 
 1. **Validate generated output against what is drawn**, and reject or regrow failures automatically (best of several). Measure the failure rate over hundreds of seeds before trusting it. _(Felix Maze)_
 2. **Store seeds/recipes, fingerprint published ones**, so later code changes can't silently alter something already printed. _(Felix Maze)_
+3. **Check what is drawn, not only the model.** Record each drawn line while rendering and test the answer against those, not against the cell graph. _(Felix Maze)_
+4. **Compare pixels with and without the answer**, to catch layering bugs that geometry checks miss. Layer by what the solver sees: under a bridge, redraw the bridge over the answer. _(Felix Maze)_
+5. **Don't warp a child's drawing to fit the generator.** Turn an effect off where the child's own line sits on top. _(Felix Maze)_
+6. **Calibrate levels from samples, anchored to a named reference.** Boundaries sit halfway between the typical effort of each level. One child's "that's a level 2" moved every boundary, so keep the scale anchored to a named maze. _(Felix Maze)_
+7. **Scores that all read the same are useless.** Add measures that vary, and check the spread over real samples. _(Felix Maze)_
+8. **Policy belongs in the data.** A `living: true` flag on a design stops the generator, so the rule can't be forgotten. _(Felix Maze)_
+9. **Keep device-made and published counters apart** (for example 001–7FF and 800–FFF), so a later batch can't collide with something saved on a device. _(Felix Maze)_
+10. **Enumerate small search spaces once, then sample.** Random search kept finding the same dozen boards; enumerating all grids once gave fixed variety. _(Chinese Character Sudoku)_
+11. **Time the generator after any bias change.** A capped restart budget brought one size from about 800 ms back to about 100 ms. _(Chinese Character Sudoku)_
 
 ## File-based pages and generated samples (Make 3D)
 - ES module imports don't load from `file://`. Use classic scripts and UMD builds so a double-click works. _(Make 3D)_
@@ -216,3 +257,14 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 - Show the readable result first and fold the editing UI away. Measure the page height.
 - Test the page at phone width and measure which element overflows.
 - When a shared page changes, load every existing item once.
+
+## Privacy, owner access and checks (2026-11-04)
+
+- **Never put a sign-in email in a public migration.** A repo file is public forever, and rewriting history is disruptive and rarely removes every copy. Identify the owner by auth user id in an owner table that is filled by hand, and check policies with `public.platform_is_owner()`. _(Growth, Make 3D; `04 AI/Supabase/platform_owner.sql`)_
+- **Check the live policies before deciding a repo fix is enough.** The repo copy and the live database can differ. The Architecture project had email-based policies live on eleven tables that the repo files didn't cover. _(Architecture, 2026-11-04)_
+- **Read every result set of a multi-statement query.** Some clients show only the last result, so an empty-looking check can hide a live policy. _(Architecture, 2026-11-04)_
+- **Test an owner rule in a rolled-back block** that returns the owner and non-owner results in the raise message. Create the table, function and policy inside the block, so the rollback removes all of them. _(Architecture, 2026-11-04)_
+- **A pattern that starts with a dash needs `grep -e`.** Otherwise grep reads it as an option and reports nothing, so a scanner can pass with a real problem in place. Test every scanner on a fixture with planted problems. _(Privacy scan, 2026-11-04)_
+- **Sandbox proxy errors are not app errors.** A `net::ERR_TUNNEL_CONNECTION_FAILED` to an outside host means the sandbox blocked it. Name the host and check the page still works without it. _(Expansion Wars smoke run, 2026-11-04)_
+- **Feedback notes belong on the item, not in the page's head.** Save each note with the map, level or screen it is about, the page and the time, so the owner can act on it later without asking what it meant. _(Expansion Wars, Fishes, Felix Maze)_
+- **A starter that hides its own box fails the first test.** Put the box inside the panel that opens it, and let the panel do the hiding. _(feedback_notes starter, 2026-11-04)_

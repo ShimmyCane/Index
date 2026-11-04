@@ -10,7 +10,7 @@
 * **Color Palette**: Light pastel color schemes (e.g. soft vanilla, sage, peach, mint, coral). Avoid harsh high-contrast black/white or neon tones unless specifically asked.
 * **Graphics & Styling**: Simple, bold lines (2.5px – 3.5px solid dark borders) with tactile depth (`box-shadow: 0 4px 0 ...`). Avoid stark wireframes; make it graphically rich, cute, and engaging.
 * **Focus & Simplicity**: Minimize text, nested menus, and clutter. Keep the primary activity / game board front and center.
-* **Settings & Extensions Anchor**: Place a dedicated **floating gear button (`⚙️`) in the lower-right corner** that opens a clean drawer or modal for options and extensions.
+* **Settings & Extensions Anchor**: Place a dedicated **floating gear button (`⚙️`) in the lower-right corner** that opens a clean drawer or modal for options and extensions. Full build rules: `02 Refs/Skills/settings_gear.md`.
 * **Errors at the bottom**: Error messages should appear at the bottom of the page (not as top banners), behind a "Show errors" toggle in the gear panel. Never force errors on screen — users should opt in.
 * **Large Buttons**: Generous touch targets suited for tablet fingers (minimum 48px to 68px heights).
 * **Layout details** (two-column play/reference layout, decluttering into settings, no layout jumps): see `02 Refs/Skills/ipad_website.md`.
