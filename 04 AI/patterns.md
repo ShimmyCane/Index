@@ -4,6 +4,9 @@ Reusable lessons distilled from the seed projects, so a new project can start fr
 
 ## UI for kids on iPad
 
+- **Two tracks, one set of defaults:** family play (simple, graphic, settings in ⚙️) and studio design (denser, formal, still collapsible). Set the track first; the track decides the screen density, the palette and the database. See `02 Refs/Skills/project_track.md`. _(Fishes, Expansion Wars, Make 3D, Shimmy Specs)_
+- **Collapsible panels by default:** a header with an icon and name, a ▸/▾ marker, state remembered per device. _(Coins, project_track snippet)_
+- **One ⚙️ settings button everywhere:** lower-right gear, segmented options, opt-in errors at the bottom, database check. Build it from `02 Refs/Skills/settings_gear.md` (`/settings-gear`). _(Adventure, Felix Maze, Make 3D, Chinese Character Sudoku)_
 - **Layout and look:** follow `02 Refs/Skills/ipad_website.md` and `Personal Preferences/jimmy_preferences.md`: pastel colors, bold outlines, two-column play/reference layout, gear in the lower right, touch targets ≥ 48px.
 - **Lock the size of swapping content** so the layout doesn't jump. _(Coins I, Primes 01 A)_
 - **Stacked +/− panels instead of tabs** that replace each other. _(Coins C)_
@@ -44,7 +47,7 @@ Reusable lessons distilled from the seed projects, so a new project can start fr
 
 ## Process
 
-The ten recurring lessons are summarized in `profile_and_directions.md` §4. Process-level ones:
+The recurring lessons are consolidated in `lessons_pool.md`. Process-level ones:
 
 - **Clarify before building:** two rounds of numbered questions in a convo file got Moment to an MVP in one pass. _(Moment v6.1–v6.2)_
 - **Verify on the real thing before calling it done:** live schema, real browser, real iPad. "Not browser-tested" is the most common open item across briefs. _(Allowances, Moment, Coins)_
@@ -54,12 +57,13 @@ The ten recurring lessons are summarized in `profile_and_directions.md` §4. Pro
 - **Split single-file apps** into css/js once they grow. Top-level registries that reference later functions must live in the last-loaded script. _(Coins tech notes)_
 - **Respect dropped features.** Don't re-add something Jimmy removed. _(Allowances)_
 - **Render, look, then change (for visual work).** Build a page, render it to PNG with headless Chromium, compare the render with the reference, list the gaps, then make the next version as a new file (V1, V2, …). Keep the reference's pixel grid as the SVG `viewBox` so positions compare directly. About five changes per round. _(Living Room Scene)_
+- **Keep a disliked mechanic behind a switch.** Keep the first version and add the alternative as a choice in ⚙️, so Jimmy can compare. _(Chinese Character Sudoku)_
 
 ## Template candidates
 
 Patterns that repeat often enough to become a template in `02 Refs/Templates/` or a skill (Jimmy decides):
 
-1. **Kids' iPad app starter:** `index.html` + `css/style.css` + `js/app.js` + `js/ui.js` (gear, settings, error panel), pastel theme variables, two-column layout. Sources: Moment, Coins, Row Boat.
+1. **Kids' iPad app starter:** `index.html` + `css/style.css` + `js/app.js` + `js/ui.js` (gear, settings, error panel; the ⚙️ block is in `02 Refs/Skills/settings_gear.md`), pastel theme variables, two-column layout. Sources: Moment, Coins, Row Boat.
 2. **Supabase static-app starter:** `config.js`, `db.js` with 3-tier fallback and `_logError`, `schema.sql` with RLS template, diagnostics panel. Sources: Moment, Family Habits, Allowances.
 3. **Question bank JSON + schema:** from `03 Projects/Test Bank/schema for test bank json.md`.
 4. **Project brief template:** goal and boundaries · current implementation · data facts · validation (verified/unverified) · next steps. Source: Allowances and Family Accounting briefs.

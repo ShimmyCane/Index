@@ -159,7 +159,9 @@ function homePath() {
 
 // Emits the sweep: each profile band, along each piece of the path. Straights are single boxes (no rotation).
 // Arcs are split into ARC_SEGS pieces, each rotated about Z so its local x runs along the inward normal.
-function sweepSlices(shape, prefix, label, mat, path, zBase, group) {
+// attach: true for the main profile, so every slice starts at the wall face and the cornice is joined to it.
+// (Without it the top shelf, sketch band -14, started 10.8 in out from the wall and looked as if it floated.)
+function sweepSlices(shape, prefix, label, mat, path, zBase, group, attach = false) {
   const out = [];
   const bands = shape.rows.map(([b, xmin, xmax]) => {
     const lo = Math.max(b, shape.ymin), hi = Math.min(b + 1, shape.ymax);
@@ -167,7 +169,7 @@ function sweepSlices(shape, prefix, label, mat, path, zBase, group) {
     if (h < 1) return null;
     const yc = (lo + hi) / 2;
     const zc = (PROFILE.ymax - yc) * S_HALF;                  // flipped: shelf at the top
-    const u0 = Math.max(0, (xmin - REF_X) * S_HALF);
+    const u0 = attach ? 0 : Math.max(0, (xmin - REF_X) * S_HALF);
     const u1 = Math.max((xmax - REF_X) * S_HALF, u0 + 1.2);
     return { b, h, zc, u0, u1 };
   }).filter(Boolean);
@@ -275,7 +277,7 @@ function defsFor(v) {
       const gid = `${key}-sweep`;
       add(gid, { name: `${label} cornice (sweep)`, description: 'the profile swept along the three walls, arcs at the corners', type: 'group', dimensions: [], position: [0, 0, 0] });
       for (const [k, o] of [
-        ...sweepSlices(PROFILE, key, 'Profile', 'cornice', path, zBase, gid),
+        ...sweepSlices(PROFILE, key, 'Profile', 'cornice', path, zBase, gid, true),
         ...sweepSlices(STEP_A, `${key}-a`, 'Step', 'step', path, zBase, gid),
         ...sweepSlices(STEP_B, `${key}-b`, 'Step', 'step', path, zBase, gid),
       ]) add(k, o);

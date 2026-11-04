@@ -27,23 +27,24 @@ alter table public.m3d_scene_log enable row level security;
 revoke all on public.m3d_scene_log from anon;
 
 create policy "owner full access" on public.m3d_scene_log for all to authenticated
-  using ((auth.jwt() ->> 'email') = 'splusystudio@gmail.com')
-  with check ((auth.jwt() ->> 'email') = 'splusystudio@gmail.com');
+  using (public.platform_is_owner())
+  with check (public.platform_is_owner());
 
 insert into public.table_index (table_name, project, purpose) values
   ('m3d_scene_log', 'Make 3D', 'Log of every 3-D scene version: history (source), world (rules), replayed model, label and note; one row per model_id')
 on conflict (table_name) do update set project = excluded.project, purpose = excluded.purpose;
 
--- TEST (run as one statement; the final raise rolls back the test rows):
+-- TEST (run after 04 AI/Supabase/platform_owner.sql; run as one statement; the final raise rolls back the test rows):
 -- do $$
 -- declare owner_n int; other_n int;
 -- begin
---   perform set_config('request.jwt.claims', '{"role":"authenticated","email":"splusystudio@gmail.com"}', true);
+--   insert into public.platform_owners (user_id, note) values ('00000000-0000-4000-8000-000000000001', 'test');
+--   perform set_config('request.jwt.claims', '{"role":"authenticated","sub":"00000000-0000-4000-8000-000000000001"}', true);
 --   set local role authenticated;
 --   insert into public.m3d_scene_log (model_id, scene, label, name, history, world, model)
 --     values ('test-1', 'test', 'T1', 'Test', '{}', '{}', '{}');
 --   select count(*) into owner_n from public.m3d_scene_log;
---   perform set_config('request.jwt.claims', '{"role":"authenticated","email":"someone@example.com"}', true);
+--   perform set_config('request.jwt.claims', '{"role":"authenticated","sub":"00000000-0000-4000-8000-000000000002"}', true);
 --   select count(*) into other_n from public.m3d_scene_log;
 --   reset role;
 --   raise exception 'TEST RESULT owner_sees=% other_sees=% (rolled back)', owner_n, other_n;

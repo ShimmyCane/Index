@@ -10,8 +10,10 @@
 * **Color Palette**: Light pastel color schemes (e.g. soft vanilla, sage, peach, mint, coral). Avoid harsh high-contrast black/white or neon tones unless specifically asked.
 * **Graphics & Styling**: Simple, bold lines (2.5px – 3.5px solid dark borders) with tactile depth (`box-shadow: 0 4px 0 ...`). Avoid stark wireframes; make it graphically rich, cute, and engaging.
 * **Focus & Simplicity**: Minimize text, nested menus, and clutter. Keep the primary activity / game board front and center.
-* **Settings & Extensions Anchor**: Place a dedicated **floating gear button (`⚙️`) in the lower-right corner** that opens a clean drawer or modal for options and extensions.
+* **Settings & Extensions Anchor**: Place a dedicated **floating gear button (`⚙️`) in the lower-right corner** that opens a clean drawer or modal for options and extensions. Full build rules: `02 Refs/Skills/settings_gear.md`.
 * **Errors at the bottom**: Error messages should appear at the bottom of the page (not as top banners), behind a "Show errors" toggle in the gear panel. Never force errors on screen — users should opt in.
+* **Two tracks** (`02 Refs/Skills/project_track.md`): **A. Family play** is simple, graphic and short on words, with everything secondary in ⚙️. **B. Studio design** (architecture, 3-D, specifications) is denser and more formal, with more options and words, still in orderly panels.
+* **Collapsible by default**: every panel has a header with an icon and a name, and a ▸/▾ marker. Collapsing keeps the header visible, so the screen stays graphically clear. Track A starts closed on a small screen.
 * **Large Buttons**: Generous touch targets suited for tablet fingers (minimum 48px to 68px heights).
 * **Layout details** (two-column play/reference layout, decluttering into settings, no layout jumps): see `02 Refs/Skills/ipad_website.md`.
 * **Offline-first caching is valued**: Jimmy explicitly praised the 3-tier offline fallback pattern (live API → localStorage cache → bundled JSON). Preserve and honor this pattern in web apps that load remote data.

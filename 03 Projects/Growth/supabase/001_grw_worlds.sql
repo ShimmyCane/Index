@@ -11,7 +11,7 @@
 --   grw_world_versions  every saved version of a world: spec, label and note. The log of record.
 -- The row holds the world (seed, environment, time rules, steps). The numbers are replayed from it by the time model,
 -- so the document stays small and the viewers can never disagree with it.
--- Access: owner only, the same rule the other tables use (the signed-in email must be the owner's). Anon has nothing.
+-- Access: owner only, the same rule the other tables use (public.platform_is_owner) (the signed-in user must be listed in public.platform_owners (see 04 AI/Supabase/platform_owner.sql, run first)). Anon has nothing.
 
 create table if not exists public.grw_worlds (
   id uuid primary key default gen_random_uuid(),
@@ -41,29 +41,30 @@ revoke all on public.grw_worlds from anon;
 revoke all on public.grw_world_versions from anon;
 
 create policy "owner full access" on public.grw_worlds for all to authenticated
-  using ((auth.jwt() ->> 'email') = 'splusystudio@gmail.com')
-  with check ((auth.jwt() ->> 'email') = 'splusystudio@gmail.com');
+  using (public.platform_is_owner())
+  with check (public.platform_is_owner());
 
 create policy "owner full access" on public.grw_world_versions for all to authenticated
-  using ((auth.jwt() ->> 'email') = 'splusystudio@gmail.com')
-  with check ((auth.jwt() ->> 'email') = 'splusystudio@gmail.com');
+  using (public.platform_is_owner())
+  with check (public.platform_is_owner());
 
 insert into public.table_index (table_name, project, purpose) values
   ('grw_worlds', 'Growth', 'Saved worlds: the whole world (seed, environment, time rules, steps) as one jsonb document, one row per world_id'),
   ('grw_world_versions', 'Growth', 'Every saved version of a world, with label and note. The log of record.')
 on conflict (table_name) do update set project = excluded.project, purpose = excluded.purpose;
 
--- TEST (run as one statement; the final raise rolls everything back, including the tables):
+-- TEST (run after 04 AI/Supabase/platform_owner.sql; run as one statement; the final raise rolls everything back, including the tables):
 -- do $$
 -- declare owner_n int; other_n int; anon_n text;
 -- begin
 --   <paste the create table, alter table, revoke and create policy statements above here>
---   perform set_config('request.jwt.claims', '{"role":"authenticated","email":"splusystudio@gmail.com"}', true);
+--   insert into public.platform_owners (user_id, note) values ('00000000-0000-4000-8000-000000000001', 'test');
+--   perform set_config('request.jwt.claims', '{"role":"authenticated","sub":"00000000-0000-4000-8000-000000000001"}', true);
 --   set local role authenticated;
 --   insert into public.grw_worlds (world_id, title, kind, spec) values ('test_world', 'Test', 'growth', '{}');
 --   insert into public.grw_world_versions (world_id, version, spec) values ('test_world', 1, '{}');
 --   select count(*) into owner_n from public.grw_worlds;
---   perform set_config('request.jwt.claims', '{"role":"authenticated","email":"someone@example.com"}', true);
+--   perform set_config('request.jwt.claims', '{"role":"authenticated","sub":"00000000-0000-4000-8000-000000000002"}', true);
 --   select count(*) into other_n from public.grw_worlds;
 --   reset role;
 --   begin
