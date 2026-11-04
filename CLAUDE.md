@@ -51,7 +51,7 @@ Its private counterpart is `ShimmyAI`, a private repo where family and personal 
 
 Run as `/name`. Each wraps `02 Refs/Skills/<name>.md`, which is the version to edit.
 
-`start-project` · `ipad-website` · `settings-gear` · `summarize-code` · `simplify-code` · `update-lessons-learned` · `ai-consolidate` · `claude-review-project` · `supabase-project` · `fix-puzzles` · `make-3d` · `simulate-decay` · `read-notes-and-update` · `smoke-test` · `privacy-check` · `bake-cache` · `ai-json-loop` · `feedback-notes`
+`start-project` · `ipad-website` · `settings-gear` · `summarize-code` · `simplify-code` · `update-lessons-learned` · `ai-consolidate` · `claude-review-project` · `supabase-project` · `fix-puzzles` · `make-3d` · `simulate-decay` · `read-notes-and-update` · `smoke-test` · `privacy-check` · `bake-cache` · `ai-json-loop` · `feedback-notes` · `supabase-link` · `project-track`
 
 Supabase conventions and the app registry live in `04 AI/Supabase/`.
 

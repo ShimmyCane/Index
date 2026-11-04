@@ -268,3 +268,10 @@ Full build rules: `02 Refs/Skills/settings_gear.md` (run as `/settings-gear`).
 - **Sandbox proxy errors are not app errors.** A `net::ERR_TUNNEL_CONNECTION_FAILED` to an outside host means the sandbox blocked it. Name the host and check the page still works without it. _(Expansion Wars smoke run, 2026-11-04)_
 - **Feedback notes belong on the item, not in the page's head.** Save each note with the map, level or screen it is about, the page and the time, so the owner can act on it later without asking what it meant. _(Expansion Wars, Fishes, Felix Maze)_
 - **A starter that hides its own box fails the first test.** Put the box inside the panel that opens it, and let the panel do the hiding. _(feedback_notes starter, 2026-11-04)_
+
+## Pasting SQL and choosing a track (2026-11-04)
+
+- **The manual paste is the default route.** The migration tool times out or waits for a confirmation, so write short numbered files (`000_` owner check, `test_` rolled back, `001_` the change, `verify_` read-only) and let the owner paste them into the SQL editor in order. Ask for the verification output back before calling it done. _(Adventure, Supabase lessons 8; `02 Refs/Skills/supabase_link.md`)_
+- **Check paste files before the owner runs them.** The checker catches psql meta-commands, server file reads, unbalanced `$$` quotes, emails, secret keys, and a second run that would fail on a policy. Test the checker on planted bad files. _(`scripts/sql_paste_check.py`)_
+- **Set the track first.** Family play and studio design need different density, words, palettes and database owners. Deciding it at the start avoids rebuilding the screen later. _(`02 Refs/Skills/project_track.md`)_
+- **Collapsible panels keep the screen clear.** Keep each header visible when collapsed, and remember the state per device. Test the toggle and the reload. _(project_track snippet, headless run 2026-11-04)_
