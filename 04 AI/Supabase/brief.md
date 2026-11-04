@@ -41,6 +41,13 @@ Rules:
 - Athena's world has no database need yet.
 - Private family projects live in ShimmyAI. Their project references and table state are not recorded here.
 
+## How SQL gets into a database (default: by hand)
+
+- Jimmy pastes the SQL into the dashboard's SQL editor himself. The migration tool times out or waits for a confirmation in remote sessions, so it is used only when Jimmy asks.
+- Each project's SQL lives in its `supabase/` folder as short numbered files: `000_` (owner check, once per database), `test_` (rolled-back, run first), `001_` (the real change), `verify_` (read-only, pasted back).
+- Check every file first with `python3 -I "02 Refs/Skills/scripts/sql_paste_check.py" <files>`. Fix every BLOCK.
+- Process and checklist: `02 Refs/Skills/supabase_link.md` (run as `/supabase-link`).
+
 ## Owner-only access (no emails in the repo)
 
 - Owner-only policies call `public.platform_is_owner()`, which checks `public.platform_owners` for `auth.uid()`. The owner's user id is added by hand in the SQL editor and is never committed. Script: `platform_owner.sql` in this folder. Run it once per project before any app migration that uses it.

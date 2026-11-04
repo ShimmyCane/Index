@@ -4,6 +4,8 @@ Reusable lessons distilled from the seed projects, so a new project can start fr
 
 ## UI for kids on iPad
 
+- **Two tracks, one set of defaults:** family play (simple, graphic, settings in ⚙️) and studio design (denser, formal, still collapsible). Set the track first; the track decides the screen density, the palette and the database. See `02 Refs/Skills/project_track.md`. _(Fishes, Expansion Wars, Make 3D, Shimmy Specs)_
+- **Collapsible panels by default:** a header with an icon and name, a ▸/▾ marker, state remembered per device. _(Coins, project_track snippet)_
 - **One ⚙️ settings button everywhere:** lower-right gear, segmented options, opt-in errors at the bottom, database check. Build it from `02 Refs/Skills/settings_gear.md` (`/settings-gear`). _(Adventure, Felix Maze, Make 3D, Chinese Character Sudoku)_
 - **Layout and look:** follow `02 Refs/Skills/ipad_website.md` and `Personal Preferences/jimmy_preferences.md`: pastel colors, bold outlines, two-column play/reference layout, gear in the lower right, touch targets ≥ 48px.
 - **Lock the size of swapping content** so the layout doesn't jump. _(Coins I, Primes 01 A)_
