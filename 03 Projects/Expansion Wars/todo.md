@@ -69,8 +69,8 @@ Checked against `js/game.js` on `main`. Notes stay `open` in the table until Jim
 
 Checked against `js/game.js` on `main`. Notes stay `open` in the table until Jimmy confirms (convo v0.6). Nothing here is built yet.
 
-- [ ] **Team members keep their own colour** (Level 4, note `bc30ae86`, 2026-11-04). Not built: each team shares one colour (`t0`, `t1`), so members look alike. Proposed: each player keeps the player colour on their territories and avatar; the team is shown by the red divider on the population line and a team label. Question 1 in convo v0.6.
-- [ ] **Zoom out to fit, spots keep their size** (Level 5, note `ee7f`). Partly built: Fit shows the whole field, but spots shrink with zoom (44 px minimum). Question 2 in convo v0.6 (same question as v0.5 question 3, still unanswered).
+- [x] **Team members keep their own colour** (Level 4, note `bc30ae86`, 2026-11-04). Built: every player keeps their player colour on territories, cities, armies and the minimap, in teams too. The team shows on the population line (team segment colour and avatars) and by the red divider. Default chosen; convo v0.6 question 1 asks you to confirm.
+- [x] **Zoom out to fit, spots keep their size** (Level 5, note `ee7f`). Built: spots keep the same size on screen at any zoom, so they overlap on dense maps when zoomed out. The 44 px minimum is no longer needed. Convo v0.6 question 2 asks you to confirm.
 - [ ] **Test note** (`4a1aa905`, Level 4 Valley). Nothing to build. Mark done when Jimmy confirms (convo v0.6 question 3).
 
 ## Later

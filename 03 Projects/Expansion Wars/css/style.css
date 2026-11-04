@@ -130,7 +130,7 @@ html, body {
 .node {
   position: absolute;
   transform: translate(-50%, -50%);
-  width: max(calc(6.8% / var(--scale, 1)), 44px);   /* never smaller than a 44 px touch target; same size on any field */
+  width: max(calc(6.8% / (var(--scale, 1) * var(--zoom, 1))), 44px);   /* same size on screen at any zoom: spots do not shrink when you zoom out */
   aspect-ratio: 1;
   min-height: 0;
   min-width: 0;
@@ -148,7 +148,7 @@ html, body {
   background: var(--neutral);
   transition: transform 0.1s ease;
 }
-.node.city { border-radius: 24%; width: max(calc(7.6% / var(--scale, 1)), 48px); }
+.node.city { border-radius: 24%; width: max(calc(7.6% / (var(--scale, 1) * var(--zoom, 1))), 48px); }
 .node .ico { font-size: clamp(14px, 2.6vw, 24px); }
 .node .num { font-size: clamp(12px, 2vw, 18px); margin-top: 1px; }
 

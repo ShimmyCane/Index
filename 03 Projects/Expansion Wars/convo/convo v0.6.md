@@ -9,14 +9,11 @@
 
 ## Questions
 
-1. **Team colours.** Proposed: each player keeps their own colour (mint, coral, sun, lavender, peach, pink) on their territories, cities and avatar. The team is shown by the red divider on the population line, plus a team label on the team's segment. Is that what you mean? Or should the team colour stay on the territories and only the armies keep the player colour?
+1. **Team colours.** Built: each player keeps their own colour (mint, coral, sun, lavender, peach, pink) on territories, cities, armies and the minimap, in teams too. The team shows on the population line and by the red divider. Is that what you mean?
 
    > **Jimmy:**
 
-2. **Spot size when zoomed out** (note from Level 5). "The elements should stay same size." Spots currently shrink as you zoom out, to a 44-pixel minimum, so on dense maps they overlap. Which do you want?
-   - Spots keep their size and overlap is accepted.
-   - Spots shrink, with the 44-pixel minimum kept.
-   - Something else.
+2. **Spot size when zoomed out** (note from Level 5). "The elements should stay same size." Built: spots keep the same size on screen at any zoom, so on dense maps they overlap when zoomed out. Is that right, or should they shrink?
 
    > **Jimmy:**
 

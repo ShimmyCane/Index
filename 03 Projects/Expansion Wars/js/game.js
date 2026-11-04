@@ -153,7 +153,8 @@
   function colourClass(owner) {
     if (owner === -2) return 'lake';
     if (owner < 0) return 'neutral';
-    return g.teamMode ? 't' + teamOf(owner) : 'o' + owner;
+    // Every player keeps their own colour, in teams too. The team shows on the population line and by the red divider.
+    return 'o' + owner;
   }
 
   function linked(a, b) { return a.links.indexOf(b.id) !== -1; }
