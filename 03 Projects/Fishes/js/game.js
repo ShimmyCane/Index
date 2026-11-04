@@ -72,12 +72,22 @@
     }
   }
 
-  function drawBackground(z, t) {
+  function paintSea(z) {
     var g = ctx.createLinearGradient(0, 0, 0, CH);
     g.addColorStop(0, z.top);
     g.addColorStop(1, z.bottom);
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, CW, CH);
+  }
+
+  function drawBackground(z, t) {
+    paintSea(z);
+    // When the zone changes, the old colours fade out over two seconds instead of cutting over.
+    if (run && run.bgT < 1 && run.zoneOld) {
+      ctx.globalAlpha = 1 - run.bgT;
+      paintSea(run.zoneOld);
+      ctx.globalAlpha = 1;
+    }
 
     if (z.rays) {
       ctx.fillStyle = 'rgba(255,255,255,0.10)';
@@ -363,9 +373,8 @@
     r.inv = 2.5;
     cam.x = r.x;
     cam.y = r.y;
-    r.arriving = true;      // new fish swim in from the edges over a few seconds
-    fillPopulations(true);
-    r.arriving = false;
+    // The fish already around you stay. New species only appear far away, gradually (see fillPopulations).
+    if (r.zoneFrom !== r.info.zone) { r.zoneOld = r.zoneFrom || r.info.zone; r.zoneFrom = r.info.zone; r.bgT = 0; }
     var lead = D.leadOf(n), evolved = !!r.form && r.form.id !== lead.id;
     r.form = lead;
     showBanner(evolved ? 'Evolved into ' + lead.name + '!' : 'Level ' + n + ': ' + r.info.name,
@@ -400,7 +409,8 @@
   // A bite takes off the attacker's attack value. Small fish have 1 health, so one bite is enough;
   // bigger fish take several bites, with a pause between bites (player 0.6 s, fish 0.9 s).
   var BITE_S = 0.6, STRIKE_S = 0.9;
-  function maxHpOf(size) { return Math.max(1, Math.round(size / 3)); }
+  // Fish of size 4 or more take several bites (2 to 5); smaller fish go in one or two.
+  function maxHpOf(size) { return size >= 4 ? Math.max(2, Math.round(size / 2)) : Math.max(1, Math.round(size / 3)); }
   function atkOf(size) { return 1 + Math.floor(size / 8); }
   function playerMaxHp(size) { return 10 + Math.floor(size / 2); }
   var CHUM = { id: 'chum', name: 'Chum', kind: 'food', temper: 'docile', shape: 'plankton', size: 0.6, speed: 20, col: '#ffb4a2' };
@@ -408,13 +418,31 @@
   // A fish of size 4 or more leaves chum behind when it dies. Chum draws small fish in to feed and school.
   function dropChum(n) {
     if (n.sp.kind === 'food' || n.size < 4) return;
-    var count = Math.min(6, Math.round(n.size / 5));
+    var count = Math.min(12, Math.max(1, Math.round(n.size / 4)));   // bits: about a quarter of its size, in pieces
     for (var i = 0; i < count; i++) {
       run.npcs.push({
         sp: CHUM, x: n.x + rand(-40, 40), y: n.y + rand(-40, 40), vx: 0, vy: 0, size: CHUM.size,
         spd: 1, facing: 1, t: rand(0, 6), anchor: { x: n.x, y: n.y }, tgt: null, tT: 0, cool: 0,
         lunge: 0, lx: 0, ly: 0, locked: false, lockT: 0, dead: false, hp: 1, maxHp: 1, biteT: 0, life: 25
       });
+    }
+  }
+
+  // A school fish that is bitten calls on its schoolmates. Nearby schoolmates bite back at the attacker.
+  function schoolDefend(victim, attacker) {
+    if (!victim.sp.school) return;
+    var r = run, isPlayer = attacker === null;
+    var ax = isPlayer ? r.x : attacker.x, ay = isPlayer ? r.y : attacker.y;
+    for (var i = 0; i < r.npcs.length; i++) {
+      var o = r.npcs[i];
+      if (o === victim || o === attacker || o.dead || o.sp !== victim.sp || o.biteT > 0) continue;
+      if (Math.hypot(o.x - victim.x, o.y - victim.y) > 220 || Math.hypot(o.x - ax, o.y - ay) > 260) continue;
+      o.biteT = STRIKE_S;
+      var dmg = atkOf(o.size);
+      if (isPlayer) { hurt(o, dmg); continue; }
+      attacker.hp -= dmg;
+      burst(attacker.x, attacker.y, '#d9473a', 3);
+      if (attacker.hp <= 0 && !attacker.dead) { attacker.dead = true; dropChum(attacker); }
     }
   }
 
@@ -620,15 +648,18 @@
     } else if (sp.kind === 'prey') {
       var fx = 0, fy = 0, threat = false, i, pr;
       if (r.size >= n.size * 1.15 && dp < 320) { threat = true; fx -= dxp / dp; fy -= dyp / dp; }
+      var scatter = false;
       for (i = 0; i < predators.length; i++) {
         pr = predators[i];
         if (pr.size < n.size * 1.15) continue;
         var ddx = n.x - pr.x, ddy = n.y - pr.y, dd = Math.hypot(ddx, ddy) || 1;
-        if (dd < 280) { threat = true; fx += ddx / dd; fy += ddy / dd; }
+        // A predator 2.5x their size makes prey scatter from further away.
+        var huge = pr.size >= n.size * 2.5;
+        if (dd < (huge ? 420 : 280)) { threat = true; scatter = scatter || huge; fx += ddx / dd; fy += ddy / dd; }
       }
       if (threat) {
         var fl = Math.hypot(fx, fy) || 1;
-        tx = n.x + fx / fl * 400; ty = n.y + fy / fl * 400; s = speed * 1.7; k = 6;
+        tx = n.x + fx / fl * 400; ty = n.y + fy / fl * 400; s = speed * (scatter ? 2.2 : 1.7); k = 6;
       } else if (findFeed(n)) {
         var fd = findFeed(n); tx = fd.x; ty = fd.y; s = speed * 0.7;
       } else if (sp.school) {
@@ -680,9 +711,11 @@
           n.lockT = 7 + 2 * r.tension;
           tx = r.x; ty = r.y; s = sp.speed * (1.1 + 0.3 * r.tension) * n.spd; k = 4;
         } else {
+          var chumNear = sp.temper !== 'docile' ? findNear(n, 300, function (o) { return o.sp === CHUM; }) : null;
           var hunted = sp.temper !== 'docile' ? findPrey(n) : null;
           var food = !hunted && sp.temper !== 'docile' ? findNear(n, 260, function (o) { return o.sp.kind === 'food'; }) : null;
-          if (hunted) { tx = hunted.x; ty = hunted.y; s = speed * 1.1; k = 3; }
+          if (chumNear) { tx = chumNear.x; ty = chumNear.y; s = speed * 0.9; k = 3; }
+          else if (hunted) { tx = hunted.x; ty = hunted.y; s = speed * 1.1; k = 3; }
           else if (food) { tx = food.x; ty = food.y; s = speed * 0.6; }
           else { var hw = wander(n, 900); tx = hw.x; ty = hw.y; s = speed * 0.6; }
         }
@@ -748,7 +781,7 @@
       floatText(n.x, n.y, 'Spines! -2');
       FishSound.play('hurt');
     } else {
-      gain = n.size * 0.25;
+      gain = n.size * (r.info.n >= 2 ? 0.25 * CFG.EXP_FACTOR : 0.4);   // first level keeps its pace; from level 2, 1/10 as fast
       r.size += gain;
       floatText(n.x, n.y, '+' + gain.toFixed(1));
       FishSound.play('eat');
@@ -794,10 +827,12 @@
       if (n.biteT <= 0) { n.biteT = STRIKE_S; hurt(n, atkOf(n.size)); }
       return;
     }
+    if (sp.kind === 'food' && r.size >= n.size * 1.15) { eatNPC(n); return; }   // plankton and chum bits go in one go
     if (r.size >= n.size * 1.15 && r.biteT <= 0) {
       r.biteT = BITE_S;
       n.hp -= atkOf(r.size);
       burst(n.x, n.y, '#d9473a', 5);
+      schoolDefend(n, null);
       if (n.hp <= 0) eatNPC(n);
     }
   }
@@ -838,6 +873,7 @@
     var r = run;
     r.t += dt;
     r.tension = clamp((r.t - CFG.TENSION.start) / (CFG.TENSION.full - CFG.TENSION.start), 0, 1);
+    r.bgT = Math.min(1, (r.bgT || 0) + dt / 2);
     if (r.t >= CFG.TIME_LIMIT && !r.infinite) { endRun('time'); return; }
 
     updatePlayer(dt);
@@ -866,6 +902,7 @@
           eater.biteT = meal.sp.kind === 'food' ? BITE_S : STRIKE_S;
           meal.hp -= atkOf(eater.size);
           burst(meal.x, meal.y, '#d9473a', 4);
+          schoolDefend(meal, eater);
           if (meal.hp <= 0) {
             meal.dead = true;
             r.npcEaten++;
@@ -1097,6 +1134,7 @@
       stamina: 100, sprintCd: 0, sprinting: false, inv: 2.5,
       npcs: [], parts: [], spawnT: 0, bannerT: 0, lockedCount: 0, score: 0,
       difficulty: getDifficulty(), form: D.leadOf(1), npcEaten: 0, hitBy: '', infinite: infiniteOn, goal: 2,
+      zoneFrom: null, zoneOld: null, bgT: 1,
       hp: playerMaxHp(1), maxHp: playerMaxHp(1), biteT: 0, quietT: 0
     };
     run.x = run.info.W / 2;
@@ -1401,6 +1439,7 @@
         npcEaten: run && run.npcEaten, difficulty: run && run.difficulty, form: run && run.form && run.form.id,
         census: run ? census() : null, spread: run ? spread() : null,
         arriving: run ? run.npcs.filter(function (o) { return o.arrive > 0; }).length : 0,
+        nearestFood: run ? Math.round(Math.min.apply(null, [9999].concat(run.npcs.filter(function (o) { return o.sp.kind === 'food'; }).map(function (o) { return Math.hypot(o.x - run.x, o.y - run.y); })))) : null, foods: run ? run.npcs.filter(function (o) { return o.sp.kind === 'food'; }).length : 0,
         chum: run ? run.npcs.filter(function (o) { return o.sp === CHUM; }).length : 0, hp: run && run.hp, maxHp: run && run.maxHp,
         player: run && { x: run.x, y: run.y }, cam: { x: cam.x, y: cam.y, scale: cam.scale },
         hunters: run ? run.npcs.filter(function (o) { return o.sp.kind === 'hunter'; }).map(function (o) { return { x: o.x, y: o.y, size: o.size, locked: o.locked }; }) : []

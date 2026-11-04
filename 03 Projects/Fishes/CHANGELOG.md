@@ -2,6 +2,16 @@
 
 Every version the team can open, newest first. The version shows on the title screen and at the top of ⚙️ Settings. If you see a different version there than below, you are looking at an older copy.
 
+## 0.6 — 2026-11-04 (feedback round 4)
+- Level up keeps the fish around you. Background colours fade to the new zone over two seconds. No new species swap in next to you; new species appear far away, gradually.
+- Growth from fish meals is 1/10 as fast from level 2 on. Level 1 keeps its pace, with more plankton to find.
+- Hit points: fish of size 4 or more take 2 to 5 bites. Smaller fish take one or two.
+- Schools defend: a bitten school fish calls its schoolmates, who bite back at the attacker (you included).
+- Predators 2.5× a fish's size make it scatter from further away, and faster.
+- Predators notice chum and gather at it.
+- A larger fish breaks into chum bits (about a quarter of its size) when it dies, instead of vanishing.
+- Plankton and chum bits are eaten on contact again.
+
 ## 0.5 — 2026-11-04 (feedback round 3, part 2)
 - Phones: the play view is 2.5× larger, so fish are bigger on iPhone. Pinch and double-tap zoom are turned off on this page.
 - Controls: Tap and move (default) or a joystick at the lower left. Choose in ⚙️ → Sound, errors, display and controls.
