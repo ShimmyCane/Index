@@ -94,10 +94,15 @@
 - Five new levels (16 to 20) after level 15, starting as tutorials for version 2.
 - Version 2 builds on the current game. Version 1 stays untouched and playable from ⚙️.
 
+## Answered in the follow-up
+
+- **Time during battle:** the country clock pauses, more or less, while a battle runs. Simple for now; time dilation can come later.
+- **Power ladder:** as a country's power score grows, its look changes. Early on, its provinces are all villages with a town or two. Later, they are cities with some fortresses. Further on, its fortresses go beyond the 200-soldier cap. This is a ratio of power scores, so the stage depends on how strong a nation is compared with the others.
+
 ## Still open
 
-- How time works when a province battle runs while the country clock turns (time dilation).
 - Exact values: the power score formula, how often veteran upgrades happen, and how reputation moves.
+- The score thresholds for each ladder stage (villages, then towns, cities, fortresses, past 200).
 
 ---
 
