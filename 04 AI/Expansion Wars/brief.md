@@ -26,7 +26,8 @@
 
 ## Next steps
 
-1. Round 6 (`convo/convo v0.5.md`): built with defaults to check: surrender (10 to 1, off by default), upgrade times (3, 6, 10 s) with dust, levels 10 to 15 (multiplayer, denser, two screens wide), zoom buttons, pinch and minimap. Still open: surrender default and neutral spots, spot size when zoomed out (spots shrink to a 44 px minimum, so they overlap on dense maps), capture mid-upgrade, fortress numbers, and the test note.
+1. Round 7 (`convo/convo v0.6.md`, notes read 2026-11-04): 3 open notes, none built. New: team members should keep their own colours (Level 4). Open: zoom-out spot size (Level 5), and the test note. Still open from v0.5: surrender defaults, mid-upgrade capture, fortress numbers.
+2. Round 6 (`convo/convo v0.5.md`): built with defaults to check: surrender (10 to 1, off by default), upgrade times (3, 6, 10 s) with dust, levels 10 to 15 (multiplayer, denser, two screens wide), zoom buttons, pinch and minimap. Still open: surrender default and neutral spots, spot size when zoomed out (spots shrink to a 44 px minimum, so they overlap on dense maps), capture mid-upgrade, fortress numbers, and the test note.
 2. Build the round 5 items once answered. The Level 5 notes are the first real play on the new maps.
 3. Play a few games on iPad, including Levels 5 to 9 with panning. Balance pass stays on the todo.
 

@@ -65,6 +65,14 @@ Checked against `js/game.js` on `main`. Notes stay `open` in the table until Jim
 - [ ] **Zoom out to fit a bigger map, spots keep their size** (Level 5, note `ee7f`). Partly built: Fit shows the whole field. Open: spots shrink with zoom (44 px minimum), so they overlap on dense maps. Question 5.
 - [ ] **Test note** (`4a1aa905`, Level 4 Valley). Nothing to build. Mark done when Jimmy confirms.
 
+## Round 6: notes read 2026-11-04 (3 open notes)
+
+Checked against `js/game.js` on `main`. Notes stay `open` in the table until Jimmy confirms (convo v0.6). Nothing here is built yet.
+
+- [ ] **Team members keep their own colour** (Level 4, note `bc30ae86`, 2026-11-04). Not built: each team shares one colour (`t0`, `t1`), so members look alike. Proposed: each player keeps the player colour on their territories and avatar; the team is shown by the red divider on the population line and a team label. Question 1 in convo v0.6.
+- [ ] **Zoom out to fit, spots keep their size** (Level 5, note `ee7f`). Partly built: Fit shows the whole field, but spots shrink with zoom (44 px minimum). Question 2 in convo v0.6 (same question as v0.5 question 3, still unanswered).
+- [ ] **Test note** (`4a1aa905`, Level 4 Valley). Nothing to build. Mark done when Jimmy confirms (convo v0.6 question 3).
+
 ## Later
 
 - [ ] **Village and country zoom.** Zoom and minimap are built (round 5). The country view beyond Fit is unplanned.
