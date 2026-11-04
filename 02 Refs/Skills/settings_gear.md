@@ -31,7 +31,7 @@ When to use
   3. **Pages.** Links to the app's other pages, leaving out the current page (Adventure: Story / World / Under the hood / All projects).
   4. **Database.** Status line, Sign in (only when signed out), Sync, Check database, Sign out.
   5. **Show errors** checkbox (always last among the controls).
-  6. **Info.** Version, changelog, data counts. Keep it at the very bottom.
+  6. **Version log.** Its own collapsible panel, closed by default, always last. See section 9.
 - Anything hidden from the screen must stay reachable here. Never remove a feature just to save space (`ipad_website.md`).
 - Say which settings restart the current item. Changing a setting that changes what is shown (for example, the tracing guide) starts that character again. Say so in the row's hint.
 
@@ -71,7 +71,12 @@ When to use
   <div class="setting"><label>Sound</label>
     <div class="seg" data-key="sound"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
   <label class="toggle"><input type="checkbox" id="showErrors"> Show errors</label>
+  <details class="versionLog">
+    <summary>📜 Version log <span id="versionNow"></span></summary>
+    <ol id="versionList"></ol>
+  </details>
 </aside>
+<script src="js/version.js"></script>
 <div id="errorsPanel" class="errorsPanel" hidden></div>
 ```
 
@@ -123,9 +128,34 @@ renderSettings();
   font-size: 18px; font-weight: 700; cursor: pointer; }
 .seg button.on { background: #bfe8d2; }
 .toggle { display: flex; align-items: center; gap: 10px; min-height: 48px; font-weight: 700; }
+.versionLog { margin-top: 10px; border: 3px solid #2f2d3d; border-radius: 16px; padding: 8px 12px; background: #fff; }
+.versionLog summary { min-height: 44px; display: flex; align-items: center; font-weight: 700; cursor: pointer; }
+.versionLog ol { padding-left: 18px; margin: 8px 0 0; }
 .errorsPanel { position: fixed; left: 16px; right: 100px; bottom: 16px; max-height: 30vh; overflow: auto; z-index: 25;
   background: #fff0ee; border: 3px solid #2f2d3d; border-radius: 16px; padding: 8px 12px; font: 14px monospace; white-space: pre-wrap; }
 @media print { .gear, .drawer, .errorsPanel { display: none !important; } }
+```
+
+Version log data (starter, a separate file `js/version.js`, loaded at the end of the body)
+```js
+// js/version.js: the only file to edit when a change is made. Newest entry first.
+window.APP_VERSION = '0.2.0';
+window.APP_CHANGELOG = [
+  { version: '0.2.0', date: '2026-11-04', changes: ['Added the version log panel inside the settings.'] },
+  { version: '0.1.0', date: '2026-11-03', changes: ['First build: a sound setting and an error panel.'] }
+];
+(function () {
+  var now = document.getElementById('versionNow'), list = document.getElementById('versionList');
+  if (!now || !list) return;                      // the page has no version panel
+  now.textContent = 'v' + window.APP_VERSION;
+  list.textContent = '';
+  window.APP_CHANGELOG.forEach(function (entry) {
+    var li = document.createElement('li'), head = document.createElement('b'), ul = document.createElement('ul');
+    head.textContent = 'v' + entry.version + ' · ' + entry.date;
+    entry.changes.forEach(function (c) { var x = document.createElement('li'); x.textContent = c; ul.appendChild(x); });
+    li.appendChild(head); li.appendChild(ul); list.appendChild(li);
+  });
+})();
 ```
 
 ## 8. Checks before calling it done
@@ -134,9 +164,23 @@ Run in a headless browser (Chromium at `/opt/pw-browsers/chromium` with `--no-sa
 - Open and close the drawer. The gear keeps working after a page reload.
 - Each segmented option changes the app and survives a reload.
 - Show errors off → no panel. Turn it on → earlier errors appear. Zero console errors.
+- Version log: closed by default; the summary shows the current version; the newest entry is first; the entry for the current version matches `APP_VERSION`.
 - The gear does not cover a control or chip at 390 × 844, 768 × 1024 and 1180 × 820.
 - Print preview hides the gear and the drawer.
 - Database apps: "Check database" lists each table; a signed-out run says "this device only", not an error.
+
+## 9. Version log (required in every app)
+
+- Every app has one version log, inside ⚙️, as its own panel. It is closed by default. Its summary shows the current version (for example "📜 Version log v0.3.0"), so the version is visible without opening it.
+- The data lives apart from the logic, in `js/version.js`: `APP_VERSION` (the current version) and `APP_CHANGELOG` (newest first). Each entry: `version` (major.minor.patch), `date` (ISO), and `changes` (one line each, plain words).
+- **The bump rule.** Every change a user could see gets a new version in the same commit that makes it:
+  - patch (0.3.1): a fix or a wording change;
+  - minor (0.4.0): a new feature or a new option;
+  - major (1.0.0): a change that alters saved data or the rules a child already knows. Add a note on how old saves are handled.
+- **Wording by track** (`project_track.md`). Track A: short and plain ("You can now undo twice."). Track B: precise, with units and the setting it affects ("Dimensions now shown in feet and inches; stored in inches.").
+- **Keep the history.** Never delete an old entry; fix a typo only. The log is the record of what changed for the person testing the app.
+- **Saved data.** Store the version with any saved state (see `lessons_pool.md`, "Store the data version with saved state"). Drop a save from an older major version, or migrate it, and say so in the entry.
+- The starter below does this. A project that already has a changelog (Chinese Character Sudoku's drawer, Fishes' `CHANGELOG.md`) moves it to this panel when it next changes. Do not add a second log.
 
 ## Sources (pattern learned in)
 - Adventure: ⚙️ with page links, Show errors, Check database, Sign out. `js/common.js` `buildChrome()`.
