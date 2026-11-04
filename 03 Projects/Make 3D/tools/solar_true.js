@@ -46,6 +46,31 @@ const ELEMENTS = {
 };
 const SUN_ROT = 25.38;               // days, the Sun's equator
 
+// V08: the other four IAU dwarf planets (Pluto is in ELEMENTS). Sources: a, e, period from the secondary
+// tables in 04 AI/Make 3D/research/dwarf-planets.md (Britannica, UNLV table, worksheets); inc, node, peri and spin
+// from memory of the JPL SBDB, NOT yet checked against it. L is a PLACEHOLDER: each body starts at perihelion on
+// J2000 (L = node + peri). Its true place on 1958-01-31 is not yet set. Diameters: 939 km (Ceres), about 1,400 km
+// (Haumea, one source), 1,430 km (Makemake), 2,326 km (Eris).
+const DWARFS = {
+  ceres: { a: 2.7675, e: 0.0758, inc: 10.59, node: 80.39, peri: 73.60, L: 153.99, period: 1680.5, rot: 0.3781 },
+  haumea: { a: 43.11, e: 0.19, inc: 28.19, node: 122.17, peri: 239.04, L: 1.21, period: 103390, rot: 0.1628 },
+  makemake: { a: 45.48, e: 0.159, inc: 28.96, node: 79.31, peri: 294.84, L: 14.15, period: 111824, rot: 0.951 },
+  eris: { a: 67.84, e: 0.44, inc: 44.04, node: 35.95, peri: 151.64, L: 187.59, period: 204070, rot: 1.08 },
+};
+// Radii in inches, on Pluto's scale (Pluto's 1,188 km radius = 3.5 in, the same as the planets' rough scale).
+const DWARF_PLANETS = {
+  ceres: { name: 'Ceres', R: 1.4, mat: 'ceres', desc: 'the largest object in the asteroid belt; a dwarf planet, about 940 km across' },
+  haumea: { name: 'Haumea', R: 2.1, mat: 'haumea', desc: 'a dwarf planet that spins fast and is stretched like a rugby ball; about 1,400 km long' },
+  makemake: { name: 'Makemake', R: 2.1, mat: 'makemake', desc: 'a reddish icy dwarf planet in the Kuiper belt, about 1,430 km across' },
+  eris: { name: 'Eris', R: 3.4, mat: 'eris', desc: 'the most distant known dwarf planet, about 2,330 km across; its orbit is tilted about 44 degrees' },
+};
+const DWARF_MATERIALS = {
+  ceres: { color: '#b5aea3', opacity: 1 },
+  haumea: { color: '#e6e0d4', opacity: 1 },
+  makemake: { color: '#d6a77a', opacity: 1 },
+  eris: { color: '#dcdde0', opacity: 1 },
+};
+
 const daysSinceJ2000 = (iso) => (Date.parse(iso + 'T00:00:00Z') - J2000_MS) / DAY_MS;
 
 // Mean anomaly at the start: M = L - (node + peri) at J2000, advanced by the mean motion to the start date.
@@ -133,6 +158,15 @@ function trueDefs(o) {
     // Tapping the ball opens the planet's own view (zoom).
     defs.push(...SS.bodyDefs(key, p, c, `orbit-${key}`, 5, { link: `${o.link(key)}:zoom` }));
   }
+  if (o.dwarfs) {
+    for (const key of Object.keys(DWARF_PLANETS)) {
+      const el = DWARFS[key], p = DWARF_PLANETS[key];
+      const c = restPos(el, start);
+      defs.push(...orbitLineDefs(key, p.name, el, start));
+      defs.push([`orbit-${key}`, { name: `${p.name} orbit`, description: 'the true orbit (inclination and node from JPL, starting place not yet checked)', type: 'group', dimensions: [], position: [0, 0, 0] }]);
+      defs.push(...SS.bodyDefs(key, p, c, `orbit-${key}`, 5, {}));
+    }
+  }
   if (o.comets) {
     for (const [key, cm] of Object.entries(COMETS)) {
       const el = cometEl(cm);
@@ -163,6 +197,13 @@ function trueMotion(o, uuid) {
     list.push({ id: `${key}-spin`, target: `body-${key}`, kind: 'spin', axis: p.spinAxis || 'z', pivot: restPos(el, start), cycles: rnd(SPAN_DAYS / el.rot) });
   }
   list.push({ id: 'sun-spin', target: 'sun', kind: 'spin', axis: 'z', pivot: [0, 0, 0], cycles: rnd(SPAN_DAYS / SUN_ROT) });
+  if (o.dwarfs) {
+    for (const key of Object.keys(DWARF_PLANETS)) {
+      const el = DWARFS[key];
+      list.push({ id: `${key}-orbit`, target: `orbit-${key}`, kind: 'orbit', ...orbitOf(el, start) });
+      list.push({ id: `${key}-spin`, target: `body-${key}`, kind: 'spin', axis: 'z', pivot: restPos(el, start), cycles: rnd(SPAN_DAYS / el.rot) });
+    }
+  }
   if (o.comets) for (const key of Object.keys(COMETS)) list.push({ id: `comet-${key}-orbit`, target: `orbit-c-${key}`, kind: 'orbit', ...cometOrbit(COMETS[key], start) });
   for (let i = 0; i < BELT_N; i++) {
     const el = beltEl(i);
@@ -192,7 +233,7 @@ function sceneTrue(o) {
       name: o.name,
       description: o.description,
       units: 'in', up: 'z', world: WORLD_ID,
-      materials: o.comets ? { ...SS.MATERIALS, ...COMET_MATERIALS } : SS.MATERIALS,
+      materials: { ...(o.comets ? { ...SS.MATERIALS, ...COMET_MATERIALS } : SS.MATERIALS), ...(o.dwarfs ? DWARF_MATERIALS : {}) },
     },
     defs: trueDefs(o),
     motion: (uuid) => trueMotion(o, uuid),
@@ -216,4 +257,12 @@ const SOLAR_TRUE_V07 = sceneTrue({
   link: (k) => PV.latestId(k),
   description: `Solar System, increment 7 of 7: the timeline starts on ${START_V07}, when Explorer 1, the first US satellite, launched. Halley's Comet, Encke and Tempel 1 added on their true orbits. One lap of Pluto plays once. Tap a planet to open its own view.`,
 });
-module.exports = { SOLAR_TRUE, SOLAR_TRUE_V07, ELEMENTS, COMETS, START_V06, START_V07, SPAN_DAYS, LOOP_S, restPos, orbitOf, cometOrbit, beltEl, BELT_N };
+// V08: adds the other four dwarf planets (Ceres, Haumea, Makemake, Eris) to V07. Same start and comets.
+// Eris laps less than once in the 240 s loop (its period is 204,070 days, Pluto's 90,560), so it does not
+// finish a lap.
+const SOLAR_TRUE_V08 = sceneTrue({
+  id: 'solar-system-v08', name: 'Solar System V08', start: START_V07, comets: true, dwarfs: true,
+  link: (k) => PV.latestId(k),
+  description: `Solar System, increment 8 of 8: the other four dwarf planets, Ceres, Haumea, Makemake and Eris, with Pluto making five. Their orbits are drawn true; their starting places are not yet checked (placeholder). Eris laps less than once in the loop. Tap a planet to open its own view.`,
+});
+module.exports = { SOLAR_TRUE, SOLAR_TRUE_V07, SOLAR_TRUE_V08, DWARFS, DWARF_PLANETS, ELEMENTS, COMETS, START_V06, START_V07, SPAN_DAYS, LOOP_S, restPos, orbitOf, cometOrbit, beltEl, BELT_N };

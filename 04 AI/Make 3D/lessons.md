@@ -240,3 +240,9 @@ Jimmy's note on V06: too slow, too small, "too diagrammatic and not real enough 
 - **Version guards keep old increments reproducible.** Blocks that a later increment replaces are `v >= N && v < M`, not deleted. Only the description of V02 changed, and it was reworded on purpose.
 - **Sweep without a sweep object.** The engine has none. Straight pieces are single boxes; arc pieces are short boxes rotated about Z so their local x runs along the inward normal. `rotateVector` applies X, then Y, then Z, so a plan angle belongs in `rotation_z`.
 - **Half scale is one number.** Change the scale constant and derive every height from it (profile height, envelope, zBase), and the walls stay put.
+
+## Solar System V08 (2026-11-04)
+
+- Published orbit elements for the dwarf planets are scattered: the search gave a, e and period, but not mean anomaly, inclination or node. Mark each value's source, and use a labelled placeholder rather than guessing a starting place.
+- The build's rules check on the full bundle takes several minutes. Run `node tools/build_samples.js` in the background and wait on its process, not by polling.
+- The render tool finds a scene through its project row in the library, which shows only the latest version label. Pass the project name ("Solar System"), not the full version name.
