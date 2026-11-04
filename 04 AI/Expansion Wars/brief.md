@@ -26,6 +26,7 @@
 
 ## Next steps
 
+0. Round 8 (`convo/convo v0.7.md`): version 1 archived in `V1/` and linked from ⚙️ ("Play version 1 (archive)"). Version 2 proposed: a country layer with food, gold, stone and reputation, alliances, trade and war, zooming into provinces. Awaiting Jimmy's answers before building.
 1. Round 7 (`convo/convo v0.6.md`, notes read 2026-11-04): built with defaults to check: team members keep their player colours (Level 4 note), and spots keep the same size on screen at any zoom (Level 5 note). Open: the test note. Still open from v0.5: surrender defaults, mid-upgrade capture, fortress numbers.
 2. Round 6 (`convo/convo v0.5.md`): built with defaults to check: surrender (10 to 1, off by default), upgrade times (3, 6, 10 s) with dust, levels 10 to 15 (multiplayer, denser, two screens wide), zoom buttons, pinch and minimap. Still open: surrender default and neutral spots, spot size when zoomed out (spots shrink to a 44 px minimum, so they overlap on dense maps), capture mid-upgrade, fortress numbers, and the test note.
 2. Build the round 5 items once answered. The Level 5 notes are the first real play on the new maps.

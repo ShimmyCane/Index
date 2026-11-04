@@ -781,3 +781,6 @@ button {
   from { transform: translateX(-50%) scale(0.5); opacity: 0.9; }
   to { transform: translateX(-50%) scale(1.5); opacity: 0; }
 }
+
+/* A link styled as a big button (the archived version 1 in ⚙️) */
+a.link-big { display: flex; align-items: center; justify-content: center; text-decoration: none; color: var(--ink); }
