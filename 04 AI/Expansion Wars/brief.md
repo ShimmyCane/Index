@@ -26,7 +26,8 @@
 
 ## Next steps
 
-0. Round 8 (`convo/convo v0.7.md`): version 1 archived in `V1/` and linked from ⚙️ ("Play version 1 (archive)"). Version 2 proposed: a country layer with food, gold, stone and reputation, alliances, trade and war, zooming into provinces. Awaiting Jimmy's answers before building.
+0. Round 10 (`convo/convo v0.9.md`): version 2 first playable slice built in `js/country.js` (🌍 on the home screen). Six nations, turns of 60 s with Ready, diplomacy on the nation card, growing, power and stage, country battles resolved at once. Not built: province battles, veteran upgrades, magic and culture effects, game log, tutorial levels 16 to 20. Version 1 is untouched in `V1/`.
+0a. Round 8 (`convo/convo v0.7.md`): version 1 archived in `V1/` and linked from ⚙️ ("Play version 1 (archive)"). Version 2 design answers recorded (convo v0.7 and v0.8).
 1. Round 7 (`convo/convo v0.6.md`, notes read 2026-11-04): built with defaults to check: team members keep their player colours (Level 4 note), and spots keep the same size on screen at any zoom (Level 5 note). Open: the test note. Still open from v0.5: surrender defaults, mid-upgrade capture, fortress numbers.
 2. Round 6 (`convo/convo v0.5.md`): built with defaults to check: surrender (10 to 1, off by default), upgrade times (3, 6, 10 s) with dust, levels 10 to 15 (multiplayer, denser, two screens wide), zoom buttons, pinch and minimap. Still open: surrender default and neutral spots, spot size when zoomed out (spots shrink to a 44 px minimum, so they overlap on dense maps), capture mid-upgrade, fortress numbers, and the test note.
 2. Build the round 5 items once answered. The Level 5 notes are the first real play on the new maps.

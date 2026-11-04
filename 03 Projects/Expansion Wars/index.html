@@ -22,8 +22,30 @@
       <button id="btn-map" class="big">🗺️ Progress map</button>
       <button id="btn-shop" class="big">🛒 Shop</button>
       <button id="btn-scores" class="big">🏆 High scores</button>
+      <button id="btn-country" class="big">🌍 Country (version 2)</button>
     </div>
     <p class="foot">Made for iPhone and iPad</p>
+  </section>
+
+  <!-- Version 2: the country layer (js/country.js) -->
+  <section id="screen-country" class="screen country" hidden>
+    <div class="gamebar">
+      <button id="country-back" class="back">🏠 Home</button>
+      <p id="country-status" class="pill">Turn 1</p>
+      <p class="turn-clock">Turn clock <span id="country-clock">60s</span></p>
+    </div>
+    <main class="country-stage">
+      <div id="country-res" class="country-res"></div>
+      <div class="country-map-wrap">
+        <svg id="country-svg" viewBox="0 0 1000 640" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Country map"></svg>
+      </div>
+      <div id="country-card" class="country-card" hidden></div>
+      <div class="country-actions">
+        <button id="country-ready" class="big hero">✔ Ready</button>
+        <button id="country-new" class="big">🔄 New country</button>
+      </div>
+      <ol id="country-log" class="country-log"></ol>
+    </main>
   </section>
 
   <!-- Progression map -->
@@ -171,5 +193,6 @@
   <script src="js/cloud.js"></script>
   <script src="js/store.js"></script>
   <script src="js/game.js"></script>
+  <script src="js/country.js"></script>
 </body>
 </html>
