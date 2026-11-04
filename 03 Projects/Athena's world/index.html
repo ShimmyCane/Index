@@ -60,6 +60,16 @@
       font-size: 18px;
     }
   </style>
+<style id="settingsGear">
+[hidden]{display:none!important}
+.gear{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));width:64px;height:64px;border-radius:50%;font-size:30px;z-index:30;background:#ffe9a8;border:3px solid #2f2d3d;box-shadow:0 4px 0 #2f2d3d;cursor:pointer}
+.drawer{position:fixed;right:18px;bottom:96px;width:min(360px,92vw);max-height:70vh;overflow-y:auto;z-index:40;background:#fffdf7;border:3px solid #2f2d3d;border-radius:20px;padding:14px;color:#2f2d3d}
+.drawer h2{margin:0 0 8px;font-size:22px}
+.versionLog{border:3px solid #2f2d3d;border-radius:14px;padding:8px 12px;background:#fff}
+.versionLog summary{min-height:44px;display:flex;align-items:center;font-weight:700;cursor:pointer}
+.versionLog ol{padding-left:18px;margin:8px 0 0}
+@media print{.gear,.drawer{display:none!important}}
+</style>
 </head>
 <body>
   <main>
@@ -69,5 +79,15 @@
     <p>It is under construction.</p>
     <span class="badge">Coming soon</span>
   </main>
+<button class="gear" id="gear" aria-label="Settings" aria-expanded="false">⚙️</button>
+<aside class="drawer" id="drawer" hidden aria-label="Settings">
+  <h2>Settings</h2>
+  <details class="versionLog">
+    <summary>📜 Version log <span id="versionNow"></span></summary>
+    <ol id="versionList"></ol>
+  </details>
+</aside>
+<script src="js/version.js"></script>
+<script>document.getElementById('gear').addEventListener('click',function(){var d=document.getElementById('drawer');d.hidden=!d.hidden;this.setAttribute('aria-expanded',String(!d.hidden));});</script>
 </body>
 </html>

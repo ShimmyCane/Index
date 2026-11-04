@@ -11,6 +11,7 @@
 * **Graphics & Styling**: Simple, bold lines (2.5px – 3.5px solid dark borders) with tactile depth (`box-shadow: 0 4px 0 ...`). Avoid stark wireframes; make it graphically rich, cute, and engaging.
 * **Focus & Simplicity**: Minimize text, nested menus, and clutter. Keep the primary activity / game board front and center.
 * **Settings & Extensions Anchor**: Place a dedicated **floating gear button (`⚙️`) in the lower-right corner** that opens a clean drawer or modal for options and extensions. Full build rules: `02 Refs/Skills/settings_gear.md`.
+* **Version log in ⚙️**: every app has a version log panel inside the gear, closed by default, with the current version in its header and the newest change first. Each change bumps the version in the same commit. Build rules: `02 Refs/Skills/settings_gear.md` §9.
 * **Errors at the bottom**: Error messages should appear at the bottom of the page (not as top banners), behind a "Show errors" toggle in the gear panel. Never force errors on screen — users should opt in.
 * **Two tracks** (`02 Refs/Skills/project_track.md`): **A. Family play** is simple, graphic and short on words, with everything secondary in ⚙️. **B. Studio design** (architecture, 3-D, specifications) is denser and more formal, with more options and words, still in orderly panels.
 * **Collapsible by default**: every panel has a header with an icon and a name, and a ▸/▾ marker. Collapsing keeps the header visible, so the screen stays graphically clear. Track A starts closed on a small screen.

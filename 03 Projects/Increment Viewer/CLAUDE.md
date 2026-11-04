@@ -7,3 +7,5 @@ Purpose: a subject-neutral template for reviewing a series of increments (slides
 - Add a review: copy `data/living_room.js`, change the items, and open with `?set=<name>`
 - Growth worlds: `viewer.html?world=<id>&step=<n>` loads `../Growth/worlds/<id>.js` (see `schematic.md`). A step with no picture shows a state card.
 - Keep the viewer generic. Subject-specific text belongs in the data file only.
+
+Track: shared tool for both tracks (the page stays neutral). See `02 Refs/Skills/project_track.md`.

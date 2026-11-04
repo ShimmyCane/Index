@@ -8,3 +8,5 @@ Purpose: a nursery seed project. Its purpose is still being defined.
 - Shared conventions: root `CLAUDE.md` (public repo, privacy rules)
 
 How to run: not set yet. Add it here once the MVP exists.
+
+Track: A. Family play (proposed, confirm). See `02 Refs/Skills/project_track.md`.

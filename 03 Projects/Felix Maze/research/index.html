@@ -210,6 +210,10 @@
 <div class="drawer" id="drawer" hidden>
   <h2>Settings</h2>
   <label><input type="checkbox" id="openAll"> Open all panels</label>
+  <details class="versionLog">
+    <summary>📜 Version log <span id="versionNow"></span></summary>
+    <ol id="versionList"></ol>
+  </details>
   <label><input type="checkbox" id="showErrors"> Show errors</label>
   <ul>
     <li><a href="../index.html">🏠 Felix Maze home</a></li>
@@ -221,6 +225,7 @@
 </div>
 <pre class="errors" id="errors" hidden></pre>
 
+<script src="../js/version.js"></script>
 <script src="research.js"></script>
 </body>
 </html>

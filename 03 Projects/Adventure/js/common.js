@@ -74,6 +74,10 @@
           <button class="btn small" id="dbCheck">Check database</button>
           <button class="btn small" id="signOut">Sign out</button>
         </div>
+        <details class="versionLog">
+          <summary>📜 Version log <span id="versionNow"></span></summary>
+          <ol id="versionList"></ol>
+        </details>
         <div id="dbResult" class="muted"></div>
       </div>
       <button class="gear" id="gear" aria-label="Settings">⚙️</button>
@@ -87,6 +91,11 @@
           <div id="loginMsg" class="muted"></div>
         </form>
       </div>`);
+    if (!document.querySelector("script[data-version-log]")) {
+      const s = document.createElement("script"); s.src = "js/version.js"; s.dataset.versionLog = "1";
+      s.onload = () => { if (window.renderVersionLog) window.renderVersionLog(); };
+      document.body.appendChild(s);
+    }
     const here = location.pathname.split('/').pop() || 'index.html';
     document.querySelectorAll('.pages a').forEach(a => a.classList.toggle('sun', a.getAttribute('href') === here));
     const extra = document.getElementById('gear-extra');

@@ -196,10 +196,19 @@
           <button class="btn" id="dbCheck" type="button">Check database</button>
           <button class="btn" id="signOut" type="button" hidden>Sign out</button>
         </div>
+        <details class="versionLog">
+          <summary>📜 Version log <span id="versionNow"></span></summary>
+          <ol id="versionList"></ol>
+        </details>
         <div id="dbResult"><small></small></div>
         <label><input type="checkbox" id="showErrors"> Show errors</label>
       </div>
       <pre class="errors noprint" id="errors" hidden></pre>`);
+    if (!document.querySelector("script[data-version-log]")) {
+      const s = document.createElement("script"); s.src = "js/version.js"; s.dataset.versionLog = "1";
+      s.onload = () => { if (window.renderVersionLog) window.renderVersionLog(); };
+      document.body.appendChild(s);
+    }
     const top = document.querySelector(".top");
     if (top && !document.getElementById("pill")) top.insertAdjacentHTML("beforeend", `<span class="chip noprint" id="pill">💾 this device</span>`);
     const drawer = document.getElementById("drawer"), form = document.getElementById("signForm");
