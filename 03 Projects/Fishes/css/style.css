@@ -125,8 +125,8 @@ html, body {
 /* ----- Sprint and ⚙️ (lower corners) ----- */
 .sprint {
   position: fixed;
-  left: 16px;
-  bottom: max(16px, env(safe-area-inset-bottom));
+  right: 16px;
+  bottom: calc(max(16px, env(safe-area-inset-bottom)) + 88px);   /* action column, just above ⚙️ */
   width: 128px;
   height: 92px;
   border: var(--line);
@@ -416,3 +416,30 @@ textarea {
 /* Fish health in the HUD */
 .hp-bar { margin-top: 6px; height: 10px; }
 #hp-fill { background: linear-gradient(90deg, #8fe0b5, #bfeedd) !important; }
+
+/* v0.5: joystick (lower left) and the infinite-mode button */
+.joy {
+  position: fixed;
+  left: 16px;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  width: 150px;
+  height: 150px;
+  border: var(--line);
+  border-radius: 50%;
+  background: rgba(253, 248, 238, 0.7);
+  box-shadow: var(--tactile);
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  touch-action: none;
+}
+.joy-knob {
+  width: 64px;
+  height: 64px;
+  border: var(--line);
+  border-radius: 50%;
+  background: var(--sun);
+  box-shadow: 0 4px 0 var(--ink);
+  pointer-events: none;
+}
+.family-link[aria-pressed="true"] { background: var(--lilac); }

@@ -515,7 +515,7 @@ button {
   position: absolute;
   left: 0;
   top: 0;
-  width: calc(var(--scale, 1) * 100%);
+  width: calc(var(--scale, 1) * var(--zoom, 1) * 100%);
   border: 0;
   border-radius: 0;
   box-shadow: none;
@@ -708,3 +708,76 @@ button {
 .pop-seg.t2 { background: var(--sun); }
 .pop-seg.t3 { background: var(--lavender); }
 .pop-seg.t4 { background: var(--peach); }
+
+/* A fortress's range: a dashed ring, shown while you own the fortress */
+.fort-range { display: none; fill: rgba(61, 52, 52, 0.07); stroke: var(--ink); stroke-width: 3; stroke-dasharray: 10 10; pointer-events: none; }
+.fort-range.on { display: inline; }
+
+/* Zoom buttons, bottom left of the window */
+.zoom-bar { position: absolute; left: 10px; bottom: 10px; z-index: 5; display: flex; gap: 8px; }
+.zoom-btn {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0 12px;
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  background: var(--paper);
+  box-shadow: 0 3px 0 var(--ink);
+  font-family: inherit;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--ink);
+}
+.zoom-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+
+/* Minimap, top right of the window. Shown only when the field scrolls. */
+.minimap {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 5;
+  width: clamp(120px, 20%, 180px);
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  background: var(--paper);
+  overflow: hidden;
+  touch-action: none;
+  cursor: pointer;
+}
+.minimap svg { display: block; width: 100%; height: 100%; }
+.minimap circle { stroke: var(--ink); stroke-width: 8; }
+.minimap .neutral { fill: var(--neutral); }
+.minimap .lake { fill: var(--lake); }
+.minimap .o0, .minimap .t0 { fill: var(--mint); }
+.minimap .o1, .minimap .t1 { fill: var(--coral); }
+.minimap .o2, .minimap .t2 { fill: var(--sun); }
+.minimap .o3, .minimap .t3 { fill: var(--lavender); }
+.minimap .o4, .minimap .t4 { fill: var(--peach); }
+.minimap .o5 { fill: var(--pink); }
+.mm-view {
+  position: absolute;
+  border: 3px solid var(--ink);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+}
+
+/* Dust while a spot grows into a new tier */
+.node.upgrading { overflow: visible; }
+.node.upgrading::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -14%;
+  width: 120%;
+  height: 40%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 30%, rgba(255, 255, 255, 0) 70%);
+  pointer-events: none;
+  animation: dust 0.9s ease-out infinite;
+}
+@keyframes dust {
+  from { transform: translateX(-50%) scale(0.5); opacity: 0.9; }
+  to { transform: translateX(-50%) scale(1.5); opacity: 0; }
+}

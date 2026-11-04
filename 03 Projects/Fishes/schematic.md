@@ -69,6 +69,30 @@ Twenty tiers (one per level), in five depth zones. The play area grows with each
 
 Each species' real-fish note is in `js/species.js`.
 
+## Round 5 rules (v0.7)
+
+- **Growth:** a fish meal gives max(prey size × 0.25, level size range ÷ 9), so a level takes at most about nine meals. Plankton and chum give size × 0.4.
+- **Your school (level 10 on):** a pod of your own species follows you within about 90 units. It bites prey up to 0.85× its size (within 220 units) and grows with you at half your size. There are 2 at level 10, rising to 12 at level 20. Eating chum within 240 units of the pod gives a 50% chance of a new member, up to 12.
+- The pod does not hurt you, you cannot eat it, and it is left out of the population counts.
+
+## Round 4 rules (v0.6)
+
+- **Level up:** the fish around you stay. The background fades to the new zone over two seconds. New species appear far away, gradually.
+- **Growth:** from level 2, a fish meal gives 0.25 × 0.1 = 0.025 of the prey's size (was 0.25). Level 1 keeps 0.4 of the prey's size, and plankton is plentiful.
+- **Hit points:** fish of size 4 or more have max(2, round(size/2)) health, so 2 to 5 bites. Smaller fish have max(1, round(size/3)).
+- **Schools:** a bitten school fish calls on its schoolmates within 220 units. They bite back at the attacker (the player included) when their bite is ready.
+- **Scatter:** a predator 2.5× a fish's size makes it flee from 420 units, at 2.2× speed.
+- **Chum:** predators within 300 units go to chum. A dead fish of size 4 or more breaks into up to 12 pieces (size / 4), lasting 25 seconds.
+
+## Controls, screen and modes (v0.5)
+
+- **Controls:** Tap and move (default), or a joystick at the lower left. The joystick is set in ⚙️ → Sound, errors, display and controls.
+- **Sprint:** lower-right action column, just above ⚙️.
+- **Phones:** the play view is 2.5× larger (screens narrower than 600 px). Pinch and double-tap zoom are off on this page.
+- **Infinite mode:** on the title screen. After tier 20 the size goal rises 25% each time; there is no 15-minute cap and no win. Score still counts.
+- **End game:** ⚙️ → End game shows your score and the best score.
+- **Level up:** the old fish stay. New fish swim in from the edges for six seconds and can't touch you until they've settled.
+
 ## Combat, health and chum (v0.4)
 
 - **Bites:** a fish is removed when its health reaches zero. A bite takes off the attacker's attack value. The player bites every 0.6 s; fish bite every 0.9 s.

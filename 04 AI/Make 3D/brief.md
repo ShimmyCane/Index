@@ -406,3 +406,14 @@ Jimmy: the tank is not a vertical extrusion; some portions should be shallow wit
 - **Sweep, honestly:** the engine has no sweep object (its only skeleton shapes are ellipse rings). V04 is a sweep built from boxes: 1,175 objects, arc pieces rotated about Z. The profile is still stepped (one sketch unit per band, about 1.9 in), so the curves come from the corners, not from the outline.
 - **Checks:** V01 to V03 unchanged in git. Build passes (166 scenes, world-bounds warnings only).
 - **Open:** scale still an estimate (Jimmy to confirm); a real sweep object in the engine needs a schema and rules change (next step if wanted); the outline's freehand curves are still not modelled.
+
+## Solar System V08: the five dwarf planets (2026-11-04, research mode)
+
+- **Request (Jimmy):** Pluto is one of five dwarf planets; tell the other four, and make a 3-D increment.
+- **Answer:** the five IAU dwarf planets are Ceres, Pluto, Haumea, Makemake and Eris.
+- **Quick Detail:** a `make3d` query on `sketch_details` (Architecture project) found no sketch for the solar system. The matches were Profile for Cornice, Robot Path, Robot Path 2, Robot Cape and Robot Loop, none used here.
+- **Mode:** research. Sources in `research/dwarf-planets.md` (Britannica, UNLV table, Space.com, worksheets).
+- **Build:** `tools/solar_true.js` adds `DWARFS` (orbits, spins), `DWARF_PLANETS` (radii) and scene `solar-system-v08` (start 1958-01-31 as V07, comets kept). V06 and V07 are unchanged. Registered in `tools/scenes.js`. Built with `node tools/build_samples.js`: 1,674 objects, 190 motions (8 new: orbit and spin for each dwarf).
+- **Checks:** `tests/test_core.js` (27 groups) and `tests/test_orbits.js` (14 tests) pass. Render: `renders/solar-system/v08.png`, no console errors.
+- **Review:** Increment Viewer `?set=solar_system`, item V08 added; the set label and title now say V01 to V08.
+- **Open:** (1) Inclination, node and perihelion of Ceres, Haumea, Makemake and Eris are from memory of the JPL SBDB, not re-checked. (2) Starting places are a placeholder (perihelion at J2000), not the 1958 positions. (3) Eris laps less than once in the 240 s loop. (4) Haumea is drawn as a sphere. (5) Makemake's diameter differs between sources (1,430 vs 1,500 km).
