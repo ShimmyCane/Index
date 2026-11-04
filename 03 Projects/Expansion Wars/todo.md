@@ -27,7 +27,7 @@ Built from the feedback notes (round 2). Each item says whether it is done, and 
 
 ## Needs a decision first (see convo v0.2 and v0.3)
 
-- [x] **Cities: tiers.** Built: village 20, town 40, city 60, metropolis 80 (round 4 below). Still open: what each tier unlocks beyond growth and the cap.
+- [x] **Cities: tiers.** Built: village 20, town 40, city 60, metropolis 100 (round 4 below, final caps in round 6). Still open: what each tier unlocks beyond growth and the cap.
 - [x] **Team mode by level.** Built: Levels 4, 6 and 8 have fair teams, up to 3 here (round 4 below). Each team shares one colour.
 - [ ] **Baby-animal avatars** instead of the fungi for each team. Decide: which animals, and whether the avatars replace the map icons or appear only on the team card.
 - [x] **Dragon drop through unlinked spots.** Decided yes: a drop routes along roads through your own spots. Built, and Jimmy confirmed it works well (2026-11-03).
@@ -56,14 +56,24 @@ Checked against `js/game.js` on `main`. Notes stay `open` in the table until Jim
 - [x] **Race-track countdown on every start** (Level 4, note `4e91a3a2`). Built in round 3 (3, 2, 1, Go).
 - [x] **Assistant marks tasks done** (Level 5, note `f1f02147`). Process note, not a game feature. Done when built: todo items are ticked in the same change, and notes are marked done after Jimmy confirms. Recorded in the brief.
 - [x] **All territories can be upgraded; capture drops the grade** (Level 5, note `598aba02`). Built with my defaults: a mushroom upgrades to a town-tier city (20 soldiers); a metropolis becomes a fortress (40 soldiers); a captured city drops one grade. Question 1 in convo v0.4 has the defaults to check.
+- [x] **Fortress levels** (convo v0.6, question 7). Built: three levels, cap 120 / 160 / 200, range 120 / 140 / 160, shooting 2 / 4 / 6 a second. Tap a fortress to grow it. Costs 80 and 100 for the steps, 60 to convert a metropolis. Times 80 s and 160 s. A captured fortress drops one level.
+- [x] **Final tiers** (Jimmy, convo v0.6). Village 20, town 40, city 60, metropolis 100; fortress 120, 160, 200. Costs half the next cap; each upgrade takes double the previous time, from 5 s for the town.
 - [x] **Fortresses shoot** (from convo v0.4, question 1). Built: enemy soldiers inside 120 map units of an owned fortress stop and lose 2 a second. The ring shows while you own it. Range and damage are my defaults, to check.
 - [x] **Simple mushrooms are villages** (Level 5, note `bed5a34f`). Built: mushrooms are the smallest village, capped at 20. Upgrading one makes it a town-tier city.
 - [x] **Surrender for AI and user, with a toggle in settings** (Level 5, note `62214856`). Built: outnumbered 10 to 1 gives up, when Surrender is on in ⚙️ (off by default). Spots go neutral with their soldiers. Still open: default on or off, and neutral versus strongest rival.
-- [x] **Upgrades take longer each tier, pause army growth, and show dust** (Level 5, note `ca529eea`). Built: town 3 s, city 6 s, metropolis 10 s (fortress 10 s). No army growth meanwhile. Cost paid at the start; capture cancels. A dust puff shows the upgrade.
+- [x] **Upgrades take longer each tier, pause army growth, and show dust** (Level 5, note `ca529eea`). Built: each upgrade takes double the time of the one before, from 5 s for the town (town 5 s, city 10 s, metropolis 20 s, fortress 40 s, then 80 s and 160 s for the fortress steps). Costs are half the next tier's cap. No army growth meanwhile. Cost paid at the start; capture cancels. A dust puff shows the upgrade.
 - [x] **Levels 10 to 15: multiplayer, denser maps** (Jimmy, convo v0.4). Built: 4 to 6 flags, 30 to 52 spots, on a field two screens wide.
 - [x] **Zoom and minimap** (Jimmy, convo v0.4; round 4 zoom item). Built: + and − buttons, Fit, two-finger pinch. The minimap appears when the zoomed view scrolls; tap or drag it to move the view.
 - [ ] **Zoom out to fit a bigger map, spots keep their size** (Level 5, note `ee7f`). Partly built: Fit shows the whole field. Open: spots shrink with zoom (44 px minimum), so they overlap on dense maps. Question 5.
 - [ ] **Test note** (`4a1aa905`, Level 4 Valley). Nothing to build. Mark done when Jimmy confirms.
+
+## Round 6: notes read 2026-11-04 (3 open notes)
+
+Checked against `js/game.js` on `main`. Notes stay `open` in the table until Jimmy confirms (convo v0.6). Nothing here is built yet.
+
+- [x] **Team members keep their own colour** (Level 4, note `bc30ae86`, 2026-11-04). Built: every player keeps their player colour on territories, cities, armies and the minimap, in teams too. The team shows on the population line (team segment colour and avatars) and by the red divider. Default chosen; convo v0.6 question 1 asks you to confirm.
+- [x] **Zoom out to fit, spots keep their size** (Level 5, note `ee7f`). Built: spots keep the same size on screen at any zoom, so they overlap on dense maps when zoomed out. The 44 px minimum is no longer needed. Confirmed by Jimmy (convo v0.6, question 2).
+- [ ] **Test note** (`4a1aa905`, Level 4 Valley). Nothing to build. Mark done when Jimmy confirms (convo v0.6 question 3).
 
 ## Later
 

@@ -18,19 +18,23 @@
   // secs = how long the upgrade to this tier takes. The spot's army does not grow meanwhile.
   var CITY_LEVELS = [
     { name: 'village',    rate: 1.5, cap: 20, cost: 0,  secs: 0 },
-    { name: 'town',       rate: 2.0, cap: 40, cost: 20, secs: 3 },
-    { name: 'city',       rate: 2.6, cap: 60, cost: 30, secs: 6 },
-    { name: 'metropolis', rate: 3.2, cap: 80, cost: 40, secs: 10 }
+    { name: 'town',       rate: 2.0, cap: 40, cost: 20, secs: 5 },
+    { name: 'city',       rate: 2.6, cap: 60, cost: 30, secs: 10 },
+    { name: 'metropolis', rate: 3.2, cap: 100, cost: 50, secs: 20 }
   ];
-  var FORT_CONVERT_SECS = 10;   // a metropolis takes this long to become a fortress
+  var FORT_CONVERT_SECS = 40;   // a metropolis takes this long to become a fortress
   var SURRENDER_RATIO = 10;     // outnumbered this many to one, a team gives up (when Surrender is on)
   var MAX_ZOOM = 2.5;
   var ZOOM_STEP = 1.25;
-  var FORT_CAP = 40;   // a fortress grows slowly up to this garrison; it does not grow beyond it
+  // Fortress levels: garrison cap, range (map units), and damage (soldiers a second to enemies in range).
+  // cost = 50% of the next level's cap; secs = how long the step takes.
+  var FORT_LEVELS = [
+    { cap: 120, range: 120, dmg: 2, cost: 0,   secs: 0 },
+    { cap: 160, range: 140, dmg: 4, cost: 80,  secs: 80 },
+    { cap: 200, range: 160, dmg: 6, cost: 100, secs: 160 }
+  ];
   var MUSH_CAP = 20;   // a mushroom is the smallest village: it stops growing at this garrison
-  var FORT_CONVERT_COST = 40;   // soldiers to turn a metropolis into a fortress
-  var FORT_RANGE = 120;         // a fortress shoots enemy soldiers within this many map units
-  var FORT_DAMAGE = 2;          // soldiers lost per second to a fortress, and they stop while in range
+  var FORT_CONVERT_COST = 60;   // soldiers to turn a metropolis into a fortress (50% of the first fortress cap)
   var AVATARS = ['🐥', '🦆', '🐻', '🐿️', '🐭', '🦡'];   // one per player: chick, duckling, bear, gopher, mouse, badger
   var ICON = { factory: '🍄', city: '🏰', fortress: '🏯' };
   var SVG_NS = 'http://www.w3.org/2000/svg';
@@ -153,7 +157,8 @@
   function colourClass(owner) {
     if (owner === -2) return 'lake';
     if (owner < 0) return 'neutral';
-    return g.teamMode ? 't' + teamOf(owner) : 'o' + owner;
+    // Every player keeps their own colour, in teams too. The team shows on the population line and by the red divider.
+    return 'o' + owner;
   }
 
   function linked(a, b) { return a.links.indexOf(b.id) !== -1; }
@@ -389,7 +394,8 @@
         n.cap = CITY_LEVELS[0].cap;
       } else {
         n.level = 0;
-        n.cap = n.type === 'fortress' ? FORT_CAP : n.type === 'factory' ? MUSH_CAP : Infinity;
+        if (n.type === 'fortress') n.fl = 1;
+        n.cap = n.type === 'fortress' ? FORT_LEVELS[0].cap : n.type === 'factory' ? MUSH_CAP : Infinity;
       }
     });
 
@@ -514,7 +520,11 @@
         var lv = Math.max(1, (n.level || 1) - 1);
         n.level = lv; n.rate = CITY_LEVELS[lv - 1].rate; n.cap = CITY_LEVELS[lv - 1].cap;
       }
-      if (n.type === 'fortress') n.cap = FORT_CAP;
+      // A captured fortress drops one level (never below level 1), like a city drops one grade.
+      if (n.type === 'fortress') {
+        n.fl = Math.max(1, (n.fl || 1) - 1);
+        n.cap = FORT_LEVELS[n.fl - 1].cap;
+      }
       if (n.type === 'factory') n.cap = MUSH_CAP;
       if (a.owner === 0) Sound.capture();
       else if (before === 0) Sound.lost();
@@ -529,8 +539,10 @@
     } else if (u.kind === 'city') {
       var c = CITY_LEVELS[u.to - 1];
       n.level = u.to; n.rate = c.rate; n.cap = c.cap;
+    } else if (u.kind === 'fort') {
+      n.type = 'fortress'; n.fl = 1; n.level = 0; n.rate = M.TYPES.fortress.rate; n.cap = FORT_LEVELS[0].cap;
     } else {
-      n.type = 'fortress'; n.level = 0; n.rate = M.TYPES.fortress.rate; n.cap = FORT_CAP;
+      n.fl = u.to; n.cap = FORT_LEVELS[u.to - 1].cap;   // a fortress step
     }
     n.upgrade = null;
     if (n.owner === 0) setStatus('Your spot grew into ' + u.label + '!', true);
@@ -539,10 +551,15 @@
   // Spend soldiers to start growing one of your spots. A mushroom becomes a town-tier city. A city goes up
   // one tier, and a metropolis becomes a fortress. The spot does not grow its army while it upgrades.
   function tryUpgrade(n) {
-    if (n.owner !== 0 || (n.type !== 'city' && n.type !== 'factory')) return;
+    if (n.owner !== 0 || (n.type !== 'city' && n.type !== 'factory' && n.type !== 'fortress')) return;
     if (n.upgrade) { setStatus('This spot is already growing.', true); return; }
     var have = Math.floor(n.count), u, cost, secs, label;
-    if (n.type === 'factory') {
+    if (n.type === 'fortress') {
+      var fl = n.fl || 1;
+      if (fl >= FORT_LEVELS.length) { setStatus('This fortress is fully grown.', true); return; }
+      u = { kind: 'fortstep', to: fl + 1 };
+      cost = FORT_LEVELS[fl].cost; secs = FORT_LEVELS[fl].secs; label = 'a stronger fortress';
+    } else if (n.type === 'factory') {
       u = { kind: 'mush' };
       cost = CITY_LEVELS[1].cost; secs = CITY_LEVELS[1].secs; label = 'a town';
     } else if ((n.level || 1) >= CITY_LEVELS.length) {
@@ -570,12 +587,15 @@
   function underFire(a, dt) {
     var x = a.from.x + (a.to.x - a.from.x) * a.p;
     var y = a.from.y + (a.to.y - a.from.y) * a.p;
-    var inRange = g.nodes.some(function (f) {
-      return f.type === 'fortress' && f.owner >= 0 && teamOf(f.owner) !== teamOf(a.owner) &&
-        Math.hypot(f.x - x, f.y - y) <= FORT_RANGE;
+    // Each fortress in range adds its damage for its level.
+    var dmg = 0;
+    g.nodes.forEach(function (f) {
+      if (f.type !== 'fortress' || f.owner < 0 || teamOf(f.owner) === teamOf(a.owner)) return;
+      var lv = FORT_LEVELS[(f.fl || 1) - 1];
+      if (Math.hypot(f.x - x, f.y - y) <= lv.range) dmg += lv.dmg;
     });
-    if (!inRange) return false;
-    a.count -= FORT_DAMAGE * dt;
+    if (dmg === 0) return false;
+    a.count -= dmg * dt;
     if (a.count <= 0) { a.done = true; return true; }
     setArmyCount(a, Math.ceil(a.count));
     return true;
@@ -865,10 +885,16 @@
       // A fortress shows its range as a ring while it is yours.
       if (n.type === 'fortress') {
         if (!n.rangeEl) {
-          n.rangeEl = svgEl('circle', { 'class': 'fort-range', cx: n.x, cy: n.y, r: FORT_RANGE });
+          n.rangeEl = svgEl('circle', { 'class': 'fort-range', cx: n.x, cy: n.y, r: FORT_LEVELS[0].range });
           els.roads.appendChild(n.rangeEl);
         }
         n.rangeEl.setAttribute('class', 'fort-range' + (n.owner >= 0 ? ' on' : ''));
+        n.rangeEl.setAttribute('r', FORT_LEVELS[(n.fl || 1) - 1].range);
+        // Stars show the fortress level (level 2 and 3 get one and two stars).
+        if (n.shownLevel !== n.fl) {
+          n.lvlEl.textContent = (n.fl || 1) > 1 ? '★'.repeat((n.fl || 1) - 1) : '';
+          n.shownLevel = n.fl;
+        }
       }
 
       var label = Math.floor(n.count);
