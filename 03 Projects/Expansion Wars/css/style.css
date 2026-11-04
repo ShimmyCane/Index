@@ -789,7 +789,7 @@ a.link-big { display: flex; align-items: center; justify-content: center; text-d
 .country-stage { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px 12px; overflow-y: auto; }
 .country-res { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; width: min(96vw, 900px); }
 .res-item { padding: 4px 10px; border: 2px solid var(--ink); border-radius: 999px; background: #fff; font-size: 14px; }
-.country-map-wrap { width: min(96vw, 900px); aspect-ratio: 1000 / 640; border: 3px solid var(--ink); border-radius: 22px; background: var(--meadow); overflow: hidden; box-shadow: 0 6px 0 var(--ink); }
+.country-map-wrap { position: relative; width: min(96vw, 900px); aspect-ratio: 1000 / 640; touch-action: none; border: 3px solid var(--ink); border-radius: 22px; background: var(--meadow); overflow: hidden; box-shadow: 0 6px 0 var(--ink); }
 .country-map-wrap svg { display: block; width: 100%; height: 100%; }
 .country-map-wrap .cell { stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; cursor: pointer; }
 .country-map-wrap .cell.sel { stroke-width: 8; }
@@ -807,3 +807,4 @@ a.link-big { display: flex; align-items: center; justify-content: center; text-d
 .country-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 .country-log { width: min(96vw, 900px); margin: 0; padding: 8px 14px 8px 30px; border: 2px dashed var(--ink); border-radius: 14px; background: #fff; font-size: 15px; max-height: 180px; overflow-y: auto; }
 .turn-clock { margin: 0; font-weight: 800; }
+.prov-icon { pointer-events: none; }

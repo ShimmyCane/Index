@@ -22,6 +22,8 @@
   ];
 
   var st = null, timer = null, selected = 0;
+  // The country map's view: zoom (1 = the whole map) and the top-left corner of the visible part, in map units.
+  var view = { z: 1, x: 0, y: 0, moved: false, drag: null };
   var els = {};
 
   function $(id) { return document.getElementById(id); }
@@ -342,6 +344,7 @@
     addLog('The country is at peace, except ' + NAMES[1] + ' and ' + NAMES[2] + ', who are at war.');
     addLog('Each turn is 60 seconds. Pick a nation to act, then press Ready.');
     selected = 0;
+    view.z = 1; view.x = 0; view.y = 0;
     buildMap();
     render();
   }
@@ -350,13 +353,17 @@
 
   function buildMap() {
     els.svg.innerHTML = '';
-    var gRegions = svgEl('g'), gLines = svgEl('g'), gLabels = svgEl('g');
+    var gRegions = svgEl('g'), gLines = svgEl('g'), gIcons = svgEl('g'), gLabels = svgEl('g');
     st.n.forEach(function (n) {
       n.polyEl = svgEl('polygon', {
         points: n.poly.map(function (p) { return p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ')
       });
-      n.polyEl.addEventListener('click', function () { select(n.id); });
+      n.polyEl.addEventListener('click', function () { if (!view.moved) select(n.id); });
       gRegions.appendChild(n.polyEl);
+      // The nation's provinces, drawn as a ring of small icons inside its region.
+      n.iconG = svgEl('g');
+      n.iconSig = '';
+      gIcons.appendChild(n.iconG);
       n.labelEl = svgEl('text', { x: n.x, y: n.y, 'text-anchor': 'middle', 'class': 'nation-label' });
       n.nameEl = svgEl('tspan', { x: n.x, dy: '-0.3em', 'font-weight': '800' });
       n.infoEl = svgEl('tspan', { x: n.x, dy: '1.3em' });
@@ -377,7 +384,33 @@
     }
     els.svg.appendChild(gRegions);
     els.svg.appendChild(gLines);
+    els.svg.appendChild(gIcons);
     els.svg.appendChild(gLabels);
+    applyView();
+  }
+
+  // Icons for each province of a nation, in a ring around the label. Rebuilt only when the counts change.
+  var PROVINCE_ICON = { v: '🍄', t: '🏘️', c: '🏰', f: '🏯' };
+  function drawProvinces(n) {
+    var sig = n.alive ? [n.v, n.t, n.c, n.f].join(',') : 'fallen';
+    if (sig === n.iconSig) return;
+    n.iconSig = sig;
+    n.iconG.innerHTML = '';
+    if (!n.alive) return;
+    var items = [];
+    ['f', 'c', 't', 'v'].forEach(function (k) {
+      for (var c = 0; c < n[k]; c++) items.push(k);
+    });
+    var radius = Math.min(90, 26 + items.length * 9);
+    items.forEach(function (k, idx) {
+      var angle = (2 * Math.PI * idx) / items.length - Math.PI / 2;
+      var t = svgEl('text', {
+        x: n.x + radius * Math.cos(angle), y: n.y + radius * Math.sin(angle) + 8,
+        'text-anchor': 'middle', 'font-size': 22, 'class': 'prov-icon'
+      });
+      t.textContent = PROVINCE_ICON[k];
+      n.iconG.appendChild(t);
+    });
   }
 
   function drawMap() {
@@ -385,6 +418,7 @@
       n.polyEl.setAttribute('class', 'cell ' + (n.alive ? 'o' + n.id : 'neutral') + (n.id === selected ? ' sel' : ''));
       n.nameEl.textContent = n.name;
       n.infoEl.textContent = n.alive ? Math.floor(n.soldiers) + ' · ' + stage(ratio(n)) : 'fallen';
+      drawProvinces(n);
     });
     st.lineEls.forEach(function (L) {
       var a = st.n[L.i], b = st.n[L.j], r = rel(L.i, L.j);
@@ -518,6 +552,53 @@
   els.status = $('country-status');
   els.clock = $('country-clock');
   els.ready = $('country-ready');
+
+  // ---------- zoom and pan on the country map ----------
+
+  function clampView() {
+    var w = W / view.z, h = H / view.z;
+    view.x = Math.max(0, Math.min(W - w, view.x));
+    view.y = Math.max(0, Math.min(H - h, view.y));
+  }
+  function applyView() {
+    clampView();
+    els.svg.setAttribute('viewBox', [view.x, view.y, W / view.z, H / view.z].join(' '));
+  }
+  // Zoom, keeping the map point (cx, cy) where it is. Default: the middle of the view.
+  function setZoom(z, cx, cy) {
+    z = Math.max(1, Math.min(3, z));
+    var oldW = W / view.z, oldH = H / view.z;
+    if (cx === undefined) { cx = view.x + oldW / 2; cy = view.y + oldH / 2; }
+    var fx = (cx - view.x) / oldW, fy = (cy - view.y) / oldH;
+    view.z = z;
+    view.x = cx - fx * (W / z);
+    view.y = cy - fy * (H / z);
+    applyView();
+  }
+
+  els.svg.addEventListener('pointerdown', function (e) {
+    view.moved = false;
+    view.drag = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y };
+    els.svg.setPointerCapture(e.pointerId);
+  });
+  els.svg.addEventListener('pointermove', function (e) {
+    if (!view.drag) return;
+    var dx = e.clientX - view.drag.x, dy = e.clientY - view.drag.y;
+    if (Math.hypot(dx, dy) > 6) view.moved = true;
+    var px = els.svg.getBoundingClientRect().width / (W / view.z);   // screen pixels per map unit
+    view.x = view.drag.vx - dx / px;
+    view.y = view.drag.vy - dy / px;
+    applyView();
+  });
+  els.svg.addEventListener('pointerup', function () { view.drag = null; });
+  els.svg.addEventListener('pointercancel', function () { view.drag = null; });
+  els.svg.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    setZoom(view.z * (e.deltaY < 0 ? 1.15 : 1 / 1.15));
+  }, { passive: false });
+  $('country-zoom-in').addEventListener('click', function () { setZoom(view.z * 1.25); });
+  $('country-zoom-out').addEventListener('click', function () { setZoom(view.z / 1.25); });
+  $('country-zoom-fit').addEventListener('click', function () { view.z = 1; view.x = 0; view.y = 0; applyView(); });
 
   $('btn-country').addEventListener('click', openCountry);
   $('country-back').addEventListener('click', backHome);
