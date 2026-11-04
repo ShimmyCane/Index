@@ -69,6 +69,12 @@ Twenty tiers (one per level), in five depth zones. The play area grows with each
 
 Each species' real-fish note is in `js/species.js`.
 
+## Round 5 rules (v0.7)
+
+- **Growth:** a fish meal gives max(prey size × 0.25, level size range ÷ 9), so a level takes at most about nine meals. Plankton and chum give size × 0.4.
+- **Your school (level 10 on):** a pod of your own species follows you within about 90 units. It bites prey up to 0.85× its size (within 220 units) and grows with you at half your size. There are 2 at level 10, rising to 12 at level 20. Eating chum within 240 units of the pod gives a 50% chance of a new member, up to 12.
+- The pod does not hurt you, you cannot eat it, and it is left out of the population counts.
+
 ## Round 4 rules (v0.6)
 
 - **Level up:** the fish around you stay. The background fades to the new zone over two seconds. New species appear far away, gradually.

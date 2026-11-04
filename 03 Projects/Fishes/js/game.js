@@ -428,6 +428,62 @@
     }
   }
 
+  // ---------- your school (from level 10) ----------
+  // A pod of your own species follows you, bites smaller fish, and grows with you.
+  // Eating chum near the pod has a chance to add a member (up to 12).
+  function podTarget() { return run.info.n >= 10 ? Math.min(12, 2 + (run.info.n - 10)) : 0; }
+
+  function podSpecies() {
+    if (!run.podSp) run.podSp = Object.assign({}, run.form, { id: run.form.id + '-pod', kind: 'prey', temper: 'docile', school: true });
+    return run.podSp;
+  }
+
+  function spawnPod() {
+    var r = run, a = rand(0, Math.PI * 2);
+    r.npcs.push({
+      sp: podSpecies(), pod: true, podA: a, x: r.x + Math.cos(a) * 90, y: r.y + Math.sin(a) * 90,
+      vx: 0, vy: 0, size: Math.max(0.5, r.size * 0.5), spd: 1, facing: 1, t: rand(0, 6), anchor: { x: r.x, y: r.y },
+      tgt: null, tT: 0, cool: 0, lunge: 0, lx: 0, ly: 0, locked: false, lockT: 0, dead: false,
+      hp: 0, maxHp: 0, biteT: 0, arrive: 0
+    });
+    r.npcs[r.npcs.length - 1].hp = maxHpOf(r.size * 0.5);
+    r.npcs[r.npcs.length - 1].maxHp = r.npcs[r.npcs.length - 1].hp;
+  }
+
+  function updatePods() {
+    var r = run, want = podTarget(), have = 0;
+    r.npcs.forEach(function (o) { if (o.pod && !o.dead) have++; });
+    for (var i = have; i < want; i++) spawnPod();
+  }
+
+  function updatePodMember(n, dt) {
+    var r = run, sp = n.sp;
+    n.t += dt;
+    n.biteT = Math.max(0, n.biteT - dt);
+    n.size = Math.max(0.5, r.size * 0.5);                      // the pod grows as you grow
+    n.hp = Math.min(n.hp, maxHpOf(n.size)); n.maxHp = maxHpOf(n.size);
+    // Attack: the nearest fish this pod can eat, within 220; otherwise keep station beside you.
+    var prey = findNear(n, 220, function (o) { return !o.pod && o.sp.kind !== 'food' && o.sp.kind !== 'harmless' && o.size <= n.size * 0.85; });
+    var tx, ty, s;
+    if (prey) {
+      tx = prey.x; ty = prey.y; s = 190;
+      if (n.biteT <= 0 && Math.hypot(prey.x - n.x, prey.y - n.y) < 40) {
+        n.biteT = STRIKE_S;
+        prey.hp -= atkOf(n.size);
+        burst(prey.x, prey.y, '#d9473a', 3);
+        schoolDefend(prey, n);
+        if (prey.hp <= 0 && !prey.dead) { prey.dead = true; r.npcEaten++; dropChum(prey); }
+      }
+    } else {
+      tx = r.x + Math.cos(n.podA + n.t * 0.5) * 90; ty = r.y + Math.sin(n.podA + n.t * 0.5) * 90; s = 200;
+    }
+    var dd = Math.hypot(tx - n.x, ty - n.y) || 1;
+    n.vx += ((tx - n.x) / dd * s - n.vx) * Math.min(1, dt * 4);
+    n.vy += ((ty - n.y) / dd * s - n.vy) * Math.min(1, dt * 4);
+    n.x += n.vx * dt; n.y += n.vy * dt;
+    if (Math.abs(n.vx) > 3) n.facing = n.vx > 0 ? 1 : -1;
+  }
+
   // A school fish that is bitten calls on its schoolmates. Nearby schoolmates bite back at the attacker.
   function schoolDefend(victim, attacker) {
     if (!victim.sp.school) return;
@@ -473,7 +529,7 @@
   function spread() {
     var t = run.info.n, out = { below: 0, same: 0, above: 0 };
     run.npcs.forEach(function (o) {
-      if (o.dead || o.sp.kind === 'food') return;
+      if (o.dead || o.pod || o.sp.kind === 'food') return;
       var d = o.sp.tier - t;
       if (d < 0) out.below++; else if (d === 0) out.same++; else out.above++;
     });
@@ -483,7 +539,7 @@
   function census() {
     var P = run.size, c = { fish: 0, threat: 0, edible: 0, harmless: 0, food: 0 };
     run.npcs.forEach(function (o) {
-      if (o.dead) return;
+      if (o.dead || o.pod) return;
       if (o.sp.kind === 'food') { c.food++; return; }
       c.fish++;
       if (o.sp.kind === 'harmless') c.harmless++;
@@ -633,6 +689,7 @@
 
   function updateNPC(n, dt, predators) {
     var sp = n.sp, r = run;
+    if (n.pod) { updatePodMember(n, dt); return; }
     n.biteT = Math.max(0, (n.biteT || 0) - dt);
     if (n.life !== undefined) { n.life -= dt; if (n.life <= 0) { n.dead = true; return; } }
     n.t += dt;
@@ -781,7 +838,9 @@
       floatText(n.x, n.y, 'Spines! -2');
       FishSound.play('hurt');
     } else {
-      gain = n.size * (r.info.n >= 2 ? 0.25 * CFG.EXP_FACTOR : 0.4);   // first level keeps its pace; from level 2, 1/10 as fast
+      // A level takes about nine fish meals at most: each meal gives at least a ninth of the level's size range.
+      var span = Math.max(0.5, r.goal - r.info.enterSize);
+      gain = n.sp.kind === 'food' ? n.size * 0.4 : Math.max(n.size * 0.25, span / 9);
       r.size += gain;
       floatText(n.x, n.y, '+' + gain.toFixed(1));
       FishSound.play('eat');
@@ -789,6 +848,11 @@
     r.eaten++;
     burst(n.x, n.y, n.sp.col || '#ffffff', 6);
     dropChum(n);
+    if (n.sp === CHUM) {
+      var pod = run.npcs.filter(function (o) { return o.pod && !o.dead && Math.hypot(o.x - n.x, o.y - n.y) < 240; });
+      var members = run.npcs.filter(function (o) { return o.pod && !o.dead; }).length;
+      if (pod.length && members < 12 && Math.random() < 0.5) spawnPod();   // fed chum: the group grows
+    }
     checkGrowth();
   }
 
@@ -819,6 +883,7 @@
 
   function checkContact(n) {
     var r = run, sp = n.sp;
+    if (n.pod) return;          // your school neither hurts you nor is eaten by you
     if (n.arrive > 0) return;   // arriving fish do not touch you until they have settled
     var d = Math.hypot(n.x - r.x, n.y - r.y);
     var reach = (lenFor(r.size, 'round') + lenFor(n.size, sp.shape)) * 0.36;
@@ -878,6 +943,7 @@
 
     updatePlayer(dt);
 
+    updatePods();
     r.spawnT = (r.spawnT || 0) - dt;
     if (r.spawnT <= 0) { r.spawnT = 1.2; fillPopulations(false); }
 
@@ -1439,6 +1505,7 @@
         npcEaten: run && run.npcEaten, difficulty: run && run.difficulty, form: run && run.form && run.form.id,
         census: run ? census() : null, spread: run ? spread() : null,
         arriving: run ? run.npcs.filter(function (o) { return o.arrive > 0; }).length : 0,
+        pods: run ? run.npcs.filter(function (o) { return o.pod && !o.dead; }).length : 0,
         nearestFood: run ? Math.round(Math.min.apply(null, [9999].concat(run.npcs.filter(function (o) { return o.sp.kind === 'food'; }).map(function (o) { return Math.hypot(o.x - run.x, o.y - run.y); })))) : null, foods: run ? run.npcs.filter(function (o) { return o.sp.kind === 'food'; }).length : 0,
         chum: run ? run.npcs.filter(function (o) { return o.sp === CHUM; }).length : 0, hp: run && run.hp, maxHp: run && run.maxHp,
         player: run && { x: run.x, y: run.y }, cam: { x: cam.x, y: cam.y, scale: cam.scale },
