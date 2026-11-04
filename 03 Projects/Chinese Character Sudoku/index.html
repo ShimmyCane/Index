@@ -133,8 +133,10 @@
     <div class="setting"><label>显示错误</label>
       <div class="seg" data-key="showErrors"><button data-v="1">开</button><button data-v="0">关</button></div></div>
 
-    <div class="setting col"><label>版本 <span id="version"></span></label>
-      <ul class="changelog" id="changelog"></ul></div>
+  <details class="versionLog">
+    <summary>📜 版本记录 <span id="versionNow"></span></summary>
+    <ol id="versionList"></ol>
+  </details>
   </aside>
 
   <div class="celebrate" id="celebrate" hidden>
@@ -164,6 +166,7 @@
   <script src="js/vendor/hanzi-writer.min.js"></script>
   <script src="js/engine.js"></script>
   <script src="js/trace.js"></script>
+  <script src="js/version.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

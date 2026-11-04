@@ -152,10 +152,15 @@
     <button class="btn alt small" id="importWorld">Use this world</button>
     <p class="msg" id="importMsg"></p>
   </div>
+  <details class="versionLog">
+    <summary>📜 Version log <span id="versionNow"></span></summary>
+    <ol id="versionList"></ol>
+  </details>
 </aside>
 
 <div id="errors" hidden role="log" aria-label="Errors"><pre id="errorList">No errors.</pre></div>
 
+<script src="js/version.js"></script>
 <script src="js/growth_model.js"></script>
 <script src="worlds/index.js"></script>
 <script src="worlds/rabbits_hillside.js"></script>

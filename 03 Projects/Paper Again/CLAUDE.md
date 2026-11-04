@@ -16,3 +16,5 @@ Rules:
 - The story (`js/paper_story.js`) is the record. The cache and renders are derived; rebuild them, never edit them by hand.
 - Same story, same seed, same result. Keep the engine deterministic (seeded random numbers only).
 - Public repo: synthetic story only.
+
+Track: B. Studio design (proposed, confirm). See `02 Refs/Skills/project_track.md`.

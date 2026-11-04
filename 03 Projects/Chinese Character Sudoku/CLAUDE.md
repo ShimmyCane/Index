@@ -17,3 +17,5 @@ Project rules:
 - 3.0 is made of `lessonChars`; after changing that string, run `tools/build_strokes.py` (see its docstring) so every character has stroke data, and `tools/build_font.py` if new characters appear.
 - Keep word content kid-appropriate. No names or school details (public repo).
 - Bump `APP_VERSION` and add a `CHANGELOG` line in `js/app.js` for each user-visible change.
+
+Track: A. Family play (proposed, confirm). See `02 Refs/Skills/project_track.md`.

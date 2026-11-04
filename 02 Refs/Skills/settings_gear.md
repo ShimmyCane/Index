@@ -180,6 +180,8 @@ Run in a headless browser (Chromium at `/opt/pw-browsers/chromium` with `--no-sa
 - **Wording by track** (`project_track.md`). Track A: short and plain ("You can now undo twice."). Track B: precise, with units and the setting it affects ("Dimensions now shown in feet and inches; stored in inches.").
 - **Keep the history.** Never delete an old entry; fix a typo only. The log is the record of what changed for the person testing the app.
 - **Saved data.** Store the version with any saved state (see `lessons_pool.md`, "Store the data version with saved state"). Drop a save from an older major version, or migrate it, and say so in the entry.
+- **Exceptions.** A frozen, numbered page (for example `living_room_v1.html` to `living_room_v10.html`) is its own version: its file name is the version, so it has no ⚙️ log. A project whose only page is one of these keeps its log in the pointer file (`CLAUDE.md`). Ask Jimmy before adding one to a frozen page.
+- **Dynamic drawers.** If the app builds its drawer in JavaScript (Shimmy Specs, Felix Maze, Adventure), `js/version.js` defines `window.renderVersionLog()` and calls it once on load. The app calls `renderVersionLog()` again right after it builds the drawer. Felix Maze and Adventure load `js/version.js` from their shared `common.js` after the drawer exists.
 - The starter below does this. A project that already has a changelog (Chinese Character Sudoku's drawer, Fishes' `CHANGELOG.md`) moves it to this panel when it next changes. Do not add a second log.
 
 ## Sources (pattern learned in)

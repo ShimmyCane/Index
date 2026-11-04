@@ -9,3 +9,5 @@ Purpose: a game inside a fish tank that becomes the ocean. Start as a baby fish,
 - Shared conventions: root `CLAUDE.md` (public repo, privacy rules)
 
 How to run: open `index.html` in a browser (no build step, no server). For the cookie notes to work, serve the folder (for example `python3 -m http.server`) rather than opening the file directly. Settings and notes are behind ⚙️ in the lower right.
+
+Track: A. Family play (proposed, confirm). See `02 Refs/Skills/project_track.md`.

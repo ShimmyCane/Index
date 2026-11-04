@@ -10,6 +10,7 @@ Skills:
 - bake_cache: Precompute slow results with a Node baker into a `<script>` cache with a fingerprint, so a page opens from file:// and never shows a stale result.
 - ai_json_loop: Let Jimmy use any AI chat to draft structured content: the page builds the prompt, validates the pasted JSON reply, and applies it with undo. No server, no key in the browser.
 - supabase_link: Set up a project's Supabase database by hand: short paste-ready SQL files, checked by `scripts/sql_paste_check.py`, a paste order for Jimmy, verification from his paste, and the publishable key only. The manual route is the default.
+- project_sync: Bring every project to the same standard (pointer, schematic, convo, 04 AI notes, track, version log, ⚙️ panel, privacy and database rules) and check split-readiness. Uses `scripts/project_inventory.sh`.
 - project_track: Classify a project as family play (simple, graphic, settings in ⚙️) or studio design (dense, formal), set its defaults, and make every panel collapsible.
 - feedback_notes: The in-page "Notes for improvement" box in ⚙️: notes tied to the item on screen, saved device first, read back, copyable. Pulled into work by read_notes_and_update.
 - summarize_code: Generates a visual summary file that maps out the main code structure and explains key variables.

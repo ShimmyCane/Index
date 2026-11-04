@@ -26,3 +26,5 @@ Project rules:
 - A puzzle that fails the answer-line checks is never published: it goes to `data/rework.js`. Flagged puzzles are never picked (puzzle of the day, top five, packs, print all).
 - Retire, don't delete: a replaced puzzle gets `retired: true`; its counter is never reused. Counters 001–7FF are the bank; 800–FFF are doodle mazes made on a device.
 - Supabase: Family project, app `felix-maze`. `fmz_flags` is live (`supabase/002_flags.sql`); `001_felix_maze.sql` (mazes, doodles, characters) is not applied.
+
+Track: A. Family play (proposed, confirm). See `02 Refs/Skills/project_track.md`.

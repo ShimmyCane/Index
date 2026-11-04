@@ -149,6 +149,7 @@
         '<p><button class="btn small" data-act="check-db"' + (SS.cloud.configured() ? '' : ' disabled') + '>Check database</button></p>' +
         (UI.dbMessage ? '<p class="hint">' + ui.esc(UI.dbMessage) + '</p>' : '') +
         '<p class="muted">Projects also stay on this device.</p>' +
+        '<details class="versionLog"><summary>📜 Version log <span id="versionNow"></span></summary><ol id="versionList"></ol></details>' +
         '<button class="btn" data-act="toggle-drawer">Close</button></div>' : '');
   }
 
@@ -186,6 +187,7 @@
     doc.documentElement.dataset.theme = store.settings().theme === 'auto' ? '' : store.settings().theme;
     refreshStatus();
     renderErrors();
+    if (window.renderVersionLog) window.renderVersionLog();
     if (r.name === 'start') ensureCloudList();
   }
 

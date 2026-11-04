@@ -8,3 +8,5 @@ Purpose: a simple expansion game. Flags own spots, send soldiers along roads, ta
 - Shared conventions: root `CLAUDE.md` (public repo, privacy rules)
 
 How to run: open `index.html` in a browser (no build step, no server). Settings are behind ⚙️ in the lower right.
+
+Track: A. Family play (proposed, confirm). See `02 Refs/Skills/project_track.md`.

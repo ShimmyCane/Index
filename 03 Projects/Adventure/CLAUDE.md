@@ -16,3 +16,5 @@ Rules:
 
 How to run: open `index.html` (player), `world.html` (map, journal, plot) or `hood.html` (under the hood) from GitHub Pages or a local web server, and sign in with the family account. Microphone and reading aloud need a real browser; the iPad is the target.
 Database: Supabase project "Family", tables `adv_*`, SQL in `supabase/`.
+
+Track: A. Family play (proposed, confirm). See `02 Refs/Skills/project_track.md`.

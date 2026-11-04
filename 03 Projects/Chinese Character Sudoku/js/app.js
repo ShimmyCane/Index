@@ -1,12 +1,4 @@
 // 汉字数独 — UI: board, drag-and-drop bank, settings, sounds, celebration.
-const APP_VERSION = '0.5.0';
-const CHANGELOG = [
-  ['0.1.0', '2026-10-27', '第一版：2×2 到 4×4；从字库拖字；简单（放对马上变绿）和挑战（最后检查）；拼音、繁体、加新词、撤销、答案、完成音乐。'],
-  ['0.5.0', '2026-10-28', '新增 2.0 填词（每行一个词，从字库选字填空）和 3.0 描红（用手指或 Apple Pencil 写字，按笔顺打分，左下角看笔顺动画）；在 ⚙️ 里可以随时来回切换 1.0 / 2.0 / 3.0；字体换成楷体风格的霞鹜文楷。'],
-  ['0.4.0', '2026-10-28', '最近学的字改成第4级总字表第29页最后60个字；题目优先用这些字；新增约60个带这些字的词。'],
-  ['0.3.0', '2026-10-28', '超纲字（本册超纲字和「声」）一直显示拼音；最近学的词加入海报上的例词和「叫声」；写字表标明是一年级上册。'],
-  ['0.2.0', '2026-10-28', '字库换成三张照片里的字（第3级新增60字、第4级240字、课本写字表100字，共266字）；词库只用这些字。'],
-];
 
 const $ = id => document.getElementById(id);
 const STORE = 'ccs.';
@@ -451,8 +443,6 @@ function renderSettings() {
   $('extraInfo').textContent = extra.length ? `我加的词（${extra.length}）：${extra.join(' ')}` : '还没有加词。长期保存请加到 assets/phrases.json。';
   $('dataInfo').innerHTML = `${S.idx.W.size} 个词 · ${S.idx.pool.length} 个字 · 版本 ${S.data.version || ''}<br>最近学的字（${S.lessonChars.size}）：${[...S.lessonChars].join('') || '（无）'}`;
   $('doneCount').textContent = load('stars', 0);
-  $('version').textContent = 'v' + APP_VERSION;
-  $('changelog').innerHTML = CHANGELOG.map(([v, d, t]) => `<li><b>v${v}</b> ${d}：${t}</li>`).join('');
 }
 
 function setSetting(key, raw) {

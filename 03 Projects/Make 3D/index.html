@@ -266,6 +266,10 @@
     <label class="toggle"><input id="showErrors" type="checkbox"> Show errors</label>
   </div>
 
+  <details class="versionLog">
+    <summary>📜 Version log <span id="versionNow"></span></summary>
+    <ol id="versionList"></ol>
+  </details>
   <div id="animSettings" hidden>
     <label class="field">Animation speed
       <select id="animSpeed">
@@ -298,6 +302,7 @@
   <button class="btn ghost" id="closeGear" type="button">Close</button>
 </div>
 
+<script src="js/version.js"></script>
 <script src="vendor/three/three.min.js"></script>
 <script src="js/core/units.js"></script>
 <script src="js/core/schema.js"></script>

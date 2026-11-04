@@ -32,3 +32,5 @@ Project rules:
 - Public repo. Sample models are synthetic. Real architectural details or client drawings go in `private/`.
 - Rendering never modifies the model. Rules live outside the geometry. Every change is an operation in the history.
 - Living room from a photo: `tools/living_room.js` (V01–V10, one function `defsFor(v)`). Photo in `private/` only. Render a version with `node tools/render_versions.js <dir> "Living room V10"`.
+
+Track: B. Studio design (proposed, confirm). See `02 Refs/Skills/project_track.md`.

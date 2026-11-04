@@ -22,3 +22,5 @@ Project rules:
 - Supabase: Architecture project, tables prefixed `ss_`, registered in `public.table_index`.
 - Never commit copyrighted master-guide text (MasterSpec, SpecText, BSD SpecLink, institutional guide specs, CSI manuals). Paraphrase, cite, and keep any copies in `private/`.
 - Knowledge files are written in our own words and marked where a fact still needs checking against a current CSI publication.
+
+Track: B. Studio design (proposed, confirm). See `02 Refs/Skills/project_track.md`.
