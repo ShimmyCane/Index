@@ -20,7 +20,7 @@
     { name: 'village',    rate: 1.5, cap: 20, cost: 0,  secs: 0 },
     { name: 'town',       rate: 2.0, cap: 40, cost: 20, secs: 5 },
     { name: 'city',       rate: 2.6, cap: 60, cost: 30, secs: 10 },
-    { name: 'metropolis', rate: 3.2, cap: 80, cost: 40, secs: 20 }
+    { name: 'metropolis', rate: 3.2, cap: 100, cost: 50, secs: 20 }
   ];
   var FORT_CONVERT_SECS = 40;   // a metropolis takes this long to become a fortress
   var SURRENDER_RATIO = 10;     // outnumbered this many to one, a team gives up (when Surrender is on)
@@ -29,12 +29,12 @@
   // Fortress levels: garrison cap, range (map units), and damage (soldiers a second to enemies in range).
   // cost = 50% of the next level's cap; secs = how long the step takes.
   var FORT_LEVELS = [
-    { cap: 100, range: 120, dmg: 2, cost: 0,   secs: 0 },
+    { cap: 120, range: 120, dmg: 2, cost: 0,   secs: 0 },
     { cap: 160, range: 140, dmg: 4, cost: 80,  secs: 80 },
     { cap: 200, range: 160, dmg: 6, cost: 100, secs: 160 }
   ];
   var MUSH_CAP = 20;   // a mushroom is the smallest village: it stops growing at this garrison
-  var FORT_CONVERT_COST = 50;   // soldiers to turn a metropolis into a fortress (50% of the first fortress cap)
+  var FORT_CONVERT_COST = 60;   // soldiers to turn a metropolis into a fortress (50% of the first fortress cap)
   var AVATARS = ['🐥', '🦆', '🐻', '🐿️', '🐭', '🦡'];   // one per player: chick, duckling, bear, gopher, mouse, badger
   var ICON = { factory: '🍄', city: '🏰', fortress: '🏯' };
   var SVG_NS = 'http://www.w3.org/2000/svg';

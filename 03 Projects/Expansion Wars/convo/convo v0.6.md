@@ -50,6 +50,8 @@
    > **Built, with my defaults to check:** three fortress levels. Level 2 costs 80 soldiers and takes 80 seconds; level 3 costs 100 and takes 160 seconds (each cost is 50% of the next cap). Converting a metropolis costs 50 (50% of 100). A captured fortress drops one level. Stars show the level.
    >
    > **Jimmy (later):** Each cost is half of the next, and each upgrade takes double the previous time, starting at 5 seconds for the town. Built: town 5 s, city 10 s, metropolis 20 s, fortress conversion 40 s, fortress level 2 80 s, level 3 160 s.
+   >
+   > **Jimmy (final tiers):** village 20, town 40, city 60, metropolis 100, then fortress 120, level two 160, level three 200. Built: metropolis cap 100 (cost 50), fortress base cap 120 (conversion cost 60), fortress steps 160 (cost 80) and 200 (cost 100).
 
 ---
 

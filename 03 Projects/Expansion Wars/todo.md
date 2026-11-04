@@ -27,7 +27,7 @@ Built from the feedback notes (round 2). Each item says whether it is done, and 
 
 ## Needs a decision first (see convo v0.2 and v0.3)
 
-- [x] **Cities: tiers.** Built: village 20, town 40, city 60, metropolis 80 (round 4 below). Still open: what each tier unlocks beyond growth and the cap.
+- [x] **Cities: tiers.** Built: village 20, town 40, city 60, metropolis 100 (round 4 below, final caps in round 6). Still open: what each tier unlocks beyond growth and the cap.
 - [x] **Team mode by level.** Built: Levels 4, 6 and 8 have fair teams, up to 3 here (round 4 below). Each team shares one colour.
 - [ ] **Baby-animal avatars** instead of the fungi for each team. Decide: which animals, and whether the avatars replace the map icons or appear only on the team card.
 - [x] **Dragon drop through unlinked spots.** Decided yes: a drop routes along roads through your own spots. Built, and Jimmy confirmed it works well (2026-11-03).
@@ -56,7 +56,8 @@ Checked against `js/game.js` on `main`. Notes stay `open` in the table until Jim
 - [x] **Race-track countdown on every start** (Level 4, note `4e91a3a2`). Built in round 3 (3, 2, 1, Go).
 - [x] **Assistant marks tasks done** (Level 5, note `f1f02147`). Process note, not a game feature. Done when built: todo items are ticked in the same change, and notes are marked done after Jimmy confirms. Recorded in the brief.
 - [x] **All territories can be upgraded; capture drops the grade** (Level 5, note `598aba02`). Built with my defaults: a mushroom upgrades to a town-tier city (20 soldiers); a metropolis becomes a fortress (40 soldiers); a captured city drops one grade. Question 1 in convo v0.4 has the defaults to check.
-- [x] **Fortress levels** (convo v0.6, question 7). Built: three levels, cap 100 / 160 / 200, range 120 / 140 / 160, shooting 2 / 4 / 6 a second. Tap a fortress to grow it. Defaults to check: step costs 80 and 100, step time 10 s, metropolis conversion 50, captured fortress drops one level.
+- [x] **Fortress levels** (convo v0.6, question 7). Built: three levels, cap 120 / 160 / 200, range 120 / 140 / 160, shooting 2 / 4 / 6 a second. Tap a fortress to grow it. Costs 80 and 100 for the steps, 60 to convert a metropolis. Times 80 s and 160 s. A captured fortress drops one level.
+- [x] **Final tiers** (Jimmy, convo v0.6). Village 20, town 40, city 60, metropolis 100; fortress 120, 160, 200. Costs half the next cap; each upgrade takes double the previous time, from 5 s for the town.
 - [x] **Fortresses shoot** (from convo v0.4, question 1). Built: enemy soldiers inside 120 map units of an owned fortress stop and lose 2 a second. The ring shows while you own it. Range and damage are my defaults, to check.
 - [x] **Simple mushrooms are villages** (Level 5, note `bed5a34f`). Built: mushrooms are the smallest village, capped at 20. Upgrading one makes it a town-tier city.
 - [x] **Surrender for AI and user, with a toggle in settings** (Level 5, note `62214856`). Built: outnumbered 10 to 1 gives up, when Surrender is on in ⚙️ (off by default). Spots go neutral with their soldiers. Still open: default on or off, and neutral versus strongest rival.
