@@ -26,6 +26,11 @@
 
 ## Next steps
 
-1. Jimmy answers `convo/convo v0.3.md` (round 4: five more maps, castles, city upgrade unlocks, team setup, avatars, zoom).
-2. Build the five-map set once density and scrolling are answered; then confirm the round 3 notes as done.
-3. Play a few games on iPad; note what feels slow, fiddly or unfair. Balance pass stays on the todo.
+1. Round 6 (`convo/convo v0.5.md`): built with defaults to check: surrender (10 to 1, off by default), upgrade times (3, 6, 10 s) with dust, levels 10 to 15 (multiplayer, denser, two screens wide), zoom buttons, pinch and minimap. Still open: surrender default and neutral spots, spot size when zoomed out (spots shrink to a 44 px minimum, so they overlap on dense maps), capture mid-upgrade, fortress numbers, and the test note.
+2. Build the round 5 items once answered. The Level 5 notes are the first real play on the new maps.
+3. Play a few games on iPad, including Levels 5 to 9 with panning. Balance pass stays on the todo.
+
+## Working rules (from Jimmy's notes)
+
+- Tick todo items in the same change that builds them. Mark notes done only after Jimmy confirms (skill rule).
+- Each round starts a new branch from `main`. The round 4 PR was merged.

@@ -81,6 +81,15 @@
           <svg id="armies" class="layer" viewBox="0 0 1000 640"></svg>
         </div>
         <div id="countdown" class="countdown" hidden></div>
+        <div class="zoom-bar">
+          <button id="zoom-out" class="zoom-btn" type="button" aria-label="Zoom out">−</button>
+          <button id="zoom-fit" class="zoom-btn" type="button">Fit</button>
+          <button id="zoom-in" class="zoom-btn" type="button" aria-label="Zoom in">+</button>
+        </div>
+        <div id="minimap" class="minimap" hidden>
+          <svg id="mm-svg" viewBox="0 0 1000 640" preserveAspectRatio="none"></svg>
+          <div id="mm-view" class="mm-view"></div>
+        </div>
       </div>
     </main>
     <p class="rotate-hint">Turn your phone sideways for a bigger board.</p>
@@ -94,6 +103,10 @@
           <button data-ai="normal" aria-pressed="true">Normal</button>
           <button data-ai="hard" aria-pressed="false">Hard</button>
         </div>
+      </div>
+      <div class="row">
+        <span>Surrender when outnumbered 10 to 1</span>
+        <button id="surrender-toggle" class="toggle" aria-pressed="false">Off</button>
       </div>
       <div class="row">
         <span>Sound</span>
