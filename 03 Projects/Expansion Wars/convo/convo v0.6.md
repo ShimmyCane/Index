@@ -15,7 +15,7 @@
 
 2. **Spot size when zoomed out** (note from Level 5). "The elements should stay same size." Built: spots keep the same size on screen at any zoom, so on dense maps they overlap when zoomed out. Is that right, or should they shrink?
 
-   > **Jimmy:**
+   > **Jimmy:** Spots should keep their size when zoomed out. As built.
 
 3. **Test note.** The note "Test note 1" (Level 4 Valley) is a test. Mark it done, or keep it open?
 
