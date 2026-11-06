@@ -3,8 +3,9 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.2.0';
+  var VERSION = '0.3.0';
   var VERSIONS = [
+    { v: '0.3.0', date: '2026-11-06', text: 'Family database wired: sign in with the family login, changes sync to the family pantry, same name, expiry and place overwrite on the server, database check in settings. The device keeps its own copy and works offline.' },
     { v: '0.2.0', date: '2026-11-06', text: 'Use-soon cards for food about to expire. Swipe left for ate or tossed, right to remain, tap for a favourite. Quantity tweak with Save and next. Predicted index for things eaten over time, with ate more / about right / ate less. Apple Voice Memo input. Same name, expiry and place overwrites; a new expiry makes a new line. Settings: pages, transcript archive, version log, notes log.' },
     { v: '0.1.0', date: '2026-11-06', text: 'Pantry with swipe check-ins, transcript capture with review, notes for improvement, opt-in errors.' }
   ];
@@ -47,7 +48,13 @@
     write(KEY.items, items);
     write(KEY.checks, checks);
     write(KEY.transcripts, transcripts);
+    queueSync();
   }
+  // Rows saved before sync existed are not on the server yet.
+  items.forEach(function (it) { if (it.synced === undefined) { it.synced = false; it.dirty = true; } });
+  checks.forEach(function (c) { if (c.synced === undefined) c.synced = false; });
+  transcripts.forEach(function (t) { if (t.synced === undefined) t.synced = false; });
+  function touch(item) { item.updated_at = nowIso(); item.dirty = true; }
 
   // ---- errors: kept at the bottom, shown only when the user opts in ----
   function reportError(msg) {
@@ -250,11 +257,11 @@
   function checkIn(itemId, action) {
     var item = find(itemId);
     if (!item) { reportError('Item not found: ' + itemId); return; }
-    checks.push({ id: uid('c'), item_id: itemId, action: action, member: whoChecks(), at: nowIso() });
+    checks.push({ id: uid('c'), item_id: itemId, action: action, member: whoChecks(), at: nowIso(), synced: false });
     if (action === 'ate') item.status = 'eaten';
     if (action === 'tossed') item.status = 'tossed';
     if (action === 'kept') item.reviewed_on = todayIso();
-    item.updated_at = nowIso();
+    touch(item);
     persist();
     renderAll();
   }
@@ -263,7 +270,7 @@
     var item = find(itemId);
     if (!item) return;
     item.fav = !item.fav;
-    item.updated_at = nowIso();
+    touch(item);
     persist();
     renderAll();
   }
@@ -277,8 +284,8 @@
     if (p) { item.quantity = p.left; item.counted_on = todayIso(); }
     if (kind === 'ate_more') item.daily_rate = round2(item.daily_rate * 1.25);
     if (kind === 'ate_less') item.daily_rate = round2(item.daily_rate * 0.8);
-    checks.push({ id: uid('c'), item_id: itemId, action: kind, member: whoChecks(), at: nowIso() });
-    item.updated_at = nowIso();
+    checks.push({ id: uid('c'), item_id: itemId, action: kind, member: whoChecks(), at: nowIso(), synced: false });
+    touch(item);
     persist();
     renderAll(itemId);
   }
@@ -301,7 +308,7 @@
     item.expires_on = f.querySelector('.fe').value || null;
     item.stored_location = f.querySelector('.fp').value;
     item.notes = f.querySelector('.fn').value.trim();
-    item.updated_at = nowIso();
+    touch(item);
     persist();
     renderAll(goNext ? nextId : item.id);
     if (goNext && !nextId) {
@@ -437,7 +444,7 @@
         dup.counted_on = day;
         dup.raw_text = d.raw;
         dup.source = d.source;
-        dup.updated_at = now;
+        touch(dup);
         updated++;
       } else {
         items.push({
@@ -446,7 +453,7 @@
           expires_on: d.expires_on || null, freshness: 'unknown', stored_location: d.stored_location || 'pantry',
           purchase_cost: null, notes: d.notes || '', status: 'in_stock', source: d.source,
           raw_text: d.raw, purchased_on: day, counted_on: day, daily_rate: null,
-          fav: false, reviewed_on: null, created_at: now, updated_at: now
+          fav: false, reviewed_on: null, created_at: now, updated_at: now, dirty: true, synced: false
         });
         added++;
       }
@@ -454,7 +461,7 @@
     // The raw transcript is archived in full, whatever was saved.
     transcripts.push({
       id: uid('t'), text: $('transcript').value, method: $('source').value,
-      parsed_count: keep.length, added: added, updated: updated, at: now
+      parsed_count: keep.length, added: added, updated: updated, at: now, synced: false
     });
     persist();
     draft = [];
@@ -503,6 +510,14 @@
   $('closeDrawer').addEventListener('click', function () {
     $('drawer').hidden = true;
     $('gear').setAttribute('aria-expanded', 'false');
+  });
+  // Panels marked data-open="false" start closed; their header stays visible.
+  document.querySelectorAll('.panel').forEach(function (sec) {
+    var closed = sec.dataset.open === 'false';
+    sec.dataset.collapsed = String(closed);
+    var head = sec.querySelector('.panelHead');
+    head.setAttribute('aria-expanded', String(!closed));
+    head.querySelector('.mark').textContent = closed ? '▸' : '▾';
   });
   document.querySelectorAll('.panelHead').forEach(function (head) {
     head.addEventListener('click', function () {
@@ -585,8 +600,170 @@
   $('showErrors').checked = read(KEY.errors, false) === true;
   $('showErrors').addEventListener('change', function (e) { write(KEY.errors, e.target.checked); renderErrors(); });
 
+  // ---- family database (optional: the page keeps working on this device without it) ----
+  var DB = window.WTCDb;
+  var DB_FIELDS = ['id', 'name', 'kind', 'category', 'subcategory', 'quality', 'quantity', 'unit', 'servings_left',
+    'expires_on', 'freshness', 'stored_location', 'purchase_cost', 'notes', 'status', 'source', 'raw_text',
+    'purchased_on', 'counted_on', 'daily_rate', 'fav', 'reviewed_on', 'updated_at'];
+  var UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  var syncTimer = null, syncing = false;
+
+  function isUuid(s) { return UUID.test(String(s || '')); }
+  function newUuid() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16);
+    });
+  }
+  function toRow(item) {
+    var row = {};
+    DB_FIELDS.forEach(function (k) { if (item[k] !== undefined) row[k] = item[k]; });
+    return row;
+  }
+  function fromRow(r) {
+    var it = {};
+    DB_FIELDS.forEach(function (k) { it[k] = r[k] === undefined ? null : r[k]; });
+    it.synced = true; it.dirty = false;
+    return it;
+  }
+  function likeEscape(s) {
+    return String(s).replace(/\*/g, '').replace(/[\\%_]/g, function (c) { return '\\' + c; });
+  }
+  function unsentCount() {
+    return items.filter(function (it) { return it.dirty; }).length +
+      checks.filter(function (c) { return !c.synced; }).length +
+      transcripts.filter(function (t) { return !t.synced; }).length;
+  }
+  function setStatusPill(extra) {
+    var s = DB.session();
+    var unsent = unsentCount();
+    var tail = extra || (unsent ? unsent + ' not sent yet' : '');
+    $('statusPill').textContent = s ? 'signed in: ' + s.email + (tail ? ' · ' + tail : '') : 'this device only';
+  }
+
+  // Server rows win, except items this device changed and has not sent yet.
+  function pull() {
+    return DB.select('wtc_items', 'select=*&order=updated_at.desc&limit=2000').then(function (res) {
+      var dirtyIds = {};
+      items.forEach(function (it) { if (it.dirty) dirtyIds[it.id] = true; });
+      var remote = (res.data || []).filter(function (r) { return !dirtyIds[r.id]; }).map(fromRow);
+      items = items.filter(function (it) { return it.dirty; }).concat(remote);
+      write(KEY.items, items);
+      renderAll();
+    });
+  }
+
+  function pushItem(it) {
+    var oldId = it.id;
+    function remap(newId) {
+      if (newId === oldId) return;
+      it.id = newId;
+      checks.forEach(function (c) { if (c.item_id === oldId) c.item_id = newId; });
+    }
+    if (it.synced && isUuid(it.id)) {
+      return DB.patch('wtc_items', 'id=eq.' + it.id, toRow(it)).then(function () { it.dirty = false; });
+    }
+    if (it.status !== 'in_stock') {
+      remap(isUuid(it.id) ? it.id : newUuid());
+      return DB.insert('wtc_items', [toRow(it)]).then(function () { it.synced = true; it.dirty = false; });
+    }
+    // Same rule as on the device: same name, expiry and place overwrites the line on the server.
+    var q = 'select=id,expires_on&status=eq.in_stock&stored_location=eq.' + encodeURIComponent(it.stored_location) +
+      '&name=ilike.' + encodeURIComponent(likeEscape(it.name));
+    return DB.select('wtc_items', q).then(function (res) {
+      var hit = (res.data || []).find(function (r) { return (r.expires_on || null) === (it.expires_on || null); });
+      if (hit) {
+        remap(hit.id);
+        return DB.patch('wtc_items', 'id=eq.' + hit.id, toRow(it)).then(function () { it.synced = true; it.dirty = false; });
+      }
+      remap(isUuid(it.id) ? it.id : newUuid());
+      return DB.insert('wtc_items', [toRow(it)]).then(function () { it.synced = true; it.dirty = false; });
+    });
+  }
+
+  function pushLog() {
+    var chain = Promise.resolve();
+    checks.filter(function (c) { return !c.synced; }).forEach(function (c) {
+      chain = chain.then(function () {
+        var item = find(c.item_id);
+        if (!item || !isUuid(item.id) || !item.synced) return;   // its item is not on the server yet: try next time
+        return DB.insert('wtc_checkins', [{ item_id: item.id, action: c.action, note: 'by ' + c.member, at: c.at }])
+          .then(function () { c.synced = true; });
+      });
+    });
+    transcripts.filter(function (t) { return !t.synced; }).forEach(function (t) {
+      chain = chain.then(function () {
+        return DB.insert('wtc_transcripts', [{ text: t.text, method: t.method, parsed_count: t.parsed_count, at: t.at }])
+          .then(function () { t.synced = true; });
+      });
+    });
+    return chain;
+  }
+
+  function pushAll() {
+    if (!DB.session() || syncing) return Promise.resolve();
+    syncing = true;
+    setStatusPill('syncing…');
+    var chain = Promise.resolve();
+    items.filter(function (it) { return it.dirty; }).forEach(function (it) {
+      chain = chain.then(function () { return pushItem(it); });
+    });
+    return chain.then(pushLog).then(function () {
+      syncing = false;
+      write(KEY.items, items); write(KEY.checks, checks); write(KEY.transcripts, transcripts);
+      setStatusPill('synced ' + new Date().toLocaleTimeString());
+    }, function (e) {
+      syncing = false;
+      write(KEY.items, items); write(KEY.checks, checks); write(KEY.transcripts, transcripts);
+      setStatusPill('not synced');
+      reportError('Sync: ' + DB.explain(e));
+    });
+  }
+
+  function queueSync() {
+    if (!DB.session()) return;
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(pushAll, 400);
+  }
+
+  // Sign-in and the database check (settings panel).
+  $('signIn').addEventListener('click', function () {
+    var email = $('dbEmail').value.trim(), password = $('dbPassword').value;
+    if (!email || !password) { $('dbStatus').textContent = 'Enter the family email and password.'; return; }
+    $('dbStatus').textContent = 'Signing in…';
+    DB.signIn(email, password).then(function () {
+      $('dbPassword').value = '';
+      $('dbStatus').textContent = 'Signed in. Syncing…';
+      return pull().then(pushAll);
+    }).then(function () {
+      $('dbStatus').textContent = 'Signed in.';
+      setStatusPill();
+    }, function (e) {
+      $('dbStatus').textContent = 'Sign-in failed. ' + DB.explain(e);
+      reportError('Sign-in: ' + DB.explain(e));
+    });
+  });
+  $('signOut').addEventListener('click', function () {
+    DB.signOut();
+    $('dbStatus').textContent = 'Signed out. This device keeps its own copy.';
+    setStatusPill();
+  });
+  $('dbCheck').addEventListener('click', function () {
+    var out = $('dbResult');
+    if (!DB.session()) { out.textContent = 'Not signed in. Sign in first; until then this device keeps its own copy.'; return; }
+    out.textContent = 'Checking…';
+    Promise.all(window.WTC_CONFIG.tables.map(function (t) {
+      return DB.count(t).then(function (n) { return t + ': ok, ' + n + ' rows'; },
+        function (e) { return t + ': ' + DB.explain(e); });
+    })).then(function (lines) { out.textContent = lines.join('\n'); });
+  });
+
   // ---- start ----
-  window.addEventListener('error', function (e) { reportError('JS: ' + e.message); });
+  window.addEventListener('error', function (e) { reportError('Page error: ' + e.message); });
+  window.addEventListener('unhandledrejection', function (e) {
+    var msg = e.reason && e.reason.message ? e.reason.message : String(e.reason);
+    reportError('Unexpected: ' + msg.slice(0, 160));
+  });
   renderMembers();
   renderPages();
   renderVersions();
@@ -594,4 +771,11 @@
   renderNotes();
   renderAll();
   renderErrors();
+  setStatusPill();
+  if (DB.session()) {
+    pull().then(pushAll, function (e) {
+      setStatusPill('offline, this device');
+      reportError(DB.explain(e));
+    });
+  }
 })();
