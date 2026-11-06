@@ -1,16 +1,18 @@
 # What to Cook — Claude Code pointer
 
-Purpose: a household website that catalogues pantry and fridge stock from voice or typed transcripts, keeps a recipe book (favourites, ingredients, photo, cook time), plans meals (a quick plan or a week calendar), and turns wish-list recipes into a shopping list.
+Purpose: a family kitchen tool. Captures pantry, fridge, freezer, tool and space stock from transcripts, photos or speech; swipe check-ins (ate or tossed); a recipe book with trials and family tastes; a food log per member; meal planning; and a shopping list.
 
 - Design: `schematic.md`
-- Q&A history: `convo/` (never compact; start a new version instead)
+- Decisions and open questions: `convo/convo v0.2.md` (older: `convo v0.1.md`). Never compact; start a new version instead.
 - AI notes: `04 AI/What to Cook/brief.md` and `lessons.md`
-- Shared conventions: root `CLAUDE.md` (public repo, privacy rules), `04 AI/Supabase/brief.md` (table prefix `wtc_`, registry)
-- Track: to confirm (leaning A. Family play)
+- Shared conventions: root `CLAUDE.md` (public repo, privacy rules), `04 AI/Supabase/brief.md` (prefix `wtc_`, registry)
+- Track: A. Family play
+- Database: Family project (`twvqvutrcobedvuhnzxq`), tables `wtc_*`. SQL in `supabase/` (`test_001`, `001`, `verify_001`). Not applied yet.
 
 Rules:
-- Pantry, recipes, photos and transcripts stay in Supabase or in `private/`, never in this repo.
+- Pantry, recipes, photos, transcripts and calories stay in Supabase or on the device, never in this repo. Calories are health data.
 - No secret keys in browser code. The publishable key only.
-- Database SQL is pasted by hand (`02 Refs/Skills/supabase_link.md`).
+- Database SQL is pasted by hand (`02 Refs/Skills/supabase_link.md`). Do not run `apply_migration` unless Jimmy asks.
+- Parser (`js/parse.js`) is pure and offline; keep it free of network calls.
 
-How to run: open `index.html` from GitHub Pages or a local web server once the MVP exists. Not built yet.
+How to run: open `index.html` directly, or serve the folder. Data stays on the device until the Family database is wired.
