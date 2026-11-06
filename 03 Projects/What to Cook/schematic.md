@@ -71,6 +71,7 @@ Live database (8 s timeout) → last good copy on the device → empty state. Ri
 4. **MVP-4:** week calendar and quick plan.
 5. **MVP-5:** wish list and shopping list generated from the plan.
 6. **MVP-6:** Claude-sorted transcript, photo route and AI review, via the JSON loop.
+7. **Planned extension: food journal** (`convo/convo v0.3.md`, name to confirm: Digital Kitchen, Twin Kitchen or Food Lab). One journal of what the family ate and where: home meals, restaurant visits, brands and favourites, each with a date, who, a rating per member and a note. A cuisine tag (for example Thai, Mexican) shows what has been practised and what is still to try. No addresses are stored. Nothing built yet; the tables are planned after the questions in v0.3 are answered.
 
 Each increment is smoke-tested (`02 Refs/Skills/smoke_test.md`) before it is called working.
 
