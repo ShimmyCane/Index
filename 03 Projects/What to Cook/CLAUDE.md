@@ -7,7 +7,7 @@ Purpose: a family kitchen tool. Captures pantry, fridge, freezer, tool and space
 - AI notes: `04 AI/What to Cook/brief.md` and `lessons.md`
 - Shared conventions: root `CLAUDE.md` (public repo, privacy rules), `04 AI/Supabase/brief.md` (prefix `wtc_`, registry)
 - Track: A. Family play
-- Database: Family project (`twvqvutrcobedvuhnzxq`), tables `wtc_*`. SQL in `supabase/` (`test_001`, `001`, `verify_001`). Not applied yet.
+- Database: Family project (`twvqvutrcobedvuhnzxq`), tables `wtc_*`. SQL in `supabase/`: `what_to_cook_setup.sql` (one file; paste it whole) and the optional `test_001_what_to_cook.sql`. Not applied yet.
 
 Rules:
 - Pantry, recipes, photos, transcripts and calories stay in Supabase or on the device, never in this repo. Calories are health data.

@@ -26,7 +26,7 @@ A family kitchen tool: stock from memos, typed lists and (later) photos, tells t
 
 ## Next steps
 
-1. Jimmy pastes `test_001` (expect RESULT with all five true), then `001`, then `verify_001`, and pastes the verify output back.
+1. Jimmy pastes `supabase/what_to_cook_setup.sql` into the Family SQL editor and runs it once. Optional first: `test_001_what_to_cook.sql` (expect RESULT with all five true). The check at the end of the setup file should show one row per wtc_ table with rls_on true, policies 1, anon_grants 0, registered 1. He pastes that result back.
 2. Wire the page to the database with the publishable key only, and add the database check in ⚙️.
 3. Photo route: Claude writes the rows straight to `wtc_items` (upsert on the conflict key). Confirm the photo can stay out of the repo.
 4. Recipe book with photo, trials and tastes (MVP-2).

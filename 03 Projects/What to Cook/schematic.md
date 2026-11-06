@@ -2,7 +2,7 @@
 
 **Status:** MVP-1 on the device, pantry v0.2.0 (use-soon cards, swipe, predicted index, Apple Voice Memo input). Database SQL written, its test passed on the live Family project, not applied.
 **Track:** A. Family play (household tool: few words, big touch targets, secondary options in ⚙️). See `02 Refs/Skills/project_track.md`.
-**Database:** Supabase **Family** project (`twvqvutrcobedvuhnzxq`), tables `wtc_*`, RLS on, anon revoked. SQL in `supabase/` (`test_001`, `001`, `verify_001`). Not applied yet; applied by Jimmy pasting the SQL.
+**Database:** Supabase **Family** project (`twvqvutrcobedvuhnzxq`), tables `wtc_*`, RLS on, anon revoked. SQL in `supabase/`: one file, `what_to_cook_setup.sql`, plus the optional `test_001_what_to_cook.sql`. Not applied yet; applied by Jimmy pasting the file.
 **Private data:** pantry, recipes, photos, transcripts and calories live in Supabase or on the device, never in this public repo.
 **Decisions:** `convo/convo v0.2.md`, `convo v0.3.md` (food journal), `convo v0.4.md` (pantry behaviour).
 

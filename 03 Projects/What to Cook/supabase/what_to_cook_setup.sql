@@ -1,10 +1,9 @@
 -- ============================================================================
--- What to Cook — tables, row-level security and registry
--- Family Supabase project. Signed-in users only. Prefix: wtc_
--- Run test_001_what_to_cook.sql first. Re-runnable (if not exists / on conflict).
--- family_members is owned by the habits app; this app only reads it, and the
--- member columns here are plain uuids with no foreign key, so a member change
--- never touches this app's rows.
+-- What to Cook — ONE setup file for the Family Supabase project.
+-- Paste the whole file into the SQL editor and press Run once. Re-runnable.
+-- Optional first: test_001_what_to_cook.sql (rolls back; ends with an error starting RESULT:
+-- when all checks are true). It is kept in its own file because it always stops with that error.
+-- Family project only. Prefix wtc_. family_members is read, never changed.
 -- ============================================================================
 
 -- Pantry, fridge, freezer, tools and space. One row per stock lot.
@@ -194,3 +193,19 @@ insert into public.app_table_registry (app, object_name, object_type, access, de
 ('what-to-cook', 'wtc_photos',              'table', 'owner', 'Recipe photos as small base64 rows, kept until moved to a storage bucket.', 'ShimmyCane/Index'),
 ('what-to-cook', 'family_members',          'table', 'reads', 'Family members, owned by the habits app. Read for names and colours only.', 'ShimmyCane/Index')
 on conflict (app, object_name) do nothing;
+
+-- ----------------------------------------------------------------------------
+-- Check after Run: one row per table. Expect rls_on = true, policies = 1,
+-- anon_grants = 0 and registered = 1 for all 11 wtc_ tables.
+-- ----------------------------------------------------------------------------
+select c.relname as table_name,
+       c.relrowsecurity as rls_on,
+       (select count(*) from pg_policy p where p.polrelid = c.oid) as policies,
+       (select count(*) from information_schema.role_table_grants g
+         where g.table_schema = 'public' and g.table_name = c.relname and g.grantee = 'anon') as anon_grants,
+       (select count(*) from public.app_table_registry r
+         where r.app = 'what-to-cook' and r.object_name = c.relname) as registered
+from pg_class c
+join pg_namespace n on n.oid = c.relnamespace
+where n.nspname = 'public' and c.relkind = 'r' and c.relname like 'wtc\_%'
+order by 1;
