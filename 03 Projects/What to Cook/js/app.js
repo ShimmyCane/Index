@@ -629,9 +629,16 @@
   function likeEscape(s) {
     return String(s).replace(/\*/g, '').replace(/[\\%_]/g, function (c) { return '\\' + c; });
   }
+  function unsentCount() {
+    return items.filter(function (it) { return it.dirty; }).length +
+      checks.filter(function (c) { return !c.synced; }).length +
+      transcripts.filter(function (t) { return !t.synced; }).length;
+  }
   function setStatusPill(extra) {
     var s = DB.session();
-    $('statusPill').textContent = s ? 'signed in: ' + s.email + (extra ? ' · ' + extra : '') : 'this device only';
+    var unsent = unsentCount();
+    var tail = extra || (unsent ? unsent + ' not sent yet' : '');
+    $('statusPill').textContent = s ? 'signed in: ' + s.email + (tail ? ' · ' + tail : '') : 'this device only';
   }
 
   // Server rows win, except items this device changed and has not sent yet.
@@ -709,7 +716,7 @@
       syncing = false;
       write(KEY.items, items); write(KEY.checks, checks); write(KEY.transcripts, transcripts);
       setStatusPill('not synced');
-      reportError('Sync: ' + e.message);
+      reportError('Sync: ' + DB.explain(e));
     });
   }
 
@@ -732,8 +739,8 @@
       $('dbStatus').textContent = 'Signed in.';
       setStatusPill();
     }, function (e) {
-      $('dbStatus').textContent = 'Sign-in failed: ' + e.message;
-      reportError('Sign-in: ' + e.message);
+      $('dbStatus').textContent = 'Sign-in failed. ' + DB.explain(e);
+      reportError('Sign-in: ' + DB.explain(e));
     });
   });
   $('signOut').addEventListener('click', function () {
@@ -747,12 +754,16 @@
     out.textContent = 'Checking…';
     Promise.all(window.WTC_CONFIG.tables.map(function (t) {
       return DB.count(t).then(function (n) { return t + ': ok, ' + n + ' rows'; },
-        function (e) { return t + ': ' + e.message; });
+        function (e) { return t + ': ' + DB.explain(e); });
     })).then(function (lines) { out.textContent = lines.join('\n'); });
   });
 
   // ---- start ----
-  window.addEventListener('error', function (e) { reportError('JS: ' + e.message); });
+  window.addEventListener('error', function (e) { reportError('Page error: ' + e.message); });
+  window.addEventListener('unhandledrejection', function (e) {
+    var msg = e.reason && e.reason.message ? e.reason.message : String(e.reason);
+    reportError('Unexpected: ' + msg.slice(0, 160));
+  });
   renderMembers();
   renderPages();
   renderVersions();
@@ -764,7 +775,7 @@
   if (DB.session()) {
     pull().then(pushAll, function (e) {
       setStatusPill('offline, this device');
-      reportError('Could not reach the family database: ' + e.message);
+      reportError(DB.explain(e));
     });
   }
 })();

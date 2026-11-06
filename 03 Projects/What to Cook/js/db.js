@@ -67,11 +67,14 @@
   }
 
   function signIn(email, password) {
+    var t = withTimeout(10000);
     return fetch(CFG.url + '/auth/v1/token?grant_type=password', {
       method: 'POST',
       headers: { apikey: CFG.publishableKey, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email, password: password })
+      body: JSON.stringify({ email: email, password: password }),
+      signal: t.signal
     }).then(function (res) {
+      t.done();
       return res.json().then(function (j) {
         if (!res.ok) throw errorFrom(res, j);
         var s = { access_token: j.access_token, refresh_token: j.refresh_token,
@@ -98,8 +101,20 @@
     });
   }
 
+  // Turn a raw error into a short sentence for the family. The raw text is kept for the error log.
+  function explain(e) {
+    var m = String((e && e.message) || e || '');
+    if (/secret API key in browser/i.test(m)) return 'The family database is refusing this page right now (its key setting). This device keeps its copy.';
+    if (/invalid login credentials/i.test(m)) return 'The email or password is not right.';
+    if (/email not confirmed/i.test(m)) return 'This login has not been confirmed yet. Ask Jimmy.';
+    if (/jwt expired|invalid jwt|token is expired/i.test(m) || (e && e.status === 401 && session())) return 'Your sign-in has expired. Sign in again.';
+    if (/row-level security|permission denied|42501/i.test(m)) return 'Not allowed. Sign in with the family login.';
+    if ((e && e.name === 'AbortError') || /failed to fetch|networkerror|load failed|timed out/i.test(m)) return 'No connection to the family database. This device keeps its copy.';
+    return 'Something went wrong with the family database: ' + m.slice(0, 120);
+  }
+
   root.WTCDb = {
     session: session, signIn: signIn, signOut: signOut,
-    select: select, insert: insert, patch: patch, count: count
+    select: select, insert: insert, patch: patch, count: count, explain: explain
   };
 })(typeof window !== 'undefined' ? window : globalThis);
