@@ -1,13 +1,32 @@
-/* What to Cook — pantry, capture, swipe check-ins, settings. Device storage first (no database yet). */
+/* What to Cook — pantry, use-soon cards, swipe, predicted index, capture, settings.
+ * Device storage first (local storage, each read and write in try/catch). The database link comes later. */
 (function () {
   'use strict';
-  var KEY = { items: 'wtc.items', checks: 'wtc.checkins', transcripts: 'wtc.transcripts', members: 'wtc.members', notes: 'wtc.notes', errors: 'wtc.showErrors' };
-  var VERSION = '0.1.0';
-  var $ = function (id) { return document.getElementById(id); };
-  var draft = [];
-  var problems = [];
 
-  // ---- storage (try/catch: the page works if storage is blocked) ----
+  var VERSION = '0.2.0';
+  var VERSIONS = [
+    { v: '0.2.0', date: '2026-11-06', text: 'Use-soon cards for food about to expire. Swipe left for ate or tossed, right to remain, tap for a favourite. Quantity tweak with Save and next. Predicted index for things eaten over time, with ate more / about right / ate less. Apple Voice Memo input. Same name, expiry and place overwrites; a new expiry makes a new line. Settings: pages, transcript archive, version log, notes log.' },
+    { v: '0.1.0', date: '2026-11-06', text: 'Pantry with swipe check-ins, transcript capture with review, notes for improvement, opt-in errors.' }
+  ];
+  var PAGES = [
+    { label: '🥫 Pantry', tab: 'pantry' },
+    { label: '🎙️ Add from a memo or list', tab: 'capture' },
+    { label: '📖 Recipe book', planned: 'after the pantry is wired to the database' },
+    { label: '🥘 Food Lab (cuisines; name to confirm)', planned: 'convo v0.3' },
+    { label: '📅 Week plan', planned: 'MVP-4' },
+    { label: '🛒 Shopping list', planned: 'MVP-5' },
+    { label: '🍽️ Food journal', planned: 'convo v0.3' }
+  ];
+  var KEY = {
+    items: 'wtc.items', checks: 'wtc.checkins', transcripts: 'wtc.transcripts',
+    members: 'wtc.members', notes: 'wtc.notes', errors: 'wtc.showErrors'
+  };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var problems = [];
+  var draft = [];
+
+  // ---- storage (try/catch: the page still works if storage is blocked) ----
   function read(key, fallback) {
     try { var v = JSON.parse(localStorage.getItem(key)); return v == null ? fallback : v; }
     catch (e) { reportError('Could not read ' + key + ': ' + e.message); return fallback; }
@@ -16,7 +35,7 @@
     try { localStorage.setItem(key, JSON.stringify(value)); return true; }
     catch (e) { reportError('Could not save (storage full or blocked): ' + e.message); return false; }
   }
-  function id(prefix) { return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7); }
+  function uid(prefix) { return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7); }
 
   var items = read(KEY.items, []);
   var checks = read(KEY.checks, []);
@@ -24,7 +43,13 @@
   var members = read(KEY.members, ['Me']);
   var notes = read(KEY.notes, []);
 
-  // ---- errors: stored at the bottom, shown only when the user opts in ----
+  function persist() {
+    write(KEY.items, items);
+    write(KEY.checks, checks);
+    write(KEY.transcripts, transcripts);
+  }
+
+  // ---- errors: kept at the bottom, shown only when the user opts in ----
   function reportError(msg) {
     problems.push(new Date().toLocaleTimeString() + ' ' + msg);
     if (problems.length > 20) problems.shift();
@@ -37,12 +62,27 @@
     panel.textContent = problems.join('\n');
   }
 
+  // ---- dates and numbers ----
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function today() { var d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function isoDay(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function todayIso() { return isoDay(today()); }
+  function parseDay(s) { if (!s) return null; var p = String(s).split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function daysBetween(a, b) { return Math.round((b - a) / 86400000); }
+  function nowIso() { return new Date().toISOString(); }
+  function norm(s) { return String(s || '').toLowerCase().replace(/\s+/g, ' ').trim(); }
+  function round1(n) { return Math.round(n * 10) / 10; }
+  function round2(n) { return Math.round(n * 100) / 100; }
+  function find(id) { return items.find(function (it) { return it.id === id; }); }
+  function whoChecks() { return $('member').value || members[0]; }
+
   // ---- tabs ----
+  function showTab(name) {
+    document.querySelectorAll('.tab').forEach(function (b) { b.classList.toggle('on', b.dataset.tab === name); });
+    document.querySelectorAll('.view').forEach(function (v) { v.hidden = v.id !== 'tab-' + name; });
+  }
   document.querySelectorAll('.tab').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      document.querySelectorAll('.tab').forEach(function (b) { b.classList.toggle('on', b === btn); });
-      document.querySelectorAll('.view').forEach(function (v) { v.hidden = v.id !== 'tab-' + btn.dataset.tab; });
-    });
+    btn.addEventListener('click', function () { showTab(btn.dataset.tab); });
   });
 
   // ---- members ----
@@ -62,57 +102,221 @@
     renderMembers();
   });
 
-  // ---- pantry ----
-  function daysLeft(item) {
-    if (!item.expires_on) return null;
-    return Math.round((new Date(item.expires_on) - new Date(new Date().toDateString())) / 86400000);
+  // ---- expiry and the predicted index ----
+  function daysUntilExpiry(item) {
+    var e = parseDay(item.expires_on);
+    return e ? daysBetween(today(), e) : null;
+  }
+  function expiryState(item) {
+    var d = daysUntilExpiry(item);
+    if (d == null) return 'none';
+    if (d < 0) return 'past';
+    if (d <= 3) return 'soon';
+    return 'ok';
+  }
+  // Predicted remaining = quantity at the last count, minus the daily rate times the days since.
+  function predict(item) {
+    if (item.quantity == null || !item.daily_rate || !item.counted_on) return null;
+    var days = Math.max(0, daysBetween(parseDay(item.counted_on), today()));
+    var left = Math.max(0, item.quantity - item.daily_rate * days);
+    var pct = item.quantity > 0 ? Math.round(100 * left / item.quantity) : 0;
+    return { left: round1(left), pct: pct, days: days };
+  }
+  function inCleanup(item) {
+    if (item.status !== 'in_stock') return false;
+    if (item.reviewed_on === todayIso()) return false;
+    var s = expiryState(item);
+    return s === 'soon' || s === 'past';
+  }
+  function byExpiry(a, b) {
+    var da = daysUntilExpiry(a), db = daysUntilExpiry(b);
+    return (da == null ? 1e9 : da) - (db == null ? 1e9 : db);
+  }
+  function cleanupItems() { return items.filter(inCleanup).sort(byExpiry); }
+  function stockItems() {
+    var place = $('placeFilter').value;
+    return items
+      .filter(function (it) { return it.status === 'in_stock' && !inCleanup(it) && (!place || it.stored_location === place); })
+      .sort(function (a, b) { return (b.fav ? 1 : 0) - (a.fav ? 1 : 0) || a.name.localeCompare(b.name); });
   }
   function describe(item) {
     var bits = [];
-    if (item.quantity != null) bits.push(item.quantity + (item.unit ? ' ' + item.unit : ''));
+    if (item.quantity != null) bits.push(round1(item.quantity) + (item.unit ? ' ' + item.unit : ''));
     if (item.stored_location) bits.push(item.stored_location);
-    if (item.quality && item.quality !== 'unknown') bits.push(item.quality);
-    var d = daysLeft(item);
-    if (d != null) bits.push(d < 0 ? 'past date' : d === 0 ? 'use today' : 'use by ' + item.expires_on);
+    var p = predict(item);
+    if (p) bits.push('about ' + p.left + ' left (' + p.pct + '%, a guess)');
+    var d = daysUntilExpiry(item);
+    if (d != null) bits.push(d < 0 ? 'past its date' : d === 0 ? 'use today' : 'use by ' + item.expires_on);
     return bits.join(' · ');
   }
-  function renderStock() {
-    var place = $('placeFilter').value;
-    var list = $('stock');
-    list.textContent = '';
-    var shown = items.filter(function (it) {
-      return it.status === 'in_stock' && (!place || it.stored_location === place);
-    });
-    $('stockEmpty').hidden = shown.length > 0;
-    shown.forEach(function (it) { list.appendChild(stockCard(it)); });
+
+  // ---- rendering ----
+  function renderAll(openId) {
+    renderCleanup();
+    renderStock();
+    if (openId) openCard(openId);
   }
-  function stockCard(it) {
+
+  function renderCleanup() {
+    var list = cleanupItems();
+    var ul = $('cleanup');
+    ul.textContent = '';
+    list.forEach(function (it) { ul.appendChild(card(it, true)); });
+    $('cleanCount').textContent = String(list.length);
+    $('cleanEmpty').hidden = list.length > 0;
+    $('cleanupPanel').dataset.collapsed = list.length ? 'false' : 'true';
+    $('cleanupPanel').querySelector('.mark').textContent = list.length ? '▾' : '▸';
+  }
+
+  function renderStock() {
+    var ul = $('stock');
+    ul.textContent = '';
+    var shown = stockItems();
+    shown.forEach(function (it) { ul.appendChild(card(it, false)); });
+    $('stockEmpty').hidden = shown.length > 0;
+  }
+
+  function card(it, cleanup) {
     var li = document.createElement('li');
-    li.className = 'card';
+    li.className = 'card' + (cleanup ? ' clean' : '') + (it.fav ? ' fav' : '');
     li.dataset.id = it.id;
-    var hl = document.createElement('span'); hl.className = 'hintSwipe l'; hl.textContent = 'Toss ←';
-    var hr = document.createElement('span'); hr.className = 'hintSwipe r'; hr.textContent = '→ Ate';
-    var name = document.createElement('div'); name.className = 'name'; name.textContent = it.name;
-    var meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = describe(it) || 'no details';
-    var acts = document.createElement('div'); acts.className = 'acts';
-    [['ate', '✅ Ate'], ['kept', 'Keep'], ['tossed', '🗑️ Toss']].forEach(function (pair) {
-      var b = document.createElement('button');
-      b.type = 'button'; b.className = 'tiny'; b.textContent = pair[1];
-      b.addEventListener('click', function () { checkIn(it.id, pair[0]); });
-      acts.appendChild(b);
-    });
-    li.appendChild(hl); li.appendChild(hr); li.appendChild(name); li.appendChild(meta); li.appendChild(acts);
+    li.innerHTML =
+      '<span class="hintSwipe l">Ate / tossed ←</span>' +
+      '<span class="hintSwipe r">→ Remain</span>' +
+      '<div class="head"><span class="star"></span><span class="name"></span></div>' +
+      '<div class="meta"></div>' +
+      '<div class="choice" hidden>' +
+        '<button type="button" class="tiny" data-act="ate">✅ Ate it</button>' +
+        '<button type="button" class="tiny warm" data-act="tossed">🗑️ Tossed</button>' +
+        '<button type="button" class="tiny" data-act="back">Back</button>' +
+      '</div>' +
+      '<div class="acts"></div>' +
+      '<details><summary>Details and quantity</summary><div class="form"></div></details>';
+    li.querySelector('.star').textContent = it.fav ? '⭐' : '☆';
+    li.querySelector('.name').textContent = it.name;
+    li.querySelector('.meta').textContent = describe(it) || 'no details yet';
+
+    var acts = li.querySelector('.acts');
+    if (it.daily_rate && it.quantity != null) {
+      [['ate_more', 'Ate more'], ['ate_about_right', 'About right'], ['ate_less', 'Ate less']].forEach(function (pair) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'tiny'; b.dataset.fb = pair[0]; b.textContent = pair[1];
+        acts.appendChild(b);
+      });
+    } else {
+      var hint = document.createElement('span');
+      hint.className = 'hint';
+      hint.textContent = 'Set "Eats per day" in Details for a guess.';
+      acts.appendChild(hint);
+    }
+
+    var f = li.querySelector('.form');
+    f.innerHTML =
+      '<div class="pair">' +
+        '<label>Quantity<input type="number" step="any" inputmode="decimal" class="fq"></label>' +
+        '<label>Unit<input type="text" class="fu" list="units" autocomplete="off"></label>' +
+      '</div>' +
+      '<div class="pair">' +
+        '<label>Eats per day<input type="number" step="any" inputmode="decimal" class="fr" placeholder="e.g. 5"></label>' +
+        '<label>Expiry date<input type="date" class="fe"></label>' +
+      '</div>' +
+      '<label>Place<select class="fp"><option value="fridge">Fridge</option><option value="pantry">Pantry</option><option value="freezer">Freezer</option><option value="other">Other</option></select></label>' +
+      '<label>Notes<textarea class="fn" rows="2"></textarea></label>' +
+      '<div class="row wrap">' +
+        '<button type="button" class="primary" data-save="stay">Save</button>' +
+        (cleanup ? '<button type="button" class="primary" data-save="next">Save and next ▸</button>' : '') +
+      '</div>';
+    f.querySelector('.fq').value = it.quantity == null ? '' : String(it.quantity);
+    f.querySelector('.fu').value = it.unit || '';
+    f.querySelector('.fr').value = it.daily_rate == null ? '' : String(it.daily_rate);
+    f.querySelector('.fe').value = it.expires_on || '';
+    f.querySelector('.fp').value = ['fridge', 'pantry', 'freezer', 'other'].indexOf(it.stored_location) !== -1 ? it.stored_location : 'other';
+    f.querySelector('.fn').value = it.notes || '';
+
     attachSwipe(li, it.id);
     return li;
   }
 
-  // Swipe: drag a card left (toss) or right (ate). Buttons do the same thing for accessibility.
+  function openCard(id) {
+    var el = document.querySelector('.card[data-id="' + id + '"]');
+    if (!el) return;
+    el.querySelector('details').open = true;
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    var fq = el.querySelector('.fq');
+    if (fq) fq.focus();
+  }
+
+  // ---- actions ----
+  function checkIn(itemId, action) {
+    var item = find(itemId);
+    if (!item) { reportError('Item not found: ' + itemId); return; }
+    checks.push({ id: uid('c'), item_id: itemId, action: action, member: whoChecks(), at: nowIso() });
+    if (action === 'ate') item.status = 'eaten';
+    if (action === 'tossed') item.status = 'tossed';
+    if (action === 'kept') item.reviewed_on = todayIso();
+    item.updated_at = nowIso();
+    persist();
+    renderAll();
+  }
+
+  function toggleFav(itemId) {
+    var item = find(itemId);
+    if (!item) return;
+    item.fav = !item.fav;
+    item.updated_at = nowIso();
+    persist();
+    renderAll();
+  }
+
+  // Feedback on the predicted index: the guess becomes the new count, and the rate moves.
+  function feedback(itemId, kind) {
+    var item = find(itemId);
+    if (!item) return;
+    if (item.quantity == null || !item.daily_rate) { reportError('Enter a quantity and "Eats per day" in Details first.'); return; }
+    var p = predict(item);
+    if (p) { item.quantity = p.left; item.counted_on = todayIso(); }
+    if (kind === 'ate_more') item.daily_rate = round2(item.daily_rate * 1.25);
+    if (kind === 'ate_less') item.daily_rate = round2(item.daily_rate * 0.8);
+    checks.push({ id: uid('c'), item_id: itemId, action: kind, member: whoChecks(), at: nowIso() });
+    item.updated_at = nowIso();
+    persist();
+    renderAll(itemId);
+  }
+
+  function saveForm(li, item, goNext) {
+    var nextId = null;
+    if (goNext) {
+      var list = cleanupItems().map(function (it) { return it.id; });
+      var idx = list.indexOf(item.id);
+      nextId = idx >= 0 ? list[idx + 1] || null : null;
+    }
+    var f = li.querySelector('.form');
+    var q = parseFloat(f.querySelector('.fq').value);
+    var newQ = isNaN(q) ? null : q;
+    if (newQ !== item.quantity) { item.quantity = newQ; item.counted_on = todayIso(); }
+    item.unit = f.querySelector('.fu').value.trim();
+    var r = parseFloat(f.querySelector('.fr').value);
+    item.daily_rate = isNaN(r) || r < 0 ? null : r;
+    if (item.daily_rate != null && !item.counted_on) item.counted_on = todayIso();
+    item.expires_on = f.querySelector('.fe').value || null;
+    item.stored_location = f.querySelector('.fp').value;
+    item.notes = f.querySelector('.fn').value.trim();
+    item.updated_at = nowIso();
+    persist();
+    renderAll(goNext ? nextId : item.id);
+    if (goNext && !nextId) {
+      $('cleanHint').hidden = false;
+      $('cleanHint').textContent = 'That was the last one in Use soon. ✅';
+    }
+  }
+
+  // ---- swipe: left = ate or tossed (choose), right = remain, tap = favourite ----
   function attachSwipe(li, itemId) {
     var startX = null, dx = 0, pid = null;
     li.addEventListener('pointerdown', function (e) {
-      if (e.target.closest('button')) return;
+      if (e.target.closest('button, input, select, textarea, summary, details, label')) return;
       startX = e.clientX; dx = 0; pid = e.pointerId;
-      li.setPointerCapture(pid);
+      try { li.setPointerCapture(pid); } catch (err) { /* older browsers: swipe still works without capture */ }
     });
     li.addEventListener('pointermove', function (e) {
       if (startX == null || e.pointerId !== pid) return;
@@ -121,40 +325,58 @@
       li.querySelector('.hintSwipe.l').style.opacity = dx < -40 ? 1 : 0;
       li.querySelector('.hintSwipe.r').style.opacity = dx > 40 ? 1 : 0;
     });
-    function end(e) {
+    function finish(e, cancelled) {
       if (startX == null || e.pointerId !== pid) return;
       var moved = dx;
       startX = null; pid = null;
       li.style.transform = '';
-      if (moved > 90) checkIn(itemId, 'ate');
-      else if (moved < -90) checkIn(itemId, 'tossed');
-      else renderStock();
+      li.querySelector('.hintSwipe.l').style.opacity = 0;
+      li.querySelector('.hintSwipe.r').style.opacity = 0;
+      if (cancelled) return;
+      if (Math.abs(moved) < 10) toggleFav(itemId);
+      else if (moved < -80) li.querySelector('.choice').hidden = false;
+      else if (moved > 80) checkIn(itemId, 'kept');
     }
-    li.addEventListener('pointerup', end);
-    li.addEventListener('pointercancel', function () { startX = null; li.style.transform = ''; renderStock(); });
+    li.addEventListener('pointerup', function (e) { finish(e, false); });
+    li.addEventListener('pointercancel', function (e) { finish(e, true); });
   }
 
-  function checkIn(itemId, action) {
-    var item = items.find(function (it) { return it.id === itemId; });
-    if (!item) { reportError('Item not found: ' + itemId); renderStock(); return; }
-    var who = $('member').value || members[0];
-    checks.push({ id: id('c'), item_id: itemId, action: action, member: who, at: new Date().toISOString() });
-    if (action === 'ate') item.status = 'eaten';
-    if (action === 'tossed') item.status = 'tossed';
-    item.updated_at = new Date().toISOString();
-    write(KEY.items, items); write(KEY.checks, checks);
-    renderStock();
-  }
-  $('placeFilter').addEventListener('change', renderStock);
+  // One listener for every card button, so new cards need no wiring.
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    var el = t.closest ? t.closest('.card') : null;
+    if (!el) return;
+    if (t.dataset && t.dataset.act) {
+      if (t.dataset.act === 'back') { el.querySelector('.choice').hidden = true; return; }
+      checkIn(el.dataset.id, t.dataset.act);
+      return;
+    }
+    if (t.dataset && t.dataset.fb) { feedback(el.dataset.id, t.dataset.fb); return; }
+    if (t.dataset && t.dataset.save) {
+      var item = find(el.dataset.id);
+      if (item) saveForm(el, item, t.dataset.save === 'next');
+    }
+  });
 
-  // ---- capture ----
+  $('placeFilter').addEventListener('change', function () { renderAll(); });
+
+  // ---- capture: sort a transcript into draft items, then save with duplicate rules ----
+  function findDuplicate(name, expiresOn, place) {
+    return items.find(function (it) {
+      return it.status === 'in_stock' && norm(it.name) === norm(name) &&
+        (it.expires_on || null) === (expiresOn || null) && it.stored_location === place;
+    }) || null;
+  }
+
   $('parse').addEventListener('click', function () {
-    var text = $('transcript').value;
-    var parsed = window.WTCParse.parseTranscript(text);
-    draft = parsed.map(function (d) { return Object.assign({ keep: true }, d); });
+    var source = $('source').value;
+    var parsed = window.WTCParse.parseTranscript($('transcript').value);
+    draft = parsed.map(function (d) {
+      return Object.assign({ keep: true, expires_on: null, source: source }, d);
+    });
+    if (!draft.length) { reportError('Nothing to sort. Paste or type something first.'); $('review').hidden = true; return; }
     renderDraft();
-    $('review').hidden = draft.length === 0;
-    if (!draft.length) reportError('Nothing to sort. Type or say something first.');
+    $('review').hidden = false;
   });
 
   function renderDraft() {
@@ -165,12 +387,13 @@
       li.className = 'card';
       li.innerHTML =
         '<div class="draft-row">' +
-        '<label class="check"><input type="checkbox" class="keep"> keep</label>' +
-        '<input type="text" class="dname" aria-label="Name">' +
-        '<input type="text" class="dqty" inputmode="decimal" aria-label="Quantity">' +
-        '<select class="dunit" aria-label="Unit"></select>' +
-        '<select class="dkind" aria-label="Kind"><option>dry</option><option>wet</option><option>tool</option><option>space</option></select>' +
-        '<select class="dplace" aria-label="Place"><option>fridge</option><option>pantry</option><option>freezer</option><option>other</option></select>' +
+          '<label class="check"><input type="checkbox" class="keep"> keep</label>' +
+          '<input type="text" class="dname" aria-label="Name">' +
+          '<input type="number" step="any" inputmode="decimal" class="dqty" aria-label="Quantity">' +
+          '<select class="dunit" aria-label="Unit"></select>' +
+          '<select class="dkind" aria-label="Kind"><option>dry</option><option>wet</option><option>tool</option><option>space</option></select>' +
+          '<select class="dplace" aria-label="Place"><option>fridge</option><option>pantry</option><option>freezer</option><option>other</option></select>' +
+          '<input type="date" class="dexp" aria-label="Expiry date">' +
         '</div><div class="meta"></div>';
       li.querySelector('.keep').checked = d.keep;
       li.querySelector('.dname').value = d.name;
@@ -182,7 +405,11 @@
       unit.value = d.unit || '';
       li.querySelector('.dkind').value = d.kind;
       li.querySelector('.dplace').value = d.stored_location;
-      li.querySelector('.meta').textContent = 'from: "' + d.raw + '"' + (d.category ? ' · ' + d.category : '');
+      li.querySelector('.dexp').value = d.expires_on || '';
+      var dup = findDuplicate(d.name, d.expires_on, d.stored_location);
+      li.querySelector('.meta').textContent = 'from: "' + d.raw + '" · ' +
+        (dup ? 'already in the pantry, will update that line' : 'new line');
+
       li.querySelector('.keep').addEventListener('change', function (e) { draft[idx].keep = e.target.checked; });
       li.querySelector('.dname').addEventListener('input', function (e) { draft[idx].name = e.target.value; });
       li.querySelector('.dqty').addEventListener('input', function (e) {
@@ -191,6 +418,7 @@
       unit.addEventListener('change', function (e) { draft[idx].unit = e.target.value; });
       li.querySelector('.dkind').addEventListener('change', function (e) { draft[idx].kind = e.target.value; });
       li.querySelector('.dplace').addEventListener('change', function (e) { draft[idx].stored_location = e.target.value; });
+      li.querySelector('.dexp').addEventListener('change', function (e) { draft[idx].expires_on = e.target.value || null; });
       list.appendChild(li);
     });
   }
@@ -198,49 +426,84 @@
   $('save').addEventListener('click', function () {
     var keep = draft.filter(function (d) { return d.keep && d.name; });
     if (!keep.length) { reportError('Nothing ticked to save.'); return; }
-    var now = new Date().toISOString();
+    var now = nowIso(), day = todayIso(), added = 0, updated = 0;
     keep.forEach(function (d) {
-      items.push({
-        id: id('i'), name: d.name, kind: d.kind, category: d.category || '', subcategory: '',
-        quality: d.quality || 'unknown', quantity: d.quantity, unit: d.unit || '', servings_left: null,
-        expires_on: null, freshness: 'unknown', stored_location: d.stored_location || 'pantry',
-        purchase_cost: null, notes: d.notes || '', status: 'in_stock', source: 'transcript',
-        raw_text: d.raw, created_at: now, updated_at: now
-      });
+      var dup = findDuplicate(d.name, d.expires_on, d.stored_location);
+      if (dup) {
+        if (d.quantity != null) dup.quantity = d.quantity;
+        if (d.unit) dup.unit = d.unit;
+        dup.kind = d.kind;
+        dup.category = d.category || dup.category;
+        dup.counted_on = day;
+        dup.raw_text = d.raw;
+        dup.source = d.source;
+        dup.updated_at = now;
+        updated++;
+      } else {
+        items.push({
+          id: uid('i'), name: d.name, kind: d.kind, category: d.category || '', subcategory: '',
+          quality: d.quality || 'unknown', quantity: d.quantity, unit: d.unit || '', servings_left: null,
+          expires_on: d.expires_on || null, freshness: 'unknown', stored_location: d.stored_location || 'pantry',
+          purchase_cost: null, notes: d.notes || '', status: 'in_stock', source: d.source,
+          raw_text: d.raw, purchased_on: day, counted_on: day, daily_rate: null,
+          fav: false, reviewed_on: null, created_at: now, updated_at: now
+        });
+        added++;
+      }
     });
-    transcripts.push({ id: id('t'), text: $('transcript').value, method: 'transcript', parsed_count: keep.length, at: now });
-    if (write(KEY.items, items) && write(KEY.transcripts, transcripts)) {
-      draft = []; $('transcript').value = ''; $('review').hidden = true; renderDraft();
-      renderStock();
-      document.querySelector('.tab[data-tab="pantry"]').click();
-    }
+    // The raw transcript is archived in full, whatever was saved.
+    transcripts.push({
+      id: uid('t'), text: $('transcript').value, method: $('source').value,
+      parsed_count: keep.length, added: added, updated: updated, at: now
+    });
+    persist();
+    draft = [];
+    $('transcript').value = '';
+    $('review').hidden = true;
+    renderDraft();
+    renderArchive();
+    $('saveNote').hidden = false;
+    $('saveNote').textContent = 'Saved: ' + added + ' new, ' + updated + ' updated. The transcript is in the archive.';
+    showTab('pantry');
+    renderAll();
   });
 
   // Speech in, where the browser supports it. Typing always works.
   $('listen').addEventListener('click', function () {
     var Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
     var note = $('listenNote');
-    if (!Rec) { note.hidden = false; note.textContent = 'Speech is not available in this browser. Type or use the keyboard microphone.'; return; }
+    if (!Rec) {
+      note.hidden = false;
+      note.textContent = 'Speech is not available in this browser. Type, or use the keyboard microphone.';
+      return;
+    }
     try {
-      var rec = new Rec(); rec.lang = 'en-GB'; rec.interimResults = false; rec.maxAlternatives = 1;
+      var rec = new Rec();
+      rec.lang = 'en-GB'; rec.interimResults = false; rec.maxAlternatives = 1;
       note.hidden = false; note.textContent = 'Listening… say the list, then pause.';
       rec.onresult = function (ev) {
         var said = ev.results[0][0].transcript;
         $('transcript').value = ($('transcript').value ? $('transcript').value + '\n' : '') + said;
         note.textContent = 'Heard it. Check the words, then sort.';
       };
-      rec.onerror = function (ev) { note.textContent = 'Speech stopped: ' + ev.error + '. Type instead.'; reportError('Speech: ' + ev.error); };
+      rec.onerror = function (ev) {
+        note.textContent = 'Speech stopped: ' + ev.error + '. Type instead.';
+        reportError('Speech: ' + ev.error);
+      };
       rec.start();
     } catch (e) { reportError('Speech could not start: ' + e.message); }
   });
 
-  // ---- settings ----
+  // ---- settings drawer ----
   $('gear').addEventListener('click', function () {
     var open = $('drawer').hidden;
     $('drawer').hidden = !open;
     $('gear').setAttribute('aria-expanded', String(open));
   });
-  $('closeDrawer').addEventListener('click', function () { $('drawer').hidden = true; $('gear').setAttribute('aria-expanded', 'false'); });
+  $('closeDrawer').addEventListener('click', function () {
+    $('drawer').hidden = true;
+    $('gear').setAttribute('aria-expanded', 'false');
+  });
   document.querySelectorAll('.panelHead').forEach(function (head) {
     head.addEventListener('click', function () {
       var sec = head.parentElement;
@@ -250,29 +513,85 @@
       head.querySelector('.mark').textContent = collapsed ? '▸' : '▾';
     });
   });
-  $('showErrors').checked = read(KEY.errors, false) === true;
-  $('showErrors').addEventListener('change', function (e) { write(KEY.errors, e.target.checked); renderErrors(); });
+
+  function renderPages() {
+    var ul = $('pageLinks');
+    ul.textContent = '';
+    PAGES.forEach(function (p) {
+      var li = document.createElement('li');
+      if (p.tab) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'tiny'; b.textContent = p.label;
+        b.addEventListener('click', function () { showTab(p.tab); $('drawer').hidden = true; });
+        li.appendChild(b);
+      } else {
+        li.textContent = p.label + ' · planned (' + p.planned + ')';
+      }
+      ul.appendChild(li);
+    });
+  }
+
+  function renderArchive() {
+    var ul = $('archiveList');
+    ul.textContent = '';
+    if (!transcripts.length) {
+      var empty = document.createElement('li'); empty.textContent = 'No transcripts yet.'; ul.appendChild(empty);
+      return;
+    }
+    transcripts.slice().reverse().forEach(function (t) {
+      var li = document.createElement('li');
+      var d = document.createElement('details');
+      var s = document.createElement('summary');
+      s.textContent = new Date(t.at).toLocaleString() + ' · ' + (t.method === 'apple_memo' ? 'Apple Voice Memo' : t.method) +
+        ' · ' + (t.added || 0) + ' new, ' + (t.updated || 0) + ' updated';
+      var pre = document.createElement('pre');
+      pre.textContent = t.text;
+      d.appendChild(s); d.appendChild(pre);
+      li.appendChild(d);
+      ul.appendChild(li);
+    });
+  }
+
+  function renderVersions() {
+    var ul = $('versionList');
+    ul.textContent = '';
+    VERSIONS.forEach(function (v) {
+      var li = document.createElement('li');
+      li.textContent = 'v' + v.v + ' · ' + v.date + '\n' + v.text;
+      ul.appendChild(li);
+    });
+  }
 
   function renderNotes() {
-    var list = $('noteList'); list.textContent = '';
+    var ul = $('noteList');
+    ul.textContent = '';
     notes.slice().reverse().forEach(function (n) {
       var li = document.createElement('li');
-      li.textContent = new Date(n.at).toLocaleString() + ' · ' + n.where + '\n' + n.text;
-      list.appendChild(li);
+      li.textContent = new Date(n.at).toLocaleString() + ' · ' + n.where + ' · v' + n.version + '\n' + n.text;
+      ul.appendChild(li);
     });
   }
   $('noteSave').addEventListener('click', function () {
     var text = $('noteText').value.trim();
     if (!text) return;
-    var where = document.querySelector('.tab.on') ? document.querySelector('.tab.on').dataset.tab : 'page';
-    notes.push({ id: id('n'), at: new Date().toISOString(), status: 'open', text: text, where: where, version: VERSION });
-    write(KEY.notes, notes); $('noteText').value = ''; renderNotes();
+    var current = document.querySelector('.tab.on');
+    var where = current ? current.dataset.tab : 'page';
+    notes.push({ id: uid('n'), at: nowIso(), status: 'open', text: text, where: where, version: VERSION });
+    write(KEY.notes, notes);
+    $('noteText').value = '';
+    renderNotes();
   });
+
+  $('showErrors').checked = read(KEY.errors, false) === true;
+  $('showErrors').addEventListener('change', function (e) { write(KEY.errors, e.target.checked); renderErrors(); });
 
   // ---- start ----
   window.addEventListener('error', function (e) { reportError('JS: ' + e.message); });
   renderMembers();
-  renderStock();
+  renderPages();
+  renderVersions();
+  renderArchive();
   renderNotes();
+  renderAll();
   renderErrors();
 })();

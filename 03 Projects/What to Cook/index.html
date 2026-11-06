@@ -33,15 +33,37 @@
         </select>
       </label>
     </div>
-    <p class="hint">Swipe a card right if it was eaten, left if it was tossed. Or tap a button.</p>
-    <ul id="stock" class="cards" aria-live="polite"></ul>
-    <p id="stockEmpty" class="empty" hidden>Nothing in stock here yet. Use 🎙️ Add.</p>
+    <p class="hint">Swipe left: ate or tossed. Swipe right: remain. Tap: ⭐ favourite. Open <em>Details</em> to change the quantity.</p>
+
+    <section class="panel" data-panel="cleanup" id="cleanupPanel">
+      <button class="panelHead" type="button" aria-expanded="true"><span>🧹</span><span class="grow">Use soon (<span id="cleanCount">0</span>)</span><span class="mark">▾</span></button>
+      <div class="panelBody">
+        <p class="hint">About to expire, or past the date. Use these first.</p>
+        <ul id="cleanup" class="cards"></ul>
+        <p id="cleanEmpty" class="empty" hidden>Nothing needs using up today. 🎉</p>
+        <p id="cleanHint" class="hint" hidden></p>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="stock">
+      <button class="panelHead" type="button" aria-expanded="true"><span>🥫</span><span class="grow">Pantry, fridge and freezer</span><span class="mark">▾</span></button>
+      <div class="panelBody">
+        <ul id="stock" class="cards" aria-live="polite"></ul>
+        <p id="stockEmpty" class="empty" hidden>Nothing else in stock here. Use 🎙️ Add.</p>
+      </div>
+    </section>
   </section>
 
   <section id="tab-capture" class="view" hidden>
-    <h2>Add what you see or heard</h2>
-    <p class="hint">Type or speak a short list, one item per line or separated by commas. Example: <em>two eggs, half a bag of rice, milk nearly gone</em>.</p>
-    <textarea id="transcript" rows="4" placeholder="Say or type what is there…"></textarea>
+    <h2>Add from a memo or a list</h2>
+    <label>Where did it come from?
+      <select id="source">
+        <option value="apple_memo">🍎 Apple Voice Memo transcript</option>
+        <option value="raw">Typed or spoken here</option>
+      </select>
+    </label>
+    <p class="hint">Paste the memo's transcript, one item per line or separated by commas. The full text is archived in ⚙️ → Transcript archive.</p>
+    <textarea id="transcript" rows="5" placeholder="Paste or type…"></textarea>
     <div class="row wrap">
       <button id="listen" type="button" class="big">🎤 Speak</button>
       <button id="parse" type="button" class="big primary">Sort into items</button>
@@ -49,42 +71,84 @@
     <p id="listenNote" class="hint" hidden></p>
     <div id="review" hidden>
       <h3>Check the draft</h3>
-      <p class="hint">Untick anything to drop it. Nothing is saved until you press Save.</p>
+      <p class="hint">Same name, same expiry date and same place updates the line already in the pantry. A new expiry date makes a new line. Untick to drop an item.</p>
       <ul id="draft" class="cards"></ul>
       <button id="save" type="button" class="big primary">Save to pantry</button>
     </div>
+    <p id="saveNote" class="hint" hidden></p>
   </section>
 </main>
 
 <button id="gear" class="gear" type="button" aria-label="Settings" aria-expanded="false" aria-controls="drawer">⚙️</button>
 <aside id="drawer" class="drawer" hidden>
   <h2>⚙️ Settings</h2>
-  <section class="panel" data-panel="members">
-    <button class="panelHead" type="button" aria-expanded="true"><span>👪</span><span class="grow">Family members (this device)</span><span class="mark">▾</span></button>
+
+  <section class="panel" data-panel="pages" data-open="false">
+    <button class="panelHead" type="button" aria-expanded="false"><span>🗂️</span><span class="grow">Pages</span><span class="mark">▸</span></button>
+    <div class="panelBody">
+      <ul id="pageLinks" class="plain"></ul>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="members" data-open="false">
+    <button class="panelHead" type="button" aria-expanded="false"><span>👪</span><span class="grow">Family members (this device)</span><span class="mark">▸</span></button>
     <div class="panelBody">
       <p class="hint">Names only, one per line. Stored on this device until the family sign-in is added.</p>
       <textarea id="memberList" rows="4"></textarea>
       <button id="saveMembers" type="button">Save names</button>
     </div>
   </section>
-  <section class="panel" data-panel="notes">
-    <button class="panelHead" type="button" aria-expanded="true"><span>📝</span><span class="grow">Notes for improvement</span><span class="mark">▾</span></button>
+
+  <section class="panel" data-panel="guess" data-open="false">
+    <button class="panelHead" type="button" aria-expanded="false"><span>🔮</span><span class="grow">How the guess works</span><span class="mark">▸</span></button>
+    <div class="panelBody">
+      <p class="hint">For things eaten over time (eggs, milk). Remaining = the quantity when it was last counted, minus the eats-per-day rate times the days since. Example: 60 counted a week ago, 5 a day, so about 25 (42%) left.</p>
+      <p class="hint">Feedback: <strong>ate more</strong> lowers the guess (rate up 25%), <strong>ate less</strong> raises it (rate down 20%), <strong>about right</strong> keeps it. Each one resets the count to the guess.</p>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="archive" data-open="false">
+    <button class="panelHead" type="button" aria-expanded="false"><span>🗃️</span><span class="grow">Transcript archive</span><span class="mark">▸</span></button>
+    <div class="panelBody">
+      <ul id="archiveList" class="plain"></ul>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="versions" data-open="false">
+    <button class="panelHead" type="button" aria-expanded="false"><span>🏷️</span><span class="grow">Version log</span><span class="mark">▸</span></button>
+    <div class="panelBody">
+      <ul id="versionList" class="plain"></ul>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="notes" data-open="false">
+    <button class="panelHead" type="button" aria-expanded="false"><span>📝</span><span class="grow">Notes log (for improvement)</span><span class="mark">▸</span></button>
     <div class="panelBody">
       <textarea id="noteText" rows="3" placeholder="What would make this better?"></textarea>
       <button id="noteSave" type="button">Save note</button>
       <ul id="noteList" class="plain"></ul>
     </div>
   </section>
-  <section class="panel" data-panel="errors">
+
+  <section class="panel" data-panel="errors" data-open="false">
     <button class="panelHead" type="button" aria-expanded="false"><span>🛠️</span><span class="grow">Show errors</span><span class="mark">▸</span></button>
     <div class="panelBody">
       <label class="check"><input id="showErrors" type="checkbox"> Show problems at the bottom of the page</label>
     </div>
   </section>
+
   <button id="closeDrawer" type="button" class="big">Close</button>
 </aside>
 
 <div id="errorPanel" class="errors" hidden aria-live="polite"></div>
+
+<datalist id="units">
+  <option value="g"></option><option value="kg"></option><option value="ml"></option><option value="l"></option>
+  <option value="each"></option><option value="tin"></option><option value="bag"></option><option value="box"></option>
+  <option value="pack"></option><option value="bottle"></option><option value="loaf"></option><option value="bunch"></option>
+  <option value="clove"></option><option value="slice"></option><option value="pot"></option><option value="tub"></option>
+  <option value="cup"></option>
+</datalist>
 
 <script src="js/parse.js"></script>
 <script src="js/app.js"></script>

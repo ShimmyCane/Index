@@ -24,19 +24,31 @@ create table if not exists public.wtc_items (
     purchase_cost   numeric(10, 2),
     notes           text not null default '',
     status          text not null default 'in_stock' check (status in ('in_stock', 'eaten', 'tossed', 'used_up')),
-    source          text not null default 'manual' check (source in ('manual', 'raw', 'transcript', 'photo', 'ai_review')),
+    source          text not null default 'manual' check (source in ('manual', 'raw', 'apple_memo', 'photo', 'ai_review')),
     raw_text        text not null default '',
+    purchased_on    date,
+    counted_on      date,                                   -- day the quantity was last confirmed or changed (predictions count from here)
+    daily_rate      numeric check (daily_rate is null or daily_rate >= 0),  -- units eaten per day, for the predicted index
+    fav             boolean not null default false,         -- tapped as a favourite
+    reviewed_on     date,                                   -- swiped right (remain) on this day; hides it from "use soon" today
     created_by      uuid default auth.uid(),
     created_at      timestamptz not null default timezone('utc', now()),
     updated_at      timestamptz not null default timezone('utc', now())
 );
 alter table public.wtc_items enable row level security;
 
+-- One line per stock item, per expiry date and place. Same name + same expiry +
+-- same place is a duplicate and is overwritten (on conflict do update). A new
+-- expiry date is a new line, so versions of an item stay separate.
+create unique index if not exists wtc_items_stock_key
+    on public.wtc_items (lower(name), coalesce(expires_on, date '1900-01-01'), stored_location)
+    where status = 'in_stock';
+
 -- Swipe check-ins: did you eat it, toss it, or keep it. Append-only log.
 create table if not exists public.wtc_checkins (
     id              uuid primary key default gen_random_uuid(),
     item_id         uuid not null references public.wtc_items (id) on delete cascade,
-    action          text not null check (action in ('ate', 'tossed', 'kept')),
+    action          text not null check (action in ('ate', 'tossed', 'kept', 'ate_more', 'ate_about_right', 'ate_less')),
     member_id       uuid,
     quantity_used   numeric,
     note            text not null default '',
@@ -132,12 +144,24 @@ alter table public.wtc_shopping enable row level security;
 create table if not exists public.wtc_transcripts (
     id              uuid primary key default gen_random_uuid(),
     text            text not null,
-    method          text not null default 'raw' check (method in ('raw', 'transcript', 'photo', 'ai_review')),
+    method          text not null default 'raw' check (method in ('raw', 'apple_memo', 'photo', 'ai_review')),
     parsed_count    integer not null default 0,
     created_by      uuid default auth.uid(),
     at              timestamptz not null default timezone('utc', now())
 );
 alter table public.wtc_transcripts enable row level security;
+
+-- Recipe photos, kept in a separate table for now (not a storage bucket).
+-- Keep each photo small (resize to about 200 KB or less before saving).
+create table if not exists public.wtc_photos (
+    id              uuid primary key default gen_random_uuid(),
+    recipe_id       uuid references public.wtc_recipes (id) on delete cascade,
+    mime_type       text not null default 'image/jpeg' check (mime_type in ('image/jpeg', 'image/png', 'image/webp')),
+    data_base64     text not null check (length(data_base64) <= 300000),
+    created_by      uuid default auth.uid(),
+    created_at      timestamptz not null default timezone('utc', now())
+);
+alter table public.wtc_photos enable row level security;
 
 -- Family-only access, as the other family apps use: signed-in users, anon revoked.
 do $$
@@ -146,7 +170,7 @@ declare
 begin
     foreach t in array array['wtc_items', 'wtc_checkins', 'wtc_recipes', 'wtc_recipe_ingredients',
                              'wtc_recipe_trials', 'wtc_taste_votes', 'wtc_food_log', 'wtc_plan',
-                             'wtc_shopping', 'wtc_transcripts']
+                             'wtc_shopping', 'wtc_transcripts', 'wtc_photos']
     loop
         execute format('revoke all on public.%I from anon', t);
         execute format('drop policy if exists %I on public.%I', 'Authenticated can manage ' || t, t);
@@ -166,6 +190,7 @@ insert into public.app_table_registry (app, object_name, object_type, access, de
 ('what-to-cook', 'wtc_food_log',            'table', 'owner', 'Food log per member, with calories (health data).', 'ShimmyCane/Index'),
 ('what-to-cook', 'wtc_plan',                'table', 'owner', 'Week calendar: one slot per day.', 'ShimmyCane/Index'),
 ('what-to-cook', 'wtc_shopping',            'table', 'owner', 'Shopping list from the plan, wish recipes or by hand.', 'ShimmyCane/Index'),
-('what-to-cook', 'wtc_transcripts',         'table', 'owner', 'Raw observations kept for re-parsing.', 'ShimmyCane/Index'),
+('what-to-cook', 'wtc_transcripts',         'table', 'owner', 'Raw transcripts archived in full (Apple Voice Memo and typed).', 'ShimmyCane/Index'),
+('what-to-cook', 'wtc_photos',              'table', 'owner', 'Recipe photos as small base64 rows, kept until moved to a storage bucket.', 'ShimmyCane/Index'),
 ('what-to-cook', 'family_members',          'table', 'reads', 'Family members, owned by the habits app. Read for names and colours only.', 'ShimmyCane/Index')
 on conflict (app, object_name) do nothing;
