@@ -83,6 +83,19 @@
 <aside id="drawer" class="drawer" hidden>
   <h2>⚙️ Settings</h2>
 
+  <section class="panel" data-panel="database" data-open="false">
+    <button class="panelHead" type="button" aria-expanded="false"><span>☁️</span><span class="grow">Family database</span><span class="mark">▸</span></button>
+    <div class="panelBody">
+      <p class="hint">Sign in with the family login to share the pantry with everyone. Without it, this device keeps its own copy. The password is sent only to the database and is not kept.</p>
+      <label>Family email<input type="email" id="dbEmail" autocomplete="username"></label>
+      <label>Password<input type="password" id="dbPassword" autocomplete="current-password"></label>
+      <div class="row wrap"><button id="signIn" type="button" class="primary">Sign in</button><button id="signOut" type="button">Sign out</button></div>
+      <p id="dbStatus" class="hint"></p>
+      <button id="dbCheck" type="button">Check database</button>
+      <pre id="dbResult" class="hint"></pre>
+    </div>
+  </section>
+
   <section class="panel" data-panel="pages" data-open="false">
     <button class="panelHead" type="button" aria-expanded="false"><span>🗂️</span><span class="grow">Pages</span><span class="mark">▸</span></button>
     <div class="panelBody">
@@ -150,6 +163,8 @@
   <option value="cup"></option>
 </datalist>
 
+<script src="js/config.js"></script>
+<script src="js/db.js"></script>
 <script src="js/parse.js"></script>
 <script src="js/app.js"></script>
 </body>
