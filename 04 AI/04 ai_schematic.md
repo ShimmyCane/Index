@@ -7,7 +7,7 @@ Layout:
 - project_review_2026-11-03.md — review of all six projects: promotion readiness, privacy flags, open items for Jimmy.
 - patterns.md — reusable patterns and template candidates.
 - Personal Preferences/jimmy_preferences.md — design and workflow preferences. Auto-loaded through the root `CLAUDE.md`.
-- Supabase/ — conventions for Supabase projects: `brief.md` (rules and state), `lessons.md` (generic lessons), `supabase_registry_template.sql` (app-table registry). Skill: `/supabase-project`.
+- Supabase/ — conventions for Supabase projects: `brief.md` (rules and state), `lessons.md` (generic lessons), `lessons_learned_log.md` (dated log, incl. the 2026-11-06 browser key refusal and its reproduction), `supabase_registry_template.sql` (app-table registry). Skill: `/supabase-project`.
 - Tools/artifacts.md — limits of the claude.ai Artifact host.
 - Tools/windows_local.md — tool quirks on a local Windows PC.
 - Tools/playwright_headless.md — headless Chromium checks: WebGL flags, two-finger touch, hidden controls.
