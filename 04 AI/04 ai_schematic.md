@@ -27,6 +27,7 @@ Projects with notes:
 - Expansion Wars/ — expansion game MVP (spots, soldiers, roads, lakes, computer players, 2–4 flags). Plain HTML/CSS/JS. Convo v0.1 open (defaults built in). `brief.md`, `lessons.md`, `interests.md` (public, simplified design interests). The full interests dossier is private, in `03 Projects/Expansion Wars/private/` (gitignored).
 - Fishes/ — fish-tank game MVP (20 levels, five zones, lock-on hunters, notes in a cookie, database SQL written but not applied). Plain canvas. `brief.md`, `lessons.md`.
 - Paper Again/ — particle model of one sheet of paper over ten increments (folds, crumpling, tears, damp, mould, cuts, burns). MVP. Research in `research/paper_behaviour.md`. `brief.md`.
+- What to Cook/ — family kitchen tool. MVP-1 on the device; Family database SQL written and tested, not applied. `brief.md`, `lessons.md`.
 
 Notes:
 - Lessons in this folder come from the private ShimmyAI repo's `04 AI/`. Only generic lessons were carried over. Family and personal details were not.
