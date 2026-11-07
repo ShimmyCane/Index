@@ -1,6 +1,6 @@
 # Athena's world — Brief
 
-**Status:** MVP, not yet device-tested (see `03 Projects/Athena's world/schematic.md`).
+**Status:** MVP with settings and family sign-in (v0.3.0), not yet device-tested or database-verified (see `03 Projects/Athena's world/schematic.md`).
 
 ## Goal
 
@@ -13,6 +13,12 @@ A decorating game for Athena. A white room, a choice of house or workplace, deco
 - Wall items clamp to the wall zone, floor items to the floor zone. A new item appears at the top of the room (the "tray") until it is tapped into place.
 - State per house: `pos` (placed items), `history` (snapshots for Undo), `done`. Only the unlocked house count is saved (`localStorage`, wrapped in try/catch).
 - Sound: Web Audio oscillators, no files.
+
+## Database
+
+- Tables, RLS and registry: `03 Projects/Athena's world/supabase/` (written, not applied). Check the verify output before calling it verified.
+- Offline and signed-out paths tested in headless Chromium. A signed-in run with no network shows `⚠️ check` and no crash.
+- Not tested: a real family sign-in, and the tables in the live database.
 
 ## Verified
 

@@ -24,7 +24,10 @@ A decorating game. Athena picks who a house or workplace is for, then decorates 
 - **Show errors** is off by default. Errors are always recorded, and turning the switch on shows the bottom panel with any that already happened.
 - **Notes for improvement** save on this device only, under `athena.notes`. Each note records the house and the thing picked (for example "Athena's house · bed"), the time and the version. Copy notes puts them on the clipboard. Nothing is sent anywhere. Follows `02 Refs/Skills/feedback_notes.md`.
 - **Version** is `VERSION` at the top of the script. Add a line to the changelog in the drawer when it changes.
-- No database. Only the unlocked houses and the settings are kept on the device.
+- **Family sign-in:** the drawer has the family email and password. Signed in, the saved game (unlocked houses and rooms) and the notes go to the Family project's database (`athena_saves`, `athena_notes`). Signed out, everything stays on this device.
+- **Sync pill** (top of the play area): `💾 this device`, `☁️ synced`, `☁️ syncing…`, `⚠️ check`. Check database lists each table in the drawer.
+- Settings are kept on the device only. The publishable key is in the script; the service-role key is never used.
+- The SQL lives in `supabase/`: `test_001` (rolled back, run first), `001_athena_family` (the tables), `verify_001` (read-only, paste the result back). Not applied until pasted by hand.
 
 ## Files
 
@@ -36,7 +39,7 @@ A decorating game. Athena picks who a house or workplace is for, then decorates 
 ## Open
 
 - Athena's age and what she can do on her own (convo v0.3, Q4).
-- Whether houses and decorations should be saved between visits (Q9).
+- Whether houses and decorations should be saved between visits (Q9). Answered in code: yes, through the family sign-in.
 - Whether anyone else plays (Q5).
 - What comes next (Q16).
 

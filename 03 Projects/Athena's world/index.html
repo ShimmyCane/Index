@@ -233,6 +233,32 @@
       white-space: pre-wrap;
     }
 
+    /* Sync pill and sign-in form */
+    .pillRow { display: flex; justify-content: center; margin-bottom: 6px; }
+    .pill {
+      display: inline-block;
+      min-height: 36px;
+      padding: 6px 14px;
+      font-weight: 700;
+      font-size: 15px;
+      background: #fff;
+      border: 2px solid var(--ink);
+      border-radius: 999px;
+    }
+    .pill.synced { background: var(--mint); }
+    .pill.checking { background: var(--butter); }
+    .pill.check { background: #ffd6cf; }
+    .signForm { display: grid; gap: 8px; }
+    .signForm input {
+      min-height: 48px;
+      padding: 0 12px;
+      font: 17px system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #fff;
+      border: var(--line);
+      border-radius: 14px;
+    }
+
     /* Finished-house card */
     .modal {
       position: fixed;
@@ -272,6 +298,7 @@
 <body>
   <div class="app">
     <section class="play">
+      <div class="pillRow"><span class="pill device" id="pill">💾 this device</span></div>
       <h1 id="title"></h1>
       <p class="hint" id="hint"></p>
       <div class="room" id="room" aria-label="Room">
@@ -328,10 +355,24 @@
       <ul class="noteList" id="noteList"></ul>
     </div>
 
+    <div class="setting">
+      <label>Family sign-in</label>
+      <p class="sub" id="signInStatus"></p>
+      <form class="signForm" id="signInForm">
+        <input id="signEmail" type="email" autocomplete="username" placeholder="Email" required>
+        <input id="signPassword" type="password" autocomplete="current-password" placeholder="Password" required>
+        <button class="btn" type="submit">🔑 Sign in</button>
+      </form>
+      <button class="btn ghost" id="signOut" type="button" hidden>🚪 Sign out</button>
+      <button class="btn ghost" id="checkDb" type="button">🔎 Check database</button>
+      <p class="sub" id="dbCheck"></p>
+    </div>
+
     <div class="setting info">
       <label>About</label>
       <div>Version <span id="version"></span></div>
       <ul>
+        <li><b>0.3.0</b> Family sign-in: saved game and notes go to the family database. Check database. Shows where things are saved.</li>
         <li><b>0.2.0</b> Settings, notes for improvement, error panel, version info.</li>
         <li><b>0.1.0</b> First playable: white room, houses, things, tap to move, Undo, next house.</li>
       </ul>
@@ -352,7 +393,7 @@
 
   <script>
     // ---- Houses and things. Edit these lists to change the game. ----
-    const VERSION = '0.2.0';
+    const VERSION = '0.3.0';
     const HOUSES = [
       { name: "Athena's house", needs: ['bed', 'window', 'picture'] },
       { name: 'Cosy house', needs: ['bed', 'sofa', 'window'] },
@@ -441,6 +482,48 @@
       box.value = '';
       saveNotes();
       renderNotes();
+      pushNote(notes[notes.length - 1]);
+    }
+    function noteRow(n) {
+      return { id: n.id, text: n.text, house: n.where.item, label: n.where.label, version: n.version, status: n.status, noted_at: n.at };
+    }
+    function pushNote(n) {
+      if (!session) return;
+      setSync('checking');
+      dbFetch('POST', '/rest/v1/athena_notes', [noteRow(n)], 'resolution=ignore-duplicates')
+        .then(() => setSync('synced'))
+        .catch(e => { setSync('check'); logError('Note not sent to the family database: ' + e.message); });
+    }
+    async function pushAllNotes() {
+      if (!notes.length) return;
+      await dbFetch('POST', '/rest/v1/athena_notes', notes.slice(0, 200).map(noteRow), 'resolution=ignore-duplicates');
+    }
+    async function pullNotes() {
+      const rows = await dbFetch('GET', '/rest/v1/athena_notes?select=id,text,house,label,version,status,noted_at&order=noted_at.desc&limit=200');
+      const have = new Set(notes.map(n => n.id));
+      (rows || []).forEach(r => {
+        if (have.has(r.id)) return;
+        notes.push({ id: r.id, at: r.noted_at, status: r.status, text: r.text,
+          where: { page: 'index.html', item: r.house, label: r.label }, version: r.version });
+      });
+      saveNotes();
+      renderNotes();
+    }
+    async function checkDatabase() {
+      const out = $('dbCheck');
+      if (!session) { out.textContent = 'This device only. Sign in to check the family database.'; return; }
+      const lines = [];
+      for (const table of ['athena_saves', 'athena_notes']) {
+        try {
+          await dbFetch('GET', `/rest/v1/${table}?select=*&limit=1`);
+          lines.push('✅ ' + table);
+        } catch (e) {
+          lines.push('❌ ' + table + ': ' + e.message);
+          logError('Check database: ' + table + ' — ' + e.message);
+        }
+      }
+      out.textContent = lines.join('\n');
+      setSync(lines.every(l => l.startsWith('✅')) ? 'synced' : 'check');
     }
     $('noteSave').onclick = addNote;
     $('noteFilter').onchange = renderNotes;
@@ -450,8 +533,115 @@
       else window.prompt('Copy the notes:', out);
     };
 
+    // ---- Family database (Supabase, Family project). The game works without it: this device keeps everything too. ----
+    const DB = {
+      url: 'https://twvqvutrcobedvuhnzxq.supabase.co',
+      key: 'sb_publishable_eqUo8HEdEB1hMQM4CpSVqA_9i6b0qCo', // publishable key only: safe in browser code
+      saveKey: 'main'                                        // the family's one saved game
+    };
+    let session = store.get('athena.session', null);
+    let syncState = 'device';                                // 'device' | 'checking' | 'synced' | 'check'
+    function setSync(state) { syncState = state; renderSync(); }
+    function renderSync() {
+      const label = { device: '💾 this device', checking: '☁️ syncing…', synced: '☁️ synced', check: '⚠️ check' }[syncState];
+      $('pill').textContent = label;
+      $('pill').className = 'pill ' + syncState;
+      $('signInStatus').textContent = session
+        ? 'Signed in as ' + session.email + '. Saves and notes go to the family database.'
+        : 'Not signed in. Everything stays on this device.';
+      $('signInForm').hidden = !!session;
+      $('signOut').hidden = !session;
+    }
+    function withTimeout(ms) {
+      const c = new AbortController();
+      const t = setTimeout(() => c.abort(), ms);
+      return { signal: c.signal, done: () => clearTimeout(t) };
+    }
+    async function dbFetch(method, path, body, prefer, retried) {
+      const t = withTimeout(8000);
+      try {
+        const res = await fetch(DB.url + path, {
+          method,
+          signal: t.signal,
+          headers: Object.assign({
+            apikey: DB.key,
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + (session ? session.access_token : DB.key)
+          }, prefer ? { Prefer: prefer } : {}),
+          body: body === undefined ? undefined : JSON.stringify(body)
+        });
+        if (res.status === 401 && session && !retried) { await refreshSession(); return dbFetch(method, path, body, prefer, true); }
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : null;
+        if (!res.ok) throw new Error((data && (data.message || data.msg || data.error_description)) || ('HTTP ' + res.status));
+        return data;
+      } finally { t.done(); }
+    }
+    async function refreshSession() {
+      const res = await fetch(DB.url + '/auth/v1/token?grant_type=refresh_token', {
+        method: 'POST',
+        headers: { apikey: DB.key, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: session.refresh_token })
+      });
+      const j = await res.json();
+      if (!res.ok) { signOut(); throw new Error('Please sign in again'); }
+      session = { access_token: j.access_token, refresh_token: j.refresh_token, expires_at: Date.now() + j.expires_in * 1000, email: session.email };
+      store.set('athena.session', session);
+    }
+    async function signIn(email, password) {
+      const t = withTimeout(10000);
+      try {
+        const res = await fetch(DB.url + '/auth/v1/token?grant_type=password', {
+          method: 'POST',
+          signal: t.signal,
+          headers: { apikey: DB.key, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const j = await res.json();
+        if (!res.ok) throw new Error(j.error_description || j.msg || j.message || 'Sign-in failed');
+        session = { access_token: j.access_token, refresh_token: j.refresh_token, expires_at: Date.now() + j.expires_in * 1000, email };
+        store.set('athena.session', session);
+      } finally { t.done(); }
+    }
+    function signOut() { session = null; store.set('athena.session', null); setSync('device'); }
+
+    // ---- Saved game: this device always; the family database too when signed in ----
+    let unlocked = 1;                                        // how many houses can be chosen
+    const gameData = () => ({ unlocked, rooms: rooms.map(R => ({ pos: placedCopy(R), done: R.done })) });
+    function applyGameData(d) {
+      if (!d || !Array.isArray(d.rooms)) return;
+      unlocked = clamp(+d.unlocked || 1, 1, HOUSES.length);
+      rooms.forEach((R, i) => {
+        const r = d.rooms[i];
+        R.pos = r && r.pos ? r.pos : {};
+        R.done = !!(r && r.done);
+        R.history = [];
+      });
+    }
+    function saveGame() {
+      const savedAt = new Date().toISOString();
+      store.set('athena.save', { savedAt, data: gameData() });
+      if (!session) return;
+      setSync('checking');
+      dbFetch('POST', '/rest/v1/athena_saves?on_conflict=save_key',
+        [{ save_key: DB.saveKey, data: gameData(), updated_at: savedAt }], 'resolution=merge-duplicates')
+        .then(() => setSync('synced'))
+        .catch(e => { setSync('check'); logError('Save to the family database failed: ' + e.message); });
+    }
+    async function pullGame() {
+      const rows = await dbFetch('GET', `/rest/v1/athena_saves?save_key=eq.${DB.saveKey}&select=data,updated_at`);
+      const remote = rows && rows[0];
+      const local = store.get('athena.save', null);
+      if (!remote) { if (local) saveGame(); return; }
+      if (!local || new Date(remote.updated_at) > new Date(local.savedAt)) {
+        applyGameData(remote.data);
+        store.set('athena.save', { savedAt: remote.updated_at, data: remote.data });
+      } else {
+        saveGame();
+      }
+    }
+
     // ---- State ----
-    let unlocked = store.get('athena.unlocked', 1);   // how many houses can be chosen
     let current = 0;
     let held = null;                                   // the item waiting for a tap
     const rooms = HOUSES.map(() => ({ pos: {}, history: [], done: false }));
@@ -524,6 +714,7 @@
       blip(880, 0.12);
       R.done = isComplete(R);
       if (R.done && !wasDone) finishHouse();
+      saveGame();
       render();
     });
 
@@ -533,12 +724,12 @@
       R.pos = R.history.pop();
       held = null;
       R.done = isComplete(R);
+      saveGame();
       render();
     };
 
     function finishHouse() {
       unlocked = Math.max(unlocked, Math.min(current + 2, HOUSES.length));
-      store.set('athena.unlocked', unlocked);
       $('donetext').textContent = `${HOUSES[current].name} is all decorated.`;
       $('next').textContent = current + 1 < HOUSES.length ? 'Next house ➜' : 'Yay! 🌟';
       $('done').hidden = false;
@@ -641,6 +832,7 @@
       held = null;
       R.done = false;
       setOpen(false);
+      saveGame();
       render();
     };
     $('version').textContent = VERSION;
@@ -651,9 +843,47 @@
     };
     $('stay').onclick = () => { $('done').hidden = true; };
 
-    setNoteContext(HOUSES[current].name, `house-${current}`);
-    renderNotes();
-    render();
+    $('signInForm').onsubmit = async e => {
+      e.preventDefault();
+      const email = $('signEmail').value.trim();
+      const password = $('signPassword').value;
+      $('signPassword').value = '';
+      setSync('checking');
+      try {
+        await signIn(email, password);
+        renderSync();
+        await pushAllNotes();
+        await pullGame();
+        await pullNotes();
+        setSync('synced');
+      } catch (err) {
+        logError('Sign-in failed: ' + err.message);
+        setSync('device');
+        $('signInStatus').textContent = 'Sign-in did not work: ' + err.message;
+      }
+    };
+    $('signOut').onclick = () => { signOut(); renderSync(); };
+    $('checkDb').onclick = checkDatabase;
+
+    // Start: this device's copy first, then the family database when signed in
+    (async function start() {
+      const local = store.get('athena.save', null);
+      if (local) applyGameData(local.data);
+      setNoteContext(HOUSES[current].name, `house-${current}`);
+      renderNotes();
+      render();
+      renderSync();
+      if (!session) return;
+      try {
+        setSync('checking');
+        await pullGame();
+        await pullNotes();
+        setSync('synced');
+      } catch (e) {
+        setSync('check');
+        logError('Could not reach the family database: ' + e.message);
+      }
+    })();
   </script>
 </body>
 </html>
