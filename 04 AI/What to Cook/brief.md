@@ -1,7 +1,7 @@
 # What to Cook — AI Brief
 
-**Updated:** 2026-11-07 (consolidated after the notes and food-list round)
-**Status:** Version 0.4.0. Pantry is saved to the Family database (sign-in works; pantry rows reach `wtc_items`). Notes reach `wtc_notes`. Food list page (`foods.html`, linked from Settings → Pages) saves to `wtc_foods`. Both new paste files are written but not yet pasted into the live database.
+**Updated:** 2026-11-07 (consolidated: version 0.6.0; to-do in `todo.md`)
+**Status:** Version 0.7.0 (fridge life on entry, priority ordering and a lower list, recipe favourites and starts in the database, recipe steps). The MVP paste is applied; the tracking and recipe pastes are not. Open drafts: #121, #122, #124. Pantry is saved to the Family database (sign-in works; pantry rows reach `wtc_items`). Notes reach `wtc_notes`. Food list page (`foods.html`, linked from Settings → Pages) saves to `wtc_foods`. Both new paste files are written but not yet pasted into the live database.
 
 ## Goal
 
@@ -15,7 +15,9 @@ A family kitchen tool: stock from memos, typed lists and (later) photos; tells t
 - Database, Family project (`twvqvutrcobedvuhnzxq`), all tables `wtc_*`, RLS on, anon revoked, signed-in policy, registered to app `what-to-cook`:
   - Applied (from `supabase/what_to_cook_setup.sql`): `wtc_items`, `wtc_checkins`, `wtc_recipes`, `wtc_recipe_ingredients`, `wtc_recipe_trials`, `wtc_taste_votes`, `wtc_food_log`, `wtc_plan`, `wtc_shopping`, `wtc_transcripts`, `wtc_photos`.
   - Applied by Jimmy (2026-11-07, verified by a read-only query): `wtc_notes`. Four rows, all status `done`.
-  - Written, not yet applied: `wtc_foods` (`supabase/foods_what_to_cook.sql`, and again inside `supabase/what_to_cook_MVP.sql`), plus `wtc_journal_entries` and `wtc_journal_ratings` (MVP file, provisional). Checks: rls_on true, policies 1, anon_grants 0, registered 1.
+  - Applied (checked 2026-11-07): `wtc_foods` (seeded with 95 foods from the inventory), `wtc_items.stamped_on` and `fridge_days`, `wtc_journal_entries`, `wtc_journal_ratings`.
+  - Not applied yet: `wtc_items.tracking` (`wtc_items_tracking.sql`), recipe `dish`, `version_by` and ingredient `food_id` (`recipes_what_to_cook.sql`).
+  - Older line, superseded: `wtc_foods` (`supabase/foods_what_to_cook.sql`, and again inside `supabase/what_to_cook_MVP.sql`), plus `wtc_journal_entries` and `wtc_journal_ratings` (MVP file, provisional). Checks: rls_on true, policies 1, anon_grants 0, registered 1.
 - Duplicate rule (pantry): a partial unique index `wtc_items_stock_key` on (lower(name), coalesce(expires_on, 1900-01-01), stored_location) where status = 'in_stock'. Same key overwrites; a new expiry date is a new line.
 - Duplicate rule (food list): a partial unique index `wtc_foods_name_location_key` on (lower(name), location) where name is not blank. Same food in the same place is one row.
 - Notes: the Notes log writes to the device first and then to `wtc_notes` on sync (when signed in). Notes marked done are kept, not deleted (status `done`, text prefixed `Done- `).
@@ -36,7 +38,7 @@ A family kitchen tool: stock from memos, typed lists and (later) photos; tells t
 - The "a few other things not built" note (6 Nov 23:44) is unnamed and was skipped.
 - Merge of tables (`wtc_recipe_ingredients` into recipes, and similar) was raised, not decided. Renaming tables was declined: it would break the live data.
 
-## Next steps
+## Next steps (see todo.md for the full list)
 
 1. Jimmy pastes `supabase/what_to_cook_MVP.sql` into the Family SQL editor (it includes `wtc_foods`, so `foods_what_to_cook.sql` is not needed) and sends back the check rows. It adds `wtc_journal_entries`, `wtc_journal_ratings` (provisional, convo v0.3) and two columns on `wtc_items` (`stamped_on`, `fridge_days`).
 2. Jimmy adds a food on the Food list page, signed in, and confirms it appears in `wtc_foods` (test a save before building on it).

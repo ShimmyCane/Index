@@ -5,8 +5,9 @@
 -- Family project only. Prefix wtc_.
 --
 -- Already applied and NOT repeated here: what_to_cook_setup.sql (11 tables) and
--- notes_what_to_cook.sql (wtc_notes). Pasting foods_what_to_cook.sql is not needed
--- once this file has run: its table is created here too, with the same definition.
+-- notes_what_to_cook.sql (wtc_notes). The older food-list paste is archived at
+-- supabase/archive/foods_what_to_cook.sql; it is not needed once this file has run
+-- (its table is created here too, with the same definition).
 --
 -- Covers the to-do list and convo v0.3 (food journal):
 --   1. wtc_foods               food list page (fridge days, places)      [built, paste pending]
