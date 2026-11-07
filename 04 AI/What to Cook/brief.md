@@ -1,6 +1,6 @@
 # What to Cook — AI Brief
 
-**Updated:** 2026-11-07
+**Updated:** 2026-11-07 (notes round read; see `todo.md` and `convo v0.5.md`)
 **Status:** MVP-1 on the device, pantry v0.2.0. Family database test passes on the live project (rolled back); the SQL is not applied yet.
 
 ## Goal
@@ -23,6 +23,13 @@ A family kitchen tool: stock from memos, typed lists and (later) photos, tells t
 - Verified: the parser on sample lines, including "half a bag of rice", "1 tin of chickpeas", "and 400 g mince", "nearly gone", "frozen".
 - Verified on the live Family project (rolled back): the test returns `ok_kind=t bad_kind_rejected=t ok_member_row=t dup_overwritten=t new_expiry_is_new_line=t`.
 - Not verified: `001_what_to_cook.sql` not applied; no database link in the page; no real phone or touch; no real speech; no real family sign-in.
+
+## Notes round (2026-11-07)
+
+- Read 4 open notes from `wtc_notes`: fridge life stamp, master list of fridge life, fridge and kitchen buttons, plus one unnamed "other things" and one test note.
+- Confirmed: notes reach `wtc_notes` from the device, and pantry rows reach `wtc_items`.
+- Not built: fridge life, master list, kitchen button. Questions Q1–Q5 are in `convo/convo v0.5.md`.
+- No notes marked done yet; the table is unchanged until Jimmy confirms.
 
 ## Next steps
 
