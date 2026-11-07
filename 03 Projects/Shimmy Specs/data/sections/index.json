@@ -1,0 +1,375 @@
+{
+  "version": 1,
+  "note": "Section library. template null = no template yet (write it in a 5xx chapter first). Division 00 demo only.",
+  "sections": [
+    {
+      "number": "00 00 00",
+      "title": "Demo section (not a real spec)",
+      "division": "00",
+      "template": "_demo.json",
+      "uniformat": [
+        "B3010"
+      ]
+    },
+    {
+      "number": "01 10 00",
+      "title": "Summary",
+      "division": "01",
+      "template": null
+    },
+    {
+      "number": "01 22 00",
+      "title": "Unit Prices",
+      "division": "01",
+      "template": null
+    },
+    {
+      "number": "01 25 00",
+      "title": "Substitution Procedures",
+      "division": "01",
+      "template": null
+    },
+    {
+      "number": "01 29 00",
+      "title": "Payment Procedures",
+      "division": "01",
+      "template": null
+    },
+    {
+      "number": "01 33 00",
+      "title": "Submittal Procedures",
+      "division": "01",
+      "template": null
+    },
+    {
+      "number": "01 35 16",
+      "title": "Alteration Project Procedures",
+      "division": "01",
+      "template": null
+    },
+    {
+      "number": "01 35 91",
+      "title": "Historic Treatment Procedures",
+      "division": "01",
+      "template": null
+    },
+    {
+      "number": "01 40 00",
+      "title": "Quality Requirements",
+      "division": "01",
+      "template": null
+    },
+    {
+      "number": "01 42 00",
+      "title": "References",
+      "division": "01",
+      "template": null
+    },
+    {
+      "number": "01 43 39",
+      "title": "Mockups",
+      "division": "01",
+      "template": null
+    },
+    {
+      "number": "01 45 00",
+      "title": "Quality Control",
+      "division": "01",
+      "template": null
+    },
+    {
+      "number": "01 50 00",
+      "title": "Temporary Facilities and Controls",
+      "division": "01",
+      "template": null
+    },
+    {
+      "number": "01 60 00",
+      "title": "Product Requirements",
+      "division": "01",
+      "template": null
+    },
+    {
+      "number": "01 73 00",
+      "title": "Execution",
+      "division": "01",
+      "template": null
+    },
+    {
+      "number": "01 77 00",
+      "title": "Closeout Procedures",
+      "division": "01",
+      "template": null
+    },
+    {
+      "number": "01 78 23",
+      "title": "Operation and Maintenance Data",
+      "division": "01",
+      "template": null
+    },
+    {
+      "number": "02 41 19",
+      "title": "Selective Demolition",
+      "division": "02",
+      "template": null
+    },
+    {
+      "number": "02 83 00",
+      "title": "Lead Remediation",
+      "division": "02",
+      "template": null
+    },
+    {
+      "number": "03 01 30",
+      "title": "Maintenance of Cast-in-Place Concrete",
+      "division": "03",
+      "template": null
+    },
+    {
+      "number": "03 30 00",
+      "title": "Cast-in-Place Concrete",
+      "division": "03",
+      "template": null
+    },
+    {
+      "number": "04 01 20",
+      "title": "Maintenance of Unit Masonry",
+      "division": "04",
+      "uniformat": [
+        "B2010"
+      ],
+      "template": null
+    },
+    {
+      "number": "04 05 19",
+      "title": "Masonry Anchorage and Reinforcing",
+      "division": "04",
+      "template": null
+    },
+    {
+      "number": "04 20 00",
+      "title": "Unit Masonry",
+      "division": "04",
+      "uniformat": [
+        "B2010"
+      ],
+      "template": null
+    },
+    {
+      "number": "04 22 00",
+      "title": "Concrete Unit Masonry",
+      "division": "04",
+      "uniformat": [
+        "B2010"
+      ],
+      "template": null
+    },
+    {
+      "number": "05 50 00",
+      "title": "Metal Fabrications",
+      "division": "05",
+      "template": null
+    },
+    {
+      "number": "05 51 33",
+      "title": "Metal Ladders",
+      "division": "05",
+      "template": null
+    },
+    {
+      "number": "06 10 00",
+      "title": "Rough Carpentry",
+      "division": "06",
+      "template": null
+    },
+    {
+      "number": "06 10 53",
+      "title": "Miscellaneous Rough Carpentry",
+      "division": "06",
+      "template": null
+    },
+    {
+      "number": "06 20 00",
+      "title": "Finish Carpentry",
+      "division": "06",
+      "template": null
+    },
+    {
+      "number": "07 01 50",
+      "title": "Preparation for Re-Roofing",
+      "division": "07",
+      "uniformat": [
+        "B3010"
+      ],
+      "template": null
+    },
+    {
+      "number": "07 19 00",
+      "title": "Water Repellents",
+      "division": "07",
+      "template": null
+    },
+    {
+      "number": "07 21 00",
+      "title": "Thermal Insulation",
+      "division": "07",
+      "template": null
+    },
+    {
+      "number": "07 27 00",
+      "title": "Air Barriers",
+      "division": "07",
+      "template": null
+    },
+    {
+      "number": "07 52 00",
+      "title": "Modified Bituminous Membrane Roofing",
+      "division": "07",
+      "uniformat": [
+        "B3010"
+      ],
+      "template": null
+    },
+    {
+      "number": "07 54 23",
+      "title": "Thermoplastic-Polyolefin (TPO) Roofing",
+      "division": "07",
+      "uniformat": [
+        "B3010"
+      ],
+      "template": null
+    },
+    {
+      "number": "07 62 00",
+      "title": "Sheet Metal Flashing and Trim",
+      "division": "07",
+      "uniformat": [
+        "B3010"
+      ],
+      "template": null
+    },
+    {
+      "number": "07 72 00",
+      "title": "Roof Accessories",
+      "division": "07",
+      "uniformat": [
+        "B3010"
+      ],
+      "template": null
+    },
+    {
+      "number": "07 81 00",
+      "title": "Applied Fireproofing",
+      "division": "07",
+      "template": null
+    },
+    {
+      "number": "07 84 00",
+      "title": "Firestopping",
+      "division": "07",
+      "template": null
+    },
+    {
+      "number": "07 92 00",
+      "title": "Joint Sealants",
+      "division": "07",
+      "uniformat": [
+        "B2010"
+      ],
+      "template": null
+    },
+    {
+      "number": "08 11 13",
+      "title": "Hollow Metal Doors and Frames",
+      "division": "08",
+      "uniformat": [
+        "B2030"
+      ],
+      "template": null
+    },
+    {
+      "number": "08 14 16",
+      "title": "Flush Wood Doors",
+      "division": "08",
+      "template": null
+    },
+    {
+      "number": "08 51 13",
+      "title": "Aluminum Windows",
+      "division": "08",
+      "uniformat": [
+        "B2020"
+      ],
+      "template": null
+    },
+    {
+      "number": "08 71 00",
+      "title": "Door Hardware",
+      "division": "08",
+      "template": null
+    },
+    {
+      "number": "08 80 00",
+      "title": "Glazing",
+      "division": "08",
+      "uniformat": [
+        "B2020"
+      ],
+      "template": null
+    },
+    {
+      "number": "09 01 90",
+      "title": "Maintenance of Painting and Coating",
+      "division": "09",
+      "template": null
+    },
+    {
+      "number": "09 51 00",
+      "title": "Acoustical Ceilings",
+      "division": "09",
+      "uniformat": [
+        "C3030"
+      ],
+      "template": null
+    },
+    {
+      "number": "09 65 00",
+      "title": "Resilient Flooring",
+      "division": "09",
+      "uniformat": [
+        "C3020"
+      ],
+      "template": null
+    },
+    {
+      "number": "09 91 13",
+      "title": "Exterior Painting",
+      "division": "09",
+      "template": null
+    },
+    {
+      "number": "09 96 00",
+      "title": "High-Performance Coatings",
+      "division": "09",
+      "template": null
+    },
+    {
+      "number": "10 14 00",
+      "title": "Signage",
+      "division": "10",
+      "template": null
+    },
+    {
+      "number": "10 28 00",
+      "title": "Toilet, Bath, and Laundry Accessories",
+      "division": "10",
+      "template": null
+    },
+    {
+      "number": "12 24 00",
+      "title": "Window Shades",
+      "division": "12",
+      "template": null
+    }
+  ]
+}

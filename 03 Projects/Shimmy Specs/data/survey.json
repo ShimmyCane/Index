@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "note": "Project survey. Each option sets drivers. 'from' shows which import key pre-fills the answer. Contract variants are labels only; verify with Jimmy.",
+  "groups": [
+    { "id": "scope", "title": "Scope", "questions": [
+      { "id": "scope", "ask": "What kind of work is it? (pick all that apply)", "type": "many", "from": "summary.scope", "options": [
+        { "id": "new", "label": "New construction", "sets": ["scope-new"] },
+        { "id": "addition", "label": "Addition", "sets": ["scope-addition"] },
+        { "id": "alteration", "label": "Alteration", "sets": ["scope-alteration"] },
+        { "id": "repair", "label": "Repair", "sets": ["scope-repair"] },
+        { "id": "restoration", "label": "Restoration", "sets": ["scope-restoration"] },
+        { "id": "historic", "label": "Historic resource", "sets": ["scope-historic"] }
+      ]},
+      { "id": "occupied", "ask": "Is the building occupied during the work?", "type": "one", "from": "summary.occupied", "options": [
+        { "id": "yes", "label": "Yes", "sets": ["occupied"] },
+        { "id": "no", "label": "No", "sets": [] }
+      ]}
+    ]},
+    { "id": "use", "title": "Use and size", "questions": [
+      { "id": "use", "ask": "Occupancy group", "type": "one", "from": "summary.use", "options": [
+        { "id": "A", "label": "Group A (assembly)", "sets": ["use-A"] },
+        { "id": "B", "label": "Group B (business)", "sets": ["use-B"] },
+        { "id": "E", "label": "Group E (educational)", "sets": ["use-E"] },
+        { "id": "I", "label": "Group I (institutional)", "sets": ["use-I"] },
+        { "id": "M", "label": "Group M (mercantile)", "sets": ["use-M"] },
+        { "id": "R-1", "label": "Group R-1 (transient)", "sets": ["use-R-1"] },
+        { "id": "R-2", "label": "Group R-2 (apartments)", "sets": ["use-R-2"] },
+        { "id": "S", "label": "Group S (storage)", "sets": ["use-S"] }
+      ]}
+    ]},
+    { "id": "code", "title": "Code analysis", "questions": [
+      { "id": "construction_type", "ask": "Construction type", "type": "one", "from": "code.construction_type", "options": [
+        { "id": "IA", "label": "Type IA", "sets": ["construction-type-IA"] },
+        { "id": "IB", "label": "Type IB", "sets": ["construction-type-IB"] },
+        { "id": "IIA", "label": "Type IIA", "sets": ["construction-type-IIA"] },
+        { "id": "IIB", "label": "Type IIB", "sets": ["construction-type-IIB"] },
+        { "id": "IIIA", "label": "Type IIIA", "sets": ["construction-type-IIIA"] },
+        { "id": "IIIB", "label": "Type IIIB", "sets": ["construction-type-IIIB"] },
+        { "id": "IV", "label": "Type IV", "sets": ["construction-type-IV"] },
+        { "id": "VA", "label": "Type VA", "sets": ["construction-type-VA"] },
+        { "id": "VB", "label": "Type VB", "sets": ["construction-type-VB"] }
+      ]},
+      { "id": "sprinklered", "ask": "Is the building sprinklered?", "type": "one", "from": "code.sprinklered", "options": [
+        { "id": "yes", "label": "Yes", "sets": ["sprinklered"] },
+        { "id": "no", "label": "No", "sets": [] }
+      ]}
+    ]},
+    { "id": "repair", "title": "Repair types", "questions": [
+      { "id": "repair_types", "ask": "Which kinds of repair or replacement? (pick all that apply)", "type": "many", "from": "repair_types", "options": [
+        { "id": "masonry", "label": "Masonry", "sets": ["repair-masonry"] },
+        { "id": "roofing", "label": "Roofing", "sets": ["repair-roofing"] },
+        { "id": "windows", "label": "Windows", "sets": ["repair-windows"] },
+        { "id": "concrete", "label": "Concrete", "sets": ["repair-concrete"] },
+        { "id": "waterproofing", "label": "Waterproofing", "sets": ["repair-waterproofing"] },
+        { "id": "sealants", "label": "Sealants", "sets": ["repair-sealants"] },
+        { "id": "coatings", "label": "Coatings", "sets": ["repair-coatings"] },
+        { "id": "doors", "label": "Doors and hardware", "sets": ["repair-doors"] },
+        { "id": "interiors", "label": "Interiors", "sets": ["repair-interiors"] }
+      ]}
+    ]},
+    { "id": "contract", "title": "Contract and delivery", "questions": [
+      { "id": "contract_family", "ask": "Contract family", "type": "one", "from": "contract.family", "options": [
+        { "id": "AIA", "label": "AIA", "sets": ["contract-AIA"] },
+        { "id": "other", "label": "Other", "sets": ["contract-other"] }
+      ]},
+      { "id": "contract_variant", "ask": "Which AIA variant? (verify with Jimmy)", "type": "one", "from": "contract.agreement", "options": [
+        { "id": "A101", "label": "A101 + A201", "sets": ["contract-A101"] },
+        { "id": "A102", "label": "A102 + A201", "sets": ["contract-A102"] },
+        { "id": "A104", "label": "A104 (abbreviated)", "sets": ["contract-A104"] },
+        { "id": "A105", "label": "A105 (small project)", "sets": ["contract-A105"] },
+        { "id": "A141", "label": "A141 (design-build)", "sets": ["contract-A141"] },
+        { "id": "CM", "label": "CM (A133/A134)", "sets": ["contract-CM"] },
+        { "id": "not-sure", "label": "Other / not sure", "sets": [] }
+      ]},
+      { "id": "delivery", "ask": "Delivery method", "type": "one", "from": "contract.delivery", "options": [
+        { "id": "DBB", "label": "Design-bid-build", "sets": ["delivery-DBB"] },
+        { "id": "CMAR", "label": "CM at risk", "sets": ["delivery-CMAR"] },
+        { "id": "DB", "label": "Design-build", "sets": ["delivery-DB"] }
+      ]}
+    ]}
+  ]
+}

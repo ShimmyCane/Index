@@ -17,7 +17,9 @@ Its private counterpart is `ShimmyAI`, a private repo where family and personal 
 | `04 AI/` | Claude's working folder: `lessons_pool.md` (consolidated lessons), `patterns.md`, preferences, tools notes, per-project `brief.md` + `lessons.md` | Claude |
 | `.claude/skills/` | Thin wrappers pointing to `02 Refs/Skills/*.md`, so skills run as `/name` | Claude, when a skill is added in 02 |
 
-`readme.md` and `index.html` are human-only. Never edit them.
+`readme.md` is human-only. Never edit it.
+
+`index.html` (the nursery home page) is human-only, with one exception: adding a new project link to its Nursery list. Before adding one, confirm once with Jimmy. Never make any other change to it.
 
 ## Before starting work on a project
 
@@ -40,6 +42,7 @@ Its private counterpart is `ShimmyAI`, a private repo where family and personal 
 
 - **Never commit** family or financial data, real names with personal details beyond a first name, school or location details, health details, credentials, or private documents. Use synthetic or redacted samples.
 - Never commit secret keys. Supabase *publishable* keys may appear in browser code. Service-role keys and passwords may not appear anywhere in the repo.
+- Run `02 Refs/Skills/scripts/privacy_scan.sh --staged` before every commit (or `/privacy-check`). Owner-only database rules use `public.platform_is_owner()`, never an email (see `04 AI/Supabase/platform_owner.sql`).
 - Convo files are public too. Keep personal details out of them.
 - If a project needs private data, put it in a folder named `private/` under its project folder. `.gitignore` excludes those folders.
 - If unsure whether something is private, ask Jimmy before committing.
@@ -48,7 +51,7 @@ Its private counterpart is `ShimmyAI`, a private repo where family and personal 
 
 Run as `/name`. Each wraps `02 Refs/Skills/<name>.md`, which is the version to edit.
 
-`start-project` · `ipad-website` · `summarize-code` · `simplify-code` · `update-lessons-learned` · `ai-consolidate` · `claude-review-project` · `supabase-project` · `fix-puzzles`
+`start-project` · `ipad-website` · `settings-gear` · `summarize-code` · `simplify-code` · `update-lessons-learned` · `ai-consolidate` · `claude-review-project` · `supabase-project` · `fix-puzzles` · `make-3d` · `simulate-decay` · `read-notes-and-update` · `smoke-test` · `privacy-check` · `bake-cache` · `ai-json-loop` · `feedback-notes` · `supabase-link` · `project-track`
 
 Supabase conventions and the app registry live in `04 AI/Supabase/`.
 

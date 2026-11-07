@@ -10,8 +10,10 @@
 * **Color Palette**: Light pastel color schemes (e.g. soft vanilla, sage, peach, mint, coral). Avoid harsh high-contrast black/white or neon tones unless specifically asked.
 * **Graphics & Styling**: Simple, bold lines (2.5px – 3.5px solid dark borders) with tactile depth (`box-shadow: 0 4px 0 ...`). Avoid stark wireframes; make it graphically rich, cute, and engaging.
 * **Focus & Simplicity**: Minimize text, nested menus, and clutter. Keep the primary activity / game board front and center.
-* **Settings & Extensions Anchor**: Place a dedicated **floating gear button (`⚙️`) in the lower-right corner** that opens a clean drawer or modal for options and extensions.
+* **Settings & Extensions Anchor**: Place a dedicated **floating gear button (`⚙️`) in the lower-right corner** that opens a clean drawer or modal for options and extensions. Full build rules: `02 Refs/Skills/settings_gear.md`.
 * **Errors at the bottom**: Error messages should appear at the bottom of the page (not as top banners), behind a "Show errors" toggle in the gear panel. Never force errors on screen — users should opt in.
+* **Two tracks** (`02 Refs/Skills/project_track.md`): **A. Family play** is simple, graphic and short on words, with everything secondary in ⚙️. **B. Studio design** (architecture, 3-D, specifications) is denser and more formal, with more options and words, still in orderly panels.
+* **Collapsible by default**: every panel has a header with an icon and a name, and a ▸/▾ marker. Collapsing keeps the header visible, so the screen stays graphically clear. Track A starts closed on a small screen.
 * **Large Buttons**: Generous touch targets suited for tablet fingers (minimum 48px to 68px heights).
 * **Layout details** (two-column play/reference layout, decluttering into settings, no layout jumps): see `02 Refs/Skills/ipad_website.md`.
 * **Offline-first caching is valued**: Jimmy explicitly praised the 3-tier offline fallback pattern (live API → localStorage cache → bundled JSON). Preserve and honor this pattern in web apps that load remote data.
@@ -34,6 +36,13 @@
 * **Show the full solution space**, not a slice with variables held fixed.
 * **Toggleable stacked panels (+/−)** instead of tabs that replace each other.
 * **Animate organizing** (e.g. Sort into piles of 5/10) so structure is visible.
+
+## 2c. Animation and 3-D (from Make 3D, round 7)
+* **Animations always loop.** Paths are organic, with turns, and close on themselves; the length is whatever makes a full loop.
+* **Autoplay twice, then pause** and wait for ▶. Play, back-to-start and a time slider sit under the scene; speed and autoplay go in ⚙️.
+* **Two-finger pinch zooms** any 3-D canvas on iPad.
+* **Interaction later:** tap a part to start a motion, and chain motions (the door opens, then the cuckoo comes out).
+* **Long lists fold up:** a project with many increments is one row, its older versions unfold on tap, and the most recently changed project is on top.
 
 ## 3. Architecture & Code Structure
 * **Zero Server / All Client-Side**:
@@ -67,3 +76,15 @@
 * **Reuse the Family Habits look** for any new family app: Quicksand, Orbitron and Patrick Hand; ink, paper and sun palette; offset shadows; asymmetric radii; polka dots.
 * **Visible failures on the page** for any app that talks to a database: an error panel, a header status pill and a database check in ⚙️. Don't rely on DevTools.
 * **Publish the family apps where they actually run.** Artifacts can't run the microphone or the database, so use GitHub Pages for those.
+
+## 6. Realism studies (2026-11-03, from Paper Again)
+* **When Jimmy asks for realism, he means physical, not cartoon.** Ask for the target look before building. Pastel stays for kids' games.
+* **Show the limits with the result.** Jimmy values a result that says what it is not.
+* **He wants to see it, then decide.** Merge when asked, not before.
+* **Plan the story in words and numbers first,** look at it, then run it in 3-D. He wants a page that reads like the prompt he would say: here is the thing, here is the environment, here are the steps the AI imagines.
+* **A page should do something new,** not repeat a viewer he already has.
+
+## 7. Reviewing 3-D (from Cornice, 2026-11-03)
+* **Rotate the view.** Show a 3-D model from several angles, not only the default camera. The first look can hide the layout.
+* **Sweep when he asks for curves.** Arcs and curves on a moulding are a sweep along the path, not stepped slices.
+* **Walls meet the floor and the ceiling line.** Nothing should float under a cornice; if he says it looks off, check for a gap first.
