@@ -1,7 +1,7 @@
 # What to Cook — AI Brief
 
-**Updated:** 2026-11-07 (consolidated after the notes and food-list round)
-**Status:** Version 0.4.0. Pantry is saved to the Family database (sign-in works; pantry rows reach `wtc_items`). Notes reach `wtc_notes`. Food list page (`foods.html`, linked from Settings → Pages) saves to `wtc_foods`. Both new paste files are written but not yet pasted into the live database.
+**Updated:** 2026-11-07 (consolidated: version 0.6.0; to-do in `todo.md`)
+**Status:** Version 0.6.0 (food list, recipe book with 50 starter cards, to-do panel). Open drafts: #121, #122, #124. Pantry is saved to the Family database (sign-in works; pantry rows reach `wtc_items`). Notes reach `wtc_notes`. Food list page (`foods.html`, linked from Settings → Pages) saves to `wtc_foods`. Both new paste files are written but not yet pasted into the live database.
 
 ## Goal
 
@@ -36,7 +36,7 @@ A family kitchen tool: stock from memos, typed lists and (later) photos; tells t
 - The "a few other things not built" note (6 Nov 23:44) is unnamed and was skipped.
 - Merge of tables (`wtc_recipe_ingredients` into recipes, and similar) was raised, not decided. Renaming tables was declined: it would break the live data.
 
-## Next steps
+## Next steps (see todo.md for the full list)
 
 1. Jimmy pastes `supabase/what_to_cook_MVP.sql` into the Family SQL editor (it includes `wtc_foods`, so `foods_what_to_cook.sql` is not needed) and sends back the check rows. It adds `wtc_journal_entries`, `wtc_journal_ratings` (provisional, convo v0.3) and two columns on `wtc_items` (`stamped_on`, `fridge_days`).
 2. Jimmy adds a food on the Food list page, signed in, and confirms it appears in `wtc_foods` (test a save before building on it).

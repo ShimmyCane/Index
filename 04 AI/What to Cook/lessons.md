@@ -15,3 +15,9 @@ Project-specific lessons, appended over time. Reusable ones go to `04 AI/lessons
 - (2026-11-07) Each new table gets its own paste file, and the file that is already applied is never edited. That kept `what_to_cook_setup.sql` unchanged when `wtc_notes` and `wtc_foods` were added.
 - (2026-11-07) Feedback notes sit on the device until they sync. Say which copy the user is looking at, because "nothing took" was the device copy, not a failed save.
 - (2026-11-07) When a user asks for "delete" on feedback, the read-notes rule is to keep the rows and mark them done. Offer the choice with the trade-off, and delete only on written confirmation.
+- (2026-11-07) A page that loads its data with `fetch` will not load from a file opened directly. Test it through a local server (`python3 -m http.server`), the same way GitHub Pages serves it.
+- (2026-11-07) Dark mode turned the page text light while panels stayed white, so text was nearly invisible on phones. Give white surfaces their own dark text colour, and check contrast in both light and dark modes in a headless run.
+- (2026-11-07) A pantry matched by keyword ("egg" for "Eggs" and "Duck eggs") is quick and good enough for a first pass. Say so on the page, and list the matches to check.
+- (2026-11-07) Estimated expiry dates go in the notes with a "?" and are not presented as facts. The "use soon" list is the reminder.
+- (2026-11-07) Consolidated the to-do list by who has to act (Jimmy or Claude), with finished items in one short block. Duplicates from earlier rounds were dropped; the convo files keep the history.
+
