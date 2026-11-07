@@ -15,7 +15,7 @@ A family kitchen tool: stock from memos, typed lists and (later) photos; tells t
 - Database, Family project (`twvqvutrcobedvuhnzxq`), all tables `wtc_*`, RLS on, anon revoked, signed-in policy, registered to app `what-to-cook`:
   - Applied (from `supabase/what_to_cook_setup.sql`): `wtc_items`, `wtc_checkins`, `wtc_recipes`, `wtc_recipe_ingredients`, `wtc_recipe_trials`, `wtc_taste_votes`, `wtc_food_log`, `wtc_plan`, `wtc_shopping`, `wtc_transcripts`, `wtc_photos`.
   - Applied by Jimmy (2026-11-07, verified by a read-only query): `wtc_notes`. Four rows, all status `done`.
-  - Written, not yet applied: `wtc_foods` (`supabase/foods_what_to_cook.sql`). Its check should show rls_on true, policies 1, anon_grants 0, registered 1.
+  - Written, not yet applied: `wtc_foods` (`supabase/foods_what_to_cook.sql`, and again inside `supabase/what_to_cook_MVP.sql`), plus `wtc_journal_entries` and `wtc_journal_ratings` (MVP file, provisional). Checks: rls_on true, policies 1, anon_grants 0, registered 1.
 - Duplicate rule (pantry): a partial unique index `wtc_items_stock_key` on (lower(name), coalesce(expires_on, 1900-01-01), stored_location) where status = 'in_stock'. Same key overwrites; a new expiry date is a new line.
 - Duplicate rule (food list): a partial unique index `wtc_foods_name_location_key` on (lower(name), location) where name is not blank. Same food in the same place is one row.
 - Notes: the Notes log writes to the device first and then to `wtc_notes` on sync (when signed in). Notes marked done are kept, not deleted (status `done`, text prefixed `Done- `).
@@ -38,7 +38,7 @@ A family kitchen tool: stock from memos, typed lists and (later) photos; tells t
 
 ## Next steps
 
-1. Jimmy pastes `supabase/foods_what_to_cook.sql` into the Family SQL editor and sends back the one-row check.
+1. Jimmy pastes `supabase/what_to_cook_MVP.sql` into the Family SQL editor (it includes `wtc_foods`, so `foods_what_to_cook.sql` is not needed) and sends back the check rows. It adds `wtc_journal_entries`, `wtc_journal_ratings` (provisional, convo v0.3) and two columns on `wtc_items` (`stamped_on`, `fridge_days`).
 2. Jimmy adds a food on the Food list page, signed in, and confirms it appears in `wtc_foods` (test a save before building on it).
 3. Auto-stamp: when a pantry item goes in, set its fridge days and expiry from the food list. Later build; after the list has entries.
 4. Photo route: Claude writes rows straight to `wtc_items` (upsert on the conflict key).
