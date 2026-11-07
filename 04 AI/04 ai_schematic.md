@@ -4,6 +4,7 @@ Claude's working folder for the Index nursery. It holds the consolidated lessons
 Layout:
 - 04 ai_schematic.md — this file.
 - lessons_pool.md — consolidated lessons learned across seed projects, grouped by topic. Read first.
+- ai_task_tracker.md — shared list of open work across projects, and open PRs waiting on a decision.
 - project_review_2026-11-03.md — review of all six projects: promotion readiness, privacy flags, open items for Jimmy.
 - patterns.md — reusable patterns and template candidates.
 - Personal Preferences/jimmy_preferences.md — design and workflow preferences. Auto-loaded through the root `CLAUDE.md`.
