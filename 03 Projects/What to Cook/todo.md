@@ -32,6 +32,12 @@ All the new tables and columns the to-do list needs are compiled into one file: 
 - [ ] Not included, decide first: owner-only calorie log. Needs `04 AI/Supabase/platform_owner.sql` pasted first (`platform_owners` does not exist in the Family project yet).
 - [ ] Open (convo v0.3 questions 4–8): app name, cuisine list or free tags, restaurant fields, brand links to pantry items, kids' access to the journal. The journal tables are provisional until these are answered.
 
+## Recipe book (convo v0.7, 2026-11-07)
+
+- [ ] Answer convo v0.7 questions 1–7 (version names, dish and version, who edits, Athena and Felix, votes, pantry links, photos).
+- [ ] Add `dish` and `version_by` to `wtc_recipes` (paste file, after the answers).
+- [ ] Build the recipe list: one dish with its versions, each with its own ingredients, steps, trials and votes. Test headless at phone width.
+
 ## Earlier items
 
 See `convo/convo v0.2.md`, `convo v0.3.md` (food journal) and `convo v0.4.md` (pantry behaviour, open items 12–13).
