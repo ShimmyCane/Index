@@ -29,7 +29,7 @@ A family kitchen tool: stock from memos, typed lists and (later) photos, tells t
 - Read 4 open notes from `wtc_notes`: fridge life stamp, master list of fridge life, fridge and kitchen buttons, plus one unnamed "other things" and one test note.
 - Confirmed: notes reach `wtc_notes` from the device, and pantry rows reach `wtc_items`.
 - Not built: fridge life, master list, kitchen button. Questions Q1–Q5 are in `convo/convo v0.5.md`.
-- No notes marked done yet; the table is unchanged until Jimmy confirms.
+- Jimmy chose "mark done" (not delete) for all four notes; they are status done with the "Done- " prefix. Nothing deleted.
 
 ## Next steps
 

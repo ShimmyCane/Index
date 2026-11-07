@@ -13,6 +13,8 @@ Status key: **built** (code shows it), **new** (not in code), **question** (need
 - [ ] **Clarify the unbuilt list.** The note from 2026-11-06 23:44 says "a few other things that are not built" but does not name them. Status: **question**. Question Q4 in convo v0.5.
 - [ ] **Test note.** "Test note 1 round two" (2026-11-07 00:45) looks like a test, not feedback. Status: **question**. Question Q5 in convo v0.5: leave it open or mark it done.
 
+Notes marked done on 2026-11-07 after Jimmy's confirmation (status done, text prefixed "Done- "). The items above stay open until built or answered.
+
 ## Earlier items
 
 See `convo/convo v0.2.md`, `convo v0.3.md` (food journal) and `convo v0.4.md` (pantry behaviour, open items 12–13).
