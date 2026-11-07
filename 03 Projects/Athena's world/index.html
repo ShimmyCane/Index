@@ -129,7 +129,7 @@
     .gear {
       position: fixed;
       right: 18px;
-      bottom: 18px;
+      bottom: calc(18px + env(safe-area-inset-bottom));
       width: 68px;
       height: 68px;
       display: grid;
@@ -140,21 +140,97 @@
       border-radius: 50%;
       box-shadow: 0 4px 0 var(--ink);
       cursor: pointer;
-      z-index: 5;
+      z-index: 30;
     }
     .drawer {
       position: fixed;
       right: 18px;
       bottom: 100px;
-      width: min(280px, calc(100vw - 36px));
-      display: grid;
-      gap: 10px;
+      width: min(360px, 92vw);
+      max-height: 70vh;
+      overflow-y: auto;
       padding: 14px;
       background: var(--paper);
       border: var(--line);
       border-radius: 24px;
       box-shadow: 0 6px 0 var(--ink);
-      z-index: 5;
+      z-index: 40;
+    }
+    .drawerHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .drawerHead h2 { margin: 0; font-size: 22px; }
+    .mini {
+      min-width: 48px;
+      min-height: 48px;
+      font-size: 20px;
+      background: #fff;
+      border: var(--line);
+      border-radius: 14px;
+      cursor: pointer;
+    }
+    .setting { padding: 10px 0; display: grid; gap: 8px; }
+    .setting > label { font-weight: 700; font-size: 17px; }
+    .sub { font-size: 14px; margin: 0; }
+    .seg { display: flex; gap: 8px; }
+    .seg button {
+      flex: 1;
+      min-height: 52px;
+      font: 700 18px system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #fff;
+      border: var(--line);
+      border-radius: 16px;
+      cursor: pointer;
+    }
+    .seg button.on { background: var(--mint); }
+    .toggle { display: flex; align-items: center; gap: 10px; min-height: 48px; font-weight: 700; font-size: 17px; }
+    .toggle input { width: 26px; height: 26px; }
+    .notesBox { display: grid; gap: 8px; }
+    .notesBox textarea {
+      font: 17px system-ui, -apple-system, "Segoe UI", sans-serif;
+      padding: 10px;
+      border: var(--line);
+      border-radius: 14px;
+      background: #fff;
+      color: var(--ink);
+    }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .row button, .row select {
+      min-height: 48px;
+      padding: 0 12px;
+      font: 700 16px system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #fff;
+      border: var(--line);
+      border-radius: 14px;
+      cursor: pointer;
+    }
+    .noteList { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-height: 26vh; overflow-y: auto; }
+    .noteList li {
+      background: #fff;
+      border: 2px solid var(--ink);
+      border-radius: 14px;
+      padding: 8px 10px;
+      font-size: 15px;
+      white-space: pre-wrap;
+    }
+    .info { font-size: 14px; line-height: 1.5; }
+    .info ul { margin: 4px 0 0; padding-left: 20px; }
+
+    /* Errors: opt-in, at the bottom, clear of the gear */
+    .errorsPanel {
+      position: fixed;
+      left: 16px;
+      right: 100px;
+      bottom: 16px;
+      max-height: 30vh;
+      overflow: auto;
+      z-index: 25;
+      padding: 8px 12px;
+      background: #fff0ee;
+      border: var(--line);
+      border-radius: 16px;
+      font: 14px ui-monospace, Menlo, monospace;
+      white-space: pre-wrap;
     }
 
     /* Finished-house card */
@@ -189,6 +265,8 @@
       .room { max-width: 100%; }
       .side { overflow: visible; padding-bottom: 110px; }
     }
+
+    @media print { .gear, .drawer, .errorsPanel { display: none !important; } }
   </style>
 </head>
 <body>
@@ -211,13 +289,56 @@
     </aside>
   </div>
 
-  <button class="gear" id="gear" type="button" aria-label="Settings">⚙️</button>
+  <button class="gear" id="gear" type="button" aria-label="Settings" aria-expanded="false" aria-controls="drawer">⚙️</button>
 
-  <div class="drawer" id="drawer" hidden>
-    <button class="btn" id="sound" type="button"></button>
-    <button class="btn" id="clear" type="button">🧹 Empty this house</button>
-    <button class="btn ghost" id="close" type="button">Close</button>
-  </div>
+  <aside class="drawer" id="drawer" hidden>
+    <div class="drawerHead">
+      <h2>Settings</h2>
+      <button class="mini" id="closeDrawer" type="button" aria-label="Close">✖</button>
+    </div>
+
+    <div class="setting">
+      <label>Sound</label>
+      <div class="seg" data-key="sound">
+        <button type="button" data-v="1">On</button>
+        <button type="button" data-v="0">Off</button>
+      </div>
+    </div>
+
+    <div class="setting">
+      <button class="btn" id="clear" type="button">🧹 Empty this house</button>
+      <p class="sub">Takes everything out of this house. Undo brings it back.</p>
+    </div>
+
+    <div class="setting">
+      <label class="toggle"><input type="checkbox" id="showErrors"> Show errors</label>
+    </div>
+
+    <div class="setting notesBox" id="notesBox">
+      <label>Notes for improvement</label>
+      <textarea id="noteText" rows="3" placeholder="What would make this better?"></textarea>
+      <div class="row">
+        <button id="noteSave" type="button">Save note</button>
+        <button id="noteCopy" type="button">Copy notes</button>
+        <select id="noteFilter" aria-label="Show notes">
+          <option value="open">Open</option>
+          <option value="all">All</option>
+        </select>
+      </div>
+      <ul class="noteList" id="noteList"></ul>
+    </div>
+
+    <div class="setting info">
+      <label>About</label>
+      <div>Version <span id="version"></span></div>
+      <ul>
+        <li><b>0.2.0</b> Settings, notes for improvement, error panel, version info.</li>
+        <li><b>0.1.0</b> First playable: white room, houses, things, tap to move, Undo, next house.</li>
+      </ul>
+    </div>
+  </aside>
+
+  <div class="errorsPanel" id="errorsPanel" hidden></div>
 
   <div class="modal" id="done" hidden>
     <div class="card">
@@ -231,6 +352,7 @@
 
   <script>
     // ---- Houses and things. Edit these lists to change the game. ----
+    const VERSION = '0.2.0';
     const HOUSES = [
       { name: "Athena's house", needs: ['bed', 'window', 'picture'] },
       { name: 'Cosy house', needs: ['bed', 'sofa', 'window'] },
@@ -264,9 +386,72 @@
     const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
     const cap = s => s[0].toUpperCase() + s.slice(1);
 
+    // ---- Errors: always recorded, shown only when "Show errors" is on ----
+    const errors = [];
+    function logError(message) {
+      errors.push(new Date().toLocaleTimeString() + '  ' + message);
+      renderErrors();
+    }
+    function renderErrors() {
+      const box = $('errorsPanel');
+      box.hidden = !settings.showErrors;
+      box.textContent = errors.length ? errors.join('\n') : 'No problems so far.';
+    }
+    window.addEventListener('error', e => logError(e.message));
+    window.addEventListener('unhandledrejection', e => logError(String(e.reason)));
+
+    // ---- Settings (one object, saved on this device) ----
+    const DEFAULTS = { sound: 1, showErrors: false };
+    let settings = { ...DEFAULTS, ...store.get('athena.settings', {}) };
+    const saveSettings = () => store.set('athena.settings', settings);
+
+    // ---- Notes for improvement (saved on this device, sent nowhere) ----
+    let notes = store.get('athena.notes', []);
+    const saveNotes = () => store.set('athena.notes', notes);
+    let noteWhere = { page: 'index.html', item: '', label: '' };
+    function setNoteContext(label, item) {
+      noteWhere = { page: 'index.html', item: item || '', label: label };
+    }
+    function renderNotes() {
+      const filter = $('noteFilter').value;
+      const list = $('noteList');
+      list.replaceChildren(...notes
+        .filter(n => filter === 'all' || n.status === 'open')
+        .slice()
+        .sort((a, b) => a.at < b.at ? 1 : -1)
+        .map(n => {
+          const li = document.createElement('li');
+          const where = n.where && n.where.label ? n.where.label + ' · ' : '';
+          li.textContent = (n.status === 'done' ? '✅ ' : '📝 ') + where + new Date(n.at).toLocaleString() + '\n' + n.text;
+          return li;
+        }));
+    }
+    function addNote() {
+      const box = $('noteText');
+      const text = box.value.trim();
+      if (!text) return;
+      notes.push({
+        id: 'n-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+        at: new Date().toISOString(),
+        status: 'open',
+        text: text,
+        where: noteWhere,
+        version: VERSION
+      });
+      box.value = '';
+      saveNotes();
+      renderNotes();
+    }
+    $('noteSave').onclick = addNote;
+    $('noteFilter').onchange = renderNotes;
+    $('noteCopy').onclick = () => {
+      const out = JSON.stringify(notes, null, 2);
+      if (navigator.clipboard) navigator.clipboard.writeText(out).catch(() => window.prompt('Copy the notes:', out));
+      else window.prompt('Copy the notes:', out);
+    };
+
     // ---- State ----
     let unlocked = store.get('athena.unlocked', 1);   // how many houses can be chosen
-    let sound = store.get('athena.sound', true);
     let current = 0;
     let held = null;                                   // the item waiting for a tap
     const rooms = HOUSES.map(() => ({ pos: {}, history: [], done: false }));
@@ -275,7 +460,7 @@
     // ---- Sound (Web Audio, no files) ----
     let audio = null;
     function blip(freq, dur = 0.12, type = 'sine') {
-      if (!sound) return;
+      if (!settings.sound) return;
       try {
         audio = audio || new (window.AudioContext || window.webkitAudioContext)();
         const o = audio.createOscillator();
@@ -320,6 +505,7 @@
       discardUnplacedHeld();
       if (!R.pos[t]) R.pos[t] = { x: TRAY.x, y: TRAY.y, placed: false }; // new item appears up here
       held = t;
+      setNoteContext(`${HOUSES[current].name} · ${ITEMS[t].label}`, `house-${current}/${t}`);
       blip(520, 0.08);
       render();
     }
@@ -363,6 +549,7 @@
       if (i >= unlocked) return;
       discardUnplacedHeld();
       current = i;
+      setNoteContext(HOUSES[current].name, `house-${current}`);
       for (const t in itemEls) { itemEls[t].remove(); delete itemEls[t]; }
       render();
     }
@@ -413,7 +600,16 @@
         ? `Tap the room to put the ${ITEMS[held].label} there.`
         : Object.keys(R.pos).length ? 'Tap something in the room to move it.' : 'Tap something on the right to start.';
 
-      $('sound').textContent = sound ? '🔊 Sound: on' : '🔇 Sound: off';
+      renderSettings();
+    }
+
+    function renderSettings() {
+      document.querySelectorAll('.seg').forEach(seg => {
+        const v = String(settings[seg.dataset.key]);
+        seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+      });
+      $('showErrors').checked = !!settings.showErrors;
+      renderErrors();
     }
 
     function button(text) {
@@ -424,14 +620,19 @@
       return b;
     }
 
-    // ---- Panels ----
-    $('gear').onclick = () => { $('drawer').hidden = !$('drawer').hidden; };
-    $('close').onclick = () => { $('drawer').hidden = true; };
-    $('sound').onclick = () => {
-      sound = !sound;
-      store.set('athena.sound', sound);
-      render();
-    };
+    // ---- Settings drawer ----
+    const gear = $('gear'), drawer = $('drawer');
+    const setOpen = open => { drawer.hidden = !open; gear.setAttribute('aria-expanded', String(open)); };
+    gear.onclick = () => setOpen(drawer.hidden);
+    $('closeDrawer').onclick = () => setOpen(false);
+    document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+      const v = b.dataset.v;
+      settings[b.parentElement.dataset.key] = +v;
+      saveSettings();
+      renderSettings();
+      if (b.parentElement.dataset.key === 'sound' && +v === 1) blip(660, 0.1);
+    }));
+    $('showErrors').onchange = e => { settings.showErrors = e.target.checked; saveSettings(); renderErrors(); };
     $('clear').onclick = () => {
       const R = room();
       if (!Object.keys(R.pos).length) return;
@@ -439,9 +640,10 @@
       R.pos = {};
       held = null;
       R.done = false;
-      $('drawer').hidden = true;
+      setOpen(false);
       render();
     };
+    $('version').textContent = VERSION;
     $('next').onclick = () => {
       $('done').hidden = true;
       if (current + 1 < HOUSES.length) selectHouse(current + 1);
@@ -449,6 +651,8 @@
     };
     $('stay').onclick = () => { $('done').hidden = true; };
 
+    setNoteContext(HOUSES[current].name, `house-${current}`);
+    renderNotes();
     render();
   </script>
 </body>

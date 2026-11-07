@@ -18,6 +18,14 @@ A decorating game. Athena picks who a house or workplace is for, then decorates 
 - **Wall things (window, picture)** stay on the wall. **Floor things (bed, sofa, plant)** stay on the floor.
 - **Finishing:** when all the listed things are placed, a celebration card appears and the next house unlocks.
 
+## Settings, notes and version
+
+- **⚙️ (lower right)** opens the Settings drawer: Sound on or off, "Empty this house", Show errors, Notes for improvement, and About (version and changelog). Follows `02 Refs/Skills/settings_gear.md`.
+- **Show errors** is off by default. Errors are always recorded, and turning the switch on shows the bottom panel with any that already happened.
+- **Notes for improvement** save on this device only, under `athena.notes`. Each note records the house and the thing picked (for example "Athena's house · bed"), the time and the version. Copy notes puts them on the clipboard. Nothing is sent anywhere. Follows `02 Refs/Skills/feedback_notes.md`.
+- **Version** is `VERSION` at the top of the script. Add a line to the changelog in the drawer when it changes.
+- No database. Only the unlocked houses and the settings are kept on the device.
+
 ## Files
 
 - `index.html` — the whole game (HTML, CSS, JS, Web Audio). The house and item lists are at the top of the script.
