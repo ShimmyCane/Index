@@ -36,6 +36,8 @@ One current list (consolidated 2026-11-07). The history lives in the convo files
 
 ## Done (2026-11-07)
 
+- [x] Code review: shared helpers (storage, errors, ids), sync out of `app.js`, screens split by feature (core, content, pantry, capture, settings), and cuisine names aligned. Tested headless: pantry flow, sign-in, sync with a mocked network, recipe filters.
+
 - [x] Pantry saves to the Family database; sign-in works.
 - [x] Notes save to the database, and done notes show ✅ in the Notes log (0.5.0).
 - [x] To-do panel in Settings with ✅ and ⬜ (0.5.0).

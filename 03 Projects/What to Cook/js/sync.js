@@ -1,12 +1,12 @@
 /* What to Cook — sync with the family database: pull, push, and the status pill.
  * app.js creates it with WTCSync.create(ctx), passing the state it needs.
- * Pull is the only place the item list is replaced; it goes back through ctx.setItems. */
+ * Pull is the only place the item list is replaced; it goes back through ctx.replaceItems. */
 (function (root) {
   'use strict';
   function create(ctx) {
     var DB = ctx.DB, KEY = ctx.KEY;
     var checks = ctx.checks, transcripts = ctx.transcripts, notes = ctx.notes;
-    var getItems = ctx.getItems, setItems = ctx.setItems;
+    var items = ctx.items, replaceItems = ctx.replaceItems;
     var find = ctx.find, write = ctx.write, reportError = ctx.reportError;
     var renderAll = ctx.renderAll, renderNotes = ctx.renderNotes;
     var isUuid = root.WTCUtil.isUuid, newUuid = root.WTCUtil.newUuid;
@@ -35,7 +35,7 @@
     }
 
     function unsentCount() {
-      return getItems().filter(function (it) { return it.dirty; }).length +
+      return items.filter(function (it) { return it.dirty; }).length +
         checks.filter(function (c) { return !c.synced; }).length +
         transcripts.filter(function (t) { return !t.synced; }).length;
     }
@@ -64,10 +64,10 @@
     function pull() {
       return DB.select('wtc_items', 'select=*&order=updated_at.desc&limit=2000').then(function (res) {
         var dirtyIds = {};
-        getItems().forEach(function (it) { if (it.dirty) dirtyIds[it.id] = true; });
+        items.forEach(function (it) { if (it.dirty) dirtyIds[it.id] = true; });
         var remote = (res.data || []).filter(function (r) { return !dirtyIds[r.id]; }).map(fromRow);
-        setItems(getItems().filter(function (it) { return it.dirty; }).concat(remote));
-        write(KEY.items, getItems());
+        replaceItems(items.filter(function (it) { return it.dirty; }).concat(remote));
+        write(KEY.items, items);
         renderAll();
       });
     }
@@ -131,16 +131,16 @@
       syncing = true;
       setStatusPill('syncing…');
       var chain = Promise.resolve();
-      getItems().filter(function (it) { return it.dirty; }).forEach(function (it) {
+      items.filter(function (it) { return it.dirty; }).forEach(function (it) {
         chain = chain.then(function () { return pushItem(it); });
       });
       return chain.then(pushLog).then(function () {
         syncing = false;
-        write(KEY.items, getItems()); write(KEY.checks, checks); write(KEY.transcripts, transcripts); write(KEY.notes, notes);
+        write(KEY.items, items); write(KEY.checks, checks); write(KEY.transcripts, transcripts); write(KEY.notes, notes);
         setStatusPill('synced ' + new Date().toLocaleTimeString());
       }, function (e) {
         syncing = false;
-        write(KEY.items, getItems()); write(KEY.checks, checks); write(KEY.transcripts, transcripts); write(KEY.notes, notes);
+        write(KEY.items, items); write(KEY.checks, checks); write(KEY.transcripts, transcripts); write(KEY.notes, notes);
         setStatusPill('not synced');
         reportError('Sync: ' + DB.explain(e));
       });
