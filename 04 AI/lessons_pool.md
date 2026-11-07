@@ -78,6 +78,10 @@ Companion files: `patterns.md` (reusable patterns and template candidates), `Per
 11. **Pick the chart for the question.** A pie answers "what made up this year?"; grouped bars or lines answer "how did it change?" _(Family Accounting)_
 12. **Make decisions on a single source of truth.** A PDF or DXF writer or other output should come from one primitive list in real units, so every output matches. _(Quick Detail)_
 13. **Record relationships when they're created**, not guessed later. A leader tip that records its exact target beats a proximity guess. _(Quick Detail)_
+16. **Allow button rows to wrap at phone width.** A five-tab row pushed the page sideways at 390 px until `flex-wrap: wrap` was added. Check every new page at phone width in a headless run. _(What to Cook)_
+17. **Check the test order before blaming the page.** A "0 cards" result came from a test that switched tabs in the wrong order. _(What to Cook)_
+18. **One paste file per table, never edit an applied file.** New tables go in their own file, so the applied setup stays as it was. _(What to Cook)_
+19. **Feedback is marked done, not deleted.** Keep the rows, set status done, and ignore done items in later reviews. Delete only on written confirmation, since it can't be undone. _(What to Cook)_
 14. **Create the shared namespace in every file that uses it** (`NS = NS || {}`). A file that copies a namespace at load time sees `undefined` if it loads first. Browser smoke tests catch it; Node tests do not. _(Shimmy Specs)_
 15. **Store the data version with saved state.** A restored game can hold items no longer in the data; drop the save on a version mismatch. _(Chinese Character Sudoku)_
 

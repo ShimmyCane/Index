@@ -34,6 +34,8 @@ Reusable lessons distilled from the seed projects, so a new project can start fr
 - Only the publishable key goes in browser code; never the service-role key.
 - Add an in-app diagnostics check that pings each table. _(Family Habits)_
 - **One shared Family Supabase project:** family apps reuse its login and `family_members`. Each app prefixes its own tables (`allowance_*`, `storytime_*`, `speech_*`) and registers them in `app_table_registry`. Rules and template SQL are in `Supabase Registry/`. _(Allowances, StoryTime, Speech Therapy)_
+- **One paste file per table, applied files never edited.** A new table or feature goes in its own SQL file with its own check row; the applied setup stays untouched. _(What to Cook)_
+- **Feedback is marked done, not deleted.** Done items are ignored in later reviews; deletion is a written request only. _(What to Cook)_
 - **Host apps that need a microphone, database or downloads on GitHub Pages, not Artifacts.** See `Tools/artifacts.md`. _(Speech Therapy)_
 
 ## Content and data projects

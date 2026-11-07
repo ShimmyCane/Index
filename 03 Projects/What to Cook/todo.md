@@ -15,6 +15,15 @@ Status key: **built** (code shows it), **new** (not in code), **question** (need
 
 Notes marked done on 2026-11-07 after Jimmy's confirmation (status done, text prefixed "Done- "). The items above stay open until built or answered.
 
+## Round 2026-11-07, answered in convo v0.6
+
+- [x] Food list page linked from Settings (Pages): `foods.html`, saves to `wtc_foods`. Built, not yet pasted into the database.
+- [ ] Paste `supabase/foods_what_to_cook.sql` into the Family SQL editor and send back the one-row check.
+- [ ] Auto-stamp fridge days when an item goes in (from the food list). Later build.
+- [x] Q3: places tagged and shown by tapping Fridge, Freezer, Pantry or Other.
+- [x] Q4 skipped at Jimmy's request.
+- [x] Q5: done items are ignored from future review, not deleted.
+
 ## Earlier items
 
 See `convo/convo v0.2.md`, `convo v0.3.md` (food journal) and `convo v0.4.md` (pantry behaviour, open items 12–13).

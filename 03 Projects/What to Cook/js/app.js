@@ -3,14 +3,16 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.3.0';
+  var VERSION = '0.4.0';
   var VERSIONS = [
+    { v: '0.4.0', date: '2026-11-07', text: 'Food list page (from Settings → Pages): each food with its place (fridge, pantry, freezer, other), kind, category, fridge days and notes. Saves to the family database; blanks allowed. Notes now saved to the database too.' },
     { v: '0.3.0', date: '2026-11-06', text: 'Family database wired: sign in with the family login, changes sync to the family pantry, same name, expiry and place overwrite on the server, database check in settings. The device keeps its own copy and works offline.' },
     { v: '0.2.0', date: '2026-11-06', text: 'Use-soon cards for food about to expire. Swipe left for ate or tossed, right to remain, tap for a favourite. Quantity tweak with Save and next. Predicted index for things eaten over time, with ate more / about right / ate less. Apple Voice Memo input. Same name, expiry and place overwrites; a new expiry makes a new line. Settings: pages, transcript archive, version log, notes log.' },
     { v: '0.1.0', date: '2026-11-06', text: 'Pantry with swipe check-ins, transcript capture with review, notes for improvement, opt-in errors.' }
   ];
   var PAGES = [
     { label: '🥫 Pantry', tab: 'pantry' },
+    { label: '🧾 Food list (fridge days and places)', href: 'foods.html' },
     { label: '🎙️ Add from a memo or list', tab: 'capture' },
     { label: '📖 Recipe book', planned: 'after the pantry is wired to the database' },
     { label: '🥘 Food Lab (cuisines; name to confirm)', planned: 'convo v0.3' },
@@ -534,7 +536,11 @@
     ul.textContent = '';
     PAGES.forEach(function (p) {
       var li = document.createElement('li');
-      if (p.tab) {
+      if (p.href) {
+        var a = document.createElement('a');
+        a.className = 'tiny'; a.href = p.href; a.textContent = p.label;
+        li.appendChild(a);
+      } else if (p.tab) {
         var b = document.createElement('button');
         b.type = 'button'; b.className = 'tiny'; b.textContent = p.label;
         b.addEventListener('click', function () { showTab(p.tab); $('drawer').hidden = true; });

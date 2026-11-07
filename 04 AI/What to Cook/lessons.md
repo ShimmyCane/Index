@@ -10,3 +10,8 @@ Project-specific lessons, appended over time. Reusable ones go to `04 AI/lessons
 - (2026-11-06) Answers that come as numbered items after a list of questions map to those questions in order. Check the numbering against the last message before recording decisions.
 - (2026-11-06) A predicted remaining count reads oddly at 100% right after a feedback reset. Consider hiding the percentage when nothing has been used yet.
 - (2026-11-06) Cards far down a list are off-screen in headless tests. Scroll each card into view before a pointer swipe, or the test reports a hidden element.
+- (2026-11-07) A headless check at 390 px caught a five-button tab row that pushed the page sideways. Allow tab rows to wrap (`flex-wrap: wrap`) before shipping any new page with a row of buttons.
+- (2026-11-07) The first headless run reported "0 cards" because the test added a food on the All tab and then switched to Fridge. The page was right; the test order was wrong. Check the test sequence before changing the code.
+- (2026-11-07) Each new table gets its own paste file, and the file that is already applied is never edited. That kept `what_to_cook_setup.sql` unchanged when `wtc_notes` and `wtc_foods` were added.
+- (2026-11-07) Feedback notes sit on the device until they sync. Say which copy the user is looking at, because "nothing took" was the device copy, not a failed save.
+- (2026-11-07) When a user asks for "delete" on feedback, the read-notes rule is to keep the rows and mark them done. Offer the choice with the trade-off, and delete only on written confirmation.
