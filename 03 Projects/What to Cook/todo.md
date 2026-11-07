@@ -34,8 +34,8 @@ All the new tables and columns the to-do list needs are compiled into one file: 
 
 ## Recipe book (convo v0.7, 2026-11-07)
 
-- [ ] Answer convo v0.7 questions 1–7 (version names, dish and version, who edits, Athena and Felix, votes, pantry links, photos).
-- [ ] Add `dish` and `version_by` to `wtc_recipes` (paste file, after the answers).
+- [x] Answer convo v0.7 questions (answers in convo v0.8). Open: Athena and Felix edit or read; logos; flip-card example.
+- [ ] Paste `supabase/recipes_what_to_cook.sql` after `what_to_cook_MVP.sql` (adds `dish`, `version_by`, and the pantry link on ingredients). Expect dish_column_count 2 and food_column 1.
 - [ ] Build the recipe list: one dish with its versions, each with its own ingredients, steps, trials and votes. Test headless at phone width.
 
 ## Earlier items
