@@ -1,0 +1,1193 @@
+{
+  "title": "Recipe book: exploring (starter 50)",
+  "updated": "2026-11-07",
+  "note": "Starter ideas from what the family buys. Each card is a version to explore: Family is the starting point. Not started until someone taps 'start'.",
+  "recipes": [
+    {
+      "id": "kimchi-fried-rice",
+      "name": "Kimchi fried rice",
+      "cuisine": "Korean",
+      "minutes": 20,
+      "description": "Crispy rice with kimchi and an egg on top.",
+      "ingredients": [
+        {
+          "name": "rice",
+          "match": "rice"
+        },
+        {
+          "name": "kimchi",
+          "match": "kimchi"
+        },
+        {
+          "name": "egg",
+          "match": "egg"
+        },
+        {
+          "name": "soy sauce",
+          "match": "soy"
+        }
+      ]
+    },
+    {
+      "id": "bibimbap",
+      "name": "Bibimbap",
+      "cuisine": "Korean",
+      "minutes": 30,
+      "description": "Rice bowl with vegetables, egg and chili paste.",
+      "ingredients": [
+        {
+          "name": "rice",
+          "match": "rice"
+        },
+        {
+          "name": "spinach",
+          "match": "spinach"
+        },
+        {
+          "name": "carrots",
+          "match": "carrot"
+        },
+        {
+          "name": "egg",
+          "match": "egg"
+        },
+        {
+          "name": "gochujang",
+          "match": "gochujang"
+        }
+      ]
+    },
+    {
+      "id": "bulgogi-bowls",
+      "name": "Bulgogi beef bowls",
+      "cuisine": "Korean",
+      "minutes": 25,
+      "description": "Sweet, savoury marinated beef over rice.",
+      "ingredients": [
+        {
+          "name": "beef",
+          "match": "beef"
+        },
+        {
+          "name": "bulgogi marinade",
+          "match": "bbq"
+        },
+        {
+          "name": "rice",
+          "match": "rice"
+        },
+        {
+          "name": "lettuce",
+          "match": "lettuce"
+        }
+      ]
+    },
+    {
+      "id": "korean-chicken-stir-fry",
+      "name": "Spicy Korean chicken stir-fry",
+      "cuisine": "Korean",
+      "minutes": 25,
+      "description": "Chicken, cabbage and gochujang in one pan.",
+      "ingredients": [
+        {
+          "name": "chicken",
+          "match": "chicken"
+        },
+        {
+          "name": "cabbage",
+          "match": "cabbage"
+        },
+        {
+          "name": "gochujang",
+          "match": "gochujang"
+        },
+        {
+          "name": "carrots",
+          "match": "carrot"
+        }
+      ]
+    },
+    {
+      "id": "oyakodon",
+      "name": "Oyakodon",
+      "cuisine": "Japanese",
+      "minutes": 20,
+      "description": "Chicken and egg over rice in a sweet soy broth.",
+      "ingredients": [
+        {
+          "name": "chicken",
+          "match": "chicken"
+        },
+        {
+          "name": "egg",
+          "match": "egg"
+        },
+        {
+          "name": "rice",
+          "match": "rice"
+        },
+        {
+          "name": "soy sauce",
+          "match": "soy"
+        }
+      ]
+    },
+    {
+      "id": "teriyaki-chicken",
+      "name": "Teriyaki chicken",
+      "cuisine": "Japanese",
+      "minutes": 25,
+      "description": "Glossy sweet-salty chicken with rice.",
+      "ingredients": [
+        {
+          "name": "chicken",
+          "match": "chicken"
+        },
+        {
+          "name": "soy sauce",
+          "match": "soy"
+        },
+        {
+          "name": "rice",
+          "match": "rice"
+        }
+      ]
+    },
+    {
+      "id": "okonomiyaki",
+      "name": "Okonomiyaki",
+      "cuisine": "Japanese",
+      "minutes": 25,
+      "description": "Savoury cabbage pancake with a sweet sauce.",
+      "ingredients": [
+        {
+          "name": "cabbage",
+          "match": "cabbage"
+        },
+        {
+          "name": "eggs",
+          "match": "egg"
+        },
+        {
+          "name": "flour",
+          "match": "flour"
+        },
+        {
+          "name": "mayonnaise",
+          "match": "mayo"
+        }
+      ]
+    },
+    {
+      "id": "ramen-egg-spinach",
+      "name": "Ramen with egg and spinach",
+      "cuisine": "Japanese",
+      "minutes": 12,
+      "description": "Ramen with a soft egg and greens.",
+      "ingredients": [
+        {
+          "name": "ramen",
+          "match": "ramen"
+        },
+        {
+          "name": "eggs",
+          "match": "egg"
+        },
+        {
+          "name": "spinach",
+          "match": "spinach"
+        },
+        {
+          "name": "soy sauce",
+          "match": "soy"
+        }
+      ]
+    },
+    {
+      "id": "quick-pho",
+      "name": "Quick pho",
+      "cuisine": "Vietnamese",
+      "minutes": 15,
+      "description": "Pho from a cup, with spinach and an egg.",
+      "ingredients": [
+        {
+          "name": "pho",
+          "match": "pho"
+        },
+        {
+          "name": "spinach",
+          "match": "spinach"
+        },
+        {
+          "name": "egg",
+          "match": "egg"
+        }
+      ]
+    },
+    {
+      "id": "pad-see-ew",
+      "name": "Pad see ew",
+      "cuisine": "Thai",
+      "minutes": 20,
+      "description": "Wide noodles in soy and a little oyster sauce.",
+      "ingredients": [
+        {
+          "name": "noodles",
+          "match": "noodle"
+        },
+        {
+          "name": "soy sauce",
+          "match": "soy"
+        },
+        {
+          "name": "oyster sauce",
+          "match": "oyster"
+        },
+        {
+          "name": "egg",
+          "match": "egg"
+        },
+        {
+          "name": "broccoli",
+          "match": "broccoli"
+        }
+      ]
+    },
+    {
+      "id": "yellow-curry-chicken",
+      "name": "Yellow curry chicken and potatoes",
+      "cuisine": "Thai",
+      "minutes": 35,
+      "description": "Mild-spicy curry with potatoes.",
+      "ingredients": [
+        {
+          "name": "chicken",
+          "match": "chicken"
+        },
+        {
+          "name": "potatoes",
+          "match": "potato"
+        },
+        {
+          "name": "yellow curry",
+          "match": "curry"
+        },
+        {
+          "name": "carrots",
+          "match": "carrot"
+        }
+      ]
+    },
+    {
+      "id": "fried-rice-frozen-veg",
+      "name": "Fried rice with stir-fry veg",
+      "cuisine": "Chinese",
+      "minutes": 15,
+      "description": "Rice, eggs and the frozen veg mix.",
+      "ingredients": [
+        {
+          "name": "rice",
+          "match": "rice"
+        },
+        {
+          "name": "eggs",
+          "match": "egg"
+        },
+        {
+          "name": "stir-fry vegetables",
+          "match": "stir-fry"
+        },
+        {
+          "name": "soy sauce",
+          "match": "soy"
+        }
+      ]
+    },
+    {
+      "id": "chicken-broccoli",
+      "name": "Chicken and broccoli",
+      "cuisine": "Chinese",
+      "minutes": 20,
+      "description": "Quick stir-fry in oyster and soy sauce.",
+      "ingredients": [
+        {
+          "name": "chicken",
+          "match": "chicken"
+        },
+        {
+          "name": "broccoli",
+          "match": "broccoli"
+        },
+        {
+          "name": "oyster sauce",
+          "match": "oyster"
+        },
+        {
+          "name": "soy sauce",
+          "match": "soy"
+        }
+      ]
+    },
+    {
+      "id": "tomato-egg-stir-fry",
+      "name": "Tomato and egg stir-fry",
+      "cuisine": "Chinese",
+      "minutes": 12,
+      "description": "Soft eggs with sweet tomatoes.",
+      "ingredients": [
+        {
+          "name": "tomatoes",
+          "match": "tomato"
+        },
+        {
+          "name": "eggs",
+          "match": "egg"
+        },
+        {
+          "name": "soy sauce",
+          "match": "soy"
+        }
+      ]
+    },
+    {
+      "id": "black-bean-chicken",
+      "name": "Black bean chicken",
+      "cuisine": "Chinese",
+      "minutes": 20,
+      "description": "Chicken with black bean paste.",
+      "ingredients": [
+        {
+          "name": "chicken",
+          "match": "chicken"
+        },
+        {
+          "name": "chunjang",
+          "match": "chunjang"
+        },
+        {
+          "name": "Shaoxing wine",
+          "match": "shaoxing"
+        }
+      ]
+    },
+    {
+      "id": "kung-pao-chicken",
+      "name": "Kung pao chicken",
+      "cuisine": "Chinese",
+      "minutes": 25,
+      "description": "Peanut, chili and a little tang.",
+      "ingredients": [
+        {
+          "name": "chicken",
+          "match": "chicken"
+        },
+        {
+          "name": "peanuts",
+          "match": "peanut"
+        },
+        {
+          "name": "soy sauce",
+          "match": "soy"
+        },
+        {
+          "name": "Shaoxing wine",
+          "match": "shaoxing"
+        },
+        {
+          "name": "sweet chili",
+          "match": "chili"
+        }
+      ]
+    },
+    {
+      "id": "garlic-cabbage",
+      "name": "Garlic cabbage stir-fry",
+      "cuisine": "Chinese",
+      "minutes": 12,
+      "description": "Quick cabbage with soy and oyster sauce.",
+      "ingredients": [
+        {
+          "name": "cabbage",
+          "match": "cabbage"
+        },
+        {
+          "name": "oyster sauce",
+          "match": "oyster"
+        },
+        {
+          "name": "soy sauce",
+          "match": "soy"
+        }
+      ]
+    },
+    {
+      "id": "chicken-lettuce-wraps",
+      "name": "Chicken lettuce wraps",
+      "cuisine": "Chinese",
+      "minutes": 20,
+      "description": "Crisp lettuce cups with savoury chicken.",
+      "ingredients": [
+        {
+          "name": "chicken",
+          "match": "chicken"
+        },
+        {
+          "name": "lettuce",
+          "match": "lettuce"
+        },
+        {
+          "name": "soy sauce",
+          "match": "soy"
+        },
+        {
+          "name": "oyster sauce",
+          "match": "oyster"
+        }
+      ]
+    },
+    {
+      "id": "century-egg-congee",
+      "name": "Century egg congee",
+      "cuisine": "Chinese",
+      "minutes": 60,
+      "description": "Silky rice porridge with century egg.",
+      "ingredients": [
+        {
+          "name": "rice",
+          "match": "rice"
+        },
+        {
+          "name": "century egg",
+          "match": "century"
+        },
+        {
+          "name": "soy sauce",
+          "match": "soy"
+        }
+      ]
+    },
+    {
+      "id": "orange-chicken",
+      "name": "Orange chicken",
+      "cuisine": "Chinese",
+      "minutes": 30,
+      "description": "Crisp chicken in a tangy orange glaze.",
+      "ingredients": [
+        {
+          "name": "chicken",
+          "match": "chicken"
+        },
+        {
+          "name": "orange juice",
+          "match": "orange"
+        },
+        {
+          "name": "soy sauce",
+          "match": "soy"
+        },
+        {
+          "name": "sweet chili",
+          "match": "chili"
+        }
+      ]
+    },
+    {
+      "id": "pancit",
+      "name": "Pancit",
+      "cuisine": "Filipino",
+      "minutes": 35,
+      "description": "Noodles with chicken, cabbage and carrots.",
+      "ingredients": [
+        {
+          "name": "noodles",
+          "match": "noodle"
+        },
+        {
+          "name": "chicken",
+          "match": "chicken"
+        },
+        {
+          "name": "cabbage",
+          "match": "cabbage"
+        },
+        {
+          "name": "carrots",
+          "match": "carrot"
+        },
+        {
+          "name": "soy sauce",
+          "match": "soy"
+        }
+      ]
+    },
+    {
+      "id": "chicken-adobo",
+      "name": "Chicken adobo",
+      "cuisine": "Filipino",
+      "minutes": 40,
+      "description": "Vinegar, soy and garlic braised chicken.",
+      "ingredients": [
+        {
+          "name": "chicken",
+          "match": "chicken"
+        },
+        {
+          "name": "cider vinegar",
+          "match": "vinegar"
+        },
+        {
+          "name": "soy sauce",
+          "match": "soy"
+        }
+      ]
+    },
+    {
+      "id": "aloo-gobi",
+      "name": "Aloo gobi",
+      "cuisine": "Indian",
+      "minutes": 35,
+      "description": "Potatoes and cauliflower, lightly spiced.",
+      "ingredients": [
+        {
+          "name": "potatoes",
+          "match": "potato"
+        },
+        {
+          "name": "cauliflower",
+          "match": "cauliflower"
+        },
+        {
+          "name": "carrots",
+          "match": "carrot"
+        }
+      ]
+    },
+    {
+      "id": "butter-chicken",
+      "name": "Butter chicken",
+      "cuisine": "Indian",
+      "minutes": 40,
+      "description": "Creamy tomato sauce with chicken.",
+      "ingredients": [
+        {
+          "name": "chicken",
+          "match": "chicken"
+        },
+        {
+          "name": "yogurt",
+          "match": "yogurt"
+        },
+        {
+          "name": "tomatoes",
+          "match": "tomato"
+        },
+        {
+          "name": "butter",
+          "match": "butter"
+        }
+      ]
+    },
+    {
+      "id": "pumpkin-pasta-salami",
+      "name": "Pumpkin pasta with salami",
+      "cuisine": "Italian",
+      "minutes": 25,
+      "description": "Squash sauce, salami and pasta.",
+      "ingredients": [
+        {
+          "name": "pumpkin pasta sauce",
+          "match": "pumpkin"
+        },
+        {
+          "name": "salami",
+          "match": "salami"
+        },
+        {
+          "name": "pasta",
+          "match": "pasta"
+        }
+      ]
+    },
+    {
+      "id": "pesto-chicken-pasta",
+      "name": "Pesto chicken pasta",
+      "cuisine": "Italian",
+      "minutes": 25,
+      "description": "Pesto, chicken and tomatoes over pasta.",
+      "ingredients": [
+        {
+          "name": "pesto",
+          "match": "pesto"
+        },
+        {
+          "name": "chicken",
+          "match": "chicken"
+        },
+        {
+          "name": "tomatoes",
+          "match": "tomato"
+        },
+        {
+          "name": "pasta",
+          "match": "pasta"
+        }
+      ]
+    },
+    {
+      "id": "spinach-tomato-frittata",
+      "name": "Spinach and tomato frittata",
+      "cuisine": "Italian",
+      "minutes": 25,
+      "description": "Eggs baked with spinach, tomato and cheese.",
+      "ingredients": [
+        {
+          "name": "eggs",
+          "match": "egg"
+        },
+        {
+          "name": "spinach",
+          "match": "spinach"
+        },
+        {
+          "name": "tomatoes",
+          "match": "tomato"
+        },
+        {
+          "name": "cheddar",
+          "match": "cheddar"
+        },
+        {
+          "name": "butter",
+          "match": "butter"
+        }
+      ]
+    },
+    {
+      "id": "baked-eggs-tomato",
+      "name": "Baked eggs in tomato",
+      "cuisine": "Italian",
+      "minutes": 20,
+      "description": "Eggs baked in a tomato and pesto sauce.",
+      "ingredients": [
+        {
+          "name": "eggs",
+          "match": "egg"
+        },
+        {
+          "name": "tomatoes",
+          "match": "tomato"
+        },
+        {
+          "name": "pesto",
+          "match": "pesto"
+        }
+      ]
+    },
+    {
+      "id": "salami-pizza",
+      "name": "Salami pizza",
+      "cuisine": "Italian",
+      "minutes": 35,
+      "description": "Cheddar, salami and tomato on bread.",
+      "ingredients": [
+        {
+          "name": "salami",
+          "match": "salami"
+        },
+        {
+          "name": "cheddar",
+          "match": "cheddar"
+        },
+        {
+          "name": "tomatoes",
+          "match": "tomato"
+        },
+        {
+          "name": "bread",
+          "match": "bread"
+        }
+      ]
+    },
+    {
+      "id": "anchovy-garlic-pasta",
+      "name": "Anchovy garlic pasta",
+      "cuisine": "Italian",
+      "minutes": 20,
+      "description": "Anchovy, olive oil and a little chili.",
+      "ingredients": [
+        {
+          "name": "anchovies",
+          "match": "anchov"
+        },
+        {
+          "name": "olive oil",
+          "match": "olive oil"
+        },
+        {
+          "name": "pasta",
+          "match": "pasta"
+        }
+      ]
+    },
+    {
+      "id": "mac-and-cheese",
+      "name": "Cheddar mac and cheese",
+      "cuisine": "American",
+      "minutes": 30,
+      "description": "Baked pasta in a sharp cheddar sauce.",
+      "ingredients": [
+        {
+          "name": "cheddar",
+          "match": "cheddar"
+        },
+        {
+          "name": "milk",
+          "match": "milk"
+        },
+        {
+          "name": "butter",
+          "match": "butter"
+        },
+        {
+          "name": "pasta",
+          "match": "pasta"
+        }
+      ]
+    },
+    {
+      "id": "potato-cheddar-soup",
+      "name": "Potato and cheddar soup",
+      "cuisine": "American",
+      "minutes": 40,
+      "description": "Creamy potatoes with sharp cheddar.",
+      "ingredients": [
+        {
+          "name": "potatoes",
+          "match": "potato"
+        },
+        {
+          "name": "cheddar",
+          "match": "cheddar"
+        },
+        {
+          "name": "milk",
+          "match": "milk"
+        },
+        {
+          "name": "butter",
+          "match": "butter"
+        }
+      ]
+    },
+    {
+      "id": "sheet-pan-chicken",
+      "name": "Sheet-pan chicken and potatoes",
+      "cuisine": "American",
+      "minutes": 45,
+      "description": "Everything on one tray.",
+      "ingredients": [
+        {
+          "name": "chicken",
+          "match": "chicken"
+        },
+        {
+          "name": "potatoes",
+          "match": "potato"
+        },
+        {
+          "name": "carrots",
+          "match": "carrot"
+        },
+        {
+          "name": "butter",
+          "match": "butter"
+        }
+      ]
+    },
+    {
+      "id": "turkey-chili",
+      "name": "Turkey chili",
+      "cuisine": "American",
+      "minutes": 45,
+      "description": "Lean turkey, tomatoes and cheddar on top.",
+      "ingredients": [
+        {
+          "name": "turkey",
+          "match": "turkey"
+        },
+        {
+          "name": "tomatoes",
+          "match": "tomato"
+        },
+        {
+          "name": "cheddar",
+          "match": "cheddar"
+        }
+      ]
+    },
+    {
+      "id": "turkey-burgers",
+      "name": "Turkey burgers",
+      "cuisine": "American",
+      "minutes": 25,
+      "description": "Lean turkey burgers with cheddar.",
+      "ingredients": [
+        {
+          "name": "turkey",
+          "match": "turkey"
+        },
+        {
+          "name": "cheddar",
+          "match": "cheddar"
+        },
+        {
+          "name": "lettuce",
+          "match": "lettuce"
+        },
+        {
+          "name": "tomatoes",
+          "match": "tomato"
+        },
+        {
+          "name": "ketchup",
+          "match": "ketchup"
+        }
+      ]
+    },
+    {
+      "id": "turkey-meatball-pasta",
+      "name": "Turkey meatballs in squash sauce",
+      "cuisine": "Italian",
+      "minutes": 35,
+      "description": "Lean turkey meatballs in a squash sauce.",
+      "ingredients": [
+        {
+          "name": "turkey",
+          "match": "turkey"
+        },
+        {
+          "name": "pumpkin pasta sauce",
+          "match": "pumpkin"
+        },
+        {
+          "name": "cheddar",
+          "match": "cheddar"
+        }
+      ]
+    },
+    {
+      "id": "chicken-quesadillas",
+      "name": "Chicken quesadillas",
+      "cuisine": "Mexican",
+      "minutes": 20,
+      "description": "Crisp tortillas with chicken and cheese.",
+      "ingredients": [
+        {
+          "name": "chicken",
+          "match": "chicken"
+        },
+        {
+          "name": "cheddar",
+          "match": "cheddar"
+        },
+        {
+          "name": "salsa",
+          "match": "salsa"
+        }
+      ]
+    },
+    {
+      "id": "caesar-chicken-salad",
+      "name": "Chicken Caesar salad",
+      "cuisine": "American",
+      "minutes": 20,
+      "description": "Romaine, chicken, cheese and crisp bits.",
+      "ingredients": [
+        {
+          "name": "lettuce",
+          "match": "lettuce"
+        },
+        {
+          "name": "chicken",
+          "match": "chicken"
+        },
+        {
+          "name": "cheddar",
+          "match": "cheddar"
+        }
+      ]
+    },
+    {
+      "id": "apple-spinach-salad",
+      "name": "Spinach and apple salad",
+      "cuisine": "American",
+      "minutes": 10,
+      "description": "Spinach, apple and crunchy seeds.",
+      "ingredients": [
+        {
+          "name": "spinach",
+          "match": "spinach"
+        },
+        {
+          "name": "apples",
+          "match": "apple"
+        },
+        {
+          "name": "salad topper",
+          "match": "salad topper"
+        }
+      ]
+    },
+    {
+      "id": "chopped-salad-chicken",
+      "name": "Chopped salad with chicken",
+      "cuisine": "American",
+      "minutes": 15,
+      "description": "Salad kit, chicken and cheese.",
+      "ingredients": [
+        {
+          "name": "salad kit",
+          "match": "salad kit"
+        },
+        {
+          "name": "chicken",
+          "match": "chicken"
+        },
+        {
+          "name": "cheddar",
+          "match": "cheddar"
+        },
+        {
+          "name": "tomatoes",
+          "match": "tomato"
+        }
+      ]
+    },
+    {
+      "id": "avocado-toast-egg",
+      "name": "Avocado toast with egg",
+      "cuisine": "American",
+      "minutes": 10,
+      "description": "Avocado on toast, topped with an egg.",
+      "ingredients": [
+        {
+          "name": "avocado",
+          "match": "avocado"
+        },
+        {
+          "name": "bread",
+          "match": "bread"
+        },
+        {
+          "name": "eggs",
+          "match": "egg"
+        }
+      ]
+    },
+    {
+      "id": "avocado-salsa",
+      "name": "Avocado and tomato salsa",
+      "cuisine": "Mexican",
+      "minutes": 10,
+      "description": "Fresh salsa for chips.",
+      "ingredients": [
+        {
+          "name": "avocado",
+          "match": "avocado"
+        },
+        {
+          "name": "tomatoes",
+          "match": "tomato"
+        },
+        {
+          "name": "chips",
+          "match": "chips"
+        }
+      ]
+    },
+    {
+      "id": "plum-crumble",
+      "name": "Plum crumble",
+      "cuisine": "British",
+      "minutes": 45,
+      "description": "Baked plums under a buttery top.",
+      "ingredients": [
+        {
+          "name": "plums",
+          "match": "plum"
+        },
+        {
+          "name": "butter",
+          "match": "butter"
+        },
+        {
+          "name": "flour",
+          "match": "flour"
+        }
+      ]
+    },
+    {
+      "id": "persimmon-cookies",
+      "name": "Persimmon cookies",
+      "cuisine": "American",
+      "minutes": 30,
+      "description": "Soft spiced cookies with persimmon.",
+      "ingredients": [
+        {
+          "name": "persimmons",
+          "match": "persimmon"
+        },
+        {
+          "name": "butter",
+          "match": "butter"
+        },
+        {
+          "name": "eggs",
+          "match": "egg"
+        },
+        {
+          "name": "flour",
+          "match": "flour"
+        }
+      ]
+    },
+    {
+      "id": "mango-yogurt-bowl",
+      "name": "Mango yogurt bowl",
+      "cuisine": "American",
+      "minutes": 5,
+      "description": "Yogurt, dried mango and chia.",
+      "ingredients": [
+        {
+          "name": "yogurt",
+          "match": "yogurt"
+        },
+        {
+          "name": "mango",
+          "match": "mango"
+        },
+        {
+          "name": "chia",
+          "match": "chia"
+        }
+      ]
+    },
+    {
+      "id": "smores-bars",
+      "name": "S'mores bars",
+      "cuisine": "American",
+      "minutes": 30,
+      "description": "Graham, chocolate and marshmallow, baked.",
+      "ingredients": [
+        {
+          "name": "graham crackers",
+          "match": "graham"
+        },
+        {
+          "name": "marshmallows",
+          "match": "marshmallow"
+        },
+        {
+          "name": "nutella",
+          "match": "nutella"
+        }
+      ]
+    },
+    {
+      "id": "nutella-brownies",
+      "name": "Nutella brownies",
+      "cuisine": "American",
+      "minutes": 35,
+      "description": "Fudgy brownies with a Nutella swirl.",
+      "ingredients": [
+        {
+          "name": "nutella",
+          "match": "nutella"
+        },
+        {
+          "name": "eggs",
+          "match": "egg"
+        },
+        {
+          "name": "butter",
+          "match": "butter"
+        },
+        {
+          "name": "flour",
+          "match": "flour"
+        }
+      ]
+    },
+    {
+      "id": "peanut-butter-cookies",
+      "name": "Peanut butter cookies",
+      "cuisine": "American",
+      "minutes": 20,
+      "description": "Chewy, with a fork pattern.",
+      "ingredients": [
+        {
+          "name": "peanut butter",
+          "match": "peanut butter"
+        },
+        {
+          "name": "eggs",
+          "match": "egg"
+        },
+        {
+          "name": "butter",
+          "match": "butter"
+        }
+      ]
+    },
+    {
+      "id": "brown-rice-bowl",
+      "name": "Brown rice bowl with roast veg",
+      "cuisine": "Global",
+      "minutes": 35,
+      "description": "Brown rice, roasted veg and chicken.",
+      "ingredients": [
+        {
+          "name": "brown rice",
+          "match": "rice"
+        },
+        {
+          "name": "cauliflower",
+          "match": "cauliflower"
+        },
+        {
+          "name": "carrots",
+          "match": "carrot"
+        },
+        {
+          "name": "chicken",
+          "match": "chicken"
+        }
+      ]
+    },
+    {
+      "id": "corn-cheddar-fritters",
+      "name": "Corn and cheddar fritters",
+      "cuisine": "American",
+      "minutes": 20,
+      "description": "Corn, cheddar and egg fritters.",
+      "ingredients": [
+        {
+          "name": "corn",
+          "match": "corn"
+        },
+        {
+          "name": "cheddar",
+          "match": "cheddar"
+        },
+        {
+          "name": "eggs",
+          "match": "egg"
+        },
+        {
+          "name": "flour",
+          "match": "flour"
+        }
+      ]
+    }
+  ]
+}

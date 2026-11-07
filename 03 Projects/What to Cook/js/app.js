@@ -3,8 +3,9 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.5.0';
+  var VERSION = '0.6.0';
   var VERSIONS = [
+    { v: '0.6.0', date: '2026-11-07', text: 'Recipe book (explore): 50 starter cards from what the family buys, with pantry matches, favourites, start, a use-soon filter, and a search for versions online. Linked from Settings → Pages.' },
     { v: '0.5.0', date: '2026-11-07', text: 'Notes log shows ✅ for notes marked done in the database (it reads their status when signed in). To-do panel in Settings with ✅ for what is built. Text stays readable on white panels in dark mode.' },
     { v: '0.4.0', date: '2026-11-07', text: 'Food list page (from Settings → Pages): each food with its place (fridge, pantry, freezer, other), kind, category, fridge days and notes. Saves to the family database; blanks allowed. Notes now saved to the database too.' },
     { v: '0.3.0', date: '2026-11-06', text: 'Family database wired: sign in with the family login, changes sync to the family pantry, same name, expiry and place overwrite on the server, database check in settings. The device keeps its own copy and works offline.' },
@@ -25,6 +26,7 @@
   var PAGES = [
     { label: '🥫 Pantry', tab: 'pantry' },
     { label: '🧾 Food list (fridge days and places)', href: 'foods.html' },
+    { label: '📖 Recipe book (explore)', href: 'recipes.html' },
     { label: '🎙️ Add from a memo or list', tab: 'capture' },
     { label: '📖 Recipe book', planned: 'after the pantry is wired to the database' },
     { label: '🥘 Food Lab (cuisines; name to confirm)', planned: 'convo v0.3' },

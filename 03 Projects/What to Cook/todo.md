@@ -38,6 +38,14 @@ All the new tables and columns the to-do list needs are compiled into one file: 
 - [ ] Paste `supabase/recipes_what_to_cook.sql` after `what_to_cook_MVP.sql` (adds `dish`, `version_by`, and the pantry link on ingredients). Expect dish_column_count 2 and food_column 1.
 - [ ] Build the recipe list: one dish with its versions, each with its own ingredients, steps, trials and votes. Test headless at phone width.
 
+## Recipe book, explore (2026-11-07)
+
+- [x] `recipes_explore.json`: 50 starter recipes from what the family buys. All "not started".
+- [x] `recipes.html`: scrapbook cards that flip, filters (favourites, we have most, use soon, started), start and favourite buttons, and a "see versions" search. Device-only for now (favourites and starts are saved on this device).
+- [ ] Test on a real phone or iPad. Check the flip and the filters on the family's own pantry data.
+- [ ] Save favourites and starts in the database, once the recipe tables are in use.
+- [ ] Add steps to the back of the cards once a recipe is started.
+
 ## Cuisine library (2026-11-07)
 
 - [x] `cuisine_library.json`: 66 cuisines and cooking styles, by region (Asian, European, American and Latin American, Middle Eastern and African, Oceania) and by type (desserts, bakery, salads, cooking methods). All "to try".
