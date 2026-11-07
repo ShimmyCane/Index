@@ -24,6 +24,12 @@ Notes marked done on 2026-11-07 after Jimmy's confirmation (status done, text pr
 - [x] Q4 skipped at Jimmy's request.
 - [x] Q5: done items are ignored from future review, not deleted.
 
+## Tracking priority (2026-11-07)
+
+- [ ] Paste `supabase/wtc_items_tracking.sql` (adds `tracking`: priority or low). Expect column_exists 1 and check_exists 1.
+- [ ] Then set eggs and bread to `low`. They are in the database now, marked "LOW PRIORITY" in their notes.
+- [ ] Later: show `priority` items at the top, ordered by how often they are used, and keep `low` items on a lower list to revisit.
+
 ## Anticipated SQL (look-ahead, 2026-11-07)
 
 All the new tables and columns the to-do list needs are compiled into one file: `supabase/what_to_cook_MVP.sql`. It replaces the separate food-list paste for the live database; `foods_what_to_cook.sql` stays as history and is not needed once the MVP file has run.
