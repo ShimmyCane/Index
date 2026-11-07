@@ -24,6 +24,14 @@ Notes marked done on 2026-11-07 after Jimmy's confirmation (status done, text pr
 - [x] Q4 skipped at Jimmy's request.
 - [x] Q5: done items are ignored from future review, not deleted.
 
+## Anticipated SQL (look-ahead, 2026-11-07)
+
+All the new tables and columns the to-do list needs are compiled into one file: `supabase/what_to_cook_MVP.sql`. It replaces the separate food-list paste for the live database; `foods_what_to_cook.sql` stays as history and is not needed once the MVP file has run.
+
+- [ ] Paste `supabase/what_to_cook_MVP.sql` into the Family SQL editor. Expect three table rows (rls_on true, policies 1, anon_grants 0, registered 1) and a column count of 2.
+- [ ] Not included, decide first: owner-only calorie log. Needs `04 AI/Supabase/platform_owner.sql` pasted first (`platform_owners` does not exist in the Family project yet).
+- [ ] Open (convo v0.3 questions 4–8): app name, cuisine list or free tags, restaurant fields, brand links to pantry items, kids' access to the journal. The journal tables are provisional until these are answered.
+
 ## Earlier items
 
 See `convo/convo v0.2.md`, `convo v0.3.md` (food journal) and `convo v0.4.md` (pantry behaviour, open items 12–13).
