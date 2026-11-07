@@ -81,6 +81,8 @@ Companion files: `patterns.md` (reusable patterns and template candidates), `Per
 16. **Allow button rows to wrap at phone width.** A five-tab row pushed the page sideways at 390 px until `flex-wrap: wrap` was added. Check every new page at phone width in a headless run. _(What to Cook)_
 17. **Check the test order before blaming the page.** A "0 cards" result came from a test that switched tabs in the wrong order. _(What to Cook)_
 18. **One paste file per table, never edit an applied file.** New tables go in their own file, so the applied setup stays as it was. _(What to Cook)_
+20. **Check dark mode before shipping.** White surfaces need their own dark text colour, or dark mode leaves text invisible. Measure contrast in both modes. _(What to Cook)_
+21. **Test pages that load data through a local server.** Opening the file directly blocks the data load. _(What to Cook)_
 19. **Feedback is marked done, not deleted.** Keep the rows, set status done, and ignore done items in later reviews. Delete only on written confirmation, since it can't be undone. _(What to Cook)_
 14. **Create the shared namespace in every file that uses it** (`NS = NS || {}`). A file that copies a namespace at load time sees `undefined` if it loads first. Browser smoke tests catch it; Node tests do not. _(Shimmy Specs)_
 15. **Store the data version with saved state.** A restored game can hold items no longer in the data; drop the save on a version mismatch. _(Chinese Character Sudoku)_

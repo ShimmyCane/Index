@@ -5,3 +5,5 @@
 - Wall and floor items need clamping to their zones. A window dropped on the floor reads as wrong at once, and clamping avoids that without a message.
 - Clamp wall items away from the room edge (12%, not 8%). At 8% the emoji clipped under the border.
 - Tapping a placed item should pick it up, and tapping it again while held should put it down where it is. That gives "don't need to tap it again" without a confirm step.
+- Keep the game working with no network: the device copy is written first, the database is an extra, and a failed sync shows `⚠️ check` instead of breaking play.
+- The family database uses the publishable key only, and the table pattern matches What to Cook's notes table (RLS on, anon revoked, authenticated access, registry row).

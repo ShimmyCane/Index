@@ -38,7 +38,7 @@ Rules:
 - Make 3D (Architecture project, not Family): `m3d_scenes` is **live** (applied 2026-11-02 as migration `m3d_scenes` after a rolled-back test; RLS on, anon revoked, owner-only policy, registered in `table_index`; SQL in `03 Projects/Make 3D/supabase/001_m3d_scenes.sql`). Reads Quick Detail's `sketch_details` by tag `make 3-D`, read only.
 - Fishes: `fish_notes` is **live** in Family (applied 2026-11-03 as migration `fishes_fish_notes`, after its rolled-back test; RLS on, anon has no grants, family sign-in can insert and read; registered under app `fishes`; SQL in `03 Projects/Fishes/supabase/001_fish_notes.sql`). Fishes borrows the Family sign-in the same way Expansion Wars does.
 - Expansion Wars: `xw_maps` is **live** in Family (applied 2026-11-03 as a manual run of `03 Projects/Expansion Wars/supabase/001_xw_maps.sql`, after its rolled-back test passed). RLS on, anon revoked, family-only policies, registered under app `expansion-wars`. The page is not wired to it yet.
-- Athena's world has no database need yet.
+- Athena's world (Family project, prefix `athena_`): `athena_saves` (one row, the family's saved game) and `athena_notes` (notes for improvement) are **written, not applied**. SQL in `03 Projects/Athena's world/supabase/` (`test_001`, `001_athena_family`, `verify_001`). The game signs in with the family login and works offline without it. Not verified until Jimmy pastes the SQL and the verify output comes back.
 - Private family projects live in ShimmyAI. Their project references and table state are not recorded here.
 
 ## How SQL gets into a database (default: by hand)

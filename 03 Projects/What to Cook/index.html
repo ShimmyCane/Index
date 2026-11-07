@@ -52,6 +52,15 @@
         <p id="stockEmpty" class="empty" hidden>Nothing else in stock here. Use 🎙️ Add.</p>
       </div>
     </section>
+
+    <section class="panel" data-panel="low" data-open="false">
+      <button class="panelHead" type="button" aria-expanded="false"><span>🗂️</span><span class="grow">Lower priority (<span id="lowCount">0</span>)</span><span class="mark">▸</span></button>
+      <div class="panelBody">
+        <p class="hint">Tracked loosely, like eggs, bread and wines. Revisit now and then.</p>
+        <ul id="lowStock" class="cards"></ul>
+        <p id="lowEmpty" class="empty" hidden>Nothing on the lower list.</p>
+      </div>
+    </section>
   </section>
 
   <section id="tab-capture" class="view" hidden>
@@ -172,8 +181,17 @@
 </datalist>
 
 <script src="js/config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/util.js"></script>
+<script src="js/errors.js"></script>
 <script src="js/db.js"></script>
 <script src="js/parse.js"></script>
+<script src="js/core.js"></script>
+<script src="js/content.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/pantry.js"></script>
+<script src="js/capture.js"></script>
+<script src="js/settings.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
