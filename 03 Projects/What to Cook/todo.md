@@ -38,6 +38,12 @@ All the new tables and columns the to-do list needs are compiled into one file: 
 - [ ] Paste `supabase/recipes_what_to_cook.sql` after `what_to_cook_MVP.sql` (adds `dish`, `version_by`, and the pantry link on ingredients). Expect dish_column_count 2 and food_column 1.
 - [ ] Build the recipe list: one dish with its versions, each with its own ingredients, steps, trials and votes. Test headless at phone width.
 
+## Cuisine library (2026-11-07)
+
+- [x] `cuisine_library.json`: 66 cuisines and cooking styles, by region (Asian, European, American and Latin American, Middle Eastern and African, Oceania) and by type (desserts, bakery, salads, cooking methods). All "to try".
+- [ ] Choose the cuisines to start with, and move them to "in the book" when a first version is added.
+- [ ] Decide whether the library lives in the database (a `wtc_cuisines` table) or stays a file, once the recipe book is built.
+
 ## Earlier items
 
 See `convo/convo v0.2.md`, `convo v0.3.md` (food journal) and `convo v0.4.md` (pantry behaviour, open items 12–13).
