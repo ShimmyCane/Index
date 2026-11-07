@@ -5,12 +5,11 @@
   var CFG = root.WTC_CONFIG;
   var SESSION_KEY = 'wtc.session';
 
-  function session() {
-    try { return JSON.parse(localStorage.getItem(SESSION_KEY)) || null; } catch (e) { return null; }
-  }
+  function session() { return WTCStore.read(SESSION_KEY, null) || null; }
+  // Storage blocked: the session lasts this page load only (WTCStore never throws).
   function saveSession(s) {
-    try { if (s) localStorage.setItem(SESSION_KEY, JSON.stringify(s)); else localStorage.removeItem(SESSION_KEY); }
-    catch (e) { /* storage blocked: the session lasts this page load only */ }
+    if (s) WTCStore.write(SESSION_KEY, s);
+    else { try { localStorage.removeItem(SESSION_KEY); } catch (e) { /* blocked: nothing to remove */ } }
   }
 
   function withTimeout(ms) {

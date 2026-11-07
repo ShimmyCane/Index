@@ -15,3 +15,14 @@ Project-specific lessons, appended over time. Reusable ones go to `04 AI/lessons
 - (2026-11-07) Each new table gets its own paste file, and the file that is already applied is never edited. That kept `what_to_cook_setup.sql` unchanged when `wtc_notes` and `wtc_foods` were added.
 - (2026-11-07) Feedback notes sit on the device until they sync. Say which copy the user is looking at, because "nothing took" was the device copy, not a failed save.
 - (2026-11-07) When a user asks for "delete" on feedback, the read-notes rule is to keep the rows and mark them done. Offer the choice with the trade-off, and delete only on written confirmation.
+- (2026-11-07) A page that loads its data with `fetch` will not load from a file opened directly. Test it through a local server (`python3 -m http.server`), the same way GitHub Pages serves it.
+- (2026-11-07) Dark mode turned the page text light while panels stayed white, so text was nearly invisible on phones. Give white surfaces their own dark text colour, and check contrast in both light and dark modes in a headless run.
+- (2026-11-07) A pantry matched by keyword ("egg" for "Eggs" and "Duck eggs") is quick and good enough for a first pass. Say so on the page, and list the matches to check.
+- (2026-11-07) Estimated expiry dates go in the notes with a "?" and are not presented as facts. The "use soon" list is the reminder.
+- (2026-11-07) Consolidated the to-do list by who has to act (Jimmy or Claude), with finished items in one short block. Duplicates from earlier rounds were dropped; the convo files keep the history.
+- (2026-11-07) Before splitting a page into files, record a headless test that signs in against a mocked network and checks what gets sent. Run it on the old code, then the new code, and compare the counts. This caught nothing new here, but it makes the sync path safe to move.
+- (2026-11-07) A shared helper file that never throws (storage, errors, ids) removed four copies with no change in behaviour. Put each helper in one file, and let pages pass in only what differs (the error panel's drawing).
+- (2026-11-07) Check the live columns before building on a paste file. The MVP paste was applied but the tracking and recipe pastes were not, so each feature was built to work now and to pick up its column later.
+- (2026-11-07) Never add a field to the sync list before its column exists: the database refuses the whole row. `tracking` stays out of the sync fields until its paste is applied.
+- (2026-11-07) A feature that needs a new column can often start on an existing one: recipe favourites and starts use `wtc_recipes.favourite` and `wish`, keyed by the recipe id in `notes`, until the versions columns arrive.
+
