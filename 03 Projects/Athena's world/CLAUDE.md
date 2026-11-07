@@ -3,6 +3,7 @@
 Purpose: a decorating game. Athena decorates a white room for a house or workplace, one house after another. Nursery seed project, now at MVP.
 
 - Design: `schematic.md`
+- Mock-ups for viewing the project: `mockups/index.html`
 - Q&A history: `convo/` (never compact; start a new version instead)
 - AI notes: `04 AI/Athena's world/` (`brief.md` and `lessons.md`)
 - Shared conventions: root `CLAUDE.md` (public repo, privacy rules)

@@ -21,6 +21,7 @@ A decorating game. Athena picks who a house or workplace is for, then decorates 
 ## Files
 
 - `index.html` — the whole game (HTML, CSS, JS, Web Audio). The house and item lists are at the top of the script.
+- `mockups/` — pages to see the project at a glance: `index.html` (front page with links), `project-map.html` (every file and what it is for), `game-flow.html` (the steps of play, with a picture of the room).
 - `convo/` — Q&A history, one file per round, never compacted.
 - `CLAUDE.md` — pointer for Claude Code.
 
