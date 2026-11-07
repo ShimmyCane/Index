@@ -89,7 +89,7 @@ Per `02 Refs/Skills/settings_gear.md`, and the request in convo v0.4:
 - **How the guess works** (plain-words explanation of the predicted index).
 - **Transcript archive** (every raw transcript, in full).
 - **Version log** (what changed in each version).
-- **Notes log** (feedback, saved with the screen it was typed on).
+- **Notes log** (feedback, saved with the screen it was typed on; sent to `wtc_notes` when signed in, kept on the device otherwise).
 - **Show errors** (opt-in, at the bottom of the page).
 - Database check and sign-in: when the database is wired.
 
