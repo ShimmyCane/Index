@@ -591,10 +591,11 @@
     if (!text) return;
     var current = document.querySelector('.tab.on');
     var where = current ? current.dataset.tab : 'page';
-    notes.push({ id: uid('n'), at: nowIso(), status: 'open', text: text, where: where, version: VERSION });
+    notes.push({ id: uid('n'), at: nowIso(), status: 'open', text: text, where: where, version: VERSION, synced: false });
     write(KEY.notes, notes);
     $('noteText').value = '';
     renderNotes();
+    if (DB.session()) pushAll();   // sends it to wtc_notes; if that fails it stays on this device and is retried
   });
 
   $('showErrors').checked = read(KEY.errors, false) === true;
@@ -697,6 +698,13 @@
           .then(function () { t.synced = true; });
       });
     });
+    notes.filter(function (n) { return !n.synced; }).forEach(function (n) {
+      chain = chain.then(function () {
+        if (!isUuid(n.id)) n.id = newUuid();   // notes typed before the database had its own ids
+        return DB.insert('wtc_notes', [{ id: n.id, text: n.text, page: n.where, version: n.version, noted_at: n.at, status: n.status }])
+          .then(function () { n.synced = true; });
+      });
+    });
     return chain;
   }
 
@@ -710,11 +718,11 @@
     });
     return chain.then(pushLog).then(function () {
       syncing = false;
-      write(KEY.items, items); write(KEY.checks, checks); write(KEY.transcripts, transcripts);
+      write(KEY.items, items); write(KEY.checks, checks); write(KEY.transcripts, transcripts); write(KEY.notes, notes);
       setStatusPill('synced ' + new Date().toLocaleTimeString());
     }, function (e) {
       syncing = false;
-      write(KEY.items, items); write(KEY.checks, checks); write(KEY.transcripts, transcripts);
+      write(KEY.items, items); write(KEY.checks, checks); write(KEY.transcripts, transcripts); write(KEY.notes, notes);
       setStatusPill('not synced');
       reportError('Sync: ' + DB.explain(e));
     });
