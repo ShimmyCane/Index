@@ -24,6 +24,16 @@ Notes marked done on 2026-11-07 after Jimmy's confirmation (status done, text pr
 - [x] Q4 skipped at Jimmy's request.
 - [x] Q5: done items are ignored from future review, not deleted.
 
+## Pantry follow-ups (2026-11-07)
+
+- [ ] Freezer: do a full look. Older chicken breasts may be in there from earlier trips; the 5 bags listed are from today.
+- [ ] Storage next to the stove: not listed yet.
+- [ ] Expiry dates marked "?" are estimates. Check them against the packages, starting with the items marked "use soon" or "use now".
+- [ ] Reminders for items about to expire: the Use soon panel does this for now. Scheduled reminders are a later choice.
+- [ ] Cooking salt level: record it as a note on each cooking wine, vinegar and sauce (done for vinegars, not yet for every cooking wine).
+- [ ] Anchovies: Jimmy does not know what to do with them yet. Ask for ideas later.
+- [ ] Orange juice: take it to tomorrow's soccer game (expires 8 November, estimated).
+
 ## Anticipated SQL (look-ahead, 2026-11-07)
 
 All the new tables and columns the to-do list needs are compiled into one file: `supabase/what_to_cook_MVP.sql`. It replaces the separate food-list paste for the live database; `foods_what_to_cook.sql` stays as history and is not needed once the MVP file has run.
