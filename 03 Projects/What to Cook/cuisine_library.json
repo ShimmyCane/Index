@@ -652,6 +652,29 @@
           "status": "to try"
         }
       ]
+    },
+    {
+      "id": "everyday",
+      "title": "Everyday",
+      "cuisines": [
+        {
+          "name": "American (everyday)",
+          "examples": [
+            "Sheet-pan dinners",
+            "Burgers",
+            "Mac and cheese"
+          ],
+          "status": "to try"
+        },
+        {
+          "name": "Bowls and grain dishes",
+          "examples": [
+            "Grain bowls",
+            "Rice bowls"
+          ],
+          "status": "to try"
+        }
+      ]
     }
   ]
 }

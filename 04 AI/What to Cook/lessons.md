@@ -20,4 +20,6 @@ Project-specific lessons, appended over time. Reusable ones go to `04 AI/lessons
 - (2026-11-07) A pantry matched by keyword ("egg" for "Eggs" and "Duck eggs") is quick and good enough for a first pass. Say so on the page, and list the matches to check.
 - (2026-11-07) Estimated expiry dates go in the notes with a "?" and are not presented as facts. The "use soon" list is the reminder.
 - (2026-11-07) Consolidated the to-do list by who has to act (Jimmy or Claude), with finished items in one short block. Duplicates from earlier rounds were dropped; the convo files keep the history.
+- (2026-11-07) Before splitting a page into files, record a headless test that signs in against a mocked network and checks what gets sent. Run it on the old code, then the new code, and compare the counts. This caught nothing new here, but it makes the sync path safe to move.
+- (2026-11-07) A shared helper file that never throws (storage, errors, ids) removed four copies with no change in behaviour. Put each helper in one file, and let pages pass in only what differs (the error panel's drawing).
 

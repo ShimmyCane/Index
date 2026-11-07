@@ -40,18 +40,11 @@
   };
 
   var $ = function (id) { return document.getElementById(id); };
-  var problems = [];
   var draft = [];
 
   // ---- storage (try/catch: the page still works if storage is blocked) ----
-  function read(key, fallback) {
-    try { var v = JSON.parse(localStorage.getItem(key)); return v == null ? fallback : v; }
-    catch (e) { reportError('Could not read ' + key + ': ' + e.message); return fallback; }
-  }
-  function write(key, value) {
-    try { localStorage.setItem(key, JSON.stringify(value)); return true; }
-    catch (e) { reportError('Could not save (storage full or blocked): ' + e.message); return false; }
-  }
+  function read(key, fallback) { return WTCStore.read(key, fallback, reportError); }
+  function write(key, value) { return WTCStore.write(key, value, reportError); }
   function uid(prefix) { return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7); }
 
   var items = read(KEY.items, []);
@@ -73,17 +66,14 @@
   function touch(item) { item.updated_at = nowIso(); item.dirty = true; }
 
   // ---- errors: kept at the bottom, shown only when the user opts in ----
-  function reportError(msg) {
-    problems.push(new Date().toLocaleTimeString() + ' ' + msg);
-    if (problems.length > 20) problems.shift();
-    renderErrors();
-  }
-  function renderErrors() {
+  var errorLog = WTCErrors.create(function (lines) {
     var panel = $('errorPanel');
-    var show = read(KEY.errors, false) === true;
-    panel.hidden = !(show && problems.length);
-    panel.textContent = problems.join('\n');
-  }
+    var show = WTCStore.read(KEY.errors, false) === true;
+    panel.hidden = !(show && lines.length);
+    panel.textContent = lines.join('\n');
+  }, 20);
+  function reportError(msg) { errorLog.report(msg); }
+  function renderErrors() { errorLog.redraw(); }
 
   // ---- dates and numbers ----
   function pad(n) { return (n < 10 ? '0' : '') + n; }
@@ -623,44 +613,18 @@
 
   // ---- family database (optional: the page keeps working on this device without it) ----
   var DB = window.WTCDb;
-  var DB_FIELDS = ['id', 'name', 'kind', 'category', 'subcategory', 'quality', 'quantity', 'unit', 'servings_left',
-    'expires_on', 'freshness', 'stored_location', 'purchase_cost', 'notes', 'status', 'source', 'raw_text',
-    'purchased_on', 'counted_on', 'daily_rate', 'fav', 'reviewed_on', 'updated_at'];
-  var UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  var syncTimer = null, syncing = false;
+  // The sync engine (js/sync.js) gets the state it needs; items are replaced only by its pull.
+  var sync = WTCSync.create({
+    DB: DB, KEY: KEY,
+    checks: checks, transcripts: transcripts, notes: notes,
+    getItems: function () { return items; },
+    setItems: function (v) { items = v; },
+    find: find, write: write, reportError: reportError, renderAll: renderAll, renderNotes: renderNotes
+  });
+  var isUuid = WTCUtil.isUuid, newUuid = WTCUtil.newUuid;
+  var toRow = sync.toRow, fromRow = sync.fromRow, unsentCount = sync.unsentCount, setStatusPill = sync.setStatusPill;
+  var pull = sync.pull, pullNotes = sync.pullNotes, pushAll = sync.pushAll, queueSync = sync.queueSync;
 
-  function isUuid(s) { return UUID.test(String(s || '')); }
-  function newUuid() {
-    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      var r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16);
-    });
-  }
-  function toRow(item) {
-    var row = {};
-    DB_FIELDS.forEach(function (k) { if (item[k] !== undefined) row[k] = item[k]; });
-    return row;
-  }
-  function fromRow(r) {
-    var it = {};
-    DB_FIELDS.forEach(function (k) { it[k] = r[k] === undefined ? null : r[k]; });
-    it.synced = true; it.dirty = false;
-    return it;
-  }
-  function likeEscape(s) {
-    return String(s).replace(/\*/g, '').replace(/[\\%_]/g, function (c) { return '\\' + c; });
-  }
-  function unsentCount() {
-    return items.filter(function (it) { return it.dirty; }).length +
-      checks.filter(function (c) { return !c.synced; }).length +
-      transcripts.filter(function (t) { return !t.synced; }).length;
-  }
-  function setStatusPill(extra) {
-    var s = DB.session();
-    var unsent = unsentCount();
-    var tail = extra || (unsent ? unsent + ' not sent yet' : '');
-    $('statusPill').textContent = s ? 'signed in: ' + s.email + (tail ? ' · ' + tail : '') : 'this device only';
-  }
 
   function renderTodo() {
     var ul = $('todoList');
@@ -674,111 +638,12 @@
 
   // Notes: the database's status and text win, so a note marked done shows its tick here.
   // Rows from other devices are added to this list.
-  function pullNotes() {
-    return DB.select('wtc_notes', 'select=id,text,status,page,version,noted_at&order=noted_at.asc').then(function (res) {
-      var byId = {};
-      notes.forEach(function (n) { byId[n.id] = n; });
-      (res.data || []).forEach(function (r) {
-        var n = byId[r.id];
-        if (n) { n.status = r.status; n.text = r.text; n.synced = true; }
-        else notes.push({ id: r.id, at: r.noted_at, status: r.status, text: r.text, where: r.page, version: r.version, synced: true });
-      });
-      write(KEY.notes, notes);
-      renderNotes();
-    }, function (e) { reportError('Notes: ' + DB.explain(e)); });
-  }
 
   // Server rows win, except items this device changed and has not sent yet.
-  function pull() {
-    return DB.select('wtc_items', 'select=*&order=updated_at.desc&limit=2000').then(function (res) {
-      var dirtyIds = {};
-      items.forEach(function (it) { if (it.dirty) dirtyIds[it.id] = true; });
-      var remote = (res.data || []).filter(function (r) { return !dirtyIds[r.id]; }).map(fromRow);
-      items = items.filter(function (it) { return it.dirty; }).concat(remote);
-      write(KEY.items, items);
-      renderAll();
-    });
-  }
 
-  function pushItem(it) {
-    var oldId = it.id;
-    function remap(newId) {
-      if (newId === oldId) return;
-      it.id = newId;
-      checks.forEach(function (c) { if (c.item_id === oldId) c.item_id = newId; });
-    }
-    if (it.synced && isUuid(it.id)) {
-      return DB.patch('wtc_items', 'id=eq.' + it.id, toRow(it)).then(function () { it.dirty = false; });
-    }
-    if (it.status !== 'in_stock') {
-      remap(isUuid(it.id) ? it.id : newUuid());
-      return DB.insert('wtc_items', [toRow(it)]).then(function () { it.synced = true; it.dirty = false; });
-    }
-    // Same rule as on the device: same name, expiry and place overwrites the line on the server.
-    var q = 'select=id,expires_on&status=eq.in_stock&stored_location=eq.' + encodeURIComponent(it.stored_location) +
-      '&name=ilike.' + encodeURIComponent(likeEscape(it.name));
-    return DB.select('wtc_items', q).then(function (res) {
-      var hit = (res.data || []).find(function (r) { return (r.expires_on || null) === (it.expires_on || null); });
-      if (hit) {
-        remap(hit.id);
-        return DB.patch('wtc_items', 'id=eq.' + hit.id, toRow(it)).then(function () { it.synced = true; it.dirty = false; });
-      }
-      remap(isUuid(it.id) ? it.id : newUuid());
-      return DB.insert('wtc_items', [toRow(it)]).then(function () { it.synced = true; it.dirty = false; });
-    });
-  }
 
-  function pushLog() {
-    var chain = Promise.resolve();
-    checks.filter(function (c) { return !c.synced; }).forEach(function (c) {
-      chain = chain.then(function () {
-        var item = find(c.item_id);
-        if (!item || !isUuid(item.id) || !item.synced) return;   // its item is not on the server yet: try next time
-        return DB.insert('wtc_checkins', [{ item_id: item.id, action: c.action, note: 'by ' + c.member, at: c.at }])
-          .then(function () { c.synced = true; });
-      });
-    });
-    transcripts.filter(function (t) { return !t.synced; }).forEach(function (t) {
-      chain = chain.then(function () {
-        return DB.insert('wtc_transcripts', [{ text: t.text, method: t.method, parsed_count: t.parsed_count, at: t.at }])
-          .then(function () { t.synced = true; });
-      });
-    });
-    notes.filter(function (n) { return !n.synced; }).forEach(function (n) {
-      chain = chain.then(function () {
-        if (!isUuid(n.id)) n.id = newUuid();   // notes typed before the database had its own ids
-        return DB.insert('wtc_notes', [{ id: n.id, text: n.text, page: n.where, version: n.version, noted_at: n.at, status: n.status }])
-          .then(function () { n.synced = true; });
-      });
-    });
-    return chain;
-  }
 
-  function pushAll() {
-    if (!DB.session() || syncing) return Promise.resolve();
-    syncing = true;
-    setStatusPill('syncing…');
-    var chain = Promise.resolve();
-    items.filter(function (it) { return it.dirty; }).forEach(function (it) {
-      chain = chain.then(function () { return pushItem(it); });
-    });
-    return chain.then(pushLog).then(function () {
-      syncing = false;
-      write(KEY.items, items); write(KEY.checks, checks); write(KEY.transcripts, transcripts); write(KEY.notes, notes);
-      setStatusPill('synced ' + new Date().toLocaleTimeString());
-    }, function (e) {
-      syncing = false;
-      write(KEY.items, items); write(KEY.checks, checks); write(KEY.transcripts, transcripts); write(KEY.notes, notes);
-      setStatusPill('not synced');
-      reportError('Sync: ' + DB.explain(e));
-    });
-  }
 
-  function queueSync() {
-    if (!DB.session()) return;
-    clearTimeout(syncTimer);
-    syncTimer = setTimeout(pushAll, 400);
-  }
 
   // Sign-in and the database check (settings panel).
   $('signIn').addEventListener('click', function () {

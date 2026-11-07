@@ -57,6 +57,7 @@
   <p class="hint"><a href="index.html">← Back to the pantry</a></p>
 </main>
 
+<script src="js/store.js"></script>
 <script>
 (function () {
   'use strict';
@@ -65,8 +66,8 @@
   var recipes = [], items = [], fav = [], started = [], filter = 'all';
   var $ = function (id) { return document.getElementById(id); };
 
-  function readList(key) { try { var v = JSON.parse(localStorage.getItem(key)); return Array.isArray(v) ? v : []; } catch (e) { return []; } }
-  function writeList(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) { /* storage blocked: kept for this visit only */ } }
+  function readList(key) { var v = WTCStore.read(key, []); return Array.isArray(v) ? v : []; }
+  function writeList(key, v) { WTCStore.write(key, v); }
 
   function inStock() { return items.filter(function (it) { return it.status === 'in_stock'; }); }
   function isSoon(it) {

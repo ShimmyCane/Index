@@ -4,7 +4,7 @@ One current list (consolidated 2026-11-07). The history lives in the convo files
 
 ## Waiting on Jimmy (paste, check, decide)
 
-- [ ] **Paste `supabase/what_to_cook_MVP.sql`** into the Family SQL editor. Expect three table rows (rls_on true, policies 1, anon_grants 0, registered 1) and column count 2. This includes the food list table, so `foods_what_to_cook.sql` is not needed.
+- [ ] **Paste `supabase/what_to_cook_MVP.sql`** into the Family SQL editor. Expect three table rows (rls_on true, policies 1, anon_grants 0, registered 1) and column count 2. This includes the food list table. The older food-list paste is archived at `supabase/archive/foods_what_to_cook.sql`.
 - [ ] **Paste `supabase/wtc_items_tracking.sql`** (PR #121). Expect column_exists 1 and check_exists 1. Then say so, and eggs and bread move to the low list.
 - [ ] **Paste `supabase/recipes_what_to_cook.sql`** after the MVP file (recipe versions and pantry links). Expect dish_column_count 2 and food_column 1.
 - [ ] **Merge the drafts** when ready: PR #121 (tracking priority), PR #122 (pantry follow-ups), PR #124 (recipe book, with the explore page), PR #116 (nursery task tracker). Say "merge" for each.
