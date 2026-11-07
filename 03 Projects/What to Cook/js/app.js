@@ -3,12 +3,24 @@
 (function () {
   'use strict';
 
-  var VERSION = '0.4.0';
+  var VERSION = '0.5.0';
   var VERSIONS = [
+    { v: '0.5.0', date: '2026-11-07', text: 'Notes log shows ✅ for notes marked done in the database (it reads their status when signed in). To-do panel in Settings with ✅ for what is built. Text stays readable on white panels in dark mode.' },
     { v: '0.4.0', date: '2026-11-07', text: 'Food list page (from Settings → Pages): each food with its place (fridge, pantry, freezer, other), kind, category, fridge days and notes. Saves to the family database; blanks allowed. Notes now saved to the database too.' },
     { v: '0.3.0', date: '2026-11-06', text: 'Family database wired: sign in with the family login, changes sync to the family pantry, same name, expiry and place overwrite on the server, database check in settings. The device keeps its own copy and works offline.' },
     { v: '0.2.0', date: '2026-11-06', text: 'Use-soon cards for food about to expire. Swipe left for ate or tossed, right to remain, tap for a favourite. Quantity tweak with Save and next. Predicted index for things eaten over time, with ate more / about right / ate less. Apple Voice Memo input. Same name, expiry and place overwrites; a new expiry makes a new line. Settings: pages, transcript archive, version log, notes log.' },
     { v: '0.1.0', date: '2026-11-06', text: 'Pantry with swipe check-ins, transcript capture with review, notes for improvement, opt-in errors.' }
+  ];
+  var TODO = [
+    { done: true, text: 'Pantry saves to the family database.' },
+    { done: true, text: 'Notes save to the family database; done notes show ✅ here.' },
+    { done: true, text: 'Food list page (Settings → Pages): each food with its place, kind, category, fridge days and notes. Master list of fridge life.' },
+    { done: true, text: 'Place tabs: Fridge, Freezer, Pantry, Other, with each food tagged by place.' },
+    { done: false, text: 'Paste supabase/what_to_cook_MVP.sql into the Family database (Jimmy), then check the food list saves.' },
+    { done: false, text: 'Auto-stamp fridge life when a pantry item goes in (uses the food list).' },
+    { done: false, text: 'Kitchen button (not added: places cover it for now).' },
+    { done: false, text: 'Food journal (convo v0.3): questions still open.' },
+    { done: false, text: 'Recipe book, week plan and shopping list (MVP-2 to MVP-5).' }
   ];
   var PAGES = [
     { label: '🥫 Pantry', tab: 'pantry' },
@@ -588,7 +600,7 @@
     ul.textContent = '';
     notes.slice().reverse().forEach(function (n) {
       var li = document.createElement('li');
-      li.textContent = new Date(n.at).toLocaleString() + ' · ' + n.where + ' · v' + n.version + '\n' + n.text;
+      li.textContent = (n.status === 'done' ? '✅ ' : '') + new Date(n.at).toLocaleString() + ' · ' + n.where + ' · v' + n.version + '\n' + n.text;
       ul.appendChild(li);
     });
   }
@@ -646,6 +658,32 @@
     var unsent = unsentCount();
     var tail = extra || (unsent ? unsent + ' not sent yet' : '');
     $('statusPill').textContent = s ? 'signed in: ' + s.email + (tail ? ' · ' + tail : '') : 'this device only';
+  }
+
+  function renderTodo() {
+    var ul = $('todoList');
+    ul.textContent = '';
+    TODO.forEach(function (t) {
+      var li = document.createElement('li');
+      li.textContent = (t.done ? '✅ ' : '⬜ ') + t.text;
+      ul.appendChild(li);
+    });
+  }
+
+  // Notes: the database's status and text win, so a note marked done shows its tick here.
+  // Rows from other devices are added to this list.
+  function pullNotes() {
+    return DB.select('wtc_notes', 'select=id,text,status,page,version,noted_at&order=noted_at.asc').then(function (res) {
+      var byId = {};
+      notes.forEach(function (n) { byId[n.id] = n; });
+      (res.data || []).forEach(function (r) {
+        var n = byId[r.id];
+        if (n) { n.status = r.status; n.text = r.text; n.synced = true; }
+        else notes.push({ id: r.id, at: r.noted_at, status: r.status, text: r.text, where: r.page, version: r.version, synced: true });
+      });
+      write(KEY.notes, notes);
+      renderNotes();
+    }, function (e) { reportError('Notes: ' + DB.explain(e)); });
   }
 
   // Server rows win, except items this device changed and has not sent yet.
@@ -748,7 +786,7 @@
     DB.signIn(email, password).then(function () {
       $('dbPassword').value = '';
       $('dbStatus').textContent = 'Signed in. Syncing…';
-      return pull().then(pushAll);
+      return pull().then(pullNotes).then(pushAll);
     }).then(function () {
       $('dbStatus').textContent = 'Signed in.';
       setStatusPill();
@@ -783,11 +821,12 @@
   renderVersions();
   renderArchive();
   renderNotes();
+  renderTodo();
   renderAll();
   renderErrors();
   setStatusPill();
   if (DB.session()) {
-    pull().then(pushAll, function (e) {
+    pull().then(pullNotes).then(pushAll, function (e) {
       setStatusPill('offline, this device');
       reportError(DB.explain(e));
     });
