@@ -5,7 +5,7 @@
   'use strict';
   function create(ctx) {
     var DB = ctx.DB, KEY = ctx.KEY;
-    var checks = ctx.checks, transcripts = ctx.transcripts, notes = ctx.notes;
+    var checks = ctx.checks, transcripts = ctx.transcripts, notes = ctx.notes, foods = ctx.foods || [];
     var items = ctx.items, replaceItems = ctx.replaceItems;
     var find = ctx.find, write = ctx.write, reportError = ctx.reportError;
     var renderAll = ctx.renderAll, renderNotes = ctx.renderNotes;
@@ -13,7 +13,7 @@
 
     var DB_FIELDS = ['id', 'name', 'kind', 'category', 'subcategory', 'quality', 'quantity', 'unit', 'servings_left',
       'expires_on', 'freshness', 'stored_location', 'purchase_cost', 'notes', 'status', 'source', 'raw_text',
-      'purchased_on', 'counted_on', 'daily_rate', 'fav', 'reviewed_on', 'updated_at'];
+      'purchased_on', 'counted_on', 'daily_rate', 'fav', 'reviewed_on', 'updated_at', 'stamped_on', 'fridge_days'];
     var syncTimer = null, syncing = false;
 
 
@@ -151,7 +151,24 @@
       clearTimeout(syncTimer);
       syncTimer = setTimeout(pushAll, 400);
     }
-    return { toRow: toRow, fromRow: fromRow, unsentCount: unsentCount, setStatusPill: setStatusPill, pullNotes: pullNotes, pull: pull, pushItem: pushItem, pushLog: pushLog, pushAll: pushAll, queueSync: queueSync };
+    // The food list (fridge days per food) is edited on foods.html; here it is only read.
+    // Rows that page has not sent yet stay as they are.
+    function pullFoods() {
+      return DB.select('wtc_foods', 'select=*&order=name.asc').then(function (res) {
+        var keep = foods.filter(function (f) { return f.dirty; });
+        var dirtyIds = {};
+        keep.forEach(function (f) { if (f.id) dirtyIds[f.id] = true; });
+        var remote = (res.data || []).filter(function (r) { return !dirtyIds[r.id]; }).map(function (r) {
+          return { id: r.id, name: r.name || '', location: r.location || 'pantry', kind: r.kind || '',
+            category: r.category || '', fridge_days: r.fridge_days, notes: r.notes || '', dirty: false };
+        });
+        foods.length = 0;
+        Array.prototype.push.apply(foods, keep.concat(remote));
+        write(KEY.foods, foods);
+      }, function (e) { reportError('Food list: ' + DB.explain(e)); });
+    }
+
+    return { pullFoods: pullFoods, toRow: toRow, fromRow: fromRow, unsentCount: unsentCount, setStatusPill: setStatusPill, pullNotes: pullNotes, pull: pull, pushItem: pushItem, pushLog: pushLog, pushAll: pushAll, queueSync: queueSync };
   }
   root.WTCSync = { create: create };
 })(window);

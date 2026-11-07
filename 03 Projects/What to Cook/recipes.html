@@ -33,6 +33,8 @@
   .btns button, .btns a { min-height: 44px; font-size: 15px; padding: 6px 12px; }
   .btns a { display: inline-flex; align-items: center; color: var(--ink); text-decoration: none; background: #fff; border: 3px solid var(--ink); border-radius: var(--r); box-shadow: var(--shadow); font-weight: 700; }
   .mark { position: absolute; top: 10px; right: 12px; font-size: 20px; }
+  .steps { margin: 6px 0 4px 18px; padding: 0; font-size: 14px; }
+  .steps li { padding: 2px 0; }
 </style>
 </head>
 <body>
@@ -52,12 +54,15 @@
     <button class="chip" data-filter="started" type="button">▶ Started <span id="cStart"></span></button>
   </div>
 
+  <p id="saveState" class="hint" role="status"></p>
   <div id="book" class="book"></div>
   <div id="empty" class="empty" hidden>Nothing here yet.</div>
   <p class="hint"><a href="index.html">← Back to the pantry</a></p>
 </main>
 
+<script src="js/config.js"></script>
 <script src="js/store.js"></script>
+<script src="js/db.js"></script>
 <script>
 (function () {
   'use strict';
@@ -115,11 +120,18 @@
       var li = document.createElement('li'); li.className = ing.have ? 'yes' : 'no'; li.textContent = ing.name; ul.appendChild(li);
     });
     back.appendChild(ul);
+    if (isStart && r.steps && r.steps.length) {
+      var ol = document.createElement('ol'); ol.className = 'steps';
+      r.steps.forEach(function (t) { var li = document.createElement('li'); li.textContent = t; ol.appendChild(li); });
+      back.appendChild(ol);
+    } else if (r.steps && r.steps.length) {
+      var tip = document.createElement('p'); tip.className = 'meta'; tip.textContent = 'Start it to see the steps.'; back.appendChild(tip);
+    }
     var btns = document.createElement('div'); btns.className = 'btns';
     var b1 = document.createElement('button'); b1.type = 'button'; b1.textContent = isFav ? '⭐ Favourite' : '☆ Favourite';
-    b1.addEventListener('click', function (e) { e.stopPropagation(); toggle(fav, KEY_FAV, r.id); render(); });
+    b1.addEventListener('click', function (e) { e.stopPropagation(); toggle(fav, KEY_FAV, r.id); render(); share(r); });
     var b2 = document.createElement('button'); b2.type = 'button'; b2.textContent = isStart ? '▶ Started' : '▷ Start this';
-    b2.addEventListener('click', function (e) { e.stopPropagation(); toggle(started, KEY_START, r.id); render(); });
+    b2.addEventListener('click', function (e) { e.stopPropagation(); toggle(started, KEY_START, r.id); render(); reopen(r.id); share(r); });
     var a = document.createElement('a'); a.href = googleUrl(r.name); a.target = '_blank'; a.rel = 'noopener'; a.textContent = '🔎 See versions';
     a.addEventListener('click', function (e) { e.stopPropagation(); });
     var b3 = document.createElement('button'); b3.type = 'button'; b3.textContent = 'Back';
@@ -130,6 +142,46 @@
     inner.appendChild(front); inner.appendChild(back); flip.appendChild(inner);
     flip.addEventListener('click', function () { flip.classList.toggle('open'); });
     return flip;
+  }
+
+  // Keep the card turned over after a re-render, so the steps show at once.
+  function reopen(id) { var el = document.querySelector('.flip[data-id="' + id + '"]'); if (el) el.classList.add('open'); }
+
+  // ---- family database: favourites and starts are rows in wtc_recipes, keyed by "explore:<id>" in notes.
+  // Start = wish (on the list to cook). Device copy first; the database wins when it has a row.
+  var DB = window.WTCDb, remote = {};
+  function setSave(msg) { $('saveState').textContent = msg; }
+  function setIn(list, id, on) { var at = list.indexOf(id); if (on && at === -1) list.push(id); if (!on && at !== -1) list.splice(at, 1); }
+  function saveRemote(r) {
+    if (!DB || !DB.session()) return Promise.resolve();
+    var body = { favourite: fav.indexOf(r.id) !== -1, wish: started.indexOf(r.id) !== -1, updated_at: new Date().toISOString() };
+    var row = remote[r.id];
+    if (row) return DB.patch('wtc_recipes', 'id=eq.' + row.id, body).then(function () { row.favourite = body.favourite; row.wish = body.wish; });
+    body.name = r.name;
+    body.notes = 'explore:' + r.id + ' (from the recipe book, explore)';
+    return DB.insert('wtc_recipes', [body]).then(function (res) { var made = res.data && res.data[0]; if (made) remote[r.id] = made; });
+  }
+  function share(r) {
+    if (!DB || !DB.session()) { setSave('Kept on this device. Sign in on the Pantry page to share with the family.'); return; }
+    setSave('Saving…');
+    saveRemote(r).then(function () { setSave('Saved to the family database.'); },
+      function (e) { setSave('Not saved to the family database: ' + DB.explain(e) + ' This device keeps it.'); });
+  }
+  function loadRemote() {
+    if (!DB || !DB.session()) { setSave('Favourites and starts are kept on this device. Sign in on the Pantry page to share them.'); return; }
+    DB.select('wtc_recipes', 'select=id,name,favourite,wish,notes&notes=like.' + encodeURIComponent('explore:') + '*').then(function (res) {
+      (res.data || []).forEach(function (row) { var key = String(row.notes || '').split(' ')[0]; if (key.indexOf('explore:') === 0) remote[key.slice(8)] = row; });
+      var pushes = [];
+      recipes.forEach(function (r) {
+        var row = remote[r.id];
+        if (row) { setIn(fav, r.id, !!row.favourite); setIn(started, r.id, !!row.wish); }
+        else if (fav.indexOf(r.id) !== -1 || started.indexOf(r.id) !== -1) pushes.push(r);
+      });
+      writeList(KEY_FAV, fav); writeList(KEY_START, started);
+      render();
+      return pushes.reduce(function (p, r) { return p.then(function () { return saveRemote(r); }); }, Promise.resolve());
+    }).then(function () { setSave('Shared with the family database.'); },
+      function (e) { setSave('Could not reach the family database: ' + DB.explain(e) + ' Showing this device.'); });
   }
 
   function toggle(list, key, id) {
@@ -183,6 +235,7 @@
     fav = readList(KEY_FAV);
     started = readList(KEY_START);
     render();
+    loadRemote();
   }).catch(function () {
     $('empty').hidden = false;
     $('empty').textContent = 'Could not load the recipe list. Open this page from the nursery site.';

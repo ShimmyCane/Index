@@ -22,4 +22,7 @@ Project-specific lessons, appended over time. Reusable ones go to `04 AI/lessons
 - (2026-11-07) Consolidated the to-do list by who has to act (Jimmy or Claude), with finished items in one short block. Duplicates from earlier rounds were dropped; the convo files keep the history.
 - (2026-11-07) Before splitting a page into files, record a headless test that signs in against a mocked network and checks what gets sent. Run it on the old code, then the new code, and compare the counts. This caught nothing new here, but it makes the sync path safe to move.
 - (2026-11-07) A shared helper file that never throws (storage, errors, ids) removed four copies with no change in behaviour. Put each helper in one file, and let pages pass in only what differs (the error panel's drawing).
+- (2026-11-07) Check the live columns before building on a paste file. The MVP paste was applied but the tracking and recipe pastes were not, so each feature was built to work now and to pick up its column later.
+- (2026-11-07) Never add a field to the sync list before its column exists: the database refuses the whole row. `tracking` stays out of the sync fields until its paste is applied.
+- (2026-11-07) A feature that needs a new column can often start on an existing one: recipe favourites and starts use `wtc_recipes.favourite` and `wish`, keyed by the recipe id in `notes`, until the versions columns arrive.
 

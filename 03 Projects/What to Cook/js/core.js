@@ -6,7 +6,7 @@
   var WTC = root.WTC = root.WTC || {};
   var KEY = WTC.KEY = {
     items: 'wtc.items', checks: 'wtc.checkins', transcripts: 'wtc.transcripts',
-    members: 'wtc.members', notes: 'wtc.notes', errors: 'wtc.showErrors'
+    members: 'wtc.members', notes: 'wtc.notes', errors: 'wtc.showErrors', foods: 'wtc.foods'
   };
   WTC.$ = function (id) { return document.getElementById(id); };
   var $ = WTC.$;
@@ -17,7 +17,8 @@
   WTC.read = read; WTC.write = write; WTC.uid = uid;
 
   WTC.state = { items: read(KEY.items, []), checks: read(KEY.checks, []), transcripts: read(KEY.transcripts, []),
-    members: read(KEY.members, ['Me']), notes: read(KEY.notes, []) };
+    members: read(KEY.members, ['Me']), notes: read(KEY.notes, []), foods: read(KEY.foods, []) };
+  if (!Array.isArray(WTC.state.foods)) WTC.state.foods = [];
   var items = WTC.state.items, checks = WTC.state.checks, transcripts = WTC.state.transcripts, notes = WTC.state.notes;
   // Rows saved before sync existed are not on the server yet.
   items.forEach(function (it) { if (it.synced === undefined) { it.synced = false; it.dirty = true; } });

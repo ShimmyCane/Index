@@ -4,7 +4,33 @@
   var WTC = root.WTC;
   var $ = WTC.$, uid = WTC.uid, nowIso = WTC.nowIso, todayIso = WTC.todayIso, norm = WTC.norm,
     touch = WTC.touch, persist = WTC.persist, reportError = WTC.reportError, showTab = WTC.showTab;
-  var items = WTC.state.items, transcripts = WTC.state.transcripts;
+  var items = WTC.state.items, transcripts = WTC.state.transcripts, foods = WTC.state.foods;
+
+  // The food list says how many days a food keeps in the fridge. Exact name first, then a close match.
+  function findFood(name) {
+    var n = norm(name);
+    if (!n) return null;
+    var hasDays = function (f) { return f.fridge_days !== null && f.fridge_days !== undefined && f.fridge_days !== '' && !isNaN(Number(f.fridge_days)); };
+    var exact = foods.filter(function (f) { return norm(f.name) === n; });
+    var pool = exact.length ? exact : foods.filter(function (f) {
+      var fn = norm(f.name);
+      return fn.length > 2 && (n.indexOf(fn) !== -1 || fn.indexOf(n) !== -1);
+    });
+    return pool.filter(function (f) { return f.location === 'fridge' && hasDays(f); })[0] ||
+      pool.filter(hasDays)[0] || null;
+  }
+  function addDays(iso, n) { var d = WTC.parseDay(iso); d.setDate(d.getDate() + Math.round(n)); return WTC.isoDay(d); }
+  // Stamp on entry: the day it went in, and (for the fridge) an expiry from the food list, marked as a guess.
+  function fridgeStamp(d, day) {
+    var food = findFood(d.name);
+    var days = food ? Number(food.fridge_days) : null;
+    var out = { days: days, expires_on: d.expires_on || null, note: '' };
+    if (!out.expires_on && days !== null && (d.stored_location || 'pantry') === 'fridge') {
+      out.expires_on = addDays(day, days);
+      out.note = 'Expiry from the food list: keeps about ' + days + ' days in the fridge (?).';
+    }
+    return out;
+  }
   var draft = [];
 
 
@@ -55,8 +81,10 @@
       li.querySelector('.dplace').value = d.stored_location;
       li.querySelector('.dexp').value = d.expires_on || '';
       var dup = findDuplicate(d.name, d.expires_on, d.stored_location);
+      var food = findFood(d.name);
       li.querySelector('.meta').textContent = 'from: "' + d.raw + '" · ' +
-        (dup ? 'already in the pantry, will update that line' : 'new line');
+        (dup ? 'already in the pantry, will update that line' : 'new line') +
+        (food ? ' · keeps about ' + Number(food.fridge_days) + ' days in the fridge' : '');
 
       li.querySelector('.keep').addEventListener('change', function (e) { draft[idx].keep = e.target.checked; });
       li.querySelector('.dname').addEventListener('input', function (e) { draft[idx].name = e.target.value; });
@@ -88,13 +116,14 @@
         touch(dup);
         updated++;
       } else {
+        var stamp = fridgeStamp(d, day);
         items.push({
           id: uid('i'), name: d.name, kind: d.kind, category: d.category || '', subcategory: '',
           quality: d.quality || 'unknown', quantity: d.quantity, unit: d.unit || '', servings_left: null,
-          expires_on: d.expires_on || null, freshness: 'unknown', stored_location: d.stored_location || 'pantry',
-          purchase_cost: null, notes: d.notes || '', status: 'in_stock', source: d.source,
+          expires_on: stamp.expires_on, freshness: 'unknown', stored_location: d.stored_location || 'pantry',
+          purchase_cost: null, notes: [d.notes || '', stamp.note].filter(Boolean).join(' '), status: 'in_stock', source: d.source,
           raw_text: d.raw, purchased_on: day, counted_on: day, daily_rate: null,
-          fav: false, reviewed_on: null, created_at: now, updated_at: now, dirty: true, synced: false
+          fav: false, reviewed_on: null, stamped_on: day, fridge_days: stamp.days, created_at: now, updated_at: now, dirty: true, synced: false
         });
         added++;
       }

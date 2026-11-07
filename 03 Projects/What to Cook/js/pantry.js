@@ -41,12 +41,32 @@
     return (da == null ? 1e9 : da) - (db == null ? 1e9 : db);
   }
   function cleanupItems() { return items.filter(inCleanup).sort(byExpiry); }
-  function stockItems() {
-    var place = $('placeFilter').value;
-    return items
-      .filter(function (it) { return it.status === 'in_stock' && !inCleanup(it) && (!place || it.stored_location === place); })
-      .sort(function (a, b) { return (b.fav ? 1 : 0) - (a.fav ? 1 : 0) || a.name.localeCompare(b.name); });
+  // Low-priority items (eggs, bread, wines) sit on their own list and are revisited now and then.
+  // The tracking column is used once it exists; until then the "LOW PRIORITY" note marks them.
+  function isLow(item) { return item.tracking === 'low' || /^LOW PRIORITY/i.test(item.notes || ''); }
+  // How often a food is used: lines bought with the same name, plus check-ins on them.
+  function useCounts() {
+    var keyOf = {}, counts = {};
+    items.forEach(function (it) { var k = WTC.norm(it.name); keyOf[it.id] = k; counts[k] = (counts[k] || 0) + 1; });
+    checks.forEach(function (c) { var k = keyOf[c.item_id]; if (k) counts[k] = (counts[k] || 0) + 1; });
+    return counts;
   }
+  function placeOk(it) { var place = $('placeFilter').value; return !place || it.stored_location === place; }
+  function byPriority(counts) {
+    return function (a, b) {
+      return (b.fav ? 1 : 0) - (a.fav ? 1 : 0) ||
+        (counts[WTC.norm(b.name)] || 0) - (counts[WTC.norm(a.name)] || 0) ||
+        a.name.localeCompare(b.name);
+    };
+  }
+  function listed(low) {
+    var counts = useCounts();
+    return items.filter(function (it) {
+      return it.status === 'in_stock' && !inCleanup(it) && isLow(it) === low && placeOk(it);
+    }).sort(byPriority(counts));
+  }
+  function stockItems() { return listed(false); }
+  function lowItems() { return listed(true); }
   function describe(item) {
     var bits = [];
     if (item.quantity != null) bits.push(round1(item.quantity) + (item.unit ? ' ' + item.unit : ''));
@@ -61,6 +81,7 @@
   function renderAll(openId) {
     renderCleanup();
     renderStock();
+    renderLow();
     if (openId) openCard(openId);
   }
 
@@ -81,6 +102,16 @@
     var shown = stockItems();
     shown.forEach(function (it) { ul.appendChild(card(it, false)); });
     $('stockEmpty').hidden = shown.length > 0;
+  }
+
+  function renderLow() {
+    var ul = $('lowStock');
+    if (!ul) return;
+    ul.textContent = '';
+    var shown = lowItems();
+    shown.forEach(function (it) { ul.appendChild(card(it, false)); });
+    $('lowCount').textContent = String(shown.length);
+    $('lowEmpty').hidden = shown.length > 0;
   }
 
   function card(it, cleanup) {

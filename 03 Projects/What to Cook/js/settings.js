@@ -118,7 +118,7 @@
     DB.signIn(email, password).then(function () {
       $('dbPassword').value = '';
       $('dbStatus').textContent = 'Signed in. Syncing…';
-      return WTC.sync.pull().then(WTC.sync.pullNotes).then(WTC.sync.pushAll);
+      return WTC.sync.pull().then(WTC.sync.pullNotes).then(WTC.sync.pullFoods).then(WTC.sync.pushAll);
     }).then(function () {
       $('dbStatus').textContent = 'Signed in.';
       WTC.sync.setStatusPill();

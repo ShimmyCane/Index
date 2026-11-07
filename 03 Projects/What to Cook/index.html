@@ -52,6 +52,15 @@
         <p id="stockEmpty" class="empty" hidden>Nothing else in stock here. Use 🎙️ Add.</p>
       </div>
     </section>
+
+    <section class="panel" data-panel="low" data-open="false">
+      <button class="panelHead" type="button" aria-expanded="false"><span>🗂️</span><span class="grow">Lower priority (<span id="lowCount">0</span>)</span><span class="mark">▸</span></button>
+      <div class="panelBody">
+        <p class="hint">Tracked loosely, like eggs, bread and wines. Revisit now and then.</p>
+        <ul id="lowStock" class="cards"></ul>
+        <p id="lowEmpty" class="empty" hidden>Nothing on the lower list.</p>
+      </div>
+    </section>
   </section>
 
   <section id="tab-capture" class="view" hidden>
