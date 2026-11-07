@@ -52,6 +52,9 @@
 </main>
 
 <script src="js/config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/util.js"></script>
+<script src="js/errors.js"></script>
 <script src="js/db.js"></script>
 <script>
 (function () {
@@ -60,39 +63,28 @@
   var KEY_ROWS = 'wtc.foods', KEY_ERRORS = 'wtc.showErrors';
   var PLACES = ['fridge', 'pantry', 'freezer', 'other'];
   var KINDS = ['', 'dry', 'wet', 'tool', 'space'];
-  var UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   var $ = function (id) { return document.getElementById(id); };
   var rows = [];          // { id, name, location, kind, category, fridge_days, notes, dirty }
   var place = '';         // '' = all places
-  var errors = [];
 
   // ---- device copy (each read and write in try/catch) ----
-  function readLocal() {
-    try { var v = JSON.parse(localStorage.getItem(KEY_ROWS)); return Array.isArray(v) ? v : []; }
-    catch (e) { return []; }
-  }
-  function writeLocal() {
-    try { localStorage.setItem(KEY_ROWS, JSON.stringify(rows)); }
-    catch (e) { reportError('Could not keep a device copy: ' + e.message); }
-  }
+  function readLocal() { var v = WTCStore.read(KEY_ROWS, []); return Array.isArray(v) ? v : []; }
+  function writeLocal() { WTCStore.write(KEY_ROWS, rows, reportError); }
 
   // ---- errors at the bottom, shown only when the box is ticked ----
-  function reportError(msg) {
-    errors.push(new Date().toLocaleTimeString() + ' · ' + msg);
-    errors = errors.slice(-30);
-    renderErrors();
-  }
-  function renderErrors() {
+  var errorLog = WTCErrors.create(function (lines) {
     var ul = $('errorList');
     ul.textContent = '';
-    errors.slice().reverse().forEach(function (m) {
+    lines.slice().reverse().forEach(function (m) {
       var li = document.createElement('li'); li.textContent = m; ul.appendChild(li);
     });
     ul.hidden = !$('showErrors').checked;
-  }
-  $('showErrors').checked = (function () { try { return localStorage.getItem(KEY_ERRORS) === 'true'; } catch (e) { return false; } })();
+  }, 30);
+  function reportError(msg) { errorLog.report(msg); }
+  function renderErrors() { errorLog.redraw(); }
+  $('showErrors').checked = WTCStore.read(KEY_ERRORS, false) === true;
   $('showErrors').addEventListener('change', function (e) {
-    try { localStorage.setItem(KEY_ERRORS, e.target.checked ? 'true' : 'false'); } catch (err) { /* storage blocked */ }
+    WTCStore.write(KEY_ERRORS, e.target.checked);
     renderErrors();
   });
 
@@ -206,7 +198,7 @@
   function saveOne(r) {
     var body = { name: r.name.trim(), location: r.location, kind: r.kind, category: r.category.trim(),
       fridge_days: r.fridge_days, notes: r.notes.trim(), updated_at: new Date().toISOString() };
-    if (UUID.test(r.id)) {
+    if (WTCUtil.isUuid(r.id)) {
       return DB.patch('wtc_foods', 'id=eq.' + r.id, body).then(function () { r.dirty = false; });
     }
     return DB.insert('wtc_foods', [body]).then(function (res) {
@@ -250,9 +242,9 @@
         return { id: r.id, name: r.name || '', location: r.location || 'pantry', kind: r.kind || '',
           category: r.category || '', fridge_days: r.fridge_days, notes: r.notes || '', dirty: false };
       });
-      var keep = rows.filter(function (r) { return r.dirty && !UUID.test(r.id); });
+      var keep = rows.filter(function (r) { return r.dirty && !WTCUtil.isUuid(r.id); });
       var dirtyById = {};
-      rows.forEach(function (r) { if (r.dirty && UUID.test(r.id)) dirtyById[r.id] = r; });
+      rows.forEach(function (r) { if (r.dirty && WTCUtil.isUuid(r.id)) dirtyById[r.id] = r; });
       dbRows = dbRows.map(function (r) { return dirtyById[r.id] || r; });
       rows = dbRows.concat(keep);
       writeLocal();
