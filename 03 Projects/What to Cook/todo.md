@@ -21,6 +21,8 @@ One current list (consolidated 2026-11-07). The history lives in the convo files
 - [ ] **Chia seeds:** the bag does not close; move them to a sealed container.
 - [ ] **Anchovies (dried):** no use yet. Ask for ideas later.
 - [ ] **Orange juice:** take it to the soccer game (expires 8 November, estimated).
+- [ ] **Reminders for items about to expire:** the Use soon panel does this for now. Scheduled reminders are a later choice.
+- [ ] **Cooking salt level:** record it as a note on each cooking wine, vinegar and sauce (done for the vinegars, not yet for every cooking wine).
 - [ ] **Milk:** the lactose-free split is not recorded. Tell me the split if you want it added.
 - [ ] **Left out of the database:** "Casey's mom" and "123-4567 wines" (unclear in the memos).
 
