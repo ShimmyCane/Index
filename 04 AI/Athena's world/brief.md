@@ -58,3 +58,17 @@ A decorating game for Athena. A white room, a choice of house or workplace, deco
 - Bag of bought things: `addToBag(id)` adds to the bag; bag items become decorate buttons in every house and persist with the save. Six example things added (vase, candle, cactus, balloon, rainbow, kite).
 - Tested headless: bought items appear as buttons, a vase places in a house, the bag survives a reload. No page errors.
 - Not yet: the shops that call `addToBag`. The shop prices and the credits are still open (convo v0.5).
+
+## v0.7.0 (2026-11-08)
+
+- Front page: a small read-only picture of the current house beside the sections as tabs. The always-on top menu is gone. Home decor opens the room; Front page buttons return to the front page.
+- Tested headless: front page first, Home decor round trip, preview shows a placed item, locks and coming-soon tabs, back from panels. No page errors.
+- Stacked on the bag branch (#131), so this PR also carries that work.
+- Not verified: iPad layout of the front page.
+
+## v0.8.0 (2026-11-08)
+
+- MVPs of the Learning center (12 questions, credits), Retail therapy (12 generic shops, buy into the bag, trip home), and Get a job (37 listed jobs; Architect, Pilot, Artist have full steps; hired saved).
+- Content lives in `content.js` (questions, shops, jobs, job steps), so it can be edited without touching the game code.
+- Tested headless end to end: a full round (20 credits), 12 shops and a trip home (bag items appear as decorate buttons), and the Architect job to hired with the challenge answer saved. No page errors.
+- Not verified: iPad layout; the real Test Bank (not in this repo; the Learning center uses its own questions); credit amounts and trip rules are first guesses (convo v0.5 Q4–Q5).

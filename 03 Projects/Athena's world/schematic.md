@@ -1,6 +1,6 @@
 # Athena's world — Schematic
 
-**Status:** MVP with five houses, level menu, sign-in, bag of bought things (v0.6.0), not yet device-tested
+**Status:** MVP with five houses, level menu, sign-in, bag of bought things (v0.8.0), MVPs of the Learning center, Retail therapy and Get a job, not yet device-tested
 **Owner:** Jimmy
 **Platform:** iPad web app, landscape first (portrait stacks the room above the buttons)
 **Conversations:** `convo/convo v0.1.md` (questions), `convo/convo v0.2.md` (visibility answers), `convo/convo v0.3.md` (purpose, MVP, assumptions), `convo/convo v0.4.md` (five houses, ready pop-up, open questions)
@@ -31,6 +31,19 @@ A decorating game. Athena picks who a house or workplace is for, then decorates 
 - **Sync pill** (top of the play area): `💾 this device`, `☁️ synced`, `☁️ syncing…`, `⚠️ check`. Check database lists each table in the drawer.
 - Settings are kept on the device only. The publishable key is in the script; the service-role key is never used.
 - The SQL lives in `supabase/`: `test_001` (rolled back, run first), `001_athena_family` (the tables), `verify_001` (read-only, paste the result back). Not applied until pasted by hand.
+
+## The three MVPs (v0.8.0)
+
+- **Learning center:** a round of 4 questions from `content.js` (`QUESTIONS`). A right answer on the first try earns 5 credits; a right answer after a wrong try earns 2. Credits show as 🪙 on the front page and in every level.
+- **Retail therapy:** 12 shops (`SHOPS` in `content.js`), each selling things by id with a price. Buying puts the thing in the bag, so it becomes a decorate button in every house. A trip home needs every shop visited and 20 credits spent (`TRIP`). Shop names are generic until Jimmy answers convo v0.5.
+- **Get a job:** the job board holds all 37 jobs (`JOBS`, from `jobs.md`). Architect, Pilot and Artist have full steps (`JOB_STEPS`): two learn pages, a three-question quiz, a scenario to ask a real worker (with choices and a sentence starter, saved as the answer), a first-pass task, then Hired ⭐. The other 34 show their card; their steps come later.
+- Saved on the device, and in `athena_saves` when signed in: credits, the trip, hired jobs, and the challenge answers.
+
+## Front page (v0.7.0)
+
+- The front page is the landing screen. On the left, a small read-only picture of the current house (the home room as it is now). On the right, the sections as tabs: Home decor, Learning center, Retail therapy, Get a job, then Family life, Making friends, Exploring the world (coming soon).
+- Home decor opens the full room. The side panel's bottom button, 🏠 Front page, brings you back. Other sections open their own screen with 🏠 Back to front page.
+- The sync pill sits at the top of every screen.
 
 ## The bag (v0.6.0)
 
