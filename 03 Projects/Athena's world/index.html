@@ -32,41 +32,69 @@
       gap: 18px;
       height: 100vh;
       height: 100dvh;
-      padding: 96px 18px 18px;
+      padding: 56px 18px 18px;
     }
 
-    /* Level menu: floats above the home room */
-    .dock {
-      position: fixed;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 20;
+    /* Front page: a small room on the left, the sections as tabs on the right */
+    .landing {
+      min-height: 100dvh;
+      padding: 72px 18px 24px;
       display: flex;
-      gap: 8px;
-      max-width: calc(100vw - 20px);
-      padding: 6px;
-      overflow-x: auto;
-      background: var(--paper);
-      border: var(--line);
-      border-radius: 999px;
-      box-shadow: 0 4px 0 var(--ink);
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
     }
-    .dockBtn {
-      flex: 0 0 auto;
-      min-height: 48px;
-      padding: 0 11px;
-      font: 700 14px system-ui, -apple-system, "Segoe UI", sans-serif;
-      color: var(--ink);
+    .landing h1 { margin: 0; font-size: clamp(28px, 5vw, 40px); text-align: center; }
+    .landingGrid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 28px;
+      width: min(980px, 100%);
+      align-items: center;
+    }
+    .preview { display: grid; gap: 10px; justify-items: center; }
+    .preview .sub { margin: 0; text-align: center; font-size: 16px; font-weight: 700; }
+    .mini {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+      aspect-ratio: 4 / 3;
       background: #fff;
-      border: 2px solid var(--ink);
-      border-radius: 999px;
-      box-shadow: 0 3px 0 var(--ink);
-      white-space: nowrap;
+      border: var(--line);
+      border-radius: 22px;
+      box-shadow: 0 5px 0 var(--ink);
+      overflow: hidden;
+    }
+    .miniItem {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      font-size: 30px;
+      line-height: 1;
+    }
+    .tabs { display: grid; gap: 12px; }
+    .tab {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      column-gap: 12px;
+      align-items: center;
+      min-height: 72px;
+      padding: 10px 16px;
+      font: inherit;
+      color: var(--ink);
+      text-align: left;
+      background: #fff;
+      border: var(--line);
+      border-radius: 22px 26px 24px 28px;
+      box-shadow: 0 4px 0 var(--ink);
       cursor: pointer;
     }
-    .dockBtn.on { background: var(--butter); }
-    .dockBtn.locked { opacity: 0.6; }
+    .tab:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+    .tab.on { background: var(--butter); }
+    .tab.locked { opacity: 0.7; }
+    .tabIcon { grid-row: span 2; font-size: 30px; }
+    .tabName { font-weight: 800; font-size: 19px; }
+    .tabStatus { font-size: 14px; }
+    @media (max-width: 700px) { .landingGrid { grid-template-columns: 1fr; } }
     .play {
       display: flex;
       flex-direction: column;
@@ -267,7 +295,7 @@
     }
 
     /* Sync pill and sign-in form */
-    .pillRow { display: flex; justify-content: center; margin-bottom: 6px; }
+    .pillRow { position: fixed; top: 10px; left: 0; right: 0; display: flex; justify-content: center; z-index: 15; pointer-events: none; }
     .pill {
       display: inline-block;
       min-height: 36px;
@@ -345,11 +373,21 @@
   </style>
 </head>
 <body>
-  <nav class="dock" id="dock" aria-label="Levels"></nav>
+  <div class="pillRow"><span class="pill device" id="pill">💾 this device</span></div>
 
-  <div class="app">
+  <section class="landing" id="landing">
+    <h1>Athena's world</h1>
+    <div class="landingGrid">
+      <div class="preview">
+        <div class="mini" id="mini" aria-label="Your home right now"><div class="wall"></div><div class="floor"></div></div>
+        <p class="sub" id="miniName"></p>
+      </div>
+      <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+    </div>
+  </section>
+
+  <div class="app" id="app" hidden>
     <section class="play">
-      <div class="pillRow"><span class="pill device" id="pill">💾 this device</span></div>
       <h1 id="title"></h1>
       <p class="hint" id="hint"></p>
       <div class="room" id="room" aria-label="Room">
@@ -364,6 +402,7 @@
       <h2>Decorate</h2>
       <div class="stack" id="items"></div>
       <button class="btn ghost" id="undo" type="button">↩️ Undo</button>
+      <button class="btn ghost" id="toLanding" type="button">🏠 Front page</button>
     </aside>
   </div>
 
@@ -423,6 +462,7 @@
       <label>Version log</label>
       <div>Now on version <span id="version"></span></div>
       <ul>
+        <li><b>0.7.0</b> The front page is now a small picture of your home beside the sections as tabs. Home decor opens the room; a Front page button brings you back.</li>
         <li><b>0.6.0</b> A bag for things bought in the shops. Bought things show as decorate buttons in every house. Six new things: vase, candle, cactus, balloon, rainbow, kite.</li>
         <li><b>0.5.0</b> Level menu over the home room: Home decor, Learning center, Retail therapy, Get a job, then three coming soon. Locks open with progress.</li>
         <li><b>0.4.0</b> Five houses, each with its own furniture. After the last house: ready for Retail therapy? Replay keeps progress.</li>
@@ -460,12 +500,12 @@
     <div class="cheer" id="panelIcon" aria-hidden="true"></div>
     <h1 id="panelTitle"></h1>
     <p id="panelText"></p>
-    <button class="btn ghost" id="panelBack" type="button">🏡 Back to home</button>
+    <button class="btn ghost" id="panelBack" type="button">🏠 Back to front page</button>
   </section>
 
   <script>
     // ---- Houses and things. Edit these lists to change the game. ----
-    const VERSION = '0.6.0';
+    const VERSION = '0.7.0';
     const HOUSES = [
       { name: "Athena's cottage", icon: '🏡', needs: ['bed', 'window', 'picture', 'plant'] },
       { name: 'Beach hut', icon: '🏖️', needs: ['window', 'sofa', 'plant', 'mirror'] },
@@ -874,7 +914,7 @@
       shops: 'Retail therapy is coming soon. The shops open here.',
       jobs:  'The job board goes here: 37 jobs to try.'
     };
-    let activeLevel = 'home';
+    let activeLevel = 'landing';
     // Lock rules (see convo v0.6): home and learning are open; the rest open with progress
     function isOpen(id) {
       if (id === 'home' || id === 'learn') return true;
@@ -888,25 +928,64 @@
       $('panelText').textContent = text;
       $('panel').hidden = false;
     }
-    function closePanel() {
+    const LOCK_HINT = { shops: 'Finish the first house to open', jobs: 'Finish all five houses to open' };
+    // The front page: a small room and the sections as tabs
+    function goLanding() {
+      activeLevel = 'landing';
       $('panel').hidden = true;
-      activeLevel = 'home';
-      renderDock();
+      $('app').hidden = true;
+      $('landing').hidden = false;
+      renderTabs();
+      renderMini();
     }
     function openLevel(id) {
       const L = LEVELS.find(l => l.id === id);
-      if (id === 'home') { closePanel(); return; }
-      if (L.soon) { showPanel(L.icon, L.name, 'Coming soon.'); }
-      else if (!isOpen(id)) { showPanel(L.icon, L.name, 'Finish the step before this one to open it.'); }
-      else { showPanel(L.icon, L.name, LEVEL_TEXT[id]); }
       activeLevel = id;
-      renderDock();
+      $('landing').hidden = true;
+      if (id === 'home') {
+        $('panel').hidden = true;
+        $('app').hidden = false;
+      } else {
+        $('app').hidden = true;
+        if (L.soon) showPanel(L.icon, L.name, 'Coming soon.');
+        else if (!isOpen(id)) showPanel(L.icon, L.name, 'Finish the step before this one to open it.');
+        else showPanel(L.icon, L.name, LEVEL_TEXT[id]);
+      }
+      renderTabs();
     }
-    function renderDock() {
-      $('dock').replaceChildren(...LEVELS.map(L => {
+    // The small room on the front page shows the current house, read only
+    function renderMini() {
+      const mini = $('mini');
+      mini.querySelectorAll('.miniItem').forEach(e => e.remove());
+      const R = room();
+      for (const t in R.pos) {
+        if (!R.pos[t].placed) continue;
+        const el = document.createElement('span');
+        el.className = 'miniItem';
+        el.textContent = ITEMS[t].emoji;
+        el.style.left = R.pos[t].x + '%';
+        el.style.top = R.pos[t].y + '%';
+        mini.appendChild(el);
+      }
+      $('miniName').textContent = HOUSES[current].icon + ' ' + HOUSES[current].name
+        + (Object.keys(R.pos).length ? '' : ' (empty for now)');
+    }
+    function renderTabs() {
+      $('tabs').replaceChildren(...LEVELS.map(L => {
         const open = L.soon ? false : isOpen(L.id);
-        const b = button((open ? '' : '🔒 ') + L.icon + ' ' + L.name);
-        b.className = 'dockBtn' + (activeLevel === L.id ? ' on' : '') + (open ? '' : ' locked');
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'tab' + (activeLevel === L.id ? ' on' : '') + (open ? '' : ' locked');
+        const icon = document.createElement('span');
+        icon.className = 'tabIcon';
+        icon.textContent = L.icon;
+        const name = document.createElement('span');
+        name.className = 'tabName';
+        name.textContent = L.name;
+        const status = document.createElement('span');
+        status.className = 'tabStatus';
+        status.textContent = L.soon ? 'Coming soon' : open ? 'Open' : '🔒 ' + LOCK_HINT[L.id];
+        b.append(icon, name, status);
         b.onclick = () => openLevel(L.id);
         return b;
       }));
@@ -959,7 +1038,8 @@
         : Object.keys(R.pos).length ? 'Tap something in the room to move it.' : 'Tap something on the right to start.';
 
       renderSettings();
-      renderDock();
+      renderTabs();
+      renderMini();
     }
 
     function renderSettings() {
@@ -1027,7 +1107,8 @@
       $('ready').hidden = true;
       selectHouse(0);
     };
-    $('panelBack').onclick = () => closePanel();
+    $('panelBack').onclick = () => goLanding();
+    $('toLanding').onclick = () => goLanding();
 
     $('signInForm').onsubmit = async e => {
       e.preventDefault();
@@ -1059,6 +1140,7 @@
       renderNotes();
       render();
       renderSync();
+      goLanding();
       if (!session) return;
       try {
         setSync('checking');

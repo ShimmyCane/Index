@@ -1,6 +1,6 @@
 # Athena's world — Schematic
 
-**Status:** MVP with five houses, level menu, sign-in, bag of bought things (v0.6.0), not yet device-tested
+**Status:** MVP with five houses, level menu, sign-in, bag of bought things (v0.7.0), not yet device-tested
 **Owner:** Jimmy
 **Platform:** iPad web app, landscape first (portrait stacks the room above the buttons)
 **Conversations:** `convo/convo v0.1.md` (questions), `convo/convo v0.2.md` (visibility answers), `convo/convo v0.3.md` (purpose, MVP, assumptions), `convo/convo v0.4.md` (five houses, ready pop-up, open questions)
@@ -31,6 +31,12 @@ A decorating game. Athena picks who a house or workplace is for, then decorates 
 - **Sync pill** (top of the play area): `💾 this device`, `☁️ synced`, `☁️ syncing…`, `⚠️ check`. Check database lists each table in the drawer.
 - Settings are kept on the device only. The publishable key is in the script; the service-role key is never used.
 - The SQL lives in `supabase/`: `test_001` (rolled back, run first), `001_athena_family` (the tables), `verify_001` (read-only, paste the result back). Not applied until pasted by hand.
+
+## Front page (v0.7.0)
+
+- The front page is the landing screen. On the left, a small read-only picture of the current house (the home room as it is now). On the right, the sections as tabs: Home decor, Learning center, Retail therapy, Get a job, then Family life, Making friends, Exploring the world (coming soon).
+- Home decor opens the full room. The side panel's bottom button, 🏠 Front page, brings you back. Other sections open their own screen with 🏠 Back to front page.
+- The sync pill sits at the top of every screen.
 
 ## The bag (v0.6.0)
 

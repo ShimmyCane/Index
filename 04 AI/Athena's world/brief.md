@@ -58,3 +58,10 @@ A decorating game for Athena. A white room, a choice of house or workplace, deco
 - Bag of bought things: `addToBag(id)` adds to the bag; bag items become decorate buttons in every house and persist with the save. Six example things added (vase, candle, cactus, balloon, rainbow, kite).
 - Tested headless: bought items appear as buttons, a vase places in a house, the bag survives a reload. No page errors.
 - Not yet: the shops that call `addToBag`. The shop prices and the credits are still open (convo v0.5).
+
+## v0.7.0 (2026-11-08)
+
+- Front page: a small read-only picture of the current house beside the sections as tabs. The always-on top menu is gone. Home decor opens the room; Front page buttons return to the front page.
+- Tested headless: front page first, Home decor round trip, preview shows a placed item, locks and coming-soon tabs, back from panels. No page errors.
+- Stacked on the bag branch (#131), so this PR also carries that work.
+- Not verified: iPad layout of the front page.
