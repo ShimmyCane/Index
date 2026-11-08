@@ -123,7 +123,7 @@
           expires_on: stamp.expires_on, freshness: 'unknown', stored_location: d.stored_location || 'pantry',
           purchase_cost: null, notes: [d.notes || '', stamp.note].filter(Boolean).join(' '), status: 'in_stock', source: d.source,
           raw_text: d.raw, purchased_on: day, counted_on: day, daily_rate: null,
-          fav: false, reviewed_on: null, stamped_on: day, fridge_days: stamp.days, created_at: now, updated_at: now, dirty: true, synced: false
+          fav: false, reviewed_on: null, stamped_on: day, fridge_days: stamp.days, tracking: 'priority', created_at: now, updated_at: now, dirty: true, synced: false
         });
         added++;
       }

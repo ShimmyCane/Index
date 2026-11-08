@@ -13,7 +13,7 @@
 
     var DB_FIELDS = ['id', 'name', 'kind', 'category', 'subcategory', 'quality', 'quantity', 'unit', 'servings_left',
       'expires_on', 'freshness', 'stored_location', 'purchase_cost', 'notes', 'status', 'source', 'raw_text',
-      'purchased_on', 'counted_on', 'daily_rate', 'fav', 'reviewed_on', 'updated_at', 'stamped_on', 'fridge_days'];
+      'purchased_on', 'counted_on', 'daily_rate', 'fav', 'reviewed_on', 'updated_at', 'stamped_on', 'fridge_days', 'tracking'];
     var syncTimer = null, syncing = false;
 
 

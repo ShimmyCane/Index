@@ -25,4 +25,4 @@ Project-specific lessons, appended over time. Reusable ones go to `04 AI/lessons
 - (2026-11-07) Check the live columns before building on a paste file. The MVP paste was applied but the tracking and recipe pastes were not, so each feature was built to work now and to pick up its column later.
 - (2026-11-07) Never add a field to the sync list before its column exists: the database refuses the whole row. `tracking` stays out of the sync fields until its paste is applied.
 - (2026-11-07) A feature that needs a new column can often start on an existing one: recipe favourites and starts use `wtc_recipes.favourite` and `wish`, keyed by the recipe id in `notes`, until the versions columns arrive.
-
+- (2026-11-08) A form that depends on a saved row must redraw after the save resolves, not when the tap happens. The version form first showed "sign in" because the card redrew before the family version existed.

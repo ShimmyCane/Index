@@ -34,6 +34,12 @@
   .btns a { display: inline-flex; align-items: center; color: var(--ink); text-decoration: none; background: #fff; border: 3px solid var(--ink); border-radius: var(--r); box-shadow: var(--shadow); font-weight: 700; }
   .mark { position: absolute; top: 10px; right: 12px; font-size: 20px; }
   .steps { margin: 6px 0 4px 18px; padding: 0; font-size: 14px; }
+  .logos { position: absolute; bottom: 10px; right: 12px; display: flex; gap: 4px; }
+  .logo { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--ink); display: inline-flex; align-items: center; justify-content: center; font: 700 13px Quicksand, system-ui, sans-serif; color: var(--surface-ink); flex: 0 0 auto; }
+  .versions { list-style: none; padding: 0; margin: 8px 0; font-size: 14px; }
+  .versions li { display: flex; gap: 6px; align-items: center; padding: 3px 0; }
+  .vform { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .vform select, .vform input { min-height: 44px; flex: 1 1 120px; min-width: 0; }
   .steps li { padding: 2px 0; }
 </style>
 </head>
@@ -112,6 +118,12 @@
     var mt = document.createElement('div'); mt.className = 'meta'; mt.textContent = r.minutes + ' min'; front.appendChild(mt);
     var hv = document.createElement('div'); hv.className = 'have';
     hv.textContent = s.matched + ' of ' + s.n + ' in the pantry' + (s.soon ? ' · use soon' : ''); front.appendChild(hv);
+    var vs = versions[r.id] || [];
+    if (vs.length) {
+      var lg = document.createElement('div'); lg.className = 'logos';
+      vs.forEach(function (v) { lg.appendChild(logo(v.version_by)); });
+      front.appendChild(lg);
+    }
 
     var back = document.createElement('div'); back.className = 'face back';
     var bn = document.createElement('div'); bn.className = 'name'; bn.textContent = r.name; back.appendChild(bn);
@@ -138,6 +150,7 @@
     b3.addEventListener('click', function (e) { e.stopPropagation(); flip.classList.remove('open'); });
     btns.appendChild(b1); btns.appendChild(b2); btns.appendChild(a); btns.appendChild(b3);
     back.appendChild(btns);
+    if (isStart) back.appendChild(versionBlock(r));
 
     inner.appendChild(front); inner.appendChild(back); flip.appendChild(inner);
     flip.addEventListener('click', function () { flip.classList.toggle('open'); });
@@ -155,22 +168,108 @@
   function saveRemote(r) {
     if (!DB || !DB.session()) return Promise.resolve();
     var body = { favourite: fav.indexOf(r.id) !== -1, wish: started.indexOf(r.id) !== -1, updated_at: new Date().toISOString() };
+    // The family version is the starting point; other versions are tweaks with a person's name.
     var row = remote[r.id];
     if (row) return DB.patch('wtc_recipes', 'id=eq.' + row.id, body).then(function () { row.favourite = body.favourite; row.wish = body.wish; });
     body.name = r.name;
+    body.dish = r.name;
+    body.version_by = 'Family';
     body.notes = 'explore:' + r.id + ' (from the recipe book, explore)';
-    return DB.insert('wtc_recipes', [body]).then(function (res) { var made = res.data && res.data[0]; if (made) remote[r.id] = made; });
+    return DB.insert('wtc_recipes', [body]).then(function (res) {
+      var made = res.data && res.data[0];
+      if (!made) return;
+      remote[r.id] = made;
+      return linkIngredients(r, made.id);
+    });
   }
+  // ---- versions: a tweak by one person, shown with their letter on the card's corner ----
+  var PEOPLE = [{ name: 'Jimmy', color: '#ffd166' }, { name: 'Ying', color: '#bfeee0' },
+                { name: 'Athena', color: '#ffc9a8' }, { name: 'Felix', color: '#cfe8c9' }];
+  var versions = {};   // explore id -> wtc_recipes rows that are not the family version
+  function logo(who) {
+    var p = PEOPLE.filter(function (x) { return x.name === who; })[0] || { name: who || '?', color: '#e3d9ff' };
+    var el = document.createElement('span'); el.className = 'logo'; el.style.background = p.color;
+    el.textContent = String(p.name).charAt(0).toUpperCase(); el.title = p.name + "'s version";
+    return el;
+  }
+  function tweakOf(row) { var t = String(row.notes || ''); var at = t.indexOf('tweak: '); return at === -1 ? '' : t.slice(at + 7); }
+  function versionBlock(r) {
+    var box = document.createElement('div');
+    var vs = versions[r.id] || [];
+    if (vs.length) {
+      var ul = document.createElement('ul'); ul.className = 'versions';
+      vs.forEach(function (v) {
+        var li = document.createElement('li'); li.appendChild(logo(v.version_by));
+        var t = document.createElement('span'); t.textContent = v.version_by + ': ' + (tweakOf(v) || 'own version'); li.appendChild(t);
+        ul.appendChild(li);
+      });
+      box.appendChild(ul);
+    }
+    if (!DB || !DB.session() || !remote[r.id]) {
+      var hint = document.createElement('p'); hint.className = 'meta';
+      hint.textContent = DB && DB.session() ? 'Saving the family version first…' : 'Sign in on the Pantry page to add your own version.';
+      box.appendChild(hint);
+      return box;
+    }
+    var form = document.createElement('div'); form.className = 'vform';
+    var who = document.createElement('select'); who.setAttribute('aria-label', 'Whose version');
+    PEOPLE.forEach(function (p) { var o = document.createElement('option'); o.value = p.name; o.textContent = p.name; who.appendChild(o); });
+    var tweak = document.createElement('input'); tweak.type = 'text'; tweak.placeholder = 'The tweak (for example: extra chili)'; tweak.setAttribute('aria-label', 'The tweak');
+    var add = document.createElement('button'); add.type = 'button'; add.textContent = '+ Add a version';
+    [who, tweak, add].forEach(function (el) { el.addEventListener('click', function (e) { e.stopPropagation(); }); });
+    add.addEventListener('click', function () {
+      var text = tweak.value.trim();
+      if (!text) { setSave('Write the tweak first.'); return; }
+      addVersion(r, who.value, text);
+    });
+    form.appendChild(who); form.appendChild(tweak); form.appendChild(add);
+    box.appendChild(form);
+    return box;
+  }
+  function addVersion(r, who, text) {
+    setSave('Saving…');
+    DB.insert('wtc_recipes', [{ name: r.name + ' (' + who + ')', dish: r.name, version_by: who, wish: true, favourite: false,
+      notes: 'explore:' + r.id + ' tweak: ' + text.slice(0, 300) }]).then(function (res) {
+      var made = res.data && res.data[0];
+      if (made) (versions[r.id] = versions[r.id] || []).push(made);
+      render(); reopen(r.id);
+      setSave(who + "'s version saved.");
+    }, function (e) { setSave('Version not saved: ' + DB.explain(e)); });
+  }
+
+  // ---- ingredients: when a recipe is started, its ingredients are saved, each linked to the food list ----
+  var foodsCache = null;
+  function loadFoods() {
+    if (foodsCache) return Promise.resolve(foodsCache);
+    return DB.select('wtc_foods', 'select=id,name').then(function (res) { foodsCache = res.data || []; return foodsCache; });
+  }
+  function linkIngredients(r, recipeId) {
+    return loadFoods().then(function (foods) {
+      var rows = r.ingredients.map(function (ing, i) {
+        var k = String(ing.match || '').toLowerCase();
+        var food = foods.filter(function (f) { return String(f.name || '').toLowerCase().indexOf(k) !== -1; })[0];
+        return { recipe_id: recipeId, name: ing.name, sort: i, food_id: food ? food.id : null };
+      });
+      return rows.length ? DB.insert('wtc_recipe_ingredients', rows) : null;
+    });
+  }
+
   function share(r) {
     if (!DB || !DB.session()) { setSave('Kept on this device. Sign in on the Pantry page to share with the family.'); return; }
     setSave('Saving…');
-    saveRemote(r).then(function () { setSave('Saved to the family database.'); },
+    saveRemote(r).then(function () { setSave('Saved to the family database.'); render(); if (started.indexOf(r.id) !== -1) reopen(r.id); },
       function (e) { setSave('Not saved to the family database: ' + DB.explain(e) + ' This device keeps it.'); });
   }
   function loadRemote() {
     if (!DB || !DB.session()) { setSave('Favourites and starts are kept on this device. Sign in on the Pantry page to share them.'); return; }
-    DB.select('wtc_recipes', 'select=id,name,favourite,wish,notes&notes=like.' + encodeURIComponent('explore:') + '*').then(function (res) {
-      (res.data || []).forEach(function (row) { var key = String(row.notes || '').split(' ')[0]; if (key.indexOf('explore:') === 0) remote[key.slice(8)] = row; });
+    DB.select('wtc_recipes', 'select=id,name,favourite,wish,notes,dish,version_by&notes=like.' + encodeURIComponent('explore:') + '*').then(function (res) {
+      (res.data || []).forEach(function (row) {
+        var key = String(row.notes || '').split(' ')[0];
+        if (key.indexOf('explore:') !== 0) return;
+        var id = key.slice(8);
+        if ((row.version_by || 'Family') === 'Family') remote[id] = row;
+        else (versions[id] = versions[id] || []).push(row);
+      });
       var pushes = [];
       recipes.forEach(function (r) {
         var row = remote[r.id];

@@ -43,7 +43,10 @@
   function cleanupItems() { return items.filter(inCleanup).sort(byExpiry); }
   // Low-priority items (eggs, bread, wines) sit on their own list and are revisited now and then.
   // The tracking column is used once it exists; until then the "LOW PRIORITY" note marks them.
-  function isLow(item) { return item.tracking === 'low' || /^LOW PRIORITY/i.test(item.notes || ''); }
+  function isLow(item) {
+    if (item.tracking) return item.tracking === 'low';
+    return /^LOW PRIORITY/i.test(item.notes || '');   // rows from before the tracking column
+  }
   // How often a food is used: lines bought with the same name, plus check-ins on them.
   function useCounts() {
     var keyOf = {}, counts = {};
@@ -159,6 +162,7 @@
         '<label>Expiry date<input type="date" class="fe"></label>' +
       '</div>' +
       '<label>Place<select class="fp"><option value="fridge">Fridge</option><option value="pantry">Pantry</option><option value="freezer">Freezer</option><option value="other">Other</option></select></label>' +
+      '<label>Tracking<select class="ft"><option value="priority">Priority</option><option value="low">Lower priority (revisit now and then)</option></select></label>' +
       '<label>Notes<textarea class="fn" rows="2"></textarea></label>' +
       '<div class="row wrap">' +
         '<button type="button" class="primary" data-save="stay">Save</button>' +
@@ -170,6 +174,7 @@
     f.querySelector('.fe').value = it.expires_on || '';
     f.querySelector('.fp').value = ['fridge', 'pantry', 'freezer', 'other'].indexOf(it.stored_location) !== -1 ? it.stored_location : 'other';
     f.querySelector('.fn').value = it.notes || '';
+    f.querySelector('.ft').value = isLow(it) ? 'low' : 'priority';
 
     attachSwipe(li, it.id);
     return li;
@@ -238,6 +243,7 @@
     item.expires_on = f.querySelector('.fe').value || null;
     item.stored_location = f.querySelector('.fp').value;
     item.notes = f.querySelector('.fn').value.trim();
+    item.tracking = f.querySelector('.ft').value;
     touch(item);
     persist();
     renderAll(goNext ? nextId : item.id);

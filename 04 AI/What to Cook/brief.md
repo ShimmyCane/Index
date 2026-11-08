@@ -1,7 +1,7 @@
 # What to Cook — AI Brief
 
 **Updated:** 2026-11-07 (consolidated: version 0.6.0; to-do in `todo.md`)
-**Status:** Version 0.7.0 (fridge life on entry, priority ordering and a lower list, recipe favourites and starts in the database, recipe steps). The MVP paste is applied; the tracking and recipe pastes are not. Open drafts: #121, #122, #124. Pantry is saved to the Family database (sign-in works; pantry rows reach `wtc_items`). Notes reach `wtc_notes`. Food list page (`foods.html`, linked from Settings → Pages) saves to `wtc_foods`. Both new paste files are written but not yet pasted into the live database.
+**Status:** Version 0.7.0 (fridge life on entry, priority ordering and a lower list, recipe favourites and starts in the database, recipe steps). All paste files are applied (checked 2026-11-08). Version 0.8.0 adds tracking in Details (eggs, bread and wines set to low), recipe versions per person, and ingredients linked to the food list. Open drafts: #121, #122, #124. Pantry is saved to the Family database (sign-in works; pantry rows reach `wtc_items`). Notes reach `wtc_notes`. Food list page (`foods.html`, linked from Settings → Pages) saves to `wtc_foods`. Both new paste files are written but not yet pasted into the live database.
 
 ## Goal
 
@@ -16,7 +16,7 @@ A family kitchen tool: stock from memos, typed lists and (later) photos; tells t
   - Applied (from `supabase/what_to_cook_setup.sql`): `wtc_items`, `wtc_checkins`, `wtc_recipes`, `wtc_recipe_ingredients`, `wtc_recipe_trials`, `wtc_taste_votes`, `wtc_food_log`, `wtc_plan`, `wtc_shopping`, `wtc_transcripts`, `wtc_photos`.
   - Applied by Jimmy (2026-11-07, verified by a read-only query): `wtc_notes`. Four rows, all status `done`.
   - Applied (checked 2026-11-07): `wtc_foods` (seeded with 95 foods from the inventory), `wtc_items.stamped_on` and `fridge_days`, `wtc_journal_entries`, `wtc_journal_ratings`.
-  - Not applied yet: `wtc_items.tracking` (`wtc_items_tracking.sql`), recipe `dish`, `version_by` and ingredient `food_id` (`recipes_what_to_cook.sql`).
+  - Applied 2026-11-08: `wtc_items.tracking`, recipe `dish` and `version_by`, ingredient `food_id`. Six items set to low (three wines, eggs, two breads).
   - Older line, superseded: `wtc_foods` (`supabase/foods_what_to_cook.sql`, and again inside `supabase/what_to_cook_MVP.sql`), plus `wtc_journal_entries` and `wtc_journal_ratings` (MVP file, provisional). Checks: rls_on true, policies 1, anon_grants 0, registered 1.
 - Duplicate rule (pantry): a partial unique index `wtc_items_stock_key` on (lower(name), coalesce(expires_on, 1900-01-01), stored_location) where status = 'in_stock'. Same key overwrites; a new expiry date is a new line.
 - Duplicate rule (food list): a partial unique index `wtc_foods_name_location_key` on (lower(name), location) where name is not blank. Same food in the same place is one row.
