@@ -72,3 +72,10 @@ A decorating game for Athena. A white room, a choice of house or workplace, deco
 - Content lives in `content.js` (questions, shops, jobs, job steps), so it can be edited without touching the game code.
 - Tested headless end to end: a full round (20 credits), 12 shops and a trip home (bag items appear as decorate buttons), and the Architect job to hired with the challenge answer saved. No page errors.
 - Not verified: iPad layout; the real Test Bank (not in this repo; the Learning center uses its own questions); credit amounts and trip rules are first guesses (convo v0.5 Q4–Q5).
+
+## Dessert round (2026-11-08)
+
+- Learning center round 1: baking desserts. 25 core (1 pt), 3 bonus (2 pts), 2 challenge (5 pts). 41 points in all.
+- Shape taken from the Test Bank repo (`ShimmyCane/Test-Bank`, `schema for test bank json.md`): array of questions with id, question_type, category, subcategory, topic, difficulty, source_authority, question_text, choices, correct_answer, explanation, traps. Only `multiple_choice` and `true_false` are used. `knowledge_node_ids` are left out, since no knowledge database exists for desserts yet.
+- Tested headless: a full round of right answers scores 41 of 41; wrong-then-right scores half. No page errors.
+- Not verified: iPad layout; a second round of questions.

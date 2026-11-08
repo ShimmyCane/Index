@@ -34,7 +34,7 @@ A decorating game. Athena picks who a house or workplace is for, then decorates 
 
 ## The three MVPs (v0.8.0)
 
-- **Learning center:** a round of 4 questions from `content.js` (`QUESTIONS`). A right answer on the first try earns 5 credits; a right answer after a wrong try earns 2. Credits show as 🪙 on the front page and in every level.
+- **Learning center:** the first round is about baking desserts. It has 30 questions, 41 points in all: 25 core questions (1 point each), 3 bonus questions (2 points each, harder), and 2 challenge questions (5 points each, where you put several facts together). Questions are multiple choice or true/false, in the Test Bank's JSON shape (`bank/desserts_round1.json`, loaded into `content.js`). A right answer on the first try earns its full points as credits; a right answer after a wrong try earns half, rounded up. Credits show as 🪙 on the front page and in every level.
 - **Retail therapy:** 12 shops (`SHOPS` in `content.js`), each selling things by id with a price. Buying puts the thing in the bag, so it becomes a decorate button in every house. A trip home needs every shop visited and 20 credits spent (`TRIP`). Shop names are generic until Jimmy answers convo v0.5.
 - **Get a job:** the job board holds all 37 jobs (`JOBS`, from `jobs.md`). Architect, Pilot and Artist have full steps (`JOB_STEPS`): two learn pages, a three-question quiz, a scenario to ask a real worker (with choices and a sentence starter, saved as the answer), a first-pass task, then Hired ⭐. The other 34 show their card; their steps come later.
 - Saved on the device, and in `athena_saves` when signed in: credits, the trip, hired jobs, and the challenge answers.
