@@ -173,8 +173,8 @@ const Trace = (() => {
   function renderInfo() {
     const c = T.cur;
     el('traceBig').textContent = c;
-    const showPy = S.settings.pinyin || !guide() || isExtra(c);
-    el('tracePy').textContent = showPy ? (S.data.chars[c] || [''])[0] : '';
+    // 3.0 always shows the pinyin of the character being written, whatever the pinyin setting.
+    el('tracePy').textContent = (S.data.chars[c] || [''])[0];
     el('traceCount').textContent = `${T.n} 笔`;
     el('traceWords').innerHTML = exampleWords(c).map(wordChip).join('');
     el('levelTag').textContent = `描红 · 提示${guide() ? '开' : '关'}`;
