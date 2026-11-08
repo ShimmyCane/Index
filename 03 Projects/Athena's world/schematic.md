@@ -1,6 +1,6 @@
 # Athena's world — Schematic
 
-**Status:** MVP with five houses, level menu, sign-in (v0.5.0), not yet device-tested
+**Status:** MVP with five houses, level menu, sign-in, bag of bought things (v0.6.0), not yet device-tested
 **Owner:** Jimmy
 **Platform:** iPad web app, landscape first (portrait stacks the room above the buttons)
 **Conversations:** `convo/convo v0.1.md` (questions), `convo/convo v0.2.md` (visibility answers), `convo/convo v0.3.md` (purpose, MVP, assumptions), `convo/convo v0.4.md` (five houses, ready pop-up, open questions)
@@ -31,6 +31,14 @@ A decorating game. Athena picks who a house or workplace is for, then decorates 
 - **Sync pill** (top of the play area): `💾 this device`, `☁️ synced`, `☁️ syncing…`, `⚠️ check`. Check database lists each table in the drawer.
 - Settings are kept on the device only. The publishable key is in the script; the service-role key is never used.
 - The SQL lives in `supabase/`: `test_001` (rolled back, run first), `001_athena_family` (the tables), `verify_001` (read-only, paste the result back). Not applied until pasted by hand.
+
+## The bag (v0.6.0)
+
+- Things bought in the shops go into the bag with `addToBag(id)`. Each bag item becomes a decorate button in every house, and can be placed in any house.
+- The house's own list comes first, then the rest of the bag.
+- The bag is saved with the game (on the device, and in `athena_saves` when signed in).
+- To add a new thing, add one line to `ITEMS` in the script (emoji, label, zone: `wall` or `floor`). A shop then sells it by its id.
+- Example things in v0.6.0: vase 🏺, candle 🕯️, cactus 🌵, balloon 🎈 (floor); rainbow 🌈, kite 🪁 (wall).
 
 ## Levels (v0.5.0)
 

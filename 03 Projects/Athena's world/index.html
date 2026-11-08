@@ -423,6 +423,7 @@
       <label>Version log</label>
       <div>Now on version <span id="version"></span></div>
       <ul>
+        <li><b>0.6.0</b> A bag for things bought in the shops. Bought things show as decorate buttons in every house. Six new things: vase, candle, cactus, balloon, rainbow, kite.</li>
         <li><b>0.5.0</b> Level menu over the home room: Home decor, Learning center, Retail therapy, Get a job, then three coming soon. Locks open with progress.</li>
         <li><b>0.4.0</b> Five houses, each with its own furniture. After the last house: ready for Retail therapy? Replay keeps progress.</li>
         <li><b>0.3.0</b> Family sign-in: saved game and notes go to the family database. Check database. Shows where things are saved.</li>
@@ -464,7 +465,7 @@
 
   <script>
     // ---- Houses and things. Edit these lists to change the game. ----
-    const VERSION = '0.5.0';
+    const VERSION = '0.6.0';
     const HOUSES = [
       { name: "Athena's cottage", icon: '🏡', needs: ['bed', 'window', 'picture', 'plant'] },
       { name: 'Beach hut', icon: '🏖️', needs: ['window', 'sofa', 'plant', 'mirror'] },
@@ -488,7 +489,14 @@
       teddy:     { emoji: '🧸', label: 'teddy',     zone: 'floor' },
       bookshelf: { emoji: '📚', label: 'bookshelf', zone: 'floor' },
       bath:      { emoji: '🛁', label: 'bath',      zone: 'floor' },
-      piano:     { emoji: '🎹', label: 'piano',     zone: 'floor' }
+      piano:     { emoji: '🎹', label: 'piano',     zone: 'floor' },
+      // Things from the shops (Retail therapy). Add a line here to make a new thing; a shop then sells it by id.
+      vase:      { emoji: '🏺', label: 'vase',      zone: 'floor' },
+      candle:    { emoji: '🕯️', label: 'candle',    zone: 'floor' },
+      cactus:    { emoji: '🌵', label: 'cactus',    zone: 'floor' },
+      balloon:   { emoji: '🎈', label: 'balloon',   zone: 'floor' },
+      rainbow:   { emoji: '🌈', label: 'rainbow',   zone: 'wall' },
+      kite:      { emoji: '🪁', label: 'kite',      zone: 'wall' }
     };
     // Where items may sit, as % of the room (top to bottom)
     const ZONES = { wall: { top: 12, bottom: 34 }, floor: { top: 52, bottom: 92 } };
@@ -691,10 +699,11 @@
 
     // ---- Saved game: this device always; the family database too when signed in ----
     let unlocked = 1;                                        // how many houses can be chosen
-    const gameData = () => ({ unlocked, rooms: rooms.map(R => ({ pos: placedCopy(R), done: R.done })) });
+    const gameData = () => ({ unlocked, bag, rooms: rooms.map(R => ({ pos: placedCopy(R), done: R.done })) });
     function applyGameData(d) {
       if (!d || !Array.isArray(d.rooms)) return;
       unlocked = clamp(+d.unlocked || 1, 1, HOUSES.length);
+      bag = Array.isArray(d.bag) ? d.bag.filter(id => ITEMS[id]) : [];
       rooms.forEach((R, i) => {
         const r = d.rooms[i];
         R.pos = r && r.pos ? r.pos : {};
@@ -728,6 +737,16 @@
     // ---- State ----
     let current = 0;
     let held = null;                                   // the item waiting for a tap
+    // The bag: things bought in the shops. Each one becomes a decorate button in every house.
+    let bag = [];
+    function addToBag(id) {
+      if (!ITEMS[id] || bag.includes(id)) return;
+      bag.push(id);
+      saveGame();
+      render();
+    }
+    // Decorate buttons: this house's list first, then anything else in the bag
+    const decorateList = () => [...HOUSES[current].needs, ...bag.filter(id => !HOUSES[current].needs.includes(id))];
     const rooms = HOUSES.map(() => ({ pos: {}, history: [], done: false }));
     const room = () => rooms[current];
 
@@ -925,7 +944,7 @@
         b.onclick = () => selectHouse(i);
         return b;
       }));
-      $('items').replaceChildren(...HOUSES[current].needs.map(t => {
+      $('items').replaceChildren(...decorateList().map(t => {
         const b = button(`${ITEMS[t].emoji} ${cap(ITEMS[t].label)}${isPlaced(R, t) ? ' ✓' : ''}`);
         b.setAttribute('aria-pressed', held === t);
         b.onclick = () => pressItem(t);
