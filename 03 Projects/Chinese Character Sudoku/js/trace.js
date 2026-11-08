@@ -2,6 +2,39 @@
 // Strokes must be written in the right order; the grade at the end counts the strokes written right first time.
 // Stroke outlines: hanzi-writer-data (Arphic Public License, a Kai-style typeface), drawn and matched by
 // Hanzi Writer (MIT). Both are bundled, so it works offline. Shares settings, sounds and storage with app.js.
+// Read-aloud for 3.0 (Web Speech API, no files). Uses a Chinese voice if the iPad has one
+// (Settings > Accessibility > Spoken Content > Voices > 中文). Silent if the browser can't speak.
+const Say = (() => {
+  const can = () => typeof window !== 'undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
+  let voice = null;
+  function pickVoice() {
+    try {
+      const vs = speechSynthesis.getVoices();
+      voice = vs.find(v => /^zh[-_]CN/i.test(v.lang)) || vs.find(v => /^zh/i.test(v.lang)) || null;
+    } catch (e) { voice = null; }
+  }
+  if (can()) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function speak(text) {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'zh-CN'; u.rate = 0.7;
+    if (voice) u.voice = voice;
+    speechSynthesis.speak(u);
+  }
+  return {
+    // Called from a tap, so iPad Safari allows speech from then on.
+    unlock() {
+      if (!can()) return;
+      try { speak(''); } catch (e) { /* nothing to unlock */ }
+    },
+    read(text) {
+      if (!can() || !S.settings.readAloud || !text) return;
+      try { speechSynthesis.cancel(); speak(text); }
+      catch (e) { logError('朗读出错', e); }
+    },
+    cancel() { if (can()) { try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } } },
+  };
+})();
+
 const Trace = (() => {
   const T = {
     strokes: null,   // { char: { strokes, medians, radStrokes } } from assets/strokes.json
@@ -63,6 +96,7 @@ const Trace = (() => {
     el('traceDone').hidden = true;
     renderDots();
     say('照着淡淡的字，一笔一笔写，注意笔顺哦');
+    Say.read(T.cur);   // read the character before the first stroke
     T.writer.quiz({
       showOutline: guide(),
       onMistake: s => {
@@ -114,6 +148,7 @@ const Trace = (() => {
       el('traceDone').hidden = false;
       confetti('traceConfetti');
       if (stars >= 2) sfx.win(); else sfx.good();
+      Say.read(T.cur);   // and read it again once every stroke is written
     }, 700);
   }
 
@@ -138,8 +173,8 @@ const Trace = (() => {
   function renderInfo() {
     const c = T.cur;
     el('traceBig').textContent = c;
-    const showPy = S.settings.pinyin || !guide() || isExtra(c);
-    el('tracePy').textContent = showPy ? (S.data.chars[c] || [''])[0] : '';
+    // 3.0 always shows the pinyin of the character being written, whatever the pinyin setting.
+    el('tracePy').textContent = (S.data.chars[c] || [''])[0];
     el('traceCount').textContent = `${T.n} 笔`;
     el('traceWords').innerHTML = exampleWords(c).map(wordChip).join('');
     el('levelTag').textContent = `描红 · 提示${guide() ? '开' : '关'}`;
@@ -213,14 +248,21 @@ const Trace = (() => {
     T.shown = false;
     if (T.writer) T.writer.cancelQuiz();
     el('traceDone').hidden = true;
+    Say.cancel();
   }
 
   // Settings that change what the card shows; only turning the hint on or off starts the character over.
-  function refresh(key) { if (!T.shown || !T.cur) return; renderInfo(); if (key === 'traceGuide' && !T.busy) startQuiz(); }
+  function refresh(key) {
+    if (key === 'readAloud' && !S.settings.readAloud) Say.cancel();
+    if (!T.shown || !T.cur) return;
+    renderInfo();
+    if (key === 'traceGuide' && !T.busy) startQuiz();
+  }
 
   function wire() {
     el('animBtn').onclick = animate;
     el('traceHint').onclick = hint;
+    el('traceSay').onclick = () => { if (T.cur) Say.read(T.cur); };
     el('traceRedo').onclick = redo;
     el('traceNext').onclick = next;
     el('traceNext2').onclick = next;
@@ -233,5 +275,5 @@ const Trace = (() => {
     });
   }
 
-  return { show, hide, refresh, wire, animate, hint, redo, next, select, state: T };
+  return { show, hide, refresh, wire, animate, hint, redo, next, select, say: Say, state: T };
 })();
