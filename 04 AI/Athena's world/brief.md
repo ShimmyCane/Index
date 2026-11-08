@@ -1,6 +1,6 @@
 # Athena's world — Brief
 
-**Status:** MVP with settings and family sign-in (v0.3.0), not yet device-tested or database-verified (see `03 Projects/Athena's world/schematic.md`).
+**Status:** five houses, ready pop-up and Retail therapy placeholder (v0.4.0), not yet device-tested or database-verified (see `03 Projects/Athena's world/schematic.md`).
 
 ## Goal
 
@@ -40,3 +40,9 @@ A decorating game for Athena. A white room, a choice of house or workplace, deco
 
 1. Jimmy answers convo v0.3 (age, players, saving, next steps).
 2. Device-test on iPad, then update the status in the schematic and the 03 projects schematic.
+
+## v0.4.0 (2026-11-08)
+
+- Five houses with their own things (emoji assets). Finishing all five opens the ready pop-up. Yes opens a Retail therapy placeholder; No offers Replay, which goes to the first house and keeps all progress.
+- Tested headless: all five houses, pop-up after the fifth, No → Replay keeps five stars, Yes → Retail therapy and back. No page errors.
+- Not verified: iPad layout with five house buttons; the real Retail therapy content (not decided, convo v0.4).

@@ -259,6 +259,22 @@
       border-radius: 14px;
     }
 
+    /* Retail therapy placeholder: a full-screen card */
+    .retail {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-content: center;
+      justify-items: center;
+      gap: 14px;
+      padding: 24px;
+      text-align: center;
+      background: var(--paper);
+      z-index: 12;
+    }
+    .retail p { font-size: 20px; margin: 0; }
+    .retail .btn { width: auto; min-width: 260px; }
+
     /* Finished-house card */
     .modal {
       position: fixed;
@@ -372,6 +388,7 @@
       <label>About</label>
       <div>Version <span id="version"></span></div>
       <ul>
+        <li><b>0.4.0</b> Five houses, each with its own furniture. After the last house: ready for Retail therapy? Replay keeps progress.</li>
         <li><b>0.3.0</b> Family sign-in: saved game and notes go to the family database. Check database. Shows where things are saved.</li>
         <li><b>0.2.0</b> Settings, notes for improvement, error panel, version info.</li>
         <li><b>0.1.0</b> First playable: white room, houses, things, tap to move, Undo, next house.</li>
@@ -391,20 +408,51 @@
     </div>
   </div>
 
+  <div class="modal" id="ready" hidden>
+    <div class="card">
+      <div class="cheer" aria-hidden="true">🌟</div>
+      <h2 id="readyTitle">Are you ready for the next experience?</h2>
+      <p id="readyText">Next up: Retail therapy 🛍️</p>
+      <button class="btn" id="readyYes" type="button">✅ Yes, let's go!</button>
+      <button class="btn ghost" id="readyNo" type="button">🙅 Not yet</button>
+      <button class="btn" id="replay" type="button" hidden>🔁 Replay</button>
+    </div>
+  </div>
+
+  <section class="retail" id="retail" hidden>
+    <div class="cheer" aria-hidden="true">🛍️</div>
+    <h1>Retail therapy</h1>
+    <p>Coming soon. The shops open here.</p>
+    <button class="btn ghost" id="retailBack" type="button">⬅ Back to houses</button>
+  </section>
+
   <script>
     // ---- Houses and things. Edit these lists to change the game. ----
-    const VERSION = '0.3.0';
+    const VERSION = '0.4.0';
     const HOUSES = [
-      { name: "Athena's house", needs: ['bed', 'window', 'picture'] },
-      { name: 'Cosy house', needs: ['bed', 'sofa', 'window'] },
-      { name: 'Workplace: the shop', needs: ['window', 'picture', 'plant'] }
+      { name: "Athena's cottage", icon: '🏡', needs: ['bed', 'window', 'picture', 'plant'] },
+      { name: 'Beach hut', icon: '🏖️', needs: ['window', 'sofa', 'plant', 'mirror'] },
+      { name: 'Treehouse', icon: '🌳', needs: ['window', 'bed', 'teddy', 'lamp'] },
+      { name: 'City flat', icon: '🏙️', needs: ['window', 'sofa', 'tv', 'clock'] },
+      { name: 'Farmhouse', icon: '🚜', needs: ['bed', 'window', 'chair', 'clock'] }
     ];
     const ITEMS = {
-      bed:     { emoji: '🛏️', label: 'bed',     zone: 'floor' },
-      sofa:    { emoji: '🛋️', label: 'sofa',    zone: 'floor' },
-      plant:   { emoji: '🪴', label: 'plant',   zone: 'floor' },
+      // On the wall
       window:  { emoji: '🪟', label: 'window',  zone: 'wall' },
-      picture: { emoji: '🖼️', label: 'picture', zone: 'wall' }
+      picture: { emoji: '🖼️', label: 'picture', zone: 'wall' },
+      clock:   { emoji: '🕰️', label: 'clock',   zone: 'wall' },
+      mirror:  { emoji: '🪞', label: 'mirror',  zone: 'wall' },
+      // On the floor
+      bed:       { emoji: '🛏️', label: 'bed',       zone: 'floor' },
+      sofa:      { emoji: '🛋️', label: 'sofa',      zone: 'floor' },
+      plant:     { emoji: '🪴', label: 'plant',     zone: 'floor' },
+      chair:     { emoji: '🪑', label: 'chair',     zone: 'floor' },
+      lamp:      { emoji: '🪔', label: 'lamp',      zone: 'floor' },
+      tv:        { emoji: '📺', label: 'TV',        zone: 'floor' },
+      teddy:     { emoji: '🧸', label: 'teddy',     zone: 'floor' },
+      bookshelf: { emoji: '📚', label: 'bookshelf', zone: 'floor' },
+      bath:      { emoji: '🛁', label: 'bath',      zone: 'floor' },
+      piano:     { emoji: '🎹', label: 'piano',     zone: 'floor' }
     };
     // Where items may sit, as % of the room (top to bottom)
     const ZONES = { wall: { top: 12, bottom: 34 }, floor: { top: 52, bottom: 92 } };
@@ -730,10 +778,21 @@
 
     function finishHouse() {
       unlocked = Math.max(unlocked, Math.min(current + 2, HOUSES.length));
-      $('donetext').textContent = `${HOUSES[current].name} is all decorated.`;
-      $('next').textContent = current + 1 < HOUSES.length ? 'Next house ➜' : 'Yay! 🌟';
-      $('done').hidden = false;
       fanfare();
+      if (rooms.every(R => R.done)) { showReady(); return; }
+      $('donetext').textContent = `${HOUSES[current].name} is all decorated.`;
+      $('next').textContent = 'Next house ➜';
+      $('done').hidden = false;
+    }
+
+    // After the last house: ask if Athena is ready for the next experience
+    function showReady() {
+      $('readyTitle').textContent = 'Are you ready for the next experience?';
+      $('readyText').textContent = 'Next up: Retail therapy 🛍️';
+      $('readyYes').hidden = false;
+      $('readyNo').hidden = false;
+      $('replay').hidden = true;
+      $('ready').hidden = false;
     }
 
     function selectHouse(i) {
@@ -771,7 +830,7 @@
       // Side buttons
       $('houses').replaceChildren(...HOUSES.map((h, i) => {
         const locked = i >= unlocked;
-        const b = button((locked ? '🔒 ' : rooms[i].done ? '⭐ ' : '') + h.name);
+        const b = button((locked ? '🔒 ' : rooms[i].done ? '⭐ ' : '') + h.icon + ' ' + h.name);
         b.disabled = locked;
         b.setAttribute('aria-pressed', i === current);
         b.onclick = () => selectHouse(i);
@@ -842,6 +901,27 @@
       else render();
     };
     $('stay').onclick = () => { $('done').hidden = true; };
+
+    // The ready pop-up: Yes goes on, No offers Replay underneath
+    $('readyYes').onclick = () => {
+      $('ready').hidden = true;
+      $('retail').hidden = false;
+    };
+    $('readyNo').onclick = () => {
+      $('readyTitle').textContent = 'No problem!';
+      $('readyText').textContent = 'You can keep fitting out the rooms. Replay starts again from the first house. Everything you have decorated stays.';
+      $('readyYes').hidden = true;
+      $('readyNo').hidden = true;
+      $('replay').hidden = false;
+    };
+    $('replay').onclick = () => {
+      $('ready').hidden = true;
+      selectHouse(0);
+    };
+    $('retailBack').onclick = () => {
+      $('retail').hidden = true;
+      selectHouse(0);
+    };
 
     $('signInForm').onsubmit = async e => {
       e.preventDefault();
