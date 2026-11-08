@@ -2,7 +2,7 @@
 
 **Goal:** iPad games for two children (5 and 7) learning Chinese, built on the recently learned characters. Three games on one page, switched from ⚙️: 1.0 grid (rows and columns make words), 2.0 lines (one word per line, fill the blank), 3.0 tracing (write a character in stroke order, graded).
 
-**State (2026-10-28):** v0.5.0. Jimmy found 1.0's grid awkward (words don't interlock both ways) and asked for 2.0 and 3.0 plus switching from ⚙️. Open items are at the end of `convo v0.6.md` (and the earlier checks in `convo v0.2.md`).
+**State (2026-11-08):** v0.6.0 adds read-aloud in 3.0 (character read before the first stroke and after the last). Earlier: v0.5.0. Jimmy found 1.0's grid awkward (words don't interlock both ways) and asked for 2.0 and 3.0 plus switching from ⚙️. Open items are at the end of `convo v0.6.md` (and the earlier checks in `convo v0.2.md`).
 
 ## Architecture
 
