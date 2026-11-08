@@ -52,3 +52,9 @@ A decorating game for Athena. A white room, a choice of house or workplace, deco
 - Level menu (dock) floats over the home room: Home decor, Learning center, Retail therapy, Get a job, then Family life, Making friends, Exploring the world (coming soon). Lock rules: learning always open; retail after the first house; jobs after all five houses.
 - Tested headless: locks at start, placeholder screens, Home returns from any screen, unlocks after five houses, pop-up Yes → Retail therapy. No page errors. Dock clears the sync pill; no page-level horizontal scroll at 1180 and 390 widths.
 - Not verified: iPad touch on the dock; the real content for levels 2–4.
+
+## v0.6.0 (2026-11-08)
+
+- Bag of bought things: `addToBag(id)` adds to the bag; bag items become decorate buttons in every house and persist with the save. Six example things added (vase, candle, cactus, balloon, rainbow, kite).
+- Tested headless: bought items appear as buttons, a vase places in a house, the bag survives a reload. No page errors.
+- Not yet: the shops that call `addToBag`. The shop prices and the credits are still open (convo v0.5).
