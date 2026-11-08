@@ -325,7 +325,8 @@
       position: fixed;
       inset: 0;
       display: grid;
-      place-content: center;
+      place-content: start center;
+      overflow-y: auto;
       justify-items: center;
       gap: 14px;
       padding: 96px 24px 24px;
@@ -335,6 +336,61 @@
     }
     .panel p { font-size: 20px; margin: 0; max-width: 560px; }
     .panel .btn { width: auto; min-width: 260px; }
+
+    /* The three level screens: learning, shops, jobs */
+    .levelBody { display: grid; gap: 12px; width: min(600px, 100%); }
+    .levelBody p { margin: 0; text-align: center; font-size: 19px; }
+    .levelBody .bank { font-weight: 800; }
+    .levelBody .topic { font-size: 15px; font-weight: 700; }
+    .levelBody .feedback { font-weight: 700; min-height: 1.4em; }
+    .levelBody .bigEmoji { font-size: 64px; line-height: 1; }
+    .levelBody .btn { width: 100%; min-width: 0; min-height: 56px; justify-content: center; text-align: center; }
+    .levelBody .btn:disabled { opacity: 0.5; }
+    .shopGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+    .shopBtn {
+      min-height: 64px;
+      padding: 8px;
+      font: 700 16px system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #fff;
+      border: var(--line);
+      border-radius: 18px;
+      box-shadow: 0 4px 0 var(--ink);
+      cursor: pointer;
+    }
+    .shopBtn.seen { background: var(--mint); }
+    .shopRow { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; }
+    .shopRow .shopItem, .shopRow .price { font-weight: 700; text-align: left; font-size: 17px; }
+    .shopRow .btn { width: auto; min-width: 120px; min-height: 48px; }
+    .jobGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; max-height: 52vh; overflow-y: auto; padding: 4px; }
+    .jobCard {
+      display: grid;
+      gap: 4px;
+      justify-items: center;
+      align-content: start;
+      min-height: 120px;
+      padding: 10px;
+      font: inherit;
+      color: var(--ink);
+      background: #fff;
+      border: var(--line);
+      border-radius: 18px;
+      box-shadow: 0 4px 0 var(--ink);
+      cursor: pointer;
+    }
+    .jobCard.hired { background: var(--butter); }
+    .jobCard .jobIcon { font-size: 30px; }
+    .jobCard .jobName { font-weight: 800; font-size: 15px; }
+    .jobCard .jobDesc { font-size: 12px; line-height: 1.3; }
+    .answerBox {
+      width: 100%;
+      padding: 10px;
+      font: 17px system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #fff;
+      border: var(--line);
+      border-radius: 14px;
+    }
 
     /* Finished-house card */
     .modal {
@@ -381,6 +437,7 @@
       <div class="preview">
         <div class="mini" id="mini" aria-label="Your home right now"><div class="wall"></div><div class="floor"></div></div>
         <p class="sub" id="miniName"></p>
+        <p class="sub bank"></p>
       </div>
       <nav class="tabs" id="tabs" aria-label="Sections"></nav>
     </div>
@@ -462,6 +519,7 @@
       <label>Version log</label>
       <div>Now on version <span id="version"></span></div>
       <ul>
+        <li><b>0.8.0</b> MVP for the Learning center (questions earn credits), Retail therapy (12 shops; buy things into the bag; take them home) and Get a job (job board, learn, quiz, challenge, first-pass task, hired) for three jobs.</li>
         <li><b>0.7.0</b> The front page is now a small picture of your home beside the sections as tabs. Home decor opens the room; a Front page button brings you back.</li>
         <li><b>0.6.0</b> A bag for things bought in the shops. Bought things show as decorate buttons in every house. Six new things: vase, candle, cactus, balloon, rainbow, kite.</li>
         <li><b>0.5.0</b> Level menu over the home room: Home decor, Learning center, Retail therapy, Get a job, then three coming soon. Locks open with progress.</li>
@@ -500,12 +558,14 @@
     <div class="cheer" id="panelIcon" aria-hidden="true"></div>
     <h1 id="panelTitle"></h1>
     <p id="panelText"></p>
+    <div class="levelBody" id="levelBody"></div>
     <button class="btn ghost" id="panelBack" type="button">🏠 Back to front page</button>
   </section>
 
+  <script src="content.js"></script>
   <script>
     // ---- Houses and things. Edit these lists to change the game. ----
-    const VERSION = '0.7.0';
+    const VERSION = '0.8.0';
     const HOUSES = [
       { name: "Athena's cottage", icon: '🏡', needs: ['bed', 'window', 'picture', 'plant'] },
       { name: 'Beach hut', icon: '🏖️', needs: ['window', 'sofa', 'plant', 'mirror'] },
@@ -536,7 +596,14 @@
       cactus:    { emoji: '🌵', label: 'cactus',    zone: 'floor' },
       balloon:   { emoji: '🎈', label: 'balloon',   zone: 'floor' },
       rainbow:   { emoji: '🌈', label: 'rainbow',   zone: 'wall' },
-      kite:      { emoji: '🪁', label: 'kite',      zone: 'wall' }
+      kite:      { emoji: '🪁', label: 'kite',      zone: 'wall' },
+      teapot:    { emoji: '🫖', label: 'teapot',    zone: 'floor' },
+      lantern:   { emoji: '🏮', label: 'lantern',   zone: 'floor' },
+      mushroom:  { emoji: '🍄', label: 'mushroom',  zone: 'floor' },
+      fishbowl:  { emoji: '🐠', label: 'fish bowl', zone: 'floor' },
+      tulip:     { emoji: '🌷', label: 'tulip',     zone: 'floor' },
+      basket:    { emoji: '🧺', label: 'basket',    zone: 'floor' },
+      sun:       { emoji: '☀️', label: 'sun',       zone: 'wall' }
     };
     // Where items may sit, as % of the room (top to bottom)
     const ZONES = { wall: { top: 12, bottom: 34 }, floor: { top: 52, bottom: 92 } };
@@ -739,11 +806,15 @@
 
     // ---- Saved game: this device always; the family database too when signed in ----
     let unlocked = 1;                                        // how many houses can be chosen
-    const gameData = () => ({ unlocked, bag, rooms: rooms.map(R => ({ pos: placedCopy(R), done: R.done })) });
+    const gameData = () => ({ unlocked, bag, credits, trip, hired, answers, rooms: rooms.map(R => ({ pos: placedCopy(R), done: R.done })) });
     function applyGameData(d) {
       if (!d || !Array.isArray(d.rooms)) return;
       unlocked = clamp(+d.unlocked || 1, 1, HOUSES.length);
       bag = Array.isArray(d.bag) ? d.bag.filter(id => ITEMS[id]) : [];
+      credits = Math.max(0, +d.credits || 0);
+      trip = d.trip && Array.isArray(d.trip.visited) ? { visited: d.trip.visited, spent: +d.trip.spent || 0 } : { visited: [], spent: 0 };
+      hired = Array.isArray(d.hired) ? d.hired.filter(id => JOB_STEPS[id] || JOBS.some(j => j.id === id)) : [];
+      answers = d.answers && typeof d.answers === 'object' ? d.answers : {};
       rooms.forEach((R, i) => {
         const r = d.rooms[i];
         R.pos = r && r.pos ? r.pos : {};
@@ -779,6 +850,10 @@
     let held = null;                                   // the item waiting for a tap
     // The bag: things bought in the shops. Each one becomes a decorate button in every house.
     let bag = [];
+    let credits = 0;                                    // earned in the Learning center, spent in the shops
+    let trip = { visited: [], spent: 0 };               // one trip to the shops
+    let hired = [];                                     // jobs the child has been hired for
+    let answers = {};                                   // job id -> { pick, text } from the challenge
     function addToBag(id) {
       if (!ITEMS[id] || bag.includes(id)) return;
       bag.push(id);
@@ -926,9 +1001,235 @@
       $('panelIcon').textContent = icon;
       $('panelTitle').textContent = title;
       $('panelText').textContent = text;
+      $('panelText').hidden = false;
+      $('levelBody').replaceChildren();
       $('panel').hidden = false;
     }
-    const LOCK_HINT = { shops: 'Finish the first house to open', jobs: 'Finish all five houses to open' };
+    // ---- Credits, the Learning center, the shops and the job board ----
+    const el = (tag, cls, text) => {
+      const e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text !== undefined) e.textContent = text;
+      return e;
+    };
+    const choiceBtn = (text, onClick) => {
+      const b = el('button', 'btn', text);
+      b.type = 'button';
+      b.onclick = onClick;
+      return b;
+    };
+    const shuffled = arr => [...arr].sort(() => Math.random() - 0.5);
+    function renderBank() {
+      document.querySelectorAll('.bank').forEach(e => { e.textContent = '🪙 ' + credits + ' credits'; });
+    }
+    function showLevel(id) {
+      const L = LEVELS.find(l => l.id === id);
+      $('panelIcon').textContent = L.icon;
+      $('panelTitle').textContent = L.name;
+      $('panelText').hidden = true;
+      $('panel').hidden = false;
+      renderLevelNow(id);
+    }
+    function renderLevelNow(id) {
+      if (id === 'learn') renderLearn();
+      if (id === 'shops') renderShops();
+      if (id === 'jobs') renderJobs();
+    }
+
+    // Learning center: a round of 4 questions. First try right = 5 credits; right after a wrong try = 2.
+    let round = null;
+    function newRound() {
+      const qs = shuffled(QUESTIONS).slice(0, 4).map(q => ({ ...q, order: shuffled(q.choices) }));
+      round = { qs, i: 0, tried: false, answered: false, feedback: '', done: false, earned: 0 };
+    }
+    function renderLearn() {
+      const body = $('levelBody');
+      body.replaceChildren(el('p', 'bank'));
+      if (!round) {
+        body.append(el('p', '', 'Answer the questions. Right answers earn credits, and a right answer on the first try earns more.'));
+        body.append(choiceBtn('▶ Start a round', () => { newRound(); renderLearn(); }));
+      } else if (round.done) {
+        body.append(el('p', '', `Round over. You earned ${round.earned} credits.`));
+        body.append(choiceBtn('▶ Another round', () => { newRound(); renderLearn(); }));
+      } else {
+        const q = round.qs[round.i];
+        body.append(el('p', 'topic', `${q.topic} · question ${round.i + 1} of ${round.qs.length}`));
+        body.append(el('p', '', q.q));
+        q.order.forEach(c => {
+          const b = choiceBtn(c, () => answerQuestion(c));
+          b.disabled = round.answered;
+          body.append(b);
+        });
+        body.append(el('p', 'feedback', round.feedback));
+        if (round.answered) {
+          body.append(choiceBtn(round.i + 1 < round.qs.length ? 'Next ➜' : 'See my score', nextQuestion));
+        }
+      }
+      renderBank();
+    }
+    function answerQuestion(choice) {
+      const q = round.qs[round.i];
+      if (choice !== q.a) {
+        round.tried = true;
+        round.feedback = 'Not quite. Try again!';
+        renderLearn();
+        return;
+      }
+      const gain = round.tried ? 2 : 5;
+      credits += gain;
+      round.earned += gain;
+      round.answered = true;
+      round.feedback = `🎉 Right! +${gain} credits`;
+      blip(880, 0.12);
+      saveGame();
+      renderLearn();
+    }
+    function nextQuestion() {
+      round.i += 1;
+      round.tried = false;
+      round.answered = false;
+      round.feedback = '';
+      if (round.i >= round.qs.length) round.done = true;
+      renderLearn();
+    }
+
+    // Retail therapy: visit the shops, buy things (they go into the bag), then take the things home
+    function renderShops() {
+      const body = $('levelBody');
+      body.replaceChildren(el('p', 'bank'));
+      const ready = trip.visited.length >= TRIP.shopsNeeded && trip.spent >= TRIP.spendNeeded;
+      body.append(el('p', '', `Shops visited: ${trip.visited.length} of ${TRIP.shopsNeeded}. Spent this trip: ${trip.spent} of ${TRIP.spendNeeded} credits.`));
+      const home = choiceBtn(ready ? '🏠 Take my things home' : 'Visit every shop and spend enough to go home', goHomeFromTrip);
+      home.disabled = !ready;
+      body.append(home);
+      const grid = el('div', 'shopGrid');
+      SHOPS.forEach(s => {
+        const b = el('button', 'shopBtn' + (trip.visited.includes(s.id) ? ' seen' : ''), `${s.icon} ${s.name}`);
+        b.type = 'button';
+        b.onclick = () => openShop(s.id);
+        grid.append(b);
+      });
+      body.append(grid);
+      renderBank();
+    }
+    function openShop(id) {
+      if (!trip.visited.includes(id)) { trip.visited.push(id); saveGame(); }
+      const s = SHOPS.find(x => x.id === id);
+      const body = $('levelBody');
+      body.replaceChildren(el('p', 'bank'), el('p', '', `${s.icon} ${s.name}`));
+      s.stock.forEach(([item, price]) => {
+        const row = el('div', 'shopRow');
+        const have = bag.includes(item);
+        row.append(el('span', 'shopItem', `${ITEMS[item].emoji} ${cap(ITEMS[item].label)}`), el('span', 'price', `🪙 ${price}`));
+        const b = choiceBtn(have ? 'In your bag' : 'Buy', () => buyItem(s.id, item, price));
+        b.disabled = have || credits < price;
+        row.append(b);
+        body.append(row);
+      });
+      body.append(choiceBtn('⬅ Back to the shops', () => renderShops()));
+      renderBank();
+    }
+    function buyItem(shopId, item, price) {
+      if (bag.includes(item) || credits < price) return;
+      credits -= price;
+      trip.spent += price;
+      blip(660, 0.1);
+      addToBag(item);       // the thing goes into the bag, and saves
+      openShop(shopId);
+    }
+    function goHomeFromTrip() {
+      trip = { visited: [], spent: 0 };
+      saveGame();
+      openLevel('home');
+    }
+
+    // Get a job: the board, then a job's card, learn pages, quiz, challenge, first-pass task, hired
+    let jobView = null;   // { id, stage, i, order, tried, answered, hint, pick, text }
+    function renderJobs() {
+      const body = $('levelBody');
+      body.replaceChildren(el('p', 'bank'));
+      if (!jobView) {
+        body.append(el('p', '', 'Look at the jobs. Tap one to find out more.'));
+        const grid = el('div', 'jobGrid');
+        JOBS.forEach(j => {
+          const card = el('button', 'jobCard' + (hired.includes(j.id) ? ' hired' : ''));
+          card.type = 'button';
+          card.append(el('span', 'jobIcon', j.icon), el('span', 'jobName', j.name + (hired.includes(j.id) ? ' ⭐' : '')), el('span', 'jobDesc', j.desc));
+          card.onclick = () => { jobView = { id: j.id, stage: 'card', i: 0 }; renderJobs(); };
+          grid.append(card);
+        });
+        body.append(grid);
+        renderBank();
+        return;
+      }
+      const job = JOBS.find(j => j.id === jobView.id);
+      const S = JOB_STEPS[job.id];
+      const v = jobView;
+      if (v.stage === 'card') {
+        body.append(el('span', 'bigEmoji', job.icon), el('p', '', job.name), el('p', '', job.desc));
+        if (S) body.append(choiceBtn('✅ Apply', () => { v.stage = 'learn'; v.i = 0; renderJobs(); }));
+        else body.append(el('p', '', 'The steps for this job are not written yet. Coming later.'));
+      } else if (v.stage === 'learn') {
+        const page = S.learn[v.i];
+        body.append(el('span', 'bigEmoji', page.emoji), el('p', '', page.text));
+        body.append(choiceBtn(v.i + 1 < S.learn.length ? 'Got it ➜' : 'Got it: quiz time ➜', () => {
+          v.i += 1;
+          if (v.i >= S.learn.length) { v.stage = 'quiz'; v.i = 0; v.order = S.quiz.map(q => shuffled(q.choices)); v.tried = false; v.answered = false; v.hint = ''; }
+          renderJobs();
+        }));
+      } else if (v.stage === 'quiz') {
+        const q = S.quiz[v.i];
+        body.append(el('p', 'topic', `Quiz · question ${v.i + 1} of ${S.quiz.length}`), el('p', '', q.q));
+        if (!v.answered) {
+          v.order[v.i].forEach(c => body.append(choiceBtn(c, () => {
+            if (c !== q.a) { v.tried = true; v.hint = 'Not quite. Look at the pages again.'; renderJobs(); return; }
+            v.answered = true; v.hint = '✅ Right!'; renderJobs();
+          })));
+        } else {
+          body.append(el('p', 'feedback', v.hint));
+          body.append(choiceBtn(v.i + 1 < S.quiz.length ? 'Next ➜' : 'Challenge ➜', () => {
+            v.i += 1; v.answered = false; v.tried = false; v.hint = '';
+            if (v.i >= S.quiz.length) { v.stage = 'challenge'; v.i = 0; v.pick = null; v.text = ''; }
+            renderJobs();
+          }));
+        }
+      } else if (v.stage === 'challenge') {
+        const C = S.challenge;
+        body.append(el('p', '', C.scene), el('p', 'topic', 'Ask a real person who does this job:'), el('p', '', C.question));
+        C.choices.forEach(c => body.append(choiceBtn((v.pick === c ? '● ' : '○ ') + c, () => { v.pick = c; v.hint = ''; renderJobs(); })));
+        const box = el('textarea', 'answerBox');
+        box.rows = 3;
+        box.placeholder = C.starter;
+        box.value = v.text || '';
+        box.oninput = () => { v.text = box.value; };
+        body.append(el('p', '', 'Finish the sentence:'), box);
+        body.append(el('p', 'feedback', v.hint || ''));
+        body.append(choiceBtn('Save my answer ➜', () => {
+          if (!v.pick) { v.hint = 'Pick one choice first.'; renderJobs(); return; }
+          answers[job.id] = { pick: v.pick, text: (v.text || '').slice(0, 500) };
+          saveGame();
+          v.stage = 'task'; v.hint = ''; renderJobs();
+        }));
+      } else if (v.stage === 'task') {
+        const T = S.task;
+        body.append(el('p', '', T.prompt));
+        T.choices.forEach(c => body.append(choiceBtn(c, () => {
+          if (c !== T.a) { v.hint = 'Not that one. Try another.'; renderJobs(); return; }
+          v.stage = 'hired'; v.hint = ''; renderJobs();
+        })));
+        body.append(el('p', 'feedback', v.hint || ''));
+      } else if (v.stage === 'hired') {
+        if (!hired.includes(job.id)) { hired.push(job.id); saveGame(); fanfare(); }
+        body.append(el('span', 'bigEmoji', '⭐'), el('p', '', `Hired! You are now a ${job.name.toLowerCase()}.`));
+        body.append(choiceBtn('⬅ Back to the job board', () => { jobView = null; renderJobs(); }));
+        renderBank();
+        return;
+      }
+      body.append(choiceBtn('⬅ Back to the job board', () => { jobView = null; renderJobs(); }));
+      renderBank();
+    }
+
+    const LOCK_HINT ={ shops: 'Finish the first house to open', jobs: 'Finish all five houses to open' };
     // The front page: a small room and the sections as tabs
     function goLanding() {
       activeLevel = 'landing';
@@ -937,6 +1238,7 @@
       $('landing').hidden = false;
       renderTabs();
       renderMini();
+      renderBank();
     }
     function openLevel(id) {
       const L = LEVELS.find(l => l.id === id);
@@ -949,7 +1251,7 @@
         $('app').hidden = true;
         if (L.soon) showPanel(L.icon, L.name, 'Coming soon.');
         else if (!isOpen(id)) showPanel(L.icon, L.name, 'Finish the step before this one to open it.');
-        else showPanel(L.icon, L.name, LEVEL_TEXT[id]);
+        else showLevel(id);
       }
       renderTabs();
     }
@@ -1040,6 +1342,7 @@
       renderSettings();
       renderTabs();
       renderMini();
+      renderBank();
     }
 
     function renderSettings() {

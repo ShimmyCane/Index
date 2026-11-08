@@ -65,3 +65,10 @@ A decorating game for Athena. A white room, a choice of house or workplace, deco
 - Tested headless: front page first, Home decor round trip, preview shows a placed item, locks and coming-soon tabs, back from panels. No page errors.
 - Stacked on the bag branch (#131), so this PR also carries that work.
 - Not verified: iPad layout of the front page.
+
+## v0.8.0 (2026-11-08)
+
+- MVPs of the Learning center (12 questions, credits), Retail therapy (12 generic shops, buy into the bag, trip home), and Get a job (37 listed jobs; Architect, Pilot, Artist have full steps; hired saved).
+- Content lives in `content.js` (questions, shops, jobs, job steps), so it can be edited without touching the game code.
+- Tested headless end to end: a full round (20 credits), 12 shops and a trip home (bag items appear as decorate buttons), and the Architect job to hired with the challenge answer saved. No page errors.
+- Not verified: iPad layout; the real Test Bank (not in this repo; the Learning center uses its own questions); credit amounts and trip rules are first guesses (convo v0.5 Q4–Q5).
