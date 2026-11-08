@@ -32,6 +32,11 @@ A decorating game. Athena picks who a house or workplace is for, then decorates 
 - Settings are kept on the device only. The publishable key is in the script; the service-role key is never used.
 - The SQL lives in `supabase/`: `test_001` (rolled back, run first), `001_athena_family` (the tables), `verify_001` (read-only, paste the result back). Applied to the Family project on 2026-11-08.
 
+## Start and cheat mode (v0.9.0)
+
+- A new game starts with 50 credits. Saves from before this version also get the 50 once.
+- ⚙️ settings has Cheat mode: 🪙 Add 50 credits, each press.
+
 ## The three MVPs (v0.8.0)
 
 - **Learning center:** the first round is about baking desserts. It has 30 questions, 41 points in all: 25 core questions (1 point each), 3 bonus questions (2 points each, harder), and 2 challenge questions (5 points each, where you put several facts together). Questions are multiple choice or true/false, in the Test Bank's JSON shape (`bank/desserts_round1.json`, loaded into `content.js`). A right answer on the first try earns its full points as credits; a right answer after a wrong try earns half, rounded up. Credits show as 🪙 on the front page and in every level.
