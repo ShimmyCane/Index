@@ -516,10 +516,16 @@
       <p class="sub" id="dbCheck"></p>
     </div>
 
+    <div class="setting">
+      <label>Cheat mode</label>
+      <button class="btn ghost" id="cheat" type="button">🪙 Add 50 credits</button>
+    </div>
+
     <div class="setting info">
       <label>Version log</label>
       <div>Now on version <span id="version"></span></div>
       <ul>
+        <li><b>0.9.0</b> Start with 50 credits. Cheat mode in settings adds 50 credits at a time.</li>
         <li><b>0.8.0</b> MVP for the Learning center (questions earn credits), Retail therapy (12 shops; buy things into the bag; take them home) and Get a job (job board, learn, quiz, challenge, first-pass task, hired) for three jobs.</li>
         <li><b>0.7.0</b> The front page is now a small picture of your home beside the sections as tabs. Home decor opens the room; a Front page button brings you back.</li>
         <li><b>0.6.0</b> A bag for things bought in the shops. Bought things show as decorate buttons in every house. Six new things: vase, candle, cactus, balloon, rainbow, kite.</li>
@@ -566,7 +572,7 @@
   <script src="content.js"></script>
   <script>
     // ---- Houses and things. Edit these lists to change the game. ----
-    const VERSION = '0.8.0';
+    const VERSION = '0.9.0';
     const HOUSES = [
       { name: "Athena's cottage", icon: '🏡', needs: ['bed', 'window', 'picture', 'plant'] },
       { name: 'Beach hut', icon: '🏖️', needs: ['window', 'sofa', 'plant', 'mirror'] },
@@ -807,12 +813,13 @@
 
     // ---- Saved game: this device always; the family database too when signed in ----
     let unlocked = 1;                                        // how many houses can be chosen
-    const gameData = () => ({ unlocked, bag, credits, trip, hired, answers, rooms: rooms.map(R => ({ pos: placedCopy(R), done: R.done })) });
+    const gameData = () => ({ unlocked, bag, credits, startGranted: true, trip, hired, answers, rooms: rooms.map(R => ({ pos: placedCopy(R), done: R.done })) });
     function applyGameData(d) {
       if (!d || !Array.isArray(d.rooms)) return;
       unlocked = clamp(+d.unlocked || 1, 1, HOUSES.length);
       bag = Array.isArray(d.bag) ? d.bag.filter(id => ITEMS[id]) : [];
       credits = Math.max(0, +d.credits || 0);
+      if (!d.startGranted) credits += 50;               // saves from before this version get the 50 start once
       trip = d.trip && Array.isArray(d.trip.visited) ? { visited: d.trip.visited, spent: +d.trip.spent || 0 } : { visited: [], spent: 0 };
       hired = Array.isArray(d.hired) ? d.hired.filter(id => JOB_STEPS[id] || JOBS.some(j => j.id === id)) : [];
       answers = d.answers && typeof d.answers === 'object' ? d.answers : {};
@@ -851,7 +858,7 @@
     let held = null;                                   // the item waiting for a tap
     // The bag: things bought in the shops. Each one becomes a decorate button in every house.
     let bag = [];
-    let credits = 0;                                    // earned in the Learning center, spent in the shops
+    let credits = 50;                                   // starts with 50 for fun                                    // earned in the Learning center, spent in the shops
     let trip = { visited: [], spent: 0 };               // one trip to the shops
     let hired = [];                                     // jobs the child has been hired for
     let answers = {};                                   // job id -> { pick, text } from the challenge
@@ -1439,6 +1446,11 @@
       }
     };
     $('signOut').onclick = () => { signOut(); renderSync(); };
+    $('cheat').onclick = () => {
+      credits += 50;
+      saveGame();
+      renderBank();
+    };
     $('checkDb').onclick = checkDatabase;
 
     // Start: this device's copy first, then the family database when signed in
