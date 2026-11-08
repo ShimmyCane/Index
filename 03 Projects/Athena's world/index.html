@@ -32,8 +32,41 @@
       gap: 18px;
       height: 100vh;
       height: 100dvh;
-      padding: 18px;
+      padding: 96px 18px 18px;
     }
+
+    /* Level menu: floats above the home room */
+    .dock {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: flex;
+      gap: 8px;
+      max-width: calc(100vw - 20px);
+      padding: 6px;
+      overflow-x: auto;
+      background: var(--paper);
+      border: var(--line);
+      border-radius: 999px;
+      box-shadow: 0 4px 0 var(--ink);
+    }
+    .dockBtn {
+      flex: 0 0 auto;
+      min-height: 48px;
+      padding: 0 11px;
+      font: 700 14px system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #fff;
+      border: 2px solid var(--ink);
+      border-radius: 999px;
+      box-shadow: 0 3px 0 var(--ink);
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .dockBtn.on { background: var(--butter); }
+    .dockBtn.locked { opacity: 0.6; }
     .play {
       display: flex;
       flex-direction: column;
@@ -259,21 +292,21 @@
       border-radius: 14px;
     }
 
-    /* Retail therapy placeholder: a full-screen card */
-    .retail {
+    /* A level's own screen, shown over the home room (home is always underneath) */
+    .panel {
       position: fixed;
       inset: 0;
       display: grid;
       place-content: center;
       justify-items: center;
       gap: 14px;
-      padding: 24px;
+      padding: 96px 24px 24px;
       text-align: center;
       background: var(--paper);
       z-index: 12;
     }
-    .retail p { font-size: 20px; margin: 0; }
-    .retail .btn { width: auto; min-width: 260px; }
+    .panel p { font-size: 20px; margin: 0; max-width: 560px; }
+    .panel .btn { width: auto; min-width: 260px; }
 
     /* Finished-house card */
     .modal {
@@ -312,6 +345,8 @@
   </style>
 </head>
 <body>
+  <nav class="dock" id="dock" aria-label="Levels"></nav>
+
   <div class="app">
     <section class="play">
       <div class="pillRow"><span class="pill device" id="pill">💾 this device</span></div>
@@ -388,6 +423,7 @@
       <label>About</label>
       <div>Version <span id="version"></span></div>
       <ul>
+        <li><b>0.5.0</b> Level menu over the home room: Home decor, Learning center, Retail therapy, Get a job, then three coming soon. Locks open with progress.</li>
         <li><b>0.4.0</b> Five houses, each with its own furniture. After the last house: ready for Retail therapy? Replay keeps progress.</li>
         <li><b>0.3.0</b> Family sign-in: saved game and notes go to the family database. Check database. Shows where things are saved.</li>
         <li><b>0.2.0</b> Settings, notes for improvement, error panel, version info.</li>
@@ -419,16 +455,16 @@
     </div>
   </div>
 
-  <section class="retail" id="retail" hidden>
-    <div class="cheer" aria-hidden="true">🛍️</div>
-    <h1>Retail therapy</h1>
-    <p>Coming soon. The shops open here.</p>
-    <button class="btn ghost" id="retailBack" type="button">⬅ Back to houses</button>
+  <section class="panel" id="panel" hidden>
+    <div class="cheer" id="panelIcon" aria-hidden="true"></div>
+    <h1 id="panelTitle"></h1>
+    <p id="panelText"></p>
+    <button class="btn ghost" id="panelBack" type="button">🏡 Back to home</button>
   </section>
 
   <script>
     // ---- Houses and things. Edit these lists to change the game. ----
-    const VERSION = '0.4.0';
+    const VERSION = '0.5.0';
     const HOUSES = [
       { name: "Athena's cottage", icon: '🏡', needs: ['bed', 'window', 'picture', 'plant'] },
       { name: 'Beach hut', icon: '🏖️', needs: ['window', 'sofa', 'plant', 'mirror'] },
@@ -804,6 +840,59 @@
       render();
     }
 
+    // ---- Levels: home is always level 1 and sits underneath; the menu floats above it ----
+    const LEVELS = [
+      { id: 'home',    name: 'Home decor',          icon: '🏡' },
+      { id: 'learn',   name: 'Learning center',     icon: '🎓' },
+      { id: 'shops',   name: 'Retail therapy',      icon: '🛍️' },
+      { id: 'jobs',    name: 'Get a job',           icon: '💼' },
+      { id: 'family',  name: 'Family life',         icon: '👪', soon: true },
+      { id: 'friends', name: 'Making friends',      icon: '🤝', soon: true },
+      { id: 'world',   name: 'Exploring the world', icon: '🌍', soon: true }
+    ];
+    const LEVEL_TEXT = {
+      learn: 'The Test Bank questions go here. Right answers earn credits.',
+      shops: 'Retail therapy is coming soon. The shops open here.',
+      jobs:  'The job board goes here: 37 jobs to try.'
+    };
+    let activeLevel = 'home';
+    // Lock rules (see convo v0.6): home and learning are open; the rest open with progress
+    function isOpen(id) {
+      if (id === 'home' || id === 'learn') return true;
+      if (id === 'shops') return rooms[0].done;
+      if (id === 'jobs') return rooms.every(R => R.done);
+      return false;
+    }
+    function showPanel(icon, title, text) {
+      $('panelIcon').textContent = icon;
+      $('panelTitle').textContent = title;
+      $('panelText').textContent = text;
+      $('panel').hidden = false;
+    }
+    function closePanel() {
+      $('panel').hidden = true;
+      activeLevel = 'home';
+      renderDock();
+    }
+    function openLevel(id) {
+      const L = LEVELS.find(l => l.id === id);
+      if (id === 'home') { closePanel(); return; }
+      if (L.soon) { showPanel(L.icon, L.name, 'Coming soon.'); }
+      else if (!isOpen(id)) { showPanel(L.icon, L.name, 'Finish the step before this one to open it.'); }
+      else { showPanel(L.icon, L.name, LEVEL_TEXT[id]); }
+      activeLevel = id;
+      renderDock();
+    }
+    function renderDock() {
+      $('dock').replaceChildren(...LEVELS.map(L => {
+        const open = L.soon ? false : isOpen(L.id);
+        const b = button((open ? '' : '🔒 ') + L.icon + ' ' + L.name);
+        b.className = 'dockBtn' + (activeLevel === L.id ? ' on' : '') + (open ? '' : ' locked');
+        b.onclick = () => openLevel(L.id);
+        return b;
+      }));
+    }
+
     // ---- Drawing ----
     function render() {
       const R = room();
@@ -851,6 +940,7 @@
         : Object.keys(R.pos).length ? 'Tap something in the room to move it.' : 'Tap something on the right to start.';
 
       renderSettings();
+      renderDock();
     }
 
     function renderSettings() {
@@ -905,7 +995,7 @@
     // The ready pop-up: Yes goes on, No offers Replay underneath
     $('readyYes').onclick = () => {
       $('ready').hidden = true;
-      $('retail').hidden = false;
+      openLevel('shops');
     };
     $('readyNo').onclick = () => {
       $('readyTitle').textContent = 'No problem!';
@@ -918,10 +1008,7 @@
       $('ready').hidden = true;
       selectHouse(0);
     };
-    $('retailBack').onclick = () => {
-      $('retail').hidden = true;
-      selectHouse(0);
-    };
+    $('panelBack').onclick = () => closePanel();
 
     $('signInForm').onsubmit = async e => {
       e.preventDefault();

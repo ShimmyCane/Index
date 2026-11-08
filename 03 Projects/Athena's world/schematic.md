@@ -1,6 +1,6 @@
 # Athena's world — Schematic
 
-**Status:** MVP (not yet device-tested)
+**Status:** MVP with five houses, level menu, sign-in (v0.5.0), not yet device-tested
 **Owner:** Jimmy
 **Platform:** iPad web app, landscape first (portrait stacks the room above the buttons)
 **Conversations:** `convo/convo v0.1.md` (questions), `convo/convo v0.2.md` (visibility answers), `convo/convo v0.3.md` (purpose, MVP, assumptions), `convo/convo v0.4.md` (five houses, ready pop-up, open questions)
@@ -32,6 +32,22 @@ A decorating game. Athena picks who a house or workplace is for, then decorates 
 - Settings are kept on the device only. The publishable key is in the script; the service-role key is never used.
 - The SQL lives in `supabase/`: `test_001` (rolled back, run first), `001_athena_family` (the tables), `verify_001` (read-only, paste the result back). Not applied until pasted by hand.
 
+## Levels (v0.5.0)
+
+A level menu floats above the home room. Home is always level 1, underneath, and always reachable.
+
+| # | Level | Opens when |
+|---|-------|------------|
+| 1 | Home decor | Always |
+| 2 | Learning center (Test Bank) | Always, so credits can be earned |
+| 3 | Retail therapy | The first house is finished |
+| 4 | Get a job | All five houses are finished |
+| 5 | Family life | Coming soon (locked) |
+| 6 | Making friends | Coming soon (locked) |
+| 7 | Exploring the world | Coming soon (locked) |
+
+Levels 2–4 open as placeholder screens for now. Lock rules are a suggestion, see convo v0.6.
+
 ## Jobs (planned, not built)
 
 - After the houses and the shops, Athena can **buy a job** from the job board. There are 37 jobs (see `jobs.md`).
@@ -43,7 +59,7 @@ A decorating game. Athena picks who a house or workplace is for, then decorates 
 - `index.html` — the whole game (HTML, CSS, JS, Web Audio). The house and item lists are at the top of the script.
 - `mockups/` — pages to see the project at a glance: `index.html` (front page with links), `project-map.html` (every file and what it is for), `game-flow.html` (the steps of play, with a picture of the room).
 - `jobs.md` — the 37 jobs to explore, with the job flow.
-- `convo/` — Q&A history, one file per round, never compacted.
+- `convo/` — Q&A history, one file per round, never compacted (convo v0.6 holds the level plan).
 - `CLAUDE.md` — pointer for Claude Code.
 
 ## Open
