@@ -3,7 +3,7 @@
 **Status:** MVP (not yet device-tested)
 **Owner:** Jimmy
 **Platform:** iPad web app, landscape first (portrait stacks the room above the buttons)
-**Conversations:** `convo/convo v0.1.md` (questions), `convo/convo v0.2.md` (visibility answers), `convo/convo v0.3.md` (purpose, MVP, assumptions, open questions)
+**Conversations:** `convo/convo v0.1.md` (questions), `convo/convo v0.2.md` (visibility answers), `convo/convo v0.3.md` (purpose, MVP, assumptions), `convo/convo v0.4.md` (five houses, ready pop-up, open questions)
 
 ## Purpose
 
@@ -17,6 +17,9 @@ A decorating game. Athena picks who a house or workplace is for, then decorates 
 - **Placing:** tap a decoration and it appears up top. Tap the room and it moves there straight away. Tap a placed thing to pick it up, tap the room to move it, or tap it again to put it down where it is.
 - **Wall things (window, picture)** stay on the wall. **Floor things (bed, sofa, plant)** stay on the floor.
 - **Finishing:** when all the listed things are placed, a celebration card appears and the next house unlocks.
+- **Five houses** (v0.4.0): Athena's cottage 🏡, Beach hut 🏖️, Treehouse 🌳, City flat 🏙️, Farmhouse 🚜. Each has its own list of things. The workplace shop is no longer a house.
+- **Ready pop-up:** after the fifth house, "Are you ready for the next experience?" **Yes** opens Retail therapy (a placeholder screen for now). **Not yet** shows a **Replay** button, which starts again at the first house. Everything decorated stays.
+- **Assets** are emoji only (no image files): 4 wall things and 10 floor things, listed in the script.
 
 ## Settings, notes and version
 
@@ -42,5 +45,7 @@ A decorating game. Athena picks who a house or workplace is for, then decorates 
 - Whether houses and decorations should be saved between visits (Q9). Answered in code: yes, through the family sign-in.
 - Whether anyone else plays (Q5).
 - What comes next (Q16).
+- Retail therapy: what happens there, and whether the workplace shop comes back (convo v0.4, Q1).
+- What Replay should go back to (convo v0.4, Q2).
 
 Details go in `convo/` as they are answered. Do not compact old convo files.
