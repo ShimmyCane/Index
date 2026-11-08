@@ -334,7 +334,40 @@ const Engine = (() => {
     return null;
   }
 
-  return { buildIndex, generate, generateLines, checkLines, linesWords, checkHard, easyCellOk, wordsOnBoard, makeRng };
+
+  // Name each stroke from its path (medians: [[x,y], ...] on the 1024 grid, y pointing UP as in hanzi-writer-data).
+  // A shape guess, not a textbook rule: 横 竖 撇 捺 提 点, and 折 / 钩 for a bend or hook.
+  function strokeName(medUp) {
+    const med = medUp.map(([x, y]) => [x, -y]);   // flip so +y is down the screen
+    const n = med.length;
+    if (n < 2) return '点';
+    const seg = (a, b) => {
+      const dx = b[0] - a[0], dy = b[1] - a[1];
+      if (Math.hypot(dx, dy) < 2) return null;
+      if (Math.abs(dy) <= 0.45 * Math.abs(dx)) return '横';
+      if (Math.abs(dx) <= 0.45 * Math.abs(dy)) return dy > 0 ? '竖' : '提';
+      if (dy > 0) return dx < 0 ? '撇' : '捺';
+      return '提';
+    };
+    let len = 0;
+    for (let i = 1; i < n; i++) len += Math.hypot(med[i][0] - med[i - 1][0], med[i][1] - med[i - 1][1]);
+    if (len < 110) return '点';
+    const m = Math.floor(n / 2);
+    const a = seg(med[0], med[m]), b = seg(med[m], med[n - 1]);
+    const overall = seg(med[0], med[n - 1]) || '点';
+    const end = seg(med[Math.max(0, n - 3)], med[n - 1]);
+    const right = (a === '横' && b === '竖') || (a === '竖' && b === '横');
+    if (right) {
+      // A corner between a horizontal and a vertical part: 横折 / 竖折, with a hook (钩) if it flicks up or left at the end.
+      if (end === '提' || end === '撇') return a === '横' ? (b === '竖' ? '横折钩' : '横钩') : '竖弯钩';
+      return a === '横' ? '横折' : '竖折';
+    }
+    // A plain curve or line: the overall direction, with 钩 for a hook that flicks up at the end.
+    if (end === '提' && (overall === '竖' || overall === '横')) return overall + '钩';
+    return overall;
+  }
+
+  return { buildIndex, generate, generateLines, checkLines, linesWords, checkHard, easyCellOk, wordsOnBoard, makeRng, strokeName };
 })();
 
 if (typeof module !== 'undefined') module.exports = Engine;
