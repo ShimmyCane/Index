@@ -30,7 +30,7 @@ A decorating game. Athena picks who a house or workplace is for, then decorates 
 - **Family sign-in:** the drawer has the family email and password. Signed in, the saved game (unlocked houses and rooms) and the notes go to the Family project's database (`athena_saves`, `athena_notes`). Signed out, everything stays on this device.
 - **Sync pill** (top of the play area): `💾 this device`, `☁️ synced`, `☁️ syncing…`, `⚠️ check`. Check database lists each table in the drawer.
 - Settings are kept on the device only. The publishable key is in the script; the service-role key is never used.
-- The SQL lives in `supabase/`: `test_001` (rolled back, run first), `001_athena_family` (the tables), `verify_001` (read-only, paste the result back). Not applied until pasted by hand.
+- The SQL lives in `supabase/`: `test_001` (rolled back, run first), `001_athena_family` (the tables), `verify_001` (read-only, paste the result back). Applied to the Family project on 2026-11-08.
 
 ## The three MVPs (v0.8.0)
 

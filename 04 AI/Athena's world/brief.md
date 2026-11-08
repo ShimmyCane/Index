@@ -16,9 +16,9 @@ A decorating game for Athena. A white room, a choice of house or workplace, deco
 
 ## Database
 
-- Tables, RLS and registry: `03 Projects/Athena's world/supabase/` (written, not applied). Check the verify output before calling it verified.
+- Tables, RLS and registry: applied to the Family project on 2026-11-08 (read-only check: both tables RLS on, one policy each, anon revoked, registered under `athena`). SQL in `03 Projects/Athena's world/supabase/`.
 - Offline and signed-out paths tested in headless Chromium. A signed-in run with no network shows `⚠️ check` and no crash.
-- Not tested: a real family sign-in, and the tables in the live database.
+- Not tested: a real family sign-in from the app.
 
 ## Verified
 
