@@ -63,6 +63,7 @@
           <div class="madeWords" id="traceWords"></div>
           <div class="actions">
             <button class="btn" id="traceSay">🔊 读音</button>
+            <button class="btn" id="traceHelp">🙋 帮忙</button>
             <button class="btn" id="traceHint">💡 提示</button>
             <button class="btn" id="traceRedo">↩️ 重写</button>
             <button class="btn go" id="traceNext">⏭ 下一个字</button>
@@ -114,6 +115,8 @@
       <div class="seg" data-key="traceGuide"><button data-v="1">开</button><button data-v="0">关</button></div></div>
     <div class="setting" data-games="trace"><label>朗读字音 <small>写之前读一次，写完再读一次</small></label>
       <div class="seg" data-key="readAloud"><button data-v="1">开</button><button data-v="0">关</button></div></div>
+    <div class="setting" data-games="trace"><label>笔画名 <small>每一笔说出名字：横、竖、撇、捺…</small></label>
+      <div class="seg" data-key="strokeNames"><button data-v="1">开</button><button data-v="0">关</button></div></div>
     <div class="setting" data-games="grid lines trace"><label>拼音 <small>超纲字一直显示</small></label>
       <div class="seg" data-key="pinyin"><button data-v="1">开</button><button data-v="0">关</button></div></div>
     <div class="setting" data-games="grid lines"><label>字体</label>
@@ -159,6 +162,7 @@
       <div class="strokeDots big" id="gradeDots"></div>
       <div class="actions">
         <button class="btn" id="traceAgain">↩️ 再写一次</button>
+        <button class="btn" id="traceSolo">✍️ 自己写一次</button>
         <button class="btn go" id="traceNext2">下一个字 ▶</button>
       </div>
     </div>
