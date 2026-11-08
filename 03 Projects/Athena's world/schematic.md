@@ -32,10 +32,17 @@ A decorating game. Athena picks who a house or workplace is for, then decorates 
 - Settings are kept on the device only. The publishable key is in the script; the service-role key is never used.
 - The SQL lives in `supabase/`: `test_001` (rolled back, run first), `001_athena_family` (the tables), `verify_001` (read-only, paste the result back). Not applied until pasted by hand.
 
+## Jobs (planned, not built)
+
+- After the houses and the shops, Athena can **buy a job** from the job board. There are 37 jobs (see `jobs.md`).
+- Flow: job board → job card → Apply → learn (two or three pages) → quiz → challenge for a real person (scaffolded scenario) → work on it (first pass) → Hired! badge.
+- Each job is developed on its own later.
+
 ## Files
 
 - `index.html` — the whole game (HTML, CSS, JS, Web Audio). The house and item lists are at the top of the script.
 - `mockups/` — pages to see the project at a glance: `index.html` (front page with links), `project-map.html` (every file and what it is for), `game-flow.html` (the steps of play, with a picture of the room).
+- `jobs.md` — the 37 jobs to explore, with the job flow.
 - `convo/` — Q&A history, one file per round, never compacted.
 - `CLAUDE.md` — pointer for Claude Code.
 
