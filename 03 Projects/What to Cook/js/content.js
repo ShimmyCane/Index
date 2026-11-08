@@ -2,8 +2,9 @@
  * Data only. Add a page or a to-do here, not in the code. */
 (function (root) {
   'use strict';
-  var VERSION = '0.7.0';
+  var VERSION = '0.8.0';
   var VERSIONS = [
+    { v: '0.8.0', date: '2026-11-08', text: 'Tracking: choose Priority or Lower priority in each card\'s Details; it saves to the family database. Eggs, bread and wines are on the lower list. Recipe versions: once a recipe is started, add Jimmy\'s, Ying\'s, Athena\'s or Felix\'s tweak; each version shows that person\'s letter on the card. Starting a recipe saves its ingredients, linked to the food list.' },
     { v: '0.7.0', date: '2026-11-07', text: 'Fridge life on entry: new items are stamped with the day they went in, and fridge items without a date get one from the food list (marked ?). Pantry list ordered by favourites, then by how often a food is used; eggs, bread and wines move to a Lower priority list. Recipe book: favourites and starts saved to the family database, and short steps on the back once a recipe is started. Code split by feature.' },
     { v: '0.6.0', date: '2026-11-07', text: 'Recipe book (explore): 50 starter cards from what the family buys, with pantry matches, favourites, start, a use-soon filter, and a search for versions online. Linked from Settings → Pages.' },
     { v: '0.5.0', date: '2026-11-07', text: 'Notes log shows ✅ for notes marked done in the database (it reads their status when signed in). To-do panel in Settings with ✅ for what is built. Text stays readable on white panels in dark mode.' },
@@ -21,7 +22,7 @@
     { done: true, text: 'Fridge life on entry: stamped, with an expiry from the food list (95 foods from the inventory).' },
     { done: true, text: 'Pantry ordered by favourites and how often a food is used; a Lower priority list for eggs, bread and wines.' },
     { done: true, text: 'Recipe book: favourites and starts saved to the family database; steps on the back once started.' },
-    { done: false, text: 'Paste wtc_items_tracking.sql and recipes_what_to_cook.sql (Jimmy): priority by a column, recipe versions and pantry links.' },
+    { done: true, text: 'Tracking column and recipe versions pasted; priority, versions and ingredient links built (0.8.0).' },
     { done: false, text: 'Kitchen button (not added: places cover it for now).' },
     { done: false, text: 'Food journal (convo v0.3): questions still open.' },
     { done: false, text: 'Recipe book, week plan and shopping list (MVP-2 to MVP-5).' }
