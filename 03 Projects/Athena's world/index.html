@@ -1039,21 +1039,26 @@
     // Learning center: a round of 4 questions. First try right = 5 credits; right after a wrong try = 2.
     let round = null;
     function newRound() {
-      const qs = shuffled(QUESTIONS).slice(0, 4).map(q => ({ ...q, order: shuffled(q.choices) }));
-      round = { qs, i: 0, tried: false, answered: false, feedback: '', done: false, earned: 0 };
+      // The round: the 25 core questions, then the bonus, then the challenge questions (see bank/desserts_round1.json)
+      const bySection = s => shuffled(QUESTIONS.filter(q => q.section === s));
+      const qs = [...bySection('core'), ...bySection('bonus'), ...bySection('challenge')]
+        .map(q => ({ ...q, order: shuffled(q.choices) }));
+      const total = qs.reduce((sum, q) => sum + q.points, 0);
+      round = { qs, total, i: 0, tried: false, answered: false, feedback: '', done: false, earned: 0 };
     }
     function renderLearn() {
       const body = $('levelBody');
       body.replaceChildren(el('p', 'bank'));
       if (!round) {
-        body.append(el('p', '', 'Answer the questions. Right answers earn credits, and a right answer on the first try earns more.'));
+        body.append(el('p', '', 'Answer the questions. Each right answer earns credits: 1 point for a question, 2 for a bonus question, 5 for a challenge. A right answer after a retry earns half, rounded up.'));
         body.append(choiceBtn('▶ Start a round', () => { newRound(); renderLearn(); }));
       } else if (round.done) {
-        body.append(el('p', '', `Round over. You earned ${round.earned} credits.`));
+        body.append(el('p', '', `Round over. You scored ${round.earned} of ${round.total} points, so ${round.earned} credits.`));
         body.append(choiceBtn('▶ Another round', () => { newRound(); renderLearn(); }));
       } else {
         const q = round.qs[round.i];
-        body.append(el('p', 'topic', `${q.topic} · question ${round.i + 1} of ${round.qs.length}`));
+        const kind = { core: 'Question', bonus: 'Bonus', challenge: 'Challenge' }[q.section];
+        body.append(el('p', 'topic', `${kind} · ${q.points} point${q.points > 1 ? 's' : ''} · ${round.i + 1} of ${round.qs.length}`));
         body.append(el('p', '', q.q));
         q.order.forEach(c => {
           const b = choiceBtn(c, () => answerQuestion(c));
@@ -1069,13 +1074,13 @@
     }
     function answerQuestion(choice) {
       const q = round.qs[round.i];
-      if (choice !== q.a) {
+      if (choice !== q.correct_answer) {
         round.tried = true;
         round.feedback = 'Not quite. Try again!';
         renderLearn();
         return;
       }
-      const gain = round.tried ? 2 : 5;
+      const gain = round.tried ? Math.ceil(q.points / 2) : q.points;
       credits += gain;
       round.earned += gain;
       round.answered = true;
