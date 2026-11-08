@@ -45,7 +45,7 @@ A decorating game. Athena picks who a house or workplace is for, then decorates 
 - Whether houses and decorations should be saved between visits (Q9). Answered in code: yes, through the family sign-in.
 - Whether anyone else plays (Q5).
 - What comes next (Q16).
-- Retail therapy: what happens there, and whether the workplace shop comes back (convo v0.4, Q1).
+- Retail therapy and the economy: credits from questions, a shop trip of 12+ shops, going home to decorate, and buying a job (convo v0.5, planned, awaiting answers).
 - What Replay should go back to (convo v0.4, Q2).
 
 Details go in `convo/` as they are answered. Do not compact old convo files.
