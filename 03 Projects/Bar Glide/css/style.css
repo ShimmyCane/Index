@@ -1,0 +1,106 @@
+/* Bar Glide — page chrome. Two moods: saloon (late-night arcade) and pastel (daytime family look). */
+[hidden] { display: none !important; }
+:root { --ink: #1a1020; }
+body[data-theme="saloon"] {
+  --bg: #1f120c; --bg2: #2c1a10; --card: #fff3dc; --btn: #ffd27a; --btn2: #fff3dc; --on: #ff8fb8; --text: #ffe9a8; --sub: #5a4030;
+}
+body[data-theme="pastel"] {
+  --bg: #fdf3e4; --bg2: #f6e2cf; --card: #fffdf7; --btn: #ffe9a8; --btn2: #ffffff; --on: #bfe8d2; --text: #3a2a3a; --sub: #6a5a5a;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: radial-gradient(circle at 50% 0%, var(--bg2), var(--bg) 70%);
+  color: var(--text); font: 600 17px/1.35 "Trebuchet MS", system-ui, sans-serif;
+  display: flex; flex-direction: column; overflow: hidden;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+}
+.top { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px 4px; gap: 10px; }
+.top h1 { margin: 0; font-size: 20px; letter-spacing: 1px; }
+.pill { min-height: 36px; padding: 0 14px; border-radius: 18px; border: 3px solid var(--ink); background: var(--btn2);
+  font: 700 14px system-ui, sans-serif; color: var(--ink); cursor: pointer; box-shadow: 0 3px 0 var(--ink); }
+.pill.check { background: #ffd0c8; }
+.pill.synced { background: #c8f0d8; }
+
+.stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 4px 12px 12px; min-height: 0; }
+.screen {
+  position: relative; width: min(96vw, calc((100dvh - 190px) * 1.6)); aspect-ratio: 16 / 10;
+  border: 4px solid var(--ink); border-radius: 14px; overflow: hidden; box-shadow: 0 6px 0 var(--ink), 0 0 40px rgba(255, 150, 60, 0.18);
+  background: #000; touch-action: none;
+}
+@supports not (height: 100dvh) { .screen { width: min(96vw, calc((100vh - 190px) * 1.6)); } }
+.screen canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; touch-action: none; }
+.crt { position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 3px),
+              radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.35) 100%); }
+
+.overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(20, 8, 14, 0.45); padding: 10px; }
+.card { background: var(--card); color: var(--ink); border: 3px solid var(--ink); border-radius: 20px 14px 20px 14px; box-shadow: 0 5px 0 var(--ink);
+  padding: 12px 18px; text-align: center; max-width: 92%; max-height: 96%; overflow: auto; }
+.card h2 { margin: 0 0 6px; font-size: 26px; letter-spacing: 2px; }
+.how { list-style: none; padding: 0; margin: 0 0 10px; text-align: left; }
+.how li { padding: 2px 0; font-size: 16px; }
+.how span { display: inline-block; width: 30px; text-align: center; }
+.score { font: 800 40px monospace; margin: 0; letter-spacing: 3px; }
+.initials { display: flex; gap: 8px; justify-content: center; margin: 6px 0; }
+.initials input { width: 96px; min-height: 52px; font: 800 26px monospace; text-align: center; text-transform: uppercase;
+  border: 3px solid var(--ink); border-radius: 12px; }
+.topList { margin: 4px 0 8px; padding-left: 26px; text-align: left; font: 700 15px monospace; white-space: pre; }
+
+.btn { min-height: 52px; padding: 0 16px; border: 3px solid var(--ink); border-radius: 16px; background: var(--btn); color: var(--ink);
+  font: 800 17px "Trebuchet MS", system-ui, sans-serif; box-shadow: 0 4px 0 var(--ink); cursor: pointer; touch-action: manipulation; }
+.btn:active, .btn.down { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+.btn.big { min-height: 64px; font-size: 22px; padding: 0 24px; }
+.btn.ghost { background: var(--btn2); }
+
+.controls { display: flex; align-items: center; gap: 12px; width: min(96vw, 820px); padding-right: 88px; justify-content: center; }
+.lanePad { display: flex; gap: 8px; }
+.btn.pad { width: 64px; min-height: 64px; font-size: 26px; padding: 0; }
+.btn.pour { flex: 1; max-width: 360px; min-height: 68px; font-size: 22px; background: #ffb347; -webkit-user-select: none; touch-action: none; }
+
+/* ⚙️ gear and drawer (02 Refs/Skills/settings_gear.md) */
+.gear { position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); width: 68px; height: 68px; border-radius: 50%;
+  font-size: 32px; z-index: 30; background: var(--btn); border: 3px solid var(--ink); box-shadow: 0 4px 0 var(--ink); cursor: pointer; }
+.drawer { position: fixed; right: 0; top: 0; bottom: 0; width: min(420px, 100vw); overflow-y: auto; z-index: 40; background: var(--card); color: var(--ink);
+  border-left: 3px solid var(--ink); box-shadow: -6px 0 0 rgba(0, 0, 0, 0.25); padding: 12px 14px 110px; -webkit-user-select: text; user-select: text; }
+.drawerHead { display: flex; align-items: center; justify-content: space-between; }
+.drawerHead h2 { margin: 0; }
+.mini { width: 52px; height: 52px; border-radius: 14px; border: 3px solid var(--ink); background: var(--btn2); font-size: 20px; cursor: pointer; }
+.panel { border: 3px solid var(--ink); border-radius: 18px; background: #fffdf7; margin: 10px 0; overflow: hidden; }
+.panelHead { width: 100%; min-height: 52px; display: flex; align-items: center; gap: 10px; padding: 0 14px; border: 0; background: #ffe9a8;
+  font: 700 18px system-ui, sans-serif; color: var(--ink); cursor: pointer; text-align: left; }
+.panelTitle { flex: 1; }
+.panelBody { padding: 10px 14px; }
+.panel[data-collapsed="true"] .panelBody { display: none; }
+.panel[data-collapsed="true"] .panelMark { transform: rotate(-90deg); }
+.setting { padding: 6px 0; }
+.setting > label { display: block; font-weight: 800; margin-bottom: 4px; }
+.seg { display: flex; gap: 8px; }
+.seg button { flex: 1; min-height: 52px; border: 3px solid var(--ink); border-radius: 16px; background: #fff; font: 700 16px system-ui, sans-serif; cursor: pointer; color: var(--ink); }
+.seg button.on { background: var(--on); }
+.sub { margin: 4px 0; font-size: 14px; font-weight: 500; color: var(--sub); }
+.pre { white-space: pre-wrap; }
+textarea, .signForm input, select { width: 100%; font: 16px system-ui, sans-serif; border: 3px solid var(--ink); border-radius: 12px; padding: 8px; }
+select { width: auto; min-height: 52px; }
+.row { display: flex; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+.signForm { display: grid; gap: 8px; margin-bottom: 8px; }
+.signForm input { min-height: 48px; }
+.panelBody > .btn { margin: 4px 0; width: 100%; }
+.noteList, .changes { padding-left: 18px; font-size: 14px; white-space: pre-wrap; }
+.toggle { display: flex; align-items: center; gap: 10px; min-height: 52px; font-weight: 800; padding: 0 4px; }
+.toggle input { width: 26px; height: 26px; }
+.errorsPanel { position: fixed; left: 16px; right: 100px; bottom: 16px; max-height: 30vh; overflow: auto; z-index: 25; background: #fff0ee; color: var(--ink);
+  border: 3px solid var(--ink); border-radius: 16px; padding: 8px 12px; font: 13px monospace; white-space: pre-wrap; }
+
+@media (max-width: 600px) {
+  .controls { padding-right: 84px; gap: 8px; }
+  .btn.pad { width: 54px; min-height: 60px; }
+  .btn.pour { font-size: 18px; }
+  .card h2 { font-size: 20px; }
+  .how li { font-size: 14px; }
+  .score { font-size: 30px; }
+}
+@media (orientation: portrait) {
+  .screen { width: min(96vw, calc((100dvh - 230px) * 1.6)); }
+}
+@media print { .gear, .drawer, .errorsPanel { display: none !important; } }

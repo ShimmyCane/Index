@@ -8,6 +8,10 @@ Shared list of open work across the nursery. Project to-do lists stay in each pr
 - **#102 Version log panel inside the settings button.** Important. Waiting for a go-ahead.
 - **#119 Nursery: add What to Cook tile.** Probably a duplicate: the What to Cook link was added to the nursery list by #123. Check, then close or merge.
 
+## Merged on 2026-11-09
+
+- **Bar Glide:** new seed, arcade bar game MVP 0.1.0 (⚙️, notes, scores, Family database SQL tested, not applied).
+
 ## Merged on 2026-11-07
 
 - **#20 Athena's world:** decorating game MVP.
