@@ -139,6 +139,7 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 10. **Subset an offline font to the characters used, and keep its licence.** 359 glyphs came to 78 KB as woff2. SIL OFL means keeping the licence and not claiming a reserved name. _(Chinese Character Sudoku)_
 11. **Test touch with real touch events** (CDP `Input.dispatchTouchEvent`), not only the mouse, and check that the page doesn't scroll while drawing. _(Chinese Character Sudoku)_
 12. **Headless WebGL needs flags.** Use `--no-sandbox --use-gl=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist` with the pre-installed Chromium. _(Make 3D)_
+13. **AI model weights can come from npm too.** HuggingFace and GitHub release downloads were blocked, but the Kokoro voice model and its voices were on npm (`kokoro-q8-shards`, `kokoro-js`), run with `kokoro-onnx` from PyPI. Free narration with no key. _(Voice)_
 
 ## 9. Open questions to revisit
 
