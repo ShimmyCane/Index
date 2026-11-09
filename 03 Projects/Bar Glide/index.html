@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>Bar Glide</title>
+  <title>Ole Bar Glide</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body data-theme="saloon">
   <header class="top">
-    <h1>🍺 Bar Glide</h1>
+    <h1>🍺 Ole Bar Glide</h1>
     <button class="pill device" id="pill" type="button" title="Database status">💾 this device</button>
   </header>
 
@@ -20,8 +20,9 @@
 
       <div class="overlay" id="titleOverlay">
         <div class="card">
-          <h2>Bar Glide</h2>
+          <h2>Ole Bar Glide</h2>
           <ol class="how">
+            <li><span>☀️</span> Morning is two slow bars: warm up</li>
             <li><span>👆</span> Touch a bar to run there</li>
             <li><span>🍺</span> Hold to pour, let go to slide</li>
             <li><span>🫙</span> Catch the empties coming back</li>
@@ -63,9 +64,9 @@
     <section class="panel" data-panel="game">
       <button class="panelHead" type="button" aria-expanded="true"><span>🎮</span><span class="panelTitle">Game</span><span class="panelMark">▾</span></button>
       <div class="panelBody">
-        <div class="setting"><label>Bars</label>
-          <div class="seg" data-key="lanes"><button data-v="4">4</button><button data-v="3">3 · quick</button></div>
-          <p class="sub">Changing this starts a new game.</p></div>
+        <div class="setting"><label>Start the day at</label>
+          <div class="seg" data-key="start"><button data-v="1">☀️ Morning</button><button data-v="3">🌤️ Afternoon</button><button data-v="5">🌙 Night</button></div>
+          <p class="sub">Morning is two slow bars to warm up. Changing this starts a new game.</p></div>
         <div class="setting"><label>Speed</label>
           <div class="seg" data-key="speed"><button data-v="slow">🐢 Slow</button><button data-v="normal">Normal</button><button data-v="fast">🐇 Fast</button></div></div>
         <div class="setting"><label>Glasses you can break</label>
@@ -87,6 +88,13 @@
           <div class="seg" data-key="sound"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
         <div class="setting"><label>Music</label>
           <div class="seg" data-key="music"><button data-v="1">🎵 On</button><button data-v="0">Off</button></div></div>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="pages">
+      <button class="panelHead" type="button" aria-expanded="true"><span>🎛️</span><span class="panelTitle">Pages</span><span class="panelMark">▾</span></button>
+      <div class="panelBody">
+        <a class="btn ghost link" href="synth.html">🎛️ Sound lab: play with the synthesizer</a>
       </div>
     </section>
 

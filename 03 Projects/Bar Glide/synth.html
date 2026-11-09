@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Sound lab · Ole Bar Glide</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Sound lab: a page that scrolls (the game page does not). */
+    body { display: block; overflow: auto; padding-bottom: 110px; }
+    .lab { width: min(1100px, 100%); margin: 0 auto; padding: 0 14px; display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    @media (max-width: 820px) { .lab { grid-template-columns: minmax(0, 1fr); } }
+    .play { display: grid; gap: 12px; align-content: start; }
+    .scope { width: 100%; aspect-ratio: 16 / 7; border: 4px solid var(--ink); border-radius: 14px; background: #120a14; box-shadow: 0 5px 0 var(--ink); image-rendering: pixelated; display: block; }
+    .bigPad { min-height: 96px; font-size: 26px; width: 100%; background: #ffb347; touch-action: none; -webkit-user-select: none; }
+    .keys { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; }
+    .keys .btn { min-height: 72px; padding: 0; font-size: 16px; touch-action: none; }
+    .presets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    .presets .btn { min-height: 60px; padding: 0 4px; font-size: 15px; }
+    @media (max-width: 480px) { .presets { grid-template-columns: repeat(2, minmax(0, 1fr)); } .keys .btn { font-size: 13px; } }
+    .knobs { color: var(--ink); }
+    .knob { display: grid; grid-template-columns: 96px minmax(0, 1fr) 64px; align-items: center; gap: 8px; min-height: 48px; }
+    .knob label { font-weight: 800; font-size: 15px; }
+    .knob output { font: 700 13px monospace; text-align: right; }
+    .knob input[type=range] { width: 100%; height: 36px; accent-color: #ff8fb8; }
+    .how { font-size: 14px; font-weight: 500; color: var(--sub); margin: 4px 0 8px; }
+    .mine { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .mine .btn { min-height: 48px; font-size: 15px; }
+    .row input[type=text] { flex: 1; min-height: 52px; font: 16px system-ui, sans-serif; border: 3px solid var(--ink); border-radius: 12px; padding: 0 10px; min-width: 0; }
+    .top a.pill { color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; }
+  </style>
+</head>
+<body data-theme="saloon">
+  <header class="top">
+    <h1>🎛️ Sound lab</h1>
+    <a class="pill" href="index.html">🍺 Back to the bar</a>
+  </header>
+
+  <main class="lab">
+    <div class="play">
+      <canvas class="scope" id="scope" width="320" height="140" aria-label="The sound wave"></canvas>
+      <button class="btn bigPad" id="pad" type="button">▶ Hold to play</button>
+      <div class="keys" id="keys"></div>
+      <section class="panel" data-panel="presets">
+        <button class="panelHead" type="button" aria-expanded="true"><span>🎚️</span><span class="panelTitle">Start from a sound</span><span class="panelMark">▾</span></button>
+        <div class="panelBody">
+          <div class="presets" id="presets"></div>
+          <p class="how">Tap one to load it and hear it, then move the sliders to change it.</p>
+        </div>
+      </section>
+      <section class="panel" data-panel="mine">
+        <button class="panelHead" type="button" aria-expanded="true"><span>⭐</span><span class="panelTitle">My sounds</span><span class="panelMark">▾</span></button>
+        <div class="panelBody">
+          <div class="row"><input type="text" id="saveName" maxlength="24" placeholder="Name this sound"><button class="btn" id="saveBtn" type="button">💾 Save</button></div>
+          <div class="mine" id="mine"></div>
+          <div class="row"><button class="btn ghost" id="copyBtn" type="button">📋 Copy settings</button></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="knobs" id="knobs"></div>
+  </main>
+
+  <button class="gear" id="gear" aria-label="Settings" aria-expanded="false" aria-controls="drawer">⚙️</button>
+  <aside class="drawer" id="drawer" hidden>
+    <div class="drawerHead"><h2>Settings</h2><button class="mini" id="closeDrawer" type="button" aria-label="Close">✖</button></div>
+    <div class="setting"><a class="btn ghost link" href="index.html">🍺 Back to the bar</a></div>
+    <label class="toggle"><input type="checkbox" id="showErrors"> Show errors</label>
+    <p class="sub" id="versionLine"></p>
+  </aside>
+  <div id="errorsPanel" class="errorsPanel" hidden></div>
+
+  <script src="js/config.js"></script>
+  <script>
+  /* Sound lab: one synthesizer voice per touch, built from Web Audio nodes.
+   *   source (waves with metal overtones, or noise) → ring mixer → filter → envelope → volume → echo → speakers
+   * Settings live in one object, P; every slider writes to it. Saved sounds stay on this device. */
+  (function () {
+    'use strict';
+    const $ = id => document.getElementById(id);
+    const store = {
+      get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+      set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    };
+
+    // ---- errors, opt-in at the bottom ----
+    const errors = [];
+    let showErrors = store.get('barglide.lab.errors', false);
+    function renderErrors() { $('errorsPanel').hidden = !showErrors; $('errorsPanel').textContent = errors.length ? errors.join('\n') : 'No problems so far.'; }
+    function logError(m) { errors.push(new Date().toLocaleTimeString() + '  ' + m); renderErrors(); }
+    window.addEventListener('error', e => logError(e.message));
+    $('showErrors').checked = showErrors;
+    $('showErrors').addEventListener('change', e => { showErrors = e.target.checked; store.set('barglide.lab.errors', showErrors); renderErrors(); });
+    $('versionLine').textContent = 'Ole Bar Glide ' + (window.BG && BG.VERSION || '') + ' · Sound lab';
+    const gear = $('gear'), drawer = $('drawer');
+    const setDrawer = open => { drawer.hidden = !open; gear.setAttribute('aria-expanded', String(open)); };
+    gear.onclick = () => setDrawer(drawer.hidden);
+    $('closeDrawer').onclick = () => setDrawer(false);
+    renderErrors();
+
+    // ---- the settings ----
+    // Inharmonic overtones of a struck bar or bell (times the note): this is where "metal" comes from.
+    const RATIOS = [1, 2.76, 5.40, 8.93, 13.34, 19.64];
+    const DEFAULT = { wave: 'sine', freq: 440, slide: 1, partials: 1, fmRatio: 1, fmDepth: 0, ring: 0,
+      attack: 0.005, decay: 0.4, sustain: 0.5, release: 0.4, filter: 'lowpass', cutoff: 12000, q: 0.7,
+      echo: 0, feedback: 0.3, volume: 0.7 };
+    const PRESETS = {
+      '🔔 Bell':       { wave: 'sine', freq: 880, partials: 5, decay: 1.6, sustain: 0, release: 1.2, echo: 0.22, feedback: 0.3 },
+      '🥄 Clink':      { wave: 'triangle', freq: 1760, partials: 3, attack: 0.001, decay: 0.15, sustain: 0, release: 0.1, filter: 'highpass', cutoff: 1200 },
+      '🔩 Metal pipe': { wave: 'sine', freq: 300, partials: 6, fmRatio: 3.5, fmDepth: 2, attack: 0.001, decay: 1.3, sustain: 0, release: 0.8, echo: 0.12, feedback: 0.4 },
+      '🐄 Cowbell':    { wave: 'square', freq: 560, ring: 260, attack: 0.001, decay: 0.3, sustain: 0, release: 0.15, filter: 'bandpass', cutoff: 800, q: 3 },
+      '🍺 Break':      { wave: 'noise', attack: 0.001, decay: 0.35, sustain: 0, release: 0.1, filter: 'highpass', cutoff: 3000 },
+      '👋 Whap':       { wave: 'noise', attack: 0.001, decay: 0.12, sustain: 0, release: 0.05, filter: 'lowpass', cutoff: 1800 },
+      '🛸 Laser':      { wave: 'square', freq: 1800, slide: 0.12, attack: 0.001, decay: 0.3, sustain: 0, release: 0.05 },
+      '🫧 Gulp':       { wave: 'sine', freq: 220, slide: 0.5, attack: 0.005, decay: 0.15, sustain: 0, release: 0.05 },
+      '🤖 Robot':      { wave: 'saw', freq: 140, ring: 90, sustain: 0.8, filter: 'lowpass', cutoff: 2400, q: 6 },
+      '🎸 Twang':      { wave: 'saw', freq: 196, slide: 0.98, decay: 0.9, sustain: 0, release: 0.3, filter: 'lowpass', cutoff: 1500, q: 9 },
+      '🥁 Drum':       { wave: 'sine', freq: 150, slide: 0.35, attack: 0.001, decay: 0.25, sustain: 0, release: 0.05 },
+      '🎹 Chip':       { wave: 'square', freq: 523, sustain: 0.6, release: 0.15, filter: 'lowpass', cutoff: 5000 }
+    };
+    let P = Object.assign({}, DEFAULT, store.get('barglide.lab.current', {}));
+
+    // ---- controls (built from this list) ----
+    const log = (min, max) => ({ toS: v => Math.log(v / min) / Math.log(max / min), fromS: s => min * Math.pow(max / min, s) });
+    const lin = (min, max) => ({ toS: v => (v - min) / (max - min), fromS: s => min + (max - min) * s });
+    const PANELS = [
+      { id: 'wave', icon: '〰️', title: 'Wave', how: 'The basic tone. Sine is smooth, square is buzzy like old games, saw is bright, noise is a hiss for crashes and slaps.', rows: [
+        { key: 'wave', seg: [['sine', 'Sine'], ['square', 'Square'], ['saw', 'Saw'], ['triangle', 'Tri'], ['noise', 'Noise']] },
+        { key: 'freq', label: 'Pitch', scale: log(40, 4000), fmt: v => Math.round(v) + ' Hz' },
+        { key: 'slide', label: 'Slide', scale: log(0.1, 4), fmt: v => v.toFixed(2) + '×', hint: 'Below 1 the pitch falls (laser, drum); above 1 it rises.' }
+      ] },
+      { id: 'metal', icon: '🔩', title: 'Metal', how: 'Metal rings because its overtones don’t line up with the note. Overtones adds bell-like ones (2.76×, 5.4×, 8.9× the note). FM wobbles the pitch very fast: a ratio that isn’t a whole number (3.5 or 1.41) sounds struck. Ring mixes in a second tone and keeps only the sums and differences: cowbells and robots.', rows: [
+        { key: 'partials', label: 'Overtones', scale: lin(1, 6), step: 1, fmt: v => String(Math.round(v)) },
+        { key: 'fmRatio', label: 'FM ratio', scale: log(0.25, 8), fmt: v => v.toFixed(2) },
+        { key: 'fmDepth', label: 'FM depth', scale: lin(0, 10), fmt: v => v.toFixed(1) },
+        { key: 'ring', label: 'Ring', scale: lin(0, 2000), fmt: v => v < 1 ? 'off' : Math.round(v) + ' Hz' }
+      ] },
+      { id: 'env', icon: '📈', title: 'Shape over time', how: 'Attack is how fast it starts, decay how fast it drops to the sustain level you hear while holding, release how long it rings after you let go. A pluck or a hit has sustain at 0.', rows: [
+        { key: 'attack', label: 'Attack', scale: log(0.001, 2), fmt: v => Math.round(v * 1000) + ' ms' },
+        { key: 'decay', label: 'Decay', scale: log(0.01, 3), fmt: v => Math.round(v * 1000) + ' ms' },
+        { key: 'sustain', label: 'Sustain', scale: lin(0, 1), fmt: v => Math.round(v * 100) + '%' },
+        { key: 'release', label: 'Release', scale: log(0.01, 4), fmt: v => Math.round(v * 1000) + ' ms' }
+      ] },
+      { id: 'filter', icon: '🎚️', title: 'Filter', how: 'Low lets the low sounds through (darker), high keeps the top (thinner, glassier), band keeps a slice. Resonance makes the edge whistle.', rows: [
+        { key: 'filter', seg: [['lowpass', 'Low'], ['highpass', 'High'], ['bandpass', 'Band']] },
+        { key: 'cutoff', label: 'Cutoff', scale: log(50, 16000), fmt: v => Math.round(v) + ' Hz' },
+        { key: 'q', label: 'Resonance', scale: log(0.1, 20), fmt: v => v.toFixed(1) }
+      ] },
+      { id: 'space', icon: '🔊', title: 'Echo and volume', how: 'Echo repeats the sound after a delay; feedback is how many repeats.', rows: [
+        { key: 'echo', label: 'Echo', scale: lin(0, 0.8), fmt: v => v < 0.01 ? 'off' : Math.round(v * 1000) + ' ms' },
+        { key: 'feedback', label: 'Feedback', scale: lin(0, 0.85), fmt: v => Math.round(v * 100) + '%' },
+        { key: 'volume', label: 'Volume', scale: lin(0, 1), fmt: v => Math.round(v * 100) + '%' }
+      ] }
+    ];
+    const inputs = {};
+    function buildKnobs() {
+      const root = $('knobs');
+      PANELS.forEach(pn => {
+        const sec = document.createElement('section');
+        sec.className = 'panel'; sec.dataset.panel = pn.id;
+        sec.innerHTML = '<button class="panelHead" type="button" aria-expanded="true"><span>' + pn.icon + '</span><span class="panelTitle">' + pn.title +
+          '</span><span class="panelMark">▾</span></button><div class="panelBody"><p class="how"></p></div>';
+        sec.querySelector('.how').textContent = pn.how;
+        const body = sec.querySelector('.panelBody');
+        pn.rows.forEach(r => {
+          if (r.seg) {
+            const seg = document.createElement('div'); seg.className = 'seg'; seg.style.margin = '6px 0';
+            r.seg.forEach(([v, label]) => {
+              const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.dataset.v = v;
+              b.onclick = () => { P[r.key] = v; changed(); };
+              seg.appendChild(b);
+            });
+            inputs[r.key] = { seg, r };
+            body.appendChild(seg);
+            return;
+          }
+          const row = document.createElement('div'); row.className = 'knob';
+          row.innerHTML = '<label></label><input type="range" min="0" max="1000"><output></output>';
+          row.querySelector('label').textContent = r.label;
+          const inp = row.querySelector('input'), out = row.querySelector('output');
+          inp.setAttribute('aria-label', r.label);
+          inp.oninput = () => {
+            let v = r.scale.fromS(inp.value / 1000);
+            if (r.step) v = Math.round(v);
+            P[r.key] = v; out.textContent = r.fmt(v); changed(true);
+          };
+          inputs[r.key] = { inp, out, r };
+          body.appendChild(row);
+          if (r.hint) { const h = document.createElement('p'); h.className = 'how'; h.textContent = r.hint; body.appendChild(h); }
+        });
+        root.appendChild(sec);
+      });
+    }
+    function renderKnobs() {
+      for (const k in inputs) {
+        const c = inputs[k];
+        if (c.seg) c.seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === P[k]));
+        else { c.inp.value = Math.round(Math.max(0, Math.min(1, c.r.scale.toS(Math.max(P[k], 1e-6)))) * 1000); c.out.textContent = c.r.fmt(P[k]); }
+      }
+    }
+    function changed(fromSlider) { store.set('barglide.lab.current', P); if (!fromSlider) renderKnobs(); updateEcho(); }
+
+    // ---- the engine ----
+    let ac = null, master, delay, fb, wet, analyser, noiseBuf;
+    function audio() {
+      if (!ac) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) { logError('This browser has no Web Audio.'); return null; }
+        ac = new AC();
+        master = ac.createGain(); master.gain.value = 0.5;
+        analyser = ac.createAnalyser(); analyser.fftSize = 1024;
+        delay = ac.createDelay(1); fb = ac.createGain(); wet = ac.createGain();
+        master.connect(analyser); master.connect(delay); delay.connect(fb); fb.connect(delay); delay.connect(wet); wet.connect(analyser);
+        analyser.connect(ac.destination);
+        noiseBuf = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate);
+        const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+        updateEcho();
+      }
+      if (ac.state === 'suspended') ac.resume();
+      return ac;
+    }
+    function updateEcho() {
+      if (!ac) return;
+      delay.delayTime.setTargetAtTime(Math.max(0.01, P.echo), ac.currentTime, 0.02);
+      fb.gain.setTargetAtTime(P.echo < 0.01 ? 0 : P.feedback, ac.currentTime, 0.02);
+      wet.gain.setTargetAtTime(P.echo < 0.01 ? 0 : 0.6, ac.currentTime, 0.02);
+    }
+    function voice(freq) {
+      if (!audio()) return null;
+      const t = ac.currentTime + 0.005, p = Object.assign({}, P);
+      const stops = [];
+      const sum = ac.createGain();
+      const filt = ac.createBiquadFilter(); filt.type = p.filter; filt.frequency.value = p.cutoff; filt.Q.value = p.q;
+      const env = ac.createGain(); env.gain.value = 0;
+      const glideTo = (param, base) => {
+        param.setValueAtTime(base, t);
+        if (Math.abs(p.slide - 1) > 0.01) param.exponentialRampToValueAtTime(Math.max(20, base * p.slide), t + p.attack + p.decay);
+      };
+      if (p.wave === 'noise') {
+        const src = ac.createBufferSource(); src.buffer = noiseBuf; src.loop = true; src.connect(sum); src.start(t); stops.push(src);
+      } else {
+        const n = Math.max(1, Math.round(p.partials));
+        let fm = null;
+        if (p.fmDepth > 0.01) {
+          const mod = ac.createOscillator(); mod.frequency.value = freq * p.fmRatio;
+          fm = ac.createGain(); fm.gain.value = p.fmDepth * freq;
+          mod.connect(fm); mod.start(t); stops.push(mod);
+        }
+        for (let k = 0; k < n; k++) {
+          const o = ac.createOscillator(); o.type = p.wave === 'saw' ? 'sawtooth' : p.wave;
+          glideTo(o.frequency, freq * RATIOS[k]);
+          if (fm) fm.connect(o.frequency);
+          const g = ac.createGain(); g.gain.value = 1 / (k + 1) / Math.sqrt(n);
+          o.connect(g); g.connect(sum); o.start(t); stops.push(o);
+        }
+      }
+      if (p.ring >= 1) {
+        const ring = ac.createGain(); ring.gain.value = 0;
+        const ro = ac.createOscillator(); ro.frequency.value = p.ring; ro.connect(ring.gain); ro.start(t); stops.push(ro);
+        sum.connect(ring); ring.connect(filt);
+      } else sum.connect(filt);
+      filt.connect(env); env.connect(master);
+      const peak = p.volume * (p.wave === 'square' || p.wave === 'saw' ? 0.35 : 0.6);
+      env.gain.setValueAtTime(0, t);
+      env.gain.linearRampToValueAtTime(peak, t + p.attack);
+      env.gain.setTargetAtTime(peak * p.sustain, t + p.attack, Math.max(0.005, p.decay / 4));
+      let done = false;
+      return {
+        release() {
+          if (done) return; done = true;
+          const now = ac.currentTime;
+          env.gain.cancelScheduledValues(now);
+          env.gain.setValueAtTime(env.gain.value, now);
+          env.gain.setTargetAtTime(0, now, Math.max(0.005, p.release / 4));
+          stops.forEach(s => { try { s.stop(now + p.release * 1.5 + 0.1); } catch (e) {} });
+        },
+        // A one-shot: let the attack and decay play out, then release.
+        oneShot() { setTimeout(() => this.release(), (p.attack + p.decay + (p.sustain > 0 ? 0.25 : 0)) * 1000); }
+      };
+    }
+
+    // ---- pads and keys ----
+    function holdButton(el, freqFn) {
+      let v = null;
+      el.addEventListener('pointerdown', e => { e.preventDefault(); try { el.setPointerCapture(e.pointerId); } catch (err) {} el.classList.add('down'); v = voice(freqFn()); });
+      const up = () => { el.classList.remove('down'); if (v) v.release(); v = null; };
+      el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+      el.addEventListener('contextmenu', e => e.preventDefault());
+    }
+    holdButton($('pad'), () => P.freq);
+    const NAMES = ['Do', 'Re', 'Mi', 'Fa', 'So', 'La', 'Ti', 'Do'], STEPS = [0, 2, 4, 5, 7, 9, 11, 12];
+    NAMES.forEach((n, i) => {
+      const b = document.createElement('button'); b.className = 'btn'; b.type = 'button'; b.textContent = n;
+      holdButton(b, () => P.freq * Math.pow(2, STEPS[i] / 12));
+      $('keys').appendChild(b);
+    });
+    Object.keys(PRESETS).forEach(name => {
+      const b = document.createElement('button'); b.className = 'btn ghost'; b.type = 'button'; b.textContent = name;
+      b.onclick = () => { P = Object.assign({}, DEFAULT, PRESETS[name]); changed(); const v = voice(P.freq); if (v) v.oneShot(); };
+      $('presets').appendChild(b);
+    });
+
+    // ---- my sounds (this device) ----
+    let mine = store.get('barglide.lab.mine', []);
+    function renderMine() {
+      const box = $('mine'); box.textContent = '';
+      if (!mine.length) { const p = document.createElement('p'); p.className = 'how'; p.textContent = 'Nothing saved yet.'; box.appendChild(p); return; }
+      mine.forEach((m, i) => {
+        const b = document.createElement('button'); b.className = 'btn'; b.type = 'button'; b.textContent = '⭐ ' + m.name;
+        b.onclick = () => { P = Object.assign({}, DEFAULT, m.p); changed(); const v = voice(P.freq); if (v) v.oneShot(); };
+        const x = document.createElement('button'); x.className = 'btn ghost'; x.type = 'button'; x.textContent = '✖'; x.setAttribute('aria-label', 'Delete ' + m.name);
+        x.onclick = () => { mine.splice(i, 1); store.set('barglide.lab.mine', mine); renderMine(); };
+        box.appendChild(b); box.appendChild(x);
+      });
+    }
+    $('saveBtn').onclick = () => {
+      const name = $('saveName').value.trim() || 'Sound ' + (mine.length + 1);
+      mine.push({ name, p: Object.assign({}, P) }); store.set('barglide.lab.mine', mine);
+      $('saveName').value = ''; renderMine();
+    };
+    $('copyBtn').onclick = () => {
+      const out = JSON.stringify(P, null, 1);
+      if (navigator.clipboard) navigator.clipboard.writeText(out).catch(() => window.prompt('Copy the settings:', out));
+      else window.prompt('Copy the settings:', out);
+    };
+
+    // ---- scope: the wave as it plays ----
+    const sc = $('scope'), sx = sc.getContext('2d');
+    let buf = null;
+    function drawScope() {
+      requestAnimationFrame(drawScope);
+      sx.fillStyle = '#120a14'; sx.fillRect(0, 0, sc.width, sc.height);
+      sx.fillStyle = '#2a1a30';
+      for (let x = 0; x < sc.width; x += 20) sx.fillRect(x, 0, 1, sc.height);
+      for (let y = 0; y < sc.height; y += 20) sx.fillRect(0, y, sc.width, 1);
+      sx.fillStyle = '#5a2440'; sx.fillRect(0, sc.height / 2, sc.width, 1);
+      if (!analyser) { sx.fillStyle = '#ffe9a8'; sx.font = '12px monospace'; sx.fillText('HOLD A PAD TO SEE THE WAVE', 70, 74); return; }
+      if (!buf) buf = new Uint8Array(analyser.fftSize);
+      analyser.getByteTimeDomainData(buf);
+      sx.fillStyle = '#ff5fa2';
+      for (let x = 0; x < sc.width; x++) {
+        const v = buf[Math.floor(x / sc.width * buf.length)];
+        const y = Math.round((v / 255) * (sc.height - 4)) + 2;
+        sx.fillRect(x, y, 2, 2);
+      }
+    }
+
+    // ---- panels collapse (remembered) ----
+    function panels() {
+      const saved = store.get('barglide.lab.panels', {});
+      document.querySelectorAll('.panel').forEach(sec => {
+        const id = sec.dataset.panel, head = sec.querySelector('.panelHead');
+        let open = id in saved ? saved[id] : true;
+        const apply = () => { sec.dataset.collapsed = String(!open); head.setAttribute('aria-expanded', String(open)); };
+        apply();
+        head.onclick = () => { open = !open; apply(); saved[id] = open; store.set('barglide.lab.panels', saved); };
+      });
+    }
+
+    buildKnobs(); renderKnobs(); renderMine(); panels(); drawScope();
+    window.SoundLab = { params: () => Object.assign({}, P), play: f => { const v = voice(f || P.freq); if (v) v.oneShot(); return !!v; } };
+  })();
+  </script>
+</body>
+</html>

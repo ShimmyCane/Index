@@ -1,4 +1,4 @@
-/* Bar Glide — the page around the game: controls, ⚙️ settings, collapsible panels, notes for improvement,
+/* Ole Bar Glide — the page around the game: controls, ⚙️ settings, collapsible panels, notes for improvement,
  * top scores, the family database and the opt-in error panel. Classic script, no build. */
 (function (BG) {
   'use strict';
@@ -22,7 +22,7 @@
 
   // ---------- settings ----------
   const KEY = 'barglide.settings';
-  const DEFAULTS = { lanes: '4', speed: 'normal', glasses: '3', ending: 'spank', theme: 'saloon', crt: 1, sound: 1, music: 1, showErrors: false };
+  const DEFAULTS = { start: '1', speed: 'normal', glasses: '3', ending: 'spank', theme: 'saloon', crt: 1, sound: 1, music: 1, showErrors: false };
   let settings = Object.assign({}, DEFAULTS, store.get(KEY, {}));
   for (const k in DEFAULTS) {               // an old saved value that no longer matches falls back
     const seg = document.querySelector('.seg[data-key="' + k + '"]');
@@ -30,7 +30,7 @@
   }
   const SPEEDS = { slow: 0.75, normal: 1, fast: 1.25 };
   function gameConfig() {
-    return { lanes: +settings.lanes, speed: SPEEDS[settings.speed] || 1, glasses: +settings.glasses, ending: settings.ending, theme: settings.theme };
+    return { start: +settings.start, speed: SPEEDS[settings.speed] || 1, glasses: +settings.glasses, ending: settings.ending, theme: settings.theme };
   }
   function renderSettings() {
     document.querySelectorAll('.seg').forEach(seg => {
@@ -50,7 +50,7 @@
     store.set(KEY, settings);
     renderSettings();
     G.configure(gameConfig());
-    if (key === 'lanes') { showOverlay('title'); }
+    if (key === 'start') { showOverlay('title'); }
   }));
   $('showErrors').addEventListener('change', e => { settings.showErrors = e.target.checked; store.set(KEY, settings); renderErrors(); });
 
@@ -195,7 +195,7 @@
   function where() {
     const s = G.state();
     const item = s.state === 'title' ? 'title' : 'round-' + s.round;
-    return { page: 'index.html', item, label: (s.state === 'title' ? 'Title screen' : 'Round ' + s.round + ' · ' + s.lanes + ' bars') + ' · ' + settings.theme };
+    return { page: 'index.html', item, label: (s.state === 'title' ? 'Title screen' : 'Round ' + s.round + ' · ' + s.shift + ' · ' + s.lanes + ' bars') + ' · ' + settings.theme };
   }
   function updateNoteWhere() { $('noteWhere').textContent = 'About: ' + where().label; }
   function renderNotes() {
@@ -320,7 +320,7 @@
   });
 
   // ---------- version ----------
-  $('versionLine').textContent = 'Bar Glide ' + BG.VERSION;
+  $('versionLine').textContent = 'Ole Bar Glide ' + BG.VERSION;
   BG.CHANGES.forEach(c => { const li = document.createElement('li'); li.textContent = c; $('changelog').appendChild(li); });
 
   // ---------- go ----------

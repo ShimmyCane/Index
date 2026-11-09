@@ -52,6 +52,7 @@ body {
 .btn:active, .btn.down { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
 .btn.big { min-height: 64px; font-size: 22px; padding: 0 24px; }
 .btn.ghost { background: var(--btn2); }
+.btn.link { display: flex; align-items: center; justify-content: center; text-decoration: none; text-align: center; padding: 6px 12px; }
 
 .controls { display: flex; align-items: center; gap: 12px; width: min(96vw, 820px); padding-right: 88px; justify-content: center; }
 .lanePad { display: flex; gap: 8px; }
