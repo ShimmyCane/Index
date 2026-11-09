@@ -349,7 +349,9 @@
       cursor: pointer;
     }
     .shopBtn.seen { background: var(--mint); }
-    .shopRow { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; }
+    .shopRow { display: grid; grid-template-columns: 64px 1fr auto auto; gap: 10px; align-items: center; background: #fff; border: 2px solid var(--ink); border-radius: 16px; padding: 4px 8px; }
+    .shopPic { width: 64px; height: 64px; }
+    .shopTag { display: block; font-size: 13px; font-weight: 700; color: #a2574d; }
     .shopRow .shopItem, .shopRow .price { font-weight: 700; text-align: left; font-size: 17px; }
     .shopRow .btn { width: auto; min-width: 120px; min-height: 48px; }
     .jobGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; max-height: 52vh; overflow-y: auto; padding: 4px; }
@@ -425,7 +427,10 @@
     .who button { min-height: 40px; padding: 4px 12px; font: 700 15px system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: #fff; border: 2px solid var(--ink); border-radius: 999px; box-shadow: 0 2px 0 var(--ink); cursor: pointer; }
     .who button.on { background: var(--butter); }
     /* A person you meet on a job card */
-    .personPic { width: 130px; height: 130px; margin: 0 auto; display: grid; place-items: center; font-size: 76px; background: var(--peach); border: var(--line); border-radius: 50%; box-shadow: 0 4px 0 var(--ink); position: relative; }
+    .personPic { width: 150px; height: 150px; margin: 0 auto; display: grid; place-items: center; font-size: 76px; background: var(--peach); border: var(--line); border-radius: 50%; box-shadow: 0 4px 0 var(--ink); position: relative; }
+    .personPic svg { width: 100%; height: 100%; border-radius: 50%; }
+    .jobFace { width: 64px; height: 64px; display: block; }
+    .jobFace svg { width: 100%; height: 100%; }
     .personPic .badge { position: absolute; right: -6px; bottom: -6px; width: 48px; height: 48px; display: grid; place-items: center; font-size: 26px; background: #fff; border: var(--line); border-radius: 50%; }
     .levelBody .intro { font-size: 19px; line-height: 1.45; text-align: left; background: #fff; border: var(--line); border-radius: 18px; padding: 12px 16px; }
     .levelBody .intro p { text-align: left; margin: 0 0 6px; }
@@ -551,6 +556,7 @@
       <label>Version log</label>
       <div>Now on version <span id="version"></span></div>
       <ul>
+        <li><b>2.2.0</b> Prices are set by time: about 10 credits (5 minutes of questions) buys two small things. New: a decorative pony (5) and a windmill whose sails turn (60, save up for it). The shop shows a 3-D picture of everything, and moving things move. Drawn pictures of the job people.</li>
         <li><b>2.1.0</b> Play as Athena, Felix or a guest (each has their own game, synced when signed in). Six places: cottage, beach hut, treehouse, a farm with the farmhouse and the barn, an apartment in the middle of a block, and a tall tower. Make a room bigger (8 × 8) with credits. Zoom out (or 🔭) to see the outside, full screen (⛶), two fingers to pan. Home Depot sells doors, shutters, flower boxes, lamps, awnings and siding. Shops are named H Mart, Costco and Target. Every job has a person to meet and a short hello. Five more places are coming later.</li>
         <li><b>2.0.0</b> V2: Home decor is now a little 3-D world. Turn it, pinch to zoom, and drop chunky cartoon things into a cut-away room. New houses: the farmhouse, the barn outside it, a city apartment and a tall tower. New things to buy: four more beds and four more mushrooms, and a hay bale. V1 is kept in ⚙️.</li>
         <li><b>0.9.0</b> Start with 50 credits. Cheat mode in settings adds 50 credits at a time.</li>
@@ -601,9 +607,10 @@
   <script src="models.js"></script>
   <script src="world3d.js"></script>
   <script src="content.js"></script>
+  <script src="people.js"></script>
   <script>
     // ---- Places, rooms and players. Edit these lists to change the game. ----
-    const VERSION = '2.1.0';
+    const VERSION = '2.2.0';
     // A place is a little world (ground) with one or more rooms. A room has a look (theme) and the things it needs.
     // cx, cz: where the room sits on the island; y: how high its floor is (the treehouse is up a tree).
     // The things are in models.js (ITEMS).
@@ -1260,20 +1267,39 @@
       body.append(grid);
       renderBank();
     }
+    let shopAnim = null;
     function openShop(id) {
       if (!trip.visited.includes(id)) { trip.visited.push(id); saveGame(); }
       const s = SHOPS.find(x => x.id === id);
       const body = $('levelBody');
       body.replaceChildren(el('p', 'bank'), el('p', '', `${s.icon} ${s.name}`));
+      clearInterval(shopAnim);
+      const moving = [];
       s.stock.forEach(([item, price]) => {
         const row = el('div', 'shopRow');
         const have = bag.includes(item);
-        row.append(el('span', 'shopItem', `${ITEMS[item].emoji} ${cap(ITEMS[item].label)}`), el('span', 'price', `🪙 ${price}`));
+        const pic = document.createElement('img');
+        pic.className = 'shopPic';
+        pic.alt = '';
+        pic.src = has3d ? World3D.thumb(item) : '';
+        if (!pic.src) pic.hidden = true;
+        if (has3d && ITEMS[item].animate) moving.push([pic, World3D.frames(item, 12)]);
+        const name = el('span', 'shopItem', cap(ITEMS[item].label));
+        if (ITEMS[item].animate) name.append(el('span', 'shopTag', ' ✨ it moves!'));
+        if (!have && credits < price) name.append(el('span', 'shopTag', ` · save up ${price - credits} more`));
+        row.append(pic, name, el('span', 'price', `🪙 ${price}`));
         const b = choiceBtn(have ? 'In your bag' : 'Buy', () => buyItem(s.id, item, price));
         b.disabled = have || credits < price;
         row.append(b);
         body.append(row);
       });
+      // things that move play their loop in the shop
+      let frame = 0;
+      if (moving.length) shopAnim = setInterval(() => {
+        if ($('panel').hidden) { clearInterval(shopAnim); return; }
+        frame++;
+        moving.forEach(([pic, fr]) => { if (fr.length && pic.isConnected) pic.src = fr[frame % fr.length]; });
+      }, 110);
       body.append(choiceBtn('⬅ Back to the shops', () => renderShops()));
       renderBank();
     }
@@ -1302,7 +1328,9 @@
         JOBS.forEach(j => {
           const card = el('button', 'jobCard' + (hired.includes(j.id) ? ' hired' : ''));
           card.type = 'button';
-          card.append(el('span', 'jobIcon', (j.person || '') + j.icon), el('span', 'jobName', j.name + (hired.includes(j.id) ? ' ⭐' : '')), el('span', 'jobDesc', j.who ? `Meet ${j.who}` : j.desc));
+          const face = el('span', 'jobFace');
+          face.innerHTML = window.personSVG ? personSVG(j) : (j.person || '');
+          card.append(face, el('span', 'jobName', j.icon + ' ' + j.name + (hired.includes(j.id) ? ' ⭐' : '')), el('span', 'jobDesc', j.who ? `Meet ${j.who}` : j.desc));
           card.onclick = () => { jobView = { id: j.id, stage: 'card', i: 0 }; renderJobs(); };
           grid.append(card);
         });
@@ -1314,7 +1342,8 @@
       const S = JOB_STEPS[job.id];
       const v = jobView;
       if (v.stage === 'card') {
-        const pic = el('div', 'personPic', job.person || job.icon);
+        const pic = el('div', 'personPic');
+        pic.innerHTML = window.personSVG ? personSVG(job) : (job.person || job.icon);
         pic.append(el('span', 'badge', job.icon));
         body.append(pic, el('p', 'question', job.who ? `${job.who} · ${job.name}` : job.name));
         const intro = el('div', 'intro');

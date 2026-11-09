@@ -16,3 +16,6 @@
 - Derive unlocks from what is done instead of saving an unlocked count; inserting a place then needs no migration.
 - For a room in the middle of a building, lift the floors above like a doll's house lid (and turn off their shadow) instead of hiding them, so it still reads as mid-tower.
 - Inside and outside are one camera: zooming past a threshold puts the walls, roof and upper floors back. Outside things then attach to the outer faces of the walls that face the camera.
+- Hash-based picks: use `>>>` when shifting an unsigned hash, or a large hash goes negative and indexes past the list.
+- Show a moving thing in a shop as a short loop of rendered pictures; no second live 3-D view is needed.
+- Price by time, not by size: ask how long a child should play to afford something, then set tiers.

@@ -465,6 +465,8 @@
           o.scale.set(1 + s, 1 - s, 1 + s);
         } else o.scale.set(1, 1, 1);
         if (o.parent === R.items) o.visible = !out || h.floating;   // the roof hides the inside
+        const info = window.ITEMS[id];
+        if (info.animate) info.animate(o, t);
         if (held && window.ITEMS[id].zone === 'floor' && !h.floating) {
           ringMesh.visible = true;
           ringMesh.position.set(h.x, R.y + 0.06, h.z);
@@ -668,8 +670,8 @@
     return rr.domElement.toDataURL('image/png');
   }
   const thumbs = {};
-  function thumb(id) {
-    if (thumbs[id]) return thumbs[id];
+  function thumb(id, time) {
+    if (time === undefined && thumbs[id]) return thumbs[id];
     const info = window.ITEMS[id];
     if (!info) return '';
     const s = new THREE.Scene();
@@ -677,6 +679,7 @@
     const d = new THREE.DirectionalLight(0xffffff, 0.45); d.position.set(5, 8, 6); s.add(d);
     const obj = info.build();
     if (info.zone === 'floor') obj.rotation.y = -Math.PI / 6;
+    if (info.animate) info.animate(obj, time || 0);
     s.add(obj);
     const b = new THREE.Box3().setFromObject(obj), c = new THREE.Vector3(), sz = new THREE.Vector3();
     b.getCenter(c); b.getSize(sz);
@@ -688,13 +691,29 @@
     rr.shadowMap.enabled = false;
     rr.setClearColor(0x000000, 0);
     rr.render(s, cam);
-    thumbs[id] = rr.domElement.toDataURL('image/png');
+    const url = rr.domElement.toDataURL('image/png');
     disposeTree(obj);
-    return thumbs[id];
+    if (time === undefined) thumbs[id] = url;
+    return url;
+  }
+
+  // A few pictures through one loop of a moving thing, for the shop (shown one after another)
+  function frames(id, n) {
+    const info = window.ITEMS[id];
+    if (!info || !info.animate) return [];
+    const key = id + ':' + n;
+    if (thumbs[key]) return thumbs[key];
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      delete thumbs[id];
+      out.push(thumb(id, (info.loop || 1) * i / n));
+    }
+    delete thumbs[id];
+    return (thumbs[key] = out);
   }
 
   // Geometries are made per thing; materials are shared, so only geometries are freed
   function disposeTree(root) { root.traverse(o => { if (o.geometry && !o.userData.outline) o.geometry.dispose(); }); }
 
-  window.World3D = { init, showPlace, setActive, sync, bounce, turn, zoom, resetView, setOutside, isOutside, snapshot, thumb, view, SIDING };
+  window.World3D = { init, showPlace, setActive, sync, bounce, turn, zoom, resetView, setOutside, isOutside, snapshot, thumb, frames, view, SIDING };
 })();
