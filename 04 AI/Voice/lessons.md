@@ -9,3 +9,7 @@
 7. **Playwright `route.fulfill` can't carry a 92 MB body** (the DevTools pipe has a 100 MB limit, and the browser closed). Answer with a 302 to a local CORS server instead. `route.continue` can't change http to https.
 8. **Test a hosted model without its host:** redirect its URLs to local copies. Mark any file you had to rebuild (here the tokenizer) as unverified.
 9. **Script stories:** one line = one paragraph keeps the tokens, timings, highlight and speed read unchanged; speaker labels and notes are extra elements outside the token spans.
+10. **Write notes once, show them in every language.** Translations keep the English line order and point at it with `notesFrom`; one set of director's notes serves all versions.
+11. **Japanese needs word joining for reading.** Raw fugashi tokens split verb endings (い・まし・た); join particles, auxiliaries, suffixes and closing brackets to the word before, and prefixes and opening brackets to the next.
+12. **Accented letters:** use `\p{L}` with the `u` flag for the focus letter and the weights, not `[A-Za-z]` (French and Spanish broke the speed-read split).
+13. **Python stdout to a file is block-buffered:** a background bake showed no progress lines until the end. Use `python3 -u` or check the output files.
