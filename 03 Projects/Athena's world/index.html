@@ -65,12 +65,7 @@
       box-shadow: 0 5px 0 var(--ink);
       overflow: hidden;
     }
-    .miniItem {
-      position: absolute;
-      transform: translate(-50%, -50%);
-      font-size: 30px;
-      line-height: 1;
-    }
+    .mini img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .tabs { display: grid; gap: 12px; }
     .tab {
       display: grid;
@@ -104,55 +99,34 @@
     h1 { margin: 0; font-size: clamp(26px, 4vw, 36px); text-align: center; }
     .hint { margin: 6px 0 12px; text-align: center; font-size: 18px; min-height: 1.4em; }
 
-    /* The white room: walls above the line, floor below */
+    /* The 3-D world: a cut-away room on a little island. Drag to turn, pinch to zoom, tap to place. */
     .room {
       position: relative;
       width: 100%;
-      max-width: calc((100dvh - 170px) * 4 / 3);
-      aspect-ratio: 4 / 3;
+      height: calc(100dvh - 150px);
+      min-height: 320px;
       margin: 0 auto;
       background: #fff;
       border: var(--line);
       border-radius: 26px 32px 28px 34px;
       box-shadow: 0 6px 0 var(--ink);
       overflow: hidden;
+    }
+    .room canvas { display: block; cursor: pointer; }
+    .viewBtns { position: absolute; left: 12px; bottom: 12px; display: flex; gap: 8px; }
+    .viewBtns button {
+      width: 52px; height: 52px;
+      font-size: 22px;
+      color: var(--ink);
+      background: rgba(255, 249, 238, 0.92);
+      border: var(--line);
+      border-radius: 50%;
+      box-shadow: 0 3px 0 var(--ink);
       cursor: pointer;
     }
-    .wall {
-      position: absolute;
-      left: 0; right: 0; top: 0;
-      height: 42%;
-      border-bottom: var(--line);
-    }
-    .floor {
-      position: absolute;
-      left: 0; right: 0; bottom: 0;
-      height: 58%;
-    }
-
-    .item {
-      position: absolute;
-      transform: translate(-50%, -50%);
-      padding: 4px;
-      background: none;
-      border: 0;
-      border-radius: 18px;
-      font-size: clamp(46px, 8vw, 76px);
-      line-height: 1;
-      cursor: pointer;
-      filter: drop-shadow(0 4px 0 rgba(59, 58, 74, 0.25));
-      transition: left 0.4s ease, top 0.4s ease;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .item.held {
-      animation: bob 1s ease-in-out infinite;
-      outline: 3px dashed var(--coral);
-      outline-offset: 6px;
-    }
-    @keyframes bob {
-      0%, 100% { transform: translate(-50%, -50%); }
-      50% { transform: translate(-50%, -62%); }
-    }
+    .viewBtns button:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+    .no3d { position: absolute; inset: 0; display: grid; place-content: center; gap: 10px; padding: 24px; text-align: center; font-size: 18px; }
+    .btn img.thumb { width: 44px; height: 44px; flex: none; }
 
     /* Side buttons */
     .side {
@@ -185,6 +159,7 @@
     .btn[aria-pressed="true"] { background: var(--butter); }
     .btn:disabled { opacity: 0.5; cursor: default; transform: none; box-shadow: 0 4px 0 var(--ink); }
     .btn.ghost { background: var(--paper); }
+    a.btn { text-decoration: none; }
 
     /* Settings gear, lower right */
     .gear {
@@ -422,7 +397,7 @@
     @media (max-aspect-ratio: 4/5), (max-width: 700px) {
       body { overflow: auto; }
       .app { grid-template-columns: 1fr; height: auto; min-height: 100dvh; }
-      .room { max-width: 100%; }
+      .room { height: 70vh; }
       .side { overflow: visible; padding-bottom: 110px; }
     }
 
@@ -436,7 +411,7 @@
     <h1>Athena's world</h1>
     <div class="landingGrid">
       <div class="preview">
-        <div class="mini" id="mini" aria-label="Your home right now"><div class="wall"></div><div class="floor"></div></div>
+        <div class="mini" id="mini" aria-label="Your home right now"><img id="miniImg" alt=""></div>
         <p class="sub" id="miniName"></p>
         <p class="sub bank"></p>
       </div>
@@ -448,9 +423,14 @@
     <section class="play">
       <h1 id="title"></h1>
       <p class="hint" id="hint"></p>
-      <div class="room" id="room" aria-label="Room">
-        <div class="wall"></div>
-        <div class="floor"></div>
+      <div class="room" id="room" aria-label="Room in 3-D. Drag to turn it, pinch to zoom.">
+        <div class="viewBtns">
+          <button type="button" id="viewLeft" aria-label="Turn the world left">⟲</button>
+          <button type="button" id="viewRight" aria-label="Turn the world right">⟳</button>
+          <button type="button" id="zoomIn" aria-label="Zoom in">➕</button>
+          <button type="button" id="zoomOut" aria-label="Zoom out">➖</button>
+          <button type="button" id="viewReset" aria-label="Back to the first view">🎯</button>
+        </div>
       </div>
     </section>
 
@@ -459,6 +439,7 @@
       <div class="stack" id="houses"></div>
       <h2>Decorate</h2>
       <div class="stack" id="items"></div>
+      <button class="btn ghost" id="spin" type="button">🔄 Turn it round</button>
       <button class="btn ghost" id="undo" type="button">↩️ Undo</button>
       <button class="btn ghost" id="toLanding" type="button">🏠 Front page</button>
     </aside>
@@ -517,6 +498,12 @@
     </div>
 
     <div class="setting">
+      <label>Versions</label>
+      <a class="btn ghost" href="v1/index.html">📦 Open V1 (the flat first game)</a>
+      <p class="sub">V1 is kept as it was: the white room with emoji things, and its five houses. Credits, the bag and jobs are shared.</p>
+    </div>
+
+    <div class="setting">
       <label>Cheat mode</label>
       <button class="btn ghost" id="cheat" type="button">🪙 Add 50 credits</button>
     </div>
@@ -525,6 +512,7 @@
       <label>Version log</label>
       <div>Now on version <span id="version"></span></div>
       <ul>
+        <li><b>2.0.0</b> V2: Home decor is now a little 3-D world. Turn it, pinch to zoom, and drop chunky cartoon things into a cut-away room. New houses: the farmhouse, the barn outside it, a city apartment and a tall tower. New things to buy: four more beds and four more mushrooms, and a hay bale. V1 is kept in ⚙️.</li>
         <li><b>0.9.0</b> Start with 50 credits. Cheat mode in settings adds 50 credits at a time.</li>
         <li><b>0.8.0</b> MVP for the Learning center (questions earn credits), Retail therapy (12 shops; buy things into the bag; take them home) and Get a job (job board, learn, quiz, challenge, first-pass task, hired) for three jobs.</li>
         <li><b>0.7.0</b> The front page is now a small picture of your home beside the sections as tabs. Home decor opens the room; a Front page button brings you back.</li>
@@ -569,58 +557,25 @@
     <button class="btn ghost" id="panelBack" type="button">🏠 Back to front page</button>
   </section>
 
+  <script src="lib/three.min.js"></script>
+  <script src="models.js"></script>
+  <script src="world3d.js"></script>
   <script src="content.js"></script>
   <script>
     // ---- Houses and things. Edit these lists to change the game. ----
-    const VERSION = '0.9.0';
+    const VERSION = '2.0.0';
+    // Each house is a little world (theme): cottage, farm, barn, city, tower. The things are in models.js (ITEMS).
     const HOUSES = [
-      { name: "Athena's cottage", icon: '🏡', needs: ['bed', 'window', 'picture', 'plant'] },
-      { name: 'Beach hut', icon: '🏖️', needs: ['window', 'sofa', 'plant', 'mirror'] },
-      { name: 'Treehouse', icon: '🌳', needs: ['window', 'bed', 'teddy', 'lamp'] },
-      { name: 'City flat', icon: '🏙️', needs: ['window', 'sofa', 'tv', 'clock'] },
-      { name: 'Farmhouse', icon: '🚜', needs: ['bed', 'window', 'chair', 'clock'] }
+      { name: "Athena's cottage", icon: '🏡', theme: 'cottage', needs: ['bed', 'window', 'picture', 'plant'] },
+      { name: 'Farmhouse',        icon: '🚜', theme: 'farm',    needs: ['bed', 'window', 'chair', 'clock'] },
+      { name: 'The barn',         icon: '🐄', theme: 'barn',    needs: ['haybed', 'haybale', 'lantern', 'basket'] },
+      { name: 'City apartment',   icon: '🏙️', theme: 'city',    needs: ['window', 'sofa', 'tv', 'clock'] },
+      { name: 'Tall tower',       icon: '🏢', theme: 'tower',   needs: ['window', 'bunkbed', 'lamp', 'plant'] }
     ];
-    const ITEMS = {
-      // On the wall
-      window:  { emoji: '🪟', label: 'window',  zone: 'wall' },
-      picture: { emoji: '🖼️', label: 'picture', zone: 'wall' },
-      clock:   { emoji: '🕰️', label: 'clock',   zone: 'wall' },
-      mirror:  { emoji: '🪞', label: 'mirror',  zone: 'wall' },
-      // On the floor
-      bed:       { emoji: '🛏️', label: 'bed',       zone: 'floor' },
-      sofa:      { emoji: '🛋️', label: 'sofa',      zone: 'floor' },
-      plant:     { emoji: '🪴', label: 'plant',     zone: 'floor' },
-      chair:     { emoji: '🪑', label: 'chair',     zone: 'floor' },
-      lamp:      { emoji: '🪔', label: 'lamp',      zone: 'floor' },
-      tv:        { emoji: '📺', label: 'TV',        zone: 'floor' },
-      teddy:     { emoji: '🧸', label: 'teddy',     zone: 'floor' },
-      bookshelf: { emoji: '📚', label: 'bookshelf', zone: 'floor' },
-      bath:      { emoji: '🛁', label: 'bath',      zone: 'floor' },
-      piano:     { emoji: '🎹', label: 'piano',     zone: 'floor' },
-      // Things from the shops (Retail therapy). Add a line here to make a new thing; a shop then sells it by id.
-      vase:      { emoji: '🏺', label: 'vase',      zone: 'floor' },
-      candle:    { emoji: '🕯️', label: 'candle',    zone: 'floor' },
-      cactus:    { emoji: '🌵', label: 'cactus',    zone: 'floor' },
-      balloon:   { emoji: '🎈', label: 'balloon',   zone: 'floor' },
-      rainbow:   { emoji: '🌈', label: 'rainbow',   zone: 'wall' },
-      kite:      { emoji: '🪁', label: 'kite',      zone: 'wall' },
-      teapot:    { emoji: '🫖', label: 'teapot',    zone: 'floor' },
-      lantern:   { emoji: '🏮', label: 'lantern',   zone: 'floor' },
-      mushroom:  { emoji: '🍄', label: 'mushroom',  zone: 'floor' },
-      fishbowl:  { emoji: '🐠', label: 'fish bowl', zone: 'floor' },
-      tulip:     { emoji: '🌷', label: 'tulip',     zone: 'floor' },
-      basket:    { emoji: '🧺', label: 'basket',    zone: 'floor' },
-      sun:       { emoji: '☀️', label: 'sun',       zone: 'wall' }
-    };
-    // Where items may sit, as % of the room (top to bottom)
-    const ZONES = { wall: { top: 12, bottom: 34 }, floor: { top: 52, bottom: 92 } };
-    const LEFT_RIGHT = { min: 8, max: 92 };
-    const TRAY = { x: 50, y: 14 }; // a new item appears up here first
 
     // ---- Small helpers ----
     const $ = id => document.getElementById(id);
     const roomEl = $('room');
-    const itemEls = {};
     const store = {
       get(key, fallback) {
         try { const v = localStorage.getItem(key); return v === null ? fallback : JSON.parse(v); }
@@ -813,19 +768,26 @@
 
     // ---- Saved game: this device always; the family database too when signed in ----
     let unlocked = 1;                                        // how many houses can be chosen
-    const gameData = () => ({ unlocked, bag, credits, startGranted: true, trip, hired, answers, rooms: rooms.map(R => ({ pos: placedCopy(R), done: R.done })) });
+    let legacy = {};                                         // V1's houses and anything else this version does not use: kept as it is
+    const gameData = () => ({ ...legacy, bag, credits, startGranted: true, trip, hired, answers,
+      world: { unlocked, current, rooms: rooms.map(R => ({ pos: placedCopy(R), done: R.done })) } });
     function applyGameData(d) {
-      if (!d || !Array.isArray(d.rooms)) return;
-      unlocked = clamp(+d.unlocked || 1, 1, HOUSES.length);
+      if (!d || typeof d !== 'object') return;
+      legacy = { ...d };
+      delete legacy.world;
       bag = Array.isArray(d.bag) ? d.bag.filter(id => ITEMS[id]) : [];
       credits = Math.max(0, +d.credits || 0);
-      if (!d.startGranted) credits += 50;               // saves from before this version get the 50 start once
+      if (!d.startGranted) credits += 50;               // saves from before 0.9.0 get the 50 start once
       trip = d.trip && Array.isArray(d.trip.visited) ? { visited: d.trip.visited, spent: +d.trip.spent || 0 } : { visited: [], spent: 0 };
       hired = Array.isArray(d.hired) ? d.hired.filter(id => JOB_STEPS[id] || JOBS.some(j => j.id === id)) : [];
       answers = d.answers && typeof d.answers === 'object' ? d.answers : {};
+      const w = d.world && Array.isArray(d.world.rooms) ? d.world : { unlocked: 1, current: 0, rooms: [] };
+      unlocked = clamp(+w.unlocked || 1, 1, HOUSES.length);
+      current = clamp(+w.current || 0, 0, unlocked - 1);
       rooms.forEach((R, i) => {
-        const r = d.rooms[i];
-        R.pos = r && r.pos ? r.pos : {};
+        const r = w.rooms[i];
+        R.pos = {};
+        if (r && r.pos) for (const id in r.pos) if (ITEMS[id]) R.pos[id] = r.pos[id];
         R.done = !!(r && r.done);
         R.history = [];
       });
@@ -848,6 +810,8 @@
       if (!local || new Date(remote.updated_at) > new Date(local.savedAt)) {
         applyGameData(remote.data);
         store.set('athena.save', { savedAt: remote.updated_at, data: remote.data });
+        if (has3d) World3D.showHouse(HOUSES[current]);
+        render();
       } else {
         saveGame();
       }
@@ -856,6 +820,7 @@
     // ---- State ----
     let current = 0;
     let held = null;                                   // the item waiting for a tap
+    let lastPlaced = null;                             // for the Turn button
     // The bag: things bought in the shops. Each one becomes a decorate button in every house.
     let bag = [];
     let credits = 50;                                   // starts with 50 for fun                                    // earned in the Learning center, spent in the shops
@@ -913,36 +878,57 @@
     function pressItem(t) {
       const R = room();
       if (held === t) {
-        // Tapping the held item again puts it down where it is
-        if (R.pos[t].placed) { held = null; blip(440, 0.08); }
+        // Tapping the held thing again puts it down where it is
+        if (R.pos[t].placed) { held = null; blip(440, 0.08); World3D.bounce(t); }
         render();
         return;
       }
       discardUnplacedHeld();
-      if (!R.pos[t]) R.pos[t] = { x: TRAY.x, y: TRAY.y, placed: false }; // new item appears up here
+      if (!R.pos[t]) R.pos[t] = { placed: false };     // a new thing floats above the room first
       held = t;
       setNoteContext(`${HOUSES[current].name} · ${ITEMS[t].label}`, `house-${current}/${t}`);
       blip(520, 0.08);
       render();
     }
 
-    roomEl.addEventListener('click', e => {
-      if (!held) return;
-      const r = roomEl.getBoundingClientRect();
-      const zone = ZONES[ITEMS[held].zone];
-      const x = clamp((e.clientX - r.left) / r.width * 100, LEFT_RIGHT.min, LEFT_RIGHT.max);
-      const y = clamp((e.clientY - r.top) / r.height * 100, zone.top, zone.bottom);
+    // A tap in the 3-D world: put the held thing there, or pick up the thing that was tapped
+    function tapWorld(hit) {
       const R = room();
+      if (!held) {
+        if (hit.itemId && R.pos[hit.itemId]) pressItem(hit.itemId);
+        return;
+      }
+      if (hit.heldHit && R.pos[held].placed) { pressItem(held); return; }
+      const zone = ITEMS[held].zone;
+      let spot = null;
+      if (zone === 'wall' && hit.wall) spot = { wall: hit.wall.wall, u: hit.wall.u, v: hit.wall.v };
+      if (zone === 'floor' && hit.floor) spot = { x: hit.floor.x, z: hit.floor.z, rot: (R.pos[held] && R.pos[held].rot) || 0 };
+      if (!spot) return;
       const wasDone = R.done;
       R.history.push(placedCopy(R));
-      R.pos[held] = { x, y, placed: true };
+      R.pos[held] = { ...spot, placed: true };
+      const landed = held;
+      lastPlaced = landed;
       held = null;
       blip(880, 0.12);
       R.done = isComplete(R);
       if (R.done && !wasDone) finishHouse();
       saveGame();
       render();
-    });
+      World3D.bounce(landed);
+    }
+
+    // Turn a floor thing a quarter round (the held one, or the last one placed)
+    $('spin').onclick = () => {
+      const R = room();
+      const t = held || lastPlaced;
+      if (!t || !R.pos[t] || ITEMS[t].zone !== 'floor' || !R.pos[t].placed) return;
+      R.history.push(placedCopy(R));
+      R.pos[t] = { ...R.pos[t], rot: ((R.pos[t].rot || 0) + Math.PI / 2) % (Math.PI * 2) };
+      blip(600, 0.08);
+      saveGame();
+      render();
+    };
 
     $('undo').onclick = () => {
       const R = room();
@@ -978,7 +964,9 @@
       discardUnplacedHeld();
       current = i;
       setNoteContext(HOUSES[current].name, `house-${current}`);
-      for (const t in itemEls) { itemEls[t].remove(); delete itemEls[t]; }
+      lastPlaced = null;
+      if (has3d) World3D.showHouse(HOUSES[current]);
+      saveGame();
       render();
     }
 
@@ -1001,8 +989,9 @@
     // Lock rules (see convo v0.6): home and learning are open; the rest open with progress
     function isOpen(id) {
       if (id === 'home' || id === 'learn') return true;
-      if (id === 'shops') return rooms[0].done;
-      if (id === 'jobs') return rooms.every(R => R.done);
+      const v1 = Array.isArray(legacy.rooms) ? legacy.rooms : [];
+      if (id === 'shops') return rooms[0].done || !!(v1[0] && v1[0].done);
+      if (id === 'jobs') return rooms.every(R => R.done) || (v1.length >= 5 && v1.every(r => r && r.done));
       return false;
     }
     function showPanel(icon, title, text) {
@@ -1270,18 +1259,8 @@
     }
     // The small room on the front page shows the current house, read only
     function renderMini() {
-      const mini = $('mini');
-      mini.querySelectorAll('.miniItem').forEach(e => e.remove());
       const R = room();
-      for (const t in R.pos) {
-        if (!R.pos[t].placed) continue;
-        const el = document.createElement('span');
-        el.className = 'miniItem';
-        el.textContent = ITEMS[t].emoji;
-        el.style.left = R.pos[t].x + '%';
-        el.style.top = R.pos[t].y + '%';
-        mini.appendChild(el);
-      }
+      if (has3d && !$('landing').hidden) $('miniImg').src = World3D.snapshot(560, 420);
       $('miniName').textContent = HOUSES[current].icon + ' ' + HOUSES[current].name
         + (Object.keys(R.pos).length ? '' : ' (empty for now)');
     }
@@ -1310,24 +1289,8 @@
     function render() {
       const R = room();
 
-      // Items in the room (kept as elements so they glide when moved)
-      for (const t in itemEls) if (!R.pos[t]) { itemEls[t].remove(); delete itemEls[t]; }
-      for (const t in R.pos) {
-        let el = itemEls[t];
-        if (!el) {
-          el = document.createElement('button');
-          el.type = 'button';
-          el.className = 'item';
-          el.textContent = ITEMS[t].emoji;
-          el.setAttribute('aria-label', ITEMS[t].label);
-          el.addEventListener('click', e => { e.stopPropagation(); pressItem(t); });
-          roomEl.appendChild(el);
-          itemEls[t] = el;
-        }
-        el.style.left = R.pos[t].x + '%';
-        el.style.top = R.pos[t].y + '%';
-        el.classList.toggle('held', held === t);
-      }
+      // Things in the 3-D room
+      if (has3d) World3D.sync(R.pos, held);
 
       // Side buttons
       $('houses').replaceChildren(...HOUSES.map((h, i) => {
@@ -1339,7 +1302,10 @@
         return b;
       }));
       $('items').replaceChildren(...decorateList().map(t => {
-        const b = button(`${ITEMS[t].emoji} ${cap(ITEMS[t].label)}${isPlaced(R, t) ? ' ✓' : ''}`);
+        const b = button(`${cap(ITEMS[t].label)}${isPlaced(R, t) ? ' ✓' : ''}`);
+        const src = has3d ? World3D.thumb(t) : '';
+        if (src) { const img = document.createElement('img'); img.className = 'thumb'; img.src = src; img.alt = ''; b.prepend(img); }
+        else b.prepend(ITEMS[t].emoji + ' ');
         b.setAttribute('aria-pressed', held === t);
         b.onclick = () => pressItem(t);
         return b;
@@ -1349,8 +1315,9 @@
       // Words above the room
       $('title').textContent = HOUSES[current].name;
       $('hint').textContent = held
-        ? `Tap the room to put the ${ITEMS[held].label} there.`
-        : Object.keys(R.pos).length ? 'Tap something in the room to move it.' : 'Tap something on the right to start.';
+        ? (ITEMS[held].zone === 'wall' ? `Tap a wall to hang the ${ITEMS[held].label}.` : `Tap the floor to put the ${ITEMS[held].label} there.`)
+        : Object.keys(R.pos).length ? 'Tap a thing to move it. Drag to turn the world.' : 'Pick a thing on the right to start.';
+      $('spin').disabled = !(held || lastPlaced) || ITEMS[held || lastPlaced].zone !== 'floor' || !(R.pos[held || lastPlaced] || {}).placed;
 
       renderSettings();
       renderTabs();
@@ -1454,9 +1421,27 @@
     $('checkDb').onclick = checkDatabase;
 
     // Start: this device's copy first, then the family database when signed in
+    // The 3-D world. Without WebGL the page still works, and points to V1.
+    let has3d = false;
+    try { has3d = !!window.THREE && World3D.init(roomEl, tapWorld); }
+    catch (e) { logError('3-D could not start: ' + e.message); }
+    if (!has3d) {
+      const msg = document.createElement('div');
+      msg.className = 'no3d';
+      msg.innerHTML = '<div style="font-size:48px">🧊</div><div>This browser cannot show the 3-D world.</div><a class="btn" href="v1/index.html">📦 Play V1 instead</a>';
+      roomEl.appendChild(msg);
+      logError('No WebGL: the 3-D room is off.');
+    }
+    $('viewLeft').onclick = () => has3d && World3D.turn(-Math.PI / 4);
+    $('viewRight').onclick = () => has3d && World3D.turn(Math.PI / 4);
+    $('zoomIn').onclick = () => has3d && World3D.zoom(1.2);
+    $('zoomOut').onclick = () => has3d && World3D.zoom(1 / 1.2);
+    $('viewReset').onclick = () => has3d && World3D.resetView();
+
     (async function start() {
       const local = store.get('athena.save', null);
       if (local) applyGameData(local.data);
+      if (has3d) World3D.showHouse(HOUSES[current]);
       setNoteContext(HOUSES[current].name, `house-${current}`);
       renderNotes();
       render();

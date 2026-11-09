@@ -79,3 +79,12 @@ A decorating game for Athena. A white room, a choice of house or workplace, deco
 - Shape taken from the Test Bank repo (`ShimmyCane/Test-Bank`, `schema for test bank json.md`): array of questions with id, question_type, category, subcategory, topic, difficulty, source_authority, question_text, choices, correct_answer, explanation, traps. Only `multiple_choice` and `true_false` are used. `knowledge_node_ids` are left out, since no knowledge database exists for desserts yet.
 - Tested headless: a full round of right answers scores 41 of 41; wrong-then-right scores half. No page errors.
 - Not verified: iPad layout; a second round of questions.
+
+## V2, 3-D home (2.0.0, 2026-11-09)
+
+- V1 frozen in `03 Projects/Athena's world/v1/` (linked from ⚙️). V1 now keeps unknown save fields and unknown bag ids, so it never wipes V2 data.
+- Home decor is a Three.js (r128, vendored `lib/three.min.js`) cut-away room on an island: `world3d.js` (scene, walls that drop when facing the camera, scenery that sinks when in front, drag/pinch/tap, thumbnails, snapshot) and `models.js` (37 toon models with inverted-hull outlines).
+- Save: V2 rooms under `data.world` (`unlocked`, `current`, `rooms[].pos` with `{x,z,rot}` or `{wall,u,v}`); V1 fields kept in `legacy`.
+- Tested headless (SwiftShader): place all four things in house 1 by tapping (floor and walls), finish card, drag to turn, pick up and move, Turn, Undo, buy a bunk bed, all five worlds render, front-page picture, V1 opens and keeps V2 data, 390-wide no horizontal scroll. No page errors.
+- Not verified: iPad Safari (WebGL performance, pinch), the signed-in sync with the new `world` field.
+- Open questions in convo v0.8.

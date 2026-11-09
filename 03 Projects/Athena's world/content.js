@@ -704,19 +704,19 @@ const QUESTIONS = [
   }
 ];
 
-// ---- Retail therapy: twelve shops. Each sells things by id (see ITEMS in index.html). ----
+// ---- Retail therapy: twelve shops. Each sells things by id (see ITEMS in models.js). ----
 // Shop names are generic for now (see convo v0.5). Prices are in credits.
 const SHOPS = [
-  { id: 'korean-grocery', name: 'Korean grocery', icon: '🥢', stock: [['teapot', 4], ['lantern', 6], ['mushroom', 3]] },
+  { id: 'korean-grocery', name: 'Korean grocery', icon: '🥢', stock: [['teapot', 4], ['lantern', 6], ['mushroom', 3], ['mushroomblue', 5]] },
   { id: 'warehouse', name: 'Warehouse club', icon: '📦', stock: [['sofa', 14], ['tv', 12], ['window', 9]] },
   { id: 'home-decor', name: 'Home decor shop', icon: '🏠', stock: [['vase', 4], ['picture', 6], ['sun', 6], ['rainbow', 5]] },
   { id: 'craft', name: 'Craft shop', icon: '🧶', stock: [['kite', 4], ['balloon', 3], ['basket', 4]] },
   { id: 'bakery', name: 'Bakery', icon: '🥐', stock: [['candle', 3], ['basket', 4]] },
-  { id: 'toy', name: 'Toy shop', icon: '🧸', stock: [['teddy', 5], ['balloon', 3], ['kite', 4]] },
+  { id: 'toy', name: 'Toy shop', icon: '🧸', stock: [['teddy', 5], ['balloon', 3], ['kite', 4], ['mushroomstool', 4]] },
   { id: 'pet', name: 'Pet shop', icon: '🐠', stock: [['fishbowl', 8], ['basket', 4]] },
-  { id: 'garden', name: 'Garden centre', icon: '🌱', stock: [['plant', 6], ['cactus', 4], ['tulip', 3]] },
+  { id: 'garden', name: 'Garden centre', icon: '🌱', stock: [['plant', 6], ['cactus', 4], ['tulip', 3], ['mushroomtall', 4], ['mushroomtrio', 5], ['haybale', 3]] },
   { id: 'bookshop', name: 'Bookshop', icon: '📚', stock: [['bookshelf', 10], ['lamp', 6]] },
-  { id: 'furniture', name: 'Furniture shop', icon: '🪑', stock: [['bed', 16], ['chair', 8], ['clock', 5]] },
+  { id: 'furniture', name: 'Furniture shop', icon: '🪑', stock: [['bed', 16], ['bunkbed', 18], ['canopybed', 20], ['carbed', 22], ['haybed', 10], ['chair', 8], ['clock', 5]] },
   { id: 'bathroom', name: 'Bathroom shop', icon: '🛁', stock: [['bath', 14], ['mirror', 6]] },
   { id: 'music', name: 'Music shop', icon: '🎹', stock: [['piano', 15], ['lamp', 6]] }
 ];

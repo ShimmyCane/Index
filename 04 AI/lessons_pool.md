@@ -281,3 +281,8 @@ Full build rules: `02 Refs/Skills/settings_gear.md` (run as `/settings-gear`).
 - **Check paste files before the owner runs them.** The checker catches psql meta-commands, server file reads, unbalanced `$$` quotes, emails, secret keys, and a second run that would fail on a policy. Test the checker on planted bad files. _(`scripts/sql_paste_check.py`)_
 - **Set the track first.** Family play and studio design need different density, words, palettes and database owners. Deciding it at the start avoids rebuilding the screen later. _(`02 Refs/Skills/project_track.md`)_
 - **Collapsible panels keep the screen clear.** Keep each header visible when collapsed, and remember the state per device. Test the toggle and the reload. _(project_track snippet, headless run 2026-11-04)_
+
+## 3-D toy worlds (Athena's world V2)
+- A cut-away diorama: orthographic camera at an isometric angle, drop the walls facing the camera, sink scenery on the camera side. Drag turns, pinch zooms, a tap under 8 px is a tap. _(Athena's world)_
+- Cartoon look in Three.js without post-processing: MeshToonMaterial with a three-step gradient plus a back-face outline shell scaled about the shape's middle. _(Athena's world)_
+- Vendor `three.min.js` (r128 UMD) into the project when the CDN may be blocked or offline play matters. _(Athena's world)_
