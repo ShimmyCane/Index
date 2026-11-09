@@ -22,7 +22,7 @@
 
   // ---------- settings ----------
   const KEY = 'barglide.settings';
-  const DEFAULTS = { lanes: '4', speed: 'normal', glasses: '3', ending: 'spank', theme: 'saloon', crt: 1, sound: 1, showErrors: false };
+  const DEFAULTS = { lanes: '4', speed: 'normal', glasses: '3', ending: 'spank', theme: 'saloon', crt: 1, sound: 1, music: 1, showErrors: false };
   let settings = Object.assign({}, DEFAULTS, store.get(KEY, {}));
   for (const k in DEFAULTS) {               // an old saved value that no longer matches falls back
     const seg = document.querySelector('.seg[data-key="' + k + '"]');
@@ -41,11 +41,12 @@
     document.body.dataset.theme = settings.theme;
     $('crt').hidden = !+settings.crt;
     BG.sound.setEnabled(!!+settings.sound);
+    BG.sound.setMusic(!!+settings.music);
     renderErrors();
   }
   document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
     const key = b.parentElement.dataset.key, v = b.dataset.v;
-    settings[key] = (key === 'crt' || key === 'sound') ? +v : v;
+    settings[key] = (key === 'crt' || key === 'sound' || key === 'music') ? +v : v;
     store.set(KEY, settings);
     renderSettings();
     G.configure(gameConfig());
@@ -102,6 +103,7 @@
     BG.sound.unlock();
     if (!playing()) return;
     if (G.isPaused()) { G.pause(false); renderPause(); return; }
+    if (G.tap(e.clientX, e.clientY)) return;   // a tip or a bonus-round mug
     holdId = e.pointerId;
     try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* older Safari */ }
     G.press(G.laneFromPoint(e.clientY));
@@ -137,6 +139,7 @@
       if (!$('titleOverlay').hidden || !$('overOverlay').hidden) { if (e.key === ' ') startGame(); return; }
       if (G.isPaused()) { G.pause(false); renderPause(); }
       G.press();
+    } else if (e.key === '1' || e.key === '2' || e.key === '3') { G.pickSlot(+e.key - 1);
     } else if (e.key === 'p' || e.key === 'Escape') { if (playing()) { G.pause(); renderPause(); } }
   });
   document.addEventListener('keyup', e => { if (e.key === ' ' || e.key === 'Enter') G.release(); });

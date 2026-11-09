@@ -68,9 +68,44 @@ window.BG = window.BG || {};
     over(t) { [392, 370, 349, 330].forEach((f, i) => tone(f, t + i * 0.25, 0.28, 'square', 0.1)); }
   };
 
+  SOUNDS.tip = t => { [1319, 1568, 2093].forEach((f, i) => tone(f, t + i * 0.06, 0.1, 'triangle', 0.14)); };
+  SOUNDS.show = t => { [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => tone(f, t + i * 0.07, 0.1, 'square', 0.09)); };
+  SOUNDS.swap = t => { noise(t, 0.08, 0.12, 'bandpass', 900, 1600); };
+  SOUNDS.jackpot = t => { [784, 988, 1175, 1568, 1175, 1568, 2093].forEach((f, i) => tone(f, t + i * 0.08, 0.14, 'square', 0.11)); };
+  SOUNDS.splash = t => { noise(t, 0.6, 0.3, 'lowpass', 3000, 300); tone(300, t, 0.3, 'sine', 0.15, 120); };
+
+  // ---- Music: a looping, upbeat honky-tonk tune (written here, 4 bars: C F G C). ----
+  const NOTE = n => 440 * Math.pow(2, ({ C: -9, D: -7, E: -5, F: -4, G: -2, A: 0, B: 2 }[n[0]] + (+n.slice(1) - 4) * 12) / 12);
+  const MELODY = ['E5 G5 C6 G5 E5 G5 A5 G5', 'F5 A5 C6 A5 F5 A5 C6 D6', 'D6 B5 G5 B5 D6 B5 A5 G5', 'E5 G5 C6 E6 D6 C6 G5 -']
+    .join(' ').split(' ').map(n => n === '-' ? 0 : NOTE(n));
+  const BASS = [['C3', 'G2'], ['F2', 'C3'], ['G2', 'D3'], ['C3', 'G2']];
+  const STABS = [['E4', 'G4'], ['F4', 'A4'], ['D4', 'B4'], ['E4', 'G4']];
+  let musicOn = true, musicWanted = false, tempo = 1, step = 0, nextTime = 0, timerId = null, lastBeatAt = 0;
+  function schedule() {
+    if (!ctx || ctx.state !== 'running') return;
+    while (nextTime < ctx.currentTime + 0.12) {
+      const bar = Math.floor(step / 8) % 4, i = step % 8, t = nextTime;
+      if (MELODY[step % 32]) tone(MELODY[step % 32], t, 0.11, 'square', 0.045);
+      if (i % 2 === 0) { tone(NOTE(BASS[bar][(i / 2) % 2]), t, 0.18, 'triangle', 0.16); if (i % 4 === 0) lastBeatAt = t; }
+      else STABS[bar].forEach(n => tone(NOTE(n), t, 0.06, 'square', 0.022));
+      noise(t, 0.03, i % 2 ? 0.05 : 0.025, 'highpass', 7000);
+      step++;
+      nextTime += 60 / (150 * tempo) / 2;
+    }
+  }
+  function syncMusic() {
+    const go = enabled && musicOn && musicWanted && ctx;
+    if (go && !timerId) { nextTime = ctx.currentTime + 0.05; step = 0; timerId = setInterval(schedule, 25); }
+    if (!go && timerId) { clearInterval(timerId); timerId = null; }
+  }
+
   BG.sound = {
-    unlock,
-    setEnabled(on) { enabled = !!on; },
+    unlock() { unlock(); syncMusic(); },
+    setMusic(on) { musicOn = !!on; syncMusic(); },
+    music(want, speed) { musicWanted = !!want; if (speed) tempo = speed; syncMusic(); },
+    // 1 right on a beat, fading to 0 before the next: used to pulse the neon sign.
+    pulse() { if (!timerId || !ctx) return 0; const d = ctx.currentTime - lastBeatAt; return d < 0 ? 0 : Math.max(0, 1 - d * 3 * tempo); },
+    setEnabled(on) { enabled = !!on; syncMusic(); },
     play(name, arg) {
       if (!enabled || !ctx || ctx.state !== 'running' || !SOUNDS[name]) return;
       try { SOUNDS[name](ctx.currentTime + 0.01, arg || 0); } catch (e) { /* audio is optional */ }

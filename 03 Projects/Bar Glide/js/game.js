@@ -25,6 +25,9 @@
   let round = null;
   let customers = [], mugs = [], parts = [], pops = [], doors = [];
   let bt = null, oops = null, boss = null;
+  let tips = [], dash = null, show = 0, bonus = null;
+  const TIP_CHANCE = 0.22;  // chance a customer leaves a coin when they catch a mug
+  const SHOW_TIME = 3.5;    // seconds the customers stop to watch the show
 
   // ---------- setup ----------
   function laneLayout() {
@@ -131,13 +134,21 @@
   function startRound(n) {
     const total = 3 + n * 3 + (cfg.lanes === 4 ? 1 : 0);
     round = { n, total, spawned: 0, served: 0, spawnT: 1.2 };
-    customers = []; mugs = [];
+    customers = []; mugs = []; tips = []; dash = null; show = 0; bonus = null;
+    if (bt) { bt.holding = false; bt.fill = 0; }
     setState('ready', 1.6);
   }
 
   function setState(s, t) {
     state = s; timer = t || 0;
+    syncMusic();
     if (hooks.onState) hooks.onState(s);
+  }
+  // Music runs while the bar is open, a little faster each round and during the show.
+  function syncMusic() {
+    const on = !paused && (state === 'ready' || state === 'play' || state === 'clear' || state === 'bonus');
+    const speed = Math.min(1.45, 1 + ((round && round.n) || 1) * 0.04 + (show > 0 ? 0.12 : 0));
+    BG.sound.music(on, speed);
   }
 
   // ---------- difficulty ----------
@@ -200,13 +211,19 @@
     if (bt.shake > 0) bt.shake -= dt;
 
     if (state === 'ready') { timer -= dt; if (timer <= 0) setState('play'); return; }
-    if (state === 'clear') { timer -= dt; if (timer <= 0) startRound(round.n + 1); return; }
+    if (state === 'clear') { timer -= dt; if (timer <= 0) { if (round.n % 2 === 0) startBonus(); else startRound(round.n + 1); } return; }
+    if (state === 'bonus') { updateBonus(dt); return; }
     if (state === 'oops') { updateOops(dt); return; }
     if (state === 'boss') { updateBoss(dt); return; }
     if (state !== 'play') return;
 
+    // Tips fade away; the dash to grab one; the show.
+    tips = tips.filter(t => (t.t -= dt) > 0);
+    if (show > 0) { show -= dt; if (show <= 0) syncMusic(); }
+    if (dash) updateDash(dt);
+
     // Pouring.
-    if (bt.holding && bt.fill < 1) {
+    if (bt.holding && bt.fill < 1 && !dash) {
       const before = bt.fill;
       bt.fill = Math.min(1, bt.fill + dt / POUR_TIME);
       if (Math.floor(before * 6) !== Math.floor(bt.fill * 6)) BG.sound.play('pour', bt.fill);
@@ -228,6 +245,7 @@
 
     // Customers walk in steps toward the bartender.
     for (const c of customers) {
+      if (show > 0 && (c.state === 'walk' || c.state === 'pause')) { c.bob += dt * 2; continue; }   // watching the show
       if (c.state === 'walk') {
         c.x += walkSpeed() * dt; c.bob += dt; c.t -= dt;
         if (c.t <= 0) { c.state = 'pause'; c.t = 0.5 + Math.random() * 0.6; }
@@ -259,13 +277,17 @@
         if (catcher) {
           m.gone = true; catcher.state = 'pushed'; catcher.push = PUSH_DIST; score += 10;
           BG.sound.play('catch');
+          if (Math.random() < TIP_CHANCE && !tips.some(t => t.lane === m.lane) && catcher.x > BAR_X0 + 6) {
+            tips.push({ lane: m.lane, x: Math.round(catcher.x + 4), t: 7 });
+            pop('TIP!', catcher.x + 6, lanesY[m.lane] - 20);
+          }
         } else if (m.x < BAR_X0 - 2) {
           return strike('missed', m.lane, BAR_X0 - 4, lanesY[m.lane] - 7, null, -1);
         }
       } else {
         m.x += emptySpeed() * dt;
         if (m.x >= BAR_X1 - 6) {
-          if (bt.lane === m.lane) { m.gone = true; score += 25; BG.sound.play('catch'); pop('+25', BAR_X1 - 4, lanesY[m.lane] - 14); }
+          if (bt.lane === m.lane && !dash) { m.gone = true; score += 25; BG.sound.play('catch'); pop('+25', BAR_X1 - 4, lanesY[m.lane] - 14); }
           else return strike('dropped', m.lane, BAR_X1 - 2, lanesY[m.lane] - 7, null, 1);
         }
       }
@@ -364,6 +386,120 @@
     }
   }
 
+  // ---------- tips and the show ----------
+  function grabTip(tip) {
+    bt.lane = tip.lane; bt.fill = 0; bt.holding = false;
+    dash = { lane: tip.lane, tip, x: 272, back: false };
+    BG.sound.play('slide');
+  }
+  function updateDash(dt) {
+    const speed = 300;
+    if (!dash.back) {
+      dash.x -= speed * dt;
+      if (dash.x <= dash.tip.x + 4) {
+        tips = tips.filter(t => t !== dash.tip);
+        score += 150; show = SHOW_TIME;
+        pop('+150', dash.tip.x, lanesY[dash.lane] - 18);
+        pop('SHOW TIME!', W / 2, 52, true, 1.6);
+        BG.sound.play('tip'); BG.sound.play('show');
+        syncMusic();
+        dash.back = true;
+      }
+    } else {
+      dash.x += speed * dt;
+      if (dash.x >= 272) dash = null;
+    }
+  }
+
+  // ---------- bonus round: find the coin under the mugs ----------
+  const SLOTS = [104, 160, 216];
+  function startBonus() {
+    const coin = Math.floor(Math.random() * 3);
+    const swaps = [];
+    const n = Math.min(12, 5 + Math.floor(round.n / 2));
+    for (let i = 0; i < n; i++) { const a = Math.floor(Math.random() * 3); swaps.push([a, (a + 1 + Math.floor(Math.random() * 2)) % 3]); }
+    bonus = { phase: 'show', t: 0, slotOf: [0, 1, 2], coin, swaps, k: 0, dur: Math.max(0.2, 0.46 - round.n * 0.02), pick: -1, win: false };
+    customers = []; mugs = []; tips = []; dash = null; show = 0;
+    setState('bonus');
+  }
+  function updateBonus(dt) {
+    const b = bonus;
+    b.t += dt;
+    if (b.phase === 'show' && b.t > 1.8) { b.phase = 'shuffle'; b.t = 0; BG.sound.play('swap'); }
+    else if (b.phase === 'shuffle' && b.t >= b.dur) {
+      const [s1, s2] = b.swaps[b.k];
+      const m1 = b.slotOf.indexOf(s1), m2 = b.slotOf.indexOf(s2);
+      b.slotOf[m1] = s2; b.slotOf[m2] = s1;
+      b.k++; b.t = 0;
+      if (b.k >= b.swaps.length) b.phase = 'pick'; else BG.sound.play('swap');
+    } else if (b.phase === 'reveal' && b.t > 2.4) {
+      bonus = null;
+      startRound(round.n + 1);
+    }
+  }
+  function pickSlot(slot) {
+    const b = bonus;
+    if (!b || b.phase !== 'pick') return;
+    b.pick = b.slotOf.indexOf(slot);
+    b.win = b.pick === b.coin;
+    b.phase = 'reveal'; b.t = 0;
+    if (b.win) {
+      const prize = 500 + 100 * round.n;
+      score += prize; pop('JACKPOT +' + prize, W / 2, 70, true, 2);
+      BG.sound.play('jackpot');
+      for (let i = 0; i < 30; i++) parts.push({ x: SLOTS[slot], y: 120, vx: (Math.random() - 0.5) * 160, vy: -60 - Math.random() * 90, g: 200, life: 1.6, color: ['#ffd36b', '#ff5fa2', '#7fc8ff', '#b6e34a'][i % 4] });
+    } else {
+      pop('SPLASH!', W / 2, 70, true, 2);
+      BG.sound.play('splash');
+      for (let i = 0; i < 26; i++) parts.push({ x: SLOTS[slot], y: 112, vx: (Math.random() - 0.5) * 120, vy: -50 - Math.random() * 80, g: 220, life: 1.4, color: i % 2 ? '#fff8e6' : '#f2b134' });
+    }
+    if (score > best) { best = score; try { localStorage.setItem('barglide.best', String(best)); } catch (e) {} }
+  }
+  function mugSlotX(i) {           // where mug i is drawn now (slides along an arc during a swap)
+    const b = bonus;
+    let x = SLOTS[b.slotOf[i]], lift = 0;
+    if (b.phase === 'shuffle' && b.k < b.swaps.length) {
+      const [s1, s2] = b.swaps[b.k];
+      const from = b.slotOf[i];
+      if (from === s1 || from === s2) {
+        const to = from === s1 ? s2 : s1, p = Math.min(1, b.t / b.dur), e = p * p * (3 - 2 * p);
+        x = SLOTS[from] + (SLOTS[to] - SLOTS[from]) * e;
+        lift = Math.sin(p * Math.PI) * (from === s1 ? 10 : -4);
+      }
+    }
+    return { x, lift };
+  }
+  function drawBonus() {
+    const b = bonus;
+    ctx.fillStyle = theme.dim; ctx.fillRect(0, 0, W, H); ctx.fillRect(0, 0, W, H);
+    // Spotlight and a short counter.
+    const g = ctx.createRadialGradient(160, 120, 10, 160, 120, 120);
+    g.addColorStop(0, 'rgba(255, 220, 140, 0.35)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.drawImage(barImg, 0, 0, barImg.width, 16, 70, 126, 180, 16);
+    BG.drawText(ctx, 'BONUS ROUND', W / 2, 30, theme.neon, 3, 'center', theme.ink);
+    const say = { show: 'WATCH THE COIN', shuffle: 'KEEP YOUR EYE ON IT', pick: 'TAP THE MUG WITH THE COIN', reveal: b.win ? 'YOU FOUND IT!' : 'NOT THAT ONE' }[b.phase];
+    BG.drawText(ctx, say, W / 2, 52, theme.hud, 1, 'center', theme.hudShadow);
+    for (let i = 0; i < 3; i++) {
+      const { x, lift } = mugSlotX(i);
+      let up = 0;
+      if (b.phase === 'show' && i === b.coin) up = Math.min(14, Math.sin(Math.min(1, b.t / 1.6) * Math.PI) * 18);
+      if (b.phase === 'reveal' && (i === b.pick || i === b.coin)) up = Math.min(16, b.t * 40);
+      if (up > 2 && i === b.coin) {      // the gold coin
+        ctx.fillStyle = theme.ink; ctx.fillRect(x - 4, 120, 9, 6);
+        ctx.fillStyle = '#ffd36b'; ctx.fillRect(x - 3, 121, 7, 4);
+        ctx.fillStyle = '#fff8e6'; ctx.fillRect(x - 2, 121, 2, 1);
+      }
+      // A big upside-down mug.
+      ctx.save();
+      ctx.translate(Math.round(x - 12), Math.round(126 - up - lift));
+      ctx.scale(3, -3);
+      drawMug(0, 0, 0, false);
+      ctx.restore();
+      if (b.phase === 'pick') BG.drawText(ctx, String(b.slotOf[i] + 1), x, 132, theme.hud, 1, 'center', theme.hudShadow);
+    }
+  }
+
   // ---------- effects ----------
   function puff(x, y) {
     for (let i = 0; i < 6; i++) parts.push({ x, y, vx: (Math.random() - 0.5) * 50, vy: -Math.random() * 30, g: 0, life: 0.35, color: 'rgba(255,255,255,0.7)' });
@@ -459,7 +595,9 @@
     const flick = Math.sin(clock * 13) > 0.97 || (Math.floor(clock * 2) % 17 === 0 && Math.sin(clock * 40) > 0);
     const col = flick ? theme.neonDim : theme.neon;
     if (!flick) {
+      const beat = BG.sound.pulse ? BG.sound.pulse() : 0;
       ctx.fillStyle = theme.neonGlow; ctx.fillRect(116, 2, 88, 22);
+      if (beat > 0) { ctx.globalAlpha = beat * 0.8; ctx.fillRect(112, 0, 96, 26); ctx.globalAlpha = 1; }
     }
     ctx.fillStyle = theme.ink; ctx.fillRect(118, 4, 84, 18);
     ctx.fillStyle = col; ctx.fillRect(118, 4, 84, 1); ctx.fillRect(118, 21, 84, 1); ctx.fillRect(118, 4, 1, 18); ctx.fillRect(201, 4, 1, 18);
@@ -480,15 +618,19 @@
       drawDoor(i);
       ctx.drawImage(barImg, BAR_X0 - 2, y);
       mugs.filter(m => m.lane === i).forEach(m => drawMug(m.x, y - 7, m.full ? 1 : 0, m.full));
+      tips.filter(t => t.lane === i && (t.t > 2 || Math.floor(t.t * 6) % 2)).forEach(t => drawCoin(t.x, y - 4));
       drawTap(i, state === 'play' && bt.lane === i && bt.holding && bt.fill < 1);
       if (i === bossLane) drawBossScene(i);
-      else if (i === bt.lane && state !== 'title' && !(boss && boss.t >= 1.9)) drawBartender(i);
+      else if (dash && dash.lane === i) ctx.drawImage(dash.back ? sprites.btRight : sprites.btLeft, Math.round(dash.x), y - 6 - (Math.floor(clock * 12) % 2));
+      else if (i === bt.lane && state !== 'title' && state !== 'bonus' && !(boss && boss.t >= 1.9)) drawBartender(i);
       if (oops && oops.lane === i && oops.glass) {
         const g = oops.glass;
         if (!g.broken) drawMug(g.x, g.y, 1, true);
       }
     }
     if (state === 'title') ctx.drawImage(sprites.btLeft, 272, lanesY[bt.lane] - 6);
+    if (show > 0) drawShow();
+    if (state === 'bonus') drawBonus();
     parts.forEach(p => { ctx.fillStyle = p.color; ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 1); });
     // Beer puddle under a broken glass.
     if (oops && oops.glass && oops.glass.broken) {
@@ -506,6 +648,30 @@
     if (state === 'clear') banner('ROUND ' + round.n + ' CLEAR!', 'NICE POURING');
     if (state === 'over') banner('GAME OVER', 'SCORE ' + score);
     if (paused && state !== 'title' && state !== 'over') banner('PAUSED', 'TAP TO GO ON');
+  }
+
+  function drawCoin(x, y) {
+    ctx.fillStyle = theme.ink; ctx.fillRect(x - 1, y - 1, 7, 6);
+    ctx.fillStyle = '#ffd36b'; ctx.fillRect(x, y, 5, 4);
+    ctx.fillStyle = '#fff8e6'; ctx.fillRect(x + 1, y, 1, 1);
+    if (Math.floor(clock * 4) % 2) { ctx.fillStyle = '#fff8e6'; ctx.fillRect(x + 6, y - 3, 1, 1); }
+  }
+  // Show time: coloured spotlights sweep the room while everyone watches.
+  function drawShow() {
+    const cols = ['rgba(255, 95, 162, 0.22)', 'rgba(127, 200, 255, 0.22)', 'rgba(182, 227, 74, 0.2)'];
+    cols.forEach((c, k) => {
+      const x = 160 + Math.sin(clock * (2.2 + k * 0.7) + k * 2) * 120, y = 110 + Math.cos(clock * (1.7 + k * 0.5) + k) * 50;
+      const g = ctx.createRadialGradient(x, y, 4, x, y, 46);
+      g.addColorStop(0, c); g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g; ctx.fillRect(x - 46, y - 46, 92, 92);
+    });
+    if (Math.floor(clock * 4) % 2) BG.drawText(ctx, 'SHOW TIME', W / 2, 28, '#ffd36b', 2, 'center', theme.ink);
+    // Music notes float up from the jukebox corner.
+    ctx.fillStyle = '#ffd36b';
+    for (let k = 0; k < 4; k++) {
+      const p = (clock * 0.6 + k / 4) % 1, nx = 44 + k * 60 + Math.sin(p * 6 + k) * 6, ny = 180 - p * 140;
+      ctx.fillRect(Math.round(nx), Math.round(ny), 2, 2); ctx.fillRect(Math.round(nx) + 1, Math.round(ny) - 5, 1, 5);
+    }
   }
 
   function drawBossScene(i) {
@@ -556,7 +722,25 @@
       return laneAt((clientY - r.top) / r.height * H);
     },
     start() { resetRun(); paused = false; BG.sound.play('start'); },
-    pause(on) { paused = on === undefined ? !paused : !!on; bt.holding = false; },
+    pause(on) { paused = on === undefined ? !paused : !!on; bt.holding = false; syncMusic(); },
+    // A tap on the screen: picks a mug in the bonus round, or grabs a tip. Returns true if it used the tap.
+    tap(clientX, clientY) {
+      const r = canvas.getBoundingClientRect();
+      const gx = (clientX - r.left) / r.width * W, gy = (clientY - r.top) / r.height * H;
+      if (state === 'bonus') {
+        if (bonus && bonus.phase === 'pick') {
+          let best = 0; SLOTS.forEach((x, i) => { if (Math.abs(gx - x) < Math.abs(gx - SLOTS[best])) best = i; });
+          if (Math.abs(gx - SLOTS[best]) < 28 && gy > 80 && gy < 150) pickSlot(best);
+        }
+        return true;
+      }
+      if (state === 'play' && !dash) {
+        const tip = tips.find(t => Math.abs(gx - (t.x + 2)) < 14 && Math.abs(gy - (lanesY[t.lane] - 3)) < 12);
+        if (tip) { grabTip(tip); return true; }
+      }
+      return false;
+    },
+    pickSlot,
     isPaused: () => paused,
     configure(next) {
       const relayout = next.lanes !== undefined && next.lanes !== cfg.lanes;
@@ -567,7 +751,7 @@
     },
     hooks,
     // For the smoke test and the notes box.
-    state: () => ({ state, score, best, lives, round: round && round.n, lane: bt.lane, fill: bt.fill,
+    state: () => ({ state, score, best, lives, round: round && round.n, lane: bt.lane, fill: bt.fill, tips: tips.length, dashing: !!dash,
       customers: customers.length, mugs: mugs.length, lanes: cfg.lanes, paused }),
     debug: {
       spawn(lane, x) { customers.push({ lane, x: x === undefined ? 100 : x, state: 'pause', t: 99, kind: 0, push: 0, bob: 0 }); },
@@ -575,6 +759,11 @@
       strike(kind) { strike(kind || 'dropped', bt.lane, BAR_X1 - 2, lanesY[bt.lane] - 7, null, 1); },
       setLives(n) { lives = n; },
       setScore(n) { score = n; },
+      tip(lane, x) { tips.push({ lane, x, t: 7 }); },
+      grab() { if (tips[0]) grabTip(tips[0]); },
+      bonus() { startBonus(); },
+      bonusInfo() { return bonus && { phase: bonus.phase, coinSlot: bonus.slotOf[bonus.coin], win: bonus.win }; },
+      show: () => show,
       peek() { return { customers: customers.map(c => ({ lane: c.lane, x: c.x, state: c.state })), mugs: mugs.map(m => ({ lane: m.lane, x: m.x, full: m.full })) }; },
       freezeSpawns() { round.spawned = round.total; },
       step(sec) { const n = Math.round(sec / 0.02); for (let i = 0; i < n; i++) update(0.02); draw(); }

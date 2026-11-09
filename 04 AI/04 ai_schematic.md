@@ -17,7 +17,7 @@ Layout:
 
 Projects with notes:
 - Athena's world/ — decorating game, V2 3-D home (V1 archived in `v1/`). `brief.md`, `lessons.md`. Open questions in `03 Projects/Athena's world/convo/convo v0.3.md`.
-- Bar Glide/ — arcade bar game MVP 0.1.0. `brief.md`, `lessons.md`. Open questions in `03 Projects/Bar Glide/convo/convo v0.1.md`.
+- Bar Glide/ — arcade bar game 0.2.0. `brief.md`, `lessons.md`. Open questions in `03 Projects/Bar Glide/convo/convo v0.2.md`.
 - Chinese Character Sudoku/ — word-grid game MVP. `brief.md`, `lessons.md`.
 - Adventure/ — family story game. `brief.md`, `lessons.md`.
 - Felix Maze/ — printable maze worksheets MVP. `brief.md`, `lessons.md`.
