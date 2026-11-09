@@ -12,14 +12,14 @@ Start a project for an old bartender arcade game he played (maybe on the Atari t
 
 ## Questions for Jimmy (answer inline)
 1. Is **Bar Glide** fine as the name, or would you like another (e.g. "Slide Saloon", "Last Call")?
-   > 
+   > Old barb glide
 2. Who plays it mostly: you, or the kids too? If the kids, should the drink be root beer (or milkshakes) in the pastel room?
-   > 
+   > Me
 3. Should a customer reaching the bartender count as a broken glass (now: yes, with a "HEY!"), or only real breaks?
-   > 
+   > Yeah.
 4. Tips and a bonus round between rounds, like the arcade games had: want them next?
-   > 
+   > Yes
 5. Undo doesn't fit a timing game. Is the 🐢 Slow speed and 5 glasses enough as the "learn without penalty" option?
-   > 
+   > Yeah
 6. Do you remember anything else about the version you played (the rooms, the music, the bonus game)? That helps with the mood.
-   > 
+   > It was thematically very enegetic
