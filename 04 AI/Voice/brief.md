@@ -1,29 +1,23 @@
 # Voice — AI Brief
 
 **Updated:** 2026-11-09
-**Status:** MVP 0.2.0, not device-tested. Convo v0.2 open (7 questions).
+**Status:** MVP 0.3.0, not device-tested. Convo v0.3 open (5 questions; v0.2 questions still open too).
 **Track:** A. Family play.
 
 ## Goal
-A story shelf for the kids on the iPad. Stories play in a natural AI voice made ahead of time; read along with word highlight; speed read (RSVP, red focus letter, drag speed slider).
+A story shelf for the kids on the iPad. Stories play in natural Kokoro voices, either made ahead of time or made live in the browser. Read along with word highlight, speed read (RSVP), and script stories with a cast and hidden stage notes.
 
 ## Architecture
-- Plain HTML/CSS/JS, no build: `index.html`, `css/style.css`, `js/app.js`.
-- Story = `stories/<id>.js` (pushes to `window.VOICE_STORIES`). Audio = `stories/<id>.audio.js` (`window.VOICE_AUDIO[id]['kokoro:<voice>']` = src, duration, words per paragraph `[token, t0, t1]`, and `source` = the paragraphs it was made from) + `audio/<id>.<voice>.mp3` (64 kbps mono).
-- The baker owns the tokens (jieba for Chinese), so highlight and speed read use the same split. A track whose `source` differs from the story text is shown as "older than the text" and skipped.
-- iPad voice = Web Speech API, paragraph by paragraph, highlight from `onboundary`; voices ranked Premium > Enhanced > other.
-- Planned 0.3+: Family Supabase project, `voice_*` tables, bucket `voice-audio`, Edge Function `voice-narrate`.
-
-## Kokoro route (works in the cloud session)
-- HuggingFace and GitHub release downloads are blocked; npm and PyPI are not.
-- Weights: npm `kokoro-q8-shards` (6 parts → `model_q8.onnx`, sha256 fbae9257…a1478, matches the package README). Voices: npm `kokoro-js` `voices/*.bin` → `voices.npz` (510×1×256 float32 each). Runner: PyPI `kokoro-onnx` 0.6.1. Chinese G2P: `misaki[zh]`; replace Chinese punctuation in the phonemes with ASCII (the vocab lacks `，。`).
-- Speed 0.92 (en) / 0.9 (zh). Four tracks took 3 minutes on 4 CPUs.
+- Plain HTML/CSS/JS, no build: `index.html`, `css/style.css`, `js/app.js`, `js/live.js`, `js/live_worker.js`, `lib/kokoro.web.js`.
+- Story = `stories/<id>.js`. Plain stories use `paragraphs`; script stories use `script` (lines: who, text, tone, speed, notes) and `cast` (name, icon, Kokoro voice). Audio = `stories/<id>.audio.js` + `audio/<id>.<voice>.mp3`; the track key `kokoro:cast` means one voice per speaker.
+- Baker `tools/make_kokoro.py` (kokoro-onnx, npm weights). It owns the tokens and stores `source` so stale audio is detected.
+- Live: a module worker imports the vendored kokoro-js and loads the model from huggingface.co (q8 on WASM, fp32 on WebGPU). The page asks for one line at a time, makes three lines ahead, plays with Web Audio, and estimates the highlight per line. English only.
+- Planned: 0.4 Family database, 0.5 make and save audio from the browser (no key).
 
 ## Verified vs. unverified
-- Verified (headless Chromium, 390/768/1180): zero JS errors, no horizontal scroll, audio plays and the highlight moves, the focus letter sits exactly under the ticks, Chinese speed read, notes survive reload.
-- Unverified: nobody has listened to the audio yet (no speech check possible here); the iPad voice (headless has none); real iPad Safari; ElevenLabs.
+- Verified (headless Chromium): three sizes, zero errors, no horizontal scroll, the recorded tracks play with highlight, script story labels and notes toggle, Kokoro live end to end. In the live test, HuggingFace and jsDelivr were redirected to local copies: the real kokoro-q8 weights and kokoro-js voices, the ORT wasm from npm @huggingface/transformers 3.5.1, and a **reconstructed** tokenizer.json and config.json (the real ones could not be downloaded here). In the container it made 1.7 s of speech in 4.9 s on one WASM thread.
+- Unverified: the real HF tokenizer/config files (the page will use them on the iPad), live speed on the iPad, WebGPU engine, how the audio sounds (no listening possible here).
 
 ## Next steps
-1. Jimmy listens and answers `convo v0.2.md`.
-2. ElevenLabs track if wanted (key via the credential form).
-3. 0.3 database.
+1. Jimmy listens, tries live on the iPad, answers `convo v0.3.md`.
+2. Fisherman cast; 0.4 database.

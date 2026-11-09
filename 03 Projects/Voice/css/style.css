@@ -58,6 +58,17 @@ input[type=range] { flex: 1; min-width: 60px; height: 40px; accent-color: var(--
 .time { font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; text-align: right; }
 @media (max-width: 560px) { .time { font-size: 14px; } .time .tot { display: none; } .player .mid { width: 46px; height: 46px; } }
 
+/* Script stories */
+.notesBar { display: flex; justify-content: flex-end; margin: 0 0 10px; }
+.notesBar button { min-height: 50px; padding: 0 16px; border: 3px solid var(--ink); border-radius: 16px; background: #fff; font-weight: 700; box-shadow: 0 3px 0 var(--ink); }
+.notesBar button[aria-pressed="true"] { background: #efe2ff; }
+.speaker { display: inline-block; font-size: 0.62em; font-weight: 800; padding: 1px 10px; margin-right: 8px; border: 2px solid var(--ink); border-radius: 12px; background: #fff; vertical-align: 0.2em; }
+.say.who-wolf .speaker { background: #d9d6e8; } .say.who-red .speaker { background: #ffc9c2; }
+.say.who-mother .speaker { background: var(--mint); } .say.who-grandma .speaker { background: var(--vanilla); }
+.notes { display: none; font-size: 0.62em; color: #6a4f8f; background: #f6efff; border-left: 4px solid #b89be0; border-radius: 8px; padding: 4px 10px; margin: 0 0 6px; line-height: 1.45; }
+.showNotes .notes { display: block; }
+.liveStatus { font-weight: 700; color: var(--ink); background: var(--vanilla); border-radius: 10px; padding: 6px 10px; margin: 8px 0 0; }
+
 /* Panels */
 .panel { border: 3px solid var(--ink); border-radius: 18px; background: #fffdf7; margin: 4px 0 16px; overflow: hidden; box-shadow: 0 4px 0 var(--ink); }
 .panelHead { width: 100%; min-height: 52px; display: flex; align-items: center; gap: 10px; padding: 0 14px;
