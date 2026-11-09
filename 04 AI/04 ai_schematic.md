@@ -28,6 +28,7 @@ Projects with notes:
 - Expansion Wars/ — expansion game MVP (spots, soldiers, roads, lakes, computer players, 2–4 flags). Plain HTML/CSS/JS. Convo v0.1 open (defaults built in). `brief.md`, `lessons.md`, `interests.md` (public, simplified design interests). The full interests dossier is private, in `03 Projects/Expansion Wars/private/` (gitignored).
 - Fishes/ — fish-tank game MVP (20 levels, five zones, lock-on hunters, notes in a cookie, database SQL written but not applied). Plain canvas. `brief.md`, `lessons.md`.
 - Paper Again/ — particle model of one sheet of paper over ten increments (folds, crumpling, tears, damp, mould, cuts, burns). MVP. Research in `research/paper_behaviour.md`. `brief.md`.
+- Voice/ — narrated story shelf with speed read, planning (schematic 0.1, convo v0.1 open). `brief.md`.
 - What to Cook/ — family kitchen tool, version 0.4.0. Pantry saved to the Family database; notes saved to `wtc_notes`; food list page (`foods.html`, linked from Settings) with `wtc_foods` (paste file written, not yet applied). `brief.md`, `lessons.md`, `convo v0.6` answers the v0.5 questions.
 
 Notes:
