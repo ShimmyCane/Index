@@ -6,4 +6,4 @@
 - [ ] ElevenLabs track (needs a key, via the secure credential form)
 - [ ] 0.3 Family database: `voice_stories`, `voice_versions`, `voice_notes`, bucket `voice-audio`, sign-in, device cache
 - [ ] 0.4 ✨ Make voice (Edge Function), versions and restore
-- [ ] Add Voice to the root `index.html` Nursery list (only when Jimmy asks)
+- [x] Voice added to the root `index.html` Nursery list (Jimmy asked, 2026-11-09)
