@@ -98,3 +98,9 @@ A decorating game for Athena. A white room, a choice of house or workplace, deco
 - Database check: `athena_notes` and `athena_saves` both empty on 2026-11-09.
 - Tested headless: 2.0.0 save migrates, all six places draw, farm room switch, outside view, bigger room, front door placed on an outside wall by tapping, brick siding, full screen, switching players keeps games apart, job card, 390 wide no sideways scroll. No page errors.
 - Not verified: iPad touch for pan and full screen; a signed-in round trip for Felix.
+
+## 2.2.0 (2026-11-09): prices by time
+
+- Prices re-set by time (10 credits ≈ 5 minutes ≈ two small things). Pony 5, windmill 60 with turning sails (`animate`, `loop` on the item; `World3D.frames` for the shop).
+- Drawn placeholder faces for the 37 job people (`people.js`).
+- Tested headless: the shop shows pictures and the windmill frames change, buying the pony leaves 45 of 50, the windmill turns in a room, all 37 faces draw. No page errors.

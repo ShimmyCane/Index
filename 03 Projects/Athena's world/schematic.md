@@ -1,6 +1,6 @@
 # Athena's world — Schematic
 
-**Status:** V2 (2.1.0): Home decor is a 3-D world with places, players and an outside view. Partly tested on iPad (2.0.0).
+**Status:** V2 (2.2.0): Home decor is a 3-D world with places, players and an outside view. Partly tested on iPad (2.0.0).
 **Owner:** Jimmy
 **Platform:** iPad web app, landscape first (portrait stacks the room above the buttons)
 **Conversations:** `convo/convo v0.1.md` (questions), `convo/convo v0.2.md` (visibility answers), `convo/convo v0.3.md` (purpose, MVP, assumptions), `convo/convo v0.4.md` (five houses, ready pop-up, open questions)
@@ -31,6 +31,13 @@ A decorating game. Athena picks who a house or workplace is for, then decorates 
 - **Sync pill** (top of the play area): `💾 this device`, `☁️ synced`, `☁️ syncing…`, `⚠️ check`. Check database lists each table in the drawer.
 - Settings are kept on the device only. The publishable key is in the script; the service-role key is never used.
 - The SQL lives in `supabase/`: `test_001` (rolled back, run first), `001_athena_family` (the tables), `verify_001` (read-only, paste the result back). Applied to the Family project on 2026-11-08.
+
+## Prices by time (2.2.0)
+
+- About 10 credits is 5 minutes of questions, enough for two small things. Small things 3–5, furniture 8–12, special beds 14–18, things that move 60. The tiers are noted above `SHOPS` in `content.js`.
+- New: decorative pony (Toy shop, 5) and a windmill whose sails turn (Garden centre, 60). Moving things have `animate(obj, seconds)` and `loop` in `models.js`; the world plays them, and the shop plays their loop as a strip of pictures.
+- Shop rows show a 3-D picture, "✨ it moves!" and "save up N more".
+- Job people have drawn placeholder faces (`people.js`, `personSVG(job)`): same picture every time, hats for jobs that wear one.
 
 ## Players, places and the outside (2.1.0)
 
@@ -110,6 +117,7 @@ Levels 2–4 open as placeholder screens for now. Lock rules are a suggestion, s
 - `index.html` — the game (HTML, CSS, JS, Web Audio). The house list is at the top of the script.
 - `models.js` — the 3-D things (`ITEMS`): emoji, label, zone (`wall` or `floor`) and a build function.
 - `world3d.js` — the 3-D world: places and rooms, scenery, cut-away walls, roofs and the outside view, touch, thumbnails and the front-page picture.
+- `people.js` — drawn placeholder faces for the job people.
 - `lib/three.min.js` — Three.js r128 (MIT, licence beside it).
 - `v1/` — V1, archived.
 - `mockups/` — pages to see the project at a glance: `index.html` (front page with links), `project-map.html` (every file and what it is for), `game-flow.html` (the steps of play, with a picture of the room).

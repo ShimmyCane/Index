@@ -449,6 +449,45 @@
     return g;
   }
 
+  // A decorative pony: a plush pony on a little stand (cheap and cute)
+  function pony() {
+    const g = G();
+    box(g, 2.2, 0.3, 1.0, C.wood, 0, 0.15, 0);
+    [[-0.7, -0.3], [0.7, -0.3], [-0.7, 0.3], [0.7, 0.3]].forEach(([x, z]) => cyl(g, 0.18, 0.16, 1.0, C.white, x, 0.8, z, { seg: 10 }));
+    [[-0.7, -0.3], [0.7, -0.3], [-0.7, 0.3], [0.7, 0.3]].forEach(([x, z]) => cyl(g, 0.2, 0.2, 0.15, C.lilac, x, 0.35, z, { seg: 10, outline: false }));
+    ball(g, 0.75, C.white, 0, 1.65, 0, { sx: 1.45, sy: 0.85 });                   // body
+    cyl(g, 0.3, 0.38, 0.9, C.white, 0.85, 2.15, 0, { rz: -0.6 });                 // neck
+    ball(g, 0.45, C.white, 1.25, 2.6, 0, { sx: 1.25 });                            // head
+    ball(g, 0.25, C.pink, 1.7, 2.5, 0, { sx: 1.1, outline: false });               // nose
+    [-0.15, 0.15].forEach(z => cone(g, 0.12, 0.3, C.white, 1.1, 3.05, z));        // ears
+    [-0.36, 0.36].forEach(z => ball(g, 0.07, C.dark, 1.4, 2.72, z * 0.9, { outline: false }));
+    for (let i = 0; i < 5; i++) ball(g, 0.3, [C.pink, C.lilac, C.sky, C.butter, C.mint][i], 1.15 - i * 0.2, 3.0 - i * 0.25, 0); // mane
+    box(g, 0.9, 0.2, 1.3, C.coral, -0.05, 2.35, 0);                               // saddle
+    cone(g, 0.35, 1.1, C.pink, -1.2, 1.55, 0, { rz: 2.3 });                      // tail
+    return g;
+  }
+  // A windmill whose sails turn (a big thing to save up for). animate() turns it; one turn every 4 seconds.
+  function windmill() {
+    const g = G();
+    cyl(g, 0.9, 1.5, 4.2, C.cream, 0, 2.1, 0, { seg: 8 });
+    cone(g, 1.25, 1.4, C.coral, 0, 4.9, 0, { seg: 8 });
+    box(g, 0.9, 1.3, 0.15, C.darkwood, 0, 0.65, 1.38, { rx: -0.13 });             // door
+    ball(g, 0.3, C.sky, 0, 2.8, 1.2, { sz: 0.4 });                                 // round window
+    const hub = G();
+    hub.position.set(0, 4.3, 1.3);
+    cyl(hub, 0.25, 0.25, 0.4, C.dark, 0, 0, 0, { rx: Math.PI / 2 });
+    for (let i = 0; i < 4; i++) {
+      const arm = G();
+      arm.rotation.z = i * Math.PI / 2;
+      box(arm, 0.14, 2.6, 0.08, C.darkwood, 0, 1.35, 0.1);
+      box(arm, 0.75, 2.0, 0.06, i % 2 ? C.white : C.butter, 0.42, 1.55, 0.12);
+      hub.add(arm);
+    }
+    g.add(hub);
+    g.userData.sails = hub;
+    return g;
+  }
+
   // ---- Outside things (Home Depot): on the outside of a wall, back at z = 0, facing +z ----
   function frontdoor() {
     const g = G();
@@ -546,6 +585,10 @@
     tulip:     { emoji: '🌷', label: 'tulips',    zone: 'floor', build: tulip },
     basket:    { emoji: '🧺', label: 'basket',    zone: 'floor', build: basket },
     haybale:   { emoji: '🌾', label: 'hay bale',  zone: 'floor', build: haybale },
+    pony:      { emoji: '🐴', label: 'decorative pony', zone: 'floor', build: pony },
+    // Things that move: animate(obj, seconds) is called every frame; loop is the length of one full cycle.
+    windmill:  { emoji: '🌬️', label: 'windmill', zone: 'floor', build: windmill, loop: 4,
+                 animate: (o, t) => { if (o.userData.sails) o.userData.sails.rotation.z = -t * Math.PI / 2; } },
     // Outside things (Home Depot). v: how high the middle sits, when it must be fixed (a door stands on the floor).
     frontdoor: { emoji: '🚪', label: 'front door',  zone: 'outside', build: frontdoor, v: 1.85 },
     shutters:  { emoji: '🪟', label: 'shutters',    zone: 'outside', build: shutters },

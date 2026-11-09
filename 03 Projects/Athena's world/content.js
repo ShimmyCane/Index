@@ -706,20 +706,25 @@ const QUESTIONS = [
 
 // ---- Retail therapy: the shops. Each sells things by id (see ITEMS in models.js). ----
 // Shops Athena knows from home (convo v0.8). Prices are in credits.
+// Prices are set by time (convo v1.0): about 10 credits is 5 minutes of questions.
+//   small things  3–5   (two of them for 5 minutes, like a chair or the pony)
+//   furniture     8–12  (about 5 minutes)
+//   special beds  14–18 (10–15 minutes)
+//   things that move, like the windmill: 60 (save up for it)
 const SHOPS = [
-  { id: 'korean-grocery', name: 'H Mart', icon: '🥢', stock: [['teapot', 4], ['lantern', 6], ['mushroom', 3], ['mushroomblue', 5]] },
-  { id: 'warehouse', name: 'Costco', icon: '📦', stock: [['sofa', 14], ['tv', 12], ['window', 9]] },
-  { id: 'home-decor', name: 'Target', icon: '🎯', stock: [['vase', 4], ['picture', 6], ['sun', 6], ['rainbow', 5]] },
-  { id: 'craft', name: 'Craft shop', icon: '🧶', stock: [['kite', 4], ['balloon', 3], ['basket', 4]] },
+  { id: 'korean-grocery', name: 'H Mart', icon: '🥢', stock: [['teapot', 4], ['lantern', 5], ['mushroom', 4], ['mushroomblue', 6]] },
+  { id: 'warehouse', name: 'Costco', icon: '📦', stock: [['sofa', 10], ['tv', 10], ['window', 6]] },
+  { id: 'home-decor', name: 'Target', icon: '🎯', stock: [['vase', 3], ['picture', 4], ['sun', 4], ['rainbow', 4]] },
+  { id: 'craft', name: 'Craft shop', icon: '🧶', stock: [['kite', 3], ['balloon', 3], ['basket', 4]] },
   { id: 'bakery', name: 'Bakery', icon: '🥐', stock: [['candle', 3], ['basket', 4]] },
-  { id: 'toy', name: 'Toy shop', icon: '🧸', stock: [['teddy', 5], ['balloon', 3], ['kite', 4], ['mushroomstool', 4]] },
-  { id: 'pet', name: 'Pet shop', icon: '🐠', stock: [['fishbowl', 8], ['basket', 4]] },
-  { id: 'garden', name: 'Garden centre', icon: '🌱', stock: [['plant', 6], ['cactus', 4], ['tulip', 3], ['mushroomtall', 4], ['mushroomtrio', 5], ['haybale', 3]] },
-  { id: 'bookshop', name: 'Bookshop', icon: '📚', stock: [['bookshelf', 10], ['lamp', 6]] },
-  { id: 'furniture', name: 'Furniture shop', icon: '🪑', stock: [['bed', 16], ['bunkbed', 18], ['canopybed', 20], ['carbed', 22], ['haybed', 10], ['chair', 8], ['clock', 5]] },
-  { id: 'bathroom', name: 'Bathroom shop', icon: '🛁', stock: [['bath', 14], ['mirror', 6]] },
-  { id: 'music', name: 'Music shop', icon: '🎹', stock: [['piano', 15], ['lamp', 6]] },
-  { id: 'home-depot', name: 'Home Depot', icon: '🔨', stock: [['frontdoor', 8], ['shutters', 6], ['flowerbox', 4], ['porchlamp', 4], ['awning', 6], ['sidingmint', 10], ['sidingpink', 10], ['sidingbrick', 12], ['sidingwood', 12]] }
+  { id: 'toy', name: 'Toy shop', icon: '🧸', stock: [['pony', 5], ['teddy', 5], ['balloon', 3], ['kite', 3], ['mushroomstool', 5]] },
+  { id: 'pet', name: 'Pet shop', icon: '🐠', stock: [['fishbowl', 6], ['basket', 4]] },
+  { id: 'garden', name: 'Garden centre', icon: '🌱', stock: [['windmill', 60], ['plant', 4], ['cactus', 3], ['tulip', 3], ['mushroomtall', 4], ['mushroomtrio', 6], ['haybale', 3]] },
+  { id: 'bookshop', name: 'Bookshop', icon: '📚', stock: [['bookshelf', 9], ['lamp', 5]] },
+  { id: 'furniture', name: 'Furniture shop', icon: '🪑', stock: [['bed', 12], ['bunkbed', 16], ['canopybed', 18], ['carbed', 18], ['haybed', 8], ['chair', 5], ['clock', 4]] },
+  { id: 'bathroom', name: 'Bathroom shop', icon: '🛁', stock: [['bath', 10], ['mirror', 4]] },
+  { id: 'music', name: 'Music shop', icon: '🎹', stock: [['piano', 14], ['lamp', 5]] },
+  { id: 'home-depot', name: 'Home Depot', icon: '🔨', stock: [['frontdoor', 6], ['shutters', 5], ['flowerbox', 4], ['porchlamp', 4], ['awning', 5], ['sidingmint', 10], ['sidingpink', 10], ['sidingbrick', 12], ['sidingwood', 12]] }
 ];
 // A trip home needs every shop visited and this much spent in the trip.
 const TRIP = { shopsNeeded: SHOPS.length, spendNeeded: 20 };
