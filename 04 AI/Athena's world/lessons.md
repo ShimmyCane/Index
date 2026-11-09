@@ -12,3 +12,7 @@
 - Toon pastels wash out to white under strong light. Keep hemisphere + directional near 0.5 each with a three-step gradient.
 - Model a shelf as an open frame (back, sides, shelves); a solid box hides what is on it.
 - Ease animations by time (`1 - exp(-rate*dt)`), not per frame, so slow devices and headless runs finish them.
+- Save rooms by id, not by position in a list, before adding places in the middle. Keep a one-time map from the old order.
+- Derive unlocks from what is done instead of saving an unlocked count; inserting a place then needs no migration.
+- For a room in the middle of a building, lift the floors above like a doll's house lid (and turn off their shadow) instead of hiding them, so it still reads as mid-tower.
+- Inside and outside are one camera: zooming past a threshold puts the walls, roof and upper floors back. Outside things then attach to the outer faces of the walls that face the camera.

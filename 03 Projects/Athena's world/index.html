@@ -113,10 +113,13 @@
       overflow: hidden;
     }
     .room canvas { display: block; cursor: pointer; }
-    .viewBtns { position: absolute; left: 12px; bottom: 12px; display: flex; gap: 8px; }
+    .viewBtns { position: absolute; left: 12px; bottom: 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; z-index: 2; }
     .viewBtns button {
       width: 52px; height: 52px;
-      font-size: 22px;
+      padding: 0;
+      display: grid; place-items: center;
+      line-height: 1;
+      font: 22px/1 system-ui, -apple-system, "Segoe UI", sans-serif;
       color: var(--ink);
       background: rgba(255, 249, 238, 0.92);
       border: var(--line);
@@ -125,6 +128,17 @@
       cursor: pointer;
     }
     .viewBtns button:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+    /* Full screen: the world fills the page; a strip of things sits along the bottom */
+    .room .exitFull, .room .fullHint, .room .tray { display: none; }
+    .app.full .room { position: fixed; inset: 0; height: auto; min-height: 0; max-width: none; border-radius: 0; border: 0; box-shadow: none; z-index: 20; }
+    .app.full .room .exitFull { display: grid; place-items: center; position: absolute; top: 12px; right: 12px; width: 56px; height: 56px; padding: 0; font: 24px/1 system-ui, sans-serif; background: var(--peach); border: var(--line); border-radius: 50%; box-shadow: 0 3px 0 var(--ink); cursor: pointer; z-index: 3; }
+    .app.full .room .fullHint { display: block; position: absolute; top: 14px; left: 0; right: 0; margin: 0 auto; width: max-content; max-width: 70%; padding: 6px 14px; font-weight: 700; background: rgba(255, 249, 238, 0.92); border: 2px solid var(--ink); border-radius: 999px; z-index: 2; }
+    .app.full .room .tray { display: flex; position: absolute; left: 12px; right: 12px; bottom: 76px; gap: 8px; overflow-x: auto; padding: 4px; z-index: 2; }
+    .tray button { flex: none; width: 64px; height: 64px; padding: 4px; display: grid; place-items: center; background: rgba(205, 239, 224, 0.95); border: var(--line); border-radius: 16px; box-shadow: 0 3px 0 var(--ink); cursor: pointer; }
+    .tray button[aria-pressed="true"] { background: var(--butter); }
+    .tray img { width: 48px; height: 48px; }
+    .app.full ~ .gear { display: none; }
+    .side .group { font-size: 14px; font-weight: 800; margin: 4px 0 -2px; opacity: 0.75; }
     .no3d { position: absolute; inset: 0; display: grid; place-content: center; gap: 10px; padding: 24px; text-align: center; font-size: 18px; }
     .btn img.thumb { width: 44px; height: 44px; flex: none; }
 
@@ -400,15 +414,33 @@
       .room { height: 70vh; }
       .side { overflow: visible; padding-bottom: 110px; }
     }
+    @media (max-width: 560px) {
+      .landing { padding-top: 112px; }
+      .app { padding-top: 104px; }
+    }
+
+    /* Who is playing: Athena, Felix or a guest */
+    .pillRow { gap: 8px; flex-wrap: wrap; align-items: center; padding: 0 12px; }
+    .who { display: flex; gap: 6px; pointer-events: auto; }
+    .who button { min-height: 40px; padding: 4px 12px; font: 700 15px system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: #fff; border: 2px solid var(--ink); border-radius: 999px; box-shadow: 0 2px 0 var(--ink); cursor: pointer; }
+    .who button.on { background: var(--butter); }
+    /* A person you meet on a job card */
+    .personPic { width: 130px; height: 130px; margin: 0 auto; display: grid; place-items: center; font-size: 76px; background: var(--peach); border: var(--line); border-radius: 50%; box-shadow: 0 4px 0 var(--ink); position: relative; }
+    .personPic .badge { position: absolute; right: -6px; bottom: -6px; width: 48px; height: 48px; display: grid; place-items: center; font-size: 26px; background: #fff; border: var(--line); border-radius: 50%; }
+    .levelBody .intro { font-size: 19px; line-height: 1.45; text-align: left; background: #fff; border: var(--line); border-radius: 18px; padding: 12px 16px; }
+    .levelBody .intro p { text-align: left; margin: 0 0 6px; }
 
     @media print { .gear, .drawer, .errorsPanel { display: none !important; } }
   </style>
 </head>
 <body>
-  <div class="pillRow"><span class="pill device" id="pill">💾 this device</span></div>
+  <div class="pillRow">
+    <div class="who" id="who" role="group" aria-label="Who is playing?"></div>
+    <span class="pill device" id="pill">💾 this device</span>
+  </div>
 
   <section class="landing" id="landing">
-    <h1>Athena's world</h1>
+    <h1 id="worldTitle">Athena's world</h1>
     <div class="landingGrid">
       <div class="preview">
         <div class="mini" id="mini" aria-label="Your home right now"><img id="miniImg" alt=""></div>
@@ -430,15 +462,22 @@
           <button type="button" id="zoomIn" aria-label="Zoom in">➕</button>
           <button type="button" id="zoomOut" aria-label="Zoom out">➖</button>
           <button type="button" id="viewReset" aria-label="Back to the first view">🎯</button>
+          <button type="button" id="viewOutside" aria-label="Look from outside">🔭</button>
+          <button type="button" id="viewFull" aria-label="Full screen">⛶</button>
         </div>
+        <button type="button" class="exitFull" id="exitFull" aria-label="Leave full screen">✖</button>
+        <p class="fullHint" id="fullHint"></p>
+        <div class="tray" id="tray" aria-label="Things to place"></div>
       </div>
     </section>
 
     <aside class="side">
-      <h2>Who is it for?</h2>
+      <h2>Where?</h2>
       <div class="stack" id="houses"></div>
+      <div class="stack" id="roomPick"></div>
       <h2>Decorate</h2>
       <div class="stack" id="items"></div>
+      <button class="btn ghost" id="bigger" type="button"></button>
       <button class="btn ghost" id="spin" type="button">🔄 Turn it round</button>
       <button class="btn ghost" id="undo" type="button">↩️ Undo</button>
       <button class="btn ghost" id="toLanding" type="button">🏠 Front page</button>
@@ -462,8 +501,8 @@
     </div>
 
     <div class="setting">
-      <button class="btn" id="clear" type="button">🧹 Empty this house</button>
-      <p class="sub">Takes everything out of this house. Undo brings it back.</p>
+      <button class="btn" id="clear" type="button">🧹 Empty this room</button>
+      <p class="sub">Takes everything out of this room. Undo brings it back.</p>
     </div>
 
     <div class="setting">
@@ -512,6 +551,7 @@
       <label>Version log</label>
       <div>Now on version <span id="version"></span></div>
       <ul>
+        <li><b>2.1.0</b> Play as Athena, Felix or a guest (each has their own game, synced when signed in). Six places: cottage, beach hut, treehouse, a farm with the farmhouse and the barn, an apartment in the middle of a block, and a tall tower. Make a room bigger (8 × 8) with credits. Zoom out (or 🔭) to see the outside, full screen (⛶), two fingers to pan. Home Depot sells doors, shutters, flower boxes, lamps, awnings and siding. Shops are named H Mart, Costco and Target. Every job has a person to meet and a short hello. Five more places are coming later.</li>
         <li><b>2.0.0</b> V2: Home decor is now a little 3-D world. Turn it, pinch to zoom, and drop chunky cartoon things into a cut-away room. New houses: the farmhouse, the barn outside it, a city apartment and a tall tower. New things to buy: four more beds and four more mushrooms, and a hay bale. V1 is kept in ⚙️.</li>
         <li><b>0.9.0</b> Start with 50 credits. Cheat mode in settings adds 50 credits at a time.</li>
         <li><b>0.8.0</b> MVP for the Learning center (questions earn credits), Retail therapy (12 shops; buy things into the bag; take them home) and Get a job (job board, learn, quiz, challenge, first-pass task, hired) for three jobs.</li>
@@ -562,15 +602,42 @@
   <script src="world3d.js"></script>
   <script src="content.js"></script>
   <script>
-    // ---- Houses and things. Edit these lists to change the game. ----
-    const VERSION = '2.0.0';
-    // Each house is a little world (theme): cottage, farm, barn, city, tower. The things are in models.js (ITEMS).
-    const HOUSES = [
-      { name: "Athena's cottage", icon: '🏡', theme: 'cottage', needs: ['bed', 'window', 'picture', 'plant'] },
-      { name: 'Farmhouse',        icon: '🚜', theme: 'farm',    needs: ['bed', 'window', 'chair', 'clock'] },
-      { name: 'The barn',         icon: '🐄', theme: 'barn',    needs: ['haybed', 'haybale', 'lantern', 'basket'] },
-      { name: 'City apartment',   icon: '🏙️', theme: 'city',    needs: ['window', 'sofa', 'tv', 'clock'] },
-      { name: 'Tall tower',       icon: '🏢', theme: 'tower',   needs: ['window', 'bunkbed', 'lamp', 'plant'] }
+    // ---- Places, rooms and players. Edit these lists to change the game. ----
+    const VERSION = '2.1.0';
+    // A place is a little world (ground) with one or more rooms. A room has a look (theme) and the things it needs.
+    // cx, cz: where the room sits on the island; y: how high its floor is (the treehouse is up a tree).
+    // The things are in models.js (ITEMS).
+    const PLACES = [
+      { id: 'cottage', name: 'Cottage', icon: '🏡', ground: 'cottage', rooms: [
+        { id: 'cottage', name: 'Cottage', theme: 'cottage', cx: 0, cz: 0, needs: ['bed', 'window', 'picture', 'plant'] }] },
+      { id: 'beach', name: 'Beach hut', icon: '🏖️', ground: 'beach', rooms: [
+        { id: 'beach', name: 'Beach hut', theme: 'beach', cx: 0, cz: 0, needs: ['window', 'sofa', 'plant', 'mirror'] }] },
+      { id: 'treehouse', name: 'Treehouse', icon: '🌳', ground: 'treehouse', rooms: [
+        { id: 'treehouse', name: 'Treehouse', theme: 'treehouse', cx: 0, cz: 0, y: 7, needs: ['window', 'bed', 'teddy', 'lamp'] }] },
+      { id: 'farm', name: 'Farm', icon: '🚜', ground: 'farm', rooms: [
+        { id: 'farmhouse', name: 'Farmhouse', icon: '🏠', theme: 'farm', cx: -9.5, cz: 0, needs: ['bed', 'window', 'chair', 'clock'] },
+        { id: 'barn', name: 'Barn', icon: '🐄', theme: 'barn', cx: 9.5, cz: 0, needs: ['haybed', 'haybale', 'lantern', 'basket'] }] },
+      { id: 'apartment', name: 'City apartment', icon: '🏙️', ground: 'city', rooms: [
+        { id: 'apartment', name: 'City apartment', theme: 'city', cx: 0, cz: 0, needs: ['window', 'sofa', 'tv', 'clock'] }] },
+      { id: 'tower', name: 'Tall tower', icon: '🏢', ground: 'tower', rooms: [
+        { id: 'tower', name: 'Tall tower', theme: 'tower', cx: 0, cz: 0, needs: ['window', 'bunkbed', 'lamp', 'plant'] }] }
+    ];
+    // Ideas for later. Shown locked, with the credits they will cost.
+    const FUTURE = [
+      { name: 'Island', icon: '🏝️', price: 200 },
+      { name: 'Bus', icon: '🚌', price: 150 },
+      { name: 'Boat', icon: '⛵', price: 250 },
+      { name: 'Airplane', icon: '✈️', price: 350 },
+      { name: 'Spaceship', icon: '🚀', price: 500 }
+    ];
+    const BIGGER_PRICE = 40;                                 // credits to make a room 8 × 8 instead of 5 × 5
+    const ROOMS = {};
+    PLACES.forEach(P => P.rooms.forEach(r => { ROOMS[r.id] = { ...r, place: P.id }; }));
+    // Players: each has their own game. Athena keeps the first save (and V1 shares it).
+    const PROFILES = [
+      { id: 'athena', name: 'Athena', icon: '👧', local: 'athena.save',       key: 'main' },
+      { id: 'felix',  name: 'Felix',  icon: '👦', local: 'athena.save.felix', key: 'felix' },
+      { id: 'guest',  name: 'Guest',  icon: '🙂', local: 'athena.save.guest', key: 'guest' }
     ];
 
     // ---- Small helpers ----
@@ -603,7 +670,7 @@
     window.addEventListener('unhandledrejection', e => logError(String(e.reason)));
 
     // ---- Settings (one object, saved on this device) ----
-    const DEFAULTS = { sound: 1, showErrors: false };
+    const DEFAULTS = { sound: 1, showErrors: false, profile: 'athena' };
     let settings = { ...DEFAULTS, ...store.get('athena.settings', {}) };
     const saveSettings = () => store.set('athena.settings', settings);
 
@@ -612,7 +679,7 @@
     const saveNotes = () => store.set('athena.notes', notes);
     let noteWhere = { page: 'index.html', item: '', label: '' };
     function setNoteContext(label, item) {
-      noteWhere = { page: 'index.html', item: item || '', label: label };
+      noteWhere = { page: 'index.html', item: item || '', label: player().name + ' · ' + label };
     }
     function renderNotes() {
       const filter = $('noteFilter').value;
@@ -698,8 +765,8 @@
     const DB = {
       url: 'https://twvqvutrcobedvuhnzxq.supabase.co',
       key: 'sb_publishable_eqUo8HEdEB1hMQM4CpSVqA_9i6b0qCo', // publishable key only: safe in browser code
-      saveKey: 'main'                                        // the family's one saved game
     };
+    const player = () => PROFILES.find(p => p.id === settings.profile) || PROFILES[0];
     let session = store.get('athena.session', null);
     let syncState = 'device';                                // 'device' | 'checking' | 'synced' | 'check'
     function setSync(state) { syncState = state; renderSync(); }
@@ -767,10 +834,16 @@
     function signOut() { session = null; store.set('athena.session', null); setSync('device'); }
 
     // ---- Saved game: this device always; the family database too when signed in ----
-    let unlocked = 1;                                        // how many houses can be chosen
     let legacy = {};                                         // V1's houses and anything else this version does not use: kept as it is
+    const V2_ROOM_IDS = ['cottage', 'farmhouse', 'barn', 'apartment', 'tower'];  // 2.0.0 saved its rooms in this order
     const gameData = () => ({ ...legacy, bag, credits, startGranted: true, trip, hired, answers,
-      world: { unlocked, current, rooms: rooms.map(R => ({ pos: placedCopy(R), done: R.done })) } });
+      world: { v: 3, place: placeIdx, room: roomId,
+        rooms: Object.fromEntries(Object.entries(rooms).map(([id, R]) => [id, { pos: placedCopy(R), done: R.done, big: R.big }])) } });
+    function freshRooms() { return Object.fromEntries(Object.keys(ROOMS).map(id => [id, { pos: {}, history: [], done: false, big: false }])); }
+    function resetGame() {
+      legacy = {}; bag = []; credits = 50; trip = { visited: [], spent: 0 }; hired = []; answers = {};
+      rooms = freshRooms(); placeIdx = 0; roomId = PLACES[0].rooms[0].id; held = null; lastPlaced = null;
+    }
     function applyGameData(d) {
       if (!d || typeof d !== 'object') return;
       legacy = { ...d };
@@ -781,36 +854,43 @@
       trip = d.trip && Array.isArray(d.trip.visited) ? { visited: d.trip.visited, spent: +d.trip.spent || 0 } : { visited: [], spent: 0 };
       hired = Array.isArray(d.hired) ? d.hired.filter(id => JOB_STEPS[id] || JOBS.some(j => j.id === id)) : [];
       answers = d.answers && typeof d.answers === 'object' ? d.answers : {};
-      const w = d.world && Array.isArray(d.world.rooms) ? d.world : { unlocked: 1, current: 0, rooms: [] };
-      unlocked = clamp(+w.unlocked || 1, 1, HOUSES.length);
-      current = clamp(+w.current || 0, 0, unlocked - 1);
-      rooms.forEach((R, i) => {
-        const r = w.rooms[i];
-        R.pos = {};
-        if (r && r.pos) for (const id in r.pos) if (ITEMS[id]) R.pos[id] = r.pos[id];
-        R.done = !!(r && r.done);
-        R.history = [];
-      });
+      rooms = freshRooms();
+      const w = d.world || {};
+      let saved = {};
+      if (Array.isArray(w.rooms)) w.rooms.forEach((r, i) => { if (V2_ROOM_IDS[i]) saved[V2_ROOM_IDS[i]] = r; });  // 2.0.0
+      else if (w.rooms && typeof w.rooms === 'object') saved = w.rooms;
+      for (const id in rooms) {
+        const r = saved[id], R = rooms[id];
+        if (!r) continue;
+        if (r.pos) for (const t in r.pos) if (ITEMS[t]) R.pos[t] = r.pos[t];
+        R.done = !!r.done;
+        R.big = !!r.big;
+      }
+      placeIdx = clamp(+w.place || 0, 0, unlockedCount() - 1);
+      roomId = PLACES[placeIdx].rooms.some(r => r.id === w.room) ? w.room : PLACES[placeIdx].rooms[0].id;
     }
     function saveGame() {
       const savedAt = new Date().toISOString();
-      store.set('athena.save', { savedAt, data: gameData() });
+      store.set(player().local, { savedAt, data: gameData() });
       if (!session) return;
       setSync('checking');
       dbFetch('POST', '/rest/v1/athena_saves?on_conflict=save_key',
-        [{ save_key: DB.saveKey, data: gameData(), updated_at: savedAt }], 'resolution=merge-duplicates')
+        [{ save_key: player().key, data: gameData(), updated_at: savedAt }], 'resolution=merge-duplicates')
         .then(() => setSync('synced'))
         .catch(e => { setSync('check'); logError('Save to the family database failed: ' + e.message); });
     }
     async function pullGame() {
-      const rows = await dbFetch('GET', `/rest/v1/athena_saves?save_key=eq.${DB.saveKey}&select=data,updated_at`);
+      const who = player();
+      const rows = await dbFetch('GET', `/rest/v1/athena_saves?save_key=eq.${who.key}&select=data,updated_at`);
+      if (who !== player()) return;                     // switched player while waiting
       const remote = rows && rows[0];
-      const local = store.get('athena.save', null);
+      const local = store.get(who.local, null);
       if (!remote) { if (local) saveGame(); return; }
       if (!local || new Date(remote.updated_at) > new Date(local.savedAt)) {
+        resetGame();
         applyGameData(remote.data);
-        store.set('athena.save', { savedAt: remote.updated_at, data: remote.data });
-        if (has3d) World3D.showHouse(HOUSES[current]);
+        store.set(who.local, { savedAt: remote.updated_at, data: remote.data });
+        showPlace();
         render();
       } else {
         saveGame();
@@ -818,7 +898,8 @@
     }
 
     // ---- State ----
-    let current = 0;
+    let placeIdx = 0;                                  // which place is open
+    let roomId = 'cottage';                            // which room in it is being decorated
     let held = null;                                   // the item waiting for a tap
     let lastPlaced = null;                             // for the Turn button
     // The bag: things bought in the shops. Each one becomes a decorate button in every house.
@@ -834,9 +915,26 @@
       render();
     }
     // Decorate buttons: this house's list first, then anything else in the bag
-    const decorateList = () => [...HOUSES[current].needs, ...bag.filter(id => !HOUSES[current].needs.includes(id))];
-    const rooms = HOUSES.map(() => ({ pos: {}, history: [], done: false }));
-    const room = () => rooms[current];
+    const needsOf = id => ROOMS[id].needs;
+    const decorateList = () => [...needsOf(roomId), ...bag.filter(id => !needsOf(roomId).includes(id))];
+    let rooms = freshRooms();
+    const room = () => rooms[roomId];
+    const place = () => PLACES[placeIdx];
+    const placeDone = P => P.rooms.every(r => rooms[r.id].done);
+    // Places open one after another: the next opens when the one before is all done
+    function unlockedCount() {
+      let n = 1;
+      while (n < PLACES.length && placeDone(PLACES[n - 1])) n++;
+      return n;
+    }
+    // Where the 3-D world gets the room sizes and siding
+    const roomInfo = () => Object.fromEntries(place().rooms.map(r => [r.id, { big: rooms[r.id].big, siding: sidingOf(rooms[r.id]) }]));
+    const sidingOf = R => Object.keys(R.pos).find(t => ITEMS[t].zone === 'siding' && R.pos[t].placed) || null;
+    function showPlace() {
+      if (!has3d) return;
+      World3D.showPlace(place(), roomInfo());
+      World3D.setActive(roomId);
+    }
 
     // ---- Sound (Web Audio, no files) ----
     let audio = null;
@@ -862,7 +960,7 @@
 
     // ---- Rules ----
     const isPlaced = (R, t) => !!R.pos[t] && R.pos[t].placed && held !== t;
-    const isComplete = R => HOUSES[current].needs.every(t => isPlaced(R, t));
+    const isComplete = R => needsOf(roomId).every(t => isPlaced(R, t));
     const placedCopy = R => {
       const copy = {};
       for (const t in R.pos) if (R.pos[t].placed) copy[t] = { ...R.pos[t] };
@@ -877,31 +975,55 @@
 
     function pressItem(t) {
       const R = room();
+      const zone = ITEMS[t].zone;
+      if (zone === 'siding') { applySiding(t); return; }
       if (held === t) {
         // Tapping the held thing again puts it down where it is
-        if (R.pos[t].placed) { held = null; blip(440, 0.08); World3D.bounce(t); }
+        if (R.pos[t].placed) { held = null; blip(440, 0.08); World3D.bounce(roomId, t); }
         render();
         return;
       }
       discardUnplacedHeld();
       if (!R.pos[t]) R.pos[t] = { placed: false };     // a new thing floats above the room first
       held = t;
-      setNoteContext(`${HOUSES[current].name} · ${ITEMS[t].label}`, `house-${current}/${t}`);
+      // outside things are put on from outside; inside things from inside
+      if (has3d) {
+        if (zone === 'outside' && !World3D.isOutside()) World3D.setOutside(true);
+        if (zone !== 'outside' && World3D.isOutside()) World3D.setOutside(false);
+      }
+      setNoteContext(`${ROOMS[roomId].name} · ${ITEMS[t].label}`, `${roomId}/${t}`);
       blip(520, 0.08);
       render();
     }
 
-    // A tap in the 3-D world: put the held thing there, or pick up the thing that was tapped
+    // Siding: one per room. Picking it again takes it off.
+    function applySiding(t) {
+      const R = room();
+      R.history.push(placedCopy(R));
+      const had = R.pos[t] && R.pos[t].placed;
+      for (const id in R.pos) if (ITEMS[id].zone === 'siding') delete R.pos[id];
+      if (!had) R.pos[t] = { placed: true };
+      discardUnplacedHeld();
+      blip(had ? 440 : 760, 0.12);
+      saveGame();
+      showPlace();
+      if (has3d) World3D.setOutside(true);
+      render();
+    }
+
+    // A tap in the 3-D world: put the held thing there, pick up the tapped thing, or go to the other room
     function tapWorld(hit) {
       const R = room();
       if (!held) {
         if (hit.itemId && R.pos[hit.itemId]) pressItem(hit.itemId);
+        else if (hit.otherRoom) selectRoom(hit.otherRoom);
         return;
       }
       if (hit.heldHit && R.pos[held].placed) { pressItem(held); return; }
       const zone = ITEMS[held].zone;
       let spot = null;
       if (zone === 'wall' && hit.wall) spot = { wall: hit.wall.wall, u: hit.wall.u, v: hit.wall.v };
+      if (zone === 'outside' && hit.outside) spot = { wall: hit.outside.wall, u: hit.outside.u, v: hit.outside.v };
       if (zone === 'floor' && hit.floor) spot = { x: hit.floor.x, z: hit.floor.z, rot: (R.pos[held] && R.pos[held].rot) || 0 };
       if (!spot) return;
       const wasDone = R.done;
@@ -912,10 +1034,10 @@
       held = null;
       blip(880, 0.12);
       R.done = isComplete(R);
-      if (R.done && !wasDone) finishHouse();
+      if (R.done && !wasDone) finishRoom();
       saveGame();
       render();
-      World3D.bounce(landed);
+      World3D.bounce(roomId, landed);
     }
 
     // Turn a floor thing a quarter round (the held one, or the last one placed)
@@ -933,19 +1055,31 @@
     $('undo').onclick = () => {
       const R = room();
       if (!R.history.length) return;
+      const before = sidingOf(R);
       R.pos = R.history.pop();
       held = null;
       R.done = isComplete(R);
       saveGame();
+      if (sidingOf(R) !== before) showPlace();
       render();
     };
 
-    function finishHouse() {
-      unlocked = Math.max(unlocked, Math.min(current + 2, HOUSES.length));
+    // A room is done. If its place has another room still to do, go there next; else the next place.
+    function finishRoom() {
       fanfare();
-      if (rooms.every(R => R.done)) { showReady(); return; }
-      $('donetext').textContent = `${HOUSES[current].name} is all decorated.`;
-      $('next').textContent = 'Next house ➜';
+      const P = place();
+      const left = P.rooms.find(r => !rooms[r.id].done);
+      if (left) {
+        $('donetext').textContent = `${ROOMS[roomId].name} is all decorated. Now the ${ROOMS[left.id].name.toLowerCase()}!`;
+        $('next').textContent = `${left.icon || '➜'} Go to the ${ROOMS[left.id].name.toLowerCase()}`;
+        $('next').dataset.room = left.id;
+        $('done').hidden = false;
+        return;
+      }
+      if (PLACES.every(placeDone)) { showReady(); return; }
+      $('donetext').textContent = `${P.name} is all decorated.`;
+      $('next').textContent = 'Next place ➜';
+      $('next').dataset.room = '';
       $('done').hidden = false;
     }
 
@@ -959,13 +1093,25 @@
       $('ready').hidden = false;
     }
 
-    function selectHouse(i) {
-      if (i >= unlocked) return;
+    function selectPlace(i) {
+      if (i >= unlockedCount()) return;
       discardUnplacedHeld();
-      current = i;
-      setNoteContext(HOUSES[current].name, `house-${current}`);
+      placeIdx = i;
+      roomId = PLACES[i].rooms[0].id;
       lastPlaced = null;
-      if (has3d) World3D.showHouse(HOUSES[current]);
+      setNoteContext(ROOMS[roomId].name, roomId);
+      showPlace();
+      if (has3d) World3D.resetView();
+      saveGame();
+      render();
+    }
+    function selectRoom(id) {
+      if (!place().rooms.some(r => r.id === id)) return;
+      discardUnplacedHeld();
+      roomId = id;
+      lastPlaced = null;
+      setNoteContext(ROOMS[roomId].name, roomId);
+      if (has3d) World3D.setActive(id);
       saveGame();
       render();
     }
@@ -990,8 +1136,8 @@
     function isOpen(id) {
       if (id === 'home' || id === 'learn') return true;
       const v1 = Array.isArray(legacy.rooms) ? legacy.rooms : [];
-      if (id === 'shops') return rooms[0].done || !!(v1[0] && v1[0].done);
-      if (id === 'jobs') return rooms.every(R => R.done) || (v1.length >= 5 && v1.every(r => r && r.done));
+      if (id === 'shops') return placeDone(PLACES[0]) || !!(v1[0] && v1[0].done);
+      if (id === 'jobs') return PLACES.every(placeDone) || (v1.length >= 5 && v1.every(r => r && r.done));
       return false;
     }
     function showPanel(icon, title, text) {
@@ -1156,7 +1302,7 @@
         JOBS.forEach(j => {
           const card = el('button', 'jobCard' + (hired.includes(j.id) ? ' hired' : ''));
           card.type = 'button';
-          card.append(el('span', 'jobIcon', j.icon), el('span', 'jobName', j.name + (hired.includes(j.id) ? ' ⭐' : '')), el('span', 'jobDesc', j.desc));
+          card.append(el('span', 'jobIcon', (j.person || '') + j.icon), el('span', 'jobName', j.name + (hired.includes(j.id) ? ' ⭐' : '')), el('span', 'jobDesc', j.who ? `Meet ${j.who}` : j.desc));
           card.onclick = () => { jobView = { id: j.id, stage: 'card', i: 0 }; renderJobs(); };
           grid.append(card);
         });
@@ -1168,7 +1314,12 @@
       const S = JOB_STEPS[job.id];
       const v = jobView;
       if (v.stage === 'card') {
-        body.append(el('span', 'bigEmoji', job.icon), el('p', '', job.name), el('p', '', job.desc));
+        const pic = el('div', 'personPic', job.person || job.icon);
+        pic.append(el('span', 'badge', job.icon));
+        body.append(pic, el('p', 'question', job.who ? `${job.who} · ${job.name}` : job.name));
+        const intro = el('div', 'intro');
+        (job.intro || [job.desc]).forEach(line => intro.append(el('p', '', line)));
+        body.append(intro);
         if (S) body.append(choiceBtn('✅ Apply', () => { v.stage = 'learn'; v.i = 0; renderJobs(); }));
         else body.append(el('p', '', 'The steps for this job are not written yet. Coming later.'));
       } else if (v.stage === 'learn') {
@@ -1231,7 +1382,7 @@
       renderBank();
     }
 
-    const LOCK_HINT ={ shops: 'Finish the first house to open', jobs: 'Finish all five houses to open' };
+    const LOCK_HINT = { shops: 'Finish the first place to open', jobs: 'Finish all the places to open' };
     // The front page: a small room and the sections as tabs
     function goLanding() {
       activeLevel = 'landing';
@@ -1261,7 +1412,7 @@
     function renderMini() {
       const R = room();
       if (has3d && !$('landing').hidden) $('miniImg').src = World3D.snapshot(560, 420);
-      $('miniName').textContent = HOUSES[current].icon + ' ' + HOUSES[current].name
+      $('miniName').textContent = place().icon + ' ' + ROOMS[roomId].name
         + (Object.keys(R.pos).length ? '' : ' (empty for now)');
     }
     function renderTabs() {
@@ -1289,34 +1440,78 @@
     function render() {
       const R = room();
 
-      // Things in the 3-D room
-      if (has3d) World3D.sync(R.pos, held);
+      // Things in the 3-D rooms of this place
+      if (has3d) World3D.sync(Object.fromEntries(place().rooms.map(r => [r.id, rooms[r.id].pos])), held);
 
-      // Side buttons
-      $('houses').replaceChildren(...HOUSES.map((h, i) => {
-        const locked = i >= unlocked;
-        const b = button((locked ? '🔒 ' : rooms[i].done ? '⭐ ' : '') + h.icon + ' ' + h.name);
+      // Side buttons: places (and the ones coming later), rooms, things
+      const open = unlockedCount();
+      $('houses').replaceChildren(...PLACES.map((P, i) => {
+        const locked = i >= open;
+        const b = button((locked ? '🔒 ' : placeDone(P) ? '⭐ ' : '') + P.icon + ' ' + P.name);
         b.disabled = locked;
-        b.setAttribute('aria-pressed', i === current);
-        b.onclick = () => selectHouse(i);
+        b.setAttribute('aria-pressed', i === placeIdx);
+        b.onclick = () => selectPlace(i);
+        return b;
+      }), ...FUTURE.map(F => {
+        const b = button(`🔒 ${F.icon} ${F.name} · 🪙 ${F.price}`);
+        b.disabled = true;
+        b.title = 'Coming later';
         return b;
       }));
-      $('items').replaceChildren(...decorateList().map(t => {
+      $('roomPick').replaceChildren(...(place().rooms.length > 1 ? place().rooms.map(r => {
+        const b = button((rooms[r.id].done ? '⭐ ' : '') + (r.icon || '') + ' ' + r.name);
+        b.classList.add('ghost');
+        b.setAttribute('aria-pressed', r.id === roomId);
+        b.onclick = () => selectRoom(r.id);
+        return b;
+      }) : []));
+      const list = decorateList();
+      const groups = [['Inside', list.filter(t => ITEMS[t].zone === 'floor' || ITEMS[t].zone === 'wall')],
+                      ['Outside', list.filter(t => ITEMS[t].zone === 'outside')],
+                      ['Siding', list.filter(t => ITEMS[t].zone === 'siding')]];
+      const thingButton = t => {
         const b = button(`${cap(ITEMS[t].label)}${isPlaced(R, t) ? ' ✓' : ''}`);
         const src = has3d ? World3D.thumb(t) : '';
         if (src) { const img = document.createElement('img'); img.className = 'thumb'; img.src = src; img.alt = ''; b.prepend(img); }
         else b.prepend(ITEMS[t].emoji + ' ');
+        b.setAttribute('aria-pressed', held === t || (ITEMS[t].zone === 'siding' && isPlaced(R, t)));
+        b.onclick = () => pressItem(t);
+        return b;
+      };
+      const kids = [];
+      groups.forEach(([name, ids]) => {
+        if (!ids.length) return;
+        if (groups.filter(g => g[1].length).length > 1) kids.push(el('p', 'group', name));
+        ids.forEach(t => kids.push(thingButton(t)));
+      });
+      $('items').replaceChildren(...kids);
+      // the strip of things in full screen
+      $('tray').replaceChildren(...list.map(t => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('aria-label', ITEMS[t].label);
         b.setAttribute('aria-pressed', held === t);
+        const src = has3d ? World3D.thumb(t) : '';
+        if (src) { const img = document.createElement('img'); img.src = src; img.alt = ''; b.append(img); } else b.textContent = ITEMS[t].emoji;
         b.onclick = () => pressItem(t);
         return b;
       }));
+      $('bigger').textContent = R.big ? '📐 This room is big' : `📐 Make this room bigger · 🪙 ${BIGGER_PRICE}`;
+      $('bigger').disabled = R.big || credits < BIGGER_PRICE;
       $('undo').disabled = !R.history.length;
 
       // Words above the room
-      $('title').textContent = HOUSES[current].name;
+      $('title').textContent = place().rooms.length > 1 ? `${place().name} · ${ROOMS[roomId].name}` : place().name;
+      const zone = held && ITEMS[held].zone;
       $('hint').textContent = held
-        ? (ITEMS[held].zone === 'wall' ? `Tap a wall to hang the ${ITEMS[held].label}.` : `Tap the floor to put the ${ITEMS[held].label} there.`)
-        : Object.keys(R.pos).length ? 'Tap a thing to move it. Drag to turn the world.' : 'Pick a thing on the right to start.';
+        ? (zone === 'wall' ? `Tap a wall to hang the ${ITEMS[held].label}.`
+          : zone === 'outside' ? `Tap the outside of a wall to put the ${ITEMS[held].label} there.`
+          : `Tap the floor to put the ${ITEMS[held].label} there.`)
+        : Object.keys(R.pos).length ? 'Tap a thing to move it. Drag to turn, pinch to zoom, two fingers to move.' : 'Pick a thing on the right to start.';
+      $('fullHint').textContent = $('hint').textContent;
+      $('viewOutside').textContent = has3d && World3D.isOutside() ? '🛋️' : '🔭';
+      $('viewOutside').setAttribute('aria-label', has3d && World3D.isOutside() ? 'Look inside' : 'Look from outside');
+      renderWho();
       $('spin').disabled = !(held || lastPlaced) || ITEMS[held || lastPlaced].zone !== 'floor' || !(R.pos[held || lastPlaced] || {}).placed;
 
       renderSettings();
@@ -1364,12 +1559,14 @@
       R.done = false;
       setOpen(false);
       saveGame();
+      showPlace();
       render();
     };
     $('version').textContent = VERSION;
     $('next').onclick = () => {
       $('done').hidden = true;
-      if (current + 1 < HOUSES.length) selectHouse(current + 1);
+      if ($('next').dataset.room) selectRoom($('next').dataset.room);
+      else if (placeIdx + 1 < unlockedCount()) selectPlace(placeIdx + 1);
       else render();
     };
     $('stay').onclick = () => { $('done').hidden = true; };
@@ -1381,14 +1578,14 @@
     };
     $('readyNo').onclick = () => {
       $('readyTitle').textContent = 'No problem!';
-      $('readyText').textContent = 'You can keep fitting out the rooms. Replay starts again from the first house. Everything you have decorated stays.';
+      $('readyText').textContent = 'You can keep fitting out the rooms. Replay starts again from the first place. Everything you have decorated stays.';
       $('readyYes').hidden = true;
       $('readyNo').hidden = true;
       $('replay').hidden = false;
     };
     $('replay').onclick = () => {
       $('ready').hidden = true;
-      selectHouse(0);
+      selectPlace(0);
     };
     $('panelBack').onclick = () => goLanding();
     $('toLanding').onclick = () => goLanding();
@@ -1436,13 +1633,66 @@
     $('viewRight').onclick = () => has3d && World3D.turn(Math.PI / 4);
     $('zoomIn').onclick = () => has3d && World3D.zoom(1.2);
     $('zoomOut').onclick = () => has3d && World3D.zoom(1 / 1.2);
-    $('viewReset').onclick = () => has3d && World3D.resetView();
+    $('viewReset').onclick = () => { if (has3d) { World3D.resetView(); render(); } };
+    $('viewOutside').onclick = () => { if (has3d) { World3D.setOutside(!World3D.isOutside()); render(); } };
+    const setFull = on => { $('app').classList.toggle('full', on); render(); };
+    $('viewFull').onclick = () => setFull(!$('app').classList.contains('full'));
+    $('exitFull').onclick = () => setFull(false);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') setFull(false); });
+    // the zoom can cross into the outside view: keep the 🔭 button in step
+    roomEl.addEventListener('pointerup', () => { if (has3d) render(); });
+    roomEl.addEventListener('wheel', () => { if (has3d) $('viewOutside').textContent = World3D.isOutside() ? '🛋️' : '🔭'; }, { passive: true });
+
+    // Make the room bigger: 5 × 5 becomes 8 × 8 (the room grows; things stay where they are)
+    $('bigger').onclick = () => {
+      const R = room();
+      if (R.big || credits < BIGGER_PRICE) return;
+      credits -= BIGGER_PRICE;
+      R.big = true;
+      fanfare();
+      saveGame();
+      showPlace();
+      render();
+    };
+
+    // Who is playing: each player has their own game, on this device and in the family database
+    function renderWho() {
+      $('who').replaceChildren(...PROFILES.map(p => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = p.icon + ' ' + p.name;
+        b.className = p.id === player().id ? 'on' : '';
+        b.setAttribute('aria-pressed', p.id === player().id);
+        b.onclick = () => switchPlayer(p.id);
+        return b;
+      }));
+      $('worldTitle').textContent = player().id === 'guest' ? 'Guest world' : `${player().name}'s world`;
+    }
+    async function switchPlayer(id) {
+      if (id === player().id) return;
+      saveGame();
+      settings.profile = id;
+      saveSettings();
+      resetGame();
+      const local = store.get(player().local, null);
+      if (local) applyGameData(local.data);
+      round = null; jobView = null;
+      showPlace();
+      if (has3d) World3D.resetView();
+      setNoteContext(ROOMS[roomId].name, roomId);
+      render();
+      if (activeLevel === 'landing') goLanding(); else openLevel(activeLevel);
+      blip(660, 0.1);
+      if (!session) return;
+      try { setSync('checking'); await pullGame(); setSync('synced'); }
+      catch (e) { setSync('check'); logError('Could not load ' + player().name + "'s game: " + e.message); }
+    }
 
     (async function start() {
-      const local = store.get('athena.save', null);
+      const local = store.get(player().local, null);
       if (local) applyGameData(local.data);
-      if (has3d) World3D.showHouse(HOUSES[current]);
-      setNoteContext(HOUSES[current].name, `house-${current}`);
+      showPlace();
+      setNoteContext(ROOMS[roomId].name, roomId);
       renderNotes();
       render();
       renderSync();
