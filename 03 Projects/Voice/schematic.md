@@ -1,7 +1,7 @@
 # Voice — Schematic
 
 **Track:** A. Family play (stories for the kids on the iPad). The writing and voice-making side is a small grown-up corner inside ⚙️.
-**Status:** MVP 0.3.0 (2026-11-09, not yet device-tested). Kokoro-focused: three stories, a script story with a cast of voices and hidden notes, and Kokoro live in the browser. Decisions in `convo/convo v0.3.md`.
+**Status:** MVP 0.4.0 (2026-11-09, not yet device-tested). Three stories, each in English, 中文 and a third language (日本語, Español, Français) with a tune from that culture; 🎬 director's notes with sound effects. Story list in `story_list.md`. Decisions in `convo/convo v0.4.md`.
 
 ## 1. The idea in one paragraph
 
@@ -91,9 +91,10 @@ All tables: RLS on, anon revoked, registered in `app_table_registry` under app `
 | 0.1 ✅ | Page shell: shelf, story screen, speed read, ⚙️ with notes (device storage), the iPad voice. | Nothing external. |
 | 0.2 ✅ | Listening test: The Fisherman and the Goldfish (English) and 狼来了 (Chinese), each with two Kokoro voices (MP3 + estimated word timings) beside the iPad voice, in 🎧 Compare voices. ElevenLabs slot shown, not made (needs a key). | Done with Kokoro, free. |
 | 0.3 ✅ | Kokoro focus: Little Red Riding Hood (Perrault's original, with its moral) as a **script story** (cast of five Kokoro voices, tone per line, hidden notes for blocking, gestures and thoughts behind 📜). **Kokoro · live**: the model runs in the browser (worker, kokoro-js), English only. | Nothing external; the live model downloads from huggingface.co once. |
-| 0.4 | Family database: tables, bucket, sign-in, stories load live, cache on device. | Paste SQL. |
-| 0.5 | ✨ Make voice, versions and restore in the grown-up corner (Kokoro in the browser can make it, no key needed). | — |
-| 0.6 | Polish: covers, chapter stories, per-reader speed records, character voices. | Feedback notes. |
+| 0.4 ✅ | Languages and director's notes: every story in English + 中文 + a third language read by a native Kokoro voice, a synthesized tune per culture (`js/sound.js`), 🎬 director's notes (motivation, acting, sound, moves, gesture, thought) that pop open from ⚙️, sound cues that play as the story reaches the line. `story_list.md`: ten more stories planned. | Nothing external. |
+| 0.5 | Family database: tables, bucket, sign-in, stories load live, cache on device. | Paste SQL. |
+| 0.6 | ✨ Make voice, versions and restore in the grown-up corner (Kokoro in the browser can make it, no key needed). | — |
+| 0.7 | Polish: covers, chapter stories, per-reader speed records, character voices. | Feedback notes. |
 
 ## 6b. Listening test (0.2)
 
@@ -111,6 +112,14 @@ Files: `stories/<id>.js` (text, edited by hand), `stories/<id>.audio.js` (made b
 The `cast` track reads each line in its speaker's voice: Narrator `bm_fable`, Mother `af_sarah`, Little Red `af_sky`, Wolf `am_onyx`, Grandmother `bf_isabella`. A single-narrator track (`bm_fable`) is there to compare.
 
 **Kokoro · live:** `js/live.js` starts a module worker (`js/live_worker.js`) that loads `lib/kokoro.web.js` (kokoro-js 1.2.1, Apache 2.0, vendored) and the model `onnx-community/Kokoro-82M-v1.0-ONNX` from huggingface.co. The browser keeps the model in its cache after the first time. Engines in ⚙️: Small (WASM, q8, 92 MB) and Fast (WebGPU, fp32, 326 MB). The page makes the line it needs, plays it with Web Audio, and makes three lines ahead. The word highlight is estimated per line. English only, because the kokoro-js phonemizer is English. In the cloud test (4 slow CPUs, one thread) the Small engine made 1.7 s of speech in 4.9 s, so it may pause between lines there. It has not been tested on the iPad.
+
+## 6d. Languages, notes and sound (0.4)
+
+- **Story groups:** files with the same `group` are one story in several languages. `notesFrom` points a translation at the English file, so director's notes are written once (line by line, or paragraph by paragraph via `paraNotes`). The shelf shows one card per group; the story bar has a language button for each version (remembered per story).
+- **Director's notes:** note kinds are `motivation`, `acting`, `sound` (with an optional `sfx` name), `blocking`, `gesture` and `thought`; a line's `tone` shows as Voice. Hidden by default. ⚙️ → 🎬 Director's notes, or the button on the story, opens them with a pop and stagger.
+- **Sound effects** (`js/sound.js`, Web Audio, no files): knock, door, wind, birds, axe, steps, growl, splash, waves, howl, bell, gulp, magic. The first `sfx` of a line plays when the reading reaches it (any voice engine), and each one also has a ▶ in the notes.
+- **Tunes:** japan (koto, *in* scale), korea (gayageum pentatonic), china (guzheng pentatonic), france (musette waltz), spain (Phrygian guitar), italy (mandolin tremolo), netherlands (barrel organ), australia (didgeridoo and clapsticks). They play softly while a story plays; ⚙️ → 🎵.
+- **Voices for each language:** Kokoro covers en, zh, ja, fr, es, it, pt, hi. Korean, Dutch, Danish and Australian English fall back to the iPad voice for that language. Live Kokoro is English only.
 
 ## 7. Not in scope (for now)
 

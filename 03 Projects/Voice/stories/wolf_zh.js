@@ -9,6 +9,9 @@ window.VOICE_STORIES.push({
   cover: '🐺',
   color: '#cfe8d5',
   version: 1,
+  group: 'wolf',
+  notesFrom: 'wolf_en',
+  music: 'spain',
   kokoroVoices: ['zf_xiaoxiao', 'zm_yunxi'],
   paragraphs: [
     '从前，山脚下有一个小村子。村子里有一个放羊的小男孩。',

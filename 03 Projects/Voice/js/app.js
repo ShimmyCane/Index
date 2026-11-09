@@ -2,12 +2,34 @@
    Plain script, no build. Stories: stories/<id>.js; audio + word timings: stories/<id>.audio.js. */
 (function () {
   'use strict';
-  var VERSION = '0.3.0';
+  var VERSION = '0.4.0';
   var STORIES = window.VOICE_STORIES || [];
   var AUDIO = window.VOICE_AUDIO || {};
   // Script stories (story.script + story.cast): each line is one paragraph.
   STORIES.forEach(function (s) { if (s.script && !s.paragraphs) s.paragraphs = s.script.map(function (l) { return l.text; }); });
   var $ = function (id) { return document.getElementById(id); };
+  var LANG = {
+    en: { name: 'English', speech: 'en-US' }, zh: { name: '中文', speech: 'zh-CN' }, ja: { name: '日本語', speech: 'ja-JP' },
+    fr: { name: 'Français', speech: 'fr-FR' }, es: { name: 'Español', speech: 'es-ES' }, it: { name: 'Italiano', speech: 'it-IT' },
+    ko: { name: '한국어', speech: 'ko-KR' }, nl: { name: 'Nederlands', speech: 'nl-NL' }, pt: { name: 'Português', speech: 'pt-BR' },
+    hi: { name: 'हिन्दी', speech: 'hi-IN' }, au: { name: 'Aussie English', speech: 'en-AU' }
+  };
+  var LANG_ORDER = ['en', 'zh', 'ja', 'ko', 'fr', 'es', 'it', 'nl', 'pt', 'hi', 'au'];
+  function isCJK(l) { return l === 'zh' || l === 'ja'; }
+  function cjkCount(w) { return (w.match(/[\u3040-\u30ff\u4e00-\u9fff]/g) || []).length; }
+  function byId(id) { return STORIES.filter(function (x) { return x.id === id; })[0]; }
+  function groupOf(st) { return st.group || st.id; }
+  function siblings(st) {
+    return STORIES.filter(function (x) { return groupOf(x) === groupOf(st); })
+      .sort(function (a, b) { return LANG_ORDER.indexOf(a.lang) - LANG_ORDER.indexOf(b.lang); });
+  }
+  // Director's notes for line p: own script line or paraNotes, or the twin story's (notesFrom), line by line.
+  function lineNotes(st, p) {
+    var base = (st.notesFrom && byId(st.notesFrom)) || st;
+    var line = base.script ? base.script[p] : null, items = [];
+    if (line && line.tone) items.push({ kind: 'tone', text: line.tone });
+    return items.concat((line ? line.notes : base.paraNotes && base.paraNotes[p]) || []);
+  }
 
   /* ---------- errors (opt-in, bottom) ---------- */
   var errors = [];
@@ -26,7 +48,7 @@
 
   /* ---------- settings ---------- */
   var KEY = 'voice.settings';
-  var DEFAULTS = { size: 'm', highlight: '1', rate: '1', wpm: 200, notes: '0', liveEngine: 'wasm', voiceEn: '', voiceZh: '', track: {}, best: {}, showErrors: false };
+  var DEFAULTS = { size: 'm', highlight: '1', rate: '1', wpm: 200, notes: '0', sfx: '1', music: '1', liveEngine: 'wasm', langPick: {}, voiceEn: '', voiceZh: '', track: {}, best: {}, showErrors: false };
   var settings = load(KEY, DEFAULTS);
   function load(k, def) {
     var out = JSON.parse(JSON.stringify(def));
@@ -45,12 +67,12 @@
     });
     return list;
   }
-  var PUNCT = /^[\s"'“”‘’「」（）()，。！？；：、,.!?;:—-]+$/;
+  var PUNCT = /^[\s"'“”‘’「」『』（）()«»，。！？；：、,.!?;:—-]+$/;
   function browserTokens(par, lang) {
-    if (lang !== 'zh') return par.split(/\s+/).filter(Boolean);
+    if (!isCJK(lang)) return par.split(/\s+/).filter(Boolean);
     var parts = [];
     if (window.Intl && Intl.Segmenter) {
-      var seg = new Intl.Segmenter('zh', { granularity: 'word' });
+      var seg = new Intl.Segmenter(lang, { granularity: 'word' });
       for (var it = seg.segment(par)[Symbol.iterator](), s = it.next(); !s.done; s = it.next()) parts.push(s.value.segment);
     } else parts = par.split('');
     var out = [], carry = '';
@@ -79,7 +101,10 @@
   function renderHome() {
     var home = $('home');
     home.innerHTML = '';
-    STORIES.forEach(function (st) {
+    var seen = {};
+    STORIES.forEach(function (first) {
+      var g = groupOf(first); if (seen[g]) return; seen[g] = 1;
+      var sibs = siblings(first), st = byId(settings.langPick[g]) || sibs[0];
       var tr = freshTracks(st).filter(function (t) { return t.fresh; });
       var len = tr.length ? fmt(tr[0].track.duration) + ' min' : 'iPad voice';
       var b = document.createElement('button');
@@ -87,7 +112,7 @@
       b.innerHTML = '<span class="cover">' + st.cover + '</span><span class="t"></span><span class="sub"></span><span class="len"></span><span class="go">▶</span>';
       b.querySelector('.t').textContent = st.title;
       b.querySelector('.sub').textContent = st.subtitle || '';
-      b.querySelector('.len').textContent = '🎧 ' + len;
+      b.querySelector('.len').textContent = '🎧 ' + len + '  ·  ' + sibs.map(function (x) { return (LANG[x.lang] || { name: x.lang }).name; }).join(' · ');
       b.lang = st.lang;
       b.addEventListener('click', function () { location.hash = 'story=' + st.id + '&mode=read'; });
       home.appendChild(b);
@@ -102,16 +127,29 @@
     location.hash.replace(/^#/, '').split('&').forEach(function (kv) { var a = kv.split('='); if (a[0]) q[a[0]] = decodeURIComponent(a[1] || ''); });
     var story = STORIES.filter(function (s) { return s.id === q.story; })[0];
     var isStory = !!story;
-    $('home').hidden = isStory; $('back').hidden = !isStory; $('modeSeg').hidden = !isStory;
+    $('home').hidden = isStory; $('back').hidden = !isStory; $('modeSeg').hidden = !isStory; $('storyBar').hidden = !isStory;
     if (!isStory) { cur = null; $('title').textContent = '🎙️ Stories'; $('read').hidden = $('speed').hidden = true; updateNoteWhere(); return; }
     if (!cur || cur.story !== story) cur = { story: story, flat: buildFlat(story), pos: 0, r: 0 };
     cur.mode = q.mode === 'speed' ? 'speed' : 'read';
     $('title').textContent = story.cover + ' ' + story.title;
-    document.documentElement.lang = story.lang === 'zh' ? 'zh-CN' : 'en';
+    document.documentElement.lang = (LANG[story.lang] || LANG.en).speech;
+    renderStoryBar();
     [].forEach.call($('modeSeg').children, function (b) { b.classList.toggle('on', b.dataset.mode === cur.mode); });
     $('read').hidden = cur.mode !== 'read'; $('speed').hidden = cur.mode !== 'speed';
     if (cur.mode === 'read') openRead(); else openSpeed();
     updateNoteWhere();
+  }
+  function renderStoryBar() {
+    var box = $('langSeg'), sibs = siblings(cur.story);
+    box.innerHTML = ''; box.hidden = sibs.length < 2;
+    sibs.forEach(function (x) {
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = (LANG[x.lang] || { name: x.lang }).name;
+      b.classList.toggle('on', x === cur.story); b.lang = x.lang;
+      b.addEventListener('click', function () { settings.langPick[groupOf(x)] = x.id; save(); location.hash = 'story=' + x.id + '&mode=' + cur.mode; });
+      box.appendChild(b);
+    });
+    var any = false; for (var p = 0; p < cur.story.paragraphs.length && !any; p++) any = lineNotes(cur.story, p).length > 0;
+    $('notesToggle').hidden = !any;
   }
   $('back').addEventListener('click', function () { location.hash = ''; });
   [].forEach.call($('modeSeg').children, function (b) {
@@ -130,13 +168,13 @@
     var list = freshTracks(story).map(function (t) {
       return { key: t.key, label: t.track.service + ' · ' + nice(t.track.voice), sub: t.fresh ? fmt(t.track.duration) + ' · made ' + t.track.made : 'older than the text', ok: t.fresh };
     });
-    var zh = story.lang === 'zh';
-    list.push({ key: 'live', label: 'Kokoro · live', sub: zh ? 'English only for now' : liveSub(), ok: !zh && !!window.WebAssembly && !!window.VoiceLive });
+    var notEn = story.lang !== 'en';
+    list.push({ key: 'live', label: 'Kokoro · live', sub: notEn ? 'English only for now' : liveSub(), ok: !notEn && !!window.WebAssembly && !!window.VoiceLive });
     list.push({ key: 'ipad', label: 'iPad voice', sub: ipadVoiceName(story.lang) || 'built in', ok: !!window.speechSynthesis });
     list.push({ key: 'eleven', label: 'ElevenLabs', sub: 'not made yet (needs a key)', ok: false });
     return list;
   }
-  function nice(v) { return ({ cast: 'Cast (' + Object.keys((cur && cur.story.cast) || {}).length + ' voices)', af_heart: 'Heart', bm_fable: 'Fable', zf_xiaoxiao: '晓晓', zm_yunxi: '云希' })[v] || v; }
+  function nice(v) { return ({ cast: 'Cast (' + Object.keys((cur && cur.story.cast) || {}).length + ' voices)', af_heart: 'Heart', bm_fable: 'Fable', bm_george: 'George', zf_xiaoxiao: '晓晓', zm_yunxi: '云希', zm_yunyang: '云扬', jm_kumo: 'Kumo', ff_siwis: 'Siwis', em_alex: 'Alex', ef_dora: 'Dora', if_sara: 'Sara', im_nicola: 'Nicola' })[v] || v; }
   function currentTrack() {
     var choices = trackChoices(cur.story).filter(function (c) { return c.ok; });
     var want = settings.track[cur.story.id];
@@ -147,22 +185,29 @@
 
   function openRead() {
     var st = cur.story, text = $('text');
-    text.lang = st.lang === 'zh' ? 'zh' : 'en';
+    text.lang = st.lang;
     text.innerHTML = '';
-    var sep = st.lang === 'zh' ? '' : ' ', pEl = null, lastP = -1;
-    var script = st.script, NOTE = { tone: '🎭', blocking: '🚶', gesture: '✋', thought: '💭' };
-    $('notesBar').hidden = !script;
+    var sep = isCJK(st.lang) ? '' : ' ', pEl = null, lastP = -1;
+    var script = st.script;
+    var NOTE = { motivation: ['🎯', 'Why'], tone: ['🗣️', 'Voice'], acting: ['🎭', 'Acting'], sound: ['🔊', 'Sound'], blocking: ['🚶', 'Moves'], gesture: ['✋', 'Gesture'], thought: ['💭', 'Thinks'] };
     cur.flat.forEach(function (tk, g) {
       if (tk.p !== lastP) {
-        var line = script && script[tk.p];
-        if (line && (line.tone || line.notes)) {
-          var nb = document.createElement('div'); nb.className = 'notes';
-          var items = (line.tone ? [{ kind: 'tone', text: line.tone }] : []).concat(line.notes || []);
-          items.forEach(function (n) { var d = document.createElement('div'); d.textContent = (NOTE[n.kind] || '•') + ' ' + n.text; nb.appendChild(d); });
-          text.appendChild(nb);
+        var line = script && script[tk.p], items = lineNotes(st, tk.p);
+        if (items.length) {
+          var nb = document.createElement('div'), inner = document.createElement('div'); nb.className = 'notes'; inner.className = 'notesIn';
+          items.forEach(function (n, i) {
+            var d = document.createElement('div'), k = NOTE[n.kind] || ['•', n.kind];
+            d.className = 'note note-' + n.kind; d.style.setProperty('--i', i);
+            d.innerHTML = '<b></b><span></span>';
+            d.querySelector('b').textContent = k[0] + ' ' + k[1];
+            d.querySelector('span').textContent = n.text;
+            if (n.sfx) { var pl = document.createElement('button'); pl.type = 'button'; pl.className = 'sfxBtn'; pl.textContent = '▶'; pl.setAttribute('aria-label', 'Play the sound'); pl.addEventListener('click', function (e) { e.stopPropagation(); if (window.VoiceSound) VoiceSound.sfx(n.sfx); }); d.appendChild(pl); }
+            inner.appendChild(d);
+          });
+          nb.appendChild(inner); text.appendChild(nb);
         }
         pEl = document.createElement('p'); text.appendChild(pEl); lastP = tk.p;
-        if (line && line.who !== 'narrator' && st.cast[line.who]) {
+        if (line && line.who !== 'narrator' && st.cast && st.cast[line.who]) {
           pEl.className = 'say who-' + line.who;
           var c = document.createElement('span'); c.className = 'speaker'; c.textContent = st.cast[line.who].icon + ' ' + st.cast[line.who].name;
           pEl.appendChild(c);
@@ -223,6 +268,7 @@
 
   function jumpTo(g, keepPlaying) {
     g = Math.max(0, Math.min(cur.flat.length - 1, g));
+    sfxP = -1;
     var playing = isPlaying(), t = trackData(currentTrack());
     if (t) { audio.currentTime = tAt(t, g); if (keepPlaying && playing) audio.play(); }
     else if (currentTrack() === 'live') { live.g = g; if (keepPlaying && playing) liveFrom(g); }
@@ -233,6 +279,7 @@
 
   function togglePlay() {
     if (!cur) return;
+    if (window.VoiceSound) VoiceSound.unlock();
     var t = trackData(currentTrack());
     if (t) {
       if (audio.paused) { audio.playbackRate = +settings.rate; audio.play().then(function () { setPlayIcon(true); tick(); }).catch(function (e) { logError('Play: ' + e.message); }); }
@@ -258,12 +305,26 @@
     nowEl = g >= 0 ? $('text').querySelector('[data-g="' + g + '"]') : null;
     if (!nowEl) return;
     nowEl.classList.add('now');
+    lineSfx(g);
     if (isPlaying()) {
       var r = nowEl.getBoundingClientRect();
       if (r.top < 70 || r.bottom > window.innerHeight - 120) nowEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
     }
   }
-  function setPlayIcon(on) { $('play').textContent = on ? '⏸' : '▶'; $('play').setAttribute('aria-label', on ? 'Pause' : 'Play'); }
+  function setPlayIcon(on) {
+    $('play').textContent = on ? '⏸' : '▶'; $('play').setAttribute('aria-label', on ? 'Pause' : 'Play');
+    if (!window.VoiceSound) return;
+    if (on && settings.music === '1' && cur && cur.story.music) VoiceSound.music(cur.story.music); else VoiceSound.stopMusic();
+  }
+  var sfxP = -1;
+  function lineSfx(g) {
+    var tk = cur && cur.flat[g];
+    if (!tk || tk.p === sfxP || !isPlaying()) return;
+    sfxP = tk.p;
+    if (settings.sfx !== '1' || !window.VoiceSound) return;
+    var n = lineNotes(cur.story, tk.p).filter(function (x) { return x.sfx; })[0];
+    if (n) VoiceSound.sfx(n.sfx);
+  }
   function updateTime() {
     if (!cur) return;
     var t = trackData(currentTrack());
@@ -289,10 +350,12 @@
   function rank(v) { var n = v.name; return (/premium/i.test(n) ? 30 : /enhanced|neural|natural/i.test(n) ? 20 : /siri/i.test(n) ? 10 : 0) + (v.localService ? 1 : 0) + (/zh-CN|en-GB|en-US/i.test(v.lang) ? 2 : 0); }
   function langVoices(lang) { return voices.filter(function (v) { return (v.lang || '').toLowerCase().indexOf(lang) === 0; }).sort(function (a, b) { return rank(b) - rank(a); }); }
   function pickVoice(lang) {
-    var list = langVoices(lang), want = settings[lang === 'zh' ? 'voiceZh' : 'voiceEn'];
+    var list = langVoices(lang), want = settings[lang === 'zh' ? 'voiceZh' : lang === 'en' ? 'voiceEn' : 'x'];
     return list.filter(function (v) { return v.name === want; })[0] || list[0] || null;
   }
-  function ipadVoiceName(lang) { var v = pickVoice(lang === 'zh' ? 'zh' : 'en'); return v ? v.name : ''; }
+  function speechLang(lang) { return (LANG[lang] || LANG.en).speech; }
+  function voiceKey(lang) { return lang === 'au' ? 'en-au' : lang; }
+  function ipadVoiceName(lang) { var v = pickVoice(voiceKey(lang)); return v ? v.name : ''; }
   function fillSelect(sel, lang, key) {
     var list = langVoices(lang), chosen = pickVoice(lang);
     sel.innerHTML = '';
@@ -311,14 +374,14 @@
     function para(g0) {
       if (id !== speakId || !ipad.on) return;
       if (g0 >= cur.flat.length) { ipad.on = false; ipad.g = 0; setPlayIcon(false); highlight(-1); updateTime(); return; }
-      var p = cur.flat[g0].p, sep = lang === 'zh' ? '' : ' ', text = '', starts = [], gs = [];
+      var p = cur.flat[g0].p, sep = isCJK(lang) ? '' : ' ', text = '', starts = [], gs = [];
       for (var k = g0; k < cur.flat.length && cur.flat[k].p === p; k++) {
         if (text) text += sep;
         starts.push(text.length); gs.push(k); text += cur.flat[k].text;
       }
-      var u = new SpeechSynthesisUtterance(text), v = pickVoice(lang === 'zh' ? 'zh' : 'en');
+      var u = new SpeechSynthesisUtterance(text), v = pickVoice(voiceKey(lang));
       if (v) u.voice = v;
-      u.lang = v ? v.lang : (lang === 'zh' ? 'zh-CN' : 'en-US');
+      u.lang = v ? v.lang : speechLang(lang);
       u.rate = +settings.rate;
       highlight(g0); ipad.g = g0; updateTime();
       u.onboundary = function (e) {
@@ -336,7 +399,7 @@
   function stopAll() {
     audio.pause(); cancelAnimationFrame(raf);
     if (window.speechSynthesis) { speakId++; ipad.on = false; speechSynthesis.cancel(); }
-    liveStop(); rsvpStop(); setPlayIcon(false);
+    liveStop(); rsvpStop(); setPlayIcon(false); sfxP = -1;
   }
 
   /* Kokoro live (js/live.js): makes each line in this browser, plays it with Web Audio,
@@ -372,7 +435,7 @@
   }
   function lineWeights(p) {
     var ws = [], gs = [];
-    cur.flat.forEach(function (tk, g) { if (tk.p === p) { gs.push(g); ws.push(cur.story.lang === 'zh' ? Math.max(1, tk.text.replace(/[^\u4e00-\u9fff]/g, '').length) : tk.text.replace(/[^A-Za-z0-9]/g, '').length + 1); } });
+    cur.flat.forEach(function (tk, g) { if (tk.p === p) { gs.push(g); ws.push(isCJK(cur.story.lang) ? Math.max(1, cjkCount(tk.text)) : tk.text.replace(/[^\p{L}\p{N}]/gu, '').length + 1); } });
     return { gs: gs, ws: ws, tot: ws.reduce(function (a, b) { return a + b; }, 0) };
   }
   function liveFrom(g) {
@@ -422,12 +485,12 @@
   /* ---------- speed read ---------- */
   var rTimer = 0, rOn = false;
   function splitWord(w, lang) {
-    if (lang === 'zh') {
-      var m = w.match(/^([^一-鿿]*)(.*?)([^一-鿿]*)$/), core = m[2] || w;
+    if (isCJK(lang)) {
+      var m = w.match(/^([^\u3040-\u30ff\u4e00-\u9fff]*)(.*?)([^\u3040-\u30ff\u4e00-\u9fff]*)$/), core = m[2] || w;
       var k = Math.floor((core.length - 1) / 2);
       return [m[1] + core.slice(0, k), core.charAt(k), core.slice(k + 1) + m[3]];
     }
-    var mm = w.match(/^([^A-Za-z0-9]*)(.*?)([^A-Za-z0-9]*)$/), c = mm[2] || w, n = c.length;
+    var mm = w.match(/^([^\p{L}\p{N}]*)(.*?)([^\p{L}\p{N}]*)$/u), c = mm[2] || w, n = c.length;
     var o = n <= 1 ? 0 : n <= 5 ? 1 : n <= 9 ? 2 : n <= 13 ? 3 : 4;
     return [mm[1] + c.slice(0, o), c.charAt(o), c.slice(o + 1) + mm[3]];
   }
@@ -439,8 +502,8 @@
     $('rsvpBar').style.width = (100 * (r + 1) / cur.flat.length) + '%';
   }
   function delay(r) {
-    var tk = cur.flat[r], base = 60000 / settings.wpm, w = tk.text, end = w.replace(/["'”’」）)]+$/, '').slice(-1);
-    var len = cur.story.lang === 'zh' ? w.replace(/[^一-鿿]/g, '').length * 2.5 : w.replace(/[^A-Za-z0-9]/g, '').length;
+    var tk = cur.flat[r], base = 60000 / settings.wpm, w = tk.text, end = w.replace(/["'”’」』»）)]+$/, '').slice(-1);
+    var len = isCJK(cur.story.lang) ? cjkCount(w) * 2.5 : w.replace(/[^\p{L}\p{N}]/gu, '').length;
     var f = 1 + Math.max(0, len - 6) * 0.08;
     if (/[.!?。！？]/.test(end)) f *= 2.2; else if (/[,;:，；：、]/.test(end)) f *= 1.5;
     var next = cur.flat[r + 1];
@@ -501,6 +564,8 @@
     document.body.className = 'size-' + settings.size + (settings.highlight === '1' ? '' : ' nohl');
     $('showErrors').checked = !!settings.showErrors;
     audio.playbackRate = +settings.rate;
+    renderNotesToggle();
+    if (window.VoiceSound) { if (settings.music !== '1') VoiceSound.stopMusic(); else if (cur && isPlaying() && cur.story.music) VoiceSound.music(cur.story.music); }
   }
   [].forEach.call(document.querySelectorAll('.drawer .seg[data-key]'), function (seg) {
     seg.addEventListener('click', function (e) {
@@ -516,9 +581,9 @@
     var on = settings.notes === '1';
     $('text').classList.toggle('showNotes', on);
     $('notesToggle').setAttribute('aria-pressed', on ? 'true' : 'false');
-    $('notesToggle').querySelector('span').textContent = on ? 'Hide the notes' : 'Show the hidden notes';
+    $('notesToggle').querySelector('span').textContent = on ? 'Hide director\'s notes' : 'Director\'s notes';
   }
-  $('notesToggle').addEventListener('click', function () { settings.notes = settings.notes === '1' ? '0' : '1'; save(); renderNotesToggle(); });
+  $('notesToggle').addEventListener('click', function () { settings.notes = settings.notes === '1' ? '0' : '1'; save(); renderNotesToggle(); renderSettings(); });
   renderNotesToggle();
 
   /* collapsible panels */

@@ -18,7 +18,7 @@ by how many sounds they have.
 
 Setup (once, outside the repo; the model files are not committed):
   python3 -m venv venv && . venv/bin/activate
-  pip install kokoro-onnx "misaki[zh]" soundfile
+  pip install kokoro-onnx "misaki[zh]" "misaki[ja]" soundfile
   npm pack kokoro-q8-shards kokoro-js      # model weights + voices from npm
   cat kokoro-q8.part{0..5}.bin > model_q8.onnx
   (voices.npz is built from kokoro-js/voices/*.bin, see build_voices())
@@ -34,9 +34,11 @@ SR = 24000
 PAUSE = {'comma': 0.18, 'sentence': 0.45, 'para': 0.9}
 SENT_END = '.!?。！？'
 PHRASE_END = SENT_END + ',;:，；：、'
-CLOSERS = '"\'”’」）)'
-OPENERS = '"“‘「（('
-ZH_PUNCT = {'，': ',', '。': '.', '！': '!', '？': '?', '；': ';', '：': ':', '、': ',',
+CLOSERS = '"\'”’」』»）)'
+OPENERS = '"“‘「『«（('
+CJK = '[\u3040-\u30ff\u4e00-\u9fff]'
+ESPEAK = {'fr': 'fr-fr', 'es': 'es', 'it': 'it', 'pt': 'pt-br', 'hi': 'hi'}
+ZH_PUNCT = {'「': '"', '」': '"', '『': '"', '』': '"', '«': '"', '»': '"', '，': ',', '。': '.', '！': '!', '？': '?', '；': ';', '：': ':', '、': ',',
             '“': '"', '”': '"', '‘': "'", '’': "'", '（': '(', '）': ')'}
 
 
@@ -51,10 +53,29 @@ def load_stories():
 
 def tokenize(par, lang):
     """Split a paragraph into display tokens. The page shows exactly these tokens."""
-    if lang != 'zh':
+    if lang not in ('zh', 'ja'):
         return par.split()
-    import jieba
-    raw = [w for w in jieba.cut(par) if w.strip()]
+    if lang == 'ja':
+        # fugashi words, with particles, verb endings and suffixes joined to the word before them
+        import fugashi
+        raw, prefix = [], ''
+        for w in fugashi.Tagger()(par):
+            pos, surf = w.feature.pos1, w.surface
+            if pos == '補助記号' and all(c in OPENERS for c in surf):
+                prefix += surf
+            elif pos == '接頭辞':
+                prefix += surf
+            elif raw and not prefix and pos in ('助詞', '助動詞', '接尾辞', '補助記号'):
+                raw[-1] += surf
+            else:
+                raw.append(prefix + surf)
+                prefix = ''
+        if prefix:
+            raw.append(prefix)
+        return raw
+    else:
+        import jieba
+        raw = [w for w in jieba.cut(par) if w.strip()]
     toks, carry = [], ''
     for w in raw:
         if all(c in OPENERS for c in w):
@@ -103,10 +124,10 @@ def line_voice(story, p, voice):
     line = (story.get('script') or [{}] * len(story['paragraphs']))[p]
     if voice == 'cast':
         return story['cast'][line['who']]['voice'], line.get('speed', 0.92)
-    return voice, (0.9 if story['lang'] == 'zh' else 0.92)
+    return voice, (0.9 if story['lang'] in ('zh', 'ja') else 0.92)
 
 
-def make(story, voice, kokoro, g2p_zh):
+def make(story, voice, kokoro, g2p):
     lang = story['lang']
     words_out, chunks, t = [], [], 0.0
     for p, par in enumerate(story['paragraphs']):
@@ -114,13 +135,16 @@ def make(story, voice, kokoro, g2p_zh):
         toks = tokenize(par, lang)
         row = [[w, 0, 0] for w in toks]
         for ph in phrases(toks):
-            text = (''.join if lang == 'zh' else ' '.join)(toks[i] for i in ph)
-            if lang == 'zh':
-                pho = g2p_zh(text)
+            text = (''.join if lang in ('zh', 'ja') else ' '.join)(toks[i] for i in ph)
+            if lang in ('zh', 'ja'):
+                pho = g2p[lang](text)
                 pho = pho[0] if isinstance(pho, tuple) else pho
                 pho = ''.join(ZH_PUNCT.get(c, c) for c in pho)
                 audio, _ = kokoro.create(pho, voice=v, is_phonemes=True, speed=speed)
-                weights = [max(1, sum(1 for c in toks[i] if '一' <= c <= '鿿')) for i in ph]
+                weights = [max(1, len(re.findall(CJK, toks[i]))) for i in ph]
+            elif lang in ESPEAK:
+                audio, _ = kokoro.create(text, voice=v, speed=speed, lang=ESPEAK[lang])
+                weights = [max(1, len(re.sub(r'[\W\d_]', '', toks[i]))) + 1 for i in ph]
             else:
                 audio, _ = kokoro.create(text, voice=v, speed=speed, lang='en-us' if v[0] == 'a' else 'en-gb')
                 weights = [max(1, len(re.sub(r'[^A-Za-z]', '', toks[i]))) + 1 for i in ph]
@@ -149,18 +173,21 @@ def main():
     from kokoro_onnx import Kokoro
     import soundfile as sf
     kokoro = Kokoro(os.path.join(a.model, 'model_q8.onnx'), os.path.join(a.model, 'voices.npz'))
-    g2p_zh = None
+    g2p = {}
     for story in load_stories():
         if story.get('script'):
             story['paragraphs'] = [line['text'] for line in story['script']]
         if a.ids and story['id'] not in a.ids:
             continue
-        if story['lang'] == 'zh' and g2p_zh is None:
+        if story['lang'] == 'zh' and 'zh' not in g2p:
             from misaki import zh
-            g2p_zh = zh.ZHG2P()
+            g2p['zh'] = zh.ZHG2P()
+        if story['lang'] == 'ja' and 'ja' not in g2p:
+            from misaki import ja
+            g2p['ja'] = ja.JAG2P()
         tracks = {}
         for voice in story.get('kokoroVoices', []):
-            audio, words, dur = make(story, voice, kokoro, g2p_zh)
+            audio, words, dur = make(story, voice, kokoro, g2p)
             wav = os.path.join(a.model, f"{story['id']}.{voice}.wav")
             mp3 = f"audio/{story['id']}.{voice}.mp3"
             sf.write(wav, audio, SR)

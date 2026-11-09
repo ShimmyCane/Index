@@ -17,6 +17,12 @@
 </header>
 
 <main>
+  <!-- Story bar: language and director's notes -->
+  <div class="storyBar" id="storyBar" hidden>
+    <div class="seg langSeg" id="langSeg"></div>
+    <button type="button" class="notesBtn" id="notesToggle" aria-pressed="false">🎬 <span>Director's notes</span></button>
+  </div>
+
   <!-- Home: the story shelf -->
   <section id="home" class="shelf" aria-label="Stories"></section>
 
@@ -33,9 +39,6 @@
       </div>
     </section>
 
-    <div class="notesBar" id="notesBar" hidden>
-      <button type="button" id="notesToggle" aria-pressed="false">📜 <span>Show the hidden notes</span></button>
-    </div>
     <article id="text" class="text"></article>
 
     <div class="player" id="player">
@@ -73,6 +76,14 @@
 <aside class="drawer" id="drawer" hidden>
   <div class="drawerHead"><h2>Settings</h2><button class="mini" id="closeDrawer" type="button" aria-label="Close">✖</button></div>
 
+  <div class="setting"><label>🎬 Director's notes</label>
+    <div class="seg" data-key="notes"><button data-v="1">Open</button><button data-v="0">Hidden</button></div>
+    <p class="hint">Why each character speaks, how to act it, the sounds, the moves and the thoughts. Never read aloud.</p></div>
+  <div class="setting"><label>🔊 Sound effects</label>
+    <div class="seg" data-key="sfx"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
+  <div class="setting"><label>🎵 Background music</label>
+    <div class="seg" data-key="music"><button data-v="1">On</button><button data-v="0">Off</button></div>
+    <p class="hint">A soft tune from the story's part of the world.</p></div>
   <div class="setting"><label>Text size</label>
     <div class="seg" data-key="size"><button data-v="s">A</button><button data-v="m">A+</button><button data-v="l">A++</button></div></div>
   <div class="setting"><label>Highlight the spoken word</label>
@@ -97,16 +108,29 @@
 
   <div class="setting"><label>Database</label><p class="hint">💾 This device only. Family sign-in, saved stories and versions come in 0.3.</p></div>
   <label class="toggle"><input type="checkbox" id="showErrors"> Show errors</label>
-  <p class="info">Voice 0.3.0 · stories and audio bundled with the page · live voice: Kokoro-82M (Apache 2.0) via kokoro-js</p>
+  <p class="info">Voice 0.4.0 · stories and audio bundled with the page · live voice: Kokoro-82M (Apache 2.0) via kokoro-js</p>
 </aside>
 <div id="errorsPanel" class="errorsPanel" hidden></div>
 
 <script src="stories/fisherman.js"></script>
 <script src="stories/fisherman.audio.js"></script>
+<script src="stories/fisherman_zh.js"></script>
+<script src="stories/fisherman_zh.audio.js"></script>
+<script src="stories/fisherman_ja.js"></script>
+<script src="stories/fisherman_ja.audio.js"></script>
+<script src="stories/wolf_en.js"></script>
+<script src="stories/wolf_en.audio.js"></script>
 <script src="stories/wolf_zh.js"></script>
 <script src="stories/wolf_zh.audio.js"></script>
+<script src="stories/wolf_es.js"></script>
+<script src="stories/wolf_es.audio.js"></script>
 <script src="stories/red_hood.js"></script>
 <script src="stories/red_hood.audio.js"></script>
+<script src="stories/red_hood_zh.js"></script>
+<script src="stories/red_hood_zh.audio.js"></script>
+<script src="stories/red_hood_fr.js"></script>
+<script src="stories/red_hood_fr.audio.js"></script>
+<script src="js/sound.js"></script>
 <script src="js/live.js"></script>
 <script src="js/app.js"></script>
 </body>

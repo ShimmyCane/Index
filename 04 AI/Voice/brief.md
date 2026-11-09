@@ -1,7 +1,7 @@
 # Voice — AI Brief
 
 **Updated:** 2026-11-09
-**Status:** MVP 0.3.0, not device-tested. Convo v0.3 open (5 questions; v0.2 questions still open too).
+**Status:** MVP 0.4.0, not device-tested. Convo v0.4 open (5 questions; earlier rounds still open too).
 **Track:** A. Family play.
 
 ## Goal
@@ -13,6 +13,12 @@ A story shelf for the kids on the iPad. Stories play in natural Kokoro voices, e
 - Baker `tools/make_kokoro.py` (kokoro-onnx, npm weights). It owns the tokens and stores `source` so stale audio is detected.
 - Live: a module worker imports the vendored kokoro-js and loads the model from huggingface.co (q8 on WASM, fp32 on WebGPU). The page asks for one line at a time, makes three lines ahead, plays with Web Audio, and estimates the highlight per line. English only.
 - Planned: 0.4 Family database, 0.5 make and save audio from the browser (no key).
+
+## 0.4 additions
+- Story groups (`group`), translations line by line with `notesFrom`, `paraNotes` for prose stories. Languages: en, zh, ja, fr, es now; the baker also knows it, pt, hi (espeak via kokoro-onnx) and ja (misaki[ja] + fugashi; particles, endings and closing quotes join the word before).
+- Director's notes kinds: motivation, acting, sound (+sfx), blocking, gesture, thought; tone shows as Voice. Pop-open via grid-template-rows 0fr→1fr and staggered keyframes.
+- `js/sound.js`: 13 synthesized effects, 8 culture tunes (lookahead scheduler, 120 ms tick). The music follows the play state through setPlayIcon; the effect plays when the highlight enters a new line.
+- `story_list.md`: 3 on the shelf, 10 planned, with third language, tune and voice support.
 
 ## Verified vs. unverified
 - Verified (headless Chromium): three sizes, zero errors, no horizontal scroll, the recorded tracks play with highlight, script story labels and notes toggle, Kokoro live end to end. In the live test, HuggingFace and jsDelivr were redirected to local copies: the real kokoro-q8 weights and kokoro-js voices, the ORT wasm from npm @huggingface/transformers 3.5.1, and a **reconstructed** tokenizer.json and config.json (the real ones could not be downloaded here). In the container it made 1.7 s of speech in 4.9 s on one WASM thread.
