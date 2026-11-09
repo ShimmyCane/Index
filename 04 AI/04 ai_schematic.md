@@ -16,7 +16,7 @@ Layout:
 - <Project>/lessons.md — project-specific lessons, appended over time.
 
 Projects with notes:
-- Athena's world/ — MVP decorating game. `brief.md`, `lessons.md`. Open questions in `03 Projects/Athena's world/convo/convo v0.3.md`.
+- Athena's world/ — decorating game, V2 3-D home (V1 archived in `v1/`). `brief.md`, `lessons.md`. Open questions in `03 Projects/Athena's world/convo/convo v0.3.md`.
 - Chinese Character Sudoku/ — word-grid game MVP. `brief.md`, `lessons.md`.
 - Adventure/ — family story game. `brief.md`, `lessons.md`.
 - Felix Maze/ — printable maze worksheets MVP. `brief.md`, `lessons.md`.
