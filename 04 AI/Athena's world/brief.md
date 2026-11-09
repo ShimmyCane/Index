@@ -88,3 +88,13 @@ A decorating game for Athena. A white room, a choice of house or workplace, deco
 - Tested headless (SwiftShader): place all four things in house 1 by tapping (floor and walls), finish card, drag to turn, pick up and move, Turn, Undo, buy a bunk bed, all five worlds render, front-page picture, V1 opens and keeps V2 data, 390-wide no horizontal scroll. No page errors.
 - Not verified: iPad Safari (WebGL performance, pinch), the signed-in sync with the new `world` field.
 - Open questions in convo v0.8.
+
+## 2.1.0 (2026-11-09): players, places, outside view
+
+- Players (`PROFILES`): Athena (`athena.save` / save_key `main`, shared with V1), Felix (`athena.save.felix` / `felix`), Guest (`athena.save.guest` / `guest`). The existing `athena_saves` policy allows any save_key, so no SQL change.
+- Places (`PLACES`) hold rooms; rooms are saved by id under `data.world.rooms` (v3). 2.0.0's array is migrated by index (cottage, farmhouse, barn, apartment, tower). Unlocking is derived: the next place opens when the one before is done.
+- `world3d.js` rewritten around places: several rooms per island, roofs and lifted upper floors, outside view (zoom < 0.62 or 🔭), outside-wall mounts, siding skins, two-finger pan, bigger rooms (half 8).
+- Home Depot outside things and siding in `models.js`; shops renamed H Mart, Costco, Target; 37 job people in `content.js` (`JOB_PEOPLE`).
+- Database check: `athena_notes` and `athena_saves` both empty on 2026-11-09.
+- Tested headless: 2.0.0 save migrates, all six places draw, farm room switch, outside view, bigger room, front door placed on an outside wall by tapping, brick siding, full screen, switching players keeps games apart, job card, 390 wide no sideways scroll. No page errors.
+- Not verified: iPad touch for pan and full screen; a signed-in round trip for Felix.

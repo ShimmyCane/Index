@@ -704,12 +704,12 @@ const QUESTIONS = [
   }
 ];
 
-// ---- Retail therapy: twelve shops. Each sells things by id (see ITEMS in models.js). ----
-// Shop names are generic for now (see convo v0.5). Prices are in credits.
+// ---- Retail therapy: the shops. Each sells things by id (see ITEMS in models.js). ----
+// Shops Athena knows from home (convo v0.8). Prices are in credits.
 const SHOPS = [
-  { id: 'korean-grocery', name: 'Korean grocery', icon: '🥢', stock: [['teapot', 4], ['lantern', 6], ['mushroom', 3], ['mushroomblue', 5]] },
-  { id: 'warehouse', name: 'Warehouse club', icon: '📦', stock: [['sofa', 14], ['tv', 12], ['window', 9]] },
-  { id: 'home-decor', name: 'Home decor shop', icon: '🏠', stock: [['vase', 4], ['picture', 6], ['sun', 6], ['rainbow', 5]] },
+  { id: 'korean-grocery', name: 'H Mart', icon: '🥢', stock: [['teapot', 4], ['lantern', 6], ['mushroom', 3], ['mushroomblue', 5]] },
+  { id: 'warehouse', name: 'Costco', icon: '📦', stock: [['sofa', 14], ['tv', 12], ['window', 9]] },
+  { id: 'home-decor', name: 'Target', icon: '🎯', stock: [['vase', 4], ['picture', 6], ['sun', 6], ['rainbow', 5]] },
   { id: 'craft', name: 'Craft shop', icon: '🧶', stock: [['kite', 4], ['balloon', 3], ['basket', 4]] },
   { id: 'bakery', name: 'Bakery', icon: '🥐', stock: [['candle', 3], ['basket', 4]] },
   { id: 'toy', name: 'Toy shop', icon: '🧸', stock: [['teddy', 5], ['balloon', 3], ['kite', 4], ['mushroomstool', 4]] },
@@ -718,10 +718,11 @@ const SHOPS = [
   { id: 'bookshop', name: 'Bookshop', icon: '📚', stock: [['bookshelf', 10], ['lamp', 6]] },
   { id: 'furniture', name: 'Furniture shop', icon: '🪑', stock: [['bed', 16], ['bunkbed', 18], ['canopybed', 20], ['carbed', 22], ['haybed', 10], ['chair', 8], ['clock', 5]] },
   { id: 'bathroom', name: 'Bathroom shop', icon: '🛁', stock: [['bath', 14], ['mirror', 6]] },
-  { id: 'music', name: 'Music shop', icon: '🎹', stock: [['piano', 15], ['lamp', 6]] }
+  { id: 'music', name: 'Music shop', icon: '🎹', stock: [['piano', 15], ['lamp', 6]] },
+  { id: 'home-depot', name: 'Home Depot', icon: '🔨', stock: [['frontdoor', 8], ['shutters', 6], ['flowerbox', 4], ['porchlamp', 4], ['awning', 6], ['sidingmint', 10], ['sidingpink', 10], ['sidingbrick', 12], ['sidingwood', 12]] }
 ];
 // A trip home needs every shop visited and this much spent in the trip.
-const TRIP = { shopsNeeded: 12, spendNeeded: 20 };
+const TRIP = { shopsNeeded: SHOPS.length, spendNeeded: 20 };
 
 // ---- Get a job: the list (from jobs.md). Full steps are written for some jobs below. ----
 const JOBS = [
@@ -948,6 +949,49 @@ const JOBS = [
     "desc": "Looks after bees and collects their honey."
   }
 ];
+
+// Who you meet for each job: a picture (person), a name (who) and a short hello (intro, 2-3 lines).
+// About four in five of the people are women, with some men too (convo v0.8).
+const JOB_PEOPLE = {
+  "architect": { person: "👩‍💼", who: "Maya", intro: ["Hi, I'm Maya. I draw the plans for houses, schools and libraries.", "I measure every room and think about where the sun comes in.", "Then builders use my drawings to make it real!"] },
+  "flight-attendant": { person: "💁‍♀️", who: "Grace", intro: ["Hi, I'm Grace. I look after everyone on the plane.", "I show how to stay safe and bring snacks and drinks.", "If someone feels worried, I help them feel calm."] },
+  "pilot": { person: "👩‍✈️", who: "Captain Rosa", intro: ["Hi, I'm Captain Rosa. I fly big planes all over the world.", "Before take-off I check the weather and the plane, step by step.", "Up in the sky, I can see the tops of the clouds!"] },
+  "artist": { person: "👩‍🎨", who: "Lily", intro: ["Hi, I'm Lily. I paint pictures with lots of colour.", "I look closely at things, then show how they make me feel.", "Some of my paintings hang in a gallery for everyone to see."] },
+  "dancer": { person: "💃", who: "Sofia", intro: ["Hi, I'm Sofia. I tell stories by moving to music.", "I practise every day to make my body strong and bendy.", "On stage, the lights come on and I twirl and leap!"] },
+  "singer": { person: "👩‍🎤", who: "Jade", intro: ["Hi, I'm Jade. I sing songs for people to enjoy.", "I warm up my voice with hums and silly sounds first.", "My favourite part is when everyone sings along."] },
+  "builder": { person: "👷‍♂️", who: "Marcus", intro: ["Hi, I'm Marcus. I build walls, floors and roofs.", "I follow the architect's plans and wear a hard hat to stay safe.", "When we finish, a family gets a brand new home."] },
+  "doctor": { person: "👩‍⚕️", who: "Dr. Priya", intro: ["Hi, I'm Dr. Priya. I help people when they feel sick.", "I listen to your heart and ask how you feel.", "Then I work out what will help you get better."] },
+  "nurse": { person: "👨‍⚕️", who: "Daniel", intro: ["Hi, I'm Daniel. I look after patients in the hospital.", "I check temperatures, give medicine and cheer people up.", "Doctors and nurses work together as a team."] },
+  "veterinarian": { person: "👩‍⚕️", who: "Dr. Hana", intro: ["Hi, I'm Dr. Hana. I'm a doctor for animals.", "I help puppies, kittens, bunnies and even horses feel better.", "Animals can't talk, so I watch them very carefully."] },
+  "teacher": { person: "👩‍🏫", who: "Ms. Chen", intro: ["Hi, I'm Ms. Chen. I help children learn new things every day.", "We read stories, count, sing and do experiments.", "I love it when someone says, 'Oh! Now I get it!'"] },
+  "firefighter": { person: "👩‍🚒", who: "Alex", intro: ["Hi, I'm Alex. I put out fires and help people in emergencies.", "When the alarm rings, I jump into my gear and onto the truck.", "I also teach kids how to stay safe at home."] },
+  "police-officer": { person: "👮‍♀️", who: "Officer Kim", intro: ["Hi, I'm Officer Kim. I help keep our town safe.", "I help people who are lost and make sure traffic moves safely.", "If you need help, you can always ask a police officer."] },
+  "chef": { person: "👨‍🍳", who: "Leo", intro: ["Hi, I'm Leo. I cook meals in a busy restaurant kitchen.", "I taste everything and invent new recipes.", "Making a plate look pretty is part of my job too!"] },
+  "baker": { person: "👩‍🍳", who: "Mia", intro: ["Hi, I'm Mia. I bake bread, cakes and cookies.", "I start very early in the morning, before the sun comes up.", "The whole bakery smells sweet and warm."] },
+  "farmer": { person: "👩‍🌾", who: "Ruth", intro: ["Hi, I'm Ruth. I grow vegetables and look after animals.", "I feed the chickens, milk the cows and water the crops.", "The food you eat might come from a farm like mine!"] },
+  "gardener": { person: "👩‍🌾", who: "Ivy", intro: ["Hi, I'm Ivy. I plant flowers and trees and help them grow.", "I dig, water, trim and pull out weeds.", "Bees and butterflies love my gardens."] },
+  "zookeeper": { person: "👩", who: "Nora", intro: ["Hi, I'm Nora. I look after the animals at the zoo.", "I make their food, clean their homes and give them toys.", "My favourite friend is a very hungry giraffe."] },
+  "scientist": { person: "👩‍🔬", who: "Dr. Ada", intro: ["Hi, I'm Dr. Ada. I ask questions about how things work.", "Then I test my ideas with experiments and write down what happens.", "Sometimes I discover something nobody knew before!"] },
+  "astronaut": { person: "👩‍🚀", who: "Commander Sally", intro: ["Hi, I'm Commander Sally. I fly into space on a rocket.", "On the space station everything floats, even my water!", "I do experiments and look down at the Earth."] },
+  "bus-driver": { person: "👨", who: "Mr. Joe", intro: ["Hi, I'm Mr. Joe. I drive a big bus around town.", "I stop at every bus stop and say hello to everyone.", "I drive carefully so everyone gets there safely."] },
+  "train-driver": { person: "👩‍🔧", who: "Bea", intro: ["Hi, I'm Bea. I drive a long train full of people.", "I follow the signals and keep the train on time.", "Choo choo! Next stop, the station."] },
+  "sailor": { person: "👱‍♀️", who: "Marina", intro: ["Hi, I'm Marina. I sail boats across the sea.", "I tie strong knots and read the wind and the waves.", "At night, I can find my way by the stars."] },
+  "lifeguard": { person: "🏊‍♀️", who: "Kai", intro: ["Hi, I'm Kai. I watch swimmers at the beach and the pool.", "I'm a strong swimmer, ready to help if someone needs it.", "I remind everyone to swim near a grown-up."] },
+  "mail-carrier": { person: "🙋‍♀️", who: "Pam", intro: ["Hi, I'm Pam. I bring letters and parcels to every house.", "Rain or shine, I walk my route every day.", "I love seeing a smile when a birthday card arrives."] },
+  "librarian": { person: "👩‍🏫", who: "Mrs. Patel", intro: ["Hi, I'm Mrs. Patel. I look after the books in the library.", "I help you find a story about dragons, space or anything you like.", "I also read stories aloud at story time."] },
+  "photographer": { person: "🙆‍♀️", who: "Zoe", intro: ["Hi, I'm Zoe. I take photos of people, places and special days.", "I wait for the perfect light and the perfect smile.", "A photo saves a moment so you can keep it forever."] },
+  "author": { person: "👵", who: "Elle", intro: ["Hi, I'm Elle. I write books and stories.", "I get ideas from my dreams, my walks and my cat.", "I write, then fix my words again and again until they shine."] },
+  "musician": { person: "👨‍🎤", who: "Sam", intro: ["Hi, I'm Sam. I play the guitar and the drums.", "I practise a lot and play music with my band.", "Music can make people dance, smile or feel calm."] },
+  "actor": { person: "👩‍🎤", who: "Ruby", intro: ["Hi, I'm Ruby. I pretend to be different people in plays and films.", "I learn my lines and practise how my character feels.", "When the audience claps, I take a big bow!"] },
+  "engineer": { person: "👩‍🔧", who: "Eva", intro: ["Hi, I'm Eva. I design machines and bridges.", "I use maths to make sure they are strong and safe.", "If something breaks, I work out how to fix it."] },
+  "coder": { person: "👩‍💻", who: "Lin", intro: ["Hi, I'm Lin. I write instructions that make apps and games work.", "Computers do exactly what I tell them, so I have to be very clear.", "When there's a bug, I hunt it down and fix it."] },
+  "electrician": { person: "👨‍🔧", who: "Omar", intro: ["Hi, I'm Omar. I put in the wires that bring power to buildings.", "Thanks to me, the lights turn on when you flip a switch.", "Electricity can be dangerous, so I'm very careful."] },
+  "hairdresser": { person: "👩‍🎨", who: "Bella", intro: ["Hi, I'm Bella. I cut, wash and style hair.", "I can do braids, bobs, curls and even bright colours.", "I help people feel happy when they look in the mirror."] },
+  "florist": { person: "👩‍🌾", who: "Daisy", intro: ["Hi, I'm Daisy. I make beautiful bunches of flowers.", "I pick colours that go together, like a painting.", "People give my flowers for birthdays and to say 'I love you'."] },
+  "tailor": { person: "👴", who: "Mr. Arturo", intro: ["Hi, I'm Arturo. I sew and fix clothes so they fit just right.", "I measure carefully, then cut and stitch the cloth.", "A new button or hem can make clothes feel like new."] },
+  "beekeeper": { person: "👩‍🌾", who: "Honey", intro: ["Hi, I'm Honey. I look after bees in their hives.", "I wear a suit and veil so the bees don't sting me.", "The bees make honey, and they help flowers grow too."] }
+};
+JOBS.forEach(j => Object.assign(j, JOB_PEOPLE[j.id] || {}));
 
 // Full steps. A job with no entry here shows its card, and its steps come later.
 // learn: short pages. quiz: multiple choice (first-try rules as in the Learning center).

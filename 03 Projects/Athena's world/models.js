@@ -449,6 +449,62 @@
     return g;
   }
 
+  // ---- Outside things (Home Depot): on the outside of a wall, back at z = 0, facing +z ----
+  function frontdoor() {
+    const g = G();
+    box(g, 2.2, 3.4, 0.25, C.white, 0, 0, 0.12);
+    box(g, 1.7, 3.0, 0.2, C.coral, 0, -0.15, 0.3);
+    [0.55, -0.55].forEach(y => box(g, 1.2, 0.9, 0.06, C.peach, 0, y - 0.1, 0.42, { out: 0.03 }));
+    ball(g, 0.14, C.gold, 0.55, -0.3, 0.45);
+    box(g, 2.8, 0.25, 1.0, C.grey, 0, -1.75, 0.5);                       // the step
+    cyl(g, 0.45, 0.45, 0.12, C.butter, 0, 1.15, 0.42, { rx: Math.PI / 2, outline: false });
+    return g;
+  }
+  function shutters() {
+    const g = G();
+    box(g, 2.2, 2.2, 0.2, C.white, 0, 0, 0.1);
+    box(g, 1.8, 1.8, 0.08, C.sky, 0, 0, 0.22, { outline: false });
+    box(g, 0.12, 1.8, 0.06, C.white, 0, 0, 0.28, { outline: false });
+    [-1.6, 1.6].forEach(x => {
+      box(g, 0.9, 2.4, 0.15, C.teal, x, 0, 0.12);
+      for (let i = 0; i < 6; i++) box(g, 0.7, 0.06, 0.05, C.mint, x, -0.95 + i * 0.38, 0.22, { outline: false });
+    });
+    return g;
+  }
+  function flowerbox() {
+    const g = G();
+    box(g, 2.6, 0.7, 0.8, C.wood, 0, 0, 0.4);
+    [-0.9, -0.3, 0.3, 0.9].forEach((x, i) => {
+      ball(g, 0.35, C.leaf, x, 0.45, 0.4);
+      ball(g, 0.2, [C.pink, C.butter, C.coral, C.lilac][i], x + 0.1, 0.7, 0.55);
+    });
+    return g;
+  }
+  function porchlamp() {
+    const g = G();
+    box(g, 0.5, 0.8, 0.12, C.dark, 0, 0, 0.06);
+    box(g, 0.12, 0.12, 0.6, C.dark, 0, 0.2, 0.35);
+    cyl(g, 0.3, 0.25, 0.7, C.butter, 0, -0.1, 0.65, { glow: 0.6 });
+    cone(g, 0.4, 0.35, C.dark, 0, 0.45, 0.65, { seg: 6 });
+    return g;
+  }
+  function awning() {
+    const g = G();
+    for (let i = 0; i < 6; i++) box(g, 0.5, 0.12, 1.4, i % 2 ? C.white : C.coral, -1.25 + i * 0.5, 0, 0.7, { rx: 0.45, outline: i === 0 || i === 5 });
+    box(g, 3.1, 0.3, 0.12, C.coral, 0, -0.35, 1.32);
+    return g;
+  }
+  // Siding: changes the colour of the outside walls of the room. The model is a sample board for the button.
+  function sidingSample(color, lines) {
+    return () => {
+      const g = G();
+      box(g, 2.4, 2.0, 0.2, color, 0, 1.0, 0);
+      if (lines === 'v') for (let i = -2; i <= 2; i++) box(g, 0.06, 2.0, 0.05, C.darkwood, i * 0.45, 1.0, 0.12, { outline: false });
+      else for (let y = 0.3; y < 2; y += lines === 'brick' ? 0.32 : 0.4) box(g, 2.4, 0.05, 0.05, C.white, 0, y, 0.12, { outline: false });
+      return g;
+    };
+  }
+
   const ITEMS = {
     // On the wall
     window:  { emoji: '🪟', label: 'window',  zone: 'wall', build: windowItem },
@@ -489,7 +545,18 @@
     fishbowl:  { emoji: '🐠', label: 'fish bowl', zone: 'floor', build: fishbowl },
     tulip:     { emoji: '🌷', label: 'tulips',    zone: 'floor', build: tulip },
     basket:    { emoji: '🧺', label: 'basket',    zone: 'floor', build: basket },
-    haybale:   { emoji: '🌾', label: 'hay bale',  zone: 'floor', build: haybale }
+    haybale:   { emoji: '🌾', label: 'hay bale',  zone: 'floor', build: haybale },
+    // Outside things (Home Depot). v: how high the middle sits, when it must be fixed (a door stands on the floor).
+    frontdoor: { emoji: '🚪', label: 'front door',  zone: 'outside', build: frontdoor, v: 1.85 },
+    shutters:  { emoji: '🪟', label: 'shutters',    zone: 'outside', build: shutters },
+    flowerbox: { emoji: '🌼', label: 'flower box',  zone: 'outside', build: flowerbox },
+    porchlamp: { emoji: '🏮', label: 'porch lamp',  zone: 'outside', build: porchlamp },
+    awning:    { emoji: '⛱️', label: 'awning',      zone: 'outside', build: awning },
+    // Siding: one per room, the last one picked wins
+    sidingmint:  { emoji: '🟩', label: 'mint siding',  zone: 'siding', build: sidingSample(C.mint, 'h') },
+    sidingpink:  { emoji: '🟪', label: 'pink siding',  zone: 'siding', build: sidingSample(C.pink, 'h') },
+    sidingbrick: { emoji: '🧱', label: 'brick',        zone: 'siding', build: sidingSample(C.terracotta, 'brick') },
+    sidingwood:  { emoji: '🪵', label: 'wood siding',  zone: 'siding', build: sidingSample(C.wood, 'v') }
   };
 
   window.ITEMS = ITEMS;

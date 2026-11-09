@@ -1,6 +1,6 @@
 # Athena's world — Schematic
 
-**Status:** V2 (2.0.0): Home decor is a 3-D world. Not yet device-tested on iPad.
+**Status:** V2 (2.1.0): Home decor is a 3-D world with places, players and an outside view. Partly tested on iPad (2.0.0).
 **Owner:** Jimmy
 **Platform:** iPad web app, landscape first (portrait stacks the room above the buttons)
 **Conversations:** `convo/convo v0.1.md` (questions), `convo/convo v0.2.md` (visibility answers), `convo/convo v0.3.md` (purpose, MVP, assumptions), `convo/convo v0.4.md` (five houses, ready pop-up, open questions)
@@ -31,6 +31,18 @@ A decorating game. Athena picks who a house or workplace is for, then decorates 
 - **Sync pill** (top of the play area): `💾 this device`, `☁️ synced`, `☁️ syncing…`, `⚠️ check`. Check database lists each table in the drawer.
 - Settings are kept on the device only. The publishable key is in the script; the service-role key is never used.
 - The SQL lives in `supabase/`: `test_001` (rolled back, run first), `001_athena_family` (the tables), `verify_001` (read-only, paste the result back). Applied to the Family project on 2026-11-08.
+
+## Players, places and the outside (2.1.0)
+
+- **Players:** 👧 Athena, 👦 Felix and 🙂 Guest, picked at the top of every screen. Each has their own game. On the device: `athena.save` (Athena, shared with V1), `athena.save.felix`, `athena.save.guest`. In the family database, one row each in `athena_saves`: `main` (Athena), `felix`, `guest`. Notes carry the player's name in their label.
+- **Places** (`PLACES`): Cottage, Beach hut (sand island in the sea), Treehouse (room up a tree, ladder), Farm (one island, two rooms: Farmhouse and Barn, switch with the buttons or by tapping the other building), City apartment (a middle floor of a block), Tall tower (a middle floor high up). Places open one after another.
+- **Coming later** (`FUTURE`, shown locked with prices): Island 200, Bus 150, Boat 250, Airplane 350, Spaceship 500.
+- **Bigger room:** 📐 Make this room bigger costs 40 credits and turns a 5 × 5 room (10 × 10 units) into 8 × 8 (16 × 16). The island grows with it.
+- **Outside view:** zoom far out, or press 🔭. The walls go back up, the roof goes on (or the upper floors come down), and the inside hides. 🛋️ goes back in. While you look inside, a building's upper floors float above the room like a doll's house lid.
+- **Full screen** (⛶): the world fills the page, with a strip of things along the bottom and ✖ to leave. Two fingers pan (or right-drag / shift-drag with a mouse).
+- **Outside things** (Home Depot): front door, shutters, flower box, porch lamp, awning. Picking one switches to the outside view; tap the outside of a wall. **Siding** (mint, pink, brick, wood) changes a room's outside walls at once; pick it again to take it off.
+- **Shops** now use names Athena knows: H Mart, Costco, Target, and a new Home Depot. The trip needs every shop (13).
+- **Jobs:** every job has a person to meet (a picture, a name and a 2–3 line hello). About four in five are women.
 
 ## V2: the 3-D home (2.0.0)
 
@@ -97,7 +109,7 @@ Levels 2–4 open as placeholder screens for now. Lock rules are a suggestion, s
 
 - `index.html` — the game (HTML, CSS, JS, Web Audio). The house list is at the top of the script.
 - `models.js` — the 3-D things (`ITEMS`): emoji, label, zone (`wall` or `floor`) and a build function.
-- `world3d.js` — the 3-D world: houses, scenery, cut-away walls, touch, thumbnails and the front-page picture.
+- `world3d.js` — the 3-D world: places and rooms, scenery, cut-away walls, roofs and the outside view, touch, thumbnails and the front-page picture.
 - `lib/three.min.js` — Three.js r128 (MIT, licence beside it).
 - `v1/` — V1, archived.
 - `mockups/` — pages to see the project at a glance: `index.html` (front page with links), `project-map.html` (every file and what it is for), `game-flow.html` (the steps of play, with a picture of the room).
