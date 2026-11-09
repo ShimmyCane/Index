@@ -4,6 +4,9 @@
 Kokoro-82M is an open voice model (Apache 2.0). It runs on this computer:
 no account, no key, nothing is sent anywhere.
 
+Script stories (story.script + story.cast): the voice 'cast' reads each line in its
+speaker's voice at the line's speed; any other voice reads every line itself.
+
 Output, per story and voice:
   audio/<id>.<voice>.mp3          the narration
   stories/<id>.audio.js           word timings for every voice of that story
@@ -95,10 +98,19 @@ def build_voices(js_voice_dir, out):
     np.savez(out, **v)
 
 
+def line_voice(story, p, voice):
+    """Voice and speed for paragraph p. voice 'cast' = each script line in its speaker's voice."""
+    line = (story.get('script') or [{}] * len(story['paragraphs']))[p]
+    if voice == 'cast':
+        return story['cast'][line['who']]['voice'], line.get('speed', 0.92)
+    return voice, (0.9 if story['lang'] == 'zh' else 0.92)
+
+
 def make(story, voice, kokoro, g2p_zh):
     lang = story['lang']
     words_out, chunks, t = [], [], 0.0
     for p, par in enumerate(story['paragraphs']):
+        v, speed = line_voice(story, p, voice)
         toks = tokenize(par, lang)
         row = [[w, 0, 0] for w in toks]
         for ph in phrases(toks):
@@ -107,10 +119,10 @@ def make(story, voice, kokoro, g2p_zh):
                 pho = g2p_zh(text)
                 pho = pho[0] if isinstance(pho, tuple) else pho
                 pho = ''.join(ZH_PUNCT.get(c, c) for c in pho)
-                audio, _ = kokoro.create(pho, voice=voice, is_phonemes=True, speed=0.9)
+                audio, _ = kokoro.create(pho, voice=v, is_phonemes=True, speed=speed)
                 weights = [max(1, sum(1 for c in toks[i] if '一' <= c <= '鿿')) for i in ph]
             else:
-                audio, _ = kokoro.create(text, voice=voice, speed=0.92, lang='en-us' if voice[0] == 'a' else 'en-gb')
+                audio, _ = kokoro.create(text, voice=v, speed=speed, lang='en-us' if v[0] == 'a' else 'en-gb')
                 weights = [max(1, len(re.sub(r'[^A-Za-z]', '', toks[i]))) + 1 for i in ph]
             audio = trim(np.asarray(audio, dtype=np.float32))
             d = len(audio) / SR
@@ -139,6 +151,8 @@ def main():
     kokoro = Kokoro(os.path.join(a.model, 'model_q8.onnx'), os.path.join(a.model, 'voices.npz'))
     g2p_zh = None
     for story in load_stories():
+        if story.get('script'):
+            story['paragraphs'] = [line['text'] for line in story['script']]
         if a.ids and story['id'] not in a.ids:
             continue
         if story['lang'] == 'zh' and g2p_zh is None:
@@ -153,7 +167,8 @@ def main():
             subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', wav, '-ac', '1', '-c:a', 'libmp3lame',
                             '-b:a', '64k', os.path.join(ROOT, mp3)], check=True)
             tracks['kokoro:' + voice] = {
-                'service': 'Kokoro', 'voice': voice, 'src': mp3, 'duration': dur,
+                'service': 'Kokoro', 'voice': voice,
+                'cast': {k: c['voice'] for k, c in story.get('cast', {}).items()} if voice == 'cast' else None, 'src': mp3, 'duration': dur,
                 'made': datetime.date.today().isoformat(), 'timing': 'estimated per phrase',
                 'source': story['paragraphs'], 'words': words}
             print(f"{story['id']} {voice}: {dur}s -> {mp3}")

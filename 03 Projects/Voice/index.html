@@ -29,9 +29,13 @@
       <div class="panelBody" id="voices-body" hidden>
         <div class="voiceList" id="voiceList"></div>
         <p class="hint" id="voiceHint"></p>
+        <p class="liveStatus" id="liveStatus" hidden>Tap ▶ to load the live voice.</p>
       </div>
     </section>
 
+    <div class="notesBar" id="notesBar" hidden>
+      <button type="button" id="notesToggle" aria-pressed="false">📜 <span>Show the hidden notes</span></button>
+    </div>
     <article id="text" class="text"></article>
 
     <div class="player" id="player">
@@ -75,6 +79,9 @@
     <div class="seg" data-key="highlight"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
   <div class="setting"><label>Story voice speed</label>
     <div class="seg" data-key="rate"><button data-v="0.8">Slow</button><button data-v="0.9">Calm</button><button data-v="1">Normal</button><button data-v="1.1">Quick</button></div></div>
+  <div class="setting"><label>Kokoro live engine</label>
+    <div class="seg" data-key="liveEngine"><button data-v="wasm">Small</button><button data-v="webgpu">Fast</button></div>
+    <p class="hint">Small: 92 MB, works everywhere, slower. Fast: 326 MB, needs WebGPU (newer iPads and Chrome). Downloaded once, then kept by the browser.</p></div>
   <div class="setting"><label>iPad voice (English)</label><select id="voiceEn"></select></div>
   <div class="setting"><label>iPad voice (中文)</label><select id="voiceZh"></select>
     <p class="hint">Better iPad voices: Settings → Accessibility → Spoken Content → Voices, download one marked Premium or Enhanced, then reload.</p></div>
@@ -90,7 +97,7 @@
 
   <div class="setting"><label>Database</label><p class="hint">💾 This device only. Family sign-in, saved stories and versions come in 0.3.</p></div>
   <label class="toggle"><input type="checkbox" id="showErrors"> Show errors</label>
-  <p class="info">Voice 0.2.0 · stories and audio bundled with the page</p>
+  <p class="info">Voice 0.3.0 · stories and audio bundled with the page · live voice: Kokoro-82M (Apache 2.0) via kokoro-js</p>
 </aside>
 <div id="errorsPanel" class="errorsPanel" hidden></div>
 
@@ -98,6 +105,9 @@
 <script src="stories/fisherman.audio.js"></script>
 <script src="stories/wolf_zh.js"></script>
 <script src="stories/wolf_zh.audio.js"></script>
+<script src="stories/red_hood.js"></script>
+<script src="stories/red_hood.audio.js"></script>
+<script src="js/live.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

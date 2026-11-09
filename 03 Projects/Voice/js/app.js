@@ -2,9 +2,11 @@
    Plain script, no build. Stories: stories/<id>.js; audio + word timings: stories/<id>.audio.js. */
 (function () {
   'use strict';
-  var VERSION = '0.2.0';
+  var VERSION = '0.3.0';
   var STORIES = window.VOICE_STORIES || [];
   var AUDIO = window.VOICE_AUDIO || {};
+  // Script stories (story.script + story.cast): each line is one paragraph.
+  STORIES.forEach(function (s) { if (s.script && !s.paragraphs) s.paragraphs = s.script.map(function (l) { return l.text; }); });
   var $ = function (id) { return document.getElementById(id); };
 
   /* ---------- errors (opt-in, bottom) ---------- */
@@ -24,7 +26,7 @@
 
   /* ---------- settings ---------- */
   var KEY = 'voice.settings';
-  var DEFAULTS = { size: 'm', highlight: '1', rate: '1', wpm: 200, voiceEn: '', voiceZh: '', track: {}, best: {}, showErrors: false };
+  var DEFAULTS = { size: 'm', highlight: '1', rate: '1', wpm: 200, notes: '0', liveEngine: 'wasm', voiceEn: '', voiceZh: '', track: {}, best: {}, showErrors: false };
   var settings = load(KEY, DEFAULTS);
   function load(k, def) {
     var out = JSON.parse(JSON.stringify(def));
@@ -128,11 +130,13 @@
     var list = freshTracks(story).map(function (t) {
       return { key: t.key, label: t.track.service + ' · ' + nice(t.track.voice), sub: t.fresh ? fmt(t.track.duration) + ' · made ' + t.track.made : 'older than the text', ok: t.fresh };
     });
+    var zh = story.lang === 'zh';
+    list.push({ key: 'live', label: 'Kokoro · live', sub: zh ? 'English only for now' : liveSub(), ok: !zh && !!window.WebAssembly && !!window.VoiceLive });
     list.push({ key: 'ipad', label: 'iPad voice', sub: ipadVoiceName(story.lang) || 'built in', ok: !!window.speechSynthesis });
     list.push({ key: 'eleven', label: 'ElevenLabs', sub: 'not made yet (needs a key)', ok: false });
     return list;
   }
-  function nice(v) { return ({ af_heart: 'Heart', bm_fable: 'Fable', zf_xiaoxiao: '晓晓', zm_yunxi: '云希' })[v] || v; }
+  function nice(v) { return ({ cast: 'Cast (' + Object.keys((cur && cur.story.cast) || {}).length + ' voices)', af_heart: 'Heart', bm_fable: 'Fable', zf_xiaoxiao: '晓晓', zm_yunxi: '云希' })[v] || v; }
   function currentTrack() {
     var choices = trackChoices(cur.story).filter(function (c) { return c.ok; });
     var want = settings.track[cur.story.id];
@@ -146,8 +150,24 @@
     text.lang = st.lang === 'zh' ? 'zh' : 'en';
     text.innerHTML = '';
     var sep = st.lang === 'zh' ? '' : ' ', pEl = null, lastP = -1;
+    var script = st.script, NOTE = { tone: '🎭', blocking: '🚶', gesture: '✋', thought: '💭' };
+    $('notesBar').hidden = !script;
     cur.flat.forEach(function (tk, g) {
-      if (tk.p !== lastP) { pEl = document.createElement('p'); text.appendChild(pEl); lastP = tk.p; }
+      if (tk.p !== lastP) {
+        var line = script && script[tk.p];
+        if (line && (line.tone || line.notes)) {
+          var nb = document.createElement('div'); nb.className = 'notes';
+          var items = (line.tone ? [{ kind: 'tone', text: line.tone }] : []).concat(line.notes || []);
+          items.forEach(function (n) { var d = document.createElement('div'); d.textContent = (NOTE[n.kind] || '•') + ' ' + n.text; nb.appendChild(d); });
+          text.appendChild(nb);
+        }
+        pEl = document.createElement('p'); text.appendChild(pEl); lastP = tk.p;
+        if (line && line.who !== 'narrator' && st.cast[line.who]) {
+          pEl.className = 'say who-' + line.who;
+          var c = document.createElement('span'); c.className = 'speaker'; c.textContent = st.cast[line.who].icon + ' ' + st.cast[line.who].name;
+          pEl.appendChild(c);
+        }
+      }
       else if (sep) pEl.appendChild(document.createTextNode(sep));
       var s = document.createElement('span'); s.className = 'w'; s.dataset.g = g; s.textContent = tk.text;
       pEl.appendChild(s);
@@ -179,7 +199,8 @@
       });
       box.appendChild(b);
     });
-    $('voiceHint').textContent = 'Same story, different voices. Tap one, then ▶. Kokoro is a free open voice model, made ahead of time. The iPad voice speaks live.';
+    $('voiceHint').textContent = 'Same story, different voices. Tap one, then ▶. Kokoro is a free open voice model: made ahead of time, or live in this browser (downloads the model once). The iPad voice speaks live.';
+    $('liveStatus').hidden = key !== 'live';
   }
 
   function loadTrack() {
@@ -191,7 +212,7 @@
   function position() {
     if (!cur) return 0;
     var t = trackData(currentTrack());
-    return t ? gAt(t, audio.currentTime) : ipad.g;
+    return t ? gAt(t, audio.currentTime) : currentTrack() === 'live' ? live.g : ipad.g;
   }
   function gAt(t, sec) {
     var g = 0, i = 0;
@@ -204,10 +225,11 @@
     g = Math.max(0, Math.min(cur.flat.length - 1, g));
     var playing = isPlaying(), t = trackData(currentTrack());
     if (t) { audio.currentTime = tAt(t, g); if (keepPlaying && playing) audio.play(); }
+    else if (currentTrack() === 'live') { live.g = g; if (keepPlaying && playing) liveFrom(g); }
     else { ipad.g = g; if (keepPlaying && playing) speakFrom(g); }
     highlight(g); updateTime();
   }
-  function isPlaying() { return trackData(currentTrack()) ? !audio.paused : ipad.on; }
+  function isPlaying() { var k = currentTrack(); return trackData(k) ? !audio.paused : k === 'live' ? live.on && !live.paused : ipad.on; }
 
   function togglePlay() {
     if (!cur) return;
@@ -215,6 +237,10 @@
     if (t) {
       if (audio.paused) { audio.playbackRate = +settings.rate; audio.play().then(function () { setPlayIcon(true); tick(); }).catch(function (e) { logError('Play: ' + e.message); }); }
       else { audio.pause(); setPlayIcon(false); }
+    } else if (currentTrack() === 'live') {
+      if (live.on && !live.paused) { live.paused = true; ctx.suspend(); setPlayIcon(false); }
+      else if (live.on) { live.paused = false; ctx.resume(); setPlayIcon(true); liveTick(); }
+      else liveFrom(live.g >= cur.flat.length - 1 ? 0 : live.g);
     } else {
       if (ipad.on) { ipad.on = false; speechSynthesis.cancel(); setPlayIcon(false); }
       else speakFrom(ipad.g >= cur.flat.length - 1 ? 0 : ipad.g);
@@ -242,7 +268,7 @@
     if (!cur) return;
     var t = trackData(currentTrack());
     if (t) { $('seek').value = Math.round(1000 * audio.currentTime / t.duration); $('time').innerHTML = fmt(audio.currentTime) + '<span class="tot"> / ' + fmt(t.duration) + '</span>'; }
-    else { $('seek').value = Math.round(1000 * ipad.g / Math.max(1, cur.flat.length - 1)); $('time').textContent = (cur.flat[ipad.g] ? cur.flat[ipad.g].p + 1 : 1) + ' / ' + cur.story.paragraphs.length; }
+    else { var g = currentTrack() === 'live' ? live.g : ipad.g; $('seek').value = Math.round(1000 * g / Math.max(1, cur.flat.length - 1)); $('time').textContent = (cur.flat[g] ? cur.flat[g].p + 1 : 1) + ' / ' + cur.story.paragraphs.length; }
   }
   $('play').addEventListener('click', togglePlay);
   $('restart').addEventListener('click', function () { jumpTo(0, true); });
@@ -310,7 +336,87 @@
   function stopAll() {
     audio.pause(); cancelAnimationFrame(raf);
     if (window.speechSynthesis) { speakId++; ipad.on = false; speechSynthesis.cancel(); }
-    rsvpStop(); setPlayIcon(false);
+    liveStop(); rsvpStop(); setPlayIcon(false);
+  }
+
+  /* Kokoro live (js/live.js): makes each line in this browser, plays it with Web Audio,
+     and makes the next line while this one plays. Word highlight is estimated per line. */
+  var ctx = null, live = { on: false, paused: false, g: 0, id: 0, src: null }, liveCache = {}, liveChain = Promise.resolve(), liveMsg = '';
+  function liveSub() { return window.VoiceLive && VoiceLive.ready() ? 'ready · made as it plays' : 'downloads ' + (settings.liveEngine === 'webgpu' ? '326' : '92') + ' MB once'; }
+  function setLiveStatus(m) { liveMsg = m; var el = $('liveStatus'); if (el) el.textContent = m; }
+  function liveVoice(p) {
+    var st = cur.story, line = st.script && st.script[p];
+    if (line && st.cast) return { voice: st.cast[line.who].voice, speed: line.speed || 0.92 };
+    var v = (st.kokoroVoices || []).filter(function (x) { return x !== 'cast'; })[0] || 'af_heart';
+    return { voice: v, speed: 0.92 };
+  }
+  function liveBuffer(p) {
+    var lv = liveVoice(p), key = cur.story.id + '|' + p + '|' + lv.voice + '|' + lv.speed + '|' + settings.liveEngine;
+    if (liveCache[key]) return liveCache[key];
+    var text = cur.story.paragraphs[p], n = cur.story.paragraphs.length;
+    liveCache[key] = liveChain = liveChain.then(function () {
+      if (!VoiceLive.ready()) setLiveStatus('Getting the voice ready…');
+      return VoiceLive.load(settings.liveEngine, function (got, all) { setLiveStatus('Downloading the voice: ' + Math.round(got / 1e6) + ' of ' + Math.round(all / 1e6) + ' MB'); });
+    }).then(function () {
+      setLiveStatus('Making line ' + (p + 1) + ' of ' + n + '…');
+      var t0 = performance.now();
+      return VoiceLive.generate(text, lv.voice, lv.speed).then(function (r) {
+        var buf = ctx.createBuffer(1, r.audio.length, r.rate);
+        buf.copyToChannel(r.audio, 0);
+        setLiveStatus('Line ' + (p + 1) + ' made in ' + ((performance.now() - t0) / 1000).toFixed(1) + ' s (' + buf.duration.toFixed(1) + ' s of speech).');
+        return buf;
+      });
+    });
+    liveCache[key].catch(function (e) { delete liveCache[key]; });
+    return liveCache[key];
+  }
+  function lineWeights(p) {
+    var ws = [], gs = [];
+    cur.flat.forEach(function (tk, g) { if (tk.p === p) { gs.push(g); ws.push(cur.story.lang === 'zh' ? Math.max(1, tk.text.replace(/[^\u4e00-\u9fff]/g, '').length) : tk.text.replace(/[^A-Za-z0-9]/g, '').length + 1); } });
+    return { gs: gs, ws: ws, tot: ws.reduce(function (a, b) { return a + b; }, 0) };
+  }
+  function liveFrom(g) {
+    if (!window.VoiceLive) { logError('Live voice is not available.'); return; }
+    try { ctx = ctx || new (window.AudioContext || window.webkitAudioContext)(); ctx.resume(); } catch (e) { logError('Web Audio: ' + e.message); return; }
+    liveStop();
+    var id = ++live.id;
+    live.on = true; live.paused = false; live.g = g; setPlayIcon(true);
+    playLine(cur.flat[g].p, g, id);
+  }
+  function playLine(p, gStart, id) {
+    if (id !== live.id || !live.on) return;
+    if (p >= cur.story.paragraphs.length) { live.on = false; live.g = 0; setPlayIcon(false); highlight(-1); updateTime(); return; }
+    highlight(gStart); updateTime();
+    liveBuffer(p).then(function (buf) {
+      if (id !== live.id || !live.on) return;
+      var lw = lineWeights(p), before = 0;
+      for (var k = 0; k < lw.gs.length && lw.gs[k] < gStart; k++) before += lw.ws[k];
+      var off = buf.duration * before / Math.max(1, lw.tot), rate = +settings.rate;
+      var src = ctx.createBufferSource();
+      src.buffer = buf; src.playbackRate.value = rate; src.connect(ctx.destination);
+      live.src = src; live.line = { p: p, lw: lw, dur: buf.duration, off: off, t0: ctx.currentTime, rate: rate };
+      src.onended = function () { if (id === live.id && live.on) { var nx = lineWeights(p + 1).gs[0]; playLine(p + 1, nx == null ? cur.flat.length : nx, id); } };
+      src.start(0, off);
+      for (var ahead = 1; ahead <= 3; ahead++) if (p + ahead < cur.story.paragraphs.length) liveBuffer(p + ahead);
+      liveTick();
+    }).catch(function (e) {
+      if (id !== live.id) return;
+      logError('Live voice: ' + (e && e.message || e)); setLiveStatus('The live voice could not start. ' + (e && e.message || ''));
+      live.on = false; setPlayIcon(false);
+    });
+  }
+  function liveTick() {
+    cancelAnimationFrame(raf);
+    if (!live.on || live.paused || !live.line) return;
+    var L = live.line, pos = L.off + (ctx.currentTime - L.t0) * L.rate, acc = 0, g = L.lw.gs[0];
+    for (var k = 0; k < L.lw.gs.length; k++) { if (L.dur * acc / L.lw.tot <= pos) g = L.lw.gs[k]; acc += L.lw.ws[k]; }
+    if (g !== live.g || !nowEl) { live.g = g; highlight(g); updateTime(); }
+    raf = requestAnimationFrame(liveTick);
+  }
+  function liveStop() {
+    live.id++; live.on = false; live.paused = false; live.line = null;
+    if (live.src) { live.src.onended = null; try { live.src.stop(); } catch (e) { /* not started */ } live.src = null; }
+    if (ctx && ctx.state === 'suspended') ctx.resume();
   }
 
   /* ---------- speed read ---------- */
@@ -400,9 +506,20 @@
     seg.addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       settings[seg.dataset.key] = b.dataset.v; save(); renderSettings();
+      if (seg.dataset.key === 'liveEngine' && cur && cur.mode === 'read') { if (currentTrack() === 'live') stopAll(); renderVoices(); }
     });
   });
   $('showErrors').addEventListener('change', function () { settings.showErrors = $('showErrors').checked; save(); renderErrors(); });
+
+  /* hidden notes (script stories): off by default */
+  function renderNotesToggle() {
+    var on = settings.notes === '1';
+    $('text').classList.toggle('showNotes', on);
+    $('notesToggle').setAttribute('aria-pressed', on ? 'true' : 'false');
+    $('notesToggle').querySelector('span').textContent = on ? 'Hide the notes' : 'Show the hidden notes';
+  }
+  $('notesToggle').addEventListener('click', function () { settings.notes = settings.notes === '1' ? '0' : '1'; save(); renderNotesToggle(); });
+  renderNotesToggle();
 
   /* collapsible panels */
   [].forEach.call(document.querySelectorAll('.panelHead'), function (h) {

@@ -5,3 +5,7 @@
 3. **Keep the source text with the audio** so the page can tell when audio is stale (the bake-cache fingerprint idea, with the text itself as the fingerprint).
 4. **Class name clash:** the header used `.top`, and the speed-read tick also used `.top`, which made the tick 32 px wide and moved it off the focus letter. Measure alignment in the smoke test, not by eye.
 5. **Grid centring:** `1fr auto 1fr` is not symmetric when the side columns' contents differ; use `minmax(0, 1fr)`.
+6. **Run in-browser models in a worker.** kokoro-js on the main thread froze the page for more than 30 s while it loaded and spoke. A module worker kept the page responsive; send the Float32Array back as a transferable.
+7. **Playwright `route.fulfill` can't carry a 92 MB body** (the DevTools pipe has a 100 MB limit, and the browser closed). Answer with a 302 to a local CORS server instead. `route.continue` can't change http to https.
+8. **Test a hosted model without its host:** redirect its URLs to local copies. Mark any file you had to rebuild (here the tokenizer) as unverified.
+9. **Script stories:** one line = one paragraph keeps the tokens, timings, highlight and speed read unchanged; speaker labels and notes are extra elements outside the token spans.

@@ -1,7 +1,7 @@
 # Voice — Schematic
 
 **Track:** A. Family play (stories for the kids on the iPad). The writing and voice-making side is a small grown-up corner inside ⚙️.
-**Status:** MVP 0.2.0 (2026-11-09, not yet device-tested). Two stories with Kokoro audio, read along, speed read, voice comparison. Decisions in `convo/convo v0.2.md`.
+**Status:** MVP 0.3.0 (2026-11-09, not yet device-tested). Kokoro-focused: three stories, a script story with a cast of voices and hidden notes, and Kokoro live in the browser. Decisions in `convo/convo v0.3.md`.
 
 ## 1. The idea in one paragraph
 
@@ -90,9 +90,10 @@ All tables: RLS on, anon revoked, registered in `app_table_registry` under app `
 |---|---|---|
 | 0.1 ✅ | Page shell: shelf, story screen, speed read, ⚙️ with notes (device storage), the iPad voice. | Nothing external. |
 | 0.2 ✅ | Listening test: The Fisherman and the Goldfish (English) and 狼来了 (Chinese), each with two Kokoro voices (MP3 + estimated word timings) beside the iPad voice, in 🎧 Compare voices. ElevenLabs slot shown, not made (needs a key). | Done with Kokoro, free. |
-| 0.3 | Family database: tables, bucket, sign-in, stories load live, cache on device. | Paste SQL. |
-| 0.4 | Edge Function ✨ Make voice, versions and restore in the grown-up corner. | Voice-service key as a secret. |
-| 0.5 | Polish: covers, chapter stories, per-reader speed records, character voices. | Feedback notes. |
+| 0.3 ✅ | Kokoro focus: Little Red Riding Hood (Perrault's original, with its moral) as a **script story** (cast of five Kokoro voices, tone per line, hidden notes for blocking, gestures and thoughts behind 📜). **Kokoro · live**: the model runs in the browser (worker, kokoro-js), English only. | Nothing external; the live model downloads from huggingface.co once. |
+| 0.4 | Family database: tables, bucket, sign-in, stories load live, cache on device. | Paste SQL. |
+| 0.5 | ✨ Make voice, versions and restore in the grown-up corner (Kokoro in the browser can make it, no key needed). | — |
+| 0.6 | Polish: covers, chapter stories, per-reader speed records, character voices. | Feedback notes. |
 
 ## 6b. Listening test (0.2)
 
@@ -102,6 +103,14 @@ All tables: RLS on, anon revoked, registered in `app_table_registry` under app `
 | 🐺 狼来了 | Kokoro · 晓晓 (zf_xiaoxiao, 1:31), Kokoro · 云希 (zm_yunxi, 1:22), iPad voice (中文), ElevenLabs (not made) |
 
 Files: `stories/<id>.js` (text, edited by hand), `stories/<id>.audio.js` (made by the script: tokens, word times, the text it was made from), `audio/<id>.<voice>.mp3`. If the text changes and the audio is not remade, the page marks the audio "older than the text" and uses the iPad voice. Word times are estimated: phrase starts are exact, words inside a phrase share its length by their sounds.
+
+## 6c. Script stories and Kokoro live (0.3)
+
+**Script story format** (`stories/red_hood.js`): `cast` maps a speaker to a name, an icon and a Kokoro voice; `script` is a list of lines `{ who, text, tone?, speed?, notes?: [{ kind: blocking | gesture | thought, text }] }`. Each line is one paragraph. The story view shows a speaker label on every spoken line. **📜 Show the hidden notes** (off by default) shows the tone and notes above each line. Notes are never spoken. `tone` is kept for voice services that follow directions; Kokoro only uses `speed`.
+
+The `cast` track reads each line in its speaker's voice: Narrator `bm_fable`, Mother `af_sarah`, Little Red `af_sky`, Wolf `am_onyx`, Grandmother `bf_isabella`. A single-narrator track (`bm_fable`) is there to compare.
+
+**Kokoro · live:** `js/live.js` starts a module worker (`js/live_worker.js`) that loads `lib/kokoro.web.js` (kokoro-js 1.2.1, Apache 2.0, vendored) and the model `onnx-community/Kokoro-82M-v1.0-ONNX` from huggingface.co. The browser keeps the model in its cache after the first time. Engines in ⚙️: Small (WASM, q8, 92 MB) and Fast (WebGPU, fp32, 326 MB). The page makes the line it needs, plays it with Web Audio, and makes three lines ahead. The word highlight is estimated per line. English only, because the kokoro-js phonemizer is English. In the cloud test (4 slow CPUs, one thread) the Small engine made 1.7 s of speech in 4.9 s, so it may pause between lines there. It has not been tested on the iPad.
 
 ## 7. Not in scope (for now)
 
