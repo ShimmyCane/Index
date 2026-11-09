@@ -1,7 +1,7 @@
 # Voice — Schematic
 
 **Track:** A. Family play (stories for the kids on the iPad). The writing and voice-making side is a small grown-up corner inside ⚙️.
-**Status:** idea (schematic draft 0.1, 2026-11-09). Questions open in `convo/convo v0.1.md`.
+**Status:** MVP 0.2.0 (2026-11-09, not yet device-tested). Two stories with Kokoro audio, read along, speed read, voice comparison. Decisions in `convo/convo v0.2.md`.
 
 ## 1. The idea in one paragraph
 
@@ -13,7 +13,8 @@ A home page with a shelf of stories that Jimmy and Claude write together. Tap a 
 |---|---|
 | Does the iPad's built-in voice sound bad? | The default one does. iPad also has free Enhanced and Premium voices (Settings → Accessibility → Spoken Content → Voices), which are much better, and the page can use them. They are the free fallback, not the main voice. |
 | Can we borrow "Claude's voice"? | Not directly. Claude writes the story; the voice in the Claude app cannot be called from a web page. A text-to-speech service makes the audio. |
-| Which services make natural audio? | ElevenLabs, OpenAI's speech voices, Google Cloud and Azure neural voices. All take text and return an MP3. ElevenLabs can also return the time of every character, which gives word timings for free. |
+| Is there a free natural voice? | Yes: **Kokoro-82M**, an open voice model (Apache 2.0). It runs on a computer, no account or key, and speaks English and Mandarin. Used for 0.2 (`tools/make_kokoro.py`). Its weights and voices come from npm (`kokoro-q8-shards`, `kokoro-js`), because HuggingFace and GitHub downloads are blocked in the cloud sessions. |
+| Which paid services make natural audio? | ElevenLabs, OpenAI's speech voices, Google Cloud and Azure neural voices. All take text and return an MP3. ElevenLabs can also return the time of every character, which gives word timings for free. |
 | Cost | A 500-word story is about 3,000 characters, roughly a few cents to make once. Playing it back costs nothing. To confirm with real prices before the first build. |
 | Is the key safe? | Only if it never reaches the browser. It lives as a Supabase Edge Function secret (or on Jimmy's computer for a local script). The page asks the function to narrate; the function calls the voice service. |
 | Does it work offline? | Yes, once a story was played: audio and text are cached on the device. With no audio at all, the page falls back to the iPad voice. |
@@ -87,11 +88,20 @@ All tables: RLS on, anon revoked, registered in `app_table_registry` under app `
 
 | # | What | Needs |
 |---|---|---|
-| 0.1 | Page shell: shelf, story screen, speed read, ⚙️ with notes (device storage), two bundled sample stories read by the iPad voice. | Nothing external. |
-| 0.2 | One sample story with a real AI-made MP3 and word timings, bundled, to hear the difference. | A voice service choice and one generation (by Jimmy or a local script). |
+| 0.1 ✅ | Page shell: shelf, story screen, speed read, ⚙️ with notes (device storage), the iPad voice. | Nothing external. |
+| 0.2 ✅ | Listening test: The Fisherman and the Goldfish (English) and 狼来了 (Chinese), each with two Kokoro voices (MP3 + estimated word timings) beside the iPad voice, in 🎧 Compare voices. ElevenLabs slot shown, not made (needs a key). | Done with Kokoro, free. |
 | 0.3 | Family database: tables, bucket, sign-in, stories load live, cache on device. | Paste SQL. |
 | 0.4 | Edge Function ✨ Make voice, versions and restore in the grown-up corner. | Voice-service key as a secret. |
 | 0.5 | Polish: covers, chapter stories, per-reader speed records, character voices. | Feedback notes. |
+
+## 6b. Listening test (0.2)
+
+| Story | Tracks |
+|---|---|
+| 🐟 The Fisherman and the Goldfish | Kokoro · Heart (af_heart, 2:38), Kokoro · Fable (bm_fable, 3:35), iPad voice, ElevenLabs (not made) |
+| 🐺 狼来了 | Kokoro · 晓晓 (zf_xiaoxiao, 1:31), Kokoro · 云希 (zm_yunxi, 1:22), iPad voice (中文), ElevenLabs (not made) |
+
+Files: `stories/<id>.js` (text, edited by hand), `stories/<id>.audio.js` (made by the script: tokens, word times, the text it was made from), `audio/<id>.<voice>.mp3`. If the text changes and the audio is not remade, the page marks the audio "older than the text" and uses the iPad voice. Word times are estimated: phrase starts are exact, words inside a phrase share its length by their sounds.
 
 ## 7. Not in scope (for now)
 
