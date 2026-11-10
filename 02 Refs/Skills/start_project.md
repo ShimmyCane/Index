@@ -20,6 +20,12 @@ When the user asks to initialize a project:
    - A way to read the notes back, in the same panel or on a saved-items page, so the user can review them.
    - Notes are stored with the project's other data (device storage first; a database table only when the data must persist). Notes are never sent anywhere else.
    Add the feedback feature to the project's first increment, so feedback can start on the first build. Build it from `02 Refs/Skills/feedback_notes.md`.
+8. Notes in the family database (family-play projects that need notes to persist across devices):
+   - Link to the Family project (`twvqvutrcobedvuhnzxq`) and follow `02 Refs/Skills/supabase_link.md`. Plan a table `<prefix>_notes` with `id`, `text`, `page`, `item`, `label`, `version`, `status` (`open` or `done`) and `noted_at`. Reference model: `03 Projects/中文笔画/supabase/001_zhbh_notes.sql` (with its `test_001_` and `verify_001_` files). Change only the prefix, the app slug and the table name.
+   - Row-level security on, `anon` revoked, family sign-in may insert, read and update status. Register the table in `app_table_registry` in the same file.
+   - Add a 家庭登入 block to ⚙️ (email, password, signed-in status, sign out, 檢查資料庫). Reference: the block in `03 Projects/中文笔画/index.html` and `03 Projects/中文笔画/js/family.js`. Use the publishable key only. Never put an email or password in the repo.
+   - Notes stay on the device first. When signed in they are also sent to the family table, with the note's own `id` and time unchanged. Signed out, the database check says "this device only". Notes are sent nowhere else.
+   - Test with the rolled-back test, apply by hand or with the migration tool only when Jimmy asks, and record the result in `04 AI/Supabase/brief.md`. Lessons: `04 AI/Supabase/lessons.md`.
 
 Rules:
 - Do not explain your reasoning.

@@ -92,6 +92,21 @@
       </section>
     </div>
 
+    <div class="setting col">
+      <label>家庭登入 <small>登入後，意見也會存到家庭資料庫</small></label>
+      <p class="note" id="familyStatus"></p>
+      <form class="notesBox" id="familyForm">
+        <input id="familyEmail" type="email" autocomplete="username" placeholder="電子郵件" required>
+        <input id="familyPassword" type="password" autocomplete="current-password" placeholder="密碼" required>
+        <button class="btn small" type="submit">🔑 登入</button>
+      </form>
+      <div class="row">
+        <button class="btn small" id="familyOut" type="button" hidden>🚪 登出</button>
+        <button class="btn small" id="familyCheck" type="button">🔎 檢查資料庫</button>
+      </div>
+      <p class="note" id="dbCheck"></p>
+    </div>
+
     <div class="setting"><label>寫過的字</label>
       <div class="row"><span id="doneCount">0</span>&nbsp;個 <button class="mini" id="resetStars">清零</button></div></div>
 
@@ -115,6 +130,7 @@
   <script src="data/batches.js"></script>
   <script src="data/strokes.js"></script>
   <script src="js/vendor/hanzi-writer.min.js"></script>
+  <script src="js/family.js"></script>
   <script src="js/notes.js"></script>
   <script src="js/app.js"></script>
 </body>

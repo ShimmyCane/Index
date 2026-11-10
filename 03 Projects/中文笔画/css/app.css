@@ -24,3 +24,8 @@
 }
 
 .answerLine { font-size: 18px; font-weight: 700; color: #6b5d7b; }
+
+#familyForm { display: flex; flex-direction: column; gap: 10px; }
+#familyForm input {
+  min-height: 48px; font: 500 17px var(--ui); border: var(--line); border-radius: 12px; padding: 0 12px; background: #fff;
+}
