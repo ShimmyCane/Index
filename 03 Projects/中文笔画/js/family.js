@@ -99,7 +99,8 @@
   function sendAll() {
     if (!session || !window.AppNotes) return Promise.resolve();
     return pushNotes(AppNotes.all()).then(function () {
-      status('已登入：' + session.email + '。這台裝置上的意見都已送到家庭資料庫。');
+      var el = $('familyStatus');
+      if (el) el.textContent = '已登入：' + session.email + '。這台裝置上的意見都已送到家庭資料庫。';
     });
   }
 
