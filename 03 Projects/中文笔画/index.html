@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>中文筆畫</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div class="title">中文筆畫</div>
+      <div class="chip" id="lessonTag">第一課</div>
+      <div class="chip stars">⭐ <span id="starTotal">0</span></div>
+    </header>
+
+    <!-- One tab per upload date (newest first). Add a batch in data/batches.json. -->
+    <nav class="tabs" id="tabs" aria-label="上傳日期"></nav>
+
+    <main class="cols traceStage">
+      <section class="play">
+        <div class="boardWrap"><div class="traceBoard" id="traceBoard"><div id="traceTarget"></div></div></div>
+        <div class="strokeDots" id="strokeDots"></div>
+        <div class="message" id="message" aria-live="polite"></div>
+      </section>
+
+      <section class="side">
+        <div class="panel traceCard">
+          <div class="traceRef">
+            <div class="traceBig" id="big"></div>
+            <div class="traceInfo">
+              <div class="tracePy" id="py"></div>
+              <div class="traceCount" id="count"></div>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn" id="btnSay">🔊 讀音</button>
+            <button class="btn" id="btnHelp">🙋 幫忙</button>
+            <button class="btn" id="btnHint">💡 提示</button>
+            <button class="btn" id="btnAnim">▶ 筆順</button>
+            <button class="btn" id="btnAnswer">👀 答案</button>
+            <button class="btn" id="btnRedo">↩️ 重寫</button>
+            <button class="btn go" id="btnNext">⏭ 下一個字</button>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>這一課的字 <small>星星越多，寫得越好</small></h2>
+          <div id="pickGrid" class="pickGrid"></div>
+        </div>
+      </section>
+    </main>
+
+    <section class="errors" id="errorsPanel" hidden>
+      <h2>錯誤記錄 <button class="mini" id="clearErrors">清空</button></h2>
+      <ol id="errorList"></ol>
+    </section>
+  </div>
+
+  <button class="gear" id="gear" aria-label="設定">⚙️</button>
+
+  <aside class="drawer" id="drawer" hidden>
+    <div class="drawerHead">
+      <h2>設定</h2>
+      <button class="mini" id="closeDrawer">✖</button>
+    </div>
+
+    <div class="setting"><label>筆順提示 <small>關：看不到淡淡的字</small></label>
+      <div class="seg" data-key="traceGuide"><button data-v="1">開</button><button data-v="0">關</button></div></div>
+    <div class="setting"><label>寫錯幾次給答案</label>
+      <div class="seg" data-key="showAfter"><button data-v="1">1 次</button><button data-v="2">2 次</button><button data-v="3">3 次</button></div></div>
+    <div class="setting"><label>動畫速度</label>
+      <div class="seg" data-key="animSpeed"><button data-v="slow">慢</button><button data-v="normal">快</button></div></div>
+    <div class="setting"><label>朗讀字音 <small>寫之前讀一次，寫完再讀一次</small></label>
+      <div class="seg" data-key="readAloud"><button data-v="1">開</button><button data-v="0">關</button></div></div>
+    <div class="setting"><label>筆畫名 <small>每一筆說出名字：橫、豎、撇、捺…</small></label>
+      <div class="seg" data-key="strokeNames"><button data-v="1">開</button><button data-v="0">關</button></div></div>
+    <div class="setting"><label>聲音</label>
+      <div class="seg" data-key="sound"><button data-v="1">開</button><button data-v="0">關</button></div></div>
+    <div class="setting"><label>顯示錯誤</label>
+      <div class="seg" data-key="showErrors"><button data-v="1">開</button><button data-v="0">關</button></div></div>
+
+    <div class="setting col">
+      <label>給我們的改進意見 <small>寫下你覺得哪裡可以更好</small></label>
+      <section id="notesBox" class="notesBox">
+        <textarea id="noteText" rows="3" placeholder="哪裡可以更好？"></textarea>
+        <div class="row"><button class="btn small" id="noteSave" type="button">儲存意見</button>
+          <button class="btn small" id="noteCopy" type="button">複製意見</button>
+          <select id="noteFilter"><option value="open">未處理</option><option value="all">全部</option></select></div>
+        <ul id="noteList"></ul>
+      </section>
+    </div>
+
+    <div class="setting"><label>寫過的字</label>
+      <div class="row"><span id="doneCount">0</span>&nbsp;個 <button class="mini" id="resetStars">清零</button></div></div>
+
+    <div class="setting col"><label>版本 <span id="version"></span></label>
+      <ul class="changelog" id="changelog"></ul></div>
+  </aside>
+
+  <div class="celebrate" id="done" hidden>
+    <div class="cheer">
+      <div class="big" id="doneTitle">寫完了！</div>
+      <div class="gradeStars" id="doneStars"></div>
+      <div class="gradeText" id="doneText"></div>
+      <div class="strokeDots big" id="doneDots"></div>
+      <div class="actions">
+        <button class="btn" id="btnAgain">↩️ 再寫一次</button>
+        <button class="btn go" id="btnNext2">下一個字 ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="data/batches.js"></script>
+  <script src="data/strokes.js"></script>
+  <script src="js/vendor/hanzi-writer.min.js"></script>
+  <script src="js/notes.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
