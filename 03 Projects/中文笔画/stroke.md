@@ -37,4 +37,4 @@ Stroke names for 黃, 朵, 想, 要, 青, 吃, 羊, 請 (other than 言), 找, �
 
 ## Next steps
 - Retry the stroke pages once zdic.net or the MOE host is allowed for this session. Or Jimmy can paste the stroke names from the MOE stroke-order page for each character.
-- Until then, the app keeps its shape-based stroke guess. 言 would still be named wrong in some places unless it is entered by hand.
+- Until then, the other characters show only their stroke number. Names are added to `data/batches.json` as they are checked.
