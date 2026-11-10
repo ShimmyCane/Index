@@ -32,7 +32,7 @@ A family story game played like correspondence chess: roles instead of players, 
 - **Ten books** with branches (`2·Lantern/Salt/Iron`, `3·Kept/Broken`), tracked in `setting` "Branch". Athena's other lives unlock after Books 3, 4, 5 and 8.
 - **Voices page** `voices.html` + `js/voices.js`: samples from `story/voice_samples.js` baked to `audio/samples/` (23 files, 1.6 MB); picks → `setting` "Voices" JSON `{cast: {role: {voice, speed}}}`. `Adv.signIn({ quiet: true })` lets the page work signed out; the form appears on Save.
 - **Recording step:** `make_voice.py --db` reads Voices + published chapters with a script, records those whose `audio.source/voices/speeds` differ, uploads to bucket `adv-audio` (POST storage object, x-upsert), PATCHes `adv_chapters.audio`. Cast speeds now live on the cast (`speed`), lines only override. Player: `scriptOf` attaches `ch.audio`; `narrate` gets a signed URL (3 h) before playing.
-- Live database (checked 2026-11-10): 001 and 003 applied, all tables empty; 004, 005 and 002 to paste. The cloud proxy signs REST and Storage requests to the Family project (bucket listing worked).
+- Live database (checked 2026-11-10): 001 and 003 applied, all tables empty; 004, 005 and 002 to paste. `006_registry.sql` applied 2026-11-10: all 12 `adventure` registry rows say "Adventure (03 Projects/Adventure): …", repo `ShimmyCane/Index`, nothing `adv_` unregistered. The bucket `adv-audio` can't have a registry row (types are table/view/function only); it is named on `adv_chapters`. The cloud proxy signs REST and Storage requests to the Family project (bucket listing worked).
 
 ## Verified vs. unverified
 
