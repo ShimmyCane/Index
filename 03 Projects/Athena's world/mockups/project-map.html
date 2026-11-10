@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Athena's world: project map</title>
+  <style>
+    :root { --paper: #FFF9EE; --ink: #3b3a4a; --mint: #CDEFE0; --peach: #F9C8A8; --butter: #FBE9A6; --line: 3px solid var(--ink); }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; padding: 16px; }
+    main { max-width: 760px; margin: 0 auto; }
+    h1 { font-size: clamp(26px, 6vw, 36px); margin: 12px 0 6px; }
+    h2 { font-size: 22px; margin: 26px 0 10px; }
+    p { font-size: 17px; line-height: 1.5; }
+    ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+    li { padding: 12px 16px; background: #fff; border: var(--line); border-radius: 18px; box-shadow: 0 3px 0 var(--ink); font-size: 17px; line-height: 1.4; }
+    li a { color: var(--ink); font-weight: 700; }
+    li code { font-size: 15px; background: var(--butter); padding: 1px 6px; border-radius: 8px; }
+    .tag { display: inline-block; margin-left: 6px; padding: 2px 10px; font-size: 14px; background: var(--mint); border: 2px solid var(--ink); border-radius: 999px; }
+    .back { display: inline-block; margin-top: 24px; font-size: 17px; color: var(--ink); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>🗺️ Project map</h1>
+    <p>Everything in <code>03 Projects/Athena's world/</code>. Tap a name to open it.</p>
+
+    <h2>The game</h2>
+    <ul>
+      <li><a href="../index.html">index.html</a> <span class="tag">the game</span><br>One file: looks, rules, houses and things. Lists at the top of the script are where to add houses and things.</li>
+    </ul>
+
+    <h2>Notes about the project</h2>
+    <ul>
+      <li><a href="../schematic.md">schematic.md</a> <span class="tag">design</span><br>What the game is, how it plays, what is still open.</li>
+      <li><a href="../CLAUDE.md">CLAUDE.md</a> <span class="tag">pointer</span><br>A short note for Claude Code: where things live and how to run it.</li>
+    </ul>
+
+    <h2>Questions and answers</h2>
+    <ul>
+      <li><a href="../convo/convo%20v0.1.md">convo/convo v0.1.md</a><br>The first list of questions.</li>
+      <li><a href="../convo/convo%20v0.2.md">convo/convo v0.2.md</a><br>Answers about who can see the project.</li>
+      <li><a href="../convo/convo%20v0.3.md">convo/convo v0.3.md</a> <span class="tag">newest</span><br>The purpose, the first version, the assumptions, and the questions still open.</li>
+    </ul>
+
+    <h2>Pages to look at</h2>
+    <ul>
+      <li><a href="index.html">mockups/index.html</a><br>The front page for these mock-ups.</li>
+      <li><a href="project-map.html">mockups/project-map.html</a><br>This page.</li>
+      <li><a href="game-flow.html">mockups/game-flow.html</a><br>The steps of play, with a picture of the room.</li>
+    </ul>
+
+    <h2>Notes kept for Claude</h2>
+    <p>These live in <code>04 AI/Athena's world/</code>, outside this folder.</p>
+    <ul>
+      <li><a href="../../../04%20AI/Athena's%20world/brief.md">brief.md</a><br>Where the project is now: what is checked and what is not yet.</li>
+      <li><a href="../../../04%20AI/Athena's%20world/lessons.md">lessons.md</a><br>Things learned while building it.</li>
+    </ul>
+
+    <a class="back" href="index.html">⬅ Back to mock-ups</a>
+  </main>
+</body>
+</html>

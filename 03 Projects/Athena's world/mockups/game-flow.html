@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Athena's world: game flow</title>
+  <style>
+    :root { --paper: #FFF9EE; --ink: #3b3a4a; --mint: #CDEFE0; --peach: #F9C8A8; --butter: #FBE9A6; --coral: #F08A7E; --line: 3px solid var(--ink); }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; padding: 16px; }
+    main { max-width: 860px; margin: 0 auto; }
+    h1 { font-size: clamp(26px, 6vw, 36px); margin: 12px 0 6px; }
+    h2 { font-size: 22px; margin: 26px 0 10px; }
+    p { font-size: 17px; line-height: 1.5; }
+    .steps { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+    .step { padding: 14px; background: #fff; border: var(--line); border-radius: 22px; box-shadow: 0 4px 0 var(--ink); font-size: 16px; line-height: 1.4; }
+    .step b { display: block; font-size: 18px; margin-bottom: 4px; }
+    .big { font-size: 40px; line-height: 1.1; }
+    /* A small picture of the room, drawn with boxes */
+    .room { position: relative; width: 100%; max-width: 520px; aspect-ratio: 4 / 3; margin: 8px auto 0; background: #fff; border: var(--line); border-radius: 22px; box-shadow: 0 5px 0 var(--ink); overflow: hidden; }
+    .wall { position: absolute; left: 0; right: 0; top: 0; height: 42%; border-bottom: var(--line); }
+    .item { position: absolute; transform: translate(-50%, -50%); font-size: 40px; line-height: 1; }
+    .hold { outline: 3px dashed var(--coral); outline-offset: 6px; border-radius: 14px; }
+    .note { font-size: 15px; text-align: center; margin-top: 8px; }
+    .back { display: inline-block; margin-top: 24px; font-size: 17px; color: var(--ink); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>🧭 Game flow</h1>
+    <p>How one visit to the game goes, from opening it to the next house.</p>
+
+    <h2>The steps</h2>
+    <div class="steps">
+      <div class="step"><b>1. Pick a house</b>Tap a house on the right. Locked houses show 🔒.</div>
+      <div class="step"><b>2. Pick a thing</b>Tap a thing like the bed. It comes up to the top of the room.</div>
+      <div class="step"><b>3. Tap the room</b>The thing jumps to the spot you tapped. Walls for windows and pictures, floor for beds and sofas.</div>
+      <div class="step"><b>4. Move or keep</b>Tap a placed thing to pick it up, then tap the room. Tap it again to put it down where it is.</div>
+      <div class="step"><b>5. Finish</b>When every thing for the house is placed, a card says "Lovely home!" and the next house opens.</div>
+    </div>
+
+    <h2>What the room looks like</h2>
+    <p>Athena's house: a bed on the floor, a window and a picture on the wall. The dashed outline shows a thing that is waiting for a tap.</p>
+    <div class="room" aria-label="Example room">
+      <div class="wall"></div>
+      <div class="item" style="left:24%;top:20%">🪟</div>
+      <div class="item" style="left:78%;top:24%">🖼️</div>
+      <div class="item hold" style="left:50%;top:14%">🛏️</div>
+    </div>
+    <p class="note">The bed is up top, waiting. Tap the room and it moves there.</p>
+
+    <h2>Buttons on the side</h2>
+    <div class="steps">
+      <div class="step"><b>↩️ Undo</b>Takes back the last move.</div>
+      <div class="step"><b>⚙️ Gear</b>Sound on or off, and "Empty this house".</div>
+      <div class="step"><b>✓ tick</b>Shows on a thing once it is placed.</div>
+      <div class="step"><b>⭐ star</b>Shows on a house once it is finished.</div>
+    </div>
+
+    <a class="back" href="index.html">⬅ Back to mock-ups</a>
+  </main>
+</body>
+</html>

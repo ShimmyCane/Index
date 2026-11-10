@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Voice · Stories</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="top">
+  <button class="back" id="back" type="button" aria-label="Back to the stories" hidden>←</button>
+  <h1 id="title">🎙️ Stories</h1>
+  <div class="seg modeSeg" id="modeSeg" hidden>
+    <button type="button" data-mode="read">📖 <span>Read along</span></button>
+    <button type="button" data-mode="speed">⚡ <span>Speed read</span></button>
+  </div>
+</header>
+
+<main>
+  <!-- Story bar: language and director's notes -->
+  <div class="storyBar" id="storyBar" hidden>
+    <div class="seg langSeg" id="langSeg"></div>
+    <button type="button" class="notesBtn" id="notesToggle" aria-pressed="false">🎬 <span>Director's notes</span></button>
+  </div>
+
+  <!-- Home: the story shelf -->
+  <section id="home" class="shelf" aria-label="Stories"></section>
+
+  <!-- Story: read along -->
+  <section id="read" class="story" hidden>
+    <section class="panel" data-panel="voices">
+      <button class="panelHead" type="button" aria-expanded="false" aria-controls="voices-body">
+        <span class="panelIcon">🎧</span><span class="panelTitle">Compare voices</span><span class="panelMark">▸</span>
+      </button>
+      <div class="panelBody" id="voices-body" hidden>
+        <div class="voiceList" id="voiceList"></div>
+        <p class="hint" id="voiceHint"></p>
+        <p class="liveStatus" id="liveStatus" hidden>Tap ▶ to load the live voice.</p>
+      </div>
+    </section>
+
+    <article id="text" class="text"></article>
+
+    <div class="player" id="player">
+      <button class="big" id="play" type="button" aria-label="Play">▶</button>
+      <button class="mid" id="restart" type="button" aria-label="Back to the start">⟲</button>
+      <input id="seek" type="range" min="0" max="1000" value="0" aria-label="Time">
+      <span class="time" id="time">0:00</span>
+    </div>
+  </section>
+
+  <!-- Story: speed read -->
+  <section id="speed" class="story" hidden>
+    <div class="stage" id="stage" aria-live="off">
+      <div class="tick up"></div>
+      <div class="word"><span class="l" id="wL"></span><span class="f" id="wF">▶</span><span class="r" id="wR"></span></div>
+      <div class="tick down"></div>
+    </div>
+    <div class="progress"><div id="rsvpBar"></div></div>
+    <div class="rsvpControls">
+      <button class="mid" id="rsvpBack" type="button" aria-label="Back one sentence">⏮</button>
+      <button class="big" id="rsvpPlay" type="button" aria-label="Play">▶</button>
+      <button class="mid" id="rsvpStart" type="button" aria-label="Back to the start">⟲</button>
+    </div>
+    <div class="speedRow">
+      <span class="snail">🐢</span>
+      <input id="wpm" type="range" min="100" max="600" step="10" value="200" aria-label="Speed, words a minute">
+      <span class="snail">🐇</span>
+    </div>
+    <div class="speedRead"><b id="wpmVal">200</b> words a minute <span id="best" class="best"></span></div>
+  </section>
+</main>
+
+<!-- ⚙️ settings -->
+<button class="gear" id="gear" aria-label="Settings" aria-expanded="false" aria-controls="drawer">⚙️</button>
+<aside class="drawer" id="drawer" hidden>
+  <div class="drawerHead"><h2>Settings</h2><button class="mini" id="closeDrawer" type="button" aria-label="Close">✖</button></div>
+
+  <div class="setting"><label>🎬 Director's notes</label>
+    <div class="seg" data-key="notes"><button data-v="1">Open</button><button data-v="0">Hidden</button></div>
+    <p class="hint">Why each character speaks, how to act it, the sounds, the moves and the thoughts. Never read aloud.</p></div>
+  <div class="setting"><label>🔊 Sound effects</label>
+    <div class="seg" data-key="sfx"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
+  <div class="setting"><label>🎵 Background music</label>
+    <div class="seg" data-key="music"><button data-v="1">On</button><button data-v="0">Off</button></div>
+    <p class="hint">A soft tune from the story's part of the world.</p></div>
+  <div class="setting"><label>Text size</label>
+    <div class="seg" data-key="size"><button data-v="s">A</button><button data-v="m">A+</button><button data-v="l">A++</button></div></div>
+  <div class="setting"><label>Highlight the spoken word</label>
+    <div class="seg" data-key="highlight"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
+  <div class="setting"><label>Story voice speed</label>
+    <div class="seg" data-key="rate"><button data-v="0.8">Slow</button><button data-v="0.9">Calm</button><button data-v="1">Normal</button><button data-v="1.1">Quick</button></div></div>
+  <div class="setting"><label>Kokoro live engine</label>
+    <div class="seg" data-key="liveEngine"><button data-v="wasm">Small</button><button data-v="webgpu">Fast</button></div>
+    <p class="hint">Small: 92 MB, works everywhere, slower. Fast: 326 MB, needs WebGPU (newer iPads and Chrome). Downloaded once, then kept by the browser.</p></div>
+  <div class="setting"><label>iPad voice (English)</label><select id="voiceEn"></select></div>
+  <div class="setting"><label>iPad voice (中文)</label><select id="voiceZh"></select>
+    <p class="hint">Better iPad voices: Settings → Accessibility → Spoken Content → Voices, download one marked Premium or Enhanced, then reload.</p></div>
+
+  <section class="notesBox" id="notesBox">
+    <h3>📝 Notes for improvement</h3>
+    <p class="hint" id="noteWhere"></p>
+    <textarea id="noteText" rows="3" placeholder="What would make this better?"></textarea>
+    <div class="row"><button id="noteSave" type="button">Save note</button><button id="noteCopy" type="button">Copy notes</button></div>
+    <div class="seg small" id="noteFilter"><button data-f="open">Open</button><button data-f="done">Done</button><button data-f="all">All</button></div>
+    <ul id="noteList" class="noteList"></ul>
+  </section>
+
+  <div class="setting"><label>Database</label><p class="hint">💾 This device only. Family sign-in, saved stories and versions come in 0.3.</p></div>
+  <label class="toggle"><input type="checkbox" id="showErrors"> Show errors</label>
+  <p class="info">Voice 0.4.0 · stories and audio bundled with the page · live voice: Kokoro-82M (Apache 2.0) via kokoro-js</p>
+</aside>
+<div id="errorsPanel" class="errorsPanel" hidden></div>
+
+<script src="stories/fisherman.js"></script>
+<script src="stories/fisherman.audio.js"></script>
+<script src="stories/fisherman_zh.js"></script>
+<script src="stories/fisherman_zh.audio.js"></script>
+<script src="stories/fisherman_ja.js"></script>
+<script src="stories/fisherman_ja.audio.js"></script>
+<script src="stories/wolf_en.js"></script>
+<script src="stories/wolf_en.audio.js"></script>
+<script src="stories/wolf_zh.js"></script>
+<script src="stories/wolf_zh.audio.js"></script>
+<script src="stories/wolf_es.js"></script>
+<script src="stories/wolf_es.audio.js"></script>
+<script src="stories/red_hood.js"></script>
+<script src="stories/red_hood.audio.js"></script>
+<script src="stories/red_hood_zh.js"></script>
+<script src="stories/red_hood_zh.audio.js"></script>
+<script src="stories/red_hood_fr.js"></script>
+<script src="stories/red_hood_fr.audio.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/live.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

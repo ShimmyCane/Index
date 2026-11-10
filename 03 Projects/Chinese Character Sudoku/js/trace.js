@@ -2,6 +2,44 @@
 // Strokes must be written in the right order; the grade at the end counts the strokes written right first time.
 // Stroke outlines: hanzi-writer-data (Arphic Public License, a Kai-style typeface), drawn and matched by
 // Hanzi Writer (MIT). Both are bundled, so it works offline. Shares settings, sounds and storage with app.js.
+// Read-aloud for 3.0 (Web Speech API, no files). Uses a Chinese voice if the iPad has one
+// (Settings > Accessibility > Spoken Content > Voices > 中文). Silent if the browser can't speak.
+const Say = (() => {
+  const can = () => typeof window !== 'undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
+  let voice = null;
+  function pickVoice() {
+    try {
+      const vs = speechSynthesis.getVoices();
+      voice = vs.find(v => /^zh[-_]CN/i.test(v.lang)) || vs.find(v => /^zh/i.test(v.lang)) || null;
+    } catch (e) { voice = null; }
+  }
+  if (can()) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function speak(text) {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'zh-CN'; u.rate = 0.7;
+    if (voice) u.voice = voice;
+    speechSynthesis.speak(u);
+  }
+  return {
+    // Called from a tap, so iPad Safari allows speech from then on.
+    unlock() {
+      if (!can()) return;
+      try { speak(''); } catch (e) { /* nothing to unlock */ }
+    },
+    read(text) {
+      if (!can() || !S.settings.readAloud || !text) return;
+      try { speechSynthesis.cancel(); speak(text); }
+      catch (e) { logError('朗读出错', e); }
+    },
+    // Added after what is already being said (for stroke names after the character).
+    queue(text) {
+      if (!can() || !S.settings.readAloud || !text) return;
+      try { speak(text); } catch (e) { logError('朗读出错', e); }
+    },
+    cancel() { if (can()) { try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } } },
+  };
+})();
+
 const Trace = (() => {
   const T = {
     strokes: null,   // { char: { strokes, medians, radStrokes } } from assets/strokes.json
@@ -16,6 +54,8 @@ const Trace = (() => {
     finished: false,
     busy: false,     // the stroke animation is playing
     shown: false,
+    solo: false,     // second round: no help at all (no outline, hints, stroke names or reading)
+    writerSolo: null,
   };
   const el = id => document.getElementById(id);
   const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -36,6 +76,9 @@ const Trace = (() => {
     return !!T.strokes;
   }
   const chars = () => [...S.lessonChars].filter(c => T.strokes && T.strokes[c]);
+  // Stroke name for stroke i of the current character, e.g. 横 竖 撇 捺 点 提 折 钩 (shape-based, see engine.js).
+  const nameOf = i => (T.cur && T.strokes[T.cur] && T.strokes[T.cur].medians[i]) ? Engine.strokeName(T.strokes[T.cur].medians[i]) : '';
+  const names = () => S.settings.strokeNames !== false;
 
   // ---------- the writing board ----------
   const boardSize = () => Math.max(200, Math.round(el('traceBoard').clientWidth));
@@ -44,16 +87,18 @@ const Trace = (() => {
   function ensureWriter() {
     if (typeof HanziWriter === 'undefined') throw new Error('hanzi-writer.min.js 没加载到');
     const w = boardSize();
-    if (T.writer) { T.writer.updateDimensions({ width: w, height: w, padding: pad(w) }); return; }
+    if (T.writer && T.writerSolo === T.solo) { T.writer.updateDimensions({ width: w, height: w, padding: pad(w) }); return; }
+    if (T.writer) { el('traceTarget').innerHTML = ''; T.writer = null; }   // help or no-help settings differ: rebuild
+    T.writerSolo = T.solo;
     T.writer = HanziWriter.create(el('traceTarget'), T.cur, {
       width: w, height: w, padding: pad(w),
       charDataLoader: (char, ok, fail) => (T.strokes[char] ? ok(T.strokes[char]) : fail()),
-      showCharacter: false, showOutline: guide(),
+      showCharacter: false, showOutline: guide() && !T.solo,
       strokeColor: '#3b3248', outlineColor: '#dac9a8', drawingColor: '#3b3248',
       highlightColor: '#35b383', radicalColor: '#3f9d9a',
       drawingWidth: Math.max(8, Math.round(w / 24)),
       strokeAnimationSpeed: 0.8, strokeFadeDuration: 250, delayBetweenStrokes: 300,
-      leniency: 1.4, showHintAfterMisses: 2, markStrokeCorrectAfterMisses: 5, highlightOnComplete: false,
+      leniency: 1.4, showHintAfterMisses: T.solo ? false : 2, markStrokeCorrectAfterMisses: T.solo ? false : 5, highlightOnComplete: false,
     });
   }
 
@@ -62,20 +107,29 @@ const Trace = (() => {
     T.next = 0; T.mistakes = 0; T.hints = 0; T.slips = []; T.marks = []; T.finished = false;
     el('traceDone').hidden = true;
     renderDots();
-    say('照着淡淡的字，一笔一笔写，注意笔顺哦');
+    ensureWriter();
+    if (T.solo) {
+      Say.cancel();
+      say('自己写一次，没有提示，写完再看结果');
+    } else {
+      say('照着淡淡的字，一笔一笔写，注意笔顺哦');
+      Say.read(T.cur);   // read the character before the first stroke
+      if (names() && T.n) Say.queue(nameOf(0));   // then the first stroke's name
+    }
     T.writer.quiz({
-      showOutline: guide(),
+      showOutline: guide() && !T.solo,
       onMistake: s => {
         T.mistakes++; T.slips[s.strokeNum] = true;
         sfx.bad();
-        say(s.isBackwards ? '这一笔写反了，换个方向' : `不对哦，现在该写第 ${s.strokeNum + 1} 笔`);
+        say(T.solo ? '不对，再想想' : s.isBackwards ? '这一笔写反了，换个方向' : `不对哦，现在该写第 ${s.strokeNum + 1} 笔`);
         renderDots();
       },
       onCorrectStroke: s => {
         T.marks[s.strokeNum] = T.slips[s.strokeNum] ? 'slip' : 'ok';
         T.next = s.strokeNum + 1;
         sfx.good();
-        say(T.next < T.n ? `好！下一笔是第 ${T.next + 1} 笔` : '');
+        say(T.next < T.n && !T.solo ? `好！下一笔是第 ${T.next + 1} 笔` : T.solo ? '好！' : '');
+        if (!T.solo && names() && T.next < T.n) Say.queue(nameOf(T.next));
         renderDots();
       },
       onComplete: () => finish(),
@@ -85,7 +139,7 @@ const Trace = (() => {
   function renderDots(box = el('strokeDots'), big = false) {
     box.classList.toggle('big', big);
     box.innerHTML = Array.from({ length: T.n }, (_, i) => {
-      const cls = T.marks[i] || (i === T.next && !T.finished ? 'next' + (T.slips[i] ? ' slip' : '') : '');
+      const cls = T.marks[i] || (i === T.next && !T.finished && !T.solo ? 'next' + (T.slips[i] ? ' slip' : '') : '');
       return `<i class="${cls}">${i + 1}</i>`;
     }).join('');
   }
@@ -98,13 +152,15 @@ const Trace = (() => {
     const best = progress();
     best[T.cur] = Math.max(best[T.cur] || 0, stars);
     save('trace', best);
-    save('stars', load('stars', 0) + 1);
-    el('stars').textContent = load('stars', 0);
+    if (!T.solo) { save('stars', load('stars', 0) + 1); el('stars').textContent = load('stars', 0); }
     renderPicker();
     renderDots();
-    el('traceTitle').textContent = stars === 3 ? '笔顺全对！' : '写完了！';
+    el('traceSolo').hidden = T.solo;   // after the helped round, offer the no-help round
+    el('traceTitle').textContent = T.solo ? (T.mistakes === 0 ? '自己写对了！' : '自己写完了！') : stars === 3 ? '笔顺全对！' : '写完了！';
     el('gradeStars').textContent = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
-    el('gradeText').textContent = stars === 3
+    el('gradeText').textContent = T.solo
+      ? `自己写：${T.n} 笔里有 ${clean} 笔一次写对。`
+      : stars === 3
       ? `${T.n} 笔都是第一次就写对，一笔都没错！`
       : `${T.n} 笔里有 ${clean} 笔一次写对${T.hints ? `，用了 ${T.hints} 次提示` : ''}。再写一次，拿更多星星吧！`;
     renderDots(el('gradeDots'), true);
@@ -114,6 +170,7 @@ const Trace = (() => {
       el('traceDone').hidden = false;
       confetti('traceConfetti');
       if (stars >= 2) sfx.win(); else sfx.good();
+      Say.read(T.cur);   // and read it again once every stroke is written
     }, 700);
   }
 
@@ -138,11 +195,12 @@ const Trace = (() => {
   function renderInfo() {
     const c = T.cur;
     el('traceBig').textContent = c;
-    const showPy = S.settings.pinyin || !guide() || isExtra(c);
-    el('tracePy').textContent = showPy ? (S.data.chars[c] || [''])[0] : '';
+    // 3.0 always shows the pinyin of the character being written, whatever the pinyin setting.
+    el('tracePy').textContent = (S.data.chars[c] || [''])[0];
     el('traceCount').textContent = `${T.n} 笔`;
     el('traceWords').innerHTML = exampleWords(c).map(wordChip).join('');
-    el('levelTag').textContent = `描红 · 提示${guide() ? '开' : '关'}`;
+    el('levelTag').textContent = T.solo ? '描红 · 自己写' : `描红 · 提示${guide() ? '开' : '关'}`;
+    ['traceSay', 'traceHint', 'traceHelp'].forEach(id => { el(id).hidden = T.solo; });
   }
 
   function renderPicker() {
@@ -154,6 +212,7 @@ const Trace = (() => {
   }
 
   async function setChar(c) {
+    T.solo = false;
     T.cur = c;
     T.n = T.strokes[c].strokes.length;
     if (!T.writer) ensureWriter(); else T.writer.setCharacter(c);
@@ -186,10 +245,29 @@ const Trace = (() => {
   }
 
   function hint() {
-    if (!T.writer || T.busy || T.finished) return;
+    if (!T.writer || T.busy || T.finished || T.solo) return;
     T.hints++;
     say(`💡 看，这是第 ${T.next + 1} 笔`);
+    if (names()) Say.read(nameOf(T.next));
     T.writer.highlightStroke(T.next);
+  }
+
+  // 🙋 帮忙: say the name of the stroke to write next, again.
+  function help() {
+    if (!T.writer || T.busy || T.finished || T.solo) return;
+    say(`🙋 这一笔叫「${nameOf(T.next)}」`);
+    Say.read(nameOf(T.next));
+  }
+
+  // Second round, with no help. Starts the same character again.
+  function solo() {
+    if (!T.cur || T.busy) return;
+    T.solo = true;
+    T.writer.cancelQuiz();
+    el('traceDone').hidden = true;
+    T.writer.hideCharacter({ duration: 0 });
+    renderInfo();
+    startQuiz();
   }
 
   function redo() { if (T.writer && !T.busy) { T.writer.hideCharacter({ duration: 0 }); startQuiz(); } }
@@ -213,14 +291,23 @@ const Trace = (() => {
     T.shown = false;
     if (T.writer) T.writer.cancelQuiz();
     el('traceDone').hidden = true;
+    Say.cancel();
   }
 
   // Settings that change what the card shows; only turning the hint on or off starts the character over.
-  function refresh(key) { if (!T.shown || !T.cur) return; renderInfo(); if (key === 'traceGuide' && !T.busy) startQuiz(); }
+  function refresh(key) {
+    if (key === 'readAloud' && !S.settings.readAloud) Say.cancel();
+    if (!T.shown || !T.cur) return;
+    renderInfo();
+    if (key === 'traceGuide' && !T.busy) startQuiz();
+  }
 
   function wire() {
     el('animBtn').onclick = animate;
     el('traceHint').onclick = hint;
+    el('traceSay').onclick = () => { if (T.cur) Say.read(T.cur); };
+    el('traceHelp').onclick = help;
+    el('traceSolo').onclick = solo;
     el('traceRedo').onclick = redo;
     el('traceNext').onclick = next;
     el('traceNext2').onclick = next;
@@ -233,5 +320,5 @@ const Trace = (() => {
     });
   }
 
-  return { show, hide, refresh, wire, animate, hint, redo, next, select, state: T };
+  return { show, hide, refresh, wire, animate, hint, help, solo, redo, next, select, say: Say, state: T };
 })();

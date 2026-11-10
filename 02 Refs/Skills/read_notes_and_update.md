@@ -19,6 +19,14 @@ Actions
    order by m.title, n->>'at';
    ```
    If the Supabase tools are not connected, ask Jimmy to run that query in the SQL editor and paste the result, and carry on from the pasted rows.
+
+   For What to Cook (Family project `twvqvutrcobedvuhnzxq`), the notes are rows in `public.wtc_notes` (columns `id`, `text`, `page`, `version`, `status`, `noted_at`), not JSON. Read them with:
+   ```sql
+   select id, page, version, status, noted_at, text
+   from public.wtc_notes
+   where status = 'open' and text not like 'Done- %'
+   order by noted_at;
+   ```
 3. Group the notes by map or screen, and for each one say:
    - what it asks for, in one sentence;
    - whether it is already built (check `todo.md` and the code), a bug, a new feature, or a design question;
@@ -50,6 +58,7 @@ Actions
 
 Rules
 - Notes whose text starts with `Done- ` are handled and are skipped, even if their status is still `open`.
+- Done notes are **ignored from future review**. They stay in the table with status `done` and the `Done- ` prefix. Deleting rows is not part of this skill; do it only if Jimmy asks in writing for those exact rows to be deleted, and say it cannot be undone.
 - Read is free; update needs Jimmy's yes each time. Keep an update to the notes listed in the confirmation.
 - Never delete notes. Never edit a note's `at` or `id`. The only text change is the `Done- ` prefix when a note is marked done.
 - Don't put keys, project refs or personal data in the repo. Note text is the owner's feedback: copy it into convo or todo only as written, and leave out anything that looks personal.

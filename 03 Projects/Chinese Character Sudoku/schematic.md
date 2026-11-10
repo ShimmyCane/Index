@@ -27,6 +27,7 @@ Games for two children (5 and 7) built on the characters they are learning, base
 - **Grade at the end:** ⭐⭐⭐ for every stroke right first time with no hints, ⭐⭐ for up to two slips or hints, ⭐ otherwise. The card shows how many strokes were written right first time. Best stars per character are remembered and shown in the picker.
 - **▶ 笔顺** (lower-left corner, mirroring the gear) animates the strokes one by one ("第 3 笔"), then hands over to the child.
 - 💡 提示 flashes the next stroke (counted for the grade), ↩️ 重写 restarts, ⏭ 下一个字 picks a character with fewer stars, and the picker lets the child choose any of the 60.
+- **朗读字音 (v0.6.0):** the character is read aloud before the first stroke of each attempt and again after the last stroke. 🔊 读音 on the card replays it any time. ⚙️ 朗读字音 turns it off. Uses the browser's speech (Chinese voice if the iPad has one), no files.
 - ⚙️ 描红提示 off hides the faint character, so the child writes from pinyin and the example words.
 - Simplified characters only (the stroke data is simplified).
 
@@ -60,4 +61,4 @@ Settings (including the last game), the current puzzle per game, ⭐ count, rece
 
 ## Open
 
-See the questions at the end of `convo/convo v0.6.md`. Later: read-aloud with a better voice.
+See the questions at the end of `convo/convo v0.6.md`. Later: a better voice for read-aloud (the iPad's Chinese voice decides how it sounds; polyphones may read with the common reading).

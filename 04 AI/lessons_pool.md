@@ -78,6 +78,12 @@ Companion files: `patterns.md` (reusable patterns and template candidates), `Per
 11. **Pick the chart for the question.** A pie answers "what made up this year?"; grouped bars or lines answer "how did it change?" _(Family Accounting)_
 12. **Make decisions on a single source of truth.** A PDF or DXF writer or other output should come from one primitive list in real units, so every output matches. _(Quick Detail)_
 13. **Record relationships when they're created**, not guessed later. A leader tip that records its exact target beats a proximity guess. _(Quick Detail)_
+16. **Allow button rows to wrap at phone width.** A five-tab row pushed the page sideways at 390 px until `flex-wrap: wrap` was added. Check every new page at phone width in a headless run. _(What to Cook)_
+17. **Check the test order before blaming the page.** A "0 cards" result came from a test that switched tabs in the wrong order. _(What to Cook)_
+18. **One paste file per table, never edit an applied file.** New tables go in their own file, so the applied setup stays as it was. _(What to Cook)_
+20. **Check dark mode before shipping.** White surfaces need their own dark text colour, or dark mode leaves text invisible. Measure contrast in both modes. _(What to Cook)_
+21. **Test pages that load data through a local server.** Opening the file directly blocks the data load. _(What to Cook)_
+19. **Feedback is marked done, not deleted.** Keep the rows, set status done, and ignore done items in later reviews. Delete only on written confirmation, since it can't be undone. _(What to Cook)_
 14. **Create the shared namespace in every file that uses it** (`NS = NS || {}`). A file that copies a namespace at load time sees `undefined` if it loads first. Browser smoke tests catch it; Node tests do not. _(Shimmy Specs)_
 15. **Store the data version with saved state.** A restored game can hold items no longer in the data; drop the save on a version mismatch. _(Chinese Character Sudoku)_
 
@@ -133,6 +139,7 @@ Full detail, with the registry rules, is in `04 AI/Supabase/lessons.md`. Use `/s
 10. **Subset an offline font to the characters used, and keep its licence.** 359 glyphs came to 78 KB as woff2. SIL OFL means keeping the licence and not claiming a reserved name. _(Chinese Character Sudoku)_
 11. **Test touch with real touch events** (CDP `Input.dispatchTouchEvent`), not only the mouse, and check that the page doesn't scroll while drawing. _(Chinese Character Sudoku)_
 12. **Headless WebGL needs flags.** Use `--no-sandbox --use-gl=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist` with the pre-installed Chromium. _(Make 3D)_
+13. **AI model weights can come from npm too.** HuggingFace and GitHub release downloads were blocked, but the Kokoro voice model and its voices were on npm (`kokoro-q8-shards`, `kokoro-js`), run with `kokoro-onnx` from PyPI. Free narration with no key. _(Voice)_
 
 ## 9. Open questions to revisit
 
@@ -275,3 +282,8 @@ Full build rules: `02 Refs/Skills/settings_gear.md` (run as `/settings-gear`).
 - **Check paste files before the owner runs them.** The checker catches psql meta-commands, server file reads, unbalanced `$$` quotes, emails, secret keys, and a second run that would fail on a policy. Test the checker on planted bad files. _(`scripts/sql_paste_check.py`)_
 - **Set the track first.** Family play and studio design need different density, words, palettes and database owners. Deciding it at the start avoids rebuilding the screen later. _(`02 Refs/Skills/project_track.md`)_
 - **Collapsible panels keep the screen clear.** Keep each header visible when collapsed, and remember the state per device. Test the toggle and the reload. _(project_track snippet, headless run 2026-11-04)_
+
+## 3-D toy worlds (Athena's world V2)
+- A cut-away diorama: orthographic camera at an isometric angle, drop the walls facing the camera, sink scenery on the camera side. Drag turns, pinch zooms, a tap under 8 px is a tap. _(Athena's world)_
+- Cartoon look in Three.js without post-processing: MeshToonMaterial with a three-step gradient plus a back-face outline shell scaled about the shape's middle. _(Athena's world)_
+- Vendor `three.min.js` (r128 UMD) into the project when the CDN may be blocked or offline play matters. _(Athena's world)_
