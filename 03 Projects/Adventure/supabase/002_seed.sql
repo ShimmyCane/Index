@@ -105,7 +105,10 @@ where not exists (select 1 from public.adv_entries);
 
 insert into public.adv_chapters (book, number, title, text_tiny, text_short, text_long, whispers, prompt, script) values
 (1, 1, $t$Who? Who?$t$,
- $t$You wake on soft moss in the roots of the biggest tree in the world, holding a humming key with a sun on one side and a moon on the other, and you cannot remember your own name. A scruffy grey dog is watching you, an owl keeps asking "Who?", and bells are ringing somewhere through the trees.$t$,
+ $t$You wake on moss where roots run deep,
+and cannot find your name to keep.
+A key that hums, with sun and moon,
+a grey dog and the bells in tune.$t$,
  $t$You open your eyes on a bed of soft green moss. Morning light, mist, birdsong. You try to remember your name, your home, yesterday. Nothing comes.
 
 A fox with a silver-tipped tail says your words back to you, and vanishes. A scruffy grey dog with one ear up sits watching you, as if he has waited a very long time. In your hand is a small humming key, with a sun on one side and a moon on the other. An owl above you asks, "Who? Whooo?"

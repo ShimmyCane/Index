@@ -105,16 +105,15 @@ The sketch is for shape only. It is not a real chapter.
 | `sfx` per line | Built. |
 | `notes` per line, 🎬 Director's notes toggle | Built (chapter 1 uses them). |
 | Music change or stop per line | **Not built.** Needs `narrate.js`. |
-| Peek as poem (`text_tiny`) | **Not built.** Research only (`poem structure.md`). |
+| The owner's own music from an asset/music folder | **Not built.** Requested 2026-11-10 for later. |
+| Peek as poem (`text_tiny`) | Built 2026-11-10: `storyteller.md`, chapter 1 (seed and bundle), and the player keeps the poem's line breaks. |
 | A `form` field for the peek | **Not built.** |
 
-## Questions for Jimmy
+## Decisions (owner's answers, 2026-11-10)
 
-1. Should every chapter have a poem peek, or only when the mood fits one of the forms? Default: every chapter, with iambic tetrameter when the mood is unclear.
-2. Music: keep one tune per minute, or add a stop before the question (needs a small change in `js/narrate.js`)? Default: keep one tune, and build the stop later.
-3. Director's notes: hidden by default in ⚙️, as now. Keep that, or show a short one on the minute?
-
-Answer inline here, or in a new convo version (`convo/convo v0.6.md`).
+1. **Every chapter has a poem peek.** Haiku when the mood is unclear (not iambic tetrameter, as first proposed).
+2. **One tune per minute, for now.** The owner plans to use his own music later, taken from an asset/music folder and put in the tune slot. Not built. The stop before the question is also not built.
+3. **Director's notes hidden by default** in ⚙️, as now. No short note on the minute.
 
 ## Sources and reference
 

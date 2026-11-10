@@ -50,7 +50,7 @@ Then read the world bible in the repo, `03 Projects/Adventure/world/` (`bible.md
 - Use the places and the journal notes so details stay consistent (Bristle already knows the old woods; the crypt is dusty).
 - Answers to a puzzle: generous. More than one right answer. A clever, kind or brave answer sends the story its own way. A wrong answer gets a gentle hint, never a dead end.
 - Write it **three times**, at the lengths in the `setting` entry:
-  - `text_tiny`: 2 sentences
+  - `text_tiny`: the **peek**, a short poem of 2 to 8 lines, one line per line of verse (`research/poem structure.md`). Every chapter has one. Pick the form from the chapter's mood: iambic tetrameter couplets for wonder and calm, a limerick for a laugh, a trochaic chant for a spell or the Hush, and **a haiku (5-7-5, unrhymed) when the mood is unclear**. One form per peek. Read it aloud before saving; the lines must scan and the last line should lead into the chapter.
   - `text_short`: about 150 words
   - `text_long`: about 700 words, about five minutes read aloud
   Separate paragraphs with a blank line. Short sentences that sound good aloud.

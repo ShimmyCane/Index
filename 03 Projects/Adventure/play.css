@@ -18,6 +18,7 @@
 .read { min-width: 110px; }
 .story-text { font-size: var(--story-size); line-height: 1.6; }
 .story-text p { margin: 0 0 .8em; }
+.story-text.poem p { white-space: pre-line; font-style: italic; }
 .recap { font-size: 16px; display: grid; gap: 6px; }
 .recap:empty { display: none; }
 .recap div { background: var(--paper); border-radius: 10px; padding: 8px 12px; }

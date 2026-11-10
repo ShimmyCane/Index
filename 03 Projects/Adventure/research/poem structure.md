@@ -1,7 +1,7 @@
 # Peek: poem structure
 
 **Project:** Adventure (Ondra, Athena's story)
-**Status:** research and proposal, 2026-11-10. Not yet in `storyteller.md`.
+**Status:** decided 2026-11-10 by the owner: every chapter has a poem peek, and a haiku when the mood is unclear. Built in `storyteller.md`, chapter 1 (`supabase/002_seed.sql`, `data/fallback.json`) and the player (`js/play.js`, `play.css`, which keep line breaks in the peek).
 **Sources:** see the end of this file.
 
 ## What a peek is
@@ -17,7 +17,7 @@ The storyteller reads the chapter's mood first (the `prompt` and the strongest b
 | Chapter mood | Form | Meter | Rhyme | Lines | Why it fits |
 |---|---|---|---|---|---|
 | Wonder, calm, the Tree and its roots | Iambic tetrameter, rhymed couplets | iambic, 4 feet (8 syllables) | AABB | 2 or 4 | Steady, like a heartbeat. Sounds good read aloud by a grown-up. |
-| Quiet mystery, one clear image | Haiku | none (count syllables) | unrhymed | 3 | One picture, nothing extra. Good for a closed door, a moss-lit path. |
+| Quiet mystery, one clear image, or any unclear mood (**default**) | Haiku | none (count syllables) | unrhymed | 3 | One picture, nothing extra. Good for a closed door, a moss-lit path, or when the mood is not clear. |
 | Funny beat (the "Light in the dark" rule) | Limerick | anapestic (da-da-DUM), trimeter then dimeter | AABBA | 5 | Bouncy and silly. Children remember it and say it back. |
 | Spell, the Hush, the Twin Keys, the Moon | Trochaic tetrameter | trochaic (DUM-da), 4 feet | AABB | 2 or 4 | Falling rhythm, like a chant. Works for magic and warnings. |
 | Memory, loss, the old world | Iambic pentameter, rhymed | iambic, 5 feet (10 syllables) | AABB, or ABAB | 4 | Slower and fuller. Use sparingly; the family is young. |
@@ -25,7 +25,7 @@ The storyteller reads the chapter's mood first (the `prompt` and the strongest b
 
 Rules of thumb:
 - **Never mix forms** in one peek. One form, one mood.
-- **Default to iambic tetrameter** when the mood is unclear. It is the easiest to read aloud.
+- **Default to a haiku** when the mood is unclear (owner's choice, 2026-11-10). It is simple and gives one picture.
 - **Haiku when the scene is still.** Never for a fight or a chase.
 - **Light moment every chapter** (rule "Light in the dark"): if the chapter has no funny beat, the peek can still end on a small smile line.
 - **Limerick only for a laugh** and only if the chapter really has one.
@@ -101,7 +101,7 @@ Ten syllables per line, stress on every second syllable.
 
 - `adv_chapters.text_tiny` holds the poem, lines separated by a newline. Paragraphs in the poem are separated by a blank line.
 - The player shows the poem with its line breaks kept (`white-space: pre-line`), and reads it aloud line by line.
-- Needs: a `form` note in the chapter `plan` or a new optional `peek_form` field, so the next storyteller run can check it. Not yet built. Decide with Jimmy (question 1 in `minute structure.md`).
+- No separate `form` field is needed: the form is visible in the poem itself. Every chapter has a peek (owner's decision, 2026-11-10).
 
 ## Sources
 
