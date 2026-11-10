@@ -88,8 +88,11 @@
 
     document.getElementById('since').textContent = sinceLabel(gap);
     document.getElementById('chTitle').textContent = 'Chapter ' + ch.number + ': ' + ch.title;
-    document.getElementById('chText').innerHTML = textOf(ch, state.length)
-      .split(/\n\s*\n/).map(p => '<p>' + esc(p) + '</p>').join('');
+    const script = scriptOf(ch);
+    document.getElementById('chText').innerHTML = script && state.length === 'long'
+      ? scriptHtml(script)
+      : textOf(ch, state.length).split(/\n\s*\n/).map(p => '<p>' + esc(p) + '</p>').join('');
+    document.getElementById('chText').classList.toggle('show-notes', store.get('adv.notes', false));
     document.getElementById('chPrompt').textContent = ch.prompt || '';
 
     // Earlier chapters missed since the last visit: one line each.
@@ -116,6 +119,60 @@
     }
     box.textContent = msg;
     box.classList.toggle('hidden', !msg);
+  }
+
+  // ---------------------------------------------------------------- voiced chapters
+  // A chapter is voiced when it has a script: written by the storyteller (adv_chapters.script)
+  // or bundled in story/<id>.js. "The whole page" then shows who is speaking and reads with a cast.
+  function scriptOf(ch) {
+    if (ch.script && ch.script.script && ch.script.script.length) return Object.assign({ id: 'db-' + ch.id }, ch.script);
+    return (window.ADV_SCRIPTS || {})[ch.book + '.' + ch.number] || null;
+  }
+
+  const NOTE_ICON = { motivation: '💭', acting: '🎭', sound: '🔔', blocking: '👣', gesture: '✋', thought: '💬' };
+
+  function scriptHtml(script) {
+    return script.script.map((l, i) => {
+      const c = script.cast[l.who] || { name: l.who, icon: '🙂' };
+      const who = l.who === 'narrator' ? '' : '<span class="who-tag">' + esc(c.icon + ' ' + c.name) + '</span> ';
+      const notes = (l.notes || []).map(n => '<span class="note">' + (NOTE_ICON[n.kind] || '📝') + ' ' + esc(n.text) + '</span>').join('');
+      const words = l.text.split(/\s+/).filter(Boolean).map(w => '<span class="w">' + esc(w) + '</span>').join(' ');
+      return '<p class="line ' + (l.who === 'narrator' ? 'narr' : 'said') + '" data-i="' + i + '">' +
+        (notes ? '<span class="notes">' + notes + '</span>' : '') + who + words + '</p>';
+    }).join('');
+  }
+
+  function markLine(i) {
+    document.querySelectorAll('#chText .line').forEach(p => p.classList.toggle('now', +p.dataset.i === i));
+    const p = document.querySelector('#chText .line.now');
+    if (p && p.scrollIntoView) p.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  function markWord(i, k) {
+    const old = document.querySelector('#chText .w.on');
+    const p = document.querySelector('#chText .line[data-i="' + i + '"]');
+    const w = p && p.querySelectorAll('.w')[k];
+    if (old && old !== w) old.classList.remove('on');
+    if (w) w.classList.add('on');
+  }
+
+  function narrate(from) {
+    const ch = newest();
+    const script = ch && scriptOf(ch);
+    if (!script) return false;
+    if (state.length !== 'long') { state.length = 'long'; renderStory(); }
+    const used = Narrate.play(script, {
+      mode: store.get('adv.cast', 'recorded'), from: from || 0,
+      sfx: store.get('adv.sfx', true), music: store.get('adv.music', true),
+      rate: store.get('adv.rate', 0.9) / 0.9, voiceName: store.get('adv.voice', ''),
+      onLine: markLine, onWord: markWord,
+      onEnd: () => { setReading(false); markLine(-1); markWord(-1, -1); },
+      onError: e => error('Reading aloud', e)
+    });
+    setReading(true);
+    document.getElementById('castNote').textContent = used === 'recorded'
+      ? '🎙️ Recorded cast voices' : '📱 iPad voice' + (Narrate.recordingFor(script) ? '' : ' (no recording for this chapter)');
+    return true;
   }
 
   // ---------------------------------------------------------------- reading aloud
@@ -151,9 +208,10 @@
   }
 
   function toggleRead() {
-    if (state.reading) { speechSynthesis.cancel(); setReading(false); return; }
+    if (state.reading) { Narrate.stop(); if (window.speechSynthesis) speechSynthesis.cancel(); setReading(false); return; }
     const ch = newest();
     if (!ch) return;
+    if (state.length === 'long' && narrate(0)) return;
     speak(['Chapter ' + ch.number + '. ' + ch.title + '.', textOf(ch, state.length), ch.prompt].filter(Boolean).join('\n\n'));
   }
 
@@ -317,6 +375,18 @@
     };
     size(store.get('adv.size', 20));
     document.getElementById('smaller').onclick = () => size(Math.max(15, store.get('adv.size', 20) - 2));
+    const cast = document.getElementById('castMode');
+    cast.value = store.get('adv.cast', 'recorded');
+    cast.onchange = () => store.set('adv.cast', cast.value);
+    [['sfxOn', 'adv.sfx', true], ['musicOn', 'adv.music', true], ['notesOn', 'adv.notes', false]].forEach(([id, key, def]) => {
+      const box = document.getElementById(id);
+      box.checked = store.get(key, def);
+      box.onchange = () => {
+        store.set(key, box.checked);
+        if (key === 'adv.notes') document.getElementById('chText').classList.toggle('show-notes', box.checked);
+        if (key === 'adv.music' && !box.checked && window.AdvSound) AdvSound.stopMusic();
+      };
+    });
     document.getElementById('bigger').onclick = () => size(Math.min(32, store.get('adv.size', 20) + 2));
   }
 
@@ -329,7 +399,12 @@
     document.getElementById('readBtn').onclick = toggleRead;
     document.getElementById('lengths').onclick = ev => {
       const len = ev.target.dataset && ev.target.dataset.len;
-      if (len) { state.length = len; renderStory(); }
+      if (len) { if (state.reading) toggleRead(); state.length = len; renderStory(); }
+    };
+    // Tap a line of a voiced chapter to read from there.
+    document.getElementById('chText').onclick = ev => {
+      const p = ev.target.closest('.line');
+      if (p) narrate(+p.dataset.i);
     };
     document.getElementById('roles').onclick = ev => {
       const b = ev.target.closest('.role');

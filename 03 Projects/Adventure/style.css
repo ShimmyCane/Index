@@ -33,6 +33,7 @@ button { cursor: pointer; }
 .top {
   display: flex; align-items: center; gap: 12px;
   padding: 10px 16px; border-bottom: var(--line); background: var(--sun);
+  flex-wrap: wrap;
 }
 .top h1 { font-size: 22px; flex: 1; }
 .pill {

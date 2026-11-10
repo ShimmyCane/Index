@@ -1,0 +1,11 @@
+-- ============================================================================
+-- Adventure — voiced chapters
+-- A chapter can carry a script: who says each line, sound cues and director's
+-- notes (the format borrowed from 03 Projects/Voice). The player page reads a
+-- scripted chapter with a cast of voices. Runs after 003_world.sql.
+-- Format: { "music": "forest",
+--           "cast":   { "narrator": { "name": "Storyteller", "icon": "📜", "pitch": 1, "rate": 0.92 }, ... },
+--           "script": [ { "who": "narrator", "text": "...", "sfx": "birds", "notes": [{ "kind": "acting", "text": "..." }] } ] }
+-- Logged and restorable like the rest of the row (the history trigger copies whole rows).
+-- ============================================================================
+alter table public.adv_chapters add column if not exists script jsonb;

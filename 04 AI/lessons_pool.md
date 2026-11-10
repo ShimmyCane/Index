@@ -287,3 +287,9 @@ Full build rules: `02 Refs/Skills/settings_gear.md` (run as `/settings-gear`).
 - A cut-away diorama: orthographic camera at an isometric angle, drop the walls facing the camera, sink scenery on the camera side. Drag turns, pinch zooms, a tap under 8 px is a tap. _(Athena's world)_
 - Cartoon look in Three.js without post-processing: MeshToonMaterial with a three-step gradient plus a back-face outline shell scaled about the shape's middle. _(Athena's world)_
 - Vendor `three.min.js` (r128 UMD) into the project when the CDN may be blocked or offline play matters. _(Athena's world)_
+
+## Audio and story worlds (Adventure, 2026-11-10)
+- Test audio seeking with a server that answers Range requests (`npx http-server`), not `python3 -m http.server`: without Range, Chromium can't seek an MP3 and every jump lands at 0. Seek only after `loadedmetadata`. _(Adventure)_
+- To stop an `<audio>`, clear `onerror`/`onended` first, then `removeAttribute('src')` and `load()`. Clearing `src` fires an error that can stop the next reading. _(Adventure)_
+- Reuse Voice's script-story format (cast + lines with `who`, `sfx`, `notes`) for any narrated content; a Kokoro recording with per-line timings plus a per-character iPad-voice fallback covers online and offline. _(Adventure, from Voice)_
+- Local Postgres 16 is installed in cloud sessions: test a Supabase SQL chain there with stub `anon`/`authenticated` roles and an `auth.uid()` function, in a throwaway folder the postgres user can reach. _(Adventure)_

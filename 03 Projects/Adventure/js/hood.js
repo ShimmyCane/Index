@@ -38,7 +38,8 @@
         { k: 'whispers', type: 'json', hint: '{ "role_key": "only this role hears this" }' },
         { k: 'prompt', type: 'long', hint: 'the question the chapter ends on' },
         { k: 'status', type: 'select', options: ['published', 'planned'] },
-        { k: 'plan', type: 'long', hint: 'what this chapter should do (for planned chapters)' }
+        { k: 'plan', type: 'long', hint: 'what this chapter should do (for planned chapters)' },
+        { k: 'script', type: 'json', hint: 'voiced chapter (optional): { "music": "forest", "cast": { "narrator": { "name", "icon", "pitch", "rate" } }, "script": [{ "who", "text", "sfx" }] }' }
       ],
       fresh: rows => {
         const last = rows[0];

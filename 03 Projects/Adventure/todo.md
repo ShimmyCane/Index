@@ -1,12 +1,18 @@
 # Adventure — To-do
 
 ## Next
-- [ ] **Create the database tables.** Supabase's confirmation prompt went unanswered twice. Either approve it when Claude retries, or paste `supabase/001_adventure.sql`, then `003_world.sql`, then `002_seed.sql` into the Supabase SQL editor (Family project).
+- [ ] **Create the database tables.** Supabase's confirmation prompt went unanswered twice. Either approve it when Claude retries, or paste `supabase/001_adventure.sql`, then `003_world.sql`, then `004_script.sql`, then `002_seed.sql` into the Supabase SQL editor (Family project).
+- [ ] **Read the world** (`lore.html` or `world/`) and answer `convo/convo v0.4.md`.
+- [ ] Listen to chapter 1 on the iPad (The whole page → 🔊), with and without the recording.
 - [ ] **Set up the nightly heartbeat.** A scheduled Claude task, once a night (for example 2 a.m.), that says "Run the Adventure storyteller" and follows `storyteller.md`. It needs the Supabase connector granted to the scheduled task. Claude can create it on request.
 - [ ] Try the page on the iPad: sign in, read aloud, the microphone, sending a scene.
 - [ ] Publish on GitHub Pages so the microphone and the database work on the iPad.
 
 ## Later
+- [ ] Record chapters the storyteller writes: a step that runs `tools/make_voice.py` on a chapter's `script` and stores the MP3 in Supabase Storage (needs a computer or an Edge Function; no key needed for Kokoro).
+- [ ] Kokoro live in the page (from Voice `js/live.js`) for chapters without a recording.
+- [ ] A Leaves and Rings mode: play a life in another age (Aun in the Age of Roots), with echoes into the present.
+- [ ] Show the world clocks on the World page.
 - [ ] **Story-creation page.** Jimmy and Athena rebuild the old car-ride adventures. Feed in the saved ChatGPT chats (kept in a `private/` folder, never committed), and Claude fills the page with questions and confirmations to build the world bible.
 - [ ] Rules engine for daytime play: moving between known places, items and keys, riddles with known answers, hints, and small scenes the storyteller prepares each night.
 - [ ] Map: drawn paths between places, and a background picture per map.
