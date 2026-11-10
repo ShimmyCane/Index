@@ -13,6 +13,9 @@ Verified
 - `node tools/test_data.js` passes (12 characters, stroke data for each, pinyin present, no repeats).
 - Headless Chromium: 3 sizes (phone, iPad portrait, iPad landscape), over HTTP and as a file. No console errors, no horizontal scroll, tabs, picker, board, reveal animation, drawer, and a saved note all work.
 
+Database
+- `zhbh_notes` applied to the Family project on 2026-11-10 (test passed, verify read-only). The page is not yet wired to it; notes still save on the device.
+
 Unverified
 - A real finger or Apple Pencil on a real iPad (the wrong-stroke path was not driven with real strokes).
 - Stroke-name guesses for these characters.

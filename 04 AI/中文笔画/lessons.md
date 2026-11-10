@@ -6,3 +6,5 @@
 - Stroke data for the characters comes from `hanzi-writer-data` (npm). The Sudoku repo held stroke data for only one of these 12, so check coverage with `tools/test_data.js` before building.
 - The font subset must be rebuilt when new characters arrive: the 12 characters were missing 4 glyphs in the copied subset (朵, 言, 請, 就).
 - Teaching tool: when a child misses, show the right answer and let them write it again. Do not leave them stuck.
+- Family database: the notes table and the family sign-in are live (zhbh_notes). Notes save on the device first and are sent when signed in. The 家庭登入 block is in ⚙️. A real sign-in on a device has not been tested by Claude; only the form and the notes path were tested headless.
+- The start-project skill now includes the notes-to-database step (step 8), using this project as the reference.

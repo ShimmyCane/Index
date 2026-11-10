@@ -23,9 +23,14 @@
   function addNote() {
     var box = document.getElementById('noteText'), text = box.value.trim();
     if (!text) return;
-    notes.push({ id: 'n-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-      at: new Date().toISOString(), status: 'open', text: text, where: where, version: VERSION });
+    var note = { id: 'n-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+      at: new Date().toISOString(), status: 'open', text: text, where: where, version: VERSION };
+    notes.push(note);
     box.value = ''; save(); render();
+    // Device first; also to the family database when signed in (see family.js).
+    if (window.Family && Family.signedIn()) {
+      Family.pushNotes([note]).catch(function (e) { if (typeof logError === 'function') logError('意見沒有送到家庭資料庫', e); });
+    }
   }
   document.getElementById('noteSave').addEventListener('click', addNote);
   document.getElementById('noteFilter').addEventListener('change', render);

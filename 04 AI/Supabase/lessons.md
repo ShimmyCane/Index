@@ -34,3 +34,10 @@ Generic lessons from running a shared Supabase project for several small apps. P
 16. **The sandbox proxy may block the Supabase host.** A curl from the sandbox to `*.supabase.co` returned 403 at the proxy. Test RLS through `execute_sql` instead, switching `role` and the `request.jwt.claims` setting inside one statement that ends in a `raise exception 'RESULT: …'` so nothing persists. Confirm afterwards that the table does not exist.
 17. **Anon revoke has to be explicit.** `revoke all … from anon` in the same migration as the policy. Check `pg_class.relrowsecurity`, the policy count and the anon grants after applying.
 
+
+## Added from 中文筆畫 (2026-11-10)
+
+18. **Notes: device first, then the family table.** Save every note to the device, then send it with `POST` to the table when signed in. Use `Prefer: resolution=ignore-duplicates` and batches of 200, so a note sent twice stays one row. Keep the note's own `id` and time.
+19. **Sign-in is a form in ⚙️, not a separate page.** Email and password go to `/auth/v1/token?grant_type=password`. The session (access and refresh tokens) is kept on the device. Retry once after a `401` with the refresh token; sign out if the refresh fails. Never store the email or password in the repo.
+20. **Test the anon lockout in one block.** `set local role anon` then `select` inside a `do $$` block, catch `insufficient_privilege`, and `raise exception 'RESULT: …'`. This proves the lockout without a real account.
+21. **Say what a real sign-in did not test.** A stand-in test proves the form and the notes path. Only Jimmy's own sign-in on a device proves the family login.
