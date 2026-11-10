@@ -1,4 +1,4 @@
-// Adventure — narration for voiced chapters, borrowed from 03 Projects/Voice.
+// Adventure — narration for voiced chapters, borrowed from the Voice repo (ShimmyCane/Voice).
 // A voiced chapter is a script story: { cast, script: [{ who, text, speed?, sfx?, notes? }], music? }.
 // Bundled chapters live in story/<id>.js (window.ADV_SCRIPTS['book.number']); the storyteller can also
 // write one into adv_chapters.script.

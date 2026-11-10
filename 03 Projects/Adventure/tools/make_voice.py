@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Record Adventure's voiced chapters with a cast of Kokoro voices.
 
-Borrowed from 03 Projects/Voice/tools/make_kokoro.py, simplified to English and
+Borrowed from the Voice repo (ShimmyCane/Voice) tools/make_kokoro.py, simplified to English and
 line-level timings. Kokoro-82M is an open voice model (Apache 2.0) that runs on
 this computer: no account, no key for the voices, nothing is sent to a voice service.
 

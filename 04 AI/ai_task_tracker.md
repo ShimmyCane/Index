@@ -26,5 +26,5 @@ Shared list of open work across the nursery. Project to-do lists stay in each pr
 
 ## Project items
 
-- **What to Cook:** see `03 Projects/What to Cook/todo.md`. Next: paste `supabase/wtc_items_tracking.sql` and `supabase/recipes_what_to_cook.sql`.
+- **Athena's world, Bar Glide, Chinese Character Sudoku, Voice, What to Cook:** graduated to their own repos (`ShimmyCane/Athena-s-world`, `Bar-Glide`, `Chinese-Character-Sudoku`, `Voice`, `What-to-Cook`) and removed from the nursery on 2026-11-10. Their to-dos live there.
 - **Shimmy Specs, Adventure:** see their `todo.md` files.
