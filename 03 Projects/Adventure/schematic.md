@@ -78,6 +78,7 @@ Every page has the same ⚙️ menu: Story, World, Under the hood, All projects.
 | `tools/make_voice.py` | Makes the recorded cast for `story/*.js` with Kokoro (model files stay outside the repo) |
 | `supabase/004_script.sql` | `script` column on chapters (run after 003) |
 | `supabase/005_audio.sql` | `audio` column on chapters and the private bucket `adv-audio` (run after 004) |
+| `supabase/006_registry.sql` | Links every `adv_` registry row to this project folder (applied 2026-11-10) |
 | `voices.html`, `js/voices.js`, `story/voice_samples.js`, `audio/samples/` | Voice test page and its samples |
 | `supabase/001_adventure.sql` | Tables, change log, rollback functions, registry |
 | `supabase/003_world.sql` | Places, journal, planned chapters (run after 001) |

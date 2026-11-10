@@ -1,7 +1,7 @@
 # Adventure — To-do
 
 ## Next
-- [ ] **Create the database tables.** Supabase's confirmation prompt went unanswered twice. Either approve it when Claude retries, or paste into the Supabase SQL editor (Family project). 001 and 003 are in; still to paste: `004_script.sql`, `005_audio.sql`, then `002_seed.sql`.
+- [ ] **Create the database tables.** Supabase's confirmation prompt went unanswered twice. Either approve it when Claude retries, or paste into the Supabase SQL editor (Family project). 001, 003 and 006 are in; still to paste: `004_script.sql`, `005_audio.sql`, then `002_seed.sql`.
 - [ ] Pick voices on 🎙️ Voices and save; answer `convo/convo v0.5.md`.
 - [ ] Once the seed is in: run the recording step once by hand (`tools/make_voice.py --db`) to check the upload to `adv-audio` from a cloud session.
 - [ ] Listen to chapter 1 on the iPad (The whole page → 🔊), with and without the recording.

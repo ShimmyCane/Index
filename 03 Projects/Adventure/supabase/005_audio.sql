@@ -20,10 +20,7 @@ drop policy if exists "Family can listen to adv-audio" on storage.objects;
 create policy "Family can listen to adv-audio" on storage.objects
     for select to authenticated using (bucket_id = 'adv-audio');
 
--- The registry has no row type for buckets; the bucket is noted on the chapters row.
-update public.app_table_registry
-   set description = 'Story chapters in three lengths, with per-role whispers, an optional script (voiced) and audio (recording in bucket adv-audio).'
- where app = 'adventure' and object_name = 'adv_chapters';
+-- The registry has no row type for buckets; 006_registry.sql names the bucket on the adv_chapters row.
 
 -- Check: should return one row (adv-audio, false) and the two new columns.
 select id, public from storage.buckets where id = 'adv-audio';
