@@ -14,6 +14,8 @@ Weekly upload (the one file to edit):
 - Add a batch to `data/batches.json`: `{ "date": "YYYY-MM-DD", "lesson": "第二課", "items": [{ "ch": "字", "py": "pinyin" }] }`. Each upload date becomes its own tab, newest first.
 - Run `python3 tools/build_batches.py path/to/hanzi-writer-data/package` (writes `data/batches.js` and `data/strokes.js`; see its docstring to get the package).
 - Run `node tools/test_data.js` (checks one character per item, pinyin, no repeats in a batch, and stroke data for every character).
+- Recordings: `python3 -I tools/make_audio.py path/to/kokoro-folder` makes `audio/u<hex>.mp3` for every character (Kokoro zf_xiaoxiao, speed 0.8). Needs the kokoro-onnx model and voice files from the GitHub release (see the script header). The iPad voice is the fallback.
+- Stroke names: only names checked against a source go in an item's `names` in `data/batches.json` (言 is checked; see `stroke.md`). Unchecked characters say the stroke number, not a guessed name.
 - If a new character is added, run `python3 tools/build_font.py path/to/lxgw-wenkai-webfont/files` so the big character uses the Kai font (`tools/build_font.py` needs `pip install fonttools brotli`).
 
 Project rules:

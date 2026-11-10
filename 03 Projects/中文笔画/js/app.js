@@ -69,6 +69,16 @@ const Say = (() => {
   };
 })();
 
+// ---------- recorded characters (audio/u<hex>.mp3, made by tools/make_audio.py); iPad voice if a file is missing ----------
+const Clip = {
+  read(ch) {
+    if (!ch || !S.settings.readAloud) return;
+    const a = new Audio(`audio/u${ch.codePointAt(0).toString(16)}.mp3`);
+    a.onerror = () => Say.read(ch);
+    a.play().catch(() => Say.read(ch));
+  },
+};
+
 // ---------- sounds (Web Audio, made in code) ----------
 const sfx = (() => {
   let ctx = null;
@@ -91,38 +101,8 @@ const sfx = (() => {
   };
 })();
 
-// ---------- stroke names (a shape guess, copied from 汉字数独 engine.js) ----------
-function strokeName(medUp) {
-  const med = medUp.map(([x, y]) => [x, -y]);   // flip so +y is down the screen
-  const n = med.length;
-  if (n < 2) return '點';
-  const seg = (a, b) => {
-    const dx = b[0] - a[0], dy = b[1] - a[1];
-    if (Math.hypot(dx, dy) < 2) return null;
-    if (Math.abs(dy) <= 0.45 * Math.abs(dx)) return '橫';
-    if (Math.abs(dx) <= 0.45 * Math.abs(dy)) return dy > 0 ? '豎' : '提';
-    if (dy > 0) return dx < 0 ? '撇' : '捺';
-    return '提';
-  };
-  let len = 0;
-  for (let i = 1; i < n; i++) len += Math.hypot(med[i][0] - med[i - 1][0], med[i][1] - med[i - 1][1]);
-  if (len < 110) return '點';
-  const m = Math.floor(n / 2);
-  const a = seg(med[0], med[m]), b = seg(med[m], med[n - 1]);
-  const overall = seg(med[0], med[n - 1]) || '點';
-  const end = seg(med[Math.max(0, n - 3)], med[n - 1]);
-  const right = (a === '橫' && b === '豎') || (a === '豎' && b === '橫');
-  if (right) {
-    if (end === '提' || end === '撇') return a === '橫' ? (b === '豎' ? '橫折鉤' : '橫鉤') : '豎彎鉤';
-    return a === '橫' ? '橫折' : '豎折';
-  }
-  if (end === '提' && (overall === '豎' || overall === '橫')) return overall + '鉤';
-  return overall;
-}
-const nameOf = i => {
-  const d = T.item && S.strokes[T.item.ch];
-  return d && d.medians[i] ? strokeName(d.medians[i]) : '';
-};
+// ---------- stroke names: only the names checked in data/batches.json (item "names"); nothing is guessed ----------
+const nameOf = i => (T.item && T.item.names && T.item.names[i]) || '';
 const names = () => S.settings.strokeNames !== false;
 
 // ---------- the writing board ----------
@@ -170,7 +150,7 @@ function startQuiz() {
     say('跟著寫一次，記住它');
   } else {
     say('照著淡淡的字，一筆一筆寫，注意筆順喔');
-    Say.read(T.item.ch);
+    Clip.read(T.item.ch);
     if (names() && T.n) Say.queue(nameOf(0));
   }
   T.writer.quiz({
@@ -200,7 +180,7 @@ async function reveal() {
   T.revealed = true;
   T.writer.cancelQuiz();
   say('沒關係，看看正確的寫法');
-  Say.read(T.item.ch);
+  Clip.read(T.item.ch);
   await animate();
 }
 
@@ -226,7 +206,7 @@ function finish() {
     if (!T.finished) return;
     $('done').hidden = false;
     if (stars >= 2) sfx.win(); else sfx.good();
-    Say.read(T.item.ch);
+    Clip.read(T.item.ch);
   }, 700);
 }
 
@@ -266,8 +246,9 @@ function hint() {
 
 function help() {
   if (!T.writer || T.busy || T.finished) return;
-  say(`🙋 這一筆叫「${nameOf(T.next)}」`);
-  Say.read(nameOf(T.next));
+  const nm = nameOf(T.next);
+  say(nm ? `🙋 這一筆叫「${nm}」` : `🙋 這是第 ${T.next + 1} 筆`);
+  if (nm) Say.read(nm);
 }
 
 function redo() {
@@ -388,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const item = tabItems().find(i => i.ch === p.dataset.ch);
     if (item) setItem(item);
   });
-  $('btnSay').addEventListener('click', () => { Say.unlock(); Say.read(T.item && T.item.ch); });
+  $('btnSay').addEventListener('click', () => { Say.unlock(); Clip.read(T.item && T.item.ch); });
   $('btnHelp').addEventListener('click', help);
   $('btnHint').addEventListener('click', hint);
   $('btnAnim').addEventListener('click', () => { Say.unlock(); animate(); });

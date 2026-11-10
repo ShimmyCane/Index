@@ -32,6 +32,9 @@ Sequence, from two sources (hanzipi and a stroke-order dictionary): 點、橫、
 ## Not yet sourced
 Stroke names for 黃, 朵, 想, 要, 青, 吃, 羊, 請 (other than 言), 找, 說, 就. The search results did not give stroke-by-stroke names for these. The one sequence offered for 朵 (撇 豎 點 橫 撇 捺) is Jimmy's, and no source confirmed it.
 
+## Applied
+- 言 names (點、橫、橫、橫、豎、橫折、橫) are in `data/batches.json` and shown on the page. The shape-based guess has been removed, so unchecked characters show only the stroke number.
+
 ## Next steps
 - Retry the stroke pages once zdic.net or the MOE host is allowed for this session. Or Jimmy can paste the stroke names from the MOE stroke-order page for each character.
 - Until then, the app keeps its shape-based stroke guess. 言 would still be named wrong in some places unless it is entered by hand.
