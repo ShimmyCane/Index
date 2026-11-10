@@ -34,7 +34,7 @@ Its private counterpart is `ShimmyAI`, a private repo where family and personal 
 - **Briefs and lessons:** after meaningful work, update `04 AI/<Project>/brief.md` and append to `lessons.md`. Promote anything reusable across projects to `04 AI/lessons_pool.md`.
 - **Indexes:** when adding or moving files, update the folder's schematic (`02 refs_schematic.md`, `03 projects_schematic.md`, `04 ai_schematic.md`).
 - **Versions:** git is the history. Don't create `V1/`, `V2/` copy folders unless Jimmy asks.
-- **Maturing a project:** when a project is ready to leave the nursery, Jimmy copies it into its own repo by hand. Claude does not create new repos unless asked.
+- **Maturing a project:** when a project is ready to leave the nursery, run `/graduate-project`. Jimmy copies it into its own repo and turns on Pages by hand; Claude prepares the folder, updates the home page link and the database registry, and removes the nursery copy once the new site is live. Claude does not create new repos unless asked.
 - **Stack defaults for kids' web apps:** plain HTML/CSS/JS, no build step, GitHub Pages. Add Supabase only when data must persist. See `02 Refs/Skills/ipad_website.md` and the preferences below.
 - **New projects:** `/start-project` sets up the folders, including a project `CLAUDE.md`. `/claude-review-project` brings an existing project up to these conventions.
 
@@ -51,7 +51,7 @@ Its private counterpart is `ShimmyAI`, a private repo where family and personal 
 
 Run as `/name`. Each wraps `02 Refs/Skills/<name>.md`, which is the version to edit.
 
-`start-project` · `ipad-website` · `settings-gear` · `summarize-code` · `simplify-code` · `update-lessons-learned` · `ai-consolidate` · `claude-review-project` · `supabase-project` · `fix-puzzles` · `make-3d` · `simulate-decay` · `read-notes-and-update` · `smoke-test` · `privacy-check` · `bake-cache` · `ai-json-loop` · `feedback-notes` · `supabase-link` · `project-track`
+`start-project` · `ipad-website` · `settings-gear` · `summarize-code` · `simplify-code` · `update-lessons-learned` · `ai-consolidate` · `claude-review-project` · `supabase-project` · `fix-puzzles` · `make-3d` · `simulate-decay` · `read-notes-and-update` · `smoke-test` · `privacy-check` · `bake-cache` · `ai-json-loop` · `feedback-notes` · `supabase-link` · `project-track` · `graduate-project`
 
 Supabase conventions and the app registry live in `04 AI/Supabase/`.
 

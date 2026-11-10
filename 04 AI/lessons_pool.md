@@ -293,3 +293,9 @@ Full build rules: `02 Refs/Skills/settings_gear.md` (run as `/settings-gear`).
 - To stop an `<audio>`, clear `onerror`/`onended` first, then `removeAttribute('src')` and `load()`. Clearing `src` fires an error that can stop the next reading. _(Adventure)_
 - Reuse Voice's script-story format (cast + lines with `who`, `sfx`, `notes`) for any narrated content; a Kokoro recording with per-line timings plus a per-character iPad-voice fallback covers online and offline. _(Adventure, from Voice)_
 - Local Postgres 16 is installed in cloud sessions: test a Supabase SQL chain there with stub `anon`/`authenticated` roles and an `auth.uid()` function, in a throwaway folder the postgres user can reach. _(Adventure)_
+
+## Graduating projects (2026-11-10)
+- When a project leaves the nursery, the copies left behind cause confusion: remove the nursery folder and its `04 AI` notes once the new site is live, and point every live reference (schematics, tracker, Supabase brief, other projects' "copied from" notes) at the new repo. History stays in git. _(Index clean-up)_
+- The database registry drifts silently: six apps still said `ShimmyCane/Index` after graduating. Make "point the registry at the new repo" a step of graduating (`/graduate-project` step 6), and check `select app, repo from app_table_registry where repo = 'ShimmyCane/Index'` now and then: only nursery apps should appear. _(Index clean-up)_
+- Nursery and graduated pages share one origin (`shimmycane.github.io`), so `localStorage` carries over between them. Keep storage keys prefixed per app. _(graduate_project)_
+- When a request is ambiguous ("make sure the names are linked"), check the likely targets first (repos, home page, registry), then ask one multiple-choice question naming them. _(Adventure)_
