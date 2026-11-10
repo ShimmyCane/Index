@@ -1,11 +1,11 @@
 // Book 1, Chapter 1 — Who? Who?
 // A voiced chapter, in the script-story format borrowed from the Voice repo (ShimmyCane/Voice) (see Voice stories/red_hood.js):
-//   cast    speaker → name, icon, Kokoro voice and speed (recorded audio), and pitch/rate for the iPad voice fallback
+//   cast    speaker → name, icon, Kokoro voice and speed (the recording)
 //   script  one line = one paragraph: { who, text, speed? (only to override the speaker's), sfx?, notes?: [{ kind, text }] }
 //           sfx plays a synthesized sound (js/sound.js) when the reading reaches the line.
 //           notes are hidden director's notes (motivation, acting, sound, blocking, gesture, thought), never spoken.
 // After editing, remake the audio: python3 -I tools/make_voice.py --model <dir> b1c1
-// The page notices when the audio no longer matches the text and uses the iPad voices instead.
+// The page notices when the audio no longer matches the text and then says there is no recording yet.
 window.ADV_SCRIPTS = window.ADV_SCRIPTS || {};
 window.ADV_SCRIPTS['1.1'] = {
   id: 'b1c1',

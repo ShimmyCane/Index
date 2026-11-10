@@ -61,12 +61,12 @@ Then read the world bible in the repo, `03 Projects/Adventure/world/` (`bible.md
 - `script` (voiced chapter): the long version again as a script, one line per paragraph, so the page can read it with a cast of voices. Format (borrowed from the Voice repo (`ShimmyCane/Voice`)):
   ```json
   { "music": "forest",
-    "cast": { "narrator": { "name": "Storyteller", "icon": "📜", "pitch": 1, "rate": 0.92 },
-              "owl": { "name": "Grandmother Owl", "icon": "🦉", "pitch": 0.7, "rate": 0.7 } },
+    "cast": { "narrator": { "name": "Storyteller", "icon": "📜" },
+              "owl": { "name": "Grandmother Owl", "icon": "🦉" } },
     "script": [ { "who": "narrator", "text": "...", "sfx": "birds",
                   "notes": [{ "kind": "acting", "text": "slow, warm" }] } ] }
   ```
-  Narration is `narrator`; spoken lines belong to a speaker. `text_long` must be the script's lines joined with blank lines. `sfx` is optional, one of: knock door wind birds axe steps growl splash waves howl bell gulp magic hoot hum. `notes` kinds: motivation, acting, sound, blocking, gesture, thought (hidden, never read aloud). `pitch` and `rate` shape the iPad voice per character; `voice` and `speed` are the Kokoro voice and speed for the recording. Copy the cast from `story/b1c1.js` (voices from the **Voices** setting) and add new speakers as they appear, each with a Kokoro voice (English voices: `bm_*`, `bf_*`, `am_*`, `af_*`; list in `story/voice_samples.js`). Every chapter has at least one light, funny moment (rule "Light in the dark").
+  Narration is `narrator`; spoken lines belong to a speaker. `text_long` must be the script's lines joined with blank lines. `sfx` is optional, one of: knock door wind birds axe steps growl splash waves howl bell gulp magic hoot hum. `notes` kinds: motivation, acting, sound, blocking, gesture, thought (hidden, never read aloud). `voice` and `speed` are the Kokoro voice and speed for the recording, the only voice the page plays (there is no browser voice). Copy the cast from `story/b1c1.js` (voices from the **Voices** setting) and add new speakers as they appear, each with a Kokoro voice (English voices: `bm_*`, `bf_*`, `am_*`, `af_*`; list in `story/voice_samples.js`). Every chapter has at least one light, funny moment (rule "Light in the dark").
 
 Fill the planned chapter (or insert a new one if none is planned), quoting text safely with dollar quotes:
 
@@ -116,7 +116,7 @@ cat kokoro-q8-shards-1.0.0/package/kokoro-q8.part*.bin > model_q8.onnx   # then 
 python3 -I tools/make_voice.py --model <scratchpad dir> --db
 ```
 
-In a Claude cloud session the network proxy signs the requests to the Family project, so no key is needed. If recording fails, the chapter is still published (the page uses the iPad voice): say so in the run note and carry on.
+In a Claude cloud session the network proxy signs the requests to the Family project, so no key is needed. If recording fails, the chapter is still published without a recording: the page says it has no recording yet. Say so in the run note and carry on.
 
 ## 7. Finish the run
 

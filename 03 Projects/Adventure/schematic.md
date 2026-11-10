@@ -33,12 +33,12 @@ The database holds a summary (`adv_entries`, places, planned chapters) for the s
 
 A chapter can carry a **script**: who speaks each line, sound cues and hidden director's notes (the script-story format of the Voice repo (`ShimmyCane/Voice`)). On **The whole page**, the player page then shows a label for each speaker and 🔊 reads it with a cast:
 1. **Recorded cast** (Kokoro voices, made ahead by `tools/make_voice.py`), with line and word highlight, used only while the recording matches the text: bundled chapters in `story/<id>.audio.js` + `audio/<id>.cast.mp3`; the storyteller's chapters in the private bucket `adv-audio` (`adv_chapters.audio`), recorded nightly by `make_voice.py --db` with the voices picked on `voices.html`.
-2. **iPad voice**, one line at a time with each character's pitch and rate, when there is no recording or ⚙️ says so.
-Sound effects and a soft forest tune (`js/sound.js`, copied from Voice, Web Audio, no files) play along. Tap a line to read from there. ⚙️: Story voices, 🔔 Sound effects, 🎵 Forest music, 🎬 Director's notes.
+There is no browser voice. A chapter with no recording says so, and 🔊 reads only from the recording (the whole page).
+Sound effects and a soft forest tune (`js/sound.js`, copied from Voice, Web Audio, no files) play along. Tap a line to read from there. ⚙️: 🔔 Sound effects, 🎵 Forest music, 🎬 Director's notes.
 
 Chapter 1 ("Who? Who?") is bundled in `story/b1c1.js` with a 4½-minute recording (cast: Storyteller `bm_fable`, You `af_river`, Whisperfox `af_nicole`, Grandmother Owl `bf_alice`). Chapters the storyteller writes carry their script in `adv_chapters.script`.
 
-**Voices page** (`voices.html`, ⚙️ → 🎙️ Voices): recorded samples of 12 storyteller voices and a few for each other character (`story/voice_samples.js`, baked by `make_voice.py --samples` into `audio/samples/`), the iPad's voices, a speed slider per character. Picks save to the `setting` entry "Voices", which the recorder uses.
+**Voices page** (`voices.html`, ⚙️ → 🎙️ Voices): recorded samples of 12 storyteller voices and a few for each other character (`story/voice_samples.js`, baked by `make_voice.py --samples` into `audio/samples/`), a speed slider per character. Picks save to the `setting` entry "Voices", which the recorder uses.
 
 ## How it plays
 
@@ -74,7 +74,7 @@ Every page has the same ⚙️ menu: Story, World, Under the hood, All projects.
 | `lore.html` | Reads the world bible (`world/*.md`) in collapsible panels (`lib/marked.min.js`, MIT, vendored) |
 | `world/*.md` | The world bible and Book 1 outline |
 | `story/b1c1.js`, `story/b1c1.audio.js`, `audio/b1c1.cast.mp3` | Chapter 1 as a voiced script, its recording and timings |
-| `js/narrate.js`, `js/sound.js` | Cast narration (recorded or iPad voice) and synthesized sound effects and tunes (from Voice) |
+| `js/narrate.js`, `js/sound.js` | Cast narration (recording only) and synthesized sound effects and tunes (from Voice) |
 | `tools/make_voice.py` | Makes the recorded cast for `story/*.js` with Kokoro (model files stay outside the repo) |
 | `supabase/004_script.sql` | `script` column on chapters (run after 003) |
 | `supabase/005_audio.sql` | `audio` column on chapters and the private bucket `adv-audio` (run after 004) |

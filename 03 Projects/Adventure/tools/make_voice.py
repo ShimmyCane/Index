@@ -36,6 +36,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 SR = 24000
 GAP = 0.55          # silence between lines (seconds)
+FADE_MS = 25        # fade in and out at each line's edges (milliseconds), so the joins do not click
 LEAD = 0.3          # silence at the start
 DEFAULT_SPEED = 0.92
 SPARE_VOICES = ['bf_emma', 'am_michael', 'bf_lily', 'am_adam', 'af_bella', 'bm_daniel', 'af_sky', 'bm_lewis']
@@ -64,6 +65,17 @@ def cast_for(story, voices_setting=None):
     return cast
 
 
+def edge_fade(audio, ms=FADE_MS):
+    """Ramp the first and last few milliseconds to silence, so joins between lines do not click."""
+    n = int(SR * ms / 1000)
+    out = audio.astype(np.float32).copy()
+    if len(out) > 2 * n:
+        ramp = np.linspace(0.0, 1.0, n, dtype=np.float32)
+        out[:n] *= ramp
+        out[-n:] *= ramp[::-1]
+    return out
+
+
 def bake(lines, cast, kokoro, log=True):
     """Lines [{who, text, speed?}] → (float32 audio, [[start, end], ...])."""
     chunks, timings, t = [np.zeros(int(LEAD * SR), dtype=np.float32)], [], LEAD
@@ -73,7 +85,7 @@ def bake(lines, cast, kokoro, log=True):
         assert sr == SR
         dur = len(audio) / SR
         timings.append([round(t, 3), round(t + dur, 3)])
-        chunks += [audio.astype(np.float32), np.zeros(int(GAP * SR), dtype=np.float32)]
+        chunks += [edge_fade(audio), np.zeros(int(GAP * SR), dtype=np.float32)]
         t += dur + GAP
         if log:
             print(f"  {i + 1}/{len(lines)} {line['who']:9s} {c['voice']:11s} {dur:5.1f}s", flush=True)

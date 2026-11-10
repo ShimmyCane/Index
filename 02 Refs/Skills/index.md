@@ -21,6 +21,9 @@ Skills:
 - fix_puzzles: Reviews puzzles flagged for rework (and ones the generator left unfinished): another seed, another setting, a root fix, or a replacement; re-checks them and closes the flags in the database. Run now and then.
 - graduate_project: Moves a nursery project into its own public repo with GitHub Pages: ready check, prepare the folder, the manual copy / repo / Pages steps, database registry pointers, the home page link, other pointers, and removal from the nursery, tracked in `04 AI/graduations.md`.
 - make_3d: Builds a 3-D test model from a concept, a photo or other assets, in five increments, and sets up a review in the Increment Viewer. Asks for research mode (outside sources, recorded) or assets-only mode (only what is provided). Photos of real places or people stay in `private/`.
+- consider_actions: Adventure only. Reads every family note, scene, setting and change, judges past decisions with hindsight (kept, reconsider, missed), anticipates the next moves, and lists questions for Jimmy. Read-only.
+- update_story: Adventure only. Runs consider_actions first, plans the story line and its deviations, rewrites future chapter titles when needed, writes the next chapter (poem peek, minute, whole page, director's notes), and hands the next page to the family once Jimmy says go.
+- gather_story_lessons_learned: Adventure only, internal. After each run, records the family's pacing, plot adherence, role profiles and the storyteller's own right and wrong guesses, so planning gets faster. Family details stay in Supabase.
 
 Claude Code:
 - These files are the source of truth. Each one has a thin wrapper in `.claude/skills/<name-with-hyphens>/SKILL.md`, so it can be run as `/start-project`, `/ai-consolidate`, etc.
