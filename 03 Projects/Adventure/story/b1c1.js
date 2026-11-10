@@ -1,5 +1,5 @@
 // Book 1, Chapter 1 — Who? Who?
-// A voiced chapter, in the script-story format borrowed from 03 Projects/Voice (see Voice stories/red_hood.js):
+// A voiced chapter, in the script-story format borrowed from the Voice repo (ShimmyCane/Voice) (see Voice stories/red_hood.js):
 //   cast    speaker → name, icon, Kokoro voice and speed (recorded audio), and pitch/rate for the iPad voice fallback
 //   script  one line = one paragraph: { who, text, speed? (only to override the speaker's), sfx?, notes?: [{ kind, text }] }
 //           sfx plays a synthesized sound (js/sound.js) when the reading reaches the line.

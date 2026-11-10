@@ -1,4 +1,4 @@
-/* Adventure — copied from 03 Projects/Voice/js/sound.js (Voice 0.4), plus the forest tune and the hoot and hum effects.
+/* Adventure — copied from the Voice repo (ShimmyCane/Voice) js/sound.js (Voice 0.4), plus the forest tune and the hoot and hum effects.
    Voice — sound effects and background tunes, all made with the Web Audio API (no sound files).
    VoiceSound.sfx(name)            play one effect: knock door wind birds axe steps growl splash waves howl bell gulp magic hoot hum
    VoiceSound.music(style)         start a soft looping tune: japan korea china france spain italy netherlands australia forest

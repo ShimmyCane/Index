@@ -3,7 +3,7 @@
 Status: MVP 0.1.0 (built, not yet device-tested by a child).
 
 Current state
-- Page in `03 Projects/中文笔画/`: `index.html`, `js/app.js`, `js/notes.js`, `css/style.css` (shared from Chinese Character Sudoku), `css/app.css`.
+- Page in `03 Projects/中文笔画/`: `index.html`, `js/app.js`, `js/notes.js`, `css/style.css` (copied from Chinese Character Sudoku, now in its own repo `ShimmyCane/Chinese-Character-Sudoku`), `css/app.css`.
 - Data: `data/batches.json` (edited each week) → `tools/build_batches.py` → `data/batches.js` and `data/strokes.js`.
 - First batch: 2026-11-10 · 第一課, 12 characters (readings 黃, 青, 請 confirmed by Jimmy).
 - Behaviour: date tabs; wrong strokes corrected on the spot; the answer is shown and its stroke order played after 2 misses (⚙️ can set 1–3); hints match 汉字数独 3.0; stars per character on the device; feedback box in ⚙️.

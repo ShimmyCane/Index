@@ -58,7 +58,7 @@ Then read the world bible in the repo, `03 Projects/Adventure/world/` (`bible.md
 - `prompt`: the question the chapter ends on, with 2 or 3 options.
 - Bring each book to a real ending at about 7–10 chapters. After the last chapter, start Book 2 at chapter 1 and add a new `plan` entry for it.
 
-- `script` (voiced chapter): the long version again as a script, one line per paragraph, so the page can read it with a cast of voices. Format (borrowed from `03 Projects/Voice`):
+- `script` (voiced chapter): the long version again as a script, one line per paragraph, so the page can read it with a cast of voices. Format (borrowed from the Voice repo (`ShimmyCane/Voice`)):
   ```json
   { "music": "forest",
     "cast": { "narrator": { "name": "Storyteller", "icon": "📜", "pitch": 1, "rate": 0.92 },

@@ -16,9 +16,6 @@ Layout:
 - <Project>/lessons.md — project-specific lessons, appended over time.
 
 Projects with notes:
-- Athena's world/ — decorating game, V2 3-D home (V1 archived in `v1/`). `brief.md`, `lessons.md`. Open questions in `03 Projects/Athena's world/convo/convo v0.3.md`.
-- Bar Glide/ — Ole Bar Glide, arcade bar game 0.3.0. `brief.md`, `lessons.md`. Open questions in `03 Projects/Bar Glide/convo/convo v0.3.md`.
-- Chinese Character Sudoku/ — word-grid game MVP. `brief.md`, `lessons.md`.
 - 中文笔画/ — MVP 0.1.0: stroke-writing game for the worksheet characters, date tabs from `data/batches.json`, answer shown after misses. `brief.md`, `lessons.md`. Questions in `03 Projects/中文笔画/convo/convo v0.2.md`.
 - Adventure/ — family story game (Athena's story); world of Ondra, ten-book plan, voiced chapter 1, voices page, recording step (2026-11-10). `brief.md`, `lessons.md`.
 - Felix Maze/ — printable maze worksheets MVP. `brief.md`, `lessons.md`.
@@ -30,10 +27,9 @@ Projects with notes:
 - Expansion Wars/ — expansion game MVP (spots, soldiers, roads, lakes, computer players, 2–4 flags). Plain HTML/CSS/JS. Convo v0.1 open (defaults built in). `brief.md`, `lessons.md`, `interests.md` (public, simplified design interests). The full interests dossier is private, in `03 Projects/Expansion Wars/private/` (gitignored).
 - Fishes/ — fish-tank game MVP (20 levels, five zones, lock-on hunters, notes in a cookie, database SQL written but not applied). Plain canvas. `brief.md`, `lessons.md`.
 - Paper Again/ — particle model of one sheet of paper over ten increments (folds, crumpling, tears, damp, mould, cuts, burns). MVP. Research in `research/paper_behaviour.md`. `brief.md`.
-- Voice/ — narrated story shelf with speed read, MVP 0.4.0 (three languages per story, culture tunes, director's notes with sound effects; convo v0.4 open). `brief.md`, `lessons.md`.
-- What to Cook/ — family kitchen tool, version 0.4.0. Pantry saved to the Family database; notes saved to `wtc_notes`; food list page (`foods.html`, linked from Settings) with `wtc_foods` (paste file written, not yet applied). `brief.md`, `lessons.md`, `convo v0.6` answers the v0.5 questions.
 
 Notes:
+- Graduated to their own repos (removed from the nursery 2026-11-10; history stays in git): Athena's world → `ShimmyCane/Athena-s-world`, Bar Glide → `ShimmyCane/Bar-Glide`, Chinese Character Sudoku → `ShimmyCane/Chinese-Character-Sudoku`, Voice → `ShimmyCane/Voice`, What to Cook → `ShimmyCane/What-to-Cook`.
 - Lessons in this folder come from the private ShimmyAI repo's `04 AI/`. Only generic lessons were carried over. Family and personal details were not.
 - Claude controls this folder unless Jimmy adds a file or asks for a specific structure.
 - When adding a project folder, use `brief.md` + `lessons.md` and add it to the list above.

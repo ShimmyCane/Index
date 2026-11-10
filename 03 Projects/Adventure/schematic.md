@@ -31,7 +31,7 @@ The database holds a summary (`adv_entries`, places, planned chapters) for the s
 
 ## Voiced chapters (borrowed from Voice)
 
-A chapter can carry a **script**: who speaks each line, sound cues and hidden director's notes (the script-story format of `03 Projects/Voice`). On **The whole page**, the player page then shows a label for each speaker and 🔊 reads it with a cast:
+A chapter can carry a **script**: who speaks each line, sound cues and hidden director's notes (the script-story format of the Voice repo (`ShimmyCane/Voice`)). On **The whole page**, the player page then shows a label for each speaker and 🔊 reads it with a cast:
 1. **Recorded cast** (Kokoro voices, made ahead by `tools/make_voice.py`), with line and word highlight, used only while the recording matches the text: bundled chapters in `story/<id>.audio.js` + `audio/<id>.cast.mp3`; the storyteller's chapters in the private bucket `adv-audio` (`adv_chapters.audio`), recorded nightly by `make_voice.py --db` with the voices picked on `voices.html`.
 2. **iPad voice**, one line at a time with each character's pitch and rate, when there is no recording or ⚙️ says so.
 Sound effects and a soft forest tune (`js/sound.js`, copied from Voice, Web Audio, no files) play along. Tap a line to read from there. ⚙️: Story voices, 🔔 Sound effects, 🎵 Forest music, 🎬 Director's notes.

@@ -37,6 +37,7 @@ A kids' iPad game for the characters on the weekly 中文 worksheet. The child s
 No database. Progress and notes stay on the device.
 
 ## Shared from Chinese Character Sudoku
+(Copied in; that project now lives in its own repo, `ShimmyCane/Chinese-Character-Sudoku`.)
 - `css/style.css` (the general look and layout).
 - `js/vendor/hanzi-writer.min.js` and its licence.
 - The stroke-name helper (adapted in `js/app.js`).
