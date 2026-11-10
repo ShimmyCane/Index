@@ -84,6 +84,8 @@ Every page has the same ⚙️ menu: Story, World, Under the hood, All projects.
 | `supabase/003_world.sql` | Places, journal, planned chapters (run after 001) |
 | `supabase/002_seed.sql` | Book 1: roles, the world of Ondra in short, chapter 1 (voiced), places, planned plot, clocks (run last) |
 | `storyteller.md` | Instructions for the storyteller run |
+| `research/poem structure.md` | Research and proposal: the peek as a poem (forms by mood, scansion, worked examples, terms, sources) |
+| `research/minute structure.md` | Research and proposal: the minute (five beats, about 150 words), music, sound effects, director's notes, questions for Jimmy |
 | `todo.md` | Next steps, later ideas, things to research |
 
 ## Data (Supabase **Family** project, prefix `adv_`)

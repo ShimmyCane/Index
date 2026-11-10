@@ -93,6 +93,8 @@
     document.getElementById('chText').innerHTML = script && state.length === 'long'
       ? scriptHtml(script)
       : textOf(ch, state.length).split(/\n\s*\n/).map(p => '<p>' + esc(p) + '</p>').join('');
+    // The peek is a poem: keep its line breaks.
+    document.getElementById('chText').classList.toggle('poem', state.length === 'tiny');
     document.getElementById('chText').classList.toggle('show-notes', store.get('adv.notes', false));
     document.getElementById('chPrompt').textContent = ch.prompt || '';
 
