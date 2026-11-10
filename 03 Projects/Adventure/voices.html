@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Adventure — Voices</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Patrick+Hand&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="hood.css">
+  <style>
+    .sample-text { margin: 0; font-family: 'Patrick Hand', cursive; font-size: 20px; background: var(--paper); border-radius: 12px; padding: 8px 12px; }
+    .cands { display: grid; grid-template-columns: repeat(auto-fill, minmax(136px, 1fr)); gap: 12px; }
+    .cand { border: var(--line); border-radius: var(--radius); box-shadow: var(--shadow); background: #fff; padding: 10px; display: grid; gap: 6px; }
+    .cand.picked { background: var(--mint); outline: 4px dashed var(--ink); outline-offset: 3px; }
+    .cand.playing { background: var(--sun); }
+    .cand b { font-size: 17px; }
+    .cand .muted { font-size: 13px; }
+    .cand .row { display: flex; gap: 6px; }
+    .cand .btn { flex: 1; min-height: 48px; }
+    .speed { display: flex; align-items: center; gap: 10px; font-weight: 700; flex-wrap: wrap; }
+    .speed input { flex: 1; min-width: 160px; }
+    .save-bar { position: sticky; bottom: 0; z-index: 3; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding-right: 88px; }
+    .save-bar .btn { min-height: 56px; }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <h1>🎙️ Voices</h1>
+    <a class="btn small" href="index.html">📖 Story</a>
+    <span id="pill" class="pill">Listening room</span>
+  </header>
+
+  <main class="hood">
+    <p class="muted">Tap ▶ to hear a voice, ✓ to pick it. The speed slider changes how fast that character talks.
+      Save, and the next recording run re-records every chapter with your picks.</p>
+    <div id="panels"></div>
+    <section class="panel card" data-id="ipad">
+      <button class="panel-head"><h2>📱 iPad voices</h2><span class="pm">▸</span></button>
+      <div class="panel-body hidden">
+        <p class="muted">Used when a chapter has no recording yet. Better ones can be downloaded on the iPad: Settings → Accessibility → Spoken Content → Voices.</p>
+        <div id="ipadList" class="cands"></div>
+      </div>
+    </section>
+    <div class="card save-bar">
+      <button class="btn sun" id="saveBtn">💾 Save my picks</button>
+      <span id="saveMsg" class="muted"></span>
+    </div>
+  </main>
+  <div id="gear-extra"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/common.js"></script>
+  <script src="story/voice_samples.js"></script>
+  <script src="story/b1c1.audio.js"></script>
+  <script src="js/voices.js"></script>
+</body>
+</html>

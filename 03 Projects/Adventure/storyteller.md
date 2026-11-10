@@ -10,7 +10,7 @@ The database is the Supabase project named **Family**. Use the Supabase tools (`
 insert into public.adv_runs (status) values ('running') returning id;
 ```
 
-Keep the id. If anything below fails, finish the run as `failed` with a short note (step 6), so the page says "the story is resting tonight".
+Keep the id. If anything below fails, finish the run as `failed` with a short note (step 7), so the page says "the story is resting tonight".
 
 ## 2. Read everything
 
@@ -28,6 +28,12 @@ select id, created_at, beats from public.adv_turns where status = 'waiting' orde
 ```
 
 Read the `rule` entries first and follow them. Notes of kind `note` are Jimmy's notes for tonight: weave them in.
+
+**This is Athena's story.** She is the Seedling, written as "you". Then check four `setting` entries before writing:
+- **Reckoning**: `off`, or `on (from chapter N)`. While off, never start the Reckoning: only teasers (schedule in `world/books.md`), and the Bloom clock stays at 5 / 6 or less. When on, build toward the bloom over ten chapters; the Tree blooms in chapter N + 10.
+- **Branch**: which version of the story the family is on (for example `2·Salt`). A choice that changes where the story goes opens a new branch: update the entry and add a `plan` entry for it (`world/books.md`, section 1).
+- **World clocks**.
+- **Voices**: the cast voices Jimmy picked on `voices.html`. Use them for the script's cast.
 
 Then read the world bible in the repo, `03 Projects/Adventure/world/` (`bible.md`, `regions.md`, `peoples.md`, `creatures.md`, `book1.md`). The database entries are a summary; the files are the full world. If they disagree, the database wins (Jimmy may have changed it under the hood), and say so in the run note.
 
@@ -60,7 +66,7 @@ Then read the world bible in the repo, `03 Projects/Adventure/world/` (`bible.md
     "script": [ { "who": "narrator", "text": "...", "sfx": "birds",
                   "notes": [{ "kind": "acting", "text": "slow, warm" }] } ] }
   ```
-  Narration is `narrator`; spoken lines belong to a speaker. `text_long` must be the script's lines joined with blank lines. `sfx` is optional, one of: knock door wind birds axe steps growl splash waves howl bell gulp magic hoot hum. `notes` kinds: motivation, acting, sound, blocking, gesture, thought (hidden, never read aloud). `pitch` and `rate` shape the iPad voice per character. Copy the cast from `story/b1c1.js` and add new speakers as they appear. A recorded Kokoro cast only exists for bundled chapters (`tools/make_voice.py`); database chapters are read with the iPad voice.
+  Narration is `narrator`; spoken lines belong to a speaker. `text_long` must be the script's lines joined with blank lines. `sfx` is optional, one of: knock door wind birds axe steps growl splash waves howl bell gulp magic hoot hum. `notes` kinds: motivation, acting, sound, blocking, gesture, thought (hidden, never read aloud). `pitch` and `rate` shape the iPad voice per character; `voice` and `speed` are the Kokoro voice and speed for the recording. Copy the cast from `story/b1c1.js` (voices from the **Voices** setting) and add new speakers as they appear, each with a Kokoro voice (English voices: `bm_*`, `bf_*`, `am_*`, `af_*`; list in `story/voice_samples.js`). Every chapter has at least one light, funny moment (rule "Light in the dark").
 
 Fill the planned chapter (or insert a new one if none is planned), quoting text safely with dollar quotes:
 
@@ -89,7 +95,7 @@ Change `adv_entries` when the story changes the world: add a `history` entry for
 
 - **Clocks:** tick the `setting` entry "World clocks" (see `world/bible.md`, section 9) by what the family did and what each faction would do. One or two ticks a chapter at most. Say which in the run note.
 - **Echoes:** if something done now (or in another Ring) should leave a mark later, add a `history` entry with **[echo]** in its title.
-- **The Wanderer:** note in the Wanderer's journal whether they acted bravely, cleverly, kindly or loyally, and any name they chose. Their true past is revealed only in small pieces (`world/bible.md`, section 5).
+- **Athena:** note in Athena's journal whether she acted bravely, cleverly, kindly or loyally, and any name she chose. Her true past is revealed only in small pieces (`world/bible.md`, section 5).
 
 Mark the scenes as read:
 
@@ -97,7 +103,22 @@ Mark the scenes as read:
 update public.adv_turns set status = 'used' where id in (<ids from step 2>);
 ```
 
-## 6. Finish the run
+## 6. Record the chapter
+
+Record every chapter whose recording is missing or out of date, with the cast voices from the Voices setting. The audio goes to the private bucket `adv-audio` (never into the repo, because chapters grow from the family's scenes), and the page plays it with line and word highlight.
+
+```bash
+# once per session, in the scratchpad (model files are never committed); see the header of tools/make_voice.py
+python3 -m venv venv && . venv/bin/activate && pip install kokoro-onnx soundfile
+npm pack kokoro-q8-shards kokoro-js && for f in *.tgz; do tar xzf $f --one-top-level; done
+cat kokoro-q8-shards-1.0.0/package/kokoro-q8.part*.bin > model_q8.onnx   # then build voices.npz (script header)
+# then, from 03 Projects/Adventure:
+python3 -I tools/make_voice.py --model <scratchpad dir> --db
+```
+
+In a Claude cloud session the network proxy signs the requests to the Family project, so no key is needed. If recording fails, the chapter is still published (the page uses the iPad voice): say so in the run note and carry on.
+
+## 7. Finish the run
 
 ```sql
 update public.adv_runs
@@ -111,4 +132,5 @@ On failure use `status = 'failed'` and a short note saying what went wrong.
 
 - Never write the family's words into the repo. They stay in Supabase.
 - Only `adv_` tables. Never delete rows; Jimmy does that from under the hood.
-- Keep it kind. Exciting, not frightening. Follow the "How dark it gets" rule entry (`world/bible.md`, section 8).
+- Keep it kind. Exciting, not frightening. Follow the "How dark it gets" rule entry (`world/bible.md`, section 8). For now, things are light.
+- Never switch the Reckoning on yourself. Only Jimmy does that.

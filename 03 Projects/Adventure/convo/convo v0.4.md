@@ -28,16 +28,16 @@ There has been no story yet, so make one. You wake in a forest in a far-away wor
 ## Questions for Jimmy (answer inline)
 
 1. **The Wanderer or Athena?** The role is now "The Wanderer", with a name chosen in the story. Should Athena keep a role of her own as well (two Seedlings waking together?), or is the Wanderer hers to name?
-   - Answer:
+   - Answer: This is, as they say, Athena's story.
 2. **The Reckoning.** It is the Tree's thousand-year bloom: everything forgotten returns and every promise made under the Tree comes due. Does that feel right, or did you have a different reckoning in mind (a war, a god, a comet, the sky turning over)?
-   - Answer:
+   - Answer: Hmm, I love it, but I would want there to be some sort of conflict as well, manmade. But it should also have moments of levity.
 3. **How dark?** The rule for now: terrible things are told, not shown; poison brings sleep, never death on the page. Is that the right dial for Book 1? When should it turn up?
-   - Answer:
+   - Answer: For now, things are light. The reckoning will be a manual toggle. It will take another 10 chapters to kick in. But there should be teasers within 25 chapters.
 4. **Voices.** Listen to chapter 1. Keep the Storyteller as `bm_fable` (British, warm), or try another? Is the owl too slow?
-   - Answer:
+   - Answer: Sure, give me a setting/testing page where I can try multiple voices for the storyteller.
 5. **Chapters the storyteller writes** are read by the iPad voice (no recording). Worth adding a recording step (Kokoro on a computer, or live in the page from Voice), or is the iPad voice enough?
-   - Answer:
+   - Answer: Let's use the Voice repo/borrowing from Kokoro recording step.
 6. **Book 2's road.** Book 1 ends on three roads: the lakes, the desert, the iron city. Let the family choose, or do you want to steer?
-   - Answer:
+   - Answer: Plan roughly 10 books for now; I'd imagine that there must be many sub versions as stories fragment over time.
 7. **Other lives.** A later mode where you play someone in another age (a Rootkin child in Aun, long ago) whose deeds echo into the present. Interested, and when?
-   - Answer:
+   - Answer: Yes, those will be options for Athena to explore.

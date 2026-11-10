@@ -66,6 +66,7 @@
           <a class="btn small" href="index.html">📖 Story</a>
           <a class="btn small" href="world.html">🗺️ World</a>
           <a class="btn small" href="lore.html">📚 Lore</a>
+          <a class="btn small" href="voices.html">🎙️ Voices</a>
           <a class="btn small" href="hood.html">🔧 Under the hood</a>
           <a class="btn small" href="../../index.html">🏠 All projects</a>
         </nav>
@@ -125,12 +126,13 @@
   }
 
   // Resolve once there is a signed-in session (or null when offline).
-  async function signIn() {
+  // quiet: resolve null instead of showing the sign-in form when nobody is signed in.
+  async function signIn(opts) {
     if (!window.supabase) {
       error('Start', 'Could not load the Supabase library (offline?)');
       return null;
     }
-    Adv.sb = window.supabase.createClient(cfg.url, cfg.key);
+    if (!Adv.sb) Adv.sb = window.supabase.createClient(cfg.url, cfg.key);
     try {
       const { data } = await withTimeout(Adv.sb.auth.getSession());
       if (data.session) return data.session;
@@ -138,6 +140,7 @@
       error('Session', e);
       return null;
     }
+    if (opts && opts.quiet) return null;
     const overlay = document.getElementById('login');
     overlay.classList.remove('hidden');
     return new Promise(resolve => {

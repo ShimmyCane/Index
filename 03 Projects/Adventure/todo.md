@@ -1,15 +1,18 @@
 # Adventure — To-do
 
 ## Next
-- [ ] **Create the database tables.** Supabase's confirmation prompt went unanswered twice. Either approve it when Claude retries, or paste `supabase/001_adventure.sql`, then `003_world.sql`, then `004_script.sql`, then `002_seed.sql` into the Supabase SQL editor (Family project).
-- [ ] **Read the world** (`lore.html` or `world/`) and answer `convo/convo v0.4.md`.
+- [ ] **Create the database tables.** Supabase's confirmation prompt went unanswered twice. Either approve it when Claude retries, or paste into the Supabase SQL editor (Family project). 001 and 003 are in; still to paste: `004_script.sql`, `005_audio.sql`, then `002_seed.sql`.
+- [ ] Pick voices on 🎙️ Voices and save; answer `convo/convo v0.5.md`.
+- [ ] Once the seed is in: run the recording step once by hand (`tools/make_voice.py --db`) to check the upload to `adv-audio` from a cloud session.
 - [ ] Listen to chapter 1 on the iPad (The whole page → 🔊), with and without the recording.
 - [ ] **Set up the nightly heartbeat.** A scheduled Claude task, once a night (for example 2 a.m.), that says "Run the Adventure storyteller" and follows `storyteller.md`. It needs the Supabase connector granted to the scheduled task. Claude can create it on request.
 - [ ] Try the page on the iPad: sign in, read aloud, the microphone, sending a scene.
 - [ ] Publish on GitHub Pages so the microphone and the database work on the iPad.
 
 ## Later
-- [ ] Record chapters the storyteller writes: a step that runs `tools/make_voice.py` on a chapter's `script` and stores the MP3 in Supabase Storage (needs a computer or an Edge Function; no key needed for Kokoro).
+- [ ] A `branch` column on chapters, so several versions of the story can live side by side (convo v0.5, question 2).
+- [ ] A menu for Athena's other lives once one unlocks (convo v0.5, question 3).
+- [ ] Cache recordings on the device for offline play.
 - [ ] Kokoro live in the page (from Voice `js/live.js`) for chapters without a recording.
 - [ ] A Leaves and Rings mode: play a life in another age (Aun in the Age of Roots), with echoes into the present.
 - [ ] Show the world clocks on the World page.

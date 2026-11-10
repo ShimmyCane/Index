@@ -4,7 +4,8 @@
 // write one into adv_chapters.script.
 //
 // Two ways to read it:
-//   recorded  the Kokoro cast recording (story/<id>.audio.js + audio/<id>.cast.mp3), if it matches the text
+//   recorded  the Kokoro cast recording, if it matches the text: story.recording (from the adv-audio bucket,
+//             made by tools/make_voice.py --db) or story/<id>.audio.js + audio/<id>.cast.mp3 (bundled)
 //   ipad      the browser's own voice, one line at a time, with each character's pitch and rate
 // Sound cues (sfx) play when the reading reaches a line; a soft tune (js/sound.js) plays underneath.
 (function () {
@@ -13,7 +14,7 @@
 
   // The recording for this script, or null if there is none or it no longer matches the text.
   function recordingFor(story) {
-    const a = story.id && window.ADV_AUDIO && window.ADV_AUDIO[story.id];
+    const a = (story.recording && story.recording.src && story.recording) || (story.id && window.ADV_AUDIO && window.ADV_AUDIO[story.id]);
     if (!a || !a.lines || a.lines.length !== story.script.length) return null;
     const same = story.script.every((l, i) => a.source[i] === l.text);
     return same ? a : null;
@@ -82,7 +83,7 @@
       const u = new SpeechSynthesisUtterance(l.text);
       if (base) u.voice = base;
       u.pitch = c.pitch || 1;
-      u.rate = (c.rate || 0.92) * (r.opts.rate || 1) * ((l.speed || 0.92) / 0.92);
+      u.rate = (c.rate || 0.92) * (r.opts.rate || 1) * (l.speed ? l.speed / (c.speed || 0.92) : 1);
       u.onstart = () => { if (run === r) cue(r, i); };
       u.onboundary = ev => {
         if (run !== r || ev.name === 'sentence') return;
