@@ -1,7 +1,7 @@
 # Adventure — AI Brief
 
-**Updated:** 2026-10-27
-**Status:** MVP and world tools built. Database tables not yet applied.
+**Updated:** 2026-11-10
+**Status:** MVP, world tools, the world of Ondra (`world/`), Book 1 outline and a voiced chapter 1. Database tables not yet applied.
 
 ## Goal
 
@@ -17,12 +17,21 @@ A family story game played like correspondence chess: roles instead of players, 
 - The draft scene lives in localStorage until sent, so nothing is lost offline.
 - Storyteller: `storyteller.md`, run by Claude with the Supabase connector. Writes as actor `claude`.
 
+## The world and the voices (2026-11-10)
+
+- World bible in `03 Projects/Adventure/world/` (bible, regions, peoples, creatures, book1); `lore.html` renders it with vendored `lib/marked.min.js`. Short copies live in `adv_entries` via `002_seed.sql`.
+- The player is a Seedling: woke in Vael's roots with no memory, the Sun and Moon key and Bristle. Roles: wanderer, bristle, old_lady (Granny Wren), storyteller.
+- Voiced chapters: script format from Voice (`cast`, `script` lines with `who`, `text`, `speed`, `sfx`, `notes`). Bundled: `story/b1c1.js` (`window.ADV_SCRIPTS['1.1']`), recording `story/b1c1.audio.js` + `audio/b1c1.cast.mp3` (270 s, line timings, words estimated by length). Database: `adv_chapters.script` (`004_script.sql`). `js/narrate.js` plays the recording if its `source` matches the script, else the iPad voice per line with per-character pitch/rate. `js/sound.js` copied from Voice as `AdvSound`, plus `forest` tune and `hoot`/`hum` effects.
+- Baker: `tools/make_voice.py` (kokoro-onnx + npm weights, no misaki needed for English; `misaki[en]` fails to build spacy here).
+- Seed generated from the script by a scratch script (not committed): `002_seed.sql` and `data/fallback.json` both carry the same chapter 1.
+
 ## Verified vs. unverified
 
 - Verified in headless Chromium with a stand-in Supabase client that rejects unknown tables and columns: sign-in, catch-up lengths, recap, building a 3-beat scene across two characters, send with confirm, asleep banner, reload → peek; under the hood edit/save, add chapter numbering, history undo calls `adv_restore`. No page errors.
 - World page verified the same way: map drag/resize saves, nested maps, add place, journal append with chapter, plot add/save; no horizontal scroll at phone width.
 - Not applied: `supabase/001_adventure.sql`, `003_world.sql`, `002_seed.sql` (in that order). `apply_migration` timed out twice waiting for a confirmation; nothing was created. Fallback: paste them into the Supabase SQL editor.
-- Unverified: real sign-in, RLS against the live database, the history trigger and rollback functions, the microphone and voices on iPad Safari, the storyteller run end to end.
+- 2026-11-10, verified: all four SQL files on local Postgres 16 with stub roles (seed re-runnable, every row logged in `adv_history`); headless Chromium at three sizes on all four pages plus `lore.html`, zero errors, no horizontal scroll; chapter 1 from the offline copy; recorded narration plays with line and word highlight; tap a line jumps there (with a Range-capable server); stale-recording check; director's notes toggle.
+- Unverified: how the recording sounds (no listening here), the iPad voice path on Safari, real sign-in, RLS against the live database, the history trigger and rollback functions, the microphone and voices on iPad Safari, the storyteller run end to end.
 
 ## Next steps
 

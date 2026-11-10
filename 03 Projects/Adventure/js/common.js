@@ -65,6 +65,7 @@
         <nav class="pages">
           <a class="btn small" href="index.html">📖 Story</a>
           <a class="btn small" href="world.html">🗺️ World</a>
+          <a class="btn small" href="lore.html">📚 Lore</a>
           <a class="btn small" href="hood.html">🔧 Under the hood</a>
           <a class="btn small" href="../../index.html">🏠 All projects</a>
         </nav>

@@ -19,7 +19,7 @@ Projects with notes:
 - Athena's world/ — decorating game, V2 3-D home (V1 archived in `v1/`). `brief.md`, `lessons.md`. Open questions in `03 Projects/Athena's world/convo/convo v0.3.md`.
 - Bar Glide/ — Ole Bar Glide, arcade bar game 0.3.0. `brief.md`, `lessons.md`. Open questions in `03 Projects/Bar Glide/convo/convo v0.3.md`.
 - Chinese Character Sudoku/ — word-grid game MVP. `brief.md`, `lessons.md`.
-- Adventure/ — family story game. `brief.md`, `lessons.md`.
+- Adventure/ — family story game; world of Ondra, voiced chapter 1 (2026-11-10). `brief.md`, `lessons.md`.
 - Felix Maze/ — printable maze worksheets MVP. `brief.md`, `lessons.md`.
 - Make 3D/ — Earth dot map V21 (research note `research/earth-land.md`: Natural Earth land on a 5-degree grid). JSON-as-model 3D sandbox. MVP built (v0.1–v0.6, engine, viewer, planter sample). Convo v0.3 open. `brief.md`, `lessons.md`. Adventure Coaster Park (V01–V10, 250 to 1,000 pph) and `research/adventure_park.md` added 2026-11-02. Grand Ocean Aquarium (V01–V05, about 100 to 1,000 objects, animated) and `research/aquarium.md` added 2026-11-02. Hawk (closed skeleton meshes, V01–V07; V07 physical flight) and `research/hawk.md` added 2026-11-02.
 - Increment Viewer/ — subject-neutral slideshow and running log for reviewing increments. `brief.md`.

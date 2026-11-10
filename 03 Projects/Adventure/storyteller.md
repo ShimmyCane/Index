@@ -29,6 +29,8 @@ select id, created_at, beats from public.adv_turns where status = 'waiting' orde
 
 Read the `rule` entries first and follow them. Notes of kind `note` are Jimmy's notes for tonight: weave them in.
 
+Then read the world bible in the repo, `03 Projects/Adventure/world/` (`bible.md`, `regions.md`, `peoples.md`, `creatures.md`, `book1.md`). The database entries are a summary; the files are the full world. If they disagree, the database wins (Jimmy may have changed it under the hood), and say so in the run note.
+
 ## 3. Decide whether to write
 
 - **Scenes are waiting:** write the next chapter.
@@ -50,17 +52,28 @@ Read the `rule` entries first and follow them. Notes of kind `note` are Jimmy's 
 - `prompt`: the question the chapter ends on, with 2 or 3 options.
 - Bring each book to a real ending at about 7–10 chapters. After the last chapter, start Book 2 at chapter 1 and add a new `plan` entry for it.
 
+- `script` (voiced chapter): the long version again as a script, one line per paragraph, so the page can read it with a cast of voices. Format (borrowed from `03 Projects/Voice`):
+  ```json
+  { "music": "forest",
+    "cast": { "narrator": { "name": "Storyteller", "icon": "📜", "pitch": 1, "rate": 0.92 },
+              "owl": { "name": "Grandmother Owl", "icon": "🦉", "pitch": 0.7, "rate": 0.7 } },
+    "script": [ { "who": "narrator", "text": "...", "sfx": "birds",
+                  "notes": [{ "kind": "acting", "text": "slow, warm" }] } ] }
+  ```
+  Narration is `narrator`; spoken lines belong to a speaker. `text_long` must be the script's lines joined with blank lines. `sfx` is optional, one of: knock door wind birds axe steps growl splash waves howl bell gulp magic hoot hum. `notes` kinds: motivation, acting, sound, blocking, gesture, thought (hidden, never read aloud). `pitch` and `rate` shape the iPad voice per character. Copy the cast from `story/b1c1.js` and add new speakers as they appear. A recorded Kokoro cast only exists for bundled chapters (`tools/make_voice.py`); database chapters are read with the iPad voice.
+
 Fill the planned chapter (or insert a new one if none is planned), quoting text safely with dollar quotes:
 
 ```sql
 update public.adv_chapters
    set title = $t$...$t$, text_tiny = $t$...$t$, text_short = $t$...$t$, text_long = $t$...$t$,
-       whispers = $j${...}$j$::jsonb, prompt = $t$...$t$, status = 'published', created_at = now()
+       whispers = $j${...}$j$::jsonb, prompt = $t$...$t$, script = $j${...}$j$::jsonb,
+       status = 'published', created_at = now()
  where id = '<planned chapter id>';
 
 -- or, with nothing planned:
-insert into public.adv_chapters (book, number, title, text_tiny, text_short, text_long, whispers, prompt)
-values (1, <next number>, $t$...$t$, $t$...$t$, $t$...$t$, $t$...$t$, $j${...}$j$::jsonb, $t$...$t$)
+insert into public.adv_chapters (book, number, title, text_tiny, text_short, text_long, whispers, prompt, script)
+values (1, <next number>, $t$...$t$, $t$...$t$, $t$...$t$, $t$...$t$, $j${...}$j$::jsonb, $t$...$t$, $j${...}$j$::jsonb)
 returning id;
 ```
 
@@ -73,6 +86,10 @@ returning id;
 - **Plot:** if the story turned, adjust the `plan` of the remaining planned chapters, or add planned ones.
 
 Change `adv_entries` when the story changes the world: add a `history` entry for what just happened, update the `plan` if the book took a turn, add new places, characters or objects under `world` or `character`. New characters the family could play go in `adv_roles`. Every change is logged in `adv_history` with the actor `claude`, so Jimmy can roll it back.
+
+- **Clocks:** tick the `setting` entry "World clocks" (see `world/bible.md`, section 9) by what the family did and what each faction would do. One or two ticks a chapter at most. Say which in the run note.
+- **Echoes:** if something done now (or in another Ring) should leave a mark later, add a `history` entry with **[echo]** in its title.
+- **The Wanderer:** note in the Wanderer's journal whether they acted bravely, cleverly, kindly or loyally, and any name they chose. Their true past is revealed only in small pieces (`world/bible.md`, section 5).
 
 Mark the scenes as read:
 
@@ -94,4 +111,4 @@ On failure use `status = 'failed'` and a short note saying what went wrong.
 
 - Never write the family's words into the repo. They stay in Supabase.
 - Only `adv_` tables. Never delete rows; Jimmy does that from under the hood.
-- Keep it kind. Exciting, not frightening.
+- Keep it kind. Exciting, not frightening. Follow the "How dark it gets" rule entry (`world/bible.md`, section 8).

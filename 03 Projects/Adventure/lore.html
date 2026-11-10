@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Adventure — Lore</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Patrick+Hand&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="hood.css">
+  <style>
+    .panel-head .pm { font-size: 22px; }
+    .lore { font-size: 17px; line-height: 1.55; overflow-wrap: anywhere; }
+    .lore h1 { font-size: 22px; } .lore h2 { font-size: 19px; margin-top: 18px; } .lore h3 { font-size: 16px; margin-top: 14px; }
+    .lore blockquote { margin: 8px 0; padding: 8px 14px; background: var(--paper); border-left: 4px solid var(--sage); border-radius: 8px; font-family: 'Patrick Hand', cursive; font-size: 20px; }
+    .lore .scroll { overflow-x: auto; }
+    .lore table { border-collapse: collapse; font-size: 15px; min-width: 100%; }
+    .lore th, .lore td { border: 2px solid var(--ink); padding: 6px 8px; vertical-align: top; text-align: left; }
+    .lore th { background: var(--mint); }
+    .lore pre { overflow-x: auto; background: var(--paper); padding: 10px; border-radius: 10px; font-size: 12px; }
+    .lore code { font-size: .9em; }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <h1>📚 The world of Ondra</h1>
+    <a class="btn small" href="index.html">📖 Story</a>
+  </header>
+  <main class="hood" id="panels"></main>
+  <div id="gear-extra"></div>
+
+  <script src="lib/marked.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+  // The world bible lives in world/*.md (edit those). This page only shows them, one collapsible panel per file.
+  (function () {
+    const files = [
+      ['bible', '🌳', 'The world, its myths and its ages'],
+      ['regions', '🗺️', 'Regions'],
+      ['peoples', '🏘️', 'Peoples, factions and injustices'],
+      ['creatures', '🦉', 'Creatures, spirits and forgotten things'],
+      ['book1', '📖', 'Book 1: The Waking']
+    ];
+    const open = Adv.store.get('adv.lore.open', { bible: true });
+    Adv.buildChrome();
+    const main = document.getElementById('panels');
+    main.innerHTML = files.map(([id, icon, name]) =>
+      '<section class="panel card" data-id="' + id + '"><button class="panel-head"><h2>' + icon + ' ' + Adv.esc(name) +
+      '</h2><span class="pm">' + (open[id] ? '▾' : '▸') + '</span></button><div class="panel-body lore' + (open[id] ? '' : ' hidden') +
+      '">Loading…</div></section>').join('');
+    main.onclick = ev => {
+      const head = ev.target.closest('.panel-head');
+      if (!head) return;
+      const sec = head.parentElement, body = sec.querySelector('.panel-body'), id = sec.dataset.id;
+      open[id] = body.classList.toggle('hidden') ? false : true;
+      head.querySelector('.pm').textContent = open[id] ? '▾' : '▸';
+      Adv.store.set('adv.lore.open', open);
+    };
+    files.forEach(async ([id]) => {
+      const body = main.querySelector('[data-id="' + id + '"] .panel-body');
+      try {
+        const res = await fetch('world/' + id + '.md');
+        if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+        const md = await res.text();
+        body.innerHTML = window.marked ? marked.parse(md) : '<pre>' + Adv.esc(md) + '</pre>';
+        body.querySelectorAll('table').forEach(t => { const d = document.createElement('div'); d.className = 'scroll'; t.before(d); d.appendChild(t); });
+      } catch (e) {
+        body.textContent = 'Could not load world/' + id + '.md. Open this page from GitHub Pages or a local web server.';
+        Adv.error('Loading ' + id, e);
+      }
+    });
+  })();
+  </script>
+</body>
+</html>
