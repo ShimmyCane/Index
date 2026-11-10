@@ -1,5 +1,5 @@
 // Adventure — voice test page. Plays baked Kokoro samples (audio/samples/, made by
-// tools/make_voice.py --samples from story/voice_samples.js) and the iPad's own voices.
+// tools/make_voice.py --samples from story/voice_samples.js).
 // Picks are saved on this device and in the "Voices" setting entry, which the recorder
 // (tools/make_voice.py --db) uses for every chapter.
 (function () {
@@ -39,7 +39,6 @@
 
   function stopPlaying() {
     if (player) { player.onended = null; player.pause(); player = null; }
-    if (window.speechSynthesis) speechSynthesis.cancel();
     if (playingCard) playingCard.classList.remove('playing');
     playingCard = null;
   }
@@ -62,17 +61,6 @@
     store.set('adv.voices', picks);
     document.getElementById('saveMsg').textContent = 'Not saved yet.';
     render();
-  }
-
-  // ---------------------------------------------------------------- iPad voices
-  function ipadVoices() {
-    const list = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(v => /^en/i.test(v.lang));
-    const saved = store.get('adv.voice', '');
-    document.getElementById('ipadList').innerHTML = list.length ? list.map((v, i) =>
-      '<div class="cand' + (v.name === saved ? ' picked' : '') + '" data-v="' + i + '"><b>' + esc(v.name) + '</b><span class="muted">' + esc(v.lang) +
-      (v.localService ? '' : ' · online') + '</span><div class="row"><button class="btn mint" data-act="say">▶</button><button class="btn" data-act="use">✓</button></div></div>').join('')
-      : '<p class="muted">This browser has no voices to list.</p>';
-    return list;
   }
 
   // ---------------------------------------------------------------- saving
@@ -111,8 +99,6 @@
   // ---------------------------------------------------------------- start
   Adv.buildChrome();
   render();
-  let ipad = ipadVoices();
-  if (window.speechSynthesis) speechSynthesis.onvoiceschanged = () => { ipad = ipadVoices(); };
 
   document.querySelector('main').addEventListener('click', ev => {
     const head = ev.target.closest('.panel-head');
@@ -124,16 +110,6 @@
     const btn = ev.target.closest('button[data-act]');
     if (!btn) return;
     const card = btn.closest('.cand');
-    if (card.dataset.v !== undefined) {
-      const v = ipad[+card.dataset.v];
-      if (btn.dataset.act === 'say') {
-        stopPlaying();
-        const u = new SpeechSynthesisUtterance(ROLES[0].text);
-        u.voice = v; u.rate = store.get('adv.rate', 0.9);
-        speechSynthesis.speak(u);
-      } else { store.set('adv.voice', v.name); ipad = ipadVoices(); }
-      return;
-    }
     const role = ROLES[+card.dataset.r], c = role.candidates[+card.dataset.c];
     if (btn.dataset.act === 'play') play(card, role, c); else pick(role, c);
   });

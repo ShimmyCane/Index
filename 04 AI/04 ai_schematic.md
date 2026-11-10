@@ -18,7 +18,7 @@ Layout:
 
 Projects with notes:
 - 中文笔画/ — MVP 0.1.0: stroke-writing game for the worksheet characters, date tabs from `data/batches.json`, answer shown after misses. `brief.md`, `lessons.md`. Questions in `03 Projects/中文笔画/convo/convo v0.2.md`.
-- Adventure/ — family story game (Athena's story); world of Ondra, ten-book plan, voiced chapter 1, voices page, recording step (2026-11-10). `brief.md`, `lessons.md`.
+- Adventure/ — family story game (Athena's story); world of Ondra, ten-book plan, voiced chapter 1, voices page, recording step (2026-11-10); recording only, no browser voice, story skills (2026-11-10). `brief.md`, `lessons.md`, `story_lessons.md`.
 - Living Room Scene/ — scene built from a photo over ten versions (V1–V10), render-and-compare loop. `brief.md` (version log), `lessons.md`.
 - Shimmy Specs/ — spec-writing process app; MVP planned (`mvp schematic.md`, `mvp tasks.md`). `brief.md`, `lessons.md`.
 

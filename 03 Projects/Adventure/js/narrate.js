@@ -3,11 +3,11 @@
 // Bundled chapters live in story/<id>.js (window.ADV_SCRIPTS['book.number']); the storyteller can also
 // write one into adv_chapters.script.
 //
-// Two ways to read it:
-//   recorded  the Kokoro cast recording, if it matches the text: story.recording (from the adv-audio bucket,
-//             made by tools/make_voice.py --db) or story/<id>.audio.js + audio/<id>.cast.mp3 (bundled)
-//   ipad      the browser's own voice, one line at a time, with each character's pitch and rate
-// Sound cues (sfx) play when the reading reaches a line; a soft tune (js/sound.js) plays underneath.
+// Reading aloud plays only a prerecorded file: the Kokoro cast recording, if it matches the text:
+//   story.recording (from the adv-audio bucket, made by tools/make_voice.py --db), or
+//   story/<id>.audio.js + audio/<id>.cast.mp3 (bundled).
+// There is no fallback to the browser's own voice. Sound cues (sfx) play when the reading reaches a
+// line; a soft tune (js/sound.js) plays underneath.
 (function () {
   const S = () => window.AdvSound || window.VoiceSound;
   let run = null;   // the current reading
@@ -25,7 +25,6 @@
     const r = run; run = null;
     if (r.audio) { r.audio.onerror = r.audio.onended = null; r.audio.pause(); r.audio.removeAttribute('src'); r.audio.load(); }
     if (r.raf) cancelAnimationFrame(r.raf);
-    if (window.speechSynthesis) speechSynthesis.cancel();
     if (S()) S().stopMusic();
     r.opts.onEnd && r.opts.onEnd();
   }
@@ -72,37 +71,17 @@
     audio.play().then(tick, e => fail(e.message || e));
   }
 
-  function playIpad(r, from) {
-    if (!window.speechSynthesis) { stop(); r.opts.onError && r.opts.onError('This browser cannot read aloud'); return; }
-    speechSynthesis.cancel();
-    const voices = speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang));
-    const base = voices.find(v => v.name === r.opts.voiceName);
-    r.story.script.forEach((l, i) => {
-      if (i < from) return;
-      const c = r.story.cast[l.who] || {};
-      const u = new SpeechSynthesisUtterance(l.text);
-      if (base) u.voice = base;
-      u.pitch = c.pitch || 1;
-      u.rate = (c.rate || 0.92) * (r.opts.rate || 1) * (l.speed ? l.speed / (c.speed || 0.92) : 1);
-      u.onstart = () => { if (run === r) cue(r, i); };
-      u.onboundary = ev => {
-        if (run !== r || ev.name === 'sentence') return;
-        r.opts.onWord && r.opts.onWord(i, l.text.slice(0, ev.charIndex).split(/\s+/).filter(Boolean).length);
-      };
-      if (i === r.story.script.length - 1) u.onend = () => { if (run === r) stop(); };
-      speechSynthesis.speak(u);
-    });
-  }
-
-  // opts: { mode: 'recorded'|'ipad', from: line, sfx, music, rate, voiceName, onLine, onWord, onEnd, onError }
+  // opts: { from: line, sfx, music, onLine, onWord, onEnd, onError }
+  // Returns true when playback started, false when the chapter has no matching recording.
   function play(story, opts) {
     stop();
+    const rec = recordingFor(story);
+    if (!rec) { opts.onError && opts.onError('This chapter has no recording yet.'); return false; }
     const r = { story, opts, line: -1 };
     run = r;
     if (S()) { S().unlock(); if (opts.music && story.music) S().music(story.music); }
-    const rec = opts.mode !== 'ipad' && recordingFor(story);
-    if (rec) playRecorded(r, rec, opts.from || 0); else playIpad(r, opts.from || 0);
-    return rec ? 'recorded' : 'ipad';
+    playRecorded(r, rec, opts.from || 0);
+    return true;
   }
 
   window.Narrate = { play, stop, recordingFor, playing: () => !!run };

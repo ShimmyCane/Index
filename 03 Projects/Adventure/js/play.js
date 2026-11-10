@@ -172,68 +172,39 @@
     } catch (e) { error('Finding the recording', e); }
   }
 
+  // Reads the newest chapter aloud from its recording only (the whole page).
   async function narrate(from) {
     const ch = newest();
     const script = ch && scriptOf(ch);
     if (!script) return false;
-    if (store.get('adv.cast', 'recorded') !== 'ipad') {
-      script.recording = state.recordings[ch.id] || script.recording;
-      await linkRecording(script);
-      state.recordings[ch.id] = script.recording;
-    }
+    script.recording = state.recordings[ch.id] || script.recording;
+    await linkRecording(script);
+    state.recordings[ch.id] = script.recording;
     if (state.length !== 'long') { state.length = 'long'; renderStory(); }
-    const used = Narrate.play(script, {
-      mode: store.get('adv.cast', 'recorded'), from: from || 0,
+    const started = Narrate.play(script, {
+      from: from || 0,
       sfx: store.get('adv.sfx', true), music: store.get('adv.music', true),
-      rate: store.get('adv.rate', 0.9) / 0.9, voiceName: store.get('adv.voice', ''),
       onLine: markLine, onWord: markWord,
       onEnd: () => { setReading(false); markLine(-1); markWord(-1, -1); },
       onError: e => error('Reading aloud', e)
     });
+    if (!started) return false;
     setReading(true);
-    document.getElementById('castNote').textContent = used === 'recorded'
-      ? '🎙️ Recorded cast voices' : '📱 iPad voice' + (Narrate.recordingFor(script) ? '' : ' (no recording for this chapter)');
+    document.getElementById('castNote').textContent = '🎙️ Recorded cast voices';
     return true;
   }
 
   // ---------------------------------------------------------------- reading aloud
-  function voices() {
-    return (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(v => /^en/i.test(v.lang));
-  }
-
-  function fillVoices() {
-    const sel = document.getElementById('voice');
-    const saved = store.get('adv.voice', '');
-    sel.innerHTML = '<option value="">Default</option>' + voices().map(v =>
-      '<option' + (v.name === saved ? ' selected' : '') + '>' + esc(v.name) + '</option>').join('');
-  }
-
-  function speak(text) {
-    if (!window.speechSynthesis) { error('Reading aloud', 'This browser cannot read aloud'); return; }
-    speechSynthesis.cancel();
-    const voice = voices().find(v => v.name === store.get('adv.voice', ''));
-    const parts = text.split(/\n\s*\n/).filter(Boolean);
-    parts.forEach((p, i) => {
-      const u = new SpeechSynthesisUtterance(p);
-      u.rate = store.get('adv.rate', 0.9);
-      if (voice) u.voice = voice;
-      if (i === parts.length - 1) u.onend = () => setReading(false);
-      speechSynthesis.speak(u);
-    });
-    setReading(true);
-  }
-
   function setReading(on) {
     document.getElementById('readBtn').textContent = on ? '⏹ Stop' : '🔊 Read';
     state.reading = on;
   }
 
+  // 🔊 always reads the whole page from its recording. A chapter without one says so.
   function toggleRead() {
-    if (state.reading) { Narrate.stop(); if (window.speechSynthesis) speechSynthesis.cancel(); setReading(false); return; }
-    const ch = newest();
-    if (!ch) return;
-    if (state.length === 'long' && scriptOf(ch)) { narrate(0); return; }
-    speak(['Chapter ' + ch.number + '. ' + ch.title + '.', textOf(ch, state.length), ch.prompt].filter(Boolean).join('\n\n'));
+    if (state.reading) { Narrate.stop(); setReading(false); return; }
+    if (!newest()) return;
+    narrate(0);
   }
 
   // ---------------------------------------------------------------- characters
@@ -384,21 +355,12 @@
 
   // ---------------------------------------------------------------- settings
   function setupSettings() {
-    const rate = document.getElementById('rate');
-    rate.value = store.get('adv.rate', 0.9);
-    rate.oninput = () => store.set('adv.rate', parseFloat(rate.value));
-    document.getElementById('voice').onchange = ev => store.set('adv.voice', ev.target.value);
-    fillVoices();
-    if (window.speechSynthesis) speechSynthesis.onvoiceschanged = fillVoices;
     const size = px => {
       store.set('adv.size', px);
       document.documentElement.style.setProperty('--story-size', px + 'px');
     };
     size(store.get('adv.size', 20));
     document.getElementById('smaller').onclick = () => size(Math.max(15, store.get('adv.size', 20) - 2));
-    const cast = document.getElementById('castMode');
-    cast.value = store.get('adv.cast', 'recorded');
-    cast.onchange = () => store.set('adv.cast', cast.value);
     [['sfxOn', 'adv.sfx', true], ['musicOn', 'adv.music', true], ['notesOn', 'adv.notes', false]].forEach(([id, key, def]) => {
       const box = document.getElementById(id);
       box.checked = store.get(key, def);
