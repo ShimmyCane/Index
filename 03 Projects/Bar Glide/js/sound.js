@@ -1,4 +1,4 @@
-/* Bar Glide — every sound is made with the Web Audio API (no sound files to fail).
+/* Ole Bar Glide — every sound is made with the Web Audio API (no sound files to fail).
  * BG.sound.unlock() must run inside a tap; after that, call BG.sound.play('name'). */
 window.BG = window.BG || {};
 (function (BG) {

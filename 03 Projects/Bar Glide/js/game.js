@@ -1,4 +1,4 @@
-/* Bar Glide — the game: bars, customers, mugs, breaks, rounds and the owner's ending.
+/* Ole Bar Glide — the game: a day of shifts, bars, customers, mugs, breaks and the owner's ending.
  * Draws on a 320 x 200 canvas that CSS scales up with crisp pixels.
  * Exposes window.BarGlide (start, press, release, move, pause, configure, debug). */
 (function (BG) {
@@ -13,7 +13,27 @@
   const PUSH_DIST = 46;     // how far a customer slides back when they catch a mug
   const PUSH_SPEED = 90;
 
-  const cfg = { lanes: 4, speed: 1, glasses: 3, ending: 'spank', theme: 'saloon' };
+  const cfg = { start: 1, speed: 1, glasses: 3, ending: 'spank', theme: 'saloon' };
+  let lanes = 2;            // bars open now: set by the shift
+  // A day at the bar (convo v0.2). Each round is a shift; after Night the nights keep getting faster.
+  //   bars: bars open · speed: how fast customers walk · total: customers in the shift · gap: seconds between arrivals
+  //   two: share of customers who order two drinks · relax: easy seconds at the start before it ramps up
+  const SHIFTS = [
+    { name: 'MORNING', note: 'TWO BARS - TAKE IT EASY', bars: 2, speed: 0.75, total: 6, gap: 4.0, two: 0, relax: 30 },
+    { name: 'LUNCH RUSH', note: 'SPEEDING UP!', bars: 2, speed: 0.9, total: 14, gap: 1.9, two: 0.3, relax: 8 },
+    { name: 'AFTERNOON', note: 'A THIRD BAR OPENS', bars: 3, speed: 0.9, total: 10, gap: 2.8, two: 0.3, relax: 8 },
+    { name: 'DINNER RUSH', note: 'ALL FOUR BARS!', bars: 4, speed: 1.0, total: 14, gap: 2.4, two: 0.35, relax: 8 },
+    { name: 'NIGHT', note: 'LAST CALL IS A LONG WAY OFF', bars: 4, speed: 1.15, total: 20, gap: 1.7, two: 0.45, relax: 5 }
+  ];
+  function shiftFor(n) {
+    const base = SHIFTS[Math.min(n, SHIFTS.length) - 1];
+    const extra = Math.max(0, n - SHIFTS.length);
+    if (!extra) return base;
+    return Object.assign({}, base, { name: 'NIGHT ' + (extra + 1), note: 'FASTER!', speed: base.speed + 0.07 * extra,
+      total: base.total + 3 * extra, gap: Math.max(1.1, base.gap - 0.08 * extra), two: Math.min(0.6, base.two + 0.03 * extra) });
+  }
+  const CATCH_EARLY = 0.1;  // seconds: an empty mug this close to the end is caught when you arrive
+  const TEETER = 0.25;      // seconds an empty mug wobbles on the edge before it falls
   const hooks = { onState: null, onGameOver: null, onError: null };
 
   let canvas, ctx, sprites, bg = null, barImg = null, theme = BG.THEMES.saloon;
@@ -31,8 +51,8 @@
 
   // ---------- setup ----------
   function laneLayout() {
-    const n = cfg.lanes;
-    const top = n === 4 ? 64 : 74, gap = n === 4 ? 34 : 44;
+    const n = lanes;
+    const top = { 2: 86, 3: 74, 4: 64 }[n] || 64, gap = { 2: 54, 3: 44, 4: 34 }[n] || 34;
     lanesY = [];
     for (let i = 0; i < n; i++) lanesY.push(top + i * gap);
     doors = lanesY.map(() => 0);
@@ -126,14 +146,16 @@
   function resetRun() {
     score = 0; lives = cfg.glasses;
     customers = []; mugs = []; parts = []; pops = [];
-    bt = { lane: Math.min(1, cfg.lanes - 1), fill: 0, holding: false, throwT: 0, shake: 0 };
+    bt = { lane: 0, fill: 0, holding: false, throwT: 0, shake: 0 };
     oops = null; boss = null;
-    startRound(1);
+    startRound(cfg.start);
   }
 
   function startRound(n) {
-    const total = 3 + n * 3 + (cfg.lanes === 4 ? 1 : 0);
-    round = { n, total, spawned: 0, served: 0, spawnT: 1.2 };
+    const shift = shiftFor(n);
+    round = { n, shift, total: shift.total, spawned: 0, served: 0, spawnT: 1.2, t: 0 };
+    if (shift.bars !== lanes) { lanes = shift.bars; applyConfig(); }
+    if (bt) bt.lane = Math.min(bt.lane, lanes - 1);
     customers = []; mugs = []; tips = []; dash = null; show = 0; bonus = null;
     if (bt) { bt.holding = false; bt.fill = 0; }
     setState('ready', 1.6);
@@ -152,14 +174,19 @@
   }
 
   // ---------- difficulty ----------
-  function walkSpeed() { return (10 + round.n * 2.2) * cfg.speed; }
-  function spawnGap() { return Math.max(1.1, 3.4 - round.n * 0.25) / cfg.speed; }
-  function emptySpeed() { return (34 + round.n * 2.5) * cfg.speed; }
+  // Easy for the shift's first seconds, then it ramps up over a minute.
+  function ramp() {
+    const r = round.shift.relax;
+    return round.t < r ? 0.8 : Math.min(1.2, 0.8 + (round.t - r) / 60 * 0.4);
+  }
+  function walkSpeed() { return 11 * round.shift.speed * ramp() * cfg.speed; }
+  function spawnGap() { return round.shift.gap / ramp() / cfg.speed; }
+  function emptySpeed() { return (8 + 30 * round.shift.speed) * cfg.speed; }
 
   // ---------- input ----------
   function move(lane) {
     if (state !== 'play' && state !== 'ready') return;
-    lane = Math.max(0, Math.min(cfg.lanes - 1, lane));
+    lane = Math.max(0, Math.min(lanes - 1, lane));
     if (lane === bt.lane) return;
     bt.lane = lane; bt.fill = 0; bt.throwT = 0;
     puff(BAR_X1 + 10, lanesY[lane] + 2);
@@ -230,13 +257,15 @@
     }
 
     // New customers.
+    round.t += dt;
     round.spawnT -= dt;
     if (round.spawned < round.total && round.spawnT <= 0) {
       const counts = lanesY.map((_, i) => customers.filter(c => c.lane === i).length);
       const open = lanesY.map((_, i) => i).filter(i => counts[i] < 3 && !customers.some(c => c.lane === i && c.x < 14));
       if (open.length) {
         const lane = open[Math.floor(Math.random() * open.length)];
-        customers.push({ lane, x: -14, state: 'walk', t: 0.6 + Math.random() * 0.6, kind: Math.floor(Math.random() * 5), push: 0, bob: 0 });
+        customers.push({ lane, x: -14, state: 'walk', t: 0.6 + Math.random() * 0.6, kind: Math.floor(Math.random() * 5), push: 0, bob: 0,
+          wants: Math.random() < round.shift.two ? 2 : 1, extra: 0 });
         doors[lane] = 1;
         round.spawned++;
       }
@@ -256,12 +285,16 @@
         const step = PUSH_SPEED * dt;
         c.x -= step; c.push -= step;
         if (c.x + 12 < BAR_X0 - 6) { c.gone = true; score += 50; round.served++; doors[c.lane] = 1; BG.sound.play('serve'); pop('+50', c.x + 20, lanesY[c.lane] - 18); }
-        else if (c.push <= 0) { c.state = 'drink'; c.t = 1.3; BG.sound.play('gulp'); }
+        else if (c.push <= 0) {
+          if (c.wants > 0) { c.state = 'pause'; c.t = 0.3; }        // still waiting for the second mug
+          else { c.state = 'drink'; c.t = 1.3; BG.sound.play('gulp'); }
+        }
       } else if (c.state === 'drink') {
         c.t -= dt;
         if (c.t <= 0) {
           mugs.push({ lane: c.lane, x: c.x + 12, full: false });
-          c.state = 'pause'; c.t = 0.4;
+          if (c.extra > 0) { c.extra--; c.t = 1.0; BG.sound.play('gulp'); }   // drinks the second one too
+          else { c.state = 'pause'; c.t = 0.4; }
         }
       }
     }
@@ -275,8 +308,13 @@
           .filter(c => c.lane === m.lane && (c.state === 'walk' || c.state === 'pause') && c.x - 4 <= m.x && (c.x + 11 >= m.x || m.x <= BAR_X0 + 2))
           .sort((a, b) => b.x - a.x)[0];
         if (catcher) {
-          m.gone = true; catcher.state = 'pushed'; catcher.push = PUSH_DIST; score += 10;
+          m.gone = true; score += 10;
           BG.sound.play('catch');
+          catcher.wants = (catcher.wants || 1) - 1;
+          if (catcher.wants > 0) {           // ordered two: holds this one and waits for the next
+            catcher.extra = (catcher.extra || 0) + 1; catcher.state = 'pushed'; catcher.push = 12;
+            pop('ONE MORE!', catcher.x + 6, lanesY[m.lane] - 22, true, 0.9);
+          } else { catcher.state = 'pushed'; catcher.push = PUSH_DIST; }
           if (Math.random() < TIP_CHANCE && !tips.some(t => t.lane === m.lane) && catcher.x > BAR_X0 + 6) {
             tips.push({ lane: m.lane, x: Math.round(catcher.x + 4), t: 7 });
             pop('TIP!', catcher.x + 6, lanesY[m.lane] - 20);
@@ -285,10 +323,15 @@
           return strike('missed', m.lane, BAR_X0 - 4, lanesY[m.lane] - 7, null, -1);
         }
       } else {
-        m.x += emptySpeed() * dt;
-        if (m.x >= BAR_X1 - 6) {
-          if (bt.lane === m.lane && !dash) { m.gone = true; score += 25; BG.sound.play('catch'); pop('+25', BAR_X1 - 4, lanesY[m.lane] - 14); }
-          else return strike('dropped', m.lane, BAR_X1 - 2, lanesY[m.lane] - 7, null, 1);
+        const edge = BAR_X1 - 6;
+        if (m.x < edge) m.x = Math.min(edge, m.x + emptySpeed() * dt);
+        const here = bt.lane === m.lane && !dash;
+        if (here && m.x >= edge - emptySpeed() * CATCH_EARLY) {
+          m.gone = true; score += 25; BG.sound.play('catch'); pop(m.teeter ? 'SAVED! +25' : '+25', BAR_X1 - 4, lanesY[m.lane] - 14);
+        } else if (m.x >= edge) {
+          if (!m.teeter) { m.teeter = 0; BG.sound.play('swap'); }
+          m.teeter += dt;                   // wobbles on the edge: a last moment to save it
+          if (m.teeter > TEETER) return strike('dropped', m.lane, BAR_X1 - 2, lanesY[m.lane] - 7, null, 1);
         }
       }
     }
@@ -555,7 +598,13 @@
     const img = sprites.customers[c.kind];
     ctx.drawImage(img, Math.round(c.x), y - 14 + bob);
     if (c.state === 'drink') drawMug(c.x + 7, y - 13, 0.6, false);
-    if (c.state === 'pushed') drawMug(c.x + 11, y - 7, 1, true);
+    else if (c.state === 'pushed' || c.extra > 0) drawMug(c.x + 11, y - 7, 1, true);
+    if (c.wants > 1) {                       // ordered two
+      const bx = Math.round(c.x) + 1;
+      ctx.fillStyle = theme.ink; ctx.fillRect(bx, y - 26, 11, 9);
+      ctx.fillStyle = theme.bubble; ctx.fillRect(bx + 1, y - 25, 9, 7);
+      BG.drawText(ctx, 'X2', bx + 2, y - 24, theme.ink, 1);
+    }
   }
 
   function drawBartender(i) {
@@ -582,7 +631,7 @@
 
   function drawHud() {
     BG.drawText(ctx, 'SCORE ' + String(score).padStart(6, '0'), 4, 4, theme.hud, 1, 'left', theme.hudShadow);
-    BG.drawText(ctx, 'ROUND ' + (round ? round.n : 1), 4, 12, theme.hud, 1, 'left', theme.hudShadow);
+    BG.drawText(ctx, round ? round.shift.name : 'MORNING', 4, 12, theme.hud, 1, 'left', theme.hudShadow);
     BG.drawText(ctx, 'BEST ' + String(best).padStart(6, '0'), W - 4, 4, theme.hud, 1, 'right', theme.hudShadow);
     for (let i = 0; i < cfg.glasses; i++) {
       const x = W - 12 - i * 10, y = 12;
@@ -596,16 +645,16 @@
     const col = flick ? theme.neonDim : theme.neon;
     if (!flick) {
       const beat = BG.sound.pulse ? BG.sound.pulse() : 0;
-      ctx.fillStyle = theme.neonGlow; ctx.fillRect(116, 2, 88, 22);
-      if (beat > 0) { ctx.globalAlpha = beat * 0.8; ctx.fillRect(112, 0, 96, 26); ctx.globalAlpha = 1; }
+      ctx.fillStyle = theme.neonGlow; ctx.fillRect(100, 2, 120, 22);
+      if (beat > 0) { ctx.globalAlpha = beat * 0.8; ctx.fillRect(96, 0, 136, 26); ctx.globalAlpha = 1; }
     }
-    ctx.fillStyle = theme.ink; ctx.fillRect(118, 4, 84, 18);
-    ctx.fillStyle = col; ctx.fillRect(118, 4, 84, 1); ctx.fillRect(118, 21, 84, 1); ctx.fillRect(118, 4, 1, 18); ctx.fillRect(201, 4, 1, 18);
-    BG.drawText(ctx, 'BAR GLIDE', 160, 8, col, 2, 'center');
+    ctx.fillStyle = theme.ink; ctx.fillRect(102, 4, 116, 18);
+    ctx.fillStyle = col; ctx.fillRect(102, 4, 116, 1); ctx.fillRect(102, 21, 116, 1); ctx.fillRect(102, 4, 1, 18); ctx.fillRect(217, 4, 1, 18);
+    BG.drawText(ctx, 'OLE BAR GLIDE', 160, 8, col, 2, 'center');
     // A tiny neon mug beside the words.
     ctx.fillStyle = flick ? theme.neonDim : '#f2b134';
-    ctx.fillRect(206, 9, 5, 8); ctx.fillRect(211, 11, 2, 4);
-    ctx.fillStyle = '#fff8e6'; ctx.fillRect(205, 7, 7, 2);
+    ctx.fillRect(222, 9, 5, 8); ctx.fillRect(227, 11, 2, 4);
+    ctx.fillStyle = '#fff8e6'; ctx.fillRect(221, 7, 7, 2);
   }
 
   function draw() {
@@ -617,7 +666,11 @@
       customers.filter(c => c.lane === i).forEach(drawCustomer);
       drawDoor(i);
       ctx.drawImage(barImg, BAR_X0 - 2, y);
-      mugs.filter(m => m.lane === i).forEach(m => drawMug(m.x, y - 7, m.full ? 1 : 0, m.full));
+      mugs.filter(m => m.lane === i).forEach(m => {
+        const wob = m.teeter !== undefined ? (Math.floor(clock * 40) % 2 ? 1 : -1) : 0;
+        drawMug(m.x + wob, y - 7 - (wob > 0 ? 1 : 0), m.full ? 1 : 0, m.full);
+        if (m.teeter !== undefined) BG.drawText(ctx, '!', m.x + 2, y - 16, '#ff5fa2', 1, 'left', theme.ink);
+      });
       tips.filter(t => t.lane === i && (t.t > 2 || Math.floor(t.t * 6) % 2)).forEach(t => drawCoin(t.x, y - 4));
       drawTap(i, state === 'play' && bt.lane === i && bt.holding && bt.fill < 1);
       if (i === bossLane) drawBossScene(i);
@@ -644,8 +697,8 @@
       else { ctx.globalAlpha = a; BG.drawText(ctx, p.text, p.x, p.y - p.t * 12, theme.hud, 1, 'center', theme.hudShadow); ctx.globalAlpha = 1; }
     });
     drawHud();
-    if (state === 'ready') banner('ROUND ' + round.n, 'GET READY');
-    if (state === 'clear') banner('ROUND ' + round.n + ' CLEAR!', 'NICE POURING');
+    if (state === 'ready') banner(round.shift.name, round.shift.note);
+    if (state === 'clear') banner(round.shift.name + ' DONE!', 'NICE POURING');
     if (state === 'over') banner('GAME OVER', 'SCORE ' + score);
     if (paused && state !== 'title' && state !== 'over') banner('PAUSED', 'TAP TO GO ON');
   }
@@ -743,19 +796,20 @@
     pickSlot,
     isPaused: () => paused,
     configure(next) {
-      const relayout = next.lanes !== undefined && next.lanes !== cfg.lanes;
+      const restart = next.start !== undefined && next.start !== cfg.start;
       Object.assign(cfg, next);
       applyConfig();
-      if (relayout) { resetRun(); setState('title'); }
-      if (bt) bt.lane = Math.min(bt.lane, cfg.lanes - 1);
+      if (restart && bt) { resetRun(); setState('title'); }
     },
     hooks,
     // For the smoke test and the notes box.
     state: () => ({ state, score, best, lives, round: round && round.n, lane: bt.lane, fill: bt.fill, tips: tips.length, dashing: !!dash,
-      customers: customers.length, mugs: mugs.length, lanes: cfg.lanes, paused }),
+      customers: customers.length, mugs: mugs.length, lanes, shift: round && round.shift.name, paused }),
     debug: {
-      spawn(lane, x) { customers.push({ lane, x: x === undefined ? 100 : x, state: 'pause', t: 99, kind: 0, push: 0, bob: 0 }); },
+      spawn(lane, x, wants) { customers.push({ lane, x: x === undefined ? 100 : x, state: 'pause', t: 99, kind: 0, push: 0, bob: 0, wants: wants || 1, extra: 0 }); },
+      startAt(n) { startRound(n); },
       emptyMug(lane, x) { mugs.push({ lane, x: x || 200, full: false }); },
+      peekMugs() { return mugs.map(m => ({ lane: m.lane, x: Math.round(m.x), teeter: m.teeter })); },
       strike(kind) { strike(kind || 'dropped', bt.lane, BAR_X1 - 2, lanesY[bt.lane] - 7, null, 1); },
       setLives(n) { lives = n; },
       setScore(n) { score = n; },

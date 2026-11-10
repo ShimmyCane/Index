@@ -1,4 +1,4 @@
-/* Bar Glide — pixel sprites, the tiny 3x5 font and the two room themes.
+/* Ole Bar Glide — pixel sprites, the tiny 3x5 font and the two room themes.
  * Every sprite is a list of text rows; one letter is one pixel (see PAL). '.' is see-through.
  * Classic script, no build. Exposes window.BG.sprites, BG.drawText, BG.THEMES. */
 window.BG = window.BG || {};
