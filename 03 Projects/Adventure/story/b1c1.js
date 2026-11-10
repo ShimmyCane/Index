@@ -1,7 +1,7 @@
 // Book 1, Chapter 1 — Who? Who?
 // A voiced chapter, in the script-story format borrowed from 03 Projects/Voice (see Voice stories/red_hood.js):
-//   cast    speaker → name, icon, Kokoro voice (recorded audio), and pitch/rate for the iPad voice fallback
-//   script  one line = one paragraph: { who, text, speed?, sfx?, notes?: [{ kind, text }] }
+//   cast    speaker → name, icon, Kokoro voice and speed (recorded audio), and pitch/rate for the iPad voice fallback
+//   script  one line = one paragraph: { who, text, speed? (only to override the speaker's), sfx?, notes?: [{ kind, text }] }
 //           sfx plays a synthesized sound (js/sound.js) when the reading reaches the line.
 //           notes are hidden director's notes (motivation, acting, sound, blocking, gesture, thought), never spoken.
 // After editing, remake the audio: python3 -I tools/make_voice.py --model <dir> b1c1
@@ -14,10 +14,10 @@ window.ADV_SCRIPTS['1.1'] = {
   title: 'Who? Who?',
   music: 'forest',
   cast: {
-    narrator: { name: 'Storyteller', icon: '📜', voice: 'bm_fable', pitch: 1, rate: 0.92 },
-    you: { name: 'You', icon: '🌱', voice: 'af_river', pitch: 1.15, rate: 0.95 },
-    fox: { name: 'Whisperfox', icon: '🦊', voice: 'af_nicole', pitch: 1.4, rate: 1.1 },
-    owl: { name: 'Grandmother Owl', icon: '🦉', voice: 'bf_alice', pitch: 0.7, rate: 0.7 }
+    narrator: { name: 'Storyteller', icon: '📜', voice: 'bm_fable', speed: 0.92, pitch: 1, rate: 0.92 },
+    you: { name: 'You (Athena)', icon: '🌱', voice: 'af_river', speed: 0.95, pitch: 1.15, rate: 0.95 },
+    fox: { name: 'Whisperfox', icon: '🦊', voice: 'af_nicole', speed: 1.08, pitch: 1.4, rate: 1.1 },
+    owl: { name: 'Grandmother Owl', icon: '🦉', voice: 'bf_alice', speed: 0.75, pitch: 0.7, rate: 0.7 }
   },
   script: [
     { who: 'narrator', sfx: 'birds', text: 'Far away, in a different place and a different time, there is a forest so old that the trees have forgotten how young they once were.',
@@ -31,12 +31,12 @@ window.ADV_SCRIPTS['1.1'] = {
       notes: [{ kind: 'acting', text: 'three "try to remember"s, each a little slower' }] },
     { who: 'narrator', text: 'Nothing comes. Not a name, not a home, not a face. It is like reaching into a pocket you were sure had something in it, and finding only air.',
       notes: [{ kind: 'motivation', text: 'Puzzling, not frightening. Curious, like a riddle.' }] },
-    { who: 'you', speed: 0.95, text: 'Hello? Is anybody there?',
+    { who: 'you', text: 'Hello? Is anybody there?',
       notes: [{ kind: 'acting', text: 'small, unsure, then a little louder' }, { kind: 'thought', text: 'You: Where am I? Who am I?' }] },
-    { who: 'fox', speed: 1.05, text: 'Hello? Is anybody there?',
+    { who: 'fox', text: 'Hello? Is anybody there?',
       notes: [{ kind: 'acting', text: 'the same words back, almost your voice but sly' }, { kind: 'blocking', text: 'from behind a fern' }] },
     { who: 'narrator', text: 'The words come back to you from behind a fern, in a voice that is almost yours, but a little bit sly. A pair of tufted ears pokes up. A fox with fur the colour of autumn leaves, and a tail tipped in silver, looks at you and grins.' },
-    { who: 'fox', speed: 1.1, text: 'Anybody there? Anybody there?',
+    { who: 'fox', text: 'Anybody there? Anybody there?',
       notes: [{ kind: 'acting', text: 'teasing, sing-song, a giggle at the end' }] },
     { who: 'narrator', text: 'Then it is gone, with a flick of silver. A whisperfox. Somehow you know that word, even though you know nothing else.',
       notes: [{ kind: 'thought', text: 'Storyteller: the first thing the player remembers is a forest word. A clue.' }] },
@@ -50,10 +50,10 @@ window.ADV_SCRIPTS['1.1'] = {
       notes: [{ kind: 'sound', text: 'a sparkle as the fingers open', sfx: 'magic' }, { kind: 'gesture', text: 'open a closed fist slowly' }] },
     { who: 'narrator', sfx: 'hum', text: 'An old metal key, no longer than your finger. On one side of its round head is a sun. On the other side is a moon. And it is humming, very softly, like a bee asleep in a flower.',
       notes: [{ kind: 'sound', text: 'the key hums', sfx: 'hum' }, { kind: 'motivation', text: 'The Sun and Moon key from the old car-ride story.' }] },
-    { who: 'owl', speed: 0.75, sfx: 'hoot', text: 'Who? Whooo?',
+    { who: 'owl', sfx: 'hoot', text: 'Who? Whooo?',
       notes: [{ kind: 'sound', text: 'an owl hoot', sfx: 'hoot' }, { kind: 'acting', text: 'slow, deep, a real question' }] },
     { who: 'narrator', text: 'High above you, on a branch, sits an owl as grey as a winter morning. Its round eyes blink slowly, first one, then the other.' },
-    { who: 'owl', speed: 0.75, text: 'Who are you? Whooo?',
+    { who: 'owl', text: 'Who are you? Whooo?',
       notes: [{ kind: 'motivation', text: 'Grandmother Owl knows every sleeper\'s name. She wants yours.' }] },
     { who: 'narrator', text: 'You open your mouth to answer, and close it again. You do not know.' },
     { who: 'narrator', sfx: 'steps', text: 'So you stand up, a little wobbly, and you look around properly for the first time. And that is when you see it.',
@@ -74,10 +74,10 @@ window.ADV_SCRIPTS['1.1'] = {
       notes: [{ kind: 'acting', text: 'a whisper on "puts a tiny finger to its lips"' }, { kind: 'gesture', text: 'finger to lips: shh' }, { kind: 'motivation', text: 'A Rootkin glimmer. Only the Seedling can see it.' }] },
     { who: 'narrator', text: 'The dog stands up. He looks at you. He looks east, toward the bells. He looks west, toward the stones. He looks up, at the great tree. Then he looks back at you, and waits, as if he has been waiting a very long time, and can wait a little longer.',
       notes: [{ kind: 'blocking', text: 'Bristle turns his head three ways: east, west, up' }] },
-    { who: 'owl', speed: 0.75, sfx: 'hoot', text: 'Who? Whooo?',
+    { who: 'owl', sfx: 'hoot', text: 'Who? Whooo?',
       notes: [{ kind: 'sound', text: 'owl', sfx: 'hoot' }] },
     { who: 'narrator', text: 'The owl is still asking. The forest is still listening. And you will have to decide, together, who you are going to be.' },
-    { who: 'narrator', speed: 0.88, text: 'What is your name? Say the first name that comes to you, or ask the forest to give you one. And where will you go first? East, toward the bells. West, along the carved stones. Or up, into the roots of the great tree.',
+    { who: 'narrator', text: 'What is your name? Say the first name that comes to you, or ask the forest to give you one. And where will you go first? East, toward the bells. West, along the carved stones. Or up, into the roots of the great tree.',
       notes: [{ kind: 'acting', text: 'slow and clear; leave space after each choice' }, { kind: 'motivation', text: 'Hand the story to the family.' }] }
   ]
 };

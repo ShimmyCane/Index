@@ -8,7 +8,8 @@ The world of the Adventure game. Read this first; the other files go deeper.
 | `regions.md` | The lands, from the forest where you wake to the far edges of the map |
 | `peoples.md` | Cultures, factions, people to meet, who loves and hates whom, and the injustices running through it all |
 | `creatures.md` | Animals, spirits, Wardens, forgotten tribes, and the dark things |
-| `book1.md` | Book 1, *The Waking*: chapter outlines, and where Books 2 and 3 might go |
+| `book1.md` | Book 1, *The Waking*: chapter outlines |
+| `books.md` | The plan for ten books, how the story branches into versions, the Reckoning timeline and teasers, and Athena's other lives |
 
 Everything here is a draft. Jimmy changes anything. The storyteller follows what is here, and what the family does in the game changes it.
 
@@ -22,7 +23,7 @@ The world has been at peace for three hundred years. The peace is tired. Under i
 
 Soon the Tree will bloom. It blooms once in a thousand years. When it does, everything forgotten comes back. That is **the Reckoning**. It will turn the world upside down: peasants will become heroes, and kings will kneel.
 
-For now, a child wakes in the moss, and does not know their own name.
+For now, a girl wakes in the moss, and does not know her own name. **This is Athena's story.**
 
 ## 2. What each people calls the world
 
@@ -82,13 +83,15 @@ The Glass Kings caught it and used it as a weapon. Since then, it has been wound
 
 **The Seedlings.** Sometimes, over the centuries, someone was dying, or lost, or in terrible danger near the Tree, and Vael took them in. It laid them to sleep in its roots, wrapped in moss, out of time. The Hush took their memories while they slept. When the Tree needs hands, it wakes one. Villagers call them **Seedlings**, or *the Tree's children*. The linden bells in Mossbrook ring by themselves when one wakes. It has not happened in living memory, except once, when Granny Wren was a girl.
 
-The player is a Seedling. They wake with:
-- no name, no memory, no home;
+**Athena is a Seedling.** This is her story. She wakes with:
+- no name, no memory, no home (the name she chooses at the Naming Bowl is hers; the game expects it to be Athena, but she decides);
 - a small humming key with a sun on one side and a moon on the other;
-- a scruffy grey dog who has guarded their sleep for longer than anyone knows (**Bristle**);
+- a scruffy grey dog who has guarded her sleep for longer than anyone knows (**Bristle**);
 - and the strange ability to see things the world has forgotten, like the faint shapes of Rootkin.
 
-**Who were they before?** The storyteller does not decide alone. The family's choices point to an answer, chapter by chapter. Possible truths (storyteller only; pick one when the story has earned it, or mix):
+Other family members play the people around her (Bristle, Granny Wren, Tobin, friends met on the road), and the Storyteller.
+
+**Who was she before?** The storyteller does not decide alone. Athena's choices point to an answer, chapter by chapter. Possible truths (storyteller only; pick one when the story has earned it, or mix):
 1. A Rootkin-friend from the Age of Roots, one of the last humans who lived in Aun, put to sleep by the Rootkin to carry their memory forward.
 2. An apprentice of the Glass Kings who refused to help with the Great Forgetting and ran into the forest with the Sun Key.
 3. A child from the Night Without Moon, swept out of drowning Solvane and carried to the Tree by the Great Heron.
@@ -119,7 +122,32 @@ What that means:
 
 The Reckoning is not the end of the game. It is the turning point. There is a world before it and a world after it, and lives can be played in both.
 
-**When?** The **Bloom Clock** (section 9) counts down. Book 1 sees the first bud. The Reckoning should not come before Book 4 or 5 unless Jimmy wants it sooner.
+### The war people make
+
+The bloom is not the only reckoning. Around it, people make their own: **the War of the Broken Concord**.
+
+- **Why.** Regent Cassian of Solvane wants sun-glass back, which needs the desert's sand and fire. Ferrow wants the forest's ironwood for warships and engines. The Concord's renewal on the Lantern Isle is the spark: Ferrow demands the forest, Solvane demands Ferrow's foundries, the Caravan Houses side with whoever brings water, the Tallgrass Clans ride against the fences. The Ash Hand fans every flame, because a world at war will open the Tree's heart by force.
+- **What it looks like for children.** Not battles. Soldiers on the Sun Road and a closed border. Bread getting dear. Tobin's older cousin gone to Ferrow's army. Refugees on the road, and Mossbrook having to decide, again, whether to open its doors (its old shame, section 4 of `regions.md`). Ward-Children used as bargaining pieces. Rumours, lies, a spy in the village.
+- **How it meets the bloom.** The war reaches the forest just as the Tree blooms. The bloom does not end the war on its own: every broken promise comes due, kings and guildmasters are brought low, but the fighting has to be stopped by people. Peasants become heroes because they are the ones who keep the Giving Law when the great have broken it.
+- **What Athena can do.** Carry a message no soldier would think a child carries. Find the spy by noticing. Keep a promise. Open a door. Make two enemies laugh at the same thing.
+
+### Light in the dark
+
+Even in hard times, the story has **moments of levity**, every chapter, including the darkest:
+- Pip the crow stealing a lord's gold button mid-speech. Tobin's boasts collapsing. A thornhog asleep in the general's tent.
+- The whisperfox repeating a pompous speech back in the speaker's own voice.
+- A longwalker camel that will not move until it is told it is beautiful.
+- Bristle's opinions, expressed entirely through eyebrows.
+- Grandfather Moss losing a riddle contest to a seven-year-old.
+
+Laughter is also a tool in Ondra: the Hush cannot hold a memory that someone laughed at together.
+
+### When
+
+- **The Reckoning is a manual switch.** It does not start on its own. Jimmy turns it on under the hood: the `setting` entry **Reckoning** says `off` or `on (from chapter N)`.
+- **Once switched on, it takes 10 chapters to arrive.** The storyteller builds toward it over those ten chapters (the war closing in, the bud opening, the Hush thinning) and the Tree blooms in the tenth.
+- **While it is off,** the Bloom clock cannot go past 5 / 6, and the story stays light.
+- **Teasers come early.** Within the first 25 chapters there are at least six small teasers that something enormous is coming (schedule in `books.md`). Never an explanation, only glimpses.
 
 ## 8. How dark it gets, and how it is told
 
@@ -133,16 +161,18 @@ The world is made for young children to explore, and to grow up in. It does not 
 - **Bravery, cleverness, kindness and loyalty** each open different doors. A wrong answer brings a hint, never a dead end. (`storyteller.md`)
 - **Every chapter ends with a question.** What the family chooses changes the world.
 
-As the children grow, Jimmy can turn the dial up: later books and other modes can show more.
+**For now, things are light.** That is the dial for Books 1–3: wonder, small mysteries, small injustices, a little danger that always works out. As the children grow, Jimmy can turn the dial up: later books and other modes can show more.
+
+Every chapter, even a hard one, has at least one moment of levity (section 7, "Light in the dark").
 
 ## 9. How the world lives and changes
 
 The goal: a world that breathes, that changes because of what the players do, where many lives at different times are woven back and forth.
 
 ### Leaves and Rings
-- A **Leaf** is one life a player plays. The first leaf is the Seedling who wakes in Book 1.
+- A **Leaf** is one life a player plays. The first leaf is Athena, the Seedling who wakes in Book 1.
 - A **Ring** is a time in the world's history that can be played: the Age of Roots (Aun's best days), the Age of Crowns (the burning of the Greenreach), the Night Without Moon, the Age of Embers (now), and After the Reckoning.
-- A player can have many leaves in different rings. Later modes might let a family play a Rootkin child in the Age of Roots one week and the Seedling the next.
+- A player can have many leaves in different rings. **Athena's other lives** are options for her to explore: a Rootkin child in Aun in the Age of Roots, a glass-maker's apprentice in the Age of Crowns, a girl in drowning Solvane on the Night Without Moon. Their deeds echo into her present (see `books.md`).
 
 ### Echoes
 What happens in an earlier ring **echoes** into later ones. Plant a seed in the Age of Roots, and there is a grove in the Age of Embers. Keep a promise to a desert family in the Age of Crowns, and their descendants greet you as kin. Betray someone, and a place is named after the betrayal.
@@ -154,8 +184,8 @@ Between chapters, the world moves on its own. Each **clock** has six segments. T
 
 | Clock | Starts at | When it fills |
 |---|---|---|
-| **Bloom** (to the Reckoning) | 1 / 6 (a bud) | The Tree blooms |
-| **War** (Solvane and Ferrow) | 2 / 6 | The Concord breaks; armies march |
+| **Bloom** (to the Reckoning) | 1 / 6 (a bud) | The Tree blooms. Capped at 5 / 6 while the Reckoning switch is off |
+| **War** (Solvane and Ferrow) | 2 / 6 | The Concord breaks; the War of the Broken Concord begins |
 | **Red Marks** (Ferrow's cutting reaches the forest) | 1 / 6 | Woodcutters come under Vael |
 | **Thirst** (the desert wells) | 3 / 6 | The Caravan Houses turn on each other |
 | **Ash Hand** (the secret plot) | 1 / 6 | They make their move for the keys |

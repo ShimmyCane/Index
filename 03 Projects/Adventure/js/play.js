@@ -14,6 +14,7 @@
     length: null,      // 'tiny' | 'short' | 'long'
     active: null,      // role key being spoken for
     draft: store.get('adv.draft', { beats: [] }),
+    recordings: {},    // chapter id → recording with a signed link, so a replay doesn't ask again
     listening: false
   };
 
@@ -125,7 +126,9 @@
   // A chapter is voiced when it has a script: written by the storyteller (adv_chapters.script)
   // or bundled in story/<id>.js. "The whole page" then shows who is speaking and reads with a cast.
   function scriptOf(ch) {
-    if (ch.script && ch.script.script && ch.script.script.length) return Object.assign({ id: 'db-' + ch.id }, ch.script);
+    if (ch.script && ch.script.script && ch.script.script.length) {
+      return Object.assign({ id: 'db-' + ch.id }, ch.script, { recording: ch.audio ? Object.assign({}, ch.audio) : null });
+    }
     return (window.ADV_SCRIPTS || {})[ch.book + '.' + ch.number] || null;
   }
 
@@ -156,10 +159,26 @@
     if (w) w.classList.add('on');
   }
 
-  function narrate(from) {
+  // A recording in the private bucket needs a short-lived link before it can play.
+  async function linkRecording(script) {
+    const rec = script.recording;
+    if (!rec || rec.src || !rec.path || !Adv.sb) return;
+    try {
+      const { data, error: e } = await Adv.withTimeout(Adv.sb.storage.from('adv-audio').createSignedUrl(rec.path, 3 * 3600));
+      if (e) throw new Error(e.message);
+      rec.src = data.signedUrl;
+    } catch (e) { error('Finding the recording', e); }
+  }
+
+  async function narrate(from) {
     const ch = newest();
     const script = ch && scriptOf(ch);
     if (!script) return false;
+    if (store.get('adv.cast', 'recorded') !== 'ipad') {
+      script.recording = state.recordings[ch.id] || script.recording;
+      await linkRecording(script);
+      state.recordings[ch.id] = script.recording;
+    }
     if (state.length !== 'long') { state.length = 'long'; renderStory(); }
     const used = Narrate.play(script, {
       mode: store.get('adv.cast', 'recorded'), from: from || 0,
@@ -211,7 +230,7 @@
     if (state.reading) { Narrate.stop(); if (window.speechSynthesis) speechSynthesis.cancel(); setReading(false); return; }
     const ch = newest();
     if (!ch) return;
-    if (state.length === 'long' && narrate(0)) return;
+    if (state.length === 'long' && scriptOf(ch)) { narrate(0); return; }
     speak(['Chapter ' + ch.number + '. ' + ch.title + '.', textOf(ch, state.length), ch.prompt].filter(Boolean).join('\n\n'));
   }
 
