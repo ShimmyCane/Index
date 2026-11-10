@@ -129,7 +129,10 @@
   // or bundled in story/<id>.js. "The whole page" then shows who is speaking and reads with a cast.
   function scriptOf(ch) {
     if (ch.script && ch.script.script && ch.script.script.length) {
-      return Object.assign({ id: 'db-' + ch.id }, ch.script, { recording: ch.audio ? Object.assign({}, ch.audio) : null });
+      // A chapter from the database finds its bundled recording by book and number (b1c1 for Book 1, Chapter 1).
+      const bundled = (window.ADV_AUDIO || {})['b' + ch.book + 'c' + ch.number] || null;
+      const rec = ch.audio ? Object.assign({}, ch.audio) : bundled;
+      return Object.assign({ id: 'db-' + ch.id }, ch.script, { recording: rec });
     }
     return (window.ADV_SCRIPTS || {})[ch.book + '.' + ch.number] || null;
   }
@@ -176,7 +179,7 @@
   async function narrate(from) {
     const ch = newest();
     const script = ch && scriptOf(ch);
-    if (!script) return false;
+    if (!script) { error('Reading aloud', 'This chapter has no recording yet.'); return false; }
     script.recording = state.recordings[ch.id] || script.recording;
     await linkRecording(script);
     state.recordings[ch.id] = script.recording;

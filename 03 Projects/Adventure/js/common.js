@@ -71,12 +71,30 @@
           <a class="btn small" href="../../index.html">🏠 All projects</a>
         </nav>
         <div id="gear-slot"></div>
+        <details class="gear-sec" open><summary>🗄️ Database</summary>
+          <p id="dbStatus" class="muted">Checking the connection…</p>
+          <div class="row">
+            <button class="btn small" id="signIn" hidden>🔑 Sign in</button>
+            <button class="btn small" id="dbCheck">Check database</button>
+            <button class="btn small" id="signOut">Sign out</button>
+          </div>
+          <div id="dbResult" class="muted"></div>
+        </details>
+        <details class="gear-sec"><summary>📝 Notes for improvement</summary>
+          <p class="muted">Saved on this device only. Copy them to send them.</p>
+          <textarea id="fbText" class="field" rows="3" placeholder="What would make this better?"></textarea>
+          <div class="row">
+            <button class="btn small" id="fbSave">Save note</button>
+            <button class="btn small" id="fbCopy">Copy notes</button>
+            <select id="fbFilter" class="field"><option value="open">Open</option><option value="all">All</option></select>
+          </div>
+          <ul id="fbList" class="fb-list"></ul>
+        </details>
         <label><input type="checkbox" id="showErrors"> Show errors</label>
-        <div class="row">
-          <button class="btn small" id="dbCheck">Check database</button>
-          <button class="btn small" id="signOut">Sign out</button>
-        </div>
-        <div id="dbResult" class="muted"></div>
+        <details class="gear-sec"><summary>ℹ️ Version</summary>
+          <p id="verLine" class="muted"></p>
+          <ol id="changelog" class="muted"></ol>
+        </details>
       </div>
       <button class="gear" id="gear" aria-label="Settings">⚙️</button>
       <div id="login" class="overlay hidden">
@@ -105,6 +123,54 @@
       location.reload();
     };
     renderErrors();
+
+    // Sign in from ⚙️ at any time. The button shows only while signed out.
+    const signInBtn = document.getElementById('signIn');
+    signInBtn.onclick = async () => { await signIn(); location.reload(); };
+    signIn({ quiet: true }).then(session => {
+      signInBtn.hidden = !!session;
+      document.getElementById('dbStatus').textContent = session
+        ? 'Signed in. The newest chapters and the recordings load from the family database.'
+        : 'Not signed in. The story shows the copy saved on this device. Sign in to see the newest chapters.';
+    }).catch(e => error('Session', e));
+
+    // Notes for improvement: device first (feedback_notes.md).
+    document.getElementById('fbSave').onclick = saveNote;
+    document.getElementById('fbFilter').onchange = renderNotes;
+    document.getElementById('fbCopy').onclick = () => {
+      const out = JSON.stringify(feedbackNotes(), null, 2);
+      if (navigator.clipboard) navigator.clipboard.writeText(out).catch(() => window.prompt('Copy the notes:', out));
+      else window.prompt('Copy the notes:', out);
+    };
+    renderNotes();
+
+    // Version and changelog (the bottom of ⚙️).
+    document.getElementById('verLine').textContent = 'Adventure ' + cfg.version;
+    document.getElementById('changelog').innerHTML = (cfg.changelog || []).map(c => '<li>' + esc(c) + '</li>').join('');
+  }
+
+  const FB_KEY = 'adv.feedback';
+  function feedbackNotes() { return store.get(FB_KEY, []); }
+
+  function renderNotes() {
+    const filter = document.getElementById('fbFilter').value;
+    const shown = feedbackNotes().filter(n => filter === 'all' || n.status === 'open').sort((a, b) => (a.at < b.at ? 1 : -1));
+    document.getElementById('fbList').innerHTML = shown.map(n =>
+      '<li>' + (n.status === 'done' ? '✅ ' : '📝 ') + esc(new Date(n.at).toLocaleString()) + ' · ' + esc(n.where.page) +
+      '<br>' + esc(n.text) + '</li>').join('') || '<li class="muted">No notes yet.</li>';
+  }
+
+  function saveNote() {
+    const box = document.getElementById('fbText');
+    const text = box.value.trim();
+    if (!text) return;
+    const notes = feedbackNotes();
+    notes.push({ id: 'n-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7), at: new Date().toISOString(),
+      status: 'open', text, where: { page: location.pathname.split('/').pop() || 'index.html' }, version: cfg.version });
+    store.set(FB_KEY, notes);
+    if (!store.get(FB_KEY, []).length) error('Saving a note', new Error('this browser will not keep notes'));
+    box.value = '';
+    renderNotes();
   }
 
   async function dbCheck() {
