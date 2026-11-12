@@ -104,12 +104,21 @@
       try { history.replaceState(null, '', location.pathname); } catch (err) { /* ignore */ }
       location.reload();
     });
+    function micStatus() {
+      var st = RS.mic.state, text = { on: 'The microphone is on. It is only listened to, never saved or sent.', starting: 'Waiting for the browser to answer…',
+        off: 'The microphone is off until a microphone mode starts.', denied: 'The browser said no. Allow the microphone for this site in the browser settings, then tap the button.',
+        unsupported: 'This page cannot use the microphone here (it needs https).' }[st] || st;
+      $('micStatus').textContent = text;
+    }
+    $('micAgain').addEventListener('click', function () { RS.mic.again().then(micStatus); micStatus(); });
+    gear.addEventListener('click', micStatus);
     $('shufflePads').addEventListener('click', function () { RS.modes.pads.shuffle(); });
     $('stopSound').addEventListener('click', function () { RS.modes.span.stopNote(); });
     $('newPattern').addEventListener('click', function () { RS.modes.ripples.newPattern(); });
     $('errClear').addEventListener('click', function () { RS.errors.length = 0; renderErrors(); });
     $('versionText').textContent = 'v' + RS.version;
     [
+      '0.1.1: the microphone is asked for as seldom as the browser allows: never again after a refusal, silent restart where the browser remembers a yes, one request per visit elsewhere. Button to try again.',
       '0.1.0: first build. Six modes: ripples, beads (beat looper), shake pads, strings, two fingers, how the machine hears. Hidden gear, notes for improvement, family database link for notes.',
     ].forEach(function (t) { var li = document.createElement('li'); li.textContent = t; $('changelog').appendChild(li); });
 

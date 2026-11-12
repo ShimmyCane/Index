@@ -299,3 +299,6 @@ Full build rules: `02 Refs/Skills/settings_gear.md` (run as `/settings-gear`).
 - The database registry drifts silently: six apps still said `ShimmyCane/Index` after graduating. Make "point the registry at the new repo" a step of graduating (`/graduate-project` step 6), and check `select app, repo from app_table_registry where repo = 'ShimmyCane/Index'` now and then: only nursery apps should appear. _(Index clean-up)_
 - Nursery and graduated pages share one origin (`shimmycane.github.io`), so `localStorage` carries over between them. Keep storage keys prefixed per app. _(graduate_project)_
 - When a request is ambiguous ("make sure the names are linked"), check the likely targets first (repos, home page, registry), then ask one multiple-choice question naming them. _(Adventure)_
+
+## Microphone permission in web apps (from Rhythm Sticks)
+- A page cannot make a browser remember "allow". Reduce asks instead: one `getUserMedia` per visit (keep the stream switched off with `track.enabled = false` between uses where the Permissions API is missing), release it when the permission reads `granted`, never retry after a refusal, and offer a button to try again. If the first request comes before any touch and is refused, retry once on the first touch (iOS wants a gesture).

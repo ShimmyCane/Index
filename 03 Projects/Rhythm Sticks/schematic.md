@@ -1,7 +1,7 @@
 # Rhythm Sticks — schematic
 
 **Track: A. Family play** (confirmed, `convo/convo v0.2.md`)
-**Status: MVP 0.1.0 (not yet device-tested).** Written 2026-11-12; first build the same day, all six modes. Shared background: `context.md`. Answers: `convo/convo v0.2.md`, `convo/convo v0.3.md`.
+**Status: MVP 0.1.1 (not yet device-tested).** Written 2026-11-12; first build the same day, all six modes. Shared background: `context.md`. Answers: `convo/convo v0.2.md`, `convo/convo v0.3.md`.
 
 ## Purpose
 
@@ -89,6 +89,7 @@ Link to the Family project (`twvqvutrcobedvuhnzxq`) per `02 Refs/Skills/supabase
 ## Privacy and limits
 
 - Microphone audio is analysed in the page and never stored, sent or played back.
+- The microphone is asked for as seldom as the browser allows (see `04 AI/Rhythm Sticks/brief.md`): never again after a refusal, silent restart where the browser remembers a yes, one request per visit where it cannot tell.
 - Mic needs https or localhost (GitHub Pages works; Artifacts don't).
 - No photos or recordings in the repo.
 

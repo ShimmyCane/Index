@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var RS = window.RS = {
-    version: '0.1.0',
+    version: '0.1.1',
     modes: {},
     order: ['ripples', 'beads', 'pads', 'strings', 'span', 'heat'],
     cur: null,
@@ -103,10 +103,10 @@
   function onDown(e) {
     var p = pos(e);
     if (!woke) {                         // browsers start audio only after a first touch
-      woke = true;
+      woke = true; RS.touched = true;
       if (RS.audio) RS.audio.wake();
+      if (RS.mic && RS.mic.want && RS.mic.state === 'off') RS.mic.start();   // once: browsers that wanted a touch before asking
     }
-    if (RS.mic && RS.mic.want) RS.mic.start();   // retry the microphone on a real touch
     try { S.canvas.setPointerCapture(e.pointerId); } catch (err) { /* synthetic events */ }
     if (inCorner(p.x, p.y)) { cornerPts[e.pointerId] = [p]; trail = [p]; trailFade = 1; return; }
     if (RS.cur && RS.cur.down) { try { RS.cur.down(e.pointerId, p.x, p.y, e); } catch (err) { RS.err('Touch', err); } }
