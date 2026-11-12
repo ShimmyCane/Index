@@ -16,9 +16,47 @@
   }
   M._fakeOnset = function (s) { fire(s == null ? 1 : s); };   // for tests
 
+  // The browser decides whether to remember a "yes" (Chrome and Firefox do, Safari may ask again each visit).
+  // What the page can do: ask as seldom as possible.
+  //  - It never asks again after a refusal (the gear has a button to try again).
+  //  - Where the browser reports the permission as saved ("granted"), leaving a microphone mode releases the
+  //    microphone, and coming back starts it silently.
+  //  - Where it cannot tell (Safari), the stream is kept switched off for the rest of the visit, so changing
+  //    modes does not ask again. It is switched on only in Beads and Heat, and released when the page closes.
+  var held = null;
+  M.perm = 'unknown';
+  try {
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'microphone' }).then(function (p) {
+        M.perm = p.state;
+        p.onchange = function () { M.perm = p.state; };
+      }).catch(function () { /* not supported for the microphone */ });
+    }
+  } catch (e) { /* not supported */ }
+
+  function attach(s) {
+    stream = s;
+    s.getTracks().forEach(function (t) { t.enabled = true; });
+    var c = RS.audio.ensure();
+    if (!c) { M.state = 'unsupported'; return; }
+    src = c.createMediaStreamSource(stream);
+    M.analyser = c.createAnalyser();
+    M.analyser.fftSize = 2048;
+    M.analyser.smoothingTimeConstant = 0;
+    src.connect(M.analyser);               // not connected to the speakers
+    M.freqData = new Uint8Array(M.analyser.frequencyBinCount);
+    tdata = new Uint8Array(M.analyser.fftSize);
+    base = 0.01; prev = 0;
+    M.state = 'on';
+    loop();
+  }
+  function live(s) { return s && s.getTracks().some(function (t) { return t.readyState === 'live'; }); }
+
   M.start = function () {
     M.want = true;
     if (M.state === 'on' || M.state === 'starting') return Promise.resolve();
+    if (M.state === 'denied' || M.state === 'unsupported') return Promise.resolve();   // no nagging after a refusal
+    if (live(held)) { var h = held; held = null; attach(h); return Promise.resolve(); }  // already allowed this visit
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       M.state = 'unsupported';
       RS.err('Microphone is not available here (it needs https or localhost)');
@@ -27,35 +65,34 @@
     M.state = 'starting';
     return navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } })
       .then(function (s) {
+        try { localStorage.setItem('rs.micOk', '1'); } catch (e) { /* storage blocked */ }
         if (!M.want) { s.getTracks().forEach(function (t) { t.stop(); }); M.state = 'off'; return; }
-        stream = s;
-        var c = RS.audio.ensure();
-        if (!c) { M.state = 'unsupported'; return; }
-        src = c.createMediaStreamSource(stream);
-        M.analyser = c.createAnalyser();
-        M.analyser.fftSize = 2048;
-        M.analyser.smoothingTimeConstant = 0;
-        src.connect(M.analyser);               // not connected to the speakers
-        M.freqData = new Uint8Array(M.analyser.frequencyBinCount);
-        tdata = new Uint8Array(M.analyser.fftSize);
-        base = 0.01; prev = 0;
-        M.state = 'on';
-        loop();
+        attach(s);
       })
       .catch(function (e) {
+        if (!RS.touched && e && e.name === 'NotAllowedError') { M.state = 'off'; return; }   // some browsers want a touch first: retry on the first touch
         M.state = 'denied';
         RS.err('Microphone unavailable', e);
       });
   };
+  M.again = function () { if (M.state === 'denied') M.state = 'off'; return M.start(); };
 
   M.stop = function () {
     M.want = false;
     cancelAnimationFrame(raf); raf = 0;
     if (src) { try { src.disconnect(); } catch (e) { /* already gone */ } src = null; }
-    if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; }
+    if (stream) {
+      if (M.perm === 'granted') { stream.getTracks().forEach(function (t) { t.stop(); }); }
+      else { stream.getTracks().forEach(function (t) { t.enabled = false; }); held = stream; }
+      stream = null;
+    }
     M.analyser = null; M.freqData = null; M.level = 0;
     if (M.state !== 'denied' && M.state !== 'unsupported') M.state = 'off';
   };
+  window.addEventListener('pagehide', function () {
+    if (held) { held.getTracks().forEach(function (t) { t.stop(); }); held = null; }
+    if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; }
+  });
 
   function loop() {
     raf = requestAnimationFrame(loop);

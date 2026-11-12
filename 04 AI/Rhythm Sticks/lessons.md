@@ -9,3 +9,4 @@
 - Beads: Chromium's fake microphone beeps on its own and fires real onsets; assert `>= n` hits, not `=== n`.
 - Panels that start collapsed need opening in a test before `fill` or `click` (Playwright waits for visibility).
 - "Home" in a hidden-gear single-page app can mean the app's own start page (reload, new random mode), not the nursery home; ask when the destination is not obvious.
+- 2026-11-12: "Remember the microphone permission" is the browser's choice, not the page's. What the page controls is how often it asks: keep one stream per visit where `permissions.query` is unavailable (Safari), release it where the state is `granted`, never retry after a refusal, and give a visible "try again" button. Test with init scripts that wrap or reject `getUserMedia` and count calls.

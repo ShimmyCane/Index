@@ -43,6 +43,8 @@
     <button class="panelHead" type="button" aria-expanded="true"><span class="panelIcon">🎛️</span><span class="panelTitle">This mode</span><span class="panelMark">▾</span></button>
     <div class="panelBody">
       <label class="row" data-modes="beads heat"><span>Microphone sensitivity <small>higher hears softer claps</small></span><input type="range" min="0" max="1" step="0.05" data-key="sens"></label>
+      <div class="row" data-modes="beads heat"><button class="btn wide" id="micAgain" type="button">🎤 Try the microphone again</button></div>
+      <p class="hint" id="micStatus" data-modes="beads heat"></p>
       <div class="row" data-modes="strings"><span>Strings</span><div class="seg" data-key="strings"><button type="button" data-v="auto">Random</button><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button></div></div>
       <label class="row check" data-modes="pads"><input type="checkbox" data-key="outlines"> <span>Show pad outlines <small>dashed pads: ≋ shaker ◉ snare ∿ drag for rattle ● thud</small></span></label>
       <div class="row" data-modes="pads"><button class="btn wide" id="shufflePads" type="button">🔀 Shuffle the pads</button></div>
