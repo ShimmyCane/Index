@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Rhythm Sticks</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<canvas id="stage"></canvas>
+
+<!-- The gear stays invisible until a circle is drawn in the lower-right corner. -->
+<button id="gear" class="gear" type="button" aria-label="Settings">
+  <svg viewBox="0 0 48 48" width="40" height="40" aria-hidden="true"><g fill="none" stroke="#2f2d3d" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"><circle cx="24" cy="24" r="7"/><path d="M24 4v6M24 38v6M4 24h6M38 24h6M9.9 9.9l4.3 4.3M33.8 33.8l4.3 4.3M9.9 38.1l4.3-4.3M33.8 14.2l4.3-4.3"/></g></svg>
+</button>
+
+<aside id="drawer" class="drawer" aria-hidden="true">
+  <header class="drawerHead">
+    <span class="drawerTitle">Settings</span>
+    <button id="drawerClose" class="btn icon" type="button" aria-label="Close">✖</button>
+  </header>
+
+  <section class="panel" data-panel="mode">
+    <button class="panelHead" type="button" aria-expanded="true"><span class="panelIcon">🎵</span><span class="panelTitle">Mode</span><span class="panelMark">▾</span></button>
+    <div class="panelBody">
+      <div class="seg stack" id="modeSeg"></div>
+      <a class="btn wide" id="homeLink" href="index.html">🏠 Home <small>starts a new random mode</small></a>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="sound">
+    <button class="panelHead" type="button" aria-expanded="true"><span class="panelIcon">🔊</span><span class="panelTitle">Sound and look</span><span class="panelMark">▾</span></button>
+    <div class="panelBody">
+      <label class="row check"><input type="checkbox" data-key="keepGear"> <span>Keep ⚙️ visible <small>off: it fades after 2 seconds; draw a circle in the lower-right corner to bring it back</small></span></label>
+      <label class="row"><span>Volume</span><input type="range" min="0" max="1" step="0.05" data-key="volume"></label>
+      <div class="row"><span>Notes</span><div class="seg" data-key="scale"><button type="button" data-v="penta">5 notes<small>always sounds nice</small></button><button type="button" data-v="major">7 notes</button><button type="button" data-v="all">12 notes</button></div></div>
+      <div class="row"><span>Visual speed</span><div class="seg" data-key="speed"><button type="button" data-v="slow">Slow</button><button type="button" data-v="normal">Normal</button><button type="button" data-v="fast">Fast</button></div></div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="thismode">
+    <button class="panelHead" type="button" aria-expanded="true"><span class="panelIcon">🎛️</span><span class="panelTitle">This mode</span><span class="panelMark">▾</span></button>
+    <div class="panelBody">
+      <label class="row" data-modes="beads heat"><span>Microphone sensitivity <small>higher hears softer claps</small></span><input type="range" min="0" max="1" step="0.05" data-key="sens"></label>
+      <div class="row" data-modes="strings"><span>Strings</span><div class="seg" data-key="strings"><button type="button" data-v="auto">Random</button><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button></div></div>
+      <label class="row check" data-modes="pads"><input type="checkbox" data-key="outlines"> <span>Show pad outlines <small>dashed pads: ≋ shaker ◉ snare ∿ drag for rattle ● thud</small></span></label>
+      <div class="row" data-modes="pads"><button class="btn wide" id="shufflePads" type="button">🔀 Shuffle the pads</button></div>
+      <div class="row" data-modes="span"><span>Pitch</span><div class="seg" data-key="glide"><button type="button" data-v="steps">Steps</button><button type="button" data-v="glide">Glide</button></div></div>
+      <div class="row" data-modes="span"><button class="btn wide" id="stopSound" type="button">⏹ Stop the held note</button></div>
+      <div class="row" data-modes="ripples"><button class="btn wide" id="newPattern" type="button">🎨 New background pattern</button></div>
+      <p class="hint" data-modes="ripples">Tap to drop a ripple. Hold to keep the note ringing, and slide to change it.</p>
+      <p class="hint" data-modes="pads">Nine hidden pads. Tap them, and drag across them. Look and listen to find what each one does.</p>
+      <p class="hint" data-modes="strings">Drag a finger across a string to pluck it. With two or more strings, touch the right side of a string to press a fret: sliding left raises the pitch.</p>
+      <p class="hint" data-modes="span">Two fingers on the big side: the distance between them is the note. Two fingers on the small side: the distance is the loudness. Lift your fingers and the note keeps playing.</p>
+      <p class="hint" data-modes="heat">What the microphone hears, as a picture: time runs left to right, high sounds are at the top, loud sounds are hot colors. Tap to freeze.</p>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="beads" data-open="false" data-modes="beads">
+    <button class="panelHead" type="button" aria-expanded="false"><span class="panelIcon">🥁</span><span class="panelTitle">Beads: how to play</span><span class="panelMark">▾</span></button>
+    <div class="panelBody">
+      <ol class="steps">
+        <li><b>Tap the screen once</b> to start recording. Clap, tap or drum near the microphone: each sharp sound becomes a bead.</li>
+        <li><b>Tap again</b> to stop. The beads loop: the loop is as long as your recording.</li>
+        <li><b>Tap again</b> to add another layer. It records for one turn of the loop, and each layer has its own sound and color.</li>
+        <li><b>Tap again during a layer</b> to finish it early.</li>
+        <li><b>Double tap</b> to wipe everything and start a new recording.</li>
+      </ol>
+      <p class="hint">Your voice and steady noise are ignored; only sharp sounds count. The loop plays soft synth drums, never the recorded sound. The microphone is never stored or sent. If beads show up too often or not at all, change the sensitivity above.</p>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="family" data-open="false">
+    <button class="panelHead" type="button" aria-expanded="false"><span class="panelIcon">🏠</span><span class="panelTitle">Family database</span><span class="panelMark">▾</span></button>
+    <div class="panelBody">
+      <p class="hint" id="familyStatus"></p>
+      <form id="familyForm" class="stackForm">
+        <input id="familyEmail" type="email" autocomplete="username" placeholder="Email" required>
+        <input id="familyPassword" type="password" autocomplete="current-password" placeholder="Password" required>
+        <button class="btn wide" type="submit">🔑 Sign in</button>
+      </form>
+      <button class="btn wide" id="familyOut" type="button" hidden>🚪 Sign out</button>
+      <button class="btn wide" id="familyCheck" type="button">🔎 Check the database</button>
+      <p class="hint" id="dbCheck"></p>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="notes" data-open="false">
+    <button class="panelHead" type="button" aria-expanded="false"><span class="panelIcon">📝</span><span class="panelTitle">Notes for improvement</span><span class="panelMark">▾</span></button>
+    <div class="panelBody notesBox">
+      <textarea id="noteText" rows="3" placeholder="What would make this better?"></textarea>
+      <div class="row"><button class="btn" id="noteSave" type="button">Save note</button><button class="btn" id="noteCopy" type="button">Copy notes</button>
+        <select id="noteFilter" aria-label="Filter"><option value="open">Open</option><option value="all">All</option></select></div>
+      <ul id="noteList"></ul>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="errs" data-open="false">
+    <button class="panelHead" type="button" aria-expanded="false"><span class="panelIcon">⚠️</span><span class="panelTitle">Errors</span><span class="panelMark">▾</span></button>
+    <div class="panelBody">
+      <label class="row check"><input type="checkbox" data-key="showErrors"> <span>Show errors at the bottom of the page</span></label>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="info" data-open="false">
+    <button class="panelHead" type="button" aria-expanded="false"><span class="panelIcon">ℹ️</span><span class="panelTitle">Info</span><span class="panelMark">▾</span></button>
+    <div class="panelBody">
+      <p class="row"><b>Version</b> <span id="versionText"></span></p>
+      <ul class="changelog" id="changelog"></ul>
+    </div>
+  </section>
+</aside>
+
+<section id="errors" class="errors" aria-live="polite">
+  <div class="errHead"><b>Errors</b><button class="btn small" id="errClear" type="button">Clear</button></div>
+  <ol id="errList"></ol>
+</section>
+
+<script src="js/core.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/mic.js"></script>
+<script src="js/modes/ripples.js"></script>
+<script src="js/modes/beads.js"></script>
+<script src="js/modes/pads.js"></script>
+<script src="js/modes/strings.js"></script>
+<script src="js/modes/span.js"></script>
+<script src="js/modes/heat.js"></script>
+<script src="js/notes.js"></script>
+<script src="js/family.js"></script>
+<script src="js/gear.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
