@@ -1,6 +1,6 @@
 # Rhythm Sticks — schematic
 
-**Track: A. Family play** (to confirm in `convo/convo v0.1.md`, Q1)
+**Track: A. Family play** (confirmed, `convo/convo v0.2.md`)
 **Status: idea.** Written 2026-11-12. Shared background: `context.md`.
 
 ## Purpose
@@ -25,20 +25,31 @@ A wordless web toy that shows rhythm and sound to young children. On load it pic
 One full-screen canvas. Nothing else visible. The page loads, waits for the first touch to wake audio (iPad rule), then plays in the chosen mode.
 
 - **Random mode on load.** Pick at random from the built modes, never the same one twice in a row (last mode kept in device storage).
-- **Hidden ⚙️.** The gear is lower-right per `settings_gear.md`, but starts invisible. It appears after a circular stroke in the lower-right corner, or when the "show gear" toggle is on (where that toggle lives: open question). Once shown, it stays until hidden again.
-- **Gear panel:** mode picker, microphone sensitivity, volume, scale, show-pad-outlines (dashed regions for the shake pads), speed of the visuals, Show errors, Notes for improvement, version log, note log, database check.
+- **Hidden ⚙️.** The gear is lower-right per `settings_gear.md`, but starts invisible. A circular stroke in the lower-right corner shows it, every time. It fades about 2 seconds later, unless the "Keep gear visible" toggle inside ⚙️ is on.
+- **Changing mode:** from ⚙️ (mode picker), the Home link (nursery home page), or by refreshing. No gesture for the child.
+- **Gear panel** (order per `settings_gear.md`): mode picker and Home link, Keep gear visible, microphone sensitivity, volume, scale, show pad outlines (dashed regions for the shake pads), speed of visuals, Beads controls hints, database block, Notes for improvement and note log, Show errors, and at the very bottom Info: the version (also saved with each note) and a short changelog.
 
 ## Modes
 
 | # | Mode | Input | Sound | Picture |
 |---|---|---|---|---|
-| 1 | Ripples | tap | sustained note, pentatonic, pitch from position | rings that spread, color shifting outward; maybe a filter over an image |
-| 2 | Beads | microphone | none (never plays the mic back) | beads jump or scatter on each sharp attack; speech and steady noise ignored |
+| 1 | Ripples | tap | sustained note, pentatonic, pitch from position; soft sine/triangle, long sustain | glowing rings that grow over a randomized abstract pattern, color shifting outward; no images |
+| 2 | Beads (beat looper) | microphone hears sharp attacks; screen taps control | each recorded beat plays back as a synthesized click/drum (never the mic sound) | beads pulse on each beat around a loop; speech and steady noise ignored |
 | 3 | Strings | drag and release | plucked tone with decay | string bounces, exaggerated; sub-modes: 1, 2 or 3 strings, fret side where pitch rises as you slide |
 | 4 | Shake pads | tap, drag | shaker, snare, rattle by region | hidden 3×3 grid; hint = faint reaction where a pad is; dashed pads only when ⚙️ turns them on |
 | 5 | Two-finger span | two or more fingers | note from finger distance (big side ≈ 3/5), loudness from the second pair (small side ≈ 2/5); lifting locks the note; attack on press, decay while held | sparks, light and color |
 
-Candidates later: "how the machine hears" heat map (spectrogram of the microphone, shown as AI might see it); drum/clap loop; voice-pitch.
+| 6 | How the machine hears | microphone | none | a heat map (spectrogram) of the mic as an AI might see it: time across, pitch up, loudness as color. Later increment |
+
+Candidates later: voice-pitch.
+
+### Beads controls (taps on the screen)
+
+- single tap: start recording beats
+- tap again: stop, and loop what was heard
+- more taps: overlay another layer on the loop
+- double tap: record anew, wiping all layers
+- ⚙️ shows these as hints, expanded. Loop length comes from the first recording (to confirm, `convo v0.2` Q2). Sensitivity slider in ⚙️.
 
 ## Shared engine (small modules, Pd-style)
 
@@ -66,13 +77,14 @@ Link to the Family project (`twvqvutrcobedvuhnzxq`) per `02 Refs/Skills/supabase
 
 ## Increments
 
-1. **Skeleton:** page, canvas, audio wake, random mode picker, hidden gear with circular reveal, feedback notes (device only), error panel. One mode: Ripples.
-2. **Beads** (microphone) with sensitivity in ⚙️.
+1. **Skeleton:** page, canvas, audio wake, random mode picker (never twice in a row), hidden gear with circular reveal and 2-second fade, Info/version, feedback notes (device only), error panel. One mode: Ripples.
+2. **Beads** (microphone beat looper) with sensitivity and control hints in ⚙️.
 3. **Shake pads** with the outline toggle.
 4. **Strings** (1 string, then 2–3 and fret).
 5. **Two-finger span.**
-6. Database link for the note log and version log.
-7. Smoke test at three sizes (`smoke_test`), then device test on the iPad.
+6. **How the machine hears** heat map.
+7. Database link for the note log.
+8. Smoke test at three sizes (`smoke_test`) after each increment, then device test on the iPad.
 
 ## Privacy and limits
 
