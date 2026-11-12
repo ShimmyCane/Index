@@ -1,7 +1,7 @@
 # Rhythm Sticks — schematic
 
 **Track: A. Family play** (confirmed, `convo/convo v0.2.md`)
-**Status: idea.** Written 2026-11-12. Shared background: `context.md`.
+**Status: MVP 0.1.0 (not yet device-tested).** Written 2026-11-12; first build the same day, all six modes. Shared background: `context.md`. Answers: `convo/convo v0.2.md`, `convo/convo v0.3.md`.
 
 ## Purpose
 
@@ -26,7 +26,7 @@ One full-screen canvas. Nothing else visible. The page loads, waits for the firs
 
 - **Random mode on load.** Pick at random from the built modes, never the same one twice in a row (last mode kept in device storage).
 - **Hidden ⚙️.** The gear is lower-right per `settings_gear.md`, but starts invisible. A circular stroke in the lower-right corner shows it, every time. It fades about 2 seconds later, unless the "Keep gear visible" toggle inside ⚙️ is on.
-- **Changing mode:** from ⚙️ (mode picker), the Home link (nursery home page), or by refreshing. No gesture for the child.
+- **Changing mode:** from ⚙️ (mode picker), the Home link (reloads this page for a new random mode), or by refreshing. No gesture for the child. `index.html#<mode>` opens a named mode (`ripples`, `beads`, `pads`, `strings`, `span`, `heat`).
 - **Gear panel** (order per `settings_gear.md`): mode picker and Home link, Keep gear visible, microphone sensitivity, volume, scale, show pad outlines (dashed regions for the shake pads), speed of visuals, Beads controls hints, database block, Notes for improvement and note log, Show errors, and at the very bottom Info: the version (also saved with each note) and a short changelog.
 
 ## Modes
@@ -49,7 +49,7 @@ Candidates later: voice-pitch.
 - tap again: stop, and loop what was heard
 - more taps: overlay another layer on the loop
 - double tap: record anew, wiping all layers
-- ⚙️ shows these as hints, expanded. Loop length comes from the first recording (to confirm, `convo v0.2` Q2). Sensitivity slider in ⚙️.
+- ⚙️ shows these as hints, expanded. Loop length comes from the first recording. Playback is synth drums, never the mic sound (confirmed). Sensitivity slider in ⚙️.
 
 ## Shared engine (small modules, Pd-style)
 
@@ -62,7 +62,7 @@ Each module does one job; modes wire them together.
 - `gear.js`: settings drawer, error panel, feedback notes, database check.
 - `css/app.css`
 
-Files stay inside this folder. Classic scripts, no build step.
+Files stay inside this folder. Classic scripts, no build step. Built as `index.html`, `css/app.css`, `js/core.js`, `audio.js`, `mic.js`, `modes/*.js`, `notes.js`, `family.js`, `gear.js`, `app.js`.
 
 ## Feedback notes (first increment)
 
@@ -73,7 +73,7 @@ Files stay inside this folder. Classic scripts, no build step.
 
 ## Database plan (family notes, to confirm)
 
-Link to the Family project (`twvqvutrcobedvuhnzxq`) per `02 Refs/Skills/supabase_link.md`. Table `rs_notes`: `id`, `text`, `page`, `item`, `label`, `version`, `status` (`open` or `done`), `noted_at`. RLS on, `anon` revoked, family sign-in may insert, read and update status. Register in `app_table_registry`. A 家庭登入 block in ⚙️ with the publishable key only; signed out the database check says "this device only". Reference: `03 Projects/中文笔画/`. Nothing is written until Jimmy asks.
+Link to the Family project (`twvqvutrcobedvuhnzxq`) per `02 Refs/Skills/supabase_link.md`. Table `rs_notes`: `id`, `text`, `page`, `item`, `label`, `version`, `status` (`open` or `done`), `noted_at`. RLS on, `anon` revoked, family sign-in may insert, read and update status. Register in `app_table_registry`. A 家庭登入 block in ⚙️ with the publishable key only; signed out the database check says "this device only". Reference: `03 Projects/中文笔画/`. The SQL files are written in `supabase/` and checked with `sql_paste_check.py`. Nothing is applied until Jimmy asks.
 
 ## Increments
 
@@ -94,4 +94,4 @@ Link to the Family project (`twvqvutrcobedvuhnzxq`) per `02 Refs/Skills/supabase
 
 ## Open questions
 
-See `convo/convo v0.1.md`.
+See `convo/convo v0.3.md` (after a first play on the iPad).
