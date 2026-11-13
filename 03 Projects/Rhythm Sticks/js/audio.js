@@ -5,13 +5,16 @@
 (function () {
   'use strict';
   var A = RS.audio = { maskUntil: 0 };
-  var ctx = null, master = null, noiseBuf = null, primed = false;
+  var ctx = null, master = null, noiseBuf = null, primed = false, echo = null;
 
   A.ensure = function () {
     if (ctx) return ctx;
     var AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) { RS.err('Web Audio is not available in this browser'); return null; }
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* not on every browser */ }   // iPad: play even when the side switch is on mute
     try { ctx = new AC({ latencyHint: 'interactive' }); } catch (e) { ctx = new AC(); }
+    echo = null; primed = false;
+    ctx.onstatechange = function () { if (RS.onAudioState) RS.onAudioState(ctx ? ctx.state : 'closed'); };
     var comp = ctx.createDynamicsCompressor();
     master = ctx.createGain();
     master.gain.value = RS.settings.volume;
@@ -26,7 +29,7 @@
   A.wake = function () {
     var c = A.ensure();
     if (!c) return;
-    if (c.state === 'suspended') c.resume().catch(function (e) { RS.err('Audio could not start', e); });
+    if (c.state !== 'running' && c.state !== 'closed') c.resume().catch(function (e) { RS.err('Audio could not start', e); });   // also wakes an "interrupted" engine (iPad, after a screen lock)
     if (!primed) {
       primed = true;
       try {
@@ -37,6 +40,13 @@
     }
   };
   A.context = function () { return ctx; };
+  A.running = function () { return !!ctx && ctx.state === 'running'; };
+  A.state = function () { return ctx ? ctx.state : 'none'; };
+  // Wake the engine whenever the page comes back; let go of it when the page is left (a refresh must not pile up engines).
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) A.wake(); });
+  window.addEventListener('pageshow', function () { A.ensure(); });
+  window.addEventListener('pagehide', function () { try { if (ctx) ctx.close(); } catch (e) { /* already closed */ } ctx = null; });
+  A.meter = function () { var c = A.ensure(), an = c.createAnalyser(); an.fftSize = 2048; master.connect(an); return an; };   // for tests
   A.now = function () { return ctx ? ctx.currentTime : 0; };
   A.info = function () {
     return ctx ? { state: ctx.state, sampleRate: ctx.sampleRate, base: ctx.baseLatency || 0, output: ctx.outputLatency || 0 } : null;
@@ -64,24 +74,59 @@
   A.mtof = function (m) { return 440 * Math.pow(2, (m - 69) / 12); };
 
   // ---- A held voice: attack, then it rings until release() ----
+  // Options: type, gain, attack, filter (low-pass Hz), vibrato (cents), echo (0..1 send), trem (true = it can pulse).
+  function echoBus() {
+    if (echo) return echo;
+    var d = ctx.createDelay(1); d.delayTime.value = 0.27;
+    var fb = ctx.createGain(); fb.gain.value = 0.38;
+    var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 3200;
+    var wet = ctx.createGain(); wet.gain.value = 0.7;
+    d.connect(lp); lp.connect(fb); fb.connect(d); lp.connect(wet); wet.connect(master);
+    echo = d;
+    return echo;
+  }
   A.voice = function (freq, o) {
     o = o || {};
     var c = A.ensure();
     if (!c) return null;
-    var t = c.currentTime;
+    var t = c.currentTime, stops = [];
     var osc = c.createOscillator();
     osc.type = o.type || 'sine';
     osc.frequency.value = freq;
     var g = c.createGain();
     g.gain.setValueAtTime(0.0001, t);
     g.gain.linearRampToValueAtTime(o.gain == null ? 0.25 : o.gain, t + (o.attack || 0.012));
-    osc.connect(g); g.connect(master);
-    osc.start(t);
+    var filt = null, lfoG = null, send = null, trem = null, tremLfo = null, tremDepth = null, node = osc;
+    if (o.filter) { filt = c.createBiquadFilter(); filt.type = 'lowpass'; filt.frequency.value = o.filter; filt.Q.value = 0.7; osc.connect(filt); node = filt; }
+    node.connect(g);
+    if (o.vibrato != null) {
+      var lfo = c.createOscillator(); lfo.frequency.value = 5.5; lfoG = c.createGain(); lfoG.gain.value = o.vibrato;
+      lfo.connect(lfoG); lfoG.connect(osc.detune); lfo.start(t); stops.push(lfo);
+    }
+    var out = g;
+    if (o.trem) {
+      trem = c.createGain(); trem.gain.value = 1;
+      tremLfo = c.createOscillator(); tremLfo.frequency.value = 4; tremDepth = c.createGain(); tremDepth.gain.value = 0;
+      tremLfo.connect(tremDepth); tremDepth.connect(trem.gain); tremLfo.start(t); stops.push(tremLfo);
+      g.connect(trem); out = trem;
+    }
+    out.connect(master);
+    if (o.echo != null) { send = c.createGain(); send.gain.value = o.echo; out.connect(send); send.connect(echoBus()); }
+    osc.start(t); stops.push(osc);
     var done = false;
     return {
       osc: osc, gain: g,
       setFreq: function (f, tc) { if (!done) osc.frequency.setTargetAtTime(f, c.currentTime, tc || 0.03); },
       setGain: function (v, tc) { if (!done) g.gain.setTargetAtTime(Math.max(0.0001, v), c.currentTime, tc || 0.03); },
+      setFilter: function (hz) { if (!done && filt) filt.frequency.setTargetAtTime(hz, c.currentTime, 0.03); },
+      setVibrato: function (cents) { if (!done && lfoG) lfoG.gain.setTargetAtTime(cents, c.currentTime, 0.05); },
+      setEcho: function (v) { if (!done && send) send.gain.setTargetAtTime(v, c.currentTime, 0.05); },
+      setTrem: function (rate, depth) {                              // depth 0..1: how far the loudness dips
+        if (done || !trem) return;
+        tremLfo.frequency.setTargetAtTime(Math.max(0.1, rate), c.currentTime, 0.05);
+        tremDepth.gain.setTargetAtTime(depth * 0.5, c.currentTime, 0.05);
+        trem.gain.setTargetAtTime(1 - depth * 0.5, c.currentTime, 0.05);
+      },
       release: function (r) {
         if (done) return;
         done = true;
@@ -90,7 +135,7 @@
         g.gain.cancelScheduledValues(n);
         g.gain.setValueAtTime(Math.max(cur, 0.0001), n);
         g.gain.setTargetAtTime(0.0001, n, r / 4);
-        try { osc.stop(n + r + 0.2); } catch (e) { /* already stopped */ }
+        stops.forEach(function (x) { try { x.stop(n + r + 0.2); } catch (e) { /* already stopped */ } });
       },
     };
   };
@@ -165,6 +210,46 @@
   A.pop = function (v, f) { v = v == null ? 1 : v; f = f || 500; tone('sine', f, f * 1.8, 0.1, 0.5 * v); };
   A.swish = function (v) { v = v == null ? 1 : v; burst('bandpass', 1400, 0.5, 0.06, 0.28, 0.25 * v); };
   A.testBurst = function (delay) { mask(400); burst('highpass', 2500, 0.7, 0.002, 0.04, 1.0, delay || 0); burst('bandpass', 4000, 1, 0.002, 0.05, 0.9, delay || 0); };
+
+  // Arcade sounds
+  A.coin = function (v) { v = v == null ? 1 : v; tone('square', 988, 988, 0.08, 0.16 * v); tone('square', 1319, 1319, 0.32, 0.16 * v, 0.08); };
+  A.laser = function (v) { v = v == null ? 1 : v; tone('sawtooth', 1900, 180, 0.26, 0.2 * v); };
+  A.jump = function (v) { v = v == null ? 1 : v; tone('square', 260, 760, 0.2, 0.18 * v); };
+  A.powerup = function (v) { v = v == null ? 1 : v; [392, 523, 659, 784].forEach(function (f, i) { tone('square', f, f, 0.1, 0.15 * v, i * 0.07); }); };
+  A.blip = function (v) { v = v == null ? 1 : v; tone('square', 880, 880, 0.07, 0.16 * v); };
+  // Other interesting sounds
+  A.wood = function (v) { v = v == null ? 1 : v; tone('sine', 900, 650, 0.07, 0.6 * v); burst('bandpass', 1800, 2, 0.002, 0.03, 0.3 * v); };
+  A.tink = function (v) { v = v == null ? 1 : v; tone('sine', 2400, 2380, 0.55, 0.25 * v); tone('sine', 3700, 3680, 0.3, 0.12 * v); };
+  A.cowbell = function (v) { v = v == null ? 1 : v; tone('square', 540, 540, 0.4, 0.14 * v); tone('square', 800, 800, 0.4, 0.14 * v); };
+  A.bubble = function (v) { v = v == null ? 1 : v; tone('sine', 300, 900, 0.14, 0.5 * v); };
+  A.whistle = function (v) { v = v == null ? 1 : v; tone('sine', 1100, 1900, 0.4, 0.3 * v, 0, 0.05); };
+  A.clap = function (v) { v = v == null ? 1 : v; mask(); [0, 0.012, 0.026].forEach(function (d) { burst('bandpass', 1600, 0.9, 0.001, 0.02, 0.5 * v, d); }); burst('bandpass', 1500, 0.8, 0.002, 0.12, 0.3 * v, 0.03); };
+  // For the desert objects
+  A.chirp = function (v) { v = v == null ? 1 : v; tone('sine', 2200, 3200, 0.07, 0.25 * v); tone('sine', 2600, 3500, 0.08, 0.22 * v, 0.1); tone('sine', 2400, 3000, 0.06, 0.2 * v, 0.2); };
+  A.horn = function (v) { v = v == null ? 1 : v; [0, 0.24].forEach(function (d) { tone('square', 330, 330, 0.18, 0.12 * v, d); tone('square', 415, 415, 0.18, 0.12 * v, d); }); };
+  A.rustle = function (v) { v = v == null ? 1 : v; burst('bandpass', 2600, 0.6, 0.05, 0.3, 0.2 * v); };
+  // A sung "ooh": a buzzy tone through two vowel resonances with a little wobble. The microphone hardly hears it.
+  A.voiceNote = function (freq, v, dur, vowel) {
+    var c = A.ensure();
+    if (!c) return;
+    v = v == null ? 1 : v; dur = dur || 0.5;
+    var t = c.currentTime, F = vowel === 'ah' ? [700, 1220] : vowel === 'ee' ? [310, 2200] : [330, 900];
+    var osc = c.createOscillator(); osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(freq * 0.97, t); osc.frequency.linearRampToValueAtTime(freq, t + 0.06);
+    var lfo = c.createOscillator(), lg = c.createGain(); lfo.frequency.value = 5.2; lg.gain.value = freq * 0.012; lfo.connect(lg); lg.connect(osc.frequency);
+    var sum = c.createGain(); sum.gain.value = 5;
+    F.forEach(function (f, i) {
+      var b = c.createBiquadFilter(); b.type = 'bandpass'; b.frequency.value = f; b.Q.value = 5;
+      var gg = c.createGain(); gg.gain.value = i ? 0.5 : 1; osc.connect(b); b.connect(gg); gg.connect(sum);
+    });
+    var env = c.createGain();
+    env.gain.setValueAtTime(0.0001, t); env.gain.linearRampToValueAtTime(0.5 * v, t + 0.05);
+    env.gain.setTargetAtTime(0.0001, t + dur * 0.7, dur * 0.15 + 0.02);
+    sum.connect(env); env.connect(master);
+    osc.start(t); lfo.start(t); osc.stop(t + dur + 0.5); lfo.stop(t + dur + 0.5);
+  };
+  // The pad sounds, by family (see the shake pads).
+  A.padSounds = ['shaker', 'snare', 'rattle', 'kick', 'tom', 'coin', 'laser', 'jump', 'powerup', 'blip', 'wood', 'tink', 'cowbell', 'bubble', 'whistle'];
 
   // One drum per beads layer.
   A.layerSounds = ['kick', 'snare', 'hat', 'tom', 'click'];

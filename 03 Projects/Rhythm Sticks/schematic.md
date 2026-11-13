@@ -1,7 +1,7 @@
 # Rhythm Sticks — schematic
 
 **Track: A. Family play** (confirmed, `convo/convo v0.2.md`)
-**Status: MVP 0.2.0 (not yet device-tested).** Written 2026-11-12; first build the same day, all six modes. Shared background: `context.md`. Answers: `convo/convo v0.2.md`, `convo/convo v0.3.md`.
+**Status: MVP 0.3.0 (not yet device-tested).** Written 2026-11-12; first build the same day, all six modes. Shared background: `context.md`. Answers: `convo/convo v0.2.md`, `convo/convo v0.3.md`.
 
 ## Purpose
 
@@ -36,19 +36,26 @@ One full-screen canvas. Nothing else visible. The page loads, waits for the firs
 | 1 | Ripples | tap | sustained note, pentatonic, pitch from position; soft sine/triangle, long sustain | glowing rings that grow over a randomized abstract pattern, color shifting outward; no images |
 | 2 | Beads (beat looper) | microphone hears sharp attacks; screen taps control | each recorded beat plays back as a synthesized click/drum (never the mic sound) | beads pulse on each beat around a loop; speech and steady noise ignored |
 | 3 | Strings | drag and release | plucked tone with decay | string bounces, exaggerated; sub-modes: 1, 2 or 3 strings, fret side where pitch rises as you slide |
-| 4 | Shake pads | tap, drag | shaker, snare, rattle by region | hidden 3×3 grid; hint = faint reaction where a pad is; dashed pads only when ⚙️ turns them on |
-| 5 | Two-finger span | two or more fingers | note from finger distance (big side ≈ 3/5), loudness from the second pair (small side ≈ 2/5); lifting locks the note; attack on press, decay while held | sparks, light and color |
+| 4 | Shake pads | tap, drag | 15 sounds (drums and shakers, arcade, other interesting); nine per layout, chosen from a seed number shown in ⚙️ | hidden 3×3 grid; hint = faint reaction where a pad is; dashed pads only when ⚙️ turns them on |
+| 5 | Two fingers | two fingers on the big side (≈ 3/5): the note; on the right (≈ 2/5): one finger slides for volume, two fingers set a pulse | lifting locks the note and the pulse; attack on press, decay while held | the whole screen takes the note's colour and the volume's brightness; sparks and light |
 
-| 6 | How the machine hears | microphone | none | a heat map (spectrogram) of the mic as an AI might see it: time across, pitch up, loudness as color. Later increment |
+| 6 | How the machine hears | microphone; tap freezes, two fingers change the view | none | three views: heat map; pitch (the note you sing, with name and a sharp/flat needle); chords (up to six notes on a grand staff) |
 
-| 7 | Echo | microphone or taps | a soft tick at once, then bells answer your pattern changed (same, faster, climbing, plus one, backwards) | faces for your beats below, the echo's faces above |
+| 7 | Echo | microphone or taps | a soft tick at once; the answers are sung ("ooh"), the first note longer | four levels that learn you: tap along, copy me, repeat, riff (your rhythm answered changed); two good rounds up, two poor down; faces for your beats below, the echo's above; dots show the level |
 | 8 | Marbles | tap or drag along the top | a pop on drop; every peg is a bell, low left to high right | marbles fall through glowing pegs |
-| 9 | Dot loop | taps on dots | two rings: drums (kick, snare, hat) and climbing bells, played as the hand sweeps | rings of dots, a sweeping hand, centre wipes |
-| 10 | Footsteps | taps on left and right halves | thuds, a hop pop, a climbing bell every fourth step | a creature walks, runs, hops, sits, dozes; flowers grow |
+| 9 | Dot loop | taps on dots and rings | eight rings, one sound each (kick, snare, hat, tom, clap, click, low bell, high bell), 16 steps, played as the hand sweeps | a ring shows only when the one before has a beat; a tapped ring slides to the front and the rest shrink behind it; centre wipes |
+| 10 | Footsteps | taps on left and right halves; taps on objects | thuds, a hop pop, a climbing bell every fourth step; each object has its own sound | a desert; Rhythm road: stones for S (tap), L (hold), pause, 15 rhythms in three groups, solve twice and it plays on by itself and a new object joins; Free walk kept |
 | 11 | Hum trail | microphone (pitch) | none | a glowing trail of your note's height, stars for steady notes |
 | hidden | Breathing garden | microphone (breath sound) or a held finger = breathing out | bells at long-breath milestones, a bamboo knock | Sand rake, Fountain, Blossom; five stars for 3, 5, 7, 9, 11 s |
 
 The breathing garden is not in the random pool. It opens from ⚙️ → Mode, or `index.html#breathe`. It is a calm game, not a medical tool.
+
+### Other controls in 0.3.0
+- **Upper-right corner of the screen:** a card that says what the mode does (tap again to hide). ⚙️ → What each mode does lists them all.
+- **Ripples up and down:** a drop-down in ⚙️ (None by default; Tone, Sustain, Attack, Timbre, Vibrato, Echo).
+- **Seed:** pads layout and the Ripples pattern come from a seed number shown in ⚙️; type one to bring a layout back; `?seed=N` works.
+- **Audio asleep:** a crossed-out speaker shows at the bottom; any touch wakes the sound.
+- **Error bar:** short, fades after 5 seconds, tap to keep.
 
 ### Beads controls (taps on the screen)
 
@@ -103,4 +110,4 @@ Link to the Family project (`twvqvutrcobedvuhnzxq`) per `02 Refs/Skills/supabase
 
 ## Open questions
 
-See `convo/convo v0.5.md` (after a first play on the iPad).
+See `convo/convo v0.7.md` (after a first play on the iPad).

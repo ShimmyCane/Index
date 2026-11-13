@@ -1,7 +1,7 @@
 # Rhythm Sticks — brief
 
 **Updated:** 2026-11-12
-**Status:** MVP 0.2.0, not device-tested. All six modes built in one pass after `convo v0.2` answers.
+**Status:** MVP 0.3.0, not device-tested. All six modes built in one pass after `convo v0.2` answers.
 
 ## Goal
 
@@ -27,6 +27,17 @@ Six modes × three sizes: zero errors, no horizontal scroll; gear circle, fade, 
 
 Sound by ear on iPad; real two-finger touch; clap vs speech against the real onset detector (thresholds are a first guess); real sign-in; the SQL has not been run (checked only with `sql_paste_check.py`).
 
+## Version 0.3.0 (2026-11-13)
+
+Built from the 14 notes and Jimmy's answers in `convo v0.6` (recorded in `convo v0.7`):
+- **Audio sleep fix:** wake on every touch, on `visibilitychange` and `pageshow`; wake from "interrupted" as well as "suspended"; close the engine on `pagehide`; `navigator.audioSession.type = 'playback'`; a crossed-out speaker (drawn by `core.js`) when the engine is not running, and a tap on it wakes it. Cause on the iPad unconfirmed.
+- **Error bar** fades after 5 s (opacity, not display), short, tap to pin; list also in ⚙️.
+- **Two fingers** rewritten: colours, volume fader, pulse via a tremolo option on `A.voice`.
+- **Footsteps** rewritten: desert, six tappable objects, rhythm road (15 rhythms of S/L/pause, half-second beat, window of 0.175 s either side, hold of at least 0.4 s, two clean rounds = solved, the creature plays the next bar by itself, an object unlocks), Free walk kept; progress in local storage.
+- **Heat** has heat, pitch and chords views (two-finger tap; chords by harmonic-sieve peak picking on an 8192 FFT, steady over 3 of the last 6 looks).
+- **Ripples** up/down choice (`A.voice` now takes filter, vibrato, echo and tremolo), **pads** 15 sounds from a seed (`RS.rng`, `RS.seed`, `RS.setSeed`), **dot loop** eight sliding rings, **echo** four adaptive levels with a sung tone (`A.voiceNote`), mode narratives (`js/info.js`, upper-right card).
+- Checked headless (see `convo v0.7`); every sound's peak level measured through `A.meter()`. Not checked on an iPad.
+
 ## Version 0.2.0 (2026-11-13)
 
 - **Lag:** beads taps act on touch (a second tap within 330 ms wipes); the clap detector is an AudioWorklet (blocks of ~3 ms, rise-within-12-ms test so slow breath and speech don't fire) with the old analyser detector as fallback; audio engine built at page start and primed inside the first touch; string pitches built once at mode start; `A.maskUntil` makes the detector ignore ~140 ms after noisy drums so loops don't re-trigger themselves; ⚙️ → Sound lag shows engine latencies and a speaker-to-microphone round trip.
@@ -34,7 +45,7 @@ Sound by ear on iPad; real two-finger touch; clap vs speech against the real ons
 - **Hidden breathing garden** (`js/modes/breathe.js`, not in `RS.order`, opens from ⚙️ or `#breathe`): breath sensing = adaptive floor, hysteresis, low-sound ratio for out vs in, alternation when unsure; a held finger always means breathing out. Gardens: sand rake, fountain (asks 0.75 s more each knock), blossom (pacer 4/6 s, lengthens to 6/10 on success; only the out-breath is checked). Longest breath kept in local storage only. Calm game, not medical.
 - Checked headless (made-up sound through `mic._attachTest`): 4/4 claps heard, 0 slow swells; hum finds 220 Hz within 4%; every new mode and the three gardens respond; full earlier smoke run and the microphone-permission check still pass. Not checked on a real iPad or with real breath or claps.
 
-## Notes round 2026-11-13 (14 open notes read, version 0.2.0)
+## Notes round 2026-11-13 (14 open notes read, version 0.2.0; all built in 0.3.0, not yet marked done)
 
 Read 14 open notes from `rs_notes`: 2 already answered by 0.2.0 (lag fixes, five new games), 4 bug reports (errors bar covers the gear; audio goes quiet after a while or after refreshes in three modes, two-fingers can go silent for good), and 8 design requests (two fingers: colours, volume slide, extra beat; footsteps: objects and a 15-rhythm game; heat map: pitch and chord views; ripples: a vertical-axis drop-down; pads: more sounds; dot loop: up to eight tracks; echo: mode narratives and a voice tone). Nothing built or marked done yet. Items in `todo.md`, questions and the proposed footsteps rules in `convo/convo v0.6.md`. Likely audio cause (unconfirmed on the iPad): the engine is only woken from "suspended", not "interrupted"; nothing closes it on refresh.
 

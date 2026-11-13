@@ -11,7 +11,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--vanill
 /* The gear: lower right, invisible until a circle is drawn in the corner */
 .gear { position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom));
   width: 68px; height: 68px; border-radius: 50%; border: 3px solid var(--ink); background: var(--sun);
-  box-shadow: 0 4px 0 var(--ink); display: grid; place-items: center; cursor: pointer; z-index: 20;
+  box-shadow: 0 4px 0 var(--ink); display: grid; place-items: center; cursor: pointer; z-index: 27;
   opacity: 0; pointer-events: none; transition: opacity .5s ease; }
 .gear.show { opacity: 1; pointer-events: auto; }
 .gear:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
@@ -73,11 +73,24 @@ select { width: auto; }
 #noteList .doneBtn { float: right; margin-left: 8px; min-height: 36px; padding: 0 10px; border: 2px solid var(--ink); border-radius: 10px; background: var(--mint); font-weight: 700; font-size: 13px; font-family: inherit; cursor: pointer; }
 
 /* Errors: at the bottom of the page, opt in */
-.errors { display: none; position: fixed; left: 0; right: 0; bottom: 0; max-height: 32vh; overflow-y: auto; z-index: 25;
+.errors { display: block; opacity: 0; pointer-events: none; transition: opacity .6s ease; position: fixed; left: 0; right: 0; bottom: 0; max-height: 18vh; overflow-y: auto; z-index: 25;
   background: #fff0ec; border-top: 3px solid var(--ink); padding: 8px 14px 14px; font-size: 14px; font-weight: 600; }
-body.showErrors .errors { display: block; }
+body.showErrors.errOn .errors, body.showErrors.errPin .errors { opacity: 1; pointer-events: auto; }
+.errList2 { margin: 6px 0 0; padding-left: 20px; font-size: 13px; font-weight: 600; max-height: 160px; overflow-y: auto; word-break: break-word; }
 .errHead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
 #errList { margin: 0; padding-left: 20px; word-break: break-word; }
 
 @media print { .gear, .drawer, .errors { display: none !important; } }
 @media (prefers-reduced-motion: reduce) { .gear, .drawer { transition: none; } }
+
+/* The card that says what a mode does: tap the upper-right corner of the screen */
+.infoCard { position: fixed; top: max(14px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); width: min(380px, calc(100vw - 28px)); z-index: 24;
+  background: var(--paper); border: 3px solid var(--ink); border-radius: 20px; box-shadow: 0 5px 0 var(--ink); padding: 14px 16px 16px;
+  opacity: 0; transform: translateY(-10px); pointer-events: none; transition: opacity .3s ease, transform .3s ease; }
+.infoCard.show { opacity: 1; transform: none; pointer-events: auto; }
+.infoCard h3 { margin: 0 52px 6px 0; font-size: 20px; }
+.infoCard p { margin: 0; font-weight: 600; font-size: 15px; line-height: 1.45; }
+.infoCard .btn.icon { position: absolute; top: 8px; right: 8px; width: 40px; min-height: 40px; }
+#narrList h4 { margin: 12px 0 2px; font-size: 16px; }
+#narrList p { margin: 0 0 4px; font-weight: 600; font-size: 14px; line-height: 1.4; }
+select { cursor: pointer; }

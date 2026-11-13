@@ -54,3 +54,18 @@ Nothing below is built yet. Questions are in `convo/convo v0.6.md`. Note ids are
 - [ ] **Dot loop, more tracks** (0.2.0): up to eight tracks; a new one appears after each is filled; the rings reflow and the dots shrink to fit.
 - [ ] **Echo, mode descriptions** (0.2.0): a short narrative of what each mode does, in ⚙️.
 - [ ] **Echo, voice** (0.2.0): a voice-like tone instead of bells, and a longer first sound that is easier to match.
+
+## Round of 2026-11-13, built in 0.3.0 (answers in `convo/convo v0.7.md`)
+- [x] Audio wakes from sleep; crossed-out speaker; engine closed on leaving; mute-switch setting.
+- [x] Error bar: short, fades after 5 seconds, tap to keep; gear above it.
+- [x] Two fingers: colours, volume slide, pulse; no silent trap.
+- [x] Footsteps: desert, six tappable objects, rhythm road with 15 rhythms, Free walk kept.
+- [x] Heat map: pitch view and chords view, switched by two fingers.
+- [x] Ripples: up/down drop-down (None, Tone, Sustain, Attack, Timbre, Vibrato, Echo).
+- [x] Shake pads: 15 sounds, random layout from a seed number, seed in ⚙️.
+- [x] Dot loop: up to eight rings that slide to the front for editing.
+- [x] What each mode does: the upper-right corner card and a ⚙️ panel.
+- [x] Echo: four levels that learn how well you play; sung answers.
+- [ ] Mark the 14 notes done once Jimmy has tried 0.3.0 (needs the list confirmed).
+- [ ] Try it on the iPad: audio waking, the rhythm road window, Echo levels, real chords.
+- [ ] Ideas not built: Echo singing back the pitch you used; a Footsteps rhythm editor; more Marbles boards.
