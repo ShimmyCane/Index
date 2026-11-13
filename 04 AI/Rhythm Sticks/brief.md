@@ -34,9 +34,13 @@ Sound by ear on iPad; real two-finger touch; clap vs speech against the real ons
 - **Hidden breathing garden** (`js/modes/breathe.js`, not in `RS.order`, opens from ⚙️ or `#breathe`): breath sensing = adaptive floor, hysteresis, low-sound ratio for out vs in, alternation when unsure; a held finger always means breathing out. Gardens: sand rake, fountain (asks 0.75 s more each knock), blossom (pacer 4/6 s, lengthens to 6/10 on success; only the out-breath is checked). Longest breath kept in local storage only. Calm game, not medical.
 - Checked headless (made-up sound through `mic._attachTest`): 4/4 claps heard, 0 slow swells; hum finds 220 Hz within 4%; every new mode and the three gardens respond; full earlier smoke run and the microphone-permission check still pass. Not checked on a real iPad or with real breath or claps.
 
+## Notes round 2026-11-13 (14 open notes read, version 0.2.0)
+
+Read 14 open notes from `rs_notes`: 2 already answered by 0.2.0 (lag fixes, five new games), 4 bug reports (errors bar covers the gear; audio goes quiet after a while or after refreshes in three modes, two-fingers can go silent for good), and 8 design requests (two fingers: colours, volume slide, extra beat; footsteps: objects and a 15-rhythm game; heat map: pitch and chord views; ripples: a vertical-axis drop-down; pads: more sounds; dot loop: up to eight tracks; echo: mode narratives and a voice tone). Nothing built or marked done yet. Items in `todo.md`, questions and the proposed footsteps rules in `convo/convo v0.6.md`. Likely audio cause (unconfirmed on the iPad): the engine is only woken from "suspended", not "interrupted"; nothing closes it on refresh.
+
 ## Notes round 2026-11-12
 
-Read 2 open notes from `rs_notes` (live on the Family project): lag between tap and sound (cause not yet pinned; sources found in the code are listed in `todo.md`), and a request for more "figure it out as you go along" games like Beads (five proposed). The lag and the new games are now built (0.2.0). The notes are not marked done yet; that waits for Jimmy's yes after he tries it. Questions in `03 Projects/Rhythm Sticks/convo/convo v0.4.md` (answered) and `convo v0.5.md`; items in `03 Projects/Rhythm Sticks/todo.md`.
+Read 2 open notes from `rs_notes` (live on the Family project): lag between tap and sound (cause not yet pinned; sources found in the code are listed in `todo.md`), and a request for more "figure it out as you go along" games like Beads (five proposed). The lag and the new games are now built (0.2.0). The notes are not marked done yet; that waits for Jimmy's yes after he tries it. Questions in `convo v0.4.md` and `convo v0.5.md` (both answered) and `convo v0.6.md`; items in `03 Projects/Rhythm Sticks/todo.md`.
 
 ## Next steps
 

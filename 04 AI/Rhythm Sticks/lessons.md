@@ -16,3 +16,6 @@
 - A game that makes sounds the microphone can hear will trigger itself. Mask the detector for ~140 ms after noisy sounds, and use sine-only sounds in games that listen (echo, hum, breathing).
 - Breath sensing from a phone microphone: only the sound of breath is available, not the breath. Offer an input that always works (a held finger), say what it cannot hear, and keep the wording calm and non-medical.
 - Test hooks that fake a microphone (`_attachTest`) saved a lot of time; the browser's own fake device also beeps and fires real onsets, so stop the mic in tests that count taps.
+- 2026-11-13 (notes round): dictated notes contain wrong words ("Batman objects", "X axis", "arcade typo"). Quote them as written, say how you read each one, and ask when two readings change the build. When several notes describe the same symptom ("audio stops", "volume disappears", "doesn't work"), group them and look for one cause before fixing each.
+- Reading the code for a bug note found a second, unreported bug (a loudness that can fall to zero and never recover). Read the code path for every bug note, not only the reported symptom.
+- iPad Safari audio: the engine can be "interrupted", not only "suspended"; wake it on every touch and when the page returns, close it on leaving, and set the audio session to playback so the mute switch doesn't silence it.
