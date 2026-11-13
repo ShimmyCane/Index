@@ -55,6 +55,8 @@ input[type=range] { flex: 1; min-width: 140px; height: 40px; accent-color: #ff7f
 
 .seg { display: flex; gap: 6px; flex-wrap: wrap; }
 .seg.stack { flex-direction: column; }
+.seg.grid2 { display: grid; grid-template-columns: 1fr 1fr; }
+.seg.grid2 button { font-size: 15px; padding: 4px 10px; }
 .seg button { min-height: 48px; padding: 4px 14px; border: 3px solid var(--ink); border-radius: 14px; background: var(--vanilla);
   font-weight: 700; font-size: 16px; font-family: inherit; color: var(--ink); cursor: pointer; text-align: left; box-shadow: 0 3px 0 var(--ink); }
 .seg button small { display: block; font-size: 11px; opacity: .7; font-weight: 600; }

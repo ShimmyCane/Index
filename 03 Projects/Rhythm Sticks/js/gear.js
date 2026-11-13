@@ -112,12 +112,19 @@
     }
     $('micAgain').addEventListener('click', function () { RS.mic.again().then(micStatus); micStatus(); });
     gear.addEventListener('click', micStatus);
+    $('openBreathe').addEventListener('click', function () { RS.setMode('breathe'); G.close(); });
+    $('leaveBreathe').addEventListener('click', function () {
+      try { history.replaceState(null, '', location.pathname); } catch (err) { /* ignore */ }
+      location.reload();
+    });
+    $('clearDots').addEventListener('click', function () { RS.modes.dotloop.clear(); });
     $('shufflePads').addEventListener('click', function () { RS.modes.pads.shuffle(); });
     $('stopSound').addEventListener('click', function () { RS.modes.span.stopNote(); });
     $('newPattern').addEventListener('click', function () { RS.modes.ripples.newPattern(); });
     $('errClear').addEventListener('click', function () { RS.errors.length = 0; renderErrors(); });
     $('versionText').textContent = 'v' + RS.version;
     [
+      '0.2.0: less lag (taps act at once, the microphone is heard on the audio thread, the string sounds are ready before you pluck, the audio engine is built before your first touch), a sound lag check, five new games (Echo, Marbles, Dot loop, Footsteps, Hum trail) and a hidden breathing garden with three gardens.',
       '0.1.1: the microphone is asked for as seldom as the browser allows: never again after a refusal, silent restart where the browser remembers a yes, one request per visit elsewhere. Button to try again.',
       '0.1.0: first build. Six modes: ripples, beads (beat looper), shake pads, strings, two fingers, how the machine hears. Hidden gear, notes for improvement, family database link for notes.',
     ].forEach(function (t) { var li = document.createElement('li'); li.textContent = t; $('changelog').appendChild(li); });

@@ -6,7 +6,7 @@
     if (RS.modes[fromHash]) return fromHash;
     var last = '';
     try { last = localStorage.getItem('rs.last') || ''; } catch (e) { /* storage blocked */ }
-    var choices = RS.order.filter(function (id) { return id !== last; });
+    var choices = RS.order.filter(function (id) { return id !== last && RS.hidden.indexOf(id) < 0; });
     return choices[Math.floor(Math.random() * choices.length)];
   }
   document.addEventListener('DOMContentLoaded', function () {

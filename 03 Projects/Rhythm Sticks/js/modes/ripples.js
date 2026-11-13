@@ -61,8 +61,8 @@
   M.down = function (id, x, y) {
     var f = freqAt(x), hue = (x / S.w) * 300 + Math.random() * 40;
     var t = touches[id] = { x: x, y: y, hue: hue, lastRing: performance.now(), lx: x, ly: y };
-    t.a = RS.audio.voice(f, { type: 'sine', gain: 0.22, attack: 0.03 });
-    t.b = RS.audio.voice(f * 2, { type: 'triangle', gain: 0.05, attack: 0.05 });
+    t.a = RS.audio.voice(f, { type: 'sine', gain: 0.22, attack: 0.012 });
+    t.b = RS.audio.voice(f * 2, { type: 'triangle', gain: 0.05, attack: 0.02 });
     emit(x, y, hue);
   };
   M.move = function (id, x, y) {

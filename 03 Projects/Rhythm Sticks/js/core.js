@@ -2,9 +2,10 @@
 (function () {
   'use strict';
   var RS = window.RS = {
-    version: '0.1.1',
+    version: '0.2.0',
     modes: {},
-    order: ['ripples', 'beads', 'pads', 'strings', 'span', 'heat'],
+    order: ['ripples', 'beads', 'pads', 'strings', 'span', 'heat', 'echo', 'marbles', 'dotloop', 'footsteps', 'hum'],
+    hidden: ['breathe'],                 // reachable only from the gear panel (or #breathe), never picked at random
     cur: null,
     curId: '',
     pal: { ink: '#2f2d3d', vanilla: '#fff3d6', peach: '#ffd0b5', mint: '#c6ecd9', sage: '#cfe3c3',
@@ -13,7 +14,7 @@
 
   // ---- Settings (one object, saved on this device, always inside try/catch) ----
   var DEFAULTS = { keepGear: false, volume: 0.8, scale: 'penta', sens: 0.5, speed: 'normal',
-    strings: 'auto', outlines: false, glide: 'steps', showErrors: false };
+    strings: 'auto', outlines: false, glide: 'steps', showErrors: false, garden: 'sand' };
   RS.settings = Object.assign({}, DEFAULTS);
   try { Object.assign(RS.settings, JSON.parse(localStorage.getItem('rs.settings') || '{}')); } catch (e) { /* storage blocked */ }
   var setListeners = [];
@@ -159,6 +160,10 @@
     S.canvas = document.getElementById('stage');
     S.g = S.canvas.getContext('2d');
     resize();
+    if (RS.audio) RS.audio.ensure();    // built before the first touch, so the first sound is not late (it starts on the touch)
+    ['touchend', 'mousedown', 'keydown'].forEach(function (ev) {      // some browsers only unlock sound on these
+      window.addEventListener(ev, function () { if (RS.audio) RS.audio.wake(); }, { passive: true });
+    });
     window.addEventListener('resize', resize);
     window.addEventListener('orientationchange', function () { setTimeout(resize, 200); });
     S.canvas.addEventListener('pointerdown', onDown);

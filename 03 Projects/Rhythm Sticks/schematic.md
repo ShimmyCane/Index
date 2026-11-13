@@ -1,7 +1,7 @@
 # Rhythm Sticks — schematic
 
 **Track: A. Family play** (confirmed, `convo/convo v0.2.md`)
-**Status: MVP 0.1.1 (not yet device-tested).** Written 2026-11-12; first build the same day, all six modes. Shared background: `context.md`. Answers: `convo/convo v0.2.md`, `convo/convo v0.3.md`.
+**Status: MVP 0.2.0 (not yet device-tested).** Written 2026-11-12; first build the same day, all six modes. Shared background: `context.md`. Answers: `convo/convo v0.2.md`, `convo/convo v0.3.md`.
 
 ## Purpose
 
@@ -41,7 +41,14 @@ One full-screen canvas. Nothing else visible. The page loads, waits for the firs
 
 | 6 | How the machine hears | microphone | none | a heat map (spectrogram) of the mic as an AI might see it: time across, pitch up, loudness as color. Later increment |
 
-Candidates later: voice-pitch.
+| 7 | Echo | microphone or taps | a soft tick at once, then bells answer your pattern changed (same, faster, climbing, plus one, backwards) | faces for your beats below, the echo's faces above |
+| 8 | Marbles | tap or drag along the top | a pop on drop; every peg is a bell, low left to high right | marbles fall through glowing pegs |
+| 9 | Dot loop | taps on dots | two rings: drums (kick, snare, hat) and climbing bells, played as the hand sweeps | rings of dots, a sweeping hand, centre wipes |
+| 10 | Footsteps | taps on left and right halves | thuds, a hop pop, a climbing bell every fourth step | a creature walks, runs, hops, sits, dozes; flowers grow |
+| 11 | Hum trail | microphone (pitch) | none | a glowing trail of your note's height, stars for steady notes |
+| hidden | Breathing garden | microphone (breath sound) or a held finger = breathing out | bells at long-breath milestones, a bamboo knock | Sand rake, Fountain, Blossom; five stars for 3, 5, 7, 9, 11 s |
+
+The breathing garden is not in the random pool. It opens from ⚙️ → Mode, or `index.html#breathe`. It is a calm game, not a medical tool.
 
 ### Beads controls (taps on the screen)
 
@@ -77,6 +84,7 @@ Link to the Family project (`twvqvutrcobedvuhnzxq`) per `02 Refs/Skills/supabase
 
 ## Increments
 
+0. **Done in 0.2.0:** all six first modes, five new games, the hidden breathing garden, the sound lag check, and the lag fixes (see `convo/convo v0.5.md`).
 1. **Skeleton:** page, canvas, audio wake, random mode picker (never twice in a row), hidden gear with circular reveal and 2-second fade, Info/version, feedback notes (device only), error panel. One mode: Ripples.
 2. **Beads** (microphone beat looper) with sensitivity and control hints in ⚙️.
 3. **Shake pads** with the outline toggle.
@@ -95,4 +103,4 @@ Link to the Family project (`twvqvutrcobedvuhnzxq`) per `02 Refs/Skills/supabase
 
 ## Open questions
 
-See `convo/convo v0.3.md` (after a first play on the iPad).
+See `convo/convo v0.5.md` (after a first play on the iPad).

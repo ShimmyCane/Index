@@ -1,7 +1,7 @@
 # Rhythm Sticks — brief
 
 **Updated:** 2026-11-12
-**Status:** MVP 0.1.1, not device-tested. All six modes built in one pass after `convo v0.2` answers.
+**Status:** MVP 0.2.0, not device-tested. All six modes built in one pass after `convo v0.2` answers.
 
 ## Goal
 
@@ -27,13 +27,20 @@ Six modes × three sizes: zero errors, no horizontal scroll; gear circle, fade, 
 
 Sound by ear on iPad; real two-finger touch; clap vs speech against the real onset detector (thresholds are a first guess); real sign-in; the SQL has not been run (checked only with `sql_paste_check.py`).
 
+## Version 0.2.0 (2026-11-13)
+
+- **Lag:** beads taps act on touch (a second tap within 330 ms wipes); the clap detector is an AudioWorklet (blocks of ~3 ms, rise-within-12-ms test so slow breath and speech don't fire) with the old analyser detector as fallback; audio engine built at page start and primed inside the first touch; string pitches built once at mode start; `A.maskUntil` makes the detector ignore ~140 ms after noisy drums so loops don't re-trigger themselves; ⚙️ → Sound lag shows engine latencies and a speaker-to-microphone round trip.
+- **Five new modes:** echo (taps or claps, answers changed), marbles (pegs as bells), dot loop (two rings, sweeping hand), footsteps (left/right taps, a creature), hum trail (autocorrelation pitch, no sound output).
+- **Hidden breathing garden** (`js/modes/breathe.js`, not in `RS.order`, opens from ⚙️ or `#breathe`): breath sensing = adaptive floor, hysteresis, low-sound ratio for out vs in, alternation when unsure; a held finger always means breathing out. Gardens: sand rake, fountain (asks 0.75 s more each knock), blossom (pacer 4/6 s, lengthens to 6/10 on success; only the out-breath is checked). Longest breath kept in local storage only. Calm game, not medical.
+- Checked headless (made-up sound through `mic._attachTest`): 4/4 claps heard, 0 slow swells; hum finds 220 Hz within 4%; every new mode and the three gardens respond; full earlier smoke run and the microphone-permission check still pass. Not checked on a real iPad or with real breath or claps.
+
 ## Notes round 2026-11-12
 
-Read 2 open notes from `rs_notes` (live on the Family project): lag between tap and sound (cause not yet pinned; sources found in the code are listed in `todo.md`), and a request for more "figure it out as you go along" games like Beads (five proposed). Nothing built or marked done yet. Questions in `03 Projects/Rhythm Sticks/convo/convo v0.4.md`; items in `03 Projects/Rhythm Sticks/todo.md`.
+Read 2 open notes from `rs_notes` (live on the Family project): lag between tap and sound (cause not yet pinned; sources found in the code are listed in `todo.md`), and a request for more "figure it out as you go along" games like Beads (five proposed). The lag and the new games are now built (0.2.0). The notes are not marked done yet; that waits for Jimmy's yes after he tries it. Questions in `03 Projects/Rhythm Sticks/convo/convo v0.4.md` (answered) and `convo v0.5.md`; items in `03 Projects/Rhythm Sticks/todo.md`.
 
 ## Next steps
 
-1. Jimmy plays it on the iPad and leaves notes in ⚙️.
+1. Jimmy plays it on the iPad, runs ⚙️ → Sound lag, and leaves notes in ⚙️.
 2. Tune the onset detector from real claps and speech.
 3. Run the rolled-back SQL test, apply `001_rs_notes.sql` when asked, record in `04 AI/Supabase/brief.md`.
 4. `/graduate-project` when ready (the microphone needs https).
