@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var RS = window.RS = {
-    version: '0.2.0',
+    version: '0.3.0',
     modes: {},
     order: ['ripples', 'beads', 'pads', 'strings', 'span', 'heat', 'echo', 'marbles', 'dotloop', 'footsteps', 'hum'],
     hidden: ['breathe'],                 // reachable only from the gear panel (or #breathe), never picked at random
@@ -14,7 +14,8 @@
 
   // ---- Settings (one object, saved on this device, always inside try/catch) ----
   var DEFAULTS = { keepGear: false, volume: 0.8, scale: 'penta', sens: 0.5, speed: 'normal',
-    strings: 'auto', outlines: false, glide: 'steps', showErrors: false, garden: 'sand' };
+    strings: 'auto', outlines: false, glide: 'steps', showErrors: false, garden: 'sand',
+    rippleY: 'none', echoLevel: 'auto', footMode: 'road', roadBeat: true };
   RS.settings = Object.assign({}, DEFAULTS);
   try { Object.assign(RS.settings, JSON.parse(localStorage.getItem('rs.settings') || '{}')); } catch (e) { /* storage blocked */ }
   var setListeners = [];
@@ -25,6 +26,29 @@
   };
   RS.onSet = function (fn) { setListeners.push(fn); };
   RS.speed = function () { return { slow: 0.6, normal: 1, fast: 1.6 }[RS.settings.speed] || 1; };
+
+  // ---- A seed number: pads and ripple patterns are laid out from it, so a layout you love can be brought back ----
+  function mulberry(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  RS.rng = function (seed) { return mulberry(seed >>> 0); };
+  RS.newSeedNumber = function () { return 100000 + Math.floor(Math.random() * 900000); };
+  var seedFromUrl = 0;
+  try { seedFromUrl = parseInt(new URLSearchParams(location.search).get('seed'), 10) || 0; } catch (e) { /* no seed in the address */ }
+  RS.seed = seedFromUrl || RS.newSeedNumber();
+  var seedListeners = [];
+  RS.onSeed = function (fn) { seedListeners.push(fn); };
+  RS.setSeed = function (n) {
+    n = Math.floor(Number(n));
+    if (!isFinite(n) || n < 0) return;
+    RS.seed = n;
+    seedListeners.forEach(function (fn) { try { fn(n); } catch (e) { RS.err('Seed handler', e); } });
+  };
 
   // ---- Errors: collected here, shown at the bottom only when the toggle in the gear panel is on ----
   RS.errors = [];
@@ -75,6 +99,9 @@
   var trail = [];                       // drawn while the stroke is in progress
   var trailFade = 0;
   function inCorner(x, y) { return x > S.w - CORNER && y > S.h - CORNER; }
+  function inUpperRight(x, y) { return x > S.w - 100 && y < 100; }
+  function speakerBox() { return { x: S.w / 2 - 36, y: S.h - 76, w: 72, h: 60 }; }
+  function audioAsleep() { return RS.touched && RS.audio && RS.audio.context() && !RS.audio.running(); }
   function isCircle(pts) {
     if (pts.length < 8) return false;
     var cx = 0, cy = 0;
@@ -103,13 +130,15 @@
   }
   function onDown(e) {
     var p = pos(e);
+    if (RS.audio) RS.audio.wake();       // every touch: an engine that fell asleep (screen lock, another app) is woken here
     if (!woke) {                         // browsers start audio only after a first touch
       woke = true; RS.touched = true;
-      if (RS.audio) RS.audio.wake();
       if (RS.mic && RS.mic.want && RS.mic.state === 'off') RS.mic.start();   // once: browsers that wanted a touch before asking
     }
     try { S.canvas.setPointerCapture(e.pointerId); } catch (err) { /* synthetic events */ }
     if (inCorner(p.x, p.y)) { cornerPts[e.pointerId] = [p]; trail = [p]; trailFade = 1; return; }
+    if (inUpperRight(p.x, p.y)) { if (RS.info) RS.info.toggle(); return; }          // the card that says what this mode does
+    if (audioAsleep()) { var b = speakerBox(); if (p.x > b.x && p.x < b.x + b.w && p.y > b.y && p.y < b.y + b.h) return; }   // the crossed-out speaker: the wake above is the tap
     if (RS.cur && RS.cur.down) { try { RS.cur.down(e.pointerId, p.x, p.y, e); } catch (err) { RS.err('Touch', err); } }
   }
   function onMove(e) {
@@ -141,6 +170,15 @@
       catch (e) { if (!RS._drawErr) { RS._drawErr = true; RS.err('Draw ' + RS.curId, e); } }
     }
     g.globalAlpha = 1; g.shadowBlur = 0; g.setLineDash([]);
+    if (audioAsleep()) {                 // a small crossed-out speaker: the sound is asleep, a tap here wakes it
+      var b = speakerBox(), cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+      g.save(); g.fillStyle = RS.pal.paper; g.strokeStyle = RS.pal.ink; g.lineWidth = 3.5;
+      g.beginPath(); g.roundRect ? g.roundRect(b.x, b.y, b.w, b.h, 16) : g.rect(b.x, b.y, b.w, b.h); g.fill(); g.stroke();
+      g.beginPath(); g.moveTo(cx - 16, cy - 6); g.lineTo(cx - 8, cy - 6); g.lineTo(cx + 2, cy - 15); g.lineTo(cx + 2, cy + 15); g.lineTo(cx - 8, cy + 6); g.lineTo(cx - 16, cy + 6); g.closePath();
+      g.fillStyle = RS.pal.sun; g.fill(); g.stroke();
+      g.strokeStyle = RS.pal.coral; g.lineWidth = 4.5; g.beginPath(); g.moveTo(cx - 20, cy + 20); g.lineTo(cx + 20, cy - 20); g.stroke();
+      g.restore();
+    }
     if (trail.length > 1) {              // soft trail while a circle is being drawn
       if (!Object.keys(cornerPts).length) trailFade -= dt * 2.5;
       if (trailFade <= 0) { trail = []; }

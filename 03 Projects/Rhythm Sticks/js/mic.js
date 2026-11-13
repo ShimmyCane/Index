@@ -134,6 +134,14 @@
       });
   };
   M.again = function () { if (M.state === 'denied') M.state = 'off'; return M.start(); };
+  // A longer listening window sees notes more finely (used for chords); a shorter one reacts faster.
+  M.setFft = function (n) {
+    if (!M.analyser) return;
+    M.analyser.fftSize = n;
+    M.freqData = new Uint8Array(M.analyser.frequencyBinCount);
+    tdata = new Uint8Array(n);
+    fbuf = new Float32Array(n);
+  };
   M._attachTest = function (s) { M.want = true; M.state = 'starting'; attach(s); };   // for tests: a made-up sound instead of a real microphone
 
   M.stop = function () {

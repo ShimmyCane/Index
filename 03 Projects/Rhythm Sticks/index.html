@@ -43,29 +43,26 @@
   <section class="panel" data-panel="thismode">
     <button class="panelHead" type="button" aria-expanded="true"><span class="panelIcon">🎛️</span><span class="panelTitle">This mode</span><span class="panelMark">▾</span></button>
     <div class="panelBody">
+      <p class="hint" id="modeHint"></p>
       <label class="row" data-modes="beads heat echo hum breathe"><span>Microphone sensitivity <small>higher hears softer claps</small></span><input type="range" min="0" max="1" step="0.05" data-key="sens"></label>
       <div class="row" data-modes="beads heat echo hum breathe"><button class="btn wide" id="micAgain" type="button">🎤 Try the microphone again</button></div>
       <p class="hint" id="micStatus" data-modes="beads heat echo hum breathe"></p>
       <div class="row" data-modes="strings"><span>Strings</span><div class="seg" data-key="strings"><button type="button" data-v="auto">Random</button><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button></div></div>
       <label class="row check" data-modes="pads"><input type="checkbox" data-key="outlines"> <span>Show pad outlines <small>dashed pads: ≋ shaker ◉ snare ∿ drag for rattle ● thud</small></span></label>
-      <div class="row" data-modes="pads"><button class="btn wide" id="shufflePads" type="button">🔀 Shuffle the pads</button></div>
       <div class="row" data-modes="span"><span>Pitch</span><div class="seg" data-key="glide"><button type="button" data-v="steps">Steps</button><button type="button" data-v="glide">Glide</button></div></div>
       <div class="row" data-modes="span"><button class="btn wide" id="stopSound" type="button">⏹ Stop the held note</button></div>
       <div class="row" data-modes="breathe"><span>Garden</span><div class="seg" data-key="garden"><button type="button" data-v="sand">🪨 Sand rake</button><button type="button" data-v="fountain">🎋 Fountain</button><button type="button" data-v="blossom">🌸 Blossom</button></div></div>
       <div class="row" data-modes="breathe"><button class="btn wide" id="leaveBreathe" type="button">🎵 Back to the music modes</button></div>
       <div class="row" data-modes="dotloop"><button class="btn wide" id="clearDots" type="button">🧹 Clear the dots</button></div>
+      <div class="row" data-modes="ripples"><span>Up and down <small>changes the sound's quality</small></span><select data-key="rippleY" aria-label="Up and down">
+        <option value="none">None</option><option value="tone">Tone (brightness)</option><option value="sustain">Sustain (length)</option><option value="attack">Attack (soft to sharp)</option>
+        <option value="timbre">Timbre (plain to rich)</option><option value="vibrato">Vibrato (wobble)</option><option value="echo">Echo</option></select></div>
+      <div class="row" data-modes="pads ripples"><span>Seed <small id="seedNow"></small></span><input type="number" id="seedInput" min="0" step="1" inputmode="numeric" aria-label="Seed number"></div>
+      <div class="row" data-modes="pads ripples"><button class="btn" id="seedUse" type="button">Use this seed</button><button class="btn" id="seedNew" type="button">🔀 New seed</button></div>
+      <div class="row" data-modes="echo"><span>Level</span><div class="seg" data-key="echoLevel"><button type="button" data-v="auto">Auto</button><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button></div></div>
+      <div class="row" data-modes="footsteps"><span>Game</span><div class="seg" data-key="footMode"><button type="button" data-v="road">Rhythm road</button><button type="button" data-v="free">Free walk</button></div></div>
+      <label class="row check" data-modes="footsteps"><input type="checkbox" data-key="roadBeat"> <span>Road beat <small>a soft tick on every beat</small></span></label>
       <div class="row" data-modes="ripples"><button class="btn wide" id="newPattern" type="button">🎨 New background pattern</button></div>
-      <p class="hint" data-modes="ripples">Tap to drop a ripple. Hold to keep the note ringing, and slide to change it.</p>
-      <p class="hint" data-modes="pads">Nine hidden pads. Tap them, and drag across them. Look and listen to find what each one does.</p>
-      <p class="hint" data-modes="strings">Drag a finger across a string to pluck it. With two or more strings, touch the right side of a string to press a fret: sliding left raises the pitch.</p>
-      <p class="hint" data-modes="span">Two fingers on the big side: the distance between them is the note. Two fingers on the small side: the distance is the loudness. Lift your fingers and the note keeps playing.</p>
-      <p class="hint" data-modes="echo">Clap or tap a short pattern, then wait. The echo answers, and changes it each time. Tap or clap again to interrupt.</p>
-      <p class="hint" data-modes="marbles">Tap or drag along the top to drop marbles. Each peg is a bell: the left ones are low and the right ones high.</p>
-      <p class="hint" data-modes="dotloop">Tap a dot to wake it. The outer ring cycles kick, snare, hat, off. The inner ring is bells that climb. The middle circle clears everything. The hand's speed follows Visual speed.</p>
-      <p class="hint" data-modes="footsteps">Tap the left and right halves in turn and the creature walks at your pace. Tap faster to run. Tap one side twice to hop. Stop and it sits down.</p>
-      <p class="hint" data-modes="hum">Hum or sing. The glowing trail shows the height of your note. Hold a steady note and a star appears. This mode makes no sound, so the microphone only hears you.</p>
-      <p class="hint" data-modes="breathe">Breathe out slowly near the microphone (or hold a finger on the screen while you breathe out). The longer and steadier the breath, the calmer the garden. Sand: a long breath rakes the sand. Fountain: a long breath fills the bamboo until it tips, and it asks a little more each time. Blossom: breathe with the lotus, and the tree blooms. A quiet nose breath may not be heard; the finger always works. This is a calm game, not a medical tool.</p>
-      <p class="hint" data-modes="heat">What the microphone hears, as a picture: time runs left to right, high sounds are at the top, loud sounds are hot colors. Tap to freeze.</p>
     </div>
   </section>
 
@@ -81,6 +78,11 @@
       </ol>
       <p class="hint">Your voice and steady noise are ignored; only sharp sounds count. The loop plays soft synth drums, never the recorded sound. The microphone is never stored or sent. If beads show up too often or not at all, change the sensitivity above.</p>
     </div>
+  </section>
+
+  <section class="panel" data-panel="narr" data-open="false">
+    <button class="panelHead" type="button" aria-expanded="false"><span class="panelIcon">📖</span><span class="panelTitle">What each mode does</span><span class="panelMark">▾</span></button>
+    <div class="panelBody"><p class="hint">Tap the upper-right corner of the screen to see the one you are in.</p><div id="narrList"></div></div>
   </section>
 
   <section class="panel" data-panel="lag" data-open="false">
@@ -121,7 +123,8 @@
   <section class="panel" data-panel="errs" data-open="false">
     <button class="panelHead" type="button" aria-expanded="false"><span class="panelIcon">⚠️</span><span class="panelTitle">Errors</span><span class="panelMark">▾</span></button>
     <div class="panelBody">
-      <label class="row check"><input type="checkbox" data-key="showErrors"> <span>Show errors at the bottom of the page</span></label>
+      <label class="row check"><input type="checkbox" data-key="showErrors"> <span>Show errors at the bottom of the page <small>they fade after 5 seconds; tap the bar to keep it</small></span></label>
+      <ol id="errList2" class="errList2"></ol>
     </div>
   </section>
 
@@ -132,6 +135,12 @@
       <ul class="changelog" id="changelog"></ul>
     </div>
   </section>
+</aside>
+
+<aside id="infoCard" class="infoCard" aria-live="polite">
+  <button id="infoClose" class="btn icon small" type="button" aria-label="Close">✖</button>
+  <h3 id="infoTitle"></h3>
+  <p id="infoText"></p>
 </aside>
 
 <section id="errors" class="errors" aria-live="polite">
@@ -156,6 +165,7 @@
 <script src="js/modes/breathe.js"></script>
 <script src="js/notes.js"></script>
 <script src="js/family.js"></script>
+<script src="js/info.js"></script>
 <script src="js/lag.js"></script>
 <script src="js/gear.js"></script>
 <script src="js/app.js"></script>

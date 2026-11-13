@@ -12,7 +12,9 @@
     g.scale(d, d);
     g.fillStyle = RS.pal.vanilla; g.fillRect(0, 0, w, h);
     var pal = [RS.pal.peach, RS.pal.mint, RS.pal.sky, RS.pal.lilac, RS.pal.sage, RS.pal.sun];
-    var pick = function () { return pal[Math.floor(Math.random() * pal.length)]; };
+    var rnd = RS.rng(RS.seed);
+    kind = Math.floor(rnd() * 4);
+    var pick = function () { return pal[Math.floor(rnd() * pal.length)]; };
     var i, j;
     g.globalAlpha = 0.55;
     if (kind === 0) {                                   // dots
@@ -37,7 +39,7 @@
         g.stroke();
       }
     } else {                                            // rings around a random point
-      var cx = Math.random() * w, cy = Math.random() * h;
+      var cx = rnd() * w, cy = rnd() * h;
       g.lineWidth = 20;
       for (i = 30; i < Math.hypot(w, h) + 60; i += 48) {
         g.strokeStyle = pick(); g.beginPath(); g.arc(cx, cy, i, 0, Math.PI * 2); g.stroke();
@@ -45,15 +47,29 @@
     }
     g.globalAlpha = 1;
   }
-  M.newPattern = function () { kind = Math.floor(Math.random() * 4); makeBg(S.w, S.h); };
+  M.newPattern = function () { RS.setSeed(RS.newSeedNumber()); };
+  RS.onSeed(function () { if (RS.curId === 'ripples' && S) makeBg(S.w, S.h); });
 
-  M.start = function (stage) { S = stage; rings = []; touches = {}; M.newPattern(); };
+  M.start = function (stage) { S = stage; rings = []; touches = {}; makeBg(S.w, S.h); };
   M.stop = function () {
     Object.keys(touches).forEach(function (id) { release(touches[id], 0.3); });
     touches = {}; rings = [];
   };
   M.resize = function () { makeBg(S.w, S.h); };
 
+  // What up and down does to the sound, chosen in the gear panel (None by default). Top of the screen is "more".
+  function yParams(y) {
+    var u = Math.max(0, Math.min(1, 1 - y / S.h)), o = { attack: 0.012, release: 1.6, type: 'sine', bGain: 0.05, vibrato: 0, echo: 0, u: u, mode: RS.settings.rippleY };
+    switch (o.mode) {
+      case 'tone': o.filter = 250 * Math.pow(2, u * 5); break;
+      case 'sustain': o.release = 0.25 + u * 4; break;
+      case 'attack': o.attack = 0.004 + u * u * 0.4; break;
+      case 'timbre': o.type = u < 0.33 ? 'sine' : u < 0.66 ? 'triangle' : 'sawtooth'; o.bGain = 0.02 + 0.2 * u; if (o.type === 'sawtooth') o.gain = 0.1; break;
+      case 'vibrato': o.vibrato = u * 45; break;
+      case 'echo': o.echo = u * 0.85; break;
+    }
+    return o;
+  }
   function freqAt(x) { return RS.audio.mtof(RS.audio.midiFromUnit(x / S.w, 2, 60)); }
   function emit(x, y, hue) { rings.push({ x: x, y: y, age: 0, hue: hue }); if (rings.length > 60) rings.shift(); }
   function release(t, r) { if (t.a) t.a.release(r); if (t.b) t.b.release(r); }
@@ -61,8 +77,9 @@
   M.down = function (id, x, y) {
     var f = freqAt(x), hue = (x / S.w) * 300 + Math.random() * 40;
     var t = touches[id] = { x: x, y: y, hue: hue, lastRing: performance.now(), lx: x, ly: y };
-    t.a = RS.audio.voice(f, { type: 'sine', gain: 0.22, attack: 0.012 });
-    t.b = RS.audio.voice(f * 2, { type: 'triangle', gain: 0.05, attack: 0.02 });
+    var yp = yParams(y); t.yp = yp;
+    t.a = RS.audio.voice(f, { type: yp.type, gain: yp.gain || 0.22, attack: yp.attack, filter: yp.filter, vibrato: yp.mode === 'vibrato' ? yp.vibrato : undefined, echo: yp.mode === 'echo' ? yp.echo : undefined });
+    t.b = RS.audio.voice(f * 2, { type: 'triangle', gain: yp.bGain, attack: yp.attack + 0.01, filter: yp.filter, echo: yp.mode === 'echo' ? yp.echo : undefined });
     emit(x, y, hue);
   };
   M.move = function (id, x, y) {
@@ -72,13 +89,18 @@
     var f = freqAt(x);
     if (t.a) t.a.setFreq(f, 0.05);
     if (t.b) t.b.setFreq(f * 2, 0.05);
+    var yp = yParams(y); t.yp = yp;
+    if (t.a && yp.mode === 'tone') { t.a.setFilter(yp.filter); t.b.setFilter(yp.filter); }
+    if (t.a && yp.mode === 'vibrato') t.a.setVibrato(yp.vibrato);
+    if (t.a && yp.mode === 'echo') { t.a.setEcho(yp.echo); t.b.setEcho(yp.echo); }
+    if (t.b && yp.mode === 'timbre') t.b.setGain(yp.bGain, 0.05);
     t.hue = (x / S.w) * 300;
     if (Math.hypot(x - t.lx, y - t.ly) > 70) { emit(x, y, t.hue); t.lx = x; t.ly = y; t.lastRing = performance.now(); }
   };
   M.up = function (id) {
     var t = touches[id];
     if (!t) return;
-    release(t, 1.6);
+    release(t, t.yp ? t.yp.release : 1.6);
     delete touches[id];
   };
 
@@ -114,5 +136,5 @@
       g.strokeStyle = RS.pal.ink; g.lineWidth = 3; g.stroke();
     });
   };
-  M.info = function () { return { rings: rings.length, held: Object.keys(touches).length, pattern: kind }; };
+  M.info = function () { var ids = Object.keys(touches); return { rings: rings.length, held: ids.length, pattern: kind, y: ids.length ? touches[ids[0]].yp : null }; };
 })();
