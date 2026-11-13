@@ -29,7 +29,7 @@ Type: new feature / design question. Not built.
 - [ ] Measure the real lag with ⚙️ → Sound lag on the iPad, and record it.
 - [ ] Tune the clap detector with real claps and talk, and the breath detector with real breath.
 - [ ] Decide whether the breathing garden needs its own shortcut.
-- [ ] Mark the two read notes done once Jimmy has tried the changes (needs his yes).
+- [x] Marked done with the rest on 2026-11-13.
 
 ## Round of 2026-11-13, evening (14 open notes read from `rs_notes`, versions 0.1.1 and 0.2.0)
 
@@ -66,6 +66,6 @@ Nothing below is built yet. Questions are in `convo/convo v0.6.md`. Note ids are
 - [x] Dot loop: up to eight rings that slide to the front for editing.
 - [x] What each mode does: the upper-right corner card and a ⚙️ panel.
 - [x] Echo: four levels that learn how well you play; sung answers.
-- [ ] Mark the 14 notes done once Jimmy has tried 0.3.0 (needs the list confirmed).
+- [x] The 14 notes are marked done in the family table (2026-11-13, Jimmy's yes); 0.3.1 shows them under All.
 - [ ] Try it on the iPad: audio waking, the rhythm road window, Echo levels, real chords.
 - [ ] Ideas not built: Echo singing back the pitch you used; a Footsteps rhythm editor; more Marbles boards.

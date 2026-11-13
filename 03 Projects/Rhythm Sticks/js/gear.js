@@ -166,6 +166,7 @@
     });
     $('versionText').textContent = 'v' + RS.version;
     [
+      '0.3.1: notes marked done elsewhere show as done here, and notes from other devices appear; choose All to see the done ones.',
       '0.3.0: audio wakes from sleep and shows a crossed-out speaker when asleep; shorter error bar that fades; two fingers with colours, a volume slide and a pulse; desert Footsteps with a 15-rhythm road and tap-to-play objects; heat map with pitch and chord views; ripples up-and-down choice; more pad sounds with a seed number; dot loop with up to eight rings; Echo that learns your level, with a sung tone; what each mode does (upper-right corner and ⚙️).',
       '0.2.0: less lag (taps act at once, the microphone is heard on the audio thread, the string sounds are ready before you pluck, the audio engine is built before your first touch), a sound lag check, five new games (Echo, Marbles, Dot loop, Footsteps, Hum trail) and a hidden breathing garden with three gardens.',
       '0.1.1: the microphone is asked for as seldom as the browser allows: never again after a refusal, silent restart where the browser remembers a yes, one request per visit elsewhere. Button to try again.',
