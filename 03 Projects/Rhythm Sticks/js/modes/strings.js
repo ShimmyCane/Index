@@ -27,6 +27,9 @@
     var pick = RS.settings.strings;
     n = (pick === '1' || pick === '2' || pick === '3') ? +pick : 1 + Math.floor(Math.random() * 3);
     layout();
+    var fr = [];                                              // build every pitch once now, so no pluck has to wait
+    strs.forEach(function (s) { LADDER.forEach(function (st) { fr.push(RS.audio.mtof(s.midi + st)); }); });
+    RS.audio.warmPluck(fr);
   };
   M.stop = function () { touches = {}; };
   M.resize = function () { layout(); };

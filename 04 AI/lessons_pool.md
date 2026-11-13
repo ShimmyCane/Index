@@ -302,3 +302,8 @@ Full build rules: `02 Refs/Skills/settings_gear.md` (run as `/settings-gear`).
 
 ## Microphone permission in web apps (from Rhythm Sticks)
 - A page cannot make a browser remember "allow". Reduce asks instead: one `getUserMedia` per visit (keep the stream switched off with `track.enabled = false` between uses where the Permissions API is missing), release it when the permission reads `granted`, never retry after a refusal, and offer a button to try again. If the first request comes before any touch and is refused, retry once on the first touch (iOS wants a gesture).
+
+## Low-lag sound in web apps (from Rhythm Sticks 0.2.0)
+- Build the audio engine at page start (it stays suspended), resume it inside the first touch, play one silent sound then, and also try touchend and mousedown for Safari. Act on pointer-down. Compute nothing per sound that can be computed once (cache plucked-string buffers).
+- Microphone onsets: detect on the audio thread with an AudioWorklet (blocks of ~3 ms) rather than per animation frame, require a jump over the last ~12 ms so breath and speech do not trigger, and ignore a short window after the app's own noisy sounds.
+- Whatever remains is the device: microphone plus speaker is tens of milliseconds, and Bluetooth adds 100 to 200. Give the user a measuring button instead of guessing.

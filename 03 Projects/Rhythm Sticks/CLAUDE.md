@@ -1,6 +1,6 @@
 # Rhythm Sticks — Claude Code pointer
 
-Purpose: a wordless web toy that exposes young children to rhythm and sound. It picks a random mode on load (ripples, mic beads, strings, shake pads, two-finger span); touch and microphone make sound and picture together.
+Purpose: a wordless web toy that exposes young children to rhythm and sound. It picks a random mode on load (ripples, mic beads, shake pads, strings, two fingers, how the machine hears, echo, marbles, dot loop, footsteps, hum trail); touch and microphone make sound and picture together. A hidden breathing garden (three gardens) opens from the gear panel.
 
 Track: A. Family play
 
@@ -10,8 +10,8 @@ Track: A. Family play
 - Shared conventions: root `CLAUDE.md` (public repo, privacy)
 
 How to run: open `index.html` (no server or build); `index.html#strings` opens a named mode. The microphone needs https or localhost, so test it from GitHub Pages or `python3 -m http.server`.
-Code map: `js/core.js` (settings, errors, canvas, touch, corner-circle gesture), `js/audio.js` (all sound), `js/mic.js` (onset detector), `js/modes/*.js` (one file per mode, each exposes `info()` for tests), `js/gear.js`, `js/notes.js`, `js/family.js`, `js/app.js`.
-Check: headless Chromium with `--use-fake-device-for-media-stream`; `RS.mic._fakeOnset()` fires a beat for tests. Keep the test script out of the repo.
+Code map: `js/core.js` (settings, errors, canvas, touch, corner-circle gesture), `js/audio.js` (all sound), `js/mic.js` (onset detector), `js/modes/*.js` (one file per mode, each exposes `info()` for tests; `breathe.js` is the hidden one), `js/lag.js` (sound lag check), `js/gear.js`, `js/notes.js`, `js/family.js`, `js/app.js`. The onset detector runs on the audio thread (a small worklet inside `js/mic.js`).
+Check: headless Chromium with `--use-fake-device-for-media-stream`; `RS.mic._fakeOnset()` fires a beat and `RS.mic._attachTest(stream)` feeds a made-up sound for tests. Keep the test script out of the repo.
 
 Project rules:
 - Public repo. No recordings, photos, children's or teachers' names, or locations.

@@ -74,19 +74,16 @@
     state = 'rec'; recStart = now(); curLayer = { hits: [], voice: 0 };
   }
 
-  M.down = function (id, x, y) { tapDown = { id: id, x: x, y: y, t: now() }; };
-  M.move = function () {};
-  M.up = function (id, x, y) {
-    if (!tapDown || tapDown.id !== id) return;
-    var moved = Math.hypot(x - tapDown.x, y - tapDown.y), dur = now() - tapDown.t;
-    tapDown = null;
-    if (moved > 24 || dur > 0.5) return;               // a drag or a long press is not a tap
+  // Taps act the moment the finger lands (no waiting to see whether a second tap follows).
+  // A second tap within a third of a second wipes everything and records anew.
+  M.down = function (id, x, y) {
     var t = now();
-    if (t - lastTapUp < 0.32) { clearTimeout(tapTimer); lastTapUp = 0; doubleTap(); return; }
+    if (t - lastTapUp < 0.33) { lastTapUp = 0; doubleTap(); return; }
     lastTapUp = t;
-    clearTimeout(tapTimer);
-    tapTimer = setTimeout(function () { lastTapUp = 0; try { singleTap(); } catch (e) { RS.err('Beads tap', e); } }, 330);
+    try { singleTap(); } catch (e) { RS.err('Beads tap', e); }
   };
+  M.move = function () {};
+  M.up = function () {};
 
   function ringCenter(w, h) { return { x: w / 2, y: h / 2, r: Math.min(w, h) * 0.3 }; }
   function beadAt(g, c, ang, rad, size, col, glow) {

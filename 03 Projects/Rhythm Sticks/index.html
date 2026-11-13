@@ -24,8 +24,9 @@
   <section class="panel" data-panel="mode">
     <button class="panelHead" type="button" aria-expanded="true"><span class="panelIcon">🎵</span><span class="panelTitle">Mode</span><span class="panelMark">▾</span></button>
     <div class="panelBody">
-      <div class="seg stack" id="modeSeg"></div>
+      <div class="seg grid2" id="modeSeg"></div>
       <a class="btn wide" id="homeLink" href="index.html">🏠 Home <small>starts a new random mode</small></a>
+      <button class="btn wide" id="openBreathe" type="button">🌿 Breathing garden <small>a hidden, calm mode</small></button>
     </div>
   </section>
 
@@ -42,19 +43,28 @@
   <section class="panel" data-panel="thismode">
     <button class="panelHead" type="button" aria-expanded="true"><span class="panelIcon">🎛️</span><span class="panelTitle">This mode</span><span class="panelMark">▾</span></button>
     <div class="panelBody">
-      <label class="row" data-modes="beads heat"><span>Microphone sensitivity <small>higher hears softer claps</small></span><input type="range" min="0" max="1" step="0.05" data-key="sens"></label>
-      <div class="row" data-modes="beads heat"><button class="btn wide" id="micAgain" type="button">🎤 Try the microphone again</button></div>
-      <p class="hint" id="micStatus" data-modes="beads heat"></p>
+      <label class="row" data-modes="beads heat echo hum breathe"><span>Microphone sensitivity <small>higher hears softer claps</small></span><input type="range" min="0" max="1" step="0.05" data-key="sens"></label>
+      <div class="row" data-modes="beads heat echo hum breathe"><button class="btn wide" id="micAgain" type="button">🎤 Try the microphone again</button></div>
+      <p class="hint" id="micStatus" data-modes="beads heat echo hum breathe"></p>
       <div class="row" data-modes="strings"><span>Strings</span><div class="seg" data-key="strings"><button type="button" data-v="auto">Random</button><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button></div></div>
       <label class="row check" data-modes="pads"><input type="checkbox" data-key="outlines"> <span>Show pad outlines <small>dashed pads: ≋ shaker ◉ snare ∿ drag for rattle ● thud</small></span></label>
       <div class="row" data-modes="pads"><button class="btn wide" id="shufflePads" type="button">🔀 Shuffle the pads</button></div>
       <div class="row" data-modes="span"><span>Pitch</span><div class="seg" data-key="glide"><button type="button" data-v="steps">Steps</button><button type="button" data-v="glide">Glide</button></div></div>
       <div class="row" data-modes="span"><button class="btn wide" id="stopSound" type="button">⏹ Stop the held note</button></div>
+      <div class="row" data-modes="breathe"><span>Garden</span><div class="seg" data-key="garden"><button type="button" data-v="sand">🪨 Sand rake</button><button type="button" data-v="fountain">🎋 Fountain</button><button type="button" data-v="blossom">🌸 Blossom</button></div></div>
+      <div class="row" data-modes="breathe"><button class="btn wide" id="leaveBreathe" type="button">🎵 Back to the music modes</button></div>
+      <div class="row" data-modes="dotloop"><button class="btn wide" id="clearDots" type="button">🧹 Clear the dots</button></div>
       <div class="row" data-modes="ripples"><button class="btn wide" id="newPattern" type="button">🎨 New background pattern</button></div>
       <p class="hint" data-modes="ripples">Tap to drop a ripple. Hold to keep the note ringing, and slide to change it.</p>
       <p class="hint" data-modes="pads">Nine hidden pads. Tap them, and drag across them. Look and listen to find what each one does.</p>
       <p class="hint" data-modes="strings">Drag a finger across a string to pluck it. With two or more strings, touch the right side of a string to press a fret: sliding left raises the pitch.</p>
       <p class="hint" data-modes="span">Two fingers on the big side: the distance between them is the note. Two fingers on the small side: the distance is the loudness. Lift your fingers and the note keeps playing.</p>
+      <p class="hint" data-modes="echo">Clap or tap a short pattern, then wait. The echo answers, and changes it each time. Tap or clap again to interrupt.</p>
+      <p class="hint" data-modes="marbles">Tap or drag along the top to drop marbles. Each peg is a bell: the left ones are low and the right ones high.</p>
+      <p class="hint" data-modes="dotloop">Tap a dot to wake it. The outer ring cycles kick, snare, hat, off. The inner ring is bells that climb. The middle circle clears everything. The hand's speed follows Visual speed.</p>
+      <p class="hint" data-modes="footsteps">Tap the left and right halves in turn and the creature walks at your pace. Tap faster to run. Tap one side twice to hop. Stop and it sits down.</p>
+      <p class="hint" data-modes="hum">Hum or sing. The glowing trail shows the height of your note. Hold a steady note and a star appears. This mode makes no sound, so the microphone only hears you.</p>
+      <p class="hint" data-modes="breathe">Breathe out slowly near the microphone (or hold a finger on the screen while you breathe out). The longer and steadier the breath, the calmer the garden. Sand: a long breath rakes the sand. Fountain: a long breath fills the bamboo until it tips, and it asks a little more each time. Blossom: breathe with the lotus, and the tree blooms. A quiet nose breath may not be heard; the finger always works. This is a calm game, not a medical tool.</p>
       <p class="hint" data-modes="heat">What the microphone hears, as a picture: time runs left to right, high sounds are at the top, loud sounds are hot colors. Tap to freeze.</p>
     </div>
   </section>
@@ -70,6 +80,16 @@
         <li><b>Double tap</b> to wipe everything and start a new recording.</li>
       </ol>
       <p class="hint">Your voice and steady noise are ignored; only sharp sounds count. The loop plays soft synth drums, never the recorded sound. The microphone is never stored or sent. If beads show up too often or not at all, change the sensitivity above.</p>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="lag" data-open="false">
+    <button class="panelHead" type="button" aria-expanded="false"><span class="panelIcon">⏱️</span><span class="panelTitle">Sound lag</span><span class="panelMark">▾</span></button>
+    <div class="panelBody">
+      <p class="hint" id="lagInfo"></p>
+      <button class="btn wide" id="lagRun" type="button">⏱️ Measure the round trip</button>
+      <p class="hint">Plays five short clicks and listens for them with the microphone, so hold the iPad's speaker near the microphone, or use the iPad on its own. It shows how long a sound takes to leave the speaker and come back in. Bluetooth speakers and earbuds add a lot.</p>
+      <p class="hint" id="lagResult"></p>
     </div>
   </section>
 
@@ -128,8 +148,15 @@
 <script src="js/modes/strings.js"></script>
 <script src="js/modes/span.js"></script>
 <script src="js/modes/heat.js"></script>
+<script src="js/modes/echo.js"></script>
+<script src="js/modes/marbles.js"></script>
+<script src="js/modes/dotloop.js"></script>
+<script src="js/modes/footsteps.js"></script>
+<script src="js/modes/hum.js"></script>
+<script src="js/modes/breathe.js"></script>
 <script src="js/notes.js"></script>
 <script src="js/family.js"></script>
+<script src="js/lag.js"></script>
 <script src="js/gear.js"></script>
 <script src="js/app.js"></script>
 </body>
