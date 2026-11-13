@@ -86,9 +86,16 @@
     if (!session) return;
     await dbFetch('PATCH', TABLE + '?id=eq.' + encodeURIComponent(id), { status: status });
   }
+  // Bring the table's notes (and whether each is done) into this device's list, so a note marked done elsewhere
+  // shows as done here, and notes saved on another device appear. Done notes stay visible under "All".
+  async function pullNotes() {
+    if (!session || !window.AppNotes) return;
+    var rows = await dbFetch('GET', TABLE + '?select=id,text,page,item,label,version,status,noted_at&order=noted_at.desc&limit=500');
+    if (rows && rows.length) AppNotes.merge(rows);
+  }
   function sendAll() {
     if (!session || !window.AppNotes) return Promise.resolve();
-    return pushNotes(AppNotes.all()).then(function () {
+    return pushNotes(AppNotes.all()).then(pullNotes).then(function () {
       if ($('familyStatus')) $('familyStatus').textContent = 'Signed in as ' + session.email + '. Every note on this device is in the family database.';
     });
   }
@@ -126,5 +133,5 @@
     if (session) sendAll().catch(function (e) { RS.err('Notes not sent to the family database', e); });
   });
 
-  window.Family = { signedIn: function () { return !!session; }, pushNotes: pushNotes, setStatus: setStatus, checkDb: checkDb };
+  window.Family = { signedIn: function () { return !!session; }, pushNotes: pushNotes, pullNotes: pullNotes, setStatus: setStatus, checkDb: checkDb };
 })();
