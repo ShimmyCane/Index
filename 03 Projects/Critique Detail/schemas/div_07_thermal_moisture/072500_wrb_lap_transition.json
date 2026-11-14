@@ -1,0 +1,17 @@
+{
+  "key": "div_07_thermal_moisture/072500_wrb_lap_transition",
+  "csi_division": "07",
+  "csi_section": "07 25 00",
+  "subcategory": "Weather Barriers",
+  "title": "Water-resistive barrier laps and transitions",
+  "keywords": [
+    "weather barrier",
+    "wrb",
+    "building paper",
+    "housewrap"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

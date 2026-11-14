@@ -1,0 +1,76 @@
+{
+  "key": "div_07_thermal_moisture/071400_plaza_deck_waterproofing",
+  "csi_division": "07",
+  "csi_section": "07 14 00",
+  "subcategory": "Fluid-Applied Waterproofing",
+  "title": "Plaza or balcony deck waterproofing",
+  "keywords": [
+    "plaza deck",
+    "balcony",
+    "deck waterproofing",
+    "pedestal paver"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "PD-1",
+      "item": "The structural deck slopes to drain at 1/4 in per ft (2%) minimum under the membrane, not only at the wearing surface.",
+      "why": "Water that reaches the membrane must also drain.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "slope",
+        "drainage"
+      ]
+    },
+    {
+      "id": "PD-2",
+      "item": "The membrane turns up walls and door sills at least 8 in (200 mm), or the door sill has a pan and the up-turn is noted as an accepted exception for accessibility.",
+      "why": "Low up-turns at doors are the classic balcony leak.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "membrane",
+        "door sill"
+      ]
+    },
+    {
+      "id": "PD-3",
+      "item": "Drains are two-level (surface and membrane level) or the edge drips free; overflow is provided.",
+      "why": "A drain only at the surface leaves the membrane ponded.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "drainage"
+      ]
+    },
+    {
+      "id": "PD-4",
+      "item": "Protection board and drainage layer are shown over the membrane.",
+      "why": "Pavers and pedestals damage a bare membrane.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "protection"
+      ]
+    },
+    {
+      "id": "PD-5",
+      "item": "Railing posts, door thresholds and wall claddings are flashed to the membrane without penetrating it on the flat.",
+      "why": "Every flat penetration is a leak.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "penetration",
+        "flashing"
+      ]
+    },
+    {
+      "id": "PD-6",
+      "item": "Insulation location, flood test note and the membrane product type are noted.",
+      "why": "A flood test before cover is the only check.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "labels",
+        "testing"
+      ]
+    }
+  ]
+}

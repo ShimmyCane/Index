@@ -1,0 +1,77 @@
+{
+  "key": "div_07_thermal_moisture/075400_roof_drain",
+  "csi_division": "07",
+  "csi_section": "07 54 00",
+  "subcategory": "Thermoplastic Membrane Roofing",
+  "title": "Roof drain in a low-slope roof",
+  "keywords": [
+    "roof drain",
+    "overflow drain",
+    "scupper",
+    "drain sump"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "RD-1",
+      "item": "The drain sits in a sump with tapered insulation, so the membrane slopes to it from all sides.",
+      "why": "A drain at the high point of its own insulation ponds water around it.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "slope",
+        "drainage"
+      ]
+    },
+    {
+      "id": "RD-2",
+      "item": "The membrane is clamped in the drain's clamping ring, with a reinforced target sheet.",
+      "why": "The clamp is the seal; an adhered edge alone peels.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "membrane"
+      ]
+    },
+    {
+      "id": "RD-3",
+      "item": "A secondary (overflow) drain or scupper is shown, with its inlet 2 in (50 mm) above the low point, on separate piping.",
+      "why": "Blocked primary drains collapse roofs; the overflow is a code requirement.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "code",
+        "overflow"
+      ]
+    },
+    {
+      "id": "RD-4",
+      "item": "The drain body is fixed to the deck with an underdeck clamp, and an expansion joint is shown in the leader where needed.",
+      "why": "A loose drain body tears the membrane as the roof moves.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "structure",
+        "movement"
+      ]
+    },
+    {
+      "id": "RD-5",
+      "item": "Drain body and leader are insulated where they pass through conditioned space.",
+      "why": "Cold leaders drip condensation onto ceilings.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "thermal",
+        "condensation"
+      ]
+    },
+    {
+      "id": "RD-6",
+      "item": "Strainer dome, drain size and the plumbing reference are noted.",
+      "why": "Drain size comes from the plumbing design, not the detail.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "labels",
+        "coordination"
+      ]
+    }
+  ]
+}

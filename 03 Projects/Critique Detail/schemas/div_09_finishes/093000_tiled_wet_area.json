@@ -1,0 +1,77 @@
+{
+  "key": "div_09_finishes/093000_tiled_wet_area",
+  "csi_division": "09",
+  "csi_section": "09 30 00",
+  "subcategory": "Tiling",
+  "title": "Tiled shower or wet area",
+  "keywords": [
+    "tile",
+    "shower",
+    "wet area",
+    "shower pan",
+    "curb"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "TW-1",
+      "item": "A waterproof membrane is shown under the tile on floor and walls, continuous through corners and into the drain.",
+      "why": "Tile and grout are not waterproof.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "membrane"
+      ]
+    },
+    {
+      "id": "TW-2",
+      "item": "The floor under the membrane slopes to the drain at 1/4 in per ft (2%).",
+      "why": "A flat pan under sloped tile holds water in the mortar bed.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "slope",
+        "drainage"
+      ]
+    },
+    {
+      "id": "TW-3",
+      "item": "The drain is a clamping or bonded-flange type matched to the membrane.",
+      "why": "The drain connection is the usual leak.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "drainage"
+      ]
+    },
+    {
+      "id": "TW-4",
+      "item": "Curb or threshold: membrane wraps over it; for a roll-in shower the level change and slope meet the accessibility code.",
+      "why": "The curb top is commonly pierced by fasteners.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "accessibility",
+        "membrane"
+      ]
+    },
+    {
+      "id": "TW-5",
+      "item": "Backing board is a wet-area type, and movement joints are shown at perimeters and changes of plane.",
+      "why": "Gypsum board behind tile fails; rigid corners crack.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "substrate",
+        "movement"
+      ]
+    },
+    {
+      "id": "TW-6",
+      "item": "Tile, setting material, grout and the flood test are noted.",
+      "why": "The flood test is the only check before tile.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "labels",
+        "testing"
+      ]
+    }
+  ]
+}

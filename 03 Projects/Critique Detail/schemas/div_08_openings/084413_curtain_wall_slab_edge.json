@@ -1,0 +1,76 @@
+{
+  "key": "div_08_openings/084413_curtain_wall_slab_edge",
+  "csi_division": "08",
+  "csi_section": "08 44 13",
+  "subcategory": "Glazed Aluminum Curtain Walls",
+  "title": "Curtain wall at slab edge",
+  "keywords": [
+    "curtain wall",
+    "slab edge",
+    "spandrel",
+    "perimeter fire"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "CW-1",
+      "item": "A perimeter fire containment system fills the gap between slab edge and curtain wall, with a tested system referenced and the same rating as the floor.",
+      "why": "The slab-edge gap is a floor-to-floor fire path.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "code",
+        "rating"
+      ]
+    },
+    {
+      "id": "CW-2",
+      "item": "A smoke seal is shown on top of the perimeter fire barrier.",
+      "why": "Smoke passes mineral wool alone.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "code"
+      ]
+    },
+    {
+      "id": "CW-3",
+      "item": "Anchors to the slab allow for building movement and tolerance, with embeds referenced to structural.",
+      "why": "Curtain wall anchors need three-way adjustment.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "structure",
+        "movement"
+      ]
+    },
+    {
+      "id": "CW-4",
+      "item": "Spandrel insulation, back pan and vapor control are shown, with the insulation mechanically held.",
+      "why": "Spandrel cavities condense and the insulation falls.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "thermal",
+        "vapor"
+      ]
+    },
+    {
+      "id": "CW-5",
+      "item": "Stack joint location, and the path of drained water to the outside at each floor, are shown.",
+      "why": "Water must leave at each stack joint.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "water",
+        "drainage"
+      ]
+    },
+    {
+      "id": "CW-6",
+      "item": "Interior finish closure (sill trim, ceiling pocket) is coordinated and tagged.",
+      "why": "The closure is usually left undrawn.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "coordination"
+      ]
+    }
+  ]
+}

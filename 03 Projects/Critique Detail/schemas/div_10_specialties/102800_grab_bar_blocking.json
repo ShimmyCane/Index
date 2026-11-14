@@ -1,0 +1,73 @@
+{
+  "key": "div_10_specialties/102800_grab_bar_blocking",
+  "csi_division": "10",
+  "csi_section": "10 28 00",
+  "subcategory": "Toilet, Bath, and Laundry Accessories",
+  "title": "Grab bar and accessory blocking",
+  "keywords": [
+    "grab bar",
+    "blocking",
+    "toilet accessory"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "GB-1",
+      "item": "Grab bar heights, lengths and positions are dimensioned to the accessibility code in force.",
+      "why": "These are measured at inspection.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "accessibility",
+        "code"
+      ]
+    },
+    {
+      "id": "GB-2",
+      "item": "Backing or blocking in the wall is shown, sized for the grab bar load.",
+      "why": "A bar screwed to gypsum board pulls out.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "structure",
+        "blocking"
+      ]
+    },
+    {
+      "id": "GB-3",
+      "item": "Clear space between bar and wall, and clearance above and below, are shown.",
+      "why": "Graspability depends on the clearances.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "accessibility"
+      ]
+    },
+    {
+      "id": "GB-4",
+      "item": "Fasteners through tile or a wet-wall membrane are sealed.",
+      "why": "Each anchor is a hole in the waterproofing.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "membrane"
+      ]
+    },
+    {
+      "id": "GB-5",
+      "item": "Accessory mounting heights (dispensers, mirror, hooks) are in the same detail or referenced.",
+      "why": "They are checked together.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "coordination"
+      ]
+    },
+    {
+      "id": "GB-6",
+      "item": "Bar diameter, finish and model are tagged.",
+      "why": "Diameter is a code item.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "labels"
+      ]
+    }
+  ]
+}

@@ -16,12 +16,11 @@
 </header>
 
 <main class="grid">
-  <div class="col">
+  <div class="col" id="colLeft">
     <section class="panel" data-panel="sheet">
       <button class="panelHead" type="button" aria-controls="sheet-body"><span class="panelIcon">📐</span><span class="panelTitle" id="sheetTitle">Detail</span><span class="panelMark">▾</span></button>
       <div class="panelBody" id="sheet-body">
-        <p class="banner" id="mockBanner" hidden>Mock review. No model looked at this drawing; the findings are a hand-written fixture.</p>
-        <div class="sheet" id="sheet"><img id="sheetImg" alt="The reviewed detail"><svg id="overlay" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg><div id="bubbles"></div></div>
+        <div class="sheet" id="sheet"><img id="sheetImg" alt="The reviewed detail"><svg id="overlay" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg><div id="bubbles"></div><div class="stamp" id="stamp" hidden>REJECTED</div></div>
         <p class="meta" id="sheetMeta"></p>
       </div>
     </section>
@@ -33,30 +32,57 @@
           <label class="btn">Open a report (.json)<input type="file" id="openReport" accept=".json,application/json" hidden></label>
           <label class="btn">and its image<input type="file" id="openImage" accept="image/*" hidden></label>
         </div>
-        <p class="meta">A report opened from a file stays on this device and is not saved anywhere.</p>
+        <p class="meta">A working detail opened from a file stays on this device until you save it to the cloud.</p>
+        <div class="row"><button class="btn" id="saveCloud" type="button" hidden>☁️ Save this detail to the cloud</button></div>
+        <p class="meta" id="saveCloudOut"></p>
+        <div id="quickBox" hidden><h3 class="h3">Quick Detail cloud</h3><ul class="list" id="quickList"></ul></div>
       </div>
     </section>
   </div>
 
-  <div class="col">
+  <div class="col" id="colRight">
+    <section class="verdict" id="verdictBox" data-feature="verdict" hidden><b id="verdictWord"></b><span id="verdictNote"></span></section>
     <section class="panel" data-panel="findings">
       <button class="panelHead" type="button" aria-controls="findings-body"><span class="panelIcon">🖍️</span><span class="panelTitle">Findings <span id="counts"></span></span><span class="panelMark">▾</span></button>
       <div class="panelBody" id="findings-body">
         <p id="summary"></p>
+        <ul id="gateReasons" class="reasons" hidden></ul>
         <div class="seg small" id="sevFilter"><button data-v="ALL">All</button><button data-v="CRITICAL">Critical</button><button data-v="MAJOR">Major</button><button data-v="ADVISORY">Advisory</button></div>
+        <div class="row" id="focusNav" hidden><button class="btn" id="focusPrev" type="button">◀ Back</button><span id="focusCount" class="meta"></span><button class="btn" id="focusNext" type="button">Next ▶</button></div>
         <div id="findingList"></div>
       </div>
     </section>
-    <section class="panel" data-panel="pipeline">
-      <button class="panelHead" type="button" aria-controls="pipeline-body"><span class="panelIcon">🧭</span><span class="panelTitle">The five steps of this run</span><span class="panelMark">▾</span></button>
+    <section class="panel" data-panel="proof" data-feature="proof">
+      <button class="panelHead" type="button" aria-controls="proof-body"><span class="panelIcon">⚖️</span><span class="panelTitle" id="proofTitle">Proof</span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="proof-body">
+        <p class="meta">Each line of the QC list is a claim about this detail. It is proven only when the drawing shows it and the reviewer can point to the place. Tap a line to see where.</p>
+        <div class="bar" id="proofBar"></div>
+        <div class="scrollx"><table id="proofTable"></table></div>
+        <p class="meta" id="skippedNote"></p>
+      </div>
+    </section>
+    <section class="panel" data-panel="layers" data-feature="layers">
+      <button class="panelHead" type="button" aria-controls="layers-body"><span class="panelIcon">🧵</span><span class="panelTitle">Control layers</span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="layers-body">
+        <p class="meta">Four lines must each run across the detail without a gap: water, air, thermal and vapor. Tap a broken one to see where it stops.</p>
+        <div id="layerList"></div>
+      </div>
+    </section>
+    <section class="panel" data-panel="pipeline" data-open="false">
+      <button class="panelHead" type="button" aria-controls="pipeline-body"><span class="panelIcon">🧭</span><span class="panelTitle">The five steps of this review</span><span class="panelMark">▾</span></button>
       <div class="panelBody" id="pipeline-body"><ol class="steps" id="steps"></ol></div>
     </section>
-    <section class="panel" data-panel="checklist">
-      <button class="panelHead" type="button" aria-controls="checklist-body"><span class="panelIcon">☑️</span><span class="panelTitle" id="checkTitle">Rulebook</span><span class="panelMark">▾</span></button>
-      <div class="panelBody" id="checklist-body"><div class="scrollx"><table id="checkTable"></table></div></div>
+    <section class="panel" data-panel="defaults" data-open="false" id="defaultsPanel">
+      <button class="panelHead" type="button" aria-controls="defaults-body"><span class="panelIcon">📋</span><span class="panelTitle">Project defaults</span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="defaults-body">
+        <p class="meta" id="defaultsFrom"></p>
+        <div id="defaultsForm" class="form"></div>
+        <div class="row"><button class="btn" id="defUse" type="button">Use this review's values</button><button class="btn" id="defReset" type="button">Reset to 2025 California code</button><button class="btn" id="defDownload" type="button">Download project_context.json</button></div>
+        <p class="meta">These feed the QC list of the next review: put the downloaded file next to <code>run_review.py</code>. Check every code line against the adopted edition and local amendments.</p>
+      </div>
     </section>
     <section class="panel" data-panel="rulebooks" data-open="false">
-      <button class="panelHead" type="button" aria-controls="rulebooks-body"><span class="panelIcon">📚</span><span class="panelTitle">All rulebooks and lessons</span><span class="panelMark">▾</span></button>
+      <button class="panelHead" type="button" aria-controls="rulebooks-body"><span class="panelIcon">📚</span><span class="panelTitle" id="rulebooksTitle">Rulebooks by CSI division</span><span class="panelMark">▾</span></button>
       <div class="panelBody" id="rulebooks-body"><div id="rulebookList"></div></div>
     </section>
     <section class="panel" data-panel="howto" data-open="false">
@@ -64,7 +90,8 @@
       <div class="panelBody" id="howto-body">
         <p>Each red numbered box on the drawing is one finding. Tap a number, or a finding, to pair them.</p>
         <p><b class="sev CRITICAL">Critical</b> water gets in or something fails structurally. <b class="sev MAJOR">Major</b> breaks the building code, the energy code or a project mandate. <b class="sev ADVISORY">Advisory</b> a lesson learned or best practice.</p>
-        <p>The review runs on your computer with <code>run_review.py</code>; this page only shows the result. Box positions come from the model and are approximate. A review is not a sign-off: an architect still checks the detail.</p>
+        <p>The QC list is built for each detail: the rulebook for its type, plus items that apply only under this project's conditions, plus the project's mandates, plus lessons learned.</p>
+        <p>This page shows results only. A review is written by a reviewer and checked by <code>run_review.py</code>. Box positions are approximate. A review is not a sign-off: an architect still checks the detail.</p>
       </div>
     </section>
   </div>
@@ -76,9 +103,17 @@
   <div class="setting"><label>Boxes on the drawing</label>
     <div class="seg" data-key="boxes"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
   <div class="setting"><label>Drawing shows</label>
-    <div class="seg" data-key="sheet"><button data-v="clean">Original</button><button data-v="markup">Redline file</button></div>
-    <p class="meta">Redline file is the image the script drew, with revision clouds.</p></div>
-  <div class="setting" id="dbBlock"><label>Database (owner only)</label>
+    <div class="seg" data-key="sheet"><button data-v="clean">Original</button><button data-v="markup">Redline file</button></div></div>
+  <div class="setting"><label>Ideas to evaluate</label>
+    <p class="meta">Turn each on or off and see whether it earns its place.</p>
+    <div class="opt"><span>Verdict line<small>Ready, revise, check or rejected, at the top</small></span><div class="seg" data-key="verdict"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
+    <div class="opt"><span>Proof ledger<small>Each QC item as a claim, proven only with a place on the drawing</small></span><div class="seg" data-key="proof"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
+    <div class="opt"><span>Control layer trace<small>Water, air, thermal, vapor: continuous or broken</small></span><div class="seg" data-key="layers"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
+    <div class="opt"><span>Good detail pictures<small>A small picture of a correct detail in each finding</small></span><div class="seg" data-key="good"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
+    <div class="opt"><span>One finding at a time<small>Step through the fixes in order, worst first</small></span><div class="seg" data-key="focus"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
+  </div>
+  <div class="setting"><label>Defaults</label><button class="btn" id="openDefaults" type="button">📋 Project defaults (codes, zone, mandates)</button></div>
+  <div class="setting" id="dbBlock"><label>Cloud (owner only)</label>
     <p class="meta" id="dbStatus">This device only.</p>
     <div id="signInBox"><input id="dbEmail" type="email" placeholder="Email" autocomplete="username"><input id="dbPassword" type="password" placeholder="Password" autocomplete="current-password">
       <button class="btn" id="dbSignIn" type="button">Sign in</button></div>

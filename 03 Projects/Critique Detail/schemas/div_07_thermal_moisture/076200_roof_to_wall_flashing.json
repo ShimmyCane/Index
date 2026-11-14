@@ -1,0 +1,17 @@
+{
+  "key": "div_07_thermal_moisture/076200_roof_to_wall_flashing",
+  "csi_division": "07",
+  "csi_section": "07 62 00",
+  "subcategory": "Sheet Metal Flashing and Trim",
+  "title": "Roof-to-wall flashing and counter-flashing",
+  "keywords": [
+    "counter-flashing",
+    "step flashing",
+    "reglet",
+    "roof to wall"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

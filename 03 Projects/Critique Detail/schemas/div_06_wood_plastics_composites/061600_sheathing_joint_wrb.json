@@ -1,0 +1,16 @@
+{
+  "key": "div_06_wood_plastics_composites/061600_sheathing_joint_wrb",
+  "csi_division": "06",
+  "csi_section": "06 16 00",
+  "subcategory": "Sheathing",
+  "title": "Sheathing joints and integrated water barrier",
+  "keywords": [
+    "sheathing",
+    "zip",
+    "taped joint"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

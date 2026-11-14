@@ -1,14 +1,15 @@
 {
-  "key": "div_08_openings/window_head_sill",
+  "key": "div_08_openings/085113_window_head_sill",
   "csi_division": "08",
+  "csi_section": "08 51 13",
+  "subcategory": "Aluminum Windows",
   "title": "Window head and sill in a framed or cavity wall",
   "keywords": [
     "window",
     "head",
     "sill",
     "jamb",
-    "opening",
-    "storefront"
+    "opening"
   ],
   "source": "seed",
   "status": "active",
@@ -26,7 +27,7 @@
     },
     {
       "id": "WH-2",
-      "item": "Head flashing (drip cap) laps under the water-resistive barrier above and extends past the jambs, with end dams.",
+      "item": "Head flashing (drip cap) laps under the water barrier above and extends past the jambs, with end dams.",
       "why": "Reverse-lapped head flashing sends water into the opening.",
       "default_severity": "CRITICAL",
       "tags": [
@@ -36,7 +37,7 @@
     },
     {
       "id": "WH-3",
-      "item": "Water-resistive barrier and flashing membrane are lapped shingle fashion around the opening: sill first, jambs, then head.",
+      "item": "Water barrier and flashing membrane are lapped shingle fashion around the opening: sill first, jambs, then head.",
       "why": "The lap order is the whole water management strategy.",
       "default_severity": "CRITICAL",
       "tags": [
@@ -71,6 +72,22 @@
         "labels",
         "sealant"
       ]
+    },
+    {
+      "id": "WH-7",
+      "item": "Glazing and frame meet the wildfire exposure requirements (for example tempered or multi-pane glazing) where the site is in a fire hazard severity zone.",
+      "why": "Windows are the first element to fail in a wildfire.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "code",
+        "wildfire"
+      ],
+      "when": {
+        "key": "fire_hazard_severity_zone",
+        "in": [
+          true
+        ]
+      }
     }
   ]
 }

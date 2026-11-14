@@ -1,6 +1,8 @@
 {
-  "key": "div_07_thermal_moisture/roof_parapet",
+  "key": "div_07_thermal_moisture/077100_roof_parapet",
   "csi_division": "07",
+  "csi_section": "07 71 00",
+  "subcategory": "Roof Specialties",
   "title": "Low-slope roof parapet",
   "keywords": [
     "parapet",
@@ -21,7 +23,8 @@
       "tags": [
         "flashing",
         "slope"
-      ]
+      ],
+      "good": "library/good_details/077100_roof_parapet/RP-1.jpg"
     },
     {
       "id": "RP-2",
@@ -31,7 +34,8 @@
       "tags": [
         "membrane",
         "flashing"
-      ]
+      ],
+      "good": "library/good_details/077100_roof_parapet/RP-2.jpg"
     },
     {
       "id": "RP-3",
@@ -41,7 +45,8 @@
       "tags": [
         "membrane",
         "coping"
-      ]
+      ],
+      "good": "library/good_details/077100_roof_parapet/RP-3.jpg"
     },
     {
       "id": "RP-4",
@@ -51,7 +56,8 @@
       "tags": [
         "air barrier",
         "continuity"
-      ]
+      ],
+      "good": "library/good_details/077100_roof_parapet/RP-4.jpg"
     },
     {
       "id": "RP-5",
@@ -61,7 +67,8 @@
       "tags": [
         "thermal",
         "energy code"
-      ]
+      ],
+      "good": "library/good_details/077100_roof_parapet/RP-5.jpg"
     },
     {
       "id": "RP-6",
@@ -71,7 +78,28 @@
       "tags": [
         "labels",
         "constructability"
-      ]
+      ],
+      "good": "library/good_details/077100_roof_parapet/RP-6.jpg"
+    },
+    {
+      "id": "RP-7",
+      "item": "Parapet bracing or reinforcing is shown or referenced to structural where the building is in a high seismic design category.",
+      "why": "Unbraced parapets are a falling hazard in an earthquake.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "structure",
+        "seismic"
+      ],
+      "when": {
+        "key": "seismic_design_category",
+        "in": [
+          "D",
+          "E",
+          "F"
+        ]
+      },
+      "good": "library/good_details/077100_roof_parapet/RP-7.jpg"
     }
-  ]
+  ],
+  "good_whole": "library/good_details/077100_roof_parapet/whole.jpg"
 }

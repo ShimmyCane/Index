@@ -1,0 +1,15 @@
+{
+  "key": "div_07_thermal_moisture/072400_eifs_termination",
+  "csi_division": "07",
+  "csi_section": "07 24 00",
+  "subcategory": "Exterior Insulation and Finish Systems",
+  "title": "EIFS termination and joint",
+  "keywords": [
+    "eifs",
+    "exterior insulation finish"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

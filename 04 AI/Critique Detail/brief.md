@@ -1,25 +1,28 @@
 # Critique Detail — AI brief
 
-**Updated:** 2026-11-14 · **Status:** MVP 0.1.0 · **Track:** B. Studio design
+**Updated:** 2026-11-14 · **Status:** MVP 0.2.0 · **Track:** B. Studio design
 
-What it is: `run_review.py` reviews one detail against a CSI rulebook (Claude vision, structured output) and writes a report and a redlined image. `index.html` shows the result. Design: `03 Projects/Critique Detail/schematic.md`.
+What it is: a results page (`index.html`) and a script (`run_review.py prepare | apply`) around a review written as JSON by Claude in a session or by a person. No AI call in the code. Design: `03 Projects/Critique Detail/schematic.md`; how to review: `reviewer.md`.
+
+## Decisions (Jimmy, 2026-11-14)
+- No AI key or AI call in the tool; AI works through the backend in a session.
+- Hard gate: slop is rejected and called out.
+- Rulebooks for all major CSI divisions, with subcategories; new ones active at once; Jimmy refines.
+- Working details are local, saved to the cloud on request; never reference private buckets or files.
+- Office details may go in the cloud. Sources: Quick Detail cloud, a detail library cloud (not located yet), and `dc_`.
+- Page is static and shows results; stays signed in; defaults from the JSON input or the 2025 California Building Code.
+- Wants a lean proof approach; ideas are toggles in ⚙️ to evaluate.
 
 ## Verified (2026-11-14)
-- Mock run on the synthetic sample: fast path, 6 findings, report, redline clouds.
-- Unseen detail (mock, PDF input): queue entry, draft rulebook written, run continues.
-- `--push` request order and shapes against a fake local server (auth, 2 uploads, schema, detail, review, findings).
-- Page from `file://` at 1180×820, 768×1024, 390×844: zero console errors, no horizontal scroll, bubbles select findings, filter, status and settings survive reload, notes, signed-out database check, print hides the gear.
-- `sql_paste_check.py`: all four SQL files safe to paste.
+- `prepare` and `apply` on the sample (REVISE, 7 findings, 1 of 13 proven) and on the slop sample (REJECTED, 3 reasons). A faulty review file lists its problems and writes nothing.
+- Page from `file://` at 1180×820, 768×1024, 390×844: zero console errors, no horizontal scroll, bubble scrolls the right column, pictures load, proof and layer taps, five toggles, defaults edit and download, rejected view, print.
+- Cloud paths with a faked network: sign-in, list, image, Quick Detail list, database check, session renewal after reload, save to cloud (5 requests in order), sign out.
+- Live database, read only: 6 `dc_` tables with RLS on, one policy each, anon blocked; bucket `dc-details` private with one policy; `table_index` rows present. **`platform_owners` has 0 rows.**
+- A session can read the Architecture backend over the connected host (REST and storage).
 
 ## Not verified
-- Any live model call (no key in the session). The request was only checked against the installed SDK's signature.
-- The SQL on the live database. The rolled-back test was sent with the Supabase tool and timed out waiting for a confirmation; a read-only check afterwards showed nothing was left behind.
-- Sign-in, storage upload and RLS with the real owner account. Real iPad.
-
-## Database (Architecture, seen read-only 2026-11-14)
-- No `dc_*` tables, no `platform_owners`, no `platform_is_owner()`, no `app_table_registry` (this project uses `table_index`, primary key `table_name`). One bucket, `sketch-media`. Existing `lessons_learned` belongs to Architecture practice, so ours is `dc_lessons`.
-- `supabase/000_platform_owner.sql` is the shared file minus the `app_table_registry` insert.
-- Existing policies there compare the sign-in email; ours call `platform_is_owner()`.
+- Anything with the real owner account. `002` on the live database. A review of a real detail. Real iPad.
+- Section numbers against current MasterFormat; code lines against the adopted 2025 California codes.
 
 ## Open
-Questions in `convo/convo v0.1.md`. Work list in `todo.md`.
+Questions in `convo/convo v0.2.md`. Work list in `todo.md`.

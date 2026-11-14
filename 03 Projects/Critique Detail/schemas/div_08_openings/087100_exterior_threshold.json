@@ -1,0 +1,75 @@
+{
+  "key": "div_08_openings/087100_exterior_threshold",
+  "csi_division": "08",
+  "csi_section": "08 71 00",
+  "subcategory": "Door Hardware",
+  "title": "Exterior door threshold",
+  "keywords": [
+    "threshold",
+    "door sill",
+    "door bottom",
+    "exterior door"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "TH-1",
+      "item": "Threshold height and bevels meet the accessibility limit of the code in force (1/2 in / 13 mm maximum in most cases).",
+      "why": "The most-measured dimension at final inspection.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "accessibility",
+        "code"
+      ]
+    },
+    {
+      "id": "TH-2",
+      "item": "A sill pan with back dam and end dams is under the threshold, lapped to the wall's water barrier.",
+      "why": "Doors leak at the sill corners like windows do.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "flashing",
+        "sill"
+      ]
+    },
+    {
+      "id": "TH-3",
+      "item": "The exterior landing is lower than or slopes away from the threshold, within the allowed slope.",
+      "why": "Water standing against the sill gets in.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "slope",
+        "water"
+      ]
+    },
+    {
+      "id": "TH-4",
+      "item": "Threshold is set in sealant, with weatherstripping and door bottom shown.",
+      "why": "Air and water control at the door.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "air barrier"
+      ]
+    },
+    {
+      "id": "TH-5",
+      "item": "Thermal break in the threshold lines up with the slab-edge insulation.",
+      "why": "A metal threshold on the slab is a cold strip.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "thermal"
+      ]
+    },
+    {
+      "id": "TH-6",
+      "item": "Floor finish thickness each side is shown so the level change is real.",
+      "why": "Finish changes move the threshold height.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "dimensions"
+      ]
+    }
+  ]
+}

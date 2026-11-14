@@ -1,15 +1,20 @@
 # Critique Detail — todo
 
+To do by hand (Jimmy)
+- [ ] Add your owner row to `platform_owners` (header of `supabase/000_platform_owner.sql`). Until then the page sees no rows.
+- [ ] Paste `test_002_dc.sql` → `002_dc_round2.sql` → `verify_002_dc.sql`.
+
 Not yet tested
-- [ ] A live run with a Claude key (classification, new rulebook, audit, box accuracy).
-- [ ] The SQL on the live Architecture database (Jimmy pastes; the tool's own test run timed out waiting for a confirmation).
-- [ ] `--push` and the page sign-in with the real owner account (tested against a fake local server only).
+- [ ] Sign-in, save to cloud and `--push` with the real owner account (tested with a faked network only).
+- [ ] A review of a real detail, and how close the boxes land.
 - [ ] The page on a real iPad.
 
 Next
-- [ ] Answers to `convo/convo v0.1.md`.
-- [ ] Push lessons and all rulebooks to `dc_lessons` / `dc_schemas`; let the page read them from there.
+- [ ] Answers to `convo/convo v0.2.md`.
+- [ ] First real reviews from the Quick Detail cloud (a session pulls the image, writes the review, saves it).
+- [ ] Fill stub rulebooks as detail types come up; Jimmy refines the written ones.
+- [ ] Good-detail pictures for more rulebooks, from cloud details once they exist.
+- [ ] Rulebooks and lessons read from `dc_schemas` / `dc_lessons` on the page, so edits do not need a commit.
+- [ ] Accepted and dismissed findings feed new lessons.
 - [ ] Multi-page PDF: choose the page, or crop one detail from a sheet.
-- [ ] Redline as PDF as well as PNG.
-- [ ] Turn accepted or dismissed findings into new lessons (the "self-learning" loop).
-- [ ] `index_summary.html` (`/summarize-code`) once the page settles.
+- [ ] `index_summary.html` (`/summarize-code`).

@@ -1,0 +1,23 @@
+{
+  "_note": "Written by Claude in a Claude Code session on 2026-11-14, looking at inputs/detail_slop.png, a synthetic drawing made to be rejected.",
+  "reviewer": "Claude, in a Claude Code session (2026-11-14)",
+  "detail_type": "Unreadable roof edge sketch",
+  "gate": {
+    "scale_shown": false,
+    "materials_labelled": false,
+    "geometry_clear": false,
+    "missing": [
+      "material tags",
+      "scale",
+      "dimensions",
+      "any closed shape that reads as a material"
+    ],
+    "slop": true,
+    "reasons": [
+      "Not one material is tagged. The only notes are \"flashing??\" and \"typ.\", which name nothing.",
+      "Lines do not close into shapes, so wall, roof and flashing cannot be told apart.",
+      "There is nothing here to check a rulebook against. Reviewing it would mean guessing."
+    ]
+  },
+  "summary": "Rejected at the gate."
+}

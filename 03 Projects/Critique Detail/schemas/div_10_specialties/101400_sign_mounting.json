@@ -1,0 +1,15 @@
+{
+  "key": "div_10_specialties/101400_sign_mounting",
+  "csi_division": "10",
+  "csi_section": "10 14 00",
+  "subcategory": "Signage",
+  "title": "Sign mounting",
+  "keywords": [
+    "signage",
+    "sign"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

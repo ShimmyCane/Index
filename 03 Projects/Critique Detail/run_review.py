@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
-"""Detail Critique MVP: review one architectural detail against a CSI rulebook.
+"""Critique Detail: the framework around a review of one architectural detail.
 
-    python3 run_review.py inputs/detail_sample.png --describe "Exterior low-slope roof parapet detail" --mock
-    python3 run_review.py inputs/private/my_detail.pdf --describe "Window head"          # live, needs a Claude key
-    python3 run_review.py inputs/detail_sample.png --mock --push                           # also save to the database
+This script calls no AI service and holds no key. The review itself is written by a
+reviewer (Claude in a session, or a person) as one JSON file. The script does the rest.
 
-Live runs use the Claude API through the `anthropic` package (pip install anthropic) and
-the usual credentials (ANTHROPIC_API_KEY, or an `ant auth login` profile).
---mock sends nothing anywhere: it uses a hand-written fixture next to the input if one
-exists (<name>.mock.json), otherwise it lists the checklist as "not reviewed".
+  1. python3 run_review.py prepare inputs/detail_sample.png --describe "Low-slope roof parapet"
+        routes the detail to a CSI rulebook, runs the local part of the gate, builds the
+        adaptive QC list, and writes a packet for the reviewer (outputs/packets/).
+  2. the reviewer reads the packet and the drawing and writes <name>.review.json  (see reviewer.md)
+  3. python3 run_review.py apply inputs/detail_sample.png --review inputs/detail_sample.review.json
+        checks the review file, applies the hard gate, computes the proof and the verdict,
+        and writes the report (.json, .md) and the redlined image. Add --push to save to the cloud.
+
 PDF input needs PyMuPDF (pip install pymupdf). PNG and JPEG need only Pillow.
 """
 import argparse
-import base64
 import io
 import json
 import math
@@ -27,17 +29,22 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont, ImageStat
 
 ROOT = Path(__file__).resolve().parent
-VERSION = "0.1.0"
-MODEL = "claude-opus-5-5"
+VERSION = "0.2.0"
 SEVERITIES = ["CRITICAL", "MAJOR", "ADVISORY"]
-SEVERITY_MEANING = {
-    "CRITICAL": "water entry or structural failure",
-    "MAJOR": "building code or project mandate non-compliance",
-    "ADVISORY": "lesson learned or best practice",
-}
+SEVERITY_MEANING = {"CRITICAL": "water entry or structural failure",
+                    "MAJOR": "building code or project mandate non-compliance",
+                    "ADVISORY": "lesson learned or best practice"}
+RESULTS = ["pass", "fail", "not_shown", "na"]
+LAYERS = ["water", "air", "thermal", "vapor"]
+LAYER_STATES = ["continuous", "broken", "not_shown", "na"]
+ENVELOPE_DIVISIONS = {"03", "04", "05", "06", "07", "08"}
+SOURCE_KINDS = ["sample", "sketch", "own", "office", "quick_detail", "library"]
 SUPABASE_URL = "https://xabgankckrcuhcgdolrg.supabase.co"      # Architecture project
 SUPABASE_KEY = "sb_publishable_kncKodoYJZ6ByexwWM_TtQ_OpW68M5f"  # publishable key (safe in public code)
 BUCKET = "dc-details"
+DIVISIONS = {"03": "concrete", "04": "masonry", "05": "metals", "06": "wood_plastics_composites",
+             "07": "thermal_moisture", "08": "openings", "09": "finishes", "10": "specialties",
+             "12": "furnishings", "14": "conveying", "32": "exterior_improvements"}
 
 
 def log(step, text):
@@ -58,6 +65,15 @@ def write_json(path, data):
 
 def slugify(text):
     return re.sub(r"[^a-z0-9]+", "_", text.lower()).strip("_") or "detail"
+
+
+def now():
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def rel(path):
+    path = Path(path).resolve()
+    return path.relative_to(ROOT).as_posix() if path.is_relative_to(ROOT) else path.name
 
 
 # ---------------------------------------------------------------- Phase 1: intake and routing
@@ -82,268 +98,254 @@ def load_schemas():
     out = {}
     for f in sorted((ROOT / "schemas").glob("div_*/*.json")):
         s = read_json(f)
-        s["_path"] = str(f.relative_to(ROOT))
+        s["_path"] = f.relative_to(ROOT).as_posix()
         out[s["key"]] = s
     return out
 
 
 def match_schema(text, schemas):
-    """Fast path: score each rulebook by how many of its keywords appear in the description."""
+    """Score each rulebook by how many of its keywords appear in the description. Full rulebooks win ties."""
     text = text.lower()
     best, best_score = None, 0
     for key, s in schemas.items():
         score = sum(len(k.split()) for k in s.get("keywords", []) if k.lower() in text)
+        score = score * 2 + (1 if s["checklist"] else 0) if score else 0
         if score > best_score:
             best, best_score = key, score
     return best
 
 
-def png_bytes(img, long_edge=2000):
-    if max(img.size) > long_edge:
-        img = img.copy()
-        img.thumbnail((long_edge, long_edge))
-    buf = io.BytesIO()
-    img.save(buf, "PNG")
-    return buf.getvalue()
-
-
-def ask_claude(model, system, img, prompt, schema):
-    """One structured call: image + text in, JSON matching `schema` out."""
-    try:
-        import anthropic
-    except ImportError:
-        sys.exit("Live runs need the anthropic package. Run: pip install anthropic   (or add --mock)")
-    client = anthropic.Anthropic()
-    content = [
-        {"type": "image", "source": {"type": "base64", "media_type": "image/png",
-                                     "data": base64.standard_b64encode(png_bytes(img)).decode("ascii")}},
-        {"type": "text", "text": prompt},
-    ]
-    try:
-        # fallbacks="default": if a safety classifier declines, the API re-runs the request on a fallback model.
-        resp = client.beta.messages.create(
-            model=model, max_tokens=16000, system=system,
-            betas=["server-side-fallback-2026-07-01"], fallbacks="default",
-            output_config={"effort": "high", "format": {"type": "json_schema", "schema": schema}},
-            messages=[{"role": "user", "content": content}],
-        )
-    except anthropic.AuthenticationError:
-        sys.exit("Claude rejected the credentials. Set ANTHROPIC_API_KEY or run `ant auth login`, or add --mock.")
-    except anthropic.RateLimitError:
-        sys.exit("Claude rate limit reached. Wait a minute and run again.")
-    except anthropic.APIStatusError as e:
-        sys.exit("Claude API error %s: %s" % (e.status_code, e.message))
-    except anthropic.APIConnectionError as e:
-        sys.exit("Could not reach the Claude API: %s" % e)
-    if resp.stop_reason == "refusal":
-        sys.exit("The model declined this request (%s)." % getattr(resp.stop_details, "category", "no category"))
-    if resp.stop_reason == "max_tokens":
-        sys.exit("The reply was cut off at max_tokens; nothing was saved.")
-    text = next(b.text for b in resp.content if b.type == "text")
-    return json.loads(text), resp.model
-
-
-def obj(props):
-    return {"type": "object", "properties": props, "required": list(props), "additionalProperties": False}
-
-
-STR = {"type": "string"}
-CLASSIFY_SCHEMA = obj({"match": {"anyOf": [STR, {"type": "null"}]}, "csi_division": STR, "slug": STR, "title": STR})
-NEW_SCHEMA = obj({
-    "title": STR, "keywords": {"type": "array", "items": STR},
-    "checklist": {"type": "array", "items": obj({
-        "item": STR, "why": STR, "default_severity": {"type": "string", "enum": SEVERITIES},
-        "tags": {"type": "array", "items": STR}})}})
-BOX = obj({k: {"type": "integer"} for k in ("ymin", "xmin", "ymax", "xmax")})
-AUDIT_SCHEMA = obj({
-    "detail_type": STR,
-    "completeness": obj({"scale_shown": {"type": "boolean"}, "materials_labelled": {"type": "boolean"},
-                         "geometry_clear": {"type": "boolean"}, "missing": {"type": "array", "items": STR}}),
-    "summary": STR,
-    "checklist_results": {"type": "array", "items": obj({
-        "id": STR, "status": {"type": "string", "enum": ["pass", "fail", "not_shown"]}, "note": STR})},
-    "findings": {"type": "array", "items": obj({
-        "checklist_id": STR, "severity": {"type": "string", "enum": SEVERITIES}, "title": STR, "issue": STR,
-        "recommendation": STR,
-        "basis": {"type": "string", "enum": ["building_science", "project_rule", "lesson_learned"]},
-        "box": BOX, "confidence": {"type": "string", "enum": ["high", "medium", "low"]}})},
-})
-
-DIVISIONS = {"03": "concrete", "04": "masonry", "05": "metals", "06": "wood_plastics_composites",
-             "07": "thermal_moisture", "08": "openings", "09": "finishes"}
-
-
-def route(description, img, schemas, args):
-    """Find the rulebook for this detail, or learn a new one (deferred learning path)."""
-    text = "%s %s" % (description, Path(args.detail).stem.replace("_", " "))
+def route(description, detail_path, schemas, forced=None):
+    """Fast path: an existing rulebook. Otherwise queue the detail type and start a stub for the reviewer to fill."""
+    if forced:
+        if forced not in schemas:
+            sys.exit("No rulebook with key %s. See schemas/." % forced)
+        return schemas[forced], False
+    text = "%s %s" % (description, Path(detail_path).stem.replace("_", " "))
     key = match_schema(text, schemas)
-    info = None
-    if not key and not args.mock:
-        listing = "\n".join("- %s: %s" % (k, s["title"]) for k, s in schemas.items())
-        info, _ = ask_claude(
-            args.model, "You sort architectural construction details by CSI MasterFormat division.", img,
-            "Description from the user: %s\n\nExisting rulebooks:\n%s\n\nIf one of these rulebooks fits the drawing, "
-            "return its key in `match`. If none fits, return null in `match` and give the two-digit division "
-            "(03 to 09), a short snake_case `slug` for the detail type and a plain `title`."
-            % (description or "(none)", listing), CLASSIFY_SCHEMA)
-        if info["match"] in schemas:
-            key = info["match"]
     if key:
-        log("route", "fast path: %s" % key)
         return schemas[key], False
-
-    # Deferred learning path
-    div = (info or {}).get("csi_division", "")
-    if div not in DIVISIONS:   # no model answer (mock run): guess from the words, else 07
-        words = (description + " " + Path(args.detail).stem).lower()
-        hints = [("08", "window door storefront curtain glaz louver"), ("04", "brick masonry cmu stone veneer"),
-                 ("03", "concrete slab footing precast"), ("05", "steel stair railing metal deck"),
-                 ("06", "wood timber millwork casework"), ("09", "gypsum tile ceiling plaster flooring")]
-        div = next((d for d, keys in hints if any(k in words for k in keys.split())), "07")
-    slug = slugify((info or {}).get("slug") or description or Path(args.detail).stem)[:40]
-    title = (info or {}).get("title") or description or slug.replace("_", " ")
-    key = "div_%s_%s/%s" % (div, DIVISIONS[div], slug)
+    words = text.lower()
+    hints = [("08", "window door storefront curtain glaz louver skylight"), ("04", "brick masonry cmu stone veneer"),
+             ("03", "concrete slab footing precast"), ("05", "steel stair railing metal deck guard"),
+             ("06", "wood timber millwork casework"), ("09", "gypsum tile ceiling plaster flooring partition"),
+             ("10", "toilet signage locker"), ("32", "paving curb sidewalk ramp")]
+    div = next((d for d, keys in hints if any(k in words for k in keys.split())), "07")
+    slug = slugify(description or Path(detail_path).stem)[:40]
+    key = "div_%s_%s/%s0000_%s" % (div, DIVISIONS[div], div, slug)
     queue = read_json(ROOT / "schemas/_queue.json", {"queue": []})
-    queue["queue"].append({"at": now(), "key": key, "description": description, "input": Path(args.detail).name,
-                           "mode": "mock" if args.mock else "live"})
+    queue["queue"].append({"at": now(), "key": key, "description": description, "input": Path(detail_path).name})
     write_json(ROOT / "schemas/_queue.json", queue)
-    template = read_json(ROOT / "schemas/_template.json")
-    template.pop("_note", None)
-    new = dict(template, key=key, csi_division=div, title=title, keywords=[title.lower()])
-    if args.mock:
-        new["status"] = "draft"
-        generic = [
-            ("Primary water control layer is continuous and its laps shed water outward.", "CRITICAL"),
-            ("Flashings have slope, end dams and a drip edge clear of the face below.", "CRITICAL"),
-            ("Structural support and attachment of each element are shown.", "CRITICAL"),
-            ("Air barrier and thermal insulation are continuous across the joint.", "MAJOR"),
-            ("Materials and dimensions meet the project's code edition and mandates.", "MAJOR"),
-            ("Every material is tagged and the detail has a scale and key dimensions.", "ADVISORY")]
-        new["checklist"] = [{"id": "GEN-%d" % (i + 1), "item": t, "why": "Generic item written in mock mode. Replace it.",
-                             "default_severity": s, "tags": []} for i, (t, s) in enumerate(generic)]
-    else:
-        made, _ = ask_claude(
-            args.model,
-            "You are a senior building-envelope reviewer writing an office QA checklist. Be specific and "
-            "measurable. Severity: CRITICAL = water entry or structural failure, MAJOR = code or mandate "
-            "non-compliance, ADVISORY = best practice.", img,
-            "This drawing is a '%s' (CSI division %s). No rulebook exists for this detail type yet. Write one: "
-            "exactly 6 checklist items that a reviewer should check on any detail of this type, most serious "
-            "first. Each `item` states what a correct detail shows; `why` says what goes wrong without it."
-            % (title, div), NEW_SCHEMA)
-        new.update(title=made["title"] or title, keywords=made["keywords"] or new["keywords"], status="active")
-        prefix = "".join(w[0] for w in slug.split("_")[:3]).upper() or "NEW"
-        new["checklist"] = [dict(c, id="%s-%d" % (prefix, i + 1)) for i, c in enumerate(made["checklist"][:6])]
-    path = ROOT / "schemas" / (key + ".json")
-    write_json(path, new)
-    new["_path"] = str(path.relative_to(ROOT))
-    log("route", "deferred learning: wrote %s (%d items, status %s)" % (new["_path"], len(new["checklist"]), new["status"]))
+    new = read_json(ROOT / "schemas/_template.json")
+    new.pop("_note", None)
+    new.update(key=key, csi_division=div, csi_section="%s 00 00" % div, subcategory="Unsorted",
+               title=description or slug.replace("_", " "), keywords=[(description or slug).lower()], source="auto")
+    write_json(ROOT / "schemas" / (key + ".json"), new)
+    new["_path"] = "schemas/%s.json" % key
     return new, True
 
 
-# ---------------------------------------------------------------- Phase 2: the five steps
+# ---------------------------------------------------------------- the gate and the adaptive QC list
 
-def step1_triage(img):
-    """Soft checks a script can do alone. Warnings only; the run always continues."""
-    warnings = []
+def local_gate(img):
+    """What a script can judge alone. `hard` problems reject the detail; `warnings` do not."""
+    hard, warnings = [], []
     w, h = img.size
-    if max(w, h) < 1000:
-        warnings.append("Low resolution (%d x %d px). Small text may not be readable." % (w, h))
     grey = img.convert("L")
-    if ImageStat.Stat(grey).stddev[0] < 12:
-        warnings.append("Very low contrast. The sheet may be blank or a faint scan.")
     dark = sum(grey.histogram()[:128]) / float(w * h)
-    if dark < 0.004:
-        warnings.append("Almost no linework found (%.2f%% dark pixels)." % (dark * 100))
-    return warnings
+    if max(w, h) < 600:
+        hard.append("Image is %d x %d px. That is too small to read a detail." % (w, h))
+    elif max(w, h) < 1000:
+        warnings.append("Low resolution (%d x %d px). Small text may not be readable." % (w, h))
+    if ImageStat.Stat(grey).stddev[0] < 8 or dark < 0.002:
+        hard.append("Almost no linework on the sheet (%.2f%% dark pixels). It looks blank." % (dark * 100))
+    return hard, warnings
 
 
-def step2_constraints(schema, context_path):
-    context = read_json(context_path, {})
-    context = {k: v for k, v in context.items() if not k.startswith("_")}
+def load_context(path):
+    context = {k: v for k, v in (read_json(path, {}) or {}).items() if not k.startswith("_")}
+    mandates = []
+    for i, m in enumerate(context.get("mandates", []), 1):      # a mandate may be a plain sentence
+        mandates.append(m if isinstance(m, dict) else {"id": "PM-%d" % i, "text": m, "applies_to": "*", "severity": "MAJOR"})
+    context["mandates"] = mandates
+    return context
+
+
+def build_qc_list(schema, context):
+    """The adaptive QC list for this detail on this project:
+    rulebook items (minus those whose `when` does not match the project) + project mandates + lessons learned."""
+    qc, skipped = [], []
+    for c in schema["checklist"]:
+        when = c.get("when")
+        if when and context.get(when["key"]) not in when["in"]:
+            skipped.append({"id": c["id"], "reason": "%s is %r" % (when["key"], context.get(when["key"]))})
+            continue
+        qc.append({"id": c["id"], "item": c["item"], "why": c["why"], "severity": c["default_severity"],
+                   "origin": "condition" if when else "rulebook", "tags": c.get("tags", []), "good": c.get("good", "")})
+    for m in context["mandates"]:
+        applies = m.get("applies_to", "*")
+        if applies == "*" or schema["csi_division"] in applies:
+            qc.append({"id": m["id"], "item": "Project mandate: " + m["text"], "why": "Set by the project requirements.",
+                       "severity": m.get("severity", "MAJOR"), "origin": "mandate", "tags": [], "good": ""})
     lessons = [l for l in read_json(ROOT / "library/lessons_learned.json", {"lessons": []})["lessons"]
                if l.get("category") in (schema["key"], "*")]
-    return context, lessons
+    for l in lessons:
+        qc.append({"id": l["id"], "item": "Lesson learned: " + l["text"], "why": "From past QA.",
+                   "severity": "ADVISORY", "origin": "lesson", "tags": [], "good": ""})
+    return qc, skipped, lessons
 
 
-SYSTEM = """You are a senior architect and building-envelope reviewer doing a QA redline of one construction detail.
-Judge only what the drawing shows. If something is not drawn or not legible, say it is not shown; do not assume it.
-Severity is strict:
-- CRITICAL: a path for water into the assembly, or a structural or attachment failure.
-- MAJOR: does not meet the stated building code, energy code or a project mandate.
-- ADVISORY: a lesson learned or best practice; the detail would still work.
-For each finding give a box around the place on the drawing it refers to, as integers from 0 to 1000 measured
-from the top-left corner of the image: ymin, xmin, ymax, xmax. Keep boxes tight. If a finding is about something
-missing, box the place where it should be. Write for the person who will fix the drawing: plain, short, specific."""
+# ---------------------------------------------------------------- prepare: the packet for the reviewer
+
+REVIEW_SHAPE = {
+    "reviewer": "who reviewed it, e.g. 'Claude, in a Claude Code session'",
+    "detail_type": "what the drawing is, in a few words",
+    "gate": {"scale_shown": True, "materials_labelled": True, "geometry_clear": True,
+             "missing": ["what is missing"], "slop": False, "reasons": ["only if slop is true: why this drawing is rejected"]},
+    "summary": "two or three plain sentences",
+    "results": [{"id": "<a QC id, each exactly once>", "status": "pass | fail | not_shown | na", "note": "short",
+                 "evidence_box": "[ymin, xmin, ymax, xmax] 0-1000 where the drawing shows it, or null"}],
+    "findings": [{"qc_id": "<a QC id, or OTHER>", "severity": "CRITICAL | MAJOR | ADVISORY", "title": "short",
+                  "issue": "what is wrong", "recommendation": "how to fix the drawing",
+                  "basis": "building_science | project_rule | lesson_learned",
+                  "box_2d": "[ymin, xmin, ymax, xmax] 0-1000, or null", "confidence": "high | medium | low"}],
+    "control_layers": [{"layer": "water | air | thermal | vapor", "status": "continuous | broken | not_shown | na",
+                        "note": "where it runs, or where it stops", "break_box": "[ymin, xmin, ymax, xmax] or null"}],
+    "new_checklist": "ONLY for a stub rulebook: exactly 6 of {item, why, default_severity, tags}; then use ids NEW-1..NEW-6 in results",
+}
 
 
-def step3_audit(img, schema, context, lessons, description, args):
-    fixture = Path(args.detail).with_suffix(".mock.json")
-    if args.mock:
-        if fixture.exists():
-            data = read_json(fixture)
-            data.pop("_note", None)
-            return data, "mock (hand-written fixture %s)" % fixture.name
-        return {
-            "detail_type": schema["title"], "summary": "Mock run: no model looked at this drawing. Each checklist item is listed for a manual check.",
-            "completeness": {"scale_shown": False, "materials_labelled": False, "geometry_clear": False,
-                             "missing": ["not checked (mock run)"]},
-            "checklist_results": [{"id": c["id"], "status": "not_shown", "note": "not reviewed (mock run)"} for c in schema["checklist"]],
-            "findings": [{"checklist_id": c["id"], "severity": c["default_severity"], "title": "Not reviewed: " + c["id"],
-                          "issue": c["item"], "recommendation": "Check by hand. " + c["why"], "basis": "building_science",
-                          "box_2d": None, "confidence": "low"} for c in schema["checklist"]],
-        }, "mock (no fixture; checklist only)"
-    checklist = "\n".join("- %s [%s by default] %s (Why: %s)" % (c["id"], c["default_severity"], c["item"], c["why"])
-                          for c in schema["checklist"])
-    prompt = (
-        "Detail description: %s\nRulebook: %s (CSI division %s)\n\nChecklist:\n%s\n\nProject constraints:\n%s\n\n"
-        "Lessons learned for this category:\n%s\n\n"
-        "Do all of this in one pass:\n1. Completeness: is a scale shown, are the primary materials labelled, is the "
-        "geometry clear? List what is missing.\n2. Give every checklist item a result: pass, fail or not_shown.\n"
-        "3. Report findings for each failed or not-shown item that matters, and for anything else on the drawing that "
-        "breaks building science (moisture control, thermal bridging, flashing slope) or a project constraint. Use the "
-        "checklist id in `checklist_id`, or 'OTHER' when the finding is outside the checklist."
-        % (description or "(none given)", schema["title"], schema["csi_division"], checklist,
-           json.dumps(context, indent=1), "\n".join("- %s: %s" % (l["id"], l["text"]) for l in lessons) or "(none)"))
-    data, served = ask_claude(args.model, SYSTEM, img, prompt, AUDIT_SCHEMA)
-    for f in data["findings"]:
-        b = f.pop("box")
-        f["box_2d"] = [b["ymin"], b["xmin"], b["ymax"], b["xmax"]]
-    return data, "live (%s)" % served
+def cmd_prepare(args):
+    img = load_image(args.detail)
+    stem = slugify(Path(args.detail).stem)
+    schema, new = route(args.describe, args.detail, load_schemas(), args.schema)
+    log("route", ("new stub, queued: " if new else "rulebook: ") + schema["key"] + (" (stub: reviewer writes 6 items)" if not schema["checklist"] else ""))
+    hard, warnings = local_gate(img)
+    context = load_context(args.context)
+    qc, skipped, _ = build_qc_list(schema, context)
+    packet = {"tool": "detail-critique", "version": VERSION, "made_at": now(), "detail": rel(args.detail),
+              "width": img.width, "height": img.height, "description": args.describe,
+              "rulebook": {k: schema[k] for k in ("key", "csi_section", "subcategory", "title", "status")},
+              "local_gate": {"hard": hard, "warnings": warnings}, "context": context,
+              "qc_list": qc, "skipped_by_condition": skipped,
+              "control_layers_expected": schema["csi_division"] in ENVELOPE_DIVISIONS,
+              "review_shape": REVIEW_SHAPE, "write_review_to": rel(Path(args.detail).with_suffix(".review.json"))}
+    out = Path(args.out) / "packets" / (stem + ".packet.json")
+    write_json(out, packet)
+    log("gate", "local: %d hard problem(s), %d warning(s)" % (len(hard), len(warnings)))
+    log("qc", "%d items (%s)" % (len(qc), ", ".join("%d %s" % (sum(1 for q in qc if q["origin"] == o), o)
+                                                    for o in ("rulebook", "condition", "mandate", "lesson"))))
+    log("packet", "wrote %s. Next: the reviewer follows reviewer.md and writes %s" % (rel(out), packet["write_review_to"]))
 
 
-def step4_prioritise(findings):
-    """Strict severity order, then numbered. Boxes are clamped to the sheet."""
-    clean = []
-    for f in findings:
+# ---------------------------------------------------------------- apply: check the review, gate, proof, outputs
+
+def as_box(value, where, problems):
+    if value is None:
+        return None
+    if not (isinstance(value, list) and len(value) == 4 and all(isinstance(v, (int, float)) for v in value)):
+        problems.append("%s: a box must be [ymin, xmin, ymax, xmax] with four numbers, or null" % where)
+        return None
+    y0, x0, y1, x1 = [max(0, min(1000, int(v))) for v in value]
+    box = [min(y0, y1), min(x0, x1), max(y0, y1), max(x0, x1)]
+    return box if box[2] - box[0] >= 4 and box[3] - box[1] >= 4 else None
+
+
+def validate_review(review, qc, expect_layers):
+    """Every problem is listed. Nothing is written unless the list is empty."""
+    problems = []
+    gate = review.get("gate")
+    if not isinstance(gate, dict) or any(not isinstance(gate.get(k), bool) for k in ("scale_shown", "materials_labelled", "geometry_clear")):
+        problems.append("gate: needs scale_shown, materials_labelled and geometry_clear as true or false")
+        gate = {}
+    for key in ("reviewer", "summary"):
+        if not isinstance(review.get(key), str) or not review[key].strip():
+            problems.append("%s: missing" % key)
+    if gate.get("slop") and not gate.get("reasons"):
+        problems.append("gate: slop is true but no reasons are given")
+    if gate.get("slop"):
+        return problems                                   # a rejected drawing needs no results
+    ids = {q["id"] for q in qc}
+    seen = set()
+    for i, r in enumerate(review.get("results") or []):
+        where = "results[%d]" % i
+        if r.get("id") not in ids:
+            problems.append("%s: unknown QC id %r" % (where, r.get("id")))
+        elif r["id"] in seen:
+            problems.append("%s: %s is listed twice" % (where, r["id"]))
+        seen.add(r.get("id"))
+        if r.get("status") not in RESULTS:
+            problems.append("%s: status must be one of %s" % (where, ", ".join(RESULTS)))
+        r["evidence_box"] = as_box(r.get("evidence_box"), where, problems)
+    for missing in sorted(ids - seen):
+        problems.append("results: no result for %s" % missing)
+    for i, f in enumerate(review.get("findings") or []):
+        where = "findings[%d]" % i
+        if f.get("qc_id") not in ids and f.get("qc_id") != "OTHER":
+            problems.append("%s: unknown qc_id %r (use a QC id or OTHER)" % (where, f.get("qc_id")))
         if f.get("severity") not in SEVERITIES:
-            f["severity"] = "ADVISORY"
-        b = f.get("box_2d")
-        if b and len(b) == 4:
-            y0, x0, y1, x1 = [max(0, min(1000, int(v))) for v in b]
-            f["box_2d"] = [min(y0, y1), min(x0, x1), max(y0, y1), max(x0, x1)]
-            if f["box_2d"][2] - f["box_2d"][0] < 4 or f["box_2d"][3] - f["box_2d"][1] < 4:
-                f["box_2d"] = None
-        else:
-            f["box_2d"] = None
-        clean.append(f)
-    clean.sort(key=lambda f: SEVERITIES.index(f["severity"]))
-    for n, f in enumerate(clean, 1):
-        f["n"] = n
-    return clean, {s: sum(1 for f in clean if f["severity"] == s) for s in SEVERITIES}
+            problems.append("%s: severity must be one of %s" % (where, ", ".join(SEVERITIES)))
+        for key in ("title", "issue", "recommendation"):
+            if not isinstance(f.get(key), str) or not f[key].strip():
+                problems.append("%s: %s is missing" % (where, key))
+        f["box_2d"] = as_box(f.get("box_2d"), where, problems)
+    layers = review.get("control_layers") or []
+    for i, l in enumerate(layers):
+        if l.get("layer") not in LAYERS or l.get("status") not in LAYER_STATES:
+            problems.append("control_layers[%d]: layer must be one of %s and status one of %s" % (i, ", ".join(LAYERS), ", ".join(LAYER_STATES)))
+        l["break_box"] = as_box(l.get("break_box"), "control_layers[%d]" % i, problems)
+    if expect_layers and {l.get("layer") for l in layers} != set(LAYERS):
+        problems.append("control_layers: an envelope detail needs all four layers (water, air, thermal, vapor), each once")
+    return problems
 
 
-def add_references(findings, schema):
-    """Link each finding to office standard and manufacturer details for the same rulebook."""
-    tags_by_id = {c["id"]: set(c.get("tags", [])) for c in schema["checklist"]}
-    library = []
-    for folder in ("office_typical_details", "manufacturer_standards"):
-        for d in read_json(ROOT / "library" / folder / "index.json", {"details": []})["details"]:
-            library.append(dict(d, library=folder))
-    for f in findings:
-        tags = tags_by_id.get(f.get("checklist_id"), set())
-        refs = [d for d in library if d["schema_key"] == schema["key"] and (not tags or tags & set(d.get("tags", [])))]
-        f["references"] = [{"id": d["id"], "title": d["title"], "library": d["library"], "file": d["file"]} for d in refs]
+def decide_gate(review_gate, hard, warnings, mode):
+    """The hard gate. A drawing that cannot be read is rejected and the reasons are stated."""
+    reasons = list(hard)
+    if review_gate.get("slop"):
+        reasons += review_gate.get("reasons", [])
+    else:
+        if not review_gate.get("geometry_clear", True):
+            reasons.append("The geometry is not clear enough to tell what is drawn.")
+        if not review_gate.get("materials_labelled", True):
+            reasons.append("The primary materials are not labelled.")
+    warnings = list(warnings)
+    if not review_gate.get("scale_shown", True):
+        warnings.append("No scale is shown.")
+    verdict = "reject" if reasons and mode == "hard" else "pass"
+    if reasons and mode == "soft":
+        warnings += ["Gate problem (soft mode, review continued): " + r for r in reasons]
+        reasons = []
+    return {"verdict": verdict, "mode": mode, "reasons": reasons, "warnings": warnings,
+            "checks": {k: bool(review_gate.get(k)) for k in ("scale_shown", "materials_labelled", "geometry_clear")},
+            "missing": review_gate.get("missing", [])}
+
+
+def compute_proof(qc):
+    """Lean proof: each QC item is a claim. It is proven only by a pass WITH a place on the drawing as evidence.
+    The detail is proven when every critical and major claim is proven."""
+    state = lambda q: ("na" if q["status"] == "na" else "disproven" if q["status"] == "fail" else
+                       "proven" if q["status"] == "pass" and q["evidence_box"] else "claimed" if q["status"] == "pass" else "unproven")
+    for q in qc:
+        q["proof"] = state(q)
+    live = [q for q in qc if q["proof"] != "na"]
+    count = {k: sum(1 for q in live if q["proof"] == k) for k in ("proven", "claimed", "disproven", "unproven")}
+    must = [q for q in live if q["severity"] in ("CRITICAL", "MAJOR")]
+    open_must = [q["id"] for q in must if q["proof"] != "proven"]
+    return dict(count, total=len(live), must=len(must), open=open_must,
+                verdict="PROVEN" if live and not open_must else "NOT PROVEN")
+
+
+def verdict_of(gate, counts, proof):
+    if gate["verdict"] == "reject":
+        return "REJECTED", "The drawing did not pass the gate. Redraw it and send it again."
+    if counts["CRITICAL"]:
+        return "REVISE", "%d critical finding(s). Not ready to issue." % counts["CRITICAL"]
+    if counts["MAJOR"]:
+        return "REVISE", "%d major finding(s). Not ready to issue." % counts["MAJOR"]
+    if proof["verdict"] != "PROVEN":
+        return "CHECK", "No critical or major findings, but %d claim(s) are not proven on the drawing." % len(proof["open"])
+    return "READY", "Every critical and major item is shown on the drawing."
 
 
 RED = (200, 30, 40)
@@ -364,87 +366,145 @@ def cloud(draw, box, r, width):
     def side(ax, ay, bx, by, start):
         length = math.hypot(bx - ax, by - ay)
         n = max(1, int(round(length / (2 * r))))
-        step = length / n
         for i in range(n):
-            cx = ax + (bx - ax) * (i + 0.5) / n
-            cy = ay + (by - ay) * (i + 0.5) / n
-            rr = step / 2
+            cx, cy, rr = ax + (bx - ax) * (i + 0.5) / n, ay + (by - ay) * (i + 0.5) / n, length / n / 2
             draw.arc([cx - rr, cy - rr, cx + rr, cy + rr], start, start + 180, fill=RED, width=width)
-    side(x0, y0, x1, y0, 180)   # top, bulging up
-    side(x1, y0, x1, y1, 270)   # right
-    side(x1, y1, x0, y1, 0)     # bottom
-    side(x0, y1, x0, y0, 90)    # left
+    side(x0, y0, x1, y0, 180); side(x1, y0, x1, y1, 270); side(x1, y1, x0, y1, 0); side(x0, y1, x0, y0, 90)
 
 
-def step5_markup(img, findings, out_path, mode):
+def draw_markup(img, findings, gate, out_path):
     marked = img.copy()
     draw = ImageDraw.Draw(marked)
     w, h = marked.size
     unit = max(w, h) / 1600.0
-    r, lw = 13 * unit, max(2, int(3 * unit))
-    font = load_font(int(24 * unit))
+    r, lw, font = 13 * unit, max(2, int(3 * unit)), load_font(int(24 * unit))
     for f in findings:
         if not f["box_2d"]:
             continue
         y0, x0, y1, x1 = [v / 1000.0 for v in f["box_2d"]]
         box = (x0 * w, y0 * h, x1 * w, y1 * h)
         cloud(draw, box, r, lw)
-        br = 20 * unit                                    # numbered bubble at the top-left corner
+        br = 20 * unit
         cx, cy = max(br + 2, box[0] - br * 0.6), max(br + 2, box[1] - br * 0.6)
         draw.ellipse([cx - br, cy - br, cx + br, cy + br], fill=(255, 255, 255), outline=RED, width=lw)
-        label = str(f["n"])
-        tw = draw.textlength(label, font=font)
-        draw.text((cx - tw / 2, cy - 15 * unit), label, fill=RED, font=font)
-    if mode.startswith("mock"):
-        draw.text((12 * unit, 10 * unit), "MOCK REVIEW - not produced by a model", fill=RED, font=load_font(int(18 * unit)))
+        tw = draw.textlength(str(f["n"]), font=font)
+        draw.text((cx - tw / 2, cy - 15 * unit), str(f["n"]), fill=RED, font=font)
+    if gate["verdict"] == "reject":
+        big = load_font(int(120 * unit))
+        tw = draw.textlength("REJECTED", font=big)
+        draw.text(((w - tw) / 2, h / 2 - 70 * unit), "REJECTED", fill=RED, font=big)
+        draw.rectangle([(w - tw) / 2 - 30 * unit, h / 2 - 90 * unit, (w + tw) / 2 + 30 * unit, h / 2 + 80 * unit], outline=RED, width=lw * 3)
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     marked.save(out_path, optimize=True)
     return marked
 
 
-def markdown(report):
-    L = ["# Detail critique: %s" % report["detail"]["title"], "",
-         "- Input: `%s` (%d x %d px)" % (report["detail"]["input"], report["detail"]["width"], report["detail"]["height"]),
-         "- Rulebook: `%s`%s" % (report["schema"]["key"], " (new, generated this run)" if report["schema"]["generated"] else ""),
-         "- Mode: %s" % report["mode"], "- Run: %s" % report["run_at"],
-         "- Project: %s, %s, climate zone %s" % (report["context"].get("project", "-"), report["context"].get("building_code", "-"),
-                                                 report["context"].get("ashrae_climate_zone", "-")), ""]
-    if report["mode"].startswith("mock"):
-        L += ["> **Mock run.** No model looked at this drawing.", ""]
-    L += ["## Summary", "", report["summary"], "",
-          "**%d critical, %d major, %d advisory**" % tuple(report["counts"][s] for s in SEVERITIES), "",
-          "## Step 1. Completeness", ""]
-    c = report["completeness"]
-    L += ["- Scale shown: %s" % yn(c["scale_shown"]), "- Primary materials labelled: %s" % yn(c["materials_labelled"]),
-          "- Geometry clear: %s" % yn(c["geometry_clear"])]
-    L += ["- Missing: %s" % m for m in c["missing"]] + ["- Warning: %s" % x for x in report["warnings"]] + [""]
-    L += ["## Findings", ""]
+def markdown(r):
+    yn = lambda v: "yes" if v else "no"
+    g = r["gate"]
+    L = ["# Detail critique: %s" % r["detail"]["title"], "",
+         "**%s.** %s" % (r["verdict"], r["verdict_note"]), "",
+         "- Input: `%s` (%d x %d px)" % (r["detail"]["input"], r["detail"]["width"], r["detail"]["height"]),
+         "- Rulebook: `%s` (%s %s)" % (r["schema"]["key"], r["schema"]["csi_section"], r["schema"]["subcategory"]),
+         "- Reviewer: %s" % r["reviewer"], "- Run: %s" % r["run_at"],
+         "- Project: %s; %s; %s" % (r["context"].get("project", "-"), r["context"].get("building_code", "-"), r["context"].get("climate_zone", "-")), "",
+         "## Step 1. Gate: %s" % g["verdict"].upper(), "",
+         "- Scale shown: %s" % yn(g["checks"]["scale_shown"]), "- Primary materials labelled: %s" % yn(g["checks"]["materials_labelled"]),
+         "- Geometry clear: %s" % yn(g["checks"]["geometry_clear"])]
+    L += ["- **Rejected because:** %s" % x for x in g["reasons"]] + ["- Missing: %s" % x for x in g["missing"]] + ["- Warning: %s" % x for x in g["warnings"]] + [""]
+    if g["verdict"] == "reject":
+        return "\n".join(L + ["No audit was done. Markup: `%s`" % r["markup"], ""])
+    L += ["## Summary", "", r["summary"], "", "**%d critical, %d major, %d advisory**" % tuple(r["counts"][s] for s in SEVERITIES), "", "## Findings", ""]
     for s in SEVERITIES:
-        rows = [f for f in report["findings"] if f["severity"] == s]
-        if not rows:
-            continue
-        L += ["### %s (%s)" % (s, SEVERITY_MEANING[s]), ""]
+        rows = [f for f in r["findings"] if f["severity"] == s]
+        if rows:
+            L += ["### %s (%s)" % (s, SEVERITY_MEANING[s]), ""]
         for f in rows:
-            L += ["**%d. %s** `%s`" % (f["n"], f["title"], f["checklist_id"]), "", f["issue"], "",
-                  "*Fix:* " + f["recommendation"], ""]
-            if f["references"]:
-                L += ["*See:* " + "; ".join("%s %s" % (r["id"], r["title"]) for r in f["references"]), ""]
-    L += ["## Checklist", "", "| Item | Result | Note |", "|---|---|---|"]
-    L += ["| %s | %s | %s |" % (r["id"], r["status"], r["note"]) for r in report["checklist_results"]]
-    L += ["", "Markup: `%s`" % report["markup"], "",
-          "_A model review is a second pair of eyes, not a sign-off. Box positions are approximate._", ""]
-    return "\n".join(L)
+            L += ["**%d. %s** `%s`" % (f["n"], f["title"], f["qc_id"]), "", f["issue"], "", "*Fix:* " + f["recommendation"], ""]
+    p = r["proof"]
+    L += ["## Proof: %s" % p["verdict"], "",
+          "%d of %d claims proven on the drawing; %d disproven; %d not shown; %d passed without evidence." % (p["proven"], p["total"], p["disproven"], p["unproven"], p["claimed"]), "",
+          "| Item | From | Severity | Result | Note |", "|---|---|---|---|---|"]
+    L += ["| %s | %s | %s | %s | %s |" % (q["id"], q["origin"], q["severity"], q["proof"], q["note"]) for q in r["qc_list"]]
+    if r["control_layers"]:
+        L += ["", "## Control layers", "", "| Layer | Status | Note |", "|---|---|---|"]
+        L += ["| %s | %s | %s |" % (l["layer"], l["status"], l["note"]) for l in r["control_layers"]]
+    return "\n".join(L + ["", "Markup: `%s`" % r["markup"], "",
+                          "_A review is a second pair of eyes, not a sign-off. Box positions are approximate._", ""])
 
 
-def yn(v):
-    return "yes" if v else "no"
+def cmd_apply(args):
+    img = load_image(args.detail)
+    stem = slugify(Path(args.detail).stem)
+    review_path = Path(args.review or Path(args.detail).with_suffix(".review.json"))
+    review = read_json(review_path)
+    if review is None:
+        sys.exit("No review file at %s. Run `prepare` first, then write the review (see reviewer.md)." % review_path)
+    schemas = load_schemas()
+    schema, _ = route(args.describe, args.detail, schemas, args.schema or review.get("rulebook"))
+    learned = False
+    if not schema["checklist"]:                                # deferred learning: the reviewer wrote the rulebook
+        new = review.get("new_checklist") or []
+        if len(new) != 6 or any(not c.get("item") or c.get("default_severity") not in SEVERITIES for c in new):
+            sys.exit("Rulebook %s is a stub. The review must carry new_checklist with exactly 6 items (item, why, default_severity, tags)." % schema["key"])
+        schema["checklist"] = [{"id": "NEW-%d" % (i + 1), "item": c["item"], "why": c.get("why", ""),
+                                "default_severity": c["default_severity"], "tags": c.get("tags", [])} for i, c in enumerate(new)]
+        schema.update(status="active", source="auto")
+        learned = True
+    context = load_context(args.context)
+    qc, skipped, lessons = build_qc_list(schema, context)
+    expect_layers = schema["csi_division"] in ENVELOPE_DIVISIONS
+    problems = validate_review(review, qc, expect_layers)
+    if problems:
+        print("The review file has %d problem(s). Nothing was written.\n- %s" % (len(problems), "\n- ".join(problems)))
+        sys.exit(1)
+    if learned:
+        write_json(ROOT / schema["_path"], {k: v for k, v in schema.items() if k != "_path"})
+        log("learn", "rulebook %s now has 6 items and is active" % schema["key"])
+    hard, warnings = local_gate(img)
+    gate = decide_gate(review["gate"], hard, warnings, args.gate)
+    log("step 1", "gate %s%s" % (gate["verdict"], "".join("\n         - " + x for x in gate["reasons"])))
+    rejected = gate["verdict"] == "reject"
+    results = {} if rejected else {r["id"]: r for r in review["results"]}
+    for q in qc:
+        r = results.get(q["id"], {})
+        q.update(status=r.get("status", "not_shown"), note=r.get("note", ""), evidence_box=r.get("evidence_box"))
+    findings = [] if rejected else sorted(review.get("findings") or [], key=lambda f: SEVERITIES.index(f["severity"]))
+    good = {q["id"]: q["good"] for q in qc}
+    for n, f in enumerate(findings, 1):
+        f.update(n=n, good=good.get(f["qc_id"], ""), basis=f.get("basis", "building_science"), confidence=f.get("confidence", "medium"))
+    counts = {s: sum(1 for f in findings if f["severity"] == s) for s in SEVERITIES}
+    proof = compute_proof(qc)
+    verdict, note = verdict_of(gate, counts, proof)
+    log("step 2", "QC list: %d items for this project (%d skipped by condition)" % (len(qc), len(skipped)))
+    log("step 4", "%d critical, %d major, %d advisory" % tuple(counts[s] for s in SEVERITIES))
+    log("proof", "%s: %d of %d proven" % (proof["verdict"], proof["proven"], proof["total"]))
+    out = Path(args.out)
+    markup_path = out / "markups" / (stem + "_markup.png")
+    marked = draw_markup(img, findings, gate, markup_path)
+    report = {
+        "tool": "detail-critique", "version": VERSION, "run_at": now(), "reviewer": review["reviewer"],
+        "status": "rejected" if rejected else "reviewed", "verdict": verdict, "verdict_note": note,
+        "detail": {"slug": stem, "title": review.get("detail_type") or schema["title"], "description": args.describe,
+                   "input": rel(args.detail), "width": img.width, "height": img.height,
+                   "source_kind": args.source_kind, "source_ref": args.source_ref},
+        "schema": {k: schema[k] for k in ("key", "title", "csi_division", "csi_section", "subcategory", "status", "source")},
+        "context": context, "gate": gate, "summary": "" if rejected else review["summary"],
+        "qc_list": qc, "skipped_by_condition": skipped, "counts": counts, "findings": findings,
+        "proof": proof, "control_layers": [] if rejected else (review.get("control_layers") or []),
+        "markup": rel(markup_path),
+    }
+    write_json(out / "reports" / (stem + ".json"), report)
+    (out / "reports" / (stem + ".md")).write_text(markdown(report), encoding="utf-8")
+    log("step 5", "%s. Wrote %s, %s.md and %s" % (verdict, rel(out / "reports" / (stem + ".json")), stem, report["markup"]))
+    if args.push:
+        buf, raw = io.BytesIO(), io.BytesIO()
+        marked.save(buf, "PNG")
+        img.save(raw, "PNG")
+        push(report, schema, raw.getvalue(), buf.getvalue())
 
 
-def now():
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
-# ---------------------------------------------------------------- Database (optional, owner sign-in)
+# ---------------------------------------------------------------- cloud (optional, owner sign-in)
 
 def http(method, url, token, body=None, headers=None, raw=False):
     h = {"apikey": SUPABASE_KEY, "Authorization": "Bearer " + (token or SUPABASE_KEY)}
@@ -463,98 +523,61 @@ def http(method, url, token, body=None, headers=None, raw=False):
         raise SystemExit("Could not reach the database: %s" % e.reason)
 
 
-def push(report, schema, image_png, markup_png, base=None):
+def push(report, schema, image_png, markup_png):
     """Save the detail, review, findings and rulebook to the Architecture database as the owner."""
-    base = base or os.environ.get("DC_SUPABASE_URL", SUPABASE_URL)
+    base = os.environ.get("DC_SUPABASE_URL", SUPABASE_URL)
     email, password = os.environ.get("DC_EMAIL"), os.environ.get("DC_PASSWORD")
     if not email or not password:
         sys.exit("--push needs DC_EMAIL and DC_PASSWORD in the environment (the owner sign-in). Nothing was sent.")
     token = http("POST", base + "/auth/v1/token?grant_type=password", None, {"email": email, "password": password})["access_token"]
-    rest, slug = base + "/rest/v1/", report["detail"]["slug"]
+    rest, d = base + "/rest/v1/", report["detail"]
     up = {"Prefer": "resolution=merge-duplicates,return=representation"}
     paths = {}
     for name, data in (("detail.png", image_png), ("markup.png", markup_png)):
-        paths[name] = "%s/%s" % (slug, name)
+        paths[name] = "%s/%s" % (d["slug"], name)
         http("POST", "%s/storage/v1/object/%s/%s" % (base, BUCKET, paths[name]), token, data,
              {"Content-Type": "image/png", "x-upsert": "true"}, raw=True)
     http("POST", rest + "dc_schemas?on_conflict=key", token, {
-        "key": schema["key"], "csi_division": schema["csi_division"], "title": schema["title"],
-        "checklist": schema["checklist"], "source": schema.get("source", "seed"), "status": schema.get("status", "active")}, up)
-    d = report["detail"]
+        "key": schema["key"], "csi_division": schema["csi_division"], "csi_section": schema["csi_section"],
+        "subcategory": schema["subcategory"], "title": schema["title"], "checklist": schema["checklist"],
+        "source": schema.get("source", "seed"), "status": schema.get("status", "active")}, up)
     detail = http("POST", rest + "dc_details?on_conflict=slug", token, {
-        "slug": slug, "title": d["title"], "description": d["description"], "csi_division": schema["csi_division"],
-        "schema_key": schema["key"], "source_kind": d["source_kind"], "image_path": paths["detail.png"],
-        "width": d["width"], "height": d["height"]}, up)[0]
+        "slug": d["slug"], "title": d["title"], "description": d["description"], "csi_division": schema["csi_division"],
+        "schema_key": schema["key"], "source_kind": d["source_kind"], "source_ref": d["source_ref"],
+        "image_path": paths["detail.png"], "width": d["width"], "height": d["height"]}, up)[0]
     review = http("POST", rest + "dc_reviews", token, {
-        "detail_id": detail["id"], "run_at": report["run_at"], "mode": report["mode"], "summary": report["summary"],
-        "counts": report["counts"], "markup_path": paths["markup.png"], "report": report,
+        "detail_id": detail["id"], "run_at": report["run_at"], "mode": report["reviewer"], "status": report["status"],
+        "summary": report["summary"], "counts": report["counts"], "markup_path": paths["markup.png"], "report": report,
         "version": VERSION}, {"Prefer": "return=representation"})[0]
-    http("POST", rest + "dc_findings", token, [{
-        "review_id": review["id"], "n": f["n"], "severity": f["severity"], "checklist_id": f["checklist_id"],
-        "title": f["title"], "issue": f["issue"], "recommendation": f["recommendation"], "basis": f["basis"],
-        "box_2d": f["box_2d"], "refs": f["references"]} for f in report["findings"]], {"Prefer": "return=minimal"})
-    log("push", "saved detail %s, review %s, %d findings" % (slug, review["id"], len(report["findings"])))
+    if report["findings"]:
+        http("POST", rest + "dc_findings", token, [{
+            "review_id": review["id"], "n": f["n"], "severity": f["severity"], "checklist_id": f["qc_id"],
+            "title": f["title"], "issue": f["issue"], "recommendation": f["recommendation"], "basis": f["basis"],
+            "box_2d": f["box_2d"], "refs": []} for f in report["findings"]], {"Prefer": "return=minimal"})
+    log("push", "saved detail %s, review %s, %d findings" % (d["slug"], review["id"], len(report["findings"])))
 
-
-# ---------------------------------------------------------------- main
 
 def main():
-    p = argparse.ArgumentParser(description="Review one architectural detail against a CSI rulebook.")
-    p.add_argument("detail", help="PDF, PNG or JPEG of one detail")
-    p.add_argument("--describe", default="", help='one line, e.g. "Exterior low-slope roof parapet detail"')
-    p.add_argument("--context", default=str(ROOT / "project_context.json"))
-    p.add_argument("--out", default=str(ROOT / "outputs"))
-    p.add_argument("--model", default=MODEL)
-    p.add_argument("--mock", action="store_true", help="no model call; use the fixture or list the checklist")
-    p.add_argument("--push", action="store_true", help="also save to the Architecture database (owner sign-in)")
-    p.add_argument("--source-kind", default="sample", choices=["sample", "sketch", "own"],
-                   help="what the detail is; office project details are not accepted")
+    p = argparse.ArgumentParser(description="Critique Detail: prepare a review packet, or apply a written review.")
+    sub = p.add_subparsers(dest="command", required=True)
+    for name, fn in (("prepare", cmd_prepare), ("apply", cmd_apply)):
+        s = sub.add_parser(name)
+        s.set_defaults(fn=fn)
+        s.add_argument("detail", help="PDF, PNG or JPEG of one detail")
+        s.add_argument("--describe", default="", help='one line, e.g. "Low-slope roof parapet"')
+        s.add_argument("--schema", default="", help="rulebook key, to skip the keyword match")
+        s.add_argument("--context", default=str(ROOT / "project_context.json"))
+        s.add_argument("--out", default=str(ROOT / "outputs"))
+    a = sub.choices["apply"]
+    a.add_argument("--review", default="", help="the reviewer's JSON (default: <detail>.review.json)")
+    a.add_argument("--gate", default="hard", choices=["hard", "soft"], help="hard rejects an unreadable drawing; soft only warns")
+    a.add_argument("--push", action="store_true", help="also save to the cloud (owner sign-in)")
+    a.add_argument("--source-kind", default="sample", choices=SOURCE_KINDS)
+    a.add_argument("--source-ref", default="", help="where the detail came from in the cloud, e.g. sketch_details:<id>")
     args = p.parse_args()
     if not Path(args.detail).exists():
         sys.exit("No such file: %s" % args.detail)
-
-    img = load_image(args.detail)
-    stem = slugify(Path(args.detail).stem)
-    log("intake", "%s, %d x %d px" % (Path(args.detail).name, img.width, img.height))
-    schema, generated = route(args.describe, img, load_schemas(), args)
-
-    warnings = step1_triage(img)
-    for w in warnings:
-        log("step 1", "warning: " + w)
-    context, lessons = step2_constraints(schema, args.context)
-    log("step 2", "%d constraints, %d lessons" % (len(context), len(lessons)))
-    data, mode = step3_audit(img, schema, context, lessons, args.describe, args)
-    log("step 3", "audit done, mode %s" % mode)
-    for m in data["completeness"]["missing"]:
-        log("step 1", "missing: " + m)
-    findings, counts = step4_prioritise(data["findings"])
-    add_references(findings, schema)
-    log("step 4", "%d critical, %d major, %d advisory" % tuple(counts[s] for s in SEVERITIES))
-
-    out = Path(args.out)
-    markup_path = out / "markups" / (stem + "_markup.png")
-    marked = step5_markup(img, findings, markup_path, mode)
-    def rel(path):
-        path = Path(path).resolve()
-        return path.relative_to(ROOT).as_posix() if path.is_relative_to(ROOT) else path.name
-    report = {
-        "tool": "detail-critique", "version": VERSION, "run_at": now(), "mode": mode,
-        "detail": {"slug": stem, "title": data.get("detail_type") or schema["title"], "description": args.describe,
-                   "input": rel(args.detail), "width": img.width, "height": img.height, "source_kind": args.source_kind},
-        "schema": {"key": schema["key"], "title": schema["title"], "csi_division": schema["csi_division"],
-                   "generated": generated, "status": schema.get("status", "active"), "checklist": schema["checklist"]},
-        "context": context, "lessons": lessons, "warnings": warnings,
-        "completeness": data["completeness"], "summary": data["summary"],
-        "checklist_results": data["checklist_results"], "counts": counts, "findings": findings,
-        "markup": rel(markup_path),
-    }
-    write_json(out / "reports" / (stem + ".json"), report)
-    (out / "reports" / (stem + ".md")).write_text(markdown(report), encoding="utf-8")
-    log("step 5", "wrote %s, %s and %s" % (rel(out / "reports" / (stem + ".json")), stem + ".md", report["markup"]))
-    if args.push:
-        buf = io.BytesIO()
-        marked.save(buf, "PNG")
-        push(report, schema, png_bytes(img, 4000), buf.getvalue())
+    args.fn(args)
 
 
 if __name__ == "__main__":

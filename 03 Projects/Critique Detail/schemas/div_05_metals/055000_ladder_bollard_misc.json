@@ -1,0 +1,17 @@
+{
+  "key": "div_05_metals/055000_ladder_bollard_misc",
+  "csi_division": "05",
+  "csi_section": "05 50 00",
+  "subcategory": "Metal Fabrications",
+  "title": "Miscellaneous metal: ladder, bollard, grating",
+  "keywords": [
+    "ladder",
+    "bollard",
+    "grating",
+    "metal fabrication"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}
