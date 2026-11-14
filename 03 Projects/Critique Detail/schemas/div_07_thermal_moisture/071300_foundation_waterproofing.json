@@ -1,6 +1,8 @@
 {
-  "key": "div_07_thermal_moisture/waterproofing",
+  "key": "div_07_thermal_moisture/071300_foundation_waterproofing",
   "csi_division": "07",
+  "csi_section": "07 13 00",
+  "subcategory": "Sheet Waterproofing",
   "title": "Below-grade waterproofing at foundation wall",
   "keywords": [
     "waterproofing",
@@ -26,7 +28,7 @@
     {
       "id": "WP-2",
       "item": "The wall-to-footing joint has a cant or fillet and a reinforced membrane strip; a waterstop is shown at the cold joint.",
-      "why": "The footing joint is where hydrostatic pressure finds its way in.",
+      "why": "The footing joint is where water pressure finds its way in.",
       "default_severity": "CRITICAL",
       "tags": [
         "joint",
@@ -63,12 +65,12 @@
     },
     {
       "id": "WP-6",
-      "item": "Finished grade slopes away from the wall (5% for the first 10 ft / 3 m) and the vapour retarder under the slab laps to the wall membrane.",
+      "item": "Finished grade slopes away from the wall and the vapor retarder under the slab laps to the wall membrane.",
       "why": "Surface water is cheaper to turn away than to resist.",
       "default_severity": "ADVISORY",
       "tags": [
         "grading",
-        "vapour"
+        "vapor"
       ]
     }
   ]

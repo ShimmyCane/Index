@@ -1,0 +1,15 @@
+{
+  "key": "div_07_thermal_moisture/072700_air_barrier_transition",
+  "csi_division": "07",
+  "csi_section": "07 27 00",
+  "subcategory": "Air Barriers",
+  "title": "Air barrier transition between assemblies",
+  "keywords": [
+    "air barrier",
+    "transition membrane"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

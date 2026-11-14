@@ -1,0 +1,77 @@
+{
+  "key": "div_07_thermal_moisture/077200_roof_curb",
+  "csi_division": "07",
+  "csi_section": "07 72 00",
+  "subcategory": "Roof Accessories",
+  "title": "Roof curb for equipment, hatch or skylight",
+  "keywords": [
+    "roof curb",
+    "equipment curb",
+    "roof hatch",
+    "curb"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "RC-1",
+      "item": "Top of curb is at least 8 in (200 mm) above the finished roof surface, including tapered insulation at its highest.",
+      "why": "Curbs set before the insulation end up too low.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "height",
+        "flashing"
+      ]
+    },
+    {
+      "id": "RC-2",
+      "item": "Membrane base flashing runs up the curb and is covered by the unit's counter-flashing or cap.",
+      "why": "An exposed flashing top is a leak.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "membrane",
+        "flashing"
+      ]
+    },
+    {
+      "id": "RC-3",
+      "item": "A cricket is shown on the high side of curbs wider than 24 in (600 mm).",
+      "why": "Water dams behind wide curbs.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "slope",
+        "drainage"
+      ]
+    },
+    {
+      "id": "RC-4",
+      "item": "Curb is insulated and attached to structure; equipment anchorage is referenced.",
+      "why": "Wind and seismic loads go through the curb.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "structure",
+        "thermal"
+      ]
+    },
+    {
+      "id": "RC-5",
+      "item": "Clearance from the curb to other curbs, walls and the roof edge allows the flashing to be installed.",
+      "why": "Curbs too close together cannot be flashed.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "constructability"
+      ]
+    },
+    {
+      "id": "RC-6",
+      "item": "Curb type, height and the unit it carries are tagged.",
+      "why": "The curb is often supplied by another trade.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "labels",
+        "coordination"
+      ]
+    }
+  ]
+}

@@ -1,54 +1,13 @@
 {
-  "_note": "Base for a newly generated rulebook. run_review.py fills it when a detail matches no schema. Exactly 6 checklist items. Severity is CRITICAL (water or structure failure), MAJOR (code or mandate non-compliance) or ADVISORY (lesson learned, best practice).",
-  "key": "div_XX_name/detail_type",
+  "_note": "Base for a new rulebook. A stub has an empty checklist; the reviewer writes exactly 6 items the first time a detail of that type is reviewed. Severity is CRITICAL (water or structure failure), MAJOR (code or mandate non-compliance) or ADVISORY (lesson learned, best practice). Optional per item: \"when\": {\"key\": <project_context key>, \"in\": [values]}, and \"good\": path to a small image of a correct detail.",
+  "key": "div_XX_name/XXXXXX_detail_type",
   "csi_division": "XX",
   "title": "",
   "keywords": [],
   "source": "auto",
-  "status": "draft",
+  "status": "stub",
   "version": 1,
-  "checklist": [
-    {
-      "id": "XX-1",
-      "item": "",
-      "why": "",
-      "default_severity": "MAJOR",
-      "tags": []
-    },
-    {
-      "id": "XX-2",
-      "item": "",
-      "why": "",
-      "default_severity": "MAJOR",
-      "tags": []
-    },
-    {
-      "id": "XX-3",
-      "item": "",
-      "why": "",
-      "default_severity": "MAJOR",
-      "tags": []
-    },
-    {
-      "id": "XX-4",
-      "item": "",
-      "why": "",
-      "default_severity": "MAJOR",
-      "tags": []
-    },
-    {
-      "id": "XX-5",
-      "item": "",
-      "why": "",
-      "default_severity": "MAJOR",
-      "tags": []
-    },
-    {
-      "id": "XX-6",
-      "item": "",
-      "why": "",
-      "default_severity": "MAJOR",
-      "tags": []
-    }
-  ]
+  "checklist": [],
+  "csi_section": "XX XX XX",
+  "subcategory": ""
 }

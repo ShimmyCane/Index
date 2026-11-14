@@ -1,9 +1,15 @@
-# Real details never go in this public repo. Only the synthetic sample is tracked.
+# Working details stay on this computer. Only the synthetic samples are tracked.
 inputs/*
 !inputs/detail_sample.png
-!inputs/detail_sample.mock.json
+!inputs/detail_sample.review.json
+!inputs/detail_slop.png
+!inputs/detail_slop.review.json
+outputs/packets/
 outputs/reports/*
 !outputs/reports/detail_sample.json
 !outputs/reports/detail_sample.md
+!outputs/reports/detail_slop.json
+!outputs/reports/detail_slop.md
 outputs/markups/*
 !outputs/markups/detail_sample_markup.png
+!outputs/markups/detail_slop_markup.png

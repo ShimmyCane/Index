@@ -1,14 +1,14 @@
 {
-  "key": "div_04_masonry/brick_veneer_base",
+  "key": "div_04_masonry/042113_brick_veneer_base",
   "csi_division": "04",
+  "csi_section": "04 21 13",
+  "subcategory": "Brick Masonry",
   "title": "Brick veneer at base of wall",
   "keywords": [
     "brick",
     "veneer",
-    "masonry",
     "weep",
-    "base of wall",
-    "shelf angle"
+    "base of wall"
   ],
   "source": "seed",
   "status": "active",
@@ -16,7 +16,7 @@
   "checklist": [
     {
       "id": "BV-1",
-      "item": "Through-wall flashing at the base laps up the backup at least 8 in (200 mm), under the water-resistive barrier, and runs to the face of the veneer with a drip edge.",
+      "item": "Through-wall flashing at the base laps up the backup at least 8 in (200 mm), under the water barrier, and runs to the face of the veneer with a drip edge.",
       "why": "Flashing stopped short of the face lets water run back under the wall.",
       "default_severity": "CRITICAL",
       "tags": [
@@ -64,7 +64,7 @@
     {
       "id": "BV-6",
       "item": "Base of veneer sits at least 6 in (150 mm) above grade or 2 in (50 mm) above paving, and the movement joint below a shelf angle is dimensioned.",
-      "why": "Brick near grade wicks water and spalls in freeze-thaw.",
+      "why": "Brick near grade wicks water and spalls.",
       "default_severity": "ADVISORY",
       "tags": [
         "grade",

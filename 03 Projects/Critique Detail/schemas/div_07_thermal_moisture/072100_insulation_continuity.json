@@ -1,0 +1,16 @@
+{
+  "key": "div_07_thermal_moisture/072100_insulation_continuity",
+  "csi_division": "07",
+  "csi_section": "07 21 00",
+  "subcategory": "Thermal Insulation",
+  "title": "Insulation continuity at a wall, floor or roof junction",
+  "keywords": [
+    "insulation",
+    "thermal bridge",
+    "continuous insulation"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

@@ -1,8 +1,11 @@
 {
   "tool": "detail-critique",
-  "version": "0.1.0",
-  "run_at": "2026-11-14T12:14:04Z",
-  "mode": "mock (hand-written fixture detail_sample.mock.json)",
+  "version": "0.2.0",
+  "run_at": "2026-11-14T12:55:10Z",
+  "reviewer": "Claude, in a Claude Code session (2026-11-14)",
+  "status": "reviewed",
+  "verdict": "REVISE",
+  "verdict_note": "3 critical finding(s). Not ready to issue.",
   "detail": {
     "slug": "detail_sample",
     "title": "Low-slope roof parapet section",
@@ -10,165 +13,287 @@
     "input": "inputs/detail_sample.png",
     "width": 1600,
     "height": 1200,
-    "source_kind": "sample"
+    "source_kind": "sample",
+    "source_ref": ""
   },
   "schema": {
-    "key": "div_07_thermal_moisture/roof_parapet",
+    "key": "div_07_thermal_moisture/077100_roof_parapet",
     "title": "Low-slope roof parapet",
     "csi_division": "07",
-    "generated": false,
+    "csi_section": "07 71 00",
+    "subcategory": "Roof Specialties",
     "status": "active",
-    "checklist": [
-      {
-        "id": "RP-1",
-        "item": "Coping or cap slopes back to the roof side and has a drip edge clear of both wall faces.",
-        "why": "A flat or outward-sloping cap holds water and stains or wets the facade.",
-        "default_severity": "CRITICAL",
-        "tags": [
-          "flashing",
-          "slope"
-        ]
-      },
-      {
-        "id": "RP-2",
-        "item": "Roof membrane base flashing turns up the parapet at least 8 in (200 mm) above the finished roof surface and is terminated and counter-flashed.",
-        "why": "Low or unterminated base flashing is the most common parapet leak.",
-        "default_severity": "CRITICAL",
-        "tags": [
-          "membrane",
-          "flashing"
-        ]
-      },
-      {
-        "id": "RP-3",
-        "item": "A continuous membrane or sheet-metal underlayment runs over the top of the parapet, under the coping, lapped onto both faces.",
-        "why": "Coping joints leak; the layer below is what keeps water out of the wall.",
-        "default_severity": "CRITICAL",
-        "tags": [
-          "membrane",
-          "coping"
-        ]
-      },
-      {
-        "id": "RP-4",
-        "item": "Air and water barrier of the wall is shown continuous with the roof membrane across the parapet.",
-        "why": "A break here lets interior air into the parapet, where it condenses.",
-        "default_severity": "MAJOR",
-        "tags": [
-          "air barrier",
-          "continuity"
-        ]
-      },
-      {
-        "id": "RP-5",
-        "item": "Continuous insulation wraps the parapet or the thermal break at the roof-to-wall line is shown; R-value meets the energy code for the project climate zone.",
-        "why": "An uninsulated parapet is a thermal bridge around the whole roof.",
-        "default_severity": "MAJOR",
-        "tags": [
-          "thermal",
-          "energy code"
-        ]
-      },
-      {
-        "id": "RP-6",
-        "item": "Cant or tapered edge, fastening of the coping (continuous cleat) and the wood blocking are labelled, with a scale and material tags.",
-        "why": "The builder needs these to price and build it; missing labels become RFIs.",
-        "default_severity": "ADVISORY",
-        "tags": [
-          "labels",
-          "constructability"
-        ]
-      }
-    ]
+    "source": "seed"
   },
   "context": {
     "project": "Sample Library Annex (synthetic)",
-    "building_code": "IBC 2021",
-    "energy_code": "IECC 2021 commercial",
-    "ashrae_climate_zone": "5A",
+    "building_code": "2025 California Building Code (Title 24, Part 2)",
+    "energy_code": "2025 California Energy Code (Title 24, Part 6)",
+    "accessibility_code": "2025 CBC Chapter 11B",
+    "green_code": "2025 CALGreen (Title 24, Part 11)",
+    "climate_zone": "California climate zone 3",
+    "seismic_design_category": "D",
+    "fire_hazard_severity_zone": false,
     "construction_type": "II-B",
     "occupancy": "A-3",
+    "units": "inches first, millimetres in brackets",
     "mandates": [
-      "Continuous exterior insulation on all opaque walls and roof edges; no uninsulated parapets.",
-      "Exposed sheet metal is prefinished aluminium, colour to match window frames.",
-      "No exposed sealant as the primary line of water defence."
-    ],
-    "min_roof_base_flashing_height_in": 8
+      {
+        "id": "PM-1",
+        "text": "Continuous exterior insulation on all opaque walls and roof edges; no uninsulated parapets.",
+        "applies_to": [
+          "04",
+          "05",
+          "07",
+          "08"
+        ],
+        "severity": "MAJOR"
+      },
+      {
+        "id": "PM-2",
+        "text": "Exposed sheet metal is prefinished aluminium, colour to match window frames.",
+        "applies_to": [
+          "07",
+          "08"
+        ],
+        "severity": "MAJOR"
+      },
+      {
+        "id": "PM-3",
+        "text": "No exposed sealant as the primary line of water defence.",
+        "applies_to": [
+          "04",
+          "07",
+          "08"
+        ],
+        "severity": "MAJOR"
+      }
+    ]
   },
-  "lessons": [
-    {
-      "id": "L-001",
-      "category": "div_07_thermal_moisture/roof_parapet",
-      "severity": "ADVISORY",
-      "text": "Coping joints opened after two winters where no membrane ran under the cap. Always draw the under-coping membrane and tag it.",
-      "source": "synthetic"
+  "gate": {
+    "verdict": "pass",
+    "mode": "hard",
+    "reasons": [],
+    "warnings": [
+      "No scale is shown."
+    ],
+    "checks": {
+      "scale_shown": false,
+      "materials_labelled": true,
+      "geometry_clear": true
     },
-    {
-      "id": "L-002",
-      "category": "div_07_thermal_moisture/roof_parapet",
-      "severity": "ADVISORY",
-      "text": "Parapets under 12 in high leave no room for an 8 in base flashing plus counter-flashing. Check the parapet height against the tapered insulation high point.",
-      "source": "synthetic"
-    },
-    {
-      "id": "L-004",
-      "category": "*",
-      "severity": "ADVISORY",
-      "text": "Details issued without a scale or material tags produced the most RFIs. Tag every hatch.",
-      "source": "synthetic"
-    }
-  ],
-  "warnings": [],
-  "completeness": {
-    "scale_shown": false,
-    "materials_labelled": true,
-    "geometry_clear": true,
     "missing": [
       "scale bar or stated scale",
       "dimensions for parapet height and coping overhang"
     ]
   },
-  "summary": "The parapet is shown as a single uninsulated block wall with a flat coping and a 4 in membrane upturn. Three items would let water in; two more fail the project mandates.",
-  "checklist_results": [
+  "summary": "The parapet is a single uninsulated block wall with a flat coping and a 4 in membrane upturn. Three items would let water in. Three more fail the code or the project mandates.",
+  "qc_list": [
     {
       "id": "RP-1",
+      "item": "Coping or cap slopes back to the roof side and has a drip edge clear of both wall faces.",
+      "why": "A flat or outward-sloping cap holds water and stains or wets the facade.",
+      "severity": "CRITICAL",
+      "origin": "rulebook",
+      "tags": [
+        "flashing",
+        "slope"
+      ],
+      "good": "library/good_details/077100_roof_parapet/RP-1.jpg",
       "status": "fail",
-      "note": "Coping drawn flat with no drip."
+      "note": "Coping drawn flat with no drip.",
+      "evidence_box": null,
+      "proof": "disproven"
     },
     {
       "id": "RP-2",
+      "item": "Roof membrane base flashing turns up the parapet at least 8 in (200 mm) above the finished roof surface and is terminated and counter-flashed.",
+      "why": "Low or unterminated base flashing is the most common parapet leak.",
+      "severity": "CRITICAL",
+      "origin": "rulebook",
+      "tags": [
+        "membrane",
+        "flashing"
+      ],
+      "good": "library/good_details/077100_roof_parapet/RP-2.jpg",
       "status": "fail",
-      "note": "Upturn labelled 4 in; no termination or counter-flashing."
+      "note": "Upturn labelled 4 in; no termination or counter-flashing.",
+      "evidence_box": null,
+      "proof": "disproven"
     },
     {
       "id": "RP-3",
+      "item": "A continuous membrane or sheet-metal underlayment runs over the top of the parapet, under the coping, lapped onto both faces.",
+      "why": "Coping joints leak; the layer below is what keeps water out of the wall.",
+      "severity": "CRITICAL",
+      "origin": "rulebook",
+      "tags": [
+        "membrane",
+        "coping"
+      ],
+      "good": "library/good_details/077100_roof_parapet/RP-3.jpg",
       "status": "fail",
-      "note": "Nothing drawn between coping and block."
+      "note": "Nothing drawn between coping and block.",
+      "evidence_box": null,
+      "proof": "disproven"
     },
     {
       "id": "RP-4",
+      "item": "Air and water barrier of the wall is shown continuous with the roof membrane across the parapet.",
+      "why": "A break here lets interior air into the parapet, where it condenses.",
+      "severity": "MAJOR",
+      "origin": "rulebook",
+      "tags": [
+        "air barrier",
+        "continuity"
+      ],
+      "good": "library/good_details/077100_roof_parapet/RP-4.jpg",
       "status": "not_shown",
-      "note": "No air or water barrier drawn on the wall."
+      "note": "No air or water barrier is drawn on the wall.",
+      "evidence_box": null,
+      "proof": "unproven"
     },
     {
       "id": "RP-5",
+      "item": "Continuous insulation wraps the parapet or the thermal break at the roof-to-wall line is shown; R-value meets the energy code for the project climate zone.",
+      "why": "An uninsulated parapet is a thermal bridge around the whole roof.",
+      "severity": "MAJOR",
+      "origin": "rulebook",
+      "tags": [
+        "thermal",
+        "energy code"
+      ],
+      "good": "library/good_details/077100_roof_parapet/RP-5.jpg",
       "status": "fail",
-      "note": "Wall insulation stops at the roof slab."
+      "note": "Wall insulation stops at the roof slab.",
+      "evidence_box": null,
+      "proof": "disproven"
     },
     {
       "id": "RP-6",
+      "item": "Cant or tapered edge, fastening of the coping (continuous cleat) and the wood blocking are labelled, with a scale and material tags.",
+      "why": "The builder needs these to price and build it; missing labels become RFIs.",
+      "severity": "ADVISORY",
+      "origin": "rulebook",
+      "tags": [
+        "labels",
+        "constructability"
+      ],
+      "good": "library/good_details/077100_roof_parapet/RP-6.jpg",
       "status": "fail",
-      "note": "No cleat, blocking, cant or scale."
+      "note": "No cleat, blocking, cant or scale.",
+      "evidence_box": null,
+      "proof": "disproven"
+    },
+    {
+      "id": "RP-7",
+      "item": "Parapet bracing or reinforcing is shown or referenced to structural where the building is in a high seismic design category.",
+      "why": "Unbraced parapets are a falling hazard in an earthquake.",
+      "severity": "MAJOR",
+      "origin": "condition",
+      "tags": [
+        "structure",
+        "seismic"
+      ],
+      "good": "library/good_details/077100_roof_parapet/RP-7.jpg",
+      "status": "not_shown",
+      "note": "No reinforcing or bracing shown or referenced; project is seismic design category D.",
+      "evidence_box": null,
+      "proof": "unproven"
+    },
+    {
+      "id": "PM-1",
+      "item": "Project mandate: Continuous exterior insulation on all opaque walls and roof edges; no uninsulated parapets.",
+      "why": "Set by the project requirements.",
+      "severity": "MAJOR",
+      "origin": "mandate",
+      "tags": [],
+      "good": "",
+      "status": "fail",
+      "note": "Same as RP-5: the parapet has no exterior insulation.",
+      "evidence_box": null,
+      "proof": "disproven"
+    },
+    {
+      "id": "PM-2",
+      "item": "Project mandate: Exposed sheet metal is prefinished aluminium, colour to match window frames.",
+      "why": "Set by the project requirements.",
+      "severity": "MAJOR",
+      "origin": "mandate",
+      "tags": [],
+      "good": "",
+      "status": "pass",
+      "note": "Coping is tagged prefinished aluminium.",
+      "evidence_box": [
+        150,
+        545,
+        215,
+        925
+      ],
+      "proof": "proven"
+    },
+    {
+      "id": "PM-3",
+      "item": "Project mandate: No exposed sealant as the primary line of water defence.",
+      "why": "Set by the project requirements.",
+      "severity": "MAJOR",
+      "origin": "mandate",
+      "tags": [],
+      "good": "",
+      "status": "pass",
+      "note": "No sealant joint is drawn as a water line, so there is nothing to point to.",
+      "evidence_box": null,
+      "proof": "claimed"
+    },
+    {
+      "id": "L-001",
+      "item": "Lesson learned: Coping joints opened after two winters where no membrane ran under the cap. Always draw the under-coping membrane and tag it.",
+      "why": "From past QA.",
+      "severity": "ADVISORY",
+      "origin": "lesson",
+      "tags": [],
+      "good": "",
+      "status": "fail",
+      "note": "Same as RP-3: no membrane under the coping.",
+      "evidence_box": null,
+      "proof": "disproven"
+    },
+    {
+      "id": "L-002",
+      "item": "Lesson learned: Parapets under 12 in high leave no room for an 8 in base flashing plus counter-flashing. Check the parapet height against the tapered insulation high point.",
+      "why": "From past QA.",
+      "severity": "ADVISORY",
+      "origin": "lesson",
+      "tags": [],
+      "good": "",
+      "status": "not_shown",
+      "note": "Parapet height is not dimensioned, so the room for an 8 in base flashing cannot be checked.",
+      "evidence_box": null,
+      "proof": "unproven"
+    },
+    {
+      "id": "L-004",
+      "item": "Lesson learned: Details issued without a scale or material tags produced the most RFIs. Tag every hatch.",
+      "why": "From past QA.",
+      "severity": "ADVISORY",
+      "origin": "lesson",
+      "tags": [],
+      "good": "",
+      "status": "fail",
+      "note": "No scale on the sheet.",
+      "evidence_box": null,
+      "proof": "disproven"
     }
   ],
+  "skipped_by_condition": [],
   "counts": {
     "CRITICAL": 3,
-    "MAJOR": 2,
+    "MAJOR": 3,
     "ADVISORY": 1
   },
   "findings": [
     {
-      "checklist_id": "RP-2",
+      "qc_id": "RP-2",
       "severity": "CRITICAL",
       "title": "Membrane upturn is 4 in, not terminated",
       "issue": "The roof membrane turns up the parapet only 4 in and ends with no termination bar or counter-flashing. Ponding water or wind-driven rain gets behind it.",
@@ -182,27 +307,14 @@
       ],
       "confidence": "high",
       "n": 1,
-      "references": [
-        {
-          "id": "OT-07-01",
-          "title": "Typical parapet with metal coping (placeholder)",
-          "library": "office_typical_details",
-          "file": "private/OT-07-01.pdf"
-        },
-        {
-          "id": "MS-07-01",
-          "title": "Generic single-ply membrane parapet termination (placeholder)",
-          "library": "manufacturer_standards",
-          "file": "private/MS-07-01.pdf"
-        }
-      ]
+      "good": "library/good_details/077100_roof_parapet/RP-2.jpg"
     },
     {
-      "checklist_id": "RP-1",
+      "qc_id": "RP-1",
       "severity": "CRITICAL",
       "title": "Coping is flat and has no drip edge",
       "issue": "The coping is drawn level and flush with both wall faces. Water sits on it and runs down the cladding and the block.",
-      "recommendation": "Slope the coping to the roof side (about 1:12), extend it past both faces and add drip edges. Show the continuous cleat.",
+      "recommendation": "Slope the coping to the roof side, extend it past both faces and add drip edges. Show the continuous cleat.",
       "basis": "building_science",
       "box_2d": [
         175,
@@ -212,27 +324,14 @@
       ],
       "confidence": "high",
       "n": 2,
-      "references": [
-        {
-          "id": "OT-07-01",
-          "title": "Typical parapet with metal coping (placeholder)",
-          "library": "office_typical_details",
-          "file": "private/OT-07-01.pdf"
-        },
-        {
-          "id": "MS-07-01",
-          "title": "Generic single-ply membrane parapet termination (placeholder)",
-          "library": "manufacturer_standards",
-          "file": "private/MS-07-01.pdf"
-        }
-      ]
+      "good": "library/good_details/077100_roof_parapet/RP-1.jpg"
     },
     {
-      "checklist_id": "RP-3",
+      "qc_id": "RP-3",
       "severity": "CRITICAL",
       "title": "No membrane under the coping",
       "issue": "The coping sits directly on open block. Every coping joint is a leak path into the cores of the wall.",
-      "recommendation": "Add a continuous membrane over wood blocking on top of the parapet, lapped down both faces, before the coping.",
+      "recommendation": "Add a continuous membrane over sloped wood blocking on top of the parapet, lapped down both faces, before the coping.",
       "basis": "building_science",
       "box_2d": [
         212,
@@ -242,27 +341,14 @@
       ],
       "confidence": "high",
       "n": 3,
-      "references": [
-        {
-          "id": "OT-07-01",
-          "title": "Typical parapet with metal coping (placeholder)",
-          "library": "office_typical_details",
-          "file": "private/OT-07-01.pdf"
-        },
-        {
-          "id": "MS-07-01",
-          "title": "Generic single-ply membrane parapet termination (placeholder)",
-          "library": "manufacturer_standards",
-          "file": "private/MS-07-01.pdf"
-        }
-      ]
+      "good": "library/good_details/077100_roof_parapet/RP-3.jpg"
     },
     {
-      "checklist_id": "RP-5",
+      "qc_id": "RP-5",
       "severity": "MAJOR",
       "title": "Parapet is an uninsulated thermal bridge",
-      "issue": "Exterior insulation stops at the roof slab. The parapet above it is bare block, which breaks the project mandate for continuous exterior insulation and the energy code intent in zone 5A.",
-      "recommendation": "Continue the exterior insulation up the outside face and across the top of the parapet, or add a structural thermal break at the roof line.",
+      "issue": "Exterior insulation stops at the roof slab. The parapet above it is bare block. That breaks project mandate PM-1 (continuous exterior insulation, no uninsulated parapets).",
+      "recommendation": "Continue the exterior insulation up the outside face to the top of the parapet and insulate the roof side, or add a structural thermal break at the roof line.",
       "basis": "project_rule",
       "box_2d": [
         208,
@@ -272,17 +358,10 @@
       ],
       "confidence": "high",
       "n": 4,
-      "references": [
-        {
-          "id": "OT-07-01",
-          "title": "Typical parapet with metal coping (placeholder)",
-          "library": "office_typical_details",
-          "file": "private/OT-07-01.pdf"
-        }
-      ]
+      "good": "library/good_details/077100_roof_parapet/RP-5.jpg"
     },
     {
-      "checklist_id": "RP-4",
+      "qc_id": "RP-4",
       "severity": "MAJOR",
       "title": "Air and water barrier not shown across the roof-to-wall line",
       "issue": "No wall air barrier is drawn, so there is nothing for the roof membrane to tie into.",
@@ -296,14 +375,31 @@
       ],
       "confidence": "high",
       "n": 5,
-      "references": []
+      "good": "library/good_details/077100_roof_parapet/RP-4.jpg"
     },
     {
-      "checklist_id": "RP-6",
+      "qc_id": "RP-7",
+      "severity": "MAJOR",
+      "title": "Parapet reinforcing or bracing not shown",
+      "issue": "The block parapet has no reinforcing, bracing or structural reference. The project is in seismic design category D.",
+      "recommendation": "Show the reinforcing or reference the structural detail for the parapet.",
+      "basis": "project_rule",
+      "box_2d": [
+        270,
+        560,
+        390,
+        665
+      ],
+      "confidence": "medium",
+      "n": 6,
+      "good": "library/good_details/077100_roof_parapet/RP-7.jpg"
+    },
+    {
+      "qc_id": "L-004",
       "severity": "ADVISORY",
       "title": "No scale, cleat, blocking or cant",
       "issue": "The detail has no scale and leaves out the coping cleat, the wood blocking and the cant at the roof edge.",
-      "recommendation": "Add the scale and tag each item. See lesson L-004.",
+      "recommendation": "Add the scale and tag each item.",
       "basis": "lesson_learned",
       "box_2d": [
         935,
@@ -312,8 +408,63 @@
         900
       ],
       "confidence": "high",
-      "n": 6,
-      "references": []
+      "n": 7,
+      "good": ""
+    }
+  ],
+  "proof": {
+    "proven": 1,
+    "claimed": 1,
+    "disproven": 8,
+    "unproven": 3,
+    "total": 13,
+    "must": 9,
+    "open": [
+      "RP-1",
+      "RP-2",
+      "RP-3",
+      "RP-4",
+      "RP-5",
+      "RP-7",
+      "PM-1",
+      "PM-3"
+    ],
+    "verdict": "NOT PROVEN"
+  },
+  "control_layers": [
+    {
+      "layer": "water",
+      "status": "broken",
+      "note": "The roof membrane stops 4 in up the parapet. Nothing covers the top of the wall.",
+      "break_box": [
+        395,
+        525,
+        480,
+        572
+      ]
+    },
+    {
+      "layer": "air",
+      "status": "not_shown",
+      "note": "No air barrier is drawn on the wall or across the roof line.",
+      "break_box": null
+    },
+    {
+      "layer": "thermal",
+      "status": "broken",
+      "note": "Roof insulation and wall insulation do not meet: the parapet between them is bare block.",
+      "break_box": [
+        208,
+        650,
+        533,
+        725
+      ]
+    },
+    {
+      "layer": "vapor",
+      "status": "not_shown",
+      "note": "No vapor control layer is drawn or named.",
+      "break_box": null
     }
   ],
   "markup": "outputs/markups/detail_sample_markup.png"

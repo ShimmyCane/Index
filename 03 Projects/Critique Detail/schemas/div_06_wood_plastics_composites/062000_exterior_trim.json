@@ -1,0 +1,17 @@
+{
+  "key": "div_06_wood_plastics_composites/062000_exterior_trim",
+  "csi_division": "06",
+  "csi_section": "06 20 00",
+  "subcategory": "Finish Carpentry",
+  "title": "Exterior wood trim and fascia",
+  "keywords": [
+    "trim",
+    "fascia",
+    "soffit",
+    "wood trim"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

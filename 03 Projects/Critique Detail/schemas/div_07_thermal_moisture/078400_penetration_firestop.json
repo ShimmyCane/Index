@@ -1,0 +1,74 @@
+{
+  "key": "div_07_thermal_moisture/078400_penetration_firestop",
+  "csi_division": "07",
+  "csi_section": "07 84 00",
+  "subcategory": "Firestopping",
+  "title": "Through-penetration firestop",
+  "keywords": [
+    "firestop",
+    "penetration",
+    "rated wall penetration",
+    "fire caulk"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "FS-1",
+      "item": "The rating of the wall or floor is stated and the firestop system has the same F rating (and T rating where required).",
+      "why": "A firestop is only valid as a tested system matched to the assembly.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "code",
+        "rating"
+      ]
+    },
+    {
+      "id": "FS-2",
+      "item": "A tested system number (for example a listing reference) is called out, or the detail says the contractor submits one for each condition.",
+      "why": "Generic 'fire caulk' notes do not pass inspection.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "code",
+        "listing"
+      ]
+    },
+    {
+      "id": "FS-3",
+      "item": "Annular space, penetrant type and size, sleeve and insulation on the pipe are shown, since each changes the system.",
+      "why": "The listing depends on exactly these items.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "dimensions"
+      ]
+    },
+    {
+      "id": "FS-4",
+      "item": "Backing material and sealant depth are shown.",
+      "why": "Depth is part of the tested system.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "dimensions"
+      ]
+    },
+    {
+      "id": "FS-5",
+      "item": "Where the floor needs it, a W (water) or L (smoke leakage) rating is noted.",
+      "why": "Required in some occupancies and for smoke barriers.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "rating"
+      ]
+    },
+    {
+      "id": "FS-6",
+      "item": "Membrane penetrations (boxes, recessed items) are distinguished from through-penetrations.",
+      "why": "They follow different rules.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "code"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "key": "div_12_furnishings/123600_countertop_section",
+  "csi_division": "12",
+  "csi_section": "12 36 00",
+  "subcategory": "Countertops",
+  "title": "Countertop and backsplash section",
+  "keywords": [
+    "countertop",
+    "backsplash",
+    "vanity"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

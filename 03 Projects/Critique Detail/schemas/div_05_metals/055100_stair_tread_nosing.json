@@ -1,0 +1,76 @@
+{
+  "key": "div_05_metals/055100_stair_tread_nosing",
+  "csi_division": "05",
+  "csi_section": "05 51 00",
+  "subcategory": "Metal Stairs",
+  "title": "Stair tread, riser and nosing",
+  "keywords": [
+    "stair",
+    "tread",
+    "riser",
+    "nosing",
+    "stringer"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "ST-1",
+      "item": "Riser height and tread depth are dimensioned and within the building code limits, and uniform within the flight.",
+      "why": "Uneven risers are the main cause of stair falls and a common plan-check comment.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "code",
+        "dimensions"
+      ]
+    },
+    {
+      "id": "ST-2",
+      "item": "Nosing profile and projection are shown, with a contrasting stripe where the accessibility code requires one.",
+      "why": "Open or sharp nosings catch feet; the stripe is an accessibility requirement.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "accessibility",
+        "nosing"
+      ]
+    },
+    {
+      "id": "ST-3",
+      "item": "Connection of stringer to landing and floor structure is shown, with the load path to structure.",
+      "why": "A stair that only bears on finish topping fails.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "structure"
+      ]
+    },
+    {
+      "id": "ST-4",
+      "item": "Exterior stairs: treads drain, no surface holds water, and dissimilar metals are separated.",
+      "why": "Ponding treads are a slip hazard and rust from the inside.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "water",
+        "exterior"
+      ]
+    },
+    {
+      "id": "ST-5",
+      "item": "Tread surface, pan fill and slip resistance are specified.",
+      "why": "A smooth tread is a slip hazard.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "finish"
+      ]
+    },
+    {
+      "id": "ST-6",
+      "item": "Clear headroom, landing depth and handrail extensions are referenced to the related details.",
+      "why": "These are checked together at plan check.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "coordination"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "key": "div_08_openings/089100_louver_in_wall",
+  "csi_division": "08",
+  "csi_section": "08 91 00",
+  "subcategory": "Louvers",
+  "title": "Louver in an exterior wall",
+  "keywords": [
+    "louver",
+    "vent",
+    "grille"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

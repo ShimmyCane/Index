@@ -1,0 +1,17 @@
+{
+  "key": "div_05_metals/054000_stud_wall_deflection_head",
+  "csi_division": "05",
+  "csi_section": "05 40 00",
+  "subcategory": "Cold-Formed Metal Framing",
+  "title": "Exterior stud wall at floor line or deflection head",
+  "keywords": [
+    "metal stud",
+    "deflection track",
+    "slip track",
+    "cold-formed"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

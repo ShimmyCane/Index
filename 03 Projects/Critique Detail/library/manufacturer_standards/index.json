@@ -1,15 +1,4 @@
 {
-  "_note": "Vendor reference details. This index is public and holds SYNTHETIC placeholders only. Put the real drawing files in library/manufacturer_standards/private/ (ignored by git) and list them here by title, not by client.",
-  "details": [
-    {
-      "id": "MS-07-01",
-      "title": "Generic single-ply membrane parapet termination (placeholder)",
-      "schema_key": "div_07_thermal_moisture/roof_parapet",
-      "tags": [
-        "membrane",
-        "flashing"
-      ],
-      "file": "private/MS-07-01.pdf"
-    }
-  ]
+  "_note": "Vendor reference details. Same rule as the office list: link to a cloud detail only. Empty for now.",
+  "details": []
 }
