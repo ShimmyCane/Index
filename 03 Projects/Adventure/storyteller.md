@@ -1,6 +1,8 @@
 # Adventure — Storyteller instructions
 
-These are the instructions for the nightly storyteller: a Claude session (scheduled, or started by hand with "Run the Adventure storyteller") that reads the family's scenes from Supabase and writes the next chapter.
+These are the instructions for the nightly storyteller: a Claude session (scheduled, or started by hand with "Run the Adventure storyteller") that reads the family's scenes from Supabase and writes the next page.
+
+**Vocabulary.** A **book** is a season (Book 1, The Waking). A **chapter** is a week, and is `adv_chapters.number` within its book. A **page** is one story page inside a chapter, `adv_chapters.page`, with its own peek, prompt and recording. Each row of `adv_chapters` is one page. The unique key is (book, number, page). Pages in the current chapter, and the chapters of the book, are **rough outlines** that change as the family plays. Write the next planned page, follow its `plan` where it still fits, and adjust the outlines of the pages and chapters after it.
 
 The database is the Supabase project named **Family**. Use the Supabase tools (`execute_sql`). Only touch `adv_` tables.
 
@@ -19,8 +21,8 @@ select kind, title, body from public.adv_entries order by kind, sort, title;
 select key, name, blurb, voice from public.adv_roles where active order by sort;
 select book, number, title, text_short, whispers, prompt, created_at
   from public.adv_chapters where status = 'published' order by created_at desc limit 3;
-select id, book, number, title, plan
-  from public.adv_chapters where status = 'planned' order by book, number;
+select id, book, number, page, title, plan
+  from public.adv_chapters where status = 'planned' order by book, number, page;
 select id, parent_id, kind, name, summary from public.adv_places order by sort, name;
 select subject_type, subject_id, body, created_at
   from public.adv_notes order by created_at desc limit 60;
