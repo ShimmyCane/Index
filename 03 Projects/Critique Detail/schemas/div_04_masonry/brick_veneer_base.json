@@ -1,0 +1,75 @@
+{
+  "key": "div_04_masonry/brick_veneer_base",
+  "csi_division": "04",
+  "title": "Brick veneer at base of wall",
+  "keywords": [
+    "brick",
+    "veneer",
+    "masonry",
+    "weep",
+    "base of wall",
+    "shelf angle"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "BV-1",
+      "item": "Through-wall flashing at the base laps up the backup at least 8 in (200 mm), under the water-resistive barrier, and runs to the face of the veneer with a drip edge.",
+      "why": "Flashing stopped short of the face lets water run back under the wall.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "flashing"
+      ]
+    },
+    {
+      "id": "BV-2",
+      "item": "Weeps are shown directly on the flashing at 24 in (600 mm) centres or closer, with a mortar-dropping collection device in the cavity.",
+      "why": "Blocked or missing weeps turn the cavity into a reservoir.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "weeps",
+        "cavity"
+      ]
+    },
+    {
+      "id": "BV-3",
+      "item": "A clear drained air space of at least 1 in (25 mm) is shown behind the veneer.",
+      "why": "The air space is the drainage plane and the pressure break.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "cavity"
+      ]
+    },
+    {
+      "id": "BV-4",
+      "item": "Veneer ties and their spacing are shown, with corrosion-resistant material and embedment noted, per the masonry code in force.",
+      "why": "Tie spacing is a code requirement and a structural one.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "structure",
+        "code"
+      ]
+    },
+    {
+      "id": "BV-5",
+      "item": "Continuous insulation in the cavity is uninterrupted at the base; the flashing does not short-circuit it more than necessary.",
+      "why": "Slab edges and shelf angles are the usual thermal bridges.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "thermal"
+      ]
+    },
+    {
+      "id": "BV-6",
+      "item": "Base of veneer sits at least 6 in (150 mm) above grade or 2 in (50 mm) above paving, and the movement joint below a shelf angle is dimensioned.",
+      "why": "Brick near grade wicks water and spalls in freeze-thaw.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "grade",
+        "movement joint"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "_note": "SYNTHETIC sample project. Replace with your own values; keep real project files in a folder named private/.",
+  "project": "Sample Library Annex (synthetic)",
+  "building_code": "IBC 2021",
+  "energy_code": "IECC 2021 commercial",
+  "ashrae_climate_zone": "5A",
+  "construction_type": "II-B",
+  "occupancy": "A-3",
+  "mandates": [
+    "Continuous exterior insulation on all opaque walls and roof edges; no uninsulated parapets.",
+    "Exposed sheet metal is prefinished aluminium, colour to match window frames.",
+    "No exposed sealant as the primary line of water defence."
+  ],
+  "min_roof_base_flashing_height_in": 8
+}

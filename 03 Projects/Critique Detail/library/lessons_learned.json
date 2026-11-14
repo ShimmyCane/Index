@@ -1,0 +1,33 @@
+{
+  "_note": "Cross-project QA history. SYNTHETIC entries written for the sample. Add real ones without client or project names.",
+  "lessons": [
+    {
+      "id": "L-001",
+      "category": "div_07_thermal_moisture/roof_parapet",
+      "severity": "ADVISORY",
+      "text": "Coping joints opened after two winters where no membrane ran under the cap. Always draw the under-coping membrane and tag it.",
+      "source": "synthetic"
+    },
+    {
+      "id": "L-002",
+      "category": "div_07_thermal_moisture/roof_parapet",
+      "severity": "ADVISORY",
+      "text": "Parapets under 12 in high leave no room for an 8 in base flashing plus counter-flashing. Check the parapet height against the tapered insulation high point.",
+      "source": "synthetic"
+    },
+    {
+      "id": "L-003",
+      "category": "div_08_openings/window_head_sill",
+      "severity": "ADVISORY",
+      "text": "Sill pans without end dams leaked at both jambs. Show the end dam in section and in an isometric.",
+      "source": "synthetic"
+    },
+    {
+      "id": "L-004",
+      "category": "*",
+      "severity": "ADVISORY",
+      "text": "Details issued without a scale or material tags produced the most RFIs. Tag every hatch.",
+      "source": "synthetic"
+    }
+  ]
+}

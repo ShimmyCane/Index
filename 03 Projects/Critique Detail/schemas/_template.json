@@ -1,0 +1,54 @@
+{
+  "_note": "Base for a newly generated rulebook. run_review.py fills it when a detail matches no schema. Exactly 6 checklist items. Severity is CRITICAL (water or structure failure), MAJOR (code or mandate non-compliance) or ADVISORY (lesson learned, best practice).",
+  "key": "div_XX_name/detail_type",
+  "csi_division": "XX",
+  "title": "",
+  "keywords": [],
+  "source": "auto",
+  "status": "draft",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "XX-1",
+      "item": "",
+      "why": "",
+      "default_severity": "MAJOR",
+      "tags": []
+    },
+    {
+      "id": "XX-2",
+      "item": "",
+      "why": "",
+      "default_severity": "MAJOR",
+      "tags": []
+    },
+    {
+      "id": "XX-3",
+      "item": "",
+      "why": "",
+      "default_severity": "MAJOR",
+      "tags": []
+    },
+    {
+      "id": "XX-4",
+      "item": "",
+      "why": "",
+      "default_severity": "MAJOR",
+      "tags": []
+    },
+    {
+      "id": "XX-5",
+      "item": "",
+      "why": "",
+      "default_severity": "MAJOR",
+      "tags": []
+    },
+    {
+      "id": "XX-6",
+      "item": "",
+      "why": "",
+      "default_severity": "MAJOR",
+      "tags": []
+    }
+  ]
+}

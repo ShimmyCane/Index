@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Critique Detail</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>Critique Detail</h1>
+    <p class="sub">A second pair of eyes on one construction detail. <a href="../../index.html">All projects</a></p>
+  </div>
+  <button class="pill" id="statusPill" type="button" title="Open settings">💾 this device</button>
+</header>
+
+<main class="grid">
+  <div class="col">
+    <section class="panel" data-panel="sheet">
+      <button class="panelHead" type="button" aria-controls="sheet-body"><span class="panelIcon">📐</span><span class="panelTitle" id="sheetTitle">Detail</span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="sheet-body">
+        <p class="banner" id="mockBanner" hidden>Mock review. No model looked at this drawing; the findings are a hand-written fixture.</p>
+        <div class="sheet" id="sheet"><img id="sheetImg" alt="The reviewed detail"><svg id="overlay" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg><div id="bubbles"></div></div>
+        <p class="meta" id="sheetMeta"></p>
+      </div>
+    </section>
+    <section class="panel" data-panel="details" data-open="false">
+      <button class="panelHead" type="button" aria-controls="details-body"><span class="panelIcon">🗂️</span><span class="panelTitle">Details</span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="details-body">
+        <ul class="list" id="detailList"></ul>
+        <div class="row">
+          <label class="btn">Open a report (.json)<input type="file" id="openReport" accept=".json,application/json" hidden></label>
+          <label class="btn">and its image<input type="file" id="openImage" accept="image/*" hidden></label>
+        </div>
+        <p class="meta">A report opened from a file stays on this device and is not saved anywhere.</p>
+      </div>
+    </section>
+  </div>
+
+  <div class="col">
+    <section class="panel" data-panel="findings">
+      <button class="panelHead" type="button" aria-controls="findings-body"><span class="panelIcon">🖍️</span><span class="panelTitle">Findings <span id="counts"></span></span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="findings-body">
+        <p id="summary"></p>
+        <div class="seg small" id="sevFilter"><button data-v="ALL">All</button><button data-v="CRITICAL">Critical</button><button data-v="MAJOR">Major</button><button data-v="ADVISORY">Advisory</button></div>
+        <div id="findingList"></div>
+      </div>
+    </section>
+    <section class="panel" data-panel="pipeline">
+      <button class="panelHead" type="button" aria-controls="pipeline-body"><span class="panelIcon">🧭</span><span class="panelTitle">The five steps of this run</span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="pipeline-body"><ol class="steps" id="steps"></ol></div>
+    </section>
+    <section class="panel" data-panel="checklist">
+      <button class="panelHead" type="button" aria-controls="checklist-body"><span class="panelIcon">☑️</span><span class="panelTitle" id="checkTitle">Rulebook</span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="checklist-body"><div class="scrollx"><table id="checkTable"></table></div></div>
+    </section>
+    <section class="panel" data-panel="rulebooks" data-open="false">
+      <button class="panelHead" type="button" aria-controls="rulebooks-body"><span class="panelIcon">📚</span><span class="panelTitle">All rulebooks and lessons</span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="rulebooks-body"><div id="rulebookList"></div></div>
+    </section>
+    <section class="panel" data-panel="howto" data-open="false">
+      <button class="panelHead" type="button" aria-controls="howto-body"><span class="panelIcon">❓</span><span class="panelTitle">How to read this</span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="howto-body">
+        <p>Each red numbered box on the drawing is one finding. Tap a number, or a finding, to pair them.</p>
+        <p><b class="sev CRITICAL">Critical</b> water gets in or something fails structurally. <b class="sev MAJOR">Major</b> breaks the building code, the energy code or a project mandate. <b class="sev ADVISORY">Advisory</b> a lesson learned or best practice.</p>
+        <p>The review runs on your computer with <code>run_review.py</code>; this page only shows the result. Box positions come from the model and are approximate. A review is not a sign-off: an architect still checks the detail.</p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<button class="gear" id="gear" aria-label="Settings" aria-expanded="false" aria-controls="drawer">⚙️</button>
+<aside class="drawer" id="drawer" hidden>
+  <div class="drawerHead"><h2>Settings</h2><button class="mini" id="closeDrawer" aria-label="Close">✖</button></div>
+  <div class="setting"><label>Boxes on the drawing</label>
+    <div class="seg" data-key="boxes"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
+  <div class="setting"><label>Drawing shows</label>
+    <div class="seg" data-key="sheet"><button data-v="clean">Original</button><button data-v="markup">Redline file</button></div>
+    <p class="meta">Redline file is the image the script drew, with revision clouds.</p></div>
+  <div class="setting" id="dbBlock"><label>Database (owner only)</label>
+    <p class="meta" id="dbStatus">This device only.</p>
+    <div id="signInBox"><input id="dbEmail" type="email" placeholder="Email" autocomplete="username"><input id="dbPassword" type="password" placeholder="Password" autocomplete="current-password">
+      <button class="btn" id="dbSignIn" type="button">Sign in</button></div>
+    <div class="row"><button class="btn" id="dbCheck" type="button">Check database</button><button class="btn" id="dbSignOut" type="button" hidden>Sign out</button></div>
+    <pre class="meta" id="dbCheckOut"></pre></div>
+  <section id="notesBox" class="setting">
+    <label for="noteText">Notes for improvement</label>
+    <p class="meta" id="noteWhere"></p>
+    <textarea id="noteText" rows="3" placeholder="What would make this better?"></textarea>
+    <div class="row"><button class="btn" id="noteSave" type="button">Save note</button><button class="btn" id="noteCopy" type="button">Copy notes</button>
+      <select id="noteFilter"><option value="open">Open</option><option value="all">All</option></select></div>
+    <ul id="noteList" class="list"></ul>
+  </section>
+  <label class="toggle"><input type="checkbox" id="showErrors"> Show errors</label>
+  <p class="meta" id="info"></p>
+</aside>
+<div id="errorsPanel" class="errorsPanel" hidden></div>
+
+<script src="js/config.js"></script>
+<script src="js/sample.bundle.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
