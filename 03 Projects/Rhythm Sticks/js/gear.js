@@ -140,7 +140,8 @@
       var st = RS.mic.state, text = { on: 'The microphone is on. It is only listened to, never saved or sent.', starting: 'Waiting for the browser to answer…',
         off: 'The microphone is off until a microphone mode starts.', denied: 'The browser said no. Allow the microphone for this site in the browser settings, then tap the button.',
         unsupported: 'This page cannot use the microphone here (it needs https).' }[st] || st;
-      $('micStatus').textContent = text;
+      var lines = RS.mic.diagnose ? RS.mic.diagnose() : [];
+      $('micStatus').textContent = text + '\n' + lines.join('\n');
     }
     $('micAgain').addEventListener('click', function () { RS.mic.again().then(micStatus); micStatus(); });
     gear.addEventListener('click', micStatus);

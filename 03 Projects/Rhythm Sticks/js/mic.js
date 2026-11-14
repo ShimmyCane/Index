@@ -31,6 +31,19 @@
   //  - Where it cannot tell (Safari), the stream is kept switched off for the rest of the visit, so changing
   //    modes does not ask again. It is switched on only in the modes that listen, and released when the page closes.
   M.perm = 'unknown';
+  // Error trapping: what the page saw, step by step, so a problem on a phone can be read off the ⚙️ panel.
+  var diag = { secure: !!window.isSecureContext, hasMedia: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia), tries: 0, last: '', lastName: '', lastMsg: '', lastAt: '', ok: 0 };
+  function stamp() { return new Date().toTimeString().slice(0, 8); }
+  M.diagnose = function () {
+    var L = [];
+    L.push('Page is a secure https page: ' + (diag.secure ? 'yes' : 'NO (the microphone is blocked on plain http)'));
+    L.push('Browser offers the microphone: ' + (diag.hasMedia ? 'yes' : 'NO (this browser cannot ask)'));
+    L.push('Browser says microphone permission: ' + (M.perm === 'unknown' ? 'not reported by this browser' : M.perm));
+    L.push('Tries so far: ' + diag.tries + ', successes: ' + diag.ok);
+    L.push('Last step: ' + (diag.last || 'none yet') + (diag.lastAt ? ' at ' + diag.lastAt : ''));
+    if (diag.lastName) L.push('Last error: ' + diag.lastName + (diag.lastMsg ? ' — ' + diag.lastMsg : ''));
+    return L;
+  };
   try {
     if (navigator.permissions && navigator.permissions.query) {
       navigator.permissions.query({ name: 'microphone' }).then(function (p) {
@@ -116,18 +129,22 @@
     if (M.state === 'denied' || M.state === 'unsupported') return Promise.resolve();   // no nagging after a refusal
     if (live(held)) { var h = held; held = null; attach(h); return Promise.resolve(); }  // already allowed this visit
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      M.state = 'unsupported';
+      M.state = 'unsupported'; diag.last = 'no microphone API in this browser'; diag.lastAt = stamp();
       RS.err('Microphone is not available here (it needs https or localhost)');
       return Promise.resolve();
     }
     M.state = 'starting';
+    diag.tries++; diag.last = 'asking the browser'; diag.lastAt = stamp();
     return navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } })
       .then(function (s) {
         try { localStorage.setItem('rs.micOk', '1'); } catch (e) { /* storage blocked */ }
+        diag.ok++; diag.last = 'browser gave the microphone'; diag.lastAt = stamp(); diag.lastName = ''; diag.lastMsg = '';
         if (!M.want) { s.getTracks().forEach(function (t) { t.stop(); }); M.state = 'off'; return; }
         attach(s);
       })
       .catch(function (e) {
+        diag.last = 'browser refused or failed'; diag.lastAt = stamp();
+        diag.lastName = e && e.name ? e.name : 'unknown'; diag.lastMsg = e && e.message ? e.message : '';
         if (!RS.touched && e && e.name === 'NotAllowedError') { M.state = 'off'; return; }   // some browsers want a touch first: retry on the first touch
         M.state = 'denied';
         RS.err('Microphone unavailable', e);
