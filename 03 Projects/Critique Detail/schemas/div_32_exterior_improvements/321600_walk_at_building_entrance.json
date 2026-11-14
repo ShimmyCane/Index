@@ -1,0 +1,17 @@
+{
+  "key": "div_32_exterior_improvements/321600_walk_at_building_entrance",
+  "csi_division": "32",
+  "csi_section": "32 16 00",
+  "subcategory": "Curbs, Gutters, Sidewalks, and Driveways",
+  "title": "Exterior walk at building entrance",
+  "keywords": [
+    "sidewalk",
+    "entrance walk",
+    "paving edge",
+    "landing"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

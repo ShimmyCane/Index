@@ -1,0 +1,17 @@
+{
+  "key": "div_09_finishes/095100_ceiling_perimeter",
+  "csi_division": "09",
+  "csi_section": "09 51 00",
+  "subcategory": "Acoustical Ceilings",
+  "title": "Suspended ceiling at perimeter or soffit",
+  "keywords": [
+    "ceiling",
+    "acoustical ceiling",
+    "soffit",
+    "suspended ceiling"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

@@ -1,0 +1,17 @@
+{
+  "key": "div_04_masonry/044300_stone_cladding_anchor",
+  "csi_division": "04",
+  "csi_section": "04 43 00",
+  "subcategory": "Stone Masonry",
+  "title": "Stone cladding anchorage and joint",
+  "keywords": [
+    "stone",
+    "anchor",
+    "kerf",
+    "stone veneer"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

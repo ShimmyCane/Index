@@ -1,0 +1,77 @@
+{
+  "key": "div_03_concrete/033000_slab_on_grade_edge",
+  "csi_division": "03",
+  "csi_section": "03 30 00",
+  "subcategory": "Cast-in-Place Concrete",
+  "title": "Slab on grade at the exterior wall",
+  "keywords": [
+    "slab on grade",
+    "slab edge",
+    "thickened edge",
+    "vapor retarder"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "SG-1",
+      "item": "A vapor retarder is shown directly under the slab, lapped and sealed, and turned up or sealed at the perimeter.",
+      "why": "Ground moisture through the slab ruins flooring adhesives.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "vapor",
+        "moisture"
+      ]
+    },
+    {
+      "id": "SG-2",
+      "item": "The top of slab is at least 6 in (150 mm) above adjacent earth, or the wall base is protected where it is lower.",
+      "why": "A slab near grade lets surface water reach the wall base.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "grade",
+        "water"
+      ]
+    },
+    {
+      "id": "SG-3",
+      "item": "Perimeter slab insulation is shown where the energy code requires it, with R-value and depth.",
+      "why": "The slab edge is the largest thermal bridge at the floor line.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "thermal",
+        "energy code"
+      ]
+    },
+    {
+      "id": "SG-4",
+      "item": "Reinforcing, thickened edge or footing, and the isolation joint against the wall or column are shown and tagged.",
+      "why": "The slab cracks where it is restrained without a joint.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "structure",
+        "joint"
+      ]
+    },
+    {
+      "id": "SG-5",
+      "item": "The wall's water barrier or flashing laps over the slab edge to the outside.",
+      "why": "Water running down the wall must not enter at the slab line.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "flashing",
+        "lap"
+      ]
+    },
+    {
+      "id": "SG-6",
+      "item": "Joint spacing, sealant and finish are noted, with a scale and material tags.",
+      "why": "Missing notes are settled on site.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "labels"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "key": "div_06_wood_plastics_composites/061000_wood_wall_at_foundation",
+  "csi_division": "06",
+  "csi_section": "06 10 00",
+  "subcategory": "Rough Carpentry",
+  "title": "Wood-framed wall at foundation",
+  "keywords": [
+    "sill plate",
+    "mudsill",
+    "wood frame",
+    "foundation",
+    "stud wall base"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "WF-1",
+      "item": "Sill plate is preservative-treated or naturally durable, on a sill gasket or capillary break, and anchored to the foundation with size and spacing noted.",
+      "why": "Untreated wood on concrete rots; anchor bolts are structural.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "structure",
+        "moisture"
+      ]
+    },
+    {
+      "id": "WF-2",
+      "item": "Wood framing and sheathing are at least 8 in (200 mm) above exposed earth, and siding at least 6 in (150 mm).",
+      "why": "Wood near soil decays and invites termites.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "grade",
+        "decay"
+      ]
+    },
+    {
+      "id": "WF-3",
+      "item": "The water barrier laps over flashing or a weep screed at the base so water leaves the wall above the foundation.",
+      "why": "Water trapped at the plate rots it from behind the cladding.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "flashing",
+        "lap"
+      ]
+    },
+    {
+      "id": "WF-4",
+      "item": "Shear wall nailing, hold-downs and straps are referenced to the structural drawings.",
+      "why": "Architectural and structural bases must agree.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "structure",
+        "coordination"
+      ]
+    },
+    {
+      "id": "WF-5",
+      "item": "Insulation, air sealing at the plate and slab-edge or stem-wall insulation are shown.",
+      "why": "The plate line is a major air leak.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "thermal",
+        "air barrier"
+      ]
+    },
+    {
+      "id": "WF-6",
+      "item": "Termite protection or inspection gap is noted where local practice requires it.",
+      "why": "Often required by the jurisdiction.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "durability"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "key": "div_07_thermal_moisture/079500_expansion_joint",
+  "csi_division": "07",
+  "csi_section": "07 95 00",
+  "subcategory": "Expansion Control",
+  "title": "Building expansion or seismic joint",
+  "keywords": [
+    "expansion joint",
+    "seismic joint",
+    "movement joint cover"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "EJ-1",
+      "item": "Joint width and the design movement (open, closed, shear) are stated and match the structural drawings.",
+      "why": "A cover sized without the movement tears or jams.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "movement",
+        "coordination"
+      ]
+    },
+    {
+      "id": "EJ-2",
+      "item": "The water barrier, air barrier and roof membrane cross the joint with a flexible bellows or pre-formed seal, continuous at changes of plane.",
+      "why": "Joints leak at corners and transitions, not on the straight run.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "water",
+        "continuity"
+      ]
+    },
+    {
+      "id": "EJ-3",
+      "item": "Fire-rated assemblies have a rated joint system across the gap with the same rating.",
+      "why": "An open joint in a rated floor or wall is a breach.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "code",
+        "rating"
+      ]
+    },
+    {
+      "id": "EJ-4",
+      "item": "Insulation is continuous across the joint with compressible fill.",
+      "why": "The joint is otherwise a full-height thermal gap.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "thermal"
+      ]
+    },
+    {
+      "id": "EJ-5",
+      "item": "Cover plate fixing is to one side only, or as the product requires, so it can move.",
+      "why": "A cover fixed both sides buckles.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "movement"
+      ]
+    },
+    {
+      "id": "EJ-6",
+      "item": "Floor covers are flush and meet accessibility limits for level change and gaps.",
+      "why": "Raised covers trip and fail accessibility.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "accessibility"
+      ]
+    }
+  ]
+}

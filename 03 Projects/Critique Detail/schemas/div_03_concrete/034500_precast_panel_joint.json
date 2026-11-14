@@ -1,0 +1,16 @@
+{
+  "key": "div_03_concrete/034500_precast_panel_joint",
+  "csi_division": "03",
+  "csi_section": "03 45 00",
+  "subcategory": "Precast Architectural Concrete",
+  "title": "Precast panel joint and connection",
+  "keywords": [
+    "precast",
+    "panel joint",
+    "two-stage joint"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

@@ -1,0 +1,4 @@
+{
+  "_note": "Office standard details that findings can point to. Entries link to a detail already in the cloud (a dc_details slug, or a Quick Detail id), never to a local or private file. Empty until details are sent to the cloud.",
+  "details": []
+}

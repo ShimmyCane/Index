@@ -1,0 +1,17 @@
+{
+  "key": "div_14_conveying/142000_elevator_sill_pit",
+  "csi_division": "14",
+  "csi_section": "14 20 00",
+  "subcategory": "Elevators",
+  "title": "Elevator hoistway sill or pit",
+  "keywords": [
+    "elevator",
+    "hoistway",
+    "elevator pit",
+    "elevator sill"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

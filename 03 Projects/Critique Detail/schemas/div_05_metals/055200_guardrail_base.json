@@ -1,0 +1,79 @@
+{
+  "key": "div_05_metals/055200_guardrail_base",
+  "csi_division": "05",
+  "csi_section": "05 52 00",
+  "subcategory": "Metal Railings",
+  "title": "Guard or handrail post at base",
+  "keywords": [
+    "guardrail",
+    "guard",
+    "handrail",
+    "railing",
+    "baluster",
+    "post base"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "GR-1",
+      "item": "Guard height and handrail height are dimensioned from the walking surface or stair nosing and meet the building code.",
+      "why": "Height is the first thing checked, and it is measured from the finished surface.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "code",
+        "height"
+      ]
+    },
+    {
+      "id": "GR-2",
+      "item": "Openings in the guard do not pass the sphere size the code sets (4 in / 100 mm in most locations).",
+      "why": "Wide openings are a child-fall hazard and a code failure.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "code",
+        "openings"
+      ]
+    },
+    {
+      "id": "GR-3",
+      "item": "The post anchorage and the structure it fastens to are shown, sized for the code guard load.",
+      "why": "The base connection is where guards fail.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "structure",
+        "anchor"
+      ]
+    },
+    {
+      "id": "GR-4",
+      "item": "Where the post penetrates a waterproofed deck or roof, the penetration is flashed or the post is side-mounted.",
+      "why": "A core-drilled post through a membrane is a leak at every post.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "water",
+        "penetration"
+      ]
+    },
+    {
+      "id": "GR-5",
+      "item": "Handrail has a graspable profile, the required wall clearance and extensions at top and bottom.",
+      "why": "Graspability and extensions are accessibility requirements.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "accessibility"
+      ]
+    },
+    {
+      "id": "GR-6",
+      "item": "Materials, finish, weld or fastener type and weep holes in hollow sections are noted.",
+      "why": "Trapped water splits hollow sections.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "labels",
+        "finish"
+      ]
+    }
+  ]
+}

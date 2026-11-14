@@ -1,0 +1,17 @@
+{
+  "key": "div_07_thermal_moisture/074600_siding_base_corner",
+  "csi_division": "07",
+  "csi_section": "07 46 00",
+  "subcategory": "Siding",
+  "title": "Siding at base, corner or opening",
+  "keywords": [
+    "siding",
+    "lap siding",
+    "fiber cement",
+    "wood siding"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

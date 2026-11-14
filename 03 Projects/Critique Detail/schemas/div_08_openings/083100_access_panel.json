@@ -1,0 +1,15 @@
+{
+  "key": "div_08_openings/083100_access_panel",
+  "csi_division": "08",
+  "csi_section": "08 31 00",
+  "subcategory": "Access Doors and Panels",
+  "title": "Access panel in a rated or finished assembly",
+  "keywords": [
+    "access panel",
+    "access door"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

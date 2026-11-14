@@ -1,0 +1,16 @@
+{
+  "key": "div_32_exterior_improvements/321726_curb_ramp",
+  "csi_division": "32",
+  "csi_section": "32 17 26",
+  "subcategory": "Tactile Warning Surfacing",
+  "title": "Curb ramp with detectable warning",
+  "keywords": [
+    "curb ramp",
+    "detectable warning",
+    "truncated domes"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

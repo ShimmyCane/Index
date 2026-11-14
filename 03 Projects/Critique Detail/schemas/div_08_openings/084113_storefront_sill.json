@@ -1,0 +1,76 @@
+{
+  "key": "div_08_openings/084113_storefront_sill",
+  "csi_division": "08",
+  "csi_section": "08 41 13",
+  "subcategory": "Aluminum-Framed Entrances and Storefronts",
+  "title": "Storefront sill and threshold",
+  "keywords": [
+    "storefront",
+    "entrance",
+    "threshold",
+    "sill"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "SF-1",
+      "item": "A sub-sill with end dams and a back leg is shown under the storefront, weeped to the exterior.",
+      "why": "Storefront is drained glazing: water gets in and must be led out at the sill.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "flashing",
+        "sill"
+      ]
+    },
+    {
+      "id": "SF-2",
+      "item": "Sub-sill end dams are sealed and the sill is set in sealant with shims that do not block the weeps.",
+      "why": "Missing end dams send the water into the jambs.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "flashing"
+      ]
+    },
+    {
+      "id": "SF-3",
+      "item": "The wall's water barrier laps onto the sub-sill or its flashing, and the air barrier is sealed to the frame.",
+      "why": "The frame must be tied to the wall's barriers.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "air barrier",
+        "lap"
+      ]
+    },
+    {
+      "id": "SF-4",
+      "item": "Door threshold height and bevel meet the accessibility limit, and the landing slopes away without exceeding the allowed slope.",
+      "why": "Thresholds are measured at inspection.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "accessibility",
+        "code"
+      ]
+    },
+    {
+      "id": "SF-5",
+      "item": "Frame thermal break lines up with the wall insulation and the slab edge is insulated.",
+      "why": "A sill on bare slab edge condenses.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "thermal"
+      ]
+    },
+    {
+      "id": "SF-6",
+      "item": "Glazing type (safety glazing near doors and floors), anchors and sealant joints are noted.",
+      "why": "Safety glazing locations are code-driven.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "labels",
+        "code"
+      ]
+    }
+  ]
+}

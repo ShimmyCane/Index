@@ -1,0 +1,74 @@
+{
+  "key": "div_09_finishes/092400_stucco_base_weep_screed",
+  "csi_division": "09",
+  "csi_section": "09 24 00",
+  "subcategory": "Cement Plastering",
+  "title": "Stucco at base of wall with weep screed",
+  "keywords": [
+    "stucco",
+    "plaster",
+    "weep screed",
+    "lath"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "SW-1",
+      "item": "A weep screed is at the base, at least 4 in (100 mm) above earth and 2 in (50 mm) above paving.",
+      "why": "Stucco is a reservoir cladding; the screed is where it drains.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "drainage",
+        "grade"
+      ]
+    },
+    {
+      "id": "SW-2",
+      "item": "The water barrier (two layers or a drainage layer over wood sheathing) laps over the weep screed flange.",
+      "why": "A barrier behind the flange sends water into the wall.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "lap",
+        "wrb"
+      ]
+    },
+    {
+      "id": "SW-3",
+      "item": "Control joints, their spacing and the lath treatment behind them are shown.",
+      "why": "Uncontrolled stucco cracks, and cracks let water in.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "movement"
+      ]
+    },
+    {
+      "id": "SW-4",
+      "item": "Stucco thickness, coats and lath attachment are noted.",
+      "why": "Thin stucco cracks and fails its fire rating.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "dimensions"
+      ]
+    },
+    {
+      "id": "SW-5",
+      "item": "Stucco stops above flashing at openings and roofs with a casing bead and a gap.",
+      "why": "Stucco bedded onto flashing wicks water.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "flashing"
+      ]
+    },
+    {
+      "id": "SW-6",
+      "item": "Finish, colour coat and sealant at dissimilar materials are noted.",
+      "why": "Left to the installer otherwise.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "labels"
+      ]
+    }
+  ]
+}

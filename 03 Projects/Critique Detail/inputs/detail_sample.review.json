@@ -1,0 +1,245 @@
+{
+  "_note": "Written by Claude in a Claude Code session on 2026-11-14, looking at inputs/detail_sample.png. The sample was drawn with faults on purpose, so this is a demonstration, not a blind test.",
+  "reviewer": "Claude, in a Claude Code session (2026-11-14)",
+  "detail_type": "Low-slope roof parapet section",
+  "gate": {
+    "scale_shown": false,
+    "materials_labelled": true,
+    "geometry_clear": true,
+    "missing": [
+      "scale bar or stated scale",
+      "dimensions for parapet height and coping overhang"
+    ],
+    "slop": false,
+    "reasons": []
+  },
+  "summary": "The parapet is a single uninsulated block wall with a flat coping and a 4 in membrane upturn. Three items would let water in. Three more fail the code or the project mandates.",
+  "results": [
+    {
+      "id": "RP-1",
+      "status": "fail",
+      "note": "Coping drawn flat with no drip.",
+      "evidence_box": null
+    },
+    {
+      "id": "RP-2",
+      "status": "fail",
+      "note": "Upturn labelled 4 in; no termination or counter-flashing.",
+      "evidence_box": null
+    },
+    {
+      "id": "RP-3",
+      "status": "fail",
+      "note": "Nothing drawn between coping and block.",
+      "evidence_box": null
+    },
+    {
+      "id": "RP-4",
+      "status": "not_shown",
+      "note": "No air or water barrier is drawn on the wall.",
+      "evidence_box": null
+    },
+    {
+      "id": "RP-5",
+      "status": "fail",
+      "note": "Wall insulation stops at the roof slab.",
+      "evidence_box": null
+    },
+    {
+      "id": "RP-6",
+      "status": "fail",
+      "note": "No cleat, blocking, cant or scale.",
+      "evidence_box": null
+    },
+    {
+      "id": "RP-7",
+      "status": "not_shown",
+      "note": "No reinforcing or bracing shown or referenced; project is seismic design category D.",
+      "evidence_box": null
+    },
+    {
+      "id": "PM-1",
+      "status": "fail",
+      "note": "Same as RP-5: the parapet has no exterior insulation.",
+      "evidence_box": null
+    },
+    {
+      "id": "PM-2",
+      "status": "pass",
+      "note": "Coping is tagged prefinished aluminium.",
+      "evidence_box": [
+        150,
+        545,
+        215,
+        925
+      ]
+    },
+    {
+      "id": "PM-3",
+      "status": "pass",
+      "note": "No sealant joint is drawn as a water line, so there is nothing to point to.",
+      "evidence_box": null
+    },
+    {
+      "id": "L-001",
+      "status": "fail",
+      "note": "Same as RP-3: no membrane under the coping.",
+      "evidence_box": null
+    },
+    {
+      "id": "L-002",
+      "status": "not_shown",
+      "note": "Parapet height is not dimensioned, so the room for an 8 in base flashing cannot be checked.",
+      "evidence_box": null
+    },
+    {
+      "id": "L-004",
+      "status": "fail",
+      "note": "No scale on the sheet.",
+      "evidence_box": null
+    }
+  ],
+  "findings": [
+    {
+      "qc_id": "RP-2",
+      "severity": "CRITICAL",
+      "title": "Membrane upturn is 4 in, not terminated",
+      "issue": "The roof membrane turns up the parapet only 4 in and ends with no termination bar or counter-flashing. Ponding water or wind-driven rain gets behind it.",
+      "recommendation": "Carry the base flashing at least 8 in above the finished roof, fasten it with a termination bar and cover it with counter-flashing, or run the membrane up and over the parapet.",
+      "basis": "building_science",
+      "box_2d": [
+        395,
+        525,
+        480,
+        572
+      ],
+      "confidence": "high"
+    },
+    {
+      "qc_id": "RP-1",
+      "severity": "CRITICAL",
+      "title": "Coping is flat and has no drip edge",
+      "issue": "The coping is drawn level and flush with both wall faces. Water sits on it and runs down the cladding and the block.",
+      "recommendation": "Slope the coping to the roof side, extend it past both faces and add drip edges. Show the continuous cleat.",
+      "basis": "building_science",
+      "box_2d": [
+        175,
+        535,
+        225,
+        690
+      ],
+      "confidence": "high"
+    },
+    {
+      "qc_id": "RP-3",
+      "severity": "CRITICAL",
+      "title": "No membrane under the coping",
+      "issue": "The coping sits directly on open block. Every coping joint is a leak path into the cores of the wall.",
+      "recommendation": "Add a continuous membrane over sloped wood blocking on top of the parapet, lapped down both faces, before the coping.",
+      "basis": "building_science",
+      "box_2d": [
+        212,
+        558,
+        268,
+        668
+      ],
+      "confidence": "high"
+    },
+    {
+      "qc_id": "RP-5",
+      "severity": "MAJOR",
+      "title": "Parapet is an uninsulated thermal bridge",
+      "issue": "Exterior insulation stops at the roof slab. The parapet above it is bare block. That breaks project mandate PM-1 (continuous exterior insulation, no uninsulated parapets).",
+      "recommendation": "Continue the exterior insulation up the outside face to the top of the parapet and insulate the roof side, or add a structural thermal break at the roof line.",
+      "basis": "project_rule",
+      "box_2d": [
+        208,
+        650,
+        533,
+        725
+      ],
+      "confidence": "high"
+    },
+    {
+      "qc_id": "RP-4",
+      "severity": "MAJOR",
+      "title": "Air and water barrier not shown across the roof-to-wall line",
+      "issue": "No wall air barrier is drawn, so there is nothing for the roof membrane to tie into.",
+      "recommendation": "Draw the wall air and water barrier and show it lapped to the roof membrane over the parapet.",
+      "basis": "building_science",
+      "box_2d": [
+        450,
+        537,
+        600,
+        675
+      ],
+      "confidence": "high"
+    },
+    {
+      "qc_id": "RP-7",
+      "severity": "MAJOR",
+      "title": "Parapet reinforcing or bracing not shown",
+      "issue": "The block parapet has no reinforcing, bracing or structural reference. The project is in seismic design category D.",
+      "recommendation": "Show the reinforcing or reference the structural detail for the parapet.",
+      "basis": "project_rule",
+      "box_2d": [
+        270,
+        560,
+        390,
+        665
+      ],
+      "confidence": "medium"
+    },
+    {
+      "qc_id": "L-004",
+      "severity": "ADVISORY",
+      "title": "No scale, cleat, blocking or cant",
+      "issue": "The detail has no scale and leaves out the coping cleat, the wood blocking and the cant at the roof edge.",
+      "recommendation": "Add the scale and tag each item.",
+      "basis": "lesson_learned",
+      "box_2d": [
+        935,
+        730,
+        978,
+        900
+      ],
+      "confidence": "high"
+    }
+  ],
+  "control_layers": [
+    {
+      "layer": "water",
+      "status": "broken",
+      "note": "The roof membrane stops 4 in up the parapet. Nothing covers the top of the wall.",
+      "break_box": [
+        395,
+        525,
+        480,
+        572
+      ]
+    },
+    {
+      "layer": "air",
+      "status": "not_shown",
+      "note": "No air barrier is drawn on the wall or across the roof line.",
+      "break_box": null
+    },
+    {
+      "layer": "thermal",
+      "status": "broken",
+      "note": "Roof insulation and wall insulation do not meet: the parapet between them is bare block.",
+      "break_box": [
+        208,
+        650,
+        533,
+        725
+      ]
+    },
+    {
+      "layer": "vapor",
+      "status": "not_shown",
+      "note": "No vapor control layer is drawn or named.",
+      "break_box": null
+    }
+  ]
+}

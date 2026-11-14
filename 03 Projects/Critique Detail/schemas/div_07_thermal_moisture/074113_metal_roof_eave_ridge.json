@@ -1,0 +1,18 @@
+{
+  "key": "div_07_thermal_moisture/074113_metal_roof_eave_ridge",
+  "csi_division": "07",
+  "csi_section": "07 41 13",
+  "subcategory": "Metal Roof Panels",
+  "title": "Metal roof eave, ridge or valley",
+  "keywords": [
+    "metal roof",
+    "standing seam",
+    "eave",
+    "ridge",
+    "valley"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

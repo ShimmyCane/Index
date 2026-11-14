@@ -1,0 +1,16 @@
+{
+  "key": "div_07_thermal_moisture/079200_sealant_joint",
+  "csi_division": "07",
+  "csi_section": "07 92 00",
+  "subcategory": "Joint Sealants",
+  "title": "Sealant joint",
+  "keywords": [
+    "sealant",
+    "backer rod",
+    "caulk joint"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

@@ -1,0 +1,17 @@
+{
+  "key": "div_04_masonry/042200_cmu_wall_base_top",
+  "csi_division": "04",
+  "csi_section": "04 22 00",
+  "subcategory": "Concrete Unit Masonry",
+  "title": "CMU wall at base or top of wall",
+  "keywords": [
+    "cmu",
+    "concrete block",
+    "bond beam",
+    "block wall"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

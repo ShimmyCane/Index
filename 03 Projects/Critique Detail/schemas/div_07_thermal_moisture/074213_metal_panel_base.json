@@ -1,0 +1,76 @@
+{
+  "key": "div_07_thermal_moisture/074213_metal_panel_base",
+  "csi_division": "07",
+  "csi_section": "07 42 13",
+  "subcategory": "Metal Wall Panels",
+  "title": "Metal wall panel at base or opening",
+  "keywords": [
+    "metal panel",
+    "rainscreen",
+    "panel base",
+    "girt"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "MP-1",
+      "item": "A drained and vented cavity is shown behind the panel, open at the base and top, with insect screen.",
+      "why": "A rainscreen that cannot drain or dry is only a cover.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "cavity",
+        "drainage"
+      ]
+    },
+    {
+      "id": "MP-2",
+      "item": "Base flashing laps under the water barrier and kicks water out past the foundation or wall below.",
+      "why": "Water in the cavity must leave above the base.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "flashing",
+        "lap"
+      ]
+    },
+    {
+      "id": "MP-3",
+      "item": "Sub-girts or clips are thermally broken or the continuous insulation is derated for them.",
+      "why": "Continuous metal girts cancel most of the insulation.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "thermal"
+      ]
+    },
+    {
+      "id": "MP-4",
+      "item": "Panel attachment allows thermal movement; clip and fastener spacing are referenced.",
+      "why": "Fixed long panels oil-can and tear fasteners.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "movement",
+        "structure"
+      ]
+    },
+    {
+      "id": "MP-5",
+      "item": "Dissimilar metals are separated and cut edges are protected.",
+      "why": "Galvanic corrosion at fasteners stains and fails.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "durability"
+      ]
+    },
+    {
+      "id": "MP-6",
+      "item": "Base of panel clears grade or paving by the dimension shown, and the air and water barrier behind is named.",
+      "why": "Splash-back and missing barrier names cause site decisions.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "grade",
+        "labels"
+      ]
+    }
+  ]
+}

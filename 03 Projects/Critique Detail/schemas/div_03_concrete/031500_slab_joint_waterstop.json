@@ -1,0 +1,17 @@
+{
+  "key": "div_03_concrete/031500_slab_joint_waterstop",
+  "csi_division": "03",
+  "csi_section": "03 15 00",
+  "subcategory": "Concrete Accessories",
+  "title": "Construction or control joint in a slab or wall",
+  "keywords": [
+    "construction joint",
+    "control joint",
+    "waterstop",
+    "cold joint"
+  ],
+  "source": "seed",
+  "status": "stub",
+  "version": 1,
+  "checklist": []
+}

@@ -1,0 +1,75 @@
+{
+  "key": "div_08_openings/081113_hollow_metal_frame",
+  "csi_division": "08",
+  "csi_section": "08 11 13",
+  "subcategory": "Hollow Metal Doors and Frames",
+  "title": "Hollow metal door frame in a stud or masonry wall",
+  "keywords": [
+    "hollow metal",
+    "door frame",
+    "door jamb",
+    "door head"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "HM-1",
+      "item": "Frame anchors, their number per jamb and the wall framing they fix to are shown.",
+      "why": "Loose frames are a hardware and fire-rating failure.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "structure",
+        "anchor"
+      ]
+    },
+    {
+      "id": "HM-2",
+      "item": "Fire-rated openings: frame label, wall rating, and grout or insulation fill as the listing requires are noted.",
+      "why": "The rating of the opening must match the wall.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "code",
+        "rating"
+      ]
+    },
+    {
+      "id": "HM-3",
+      "item": "Exterior frames: head flashing with end dams, sealant at the perimeter, and a thermally broken or insulated frame.",
+      "why": "Exterior hollow metal frames leak at the head and rust from inside.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "flashing",
+        "exterior"
+      ]
+    },
+    {
+      "id": "HM-4",
+      "item": "Clear opening width and the door's maneuvering clearances are referenced.",
+      "why": "The frame detail fixes the clear width.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "accessibility"
+      ]
+    },
+    {
+      "id": "HM-5",
+      "item": "Frame throat matches the wall thickness including finishes; the return on gypsum board is shown.",
+      "why": "Wrong throat size is found when the frames arrive.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "dimensions"
+      ]
+    },
+    {
+      "id": "HM-6",
+      "item": "Bottom of frame at wet floors is held up or galvanized; silencers and hardware preparation are noted.",
+      "why": "Frame feet rust at mopped floors.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "durability"
+      ]
+    }
+  ]
+}

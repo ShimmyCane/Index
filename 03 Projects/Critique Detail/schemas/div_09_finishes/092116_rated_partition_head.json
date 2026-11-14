@@ -1,0 +1,75 @@
+{
+  "key": "div_09_finishes/092116_rated_partition_head",
+  "csi_division": "09",
+  "csi_section": "09 21 16",
+  "subcategory": "Gypsum Board Assemblies",
+  "title": "Fire-rated partition at head of wall",
+  "keywords": [
+    "partition head",
+    "head of wall",
+    "rated partition",
+    "gypsum",
+    "deflection"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "PH-1",
+      "item": "The partition's rating and its tested design number are stated.",
+      "why": "Layers, stud size and spacing all come from the tested design.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "code",
+        "rating"
+      ]
+    },
+    {
+      "id": "PH-2",
+      "item": "The head-of-wall joint is a tested fire-rated joint system with the same rating, and its number is called out.",
+      "why": "The top joint is the usual gap in a rated wall.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "code",
+        "rating"
+      ]
+    },
+    {
+      "id": "PH-3",
+      "item": "A deflection track or slip joint allows the structure above to move, with the movement dimension shown.",
+      "why": "A rigid head cracks the wall and breaks the seal.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "movement"
+      ]
+    },
+    {
+      "id": "PH-4",
+      "item": "At fluted deck, the flutes are filled as the joint system requires.",
+      "why": "Open flutes are a path over the wall.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "code"
+      ]
+    },
+    {
+      "id": "PH-5",
+      "item": "Acoustic sealant and the wall's STC rating are shown where the wall is a sound separation.",
+      "why": "A sound-rated wall with an open head performs like no wall.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "acoustics"
+      ]
+    },
+    {
+      "id": "PH-6",
+      "item": "Board layers stop short of the deck by the gap shown, and fasteners are kept out of the slip zone.",
+      "why": "Screws through the slip track defeat it.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "constructability"
+      ]
+    }
+  ]
+}
