@@ -3,7 +3,7 @@
 (function () {
   'use strict';
   RS.modeInfo = {
-    ripples: { title: 'Ripples', text: 'Tap the screen and ripples spread out while a soft note rings. Hold your finger to keep the note going, and slide to change it: left is low, right is high. Up and down can change how the note sounds (its brightness, length, attack, timbre, wobble or echo). Pick which in ⚙️ → This mode, or leave it on None.' },
+    ripples: { title: 'Ripples', text: 'Tap and ripples spread while a soft note rings. Hold and slide to change the note, and the top and bottom change how it sounds.' },
     beads: { title: 'Beads', text: 'A beat looper. Tap once to start recording, then clap, tap or drum near the microphone: each sharp sound becomes a bead. Tap again to loop it. Tap again to add another layer with a new drum. Double tap to wipe it all and start again. The loop plays soft drums, never the recorded sound.' },
     pads: { title: 'Shake pads', text: 'Nine hidden pads, each with its own sound: drums, shakers, arcade beeps, bells and more. Tap them and drag across them to find out which is which. Dashed outlines in ⚙️ show where they are. The sounds and places come from a seed number: write it down and type it back in ⚙️ to bring a layout back.' },
     strings: { title: 'Strings', text: 'Drag a finger across a string to pluck it and watch it bounce. With two or three strings, press the right side of a string to hold down a fret, and slide left to raise the pitch.' },

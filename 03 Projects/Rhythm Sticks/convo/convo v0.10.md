@@ -30,3 +30,17 @@
   - Answer:
 
 ---
+
+## Increment 0.3.3 (built 2026-11-14)
+
+Jimmy checked and reported the items from v0.9 were not built. This increment builds the answered items:
+- Mic rests after 30 s with nothing heard; a tap wakes it. A busy microphone is named ("another app or tab may be using it").
+- One "What each mode does" panel, for the current mode only; the duplicate hint is gone.
+- Ripples card: the two-sentence draft (note 7).
+- Strings: every pluck wakes a sleeping sound (note 9, both cases).
+- Heat view dots: shown for 3 s after a switch, then fade (Q6).
+- Breathing garden: no countdown arc; the sun goes sunrise to sunset in five minutes (Q8).
+- Dot loop: two taps clear the middle (answer 2).
+- Two fingers: a wider note range on the left (answer 4).
+
+Not yet built (the next increment): the shapes design for Two fingers (answer 3, triangle, square, circle, drawn line, trails, split screen removed); dot loop's outward layout and dash-and-dot rings (answer 2, first part). Colour across the full range already follows the note; check it on the iPad.

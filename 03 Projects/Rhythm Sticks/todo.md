@@ -86,3 +86,8 @@ Nothing built yet. Questions in convo v0.9. Not marked done (no yes yet).
 ## Answers to v0.9 (`convo/convo v0.10.md`)
 - Yes: mic rest after 30 s and tap-to-wake, with a busy-mic message that names the other app (1). Dot loop: outside growth, dash-and-dot rings, two-tap clear (2). Two fingers: shapes design as proposed in v0.9 (3). Range and colour across about three octaves (4). One panel for the current mode; remove the duplicate (5).
 - Not answered: 6 heat dots, 7 Ripples card wording, 8 breathing garden, 9 strings case.
+
+## Increment 0.3.3 (built)
+- [x] Mic rest and busy message; one mode panel; Ripples card; strings wake; heat dots fade; breathing countdown removed and five-minute sun; dot loop two-tap clear; wider two-finger range.
+- [ ] Two fingers shapes (answer 3): the next increment.
+- [ ] Dot loop outward rings and dash-and-dot marks (answer 2, first part).

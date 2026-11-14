@@ -16,7 +16,7 @@
     { name: 'low bell', col: '#c9e8a6', play: function (v) { RS.audio.bell(RS.audio.mtof(48), v, 1.0); } },
     { name: 'high bell', col: '#f6c6e0', play: function (v) { RS.audio.bell(RS.audio.mtof(76), v, 0.9); } },
   ];
-  var S, rings, sel, tot, lastTot, ang, flashes, bursts, clearT, nVis;
+  var S, rings, sel, tot, lastTot, ang, flashes, bursts, clearT, nVis, clearArm = 0;
 
   function reset(seed) {
     rings = TRACKS.map(function (t, k) {
@@ -57,7 +57,11 @@
 
   M.down = function (id, x, y) {
     var G = geom();
-    if (Math.hypot(x - G.cx, y - G.cy) < G.centre * 1.3) { M.clear(); return; }
+    if (Math.hypot(x - G.cx, y - G.cy) < G.centre * 1.3) {       // the middle: two taps clear (the first arms it for 2 s)
+      var tn = performance.now() / 1000;
+      if (clearArm && tn - clearArm < 2) { clearArm = 0; M.clear(); } else { clearArm = tn; }
+      return;
+    }
     var best = null, bd = 1e9;
     for (var k = 0; k < nVis; k++) {
       for (var i = 0; i < STEPS; i++) {

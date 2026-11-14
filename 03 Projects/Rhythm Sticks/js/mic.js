@@ -14,8 +14,11 @@
     listeners.push(fn);
     return function () { listeners = listeners.filter(function (f) { return f !== fn; }); };
   };
+  var lastActive = performance.now();
+  M.touch = function () { lastActive = performance.now(); };
   function fire(strength) {
     var now = performance.now();
+    lastActive = now;
     if (now < RS.audio.maskUntil) return;                  // the app's own noisy sound, heard again
     lastFire = now;
     listeners.slice().forEach(function (fn) { try { fn(strength); } catch (e) { RS.err('Onset handler', e); } });
@@ -123,9 +126,25 @@
   }
   function live(s) { return s && s.getTracks().some(function (t) { return t.readyState === 'live'; }); }
 
+  // Rest: after 30 seconds with no sound and no touch, the microphone is let go (another app can use it). A tap wakes it.
+  M.REST_MS = 30000;
+  function rest() {
+    if (M.state !== 'on') return;
+    M.state = 'rest'; diag.last = 'resting after 30 s with no sound'; diag.lastAt = stamp();
+    cancelAnimationFrame(raf); raf = 0;
+    if (node) { try { node.disconnect(); node.port.onmessage = null; } catch (e) { /* gone */ } node = null; }
+    if (src) { try { src.disconnect(); } catch (e) { /* gone */ } src = null; }
+    if (stream) {                                   // keep the permission if the browser does not report it (no new prompt on wake)
+      if (M.perm === 'granted') { stream.getTracks().forEach(function (t) { t.stop(); }); }
+      else { stream.getTracks().forEach(function (t) { t.enabled = false; }); held = stream; }
+      stream = null;
+    }
+    M.analyser = null; M.freqData = null; M.level = 0; M.engine = 'none';
+  }
   M.start = function () {
     M.want = true;
     if (M.state === 'on' || M.state === 'starting') return Promise.resolve();
+    if (M.state === 'rest') { M.state = 'off'; lastActive = performance.now(); }
     if (M.state === 'denied' || M.state === 'unsupported') return Promise.resolve();   // no nagging after a refusal
     if (live(held)) { var h = held; held = null; attach(h); return Promise.resolve(); }  // already allowed this visit
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -146,6 +165,9 @@
       })
       .catch(function (e) {
         diag.last = 'browser refused or failed'; diag.lastAt = stamp();
+        if (e && (e.name === 'NotReadableError' || e.name === 'AbortError' || e.name === 'TrackStartError')) {
+          M.state = 'denied'; RS.err('The microphone is busy: another app or tab may be using it. Close it, then tap the button in ⚙️.', e); return;
+        }
         diag.lastName = e && e.name ? e.name : 'unknown'; diag.lastMsg = e && e.message ? e.message : '';
         if (!RS.touched && e && e.name === 'NotAllowedError') { M.state = 'off'; return; }   // some browsers want a touch first: retry on the first touch
         M.state = 'denied';
@@ -186,6 +208,7 @@
     raf = requestAnimationFrame(loop);
     var an = M.analyser;
     if (!an) return;
+    if (performance.now() - lastActive > M.REST_MS) { rest(); return; }
     an.getByteFrequencyData(M.freqData);
     an.getByteTimeDomainData(tdata);
     var sum = 0, k;

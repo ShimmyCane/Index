@@ -32,7 +32,7 @@
   M.up = function (id) { delete ptr[id]; };
 
   function pitchFrom(d) {
-    var u = Math.max(0, Math.min(1, (d - 50) / (S.w * SPLIT * 0.75)));
+    var u = Math.max(0, Math.min(1, (d - 30) / (S.w * SPLIT * 0.9)));
     if (RS.settings.glide === 'glide') return 130.81 * Math.pow(2, u * 3);          // C3 up three octaves, smooth
     return RS.audio.mtof(RS.audio.midiFromUnit(u, 3, 48));                          // steps on the chosen scale
   }
