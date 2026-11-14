@@ -82,3 +82,7 @@ Nothing built yet. Questions in convo v0.9. Not marked done (no yes yet).
 - [ ] Ripples card: two sentences, vague (n-1794544339627-2l2ea).
 - [ ] Breathing garden: no countdown arc on the pacer; sun on a five-minute sunrise-to-sunset cycle (n-1794545351475-z0x5l).
 - [ ] Strings: every pluck wakes the sound; check after a pause and after a mode change (n-1794545430160-qu6gc).
+
+## Answers to v0.9 (`convo/convo v0.10.md`)
+- Yes: mic rest after 30 s and tap-to-wake, with a busy-mic message that names the other app (1). Dot loop: outside growth, dash-and-dot rings, two-tap clear (2). Two fingers: shapes design as proposed in v0.9 (3). Range and colour across about three octaves (4). One panel for the current mode; remove the duplicate (5).
+- Not answered: 6 heat dots, 7 Ripples card wording, 8 breathing garden, 9 strings case.
