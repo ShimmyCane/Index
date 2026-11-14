@@ -27,6 +27,10 @@ Six modes × three sizes: zero errors, no horizontal scroll; gear circle, fade, 
 
 Sound by ear on iPad; real two-finger touch; clap vs speech against the real onset detector (thresholds are a first guess); real sign-in; the SQL has not been run (checked only with `sql_paste_check.py`).
 
+## Notes round 2026-11-14 (ten open notes, version 0.3.0)
+
+Ten new open notes from `rs_notes`: a microphone that goes silent when another app holds it (add a 30-second rest and tap-to-wake), dot loop layout and a two-tap reset, a new shapes-with-fingers design for Two fingers (a new mode, not a tweak), a wider note range and colour, the ⚙️ "what each mode does" panel showing only the current mode, heat view dots that fade, a two-sentence Ripples card, a breathing garden countdown removed and a five-minute sun cycle, and strings audio that sometimes stays silent. Nothing built or marked done. Questions in `convo/convo v0.9.md`; items in `todo.md`.
+
 ## Version 0.3.1 (2026-11-13)
 
 All 14 notes of the round were marked done in `rs_notes` (Jimmy's yes; read back to confirm). The Notes panel now pulls the table (`Family.pullNotes` → `AppNotes.merge`): a status set in the table shows on the device, notes from other devices appear, Open hides done notes, All shows them. Pulled on load, after sign-in and each time the filter changes. Checked with a made-up table reply.

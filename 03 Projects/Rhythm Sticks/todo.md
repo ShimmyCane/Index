@@ -69,3 +69,16 @@ Nothing below is built yet. Questions are in `convo/convo v0.6.md`. Note ids are
 - [x] The 14 notes are marked done in the family table (2026-11-13, Jimmy's yes); 0.3.1 shows them under All.
 - [ ] Try it on the iPad: audio waking, the rhythm road window, Echo levels, real chords.
 - [ ] Ideas not built: Echo singing back the pitch you used; a Footsteps rhythm editor; more Marbles boards.
+
+## Round of 2026-11-14 (ten open notes read, version 0.3.0; answers in `convo/convo v0.9.md`)
+Nothing built yet. Questions in convo v0.9. Not marked done (no yes yet).
+- [ ] Echo: microphone rests after 30 s with no sound or touch, tap to wake; say when the browser reports it busy (note n-1794543089902-3ejb1).
+- [ ] Dot loop: new rings grow outside; unedited rings shrink to a dash-and-dot marker (n-1794543736705-7c93e).
+- [ ] Dot loop: the middle needs two taps to clear, with a "tap again" hint (n-1794543756478-lzggf).
+- [ ] Two fingers: new design, shapes with several fingers (triangle, square, circle, a drawn line), trails that mean something, no split screen; volume by a second pair (n-1794543911965-d63z3). Needs answers in v0.9 Q3.
+- [ ] Two fingers: wider note range (about three octaves) and colour across the whole range (n-1794543927566-172kz).
+- [ ] ⚙️ "What each mode does": show only the current mode (n-1794543982750-cqrlt).
+- [ ] Heat: view dots show for 3 s after a two-finger switch, then fade (n-1794544014736-asntq).
+- [ ] Ripples card: two sentences, vague (n-1794544339627-2l2ea).
+- [ ] Breathing garden: no countdown arc on the pacer; sun on a five-minute sunrise-to-sunset cycle (n-1794545351475-z0x5l).
+- [ ] Strings: every pluck wakes the sound; check after a pause and after a mode change (n-1794545430160-qu6gc).
