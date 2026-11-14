@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var RS = window.RS = {
-    version: '0.3.2',
+    version: '0.3.3',
     modes: {},
     order: ['ripples', 'beads', 'pads', 'strings', 'span', 'heat', 'echo', 'marbles', 'dotloop', 'footsteps', 'hum'],
     hidden: ['breathe'],                 // reachable only from the gear panel (or #breathe), never picked at random
@@ -131,6 +131,7 @@
   function onDown(e) {
     var p = pos(e);
     if (RS.audio) RS.audio.wake();       // every touch: an engine that fell asleep (screen lock, another app) is woken here
+    if (RS.mic) { if (RS.mic.touch) RS.mic.touch(); if (RS.mic.want && (RS.mic.state === 'rest' || RS.mic.state === 'off')) RS.mic.start(); }
     if (!woke) {                         // browsers start audio only after a first touch
       woke = true; RS.touched = true;
       if (RS.mic && RS.mic.want && RS.mic.state === 'off') RS.mic.start();   // once: browsers that wanted a touch before asking

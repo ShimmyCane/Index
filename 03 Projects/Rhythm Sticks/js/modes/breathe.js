@@ -83,7 +83,7 @@
     gr.addColorStop(0, 'hsl(' + lerp(265, 195, calm) + ',' + lerp(45, 60, calm) + '%,' + lerp(86, 90, calm) + '%)');
     gr.addColorStop(1, 'hsl(' + lerp(20, 50, calm) + ',' + lerp(80, 85, calm) + '%,' + lerp(88, 93, calm) + '%)');
     g.fillStyle = gr; g.fillRect(0, 0, w, h);
-    var sx = w * lerp(0.12, 0.8, calm), sy = h * lerp(0.28, 0.14, calm), sr = Math.min(w, h) * lerp(0.05, 0.075, calm);
+    var ph = (performance.now() / 1000 % 300) / 300, sx = w * (0.08 + 0.84 * ph), sy = h * (0.12 + 0.2 * Math.sin(Math.PI * ph) ** 2), sr = Math.min(w, h) * lerp(0.05, 0.075, calm);   // sunrise to sunset over five minutes
     g.fillStyle = 'hsl(' + lerp(30, 48, calm) + ',95%,75%)'; g.shadowColor = g.fillStyle; g.shadowBlur = 30 + 40 * calm;
     g.beginPath(); g.arc(sx, sy, sr, 0, Math.PI * 2); g.fill(); g.shadowBlur = 0;
     g.strokeStyle = RS.pal.ink; g.lineWidth = 3; g.globalAlpha = 0.5; g.stroke(); g.globalAlpha = 1;
@@ -370,8 +370,6 @@
     }
     g.fillStyle = RS.pal.sun; g.beginPath(); g.arc(px, py, R * 0.22, 0, Math.PI * 2); g.fill(); g.strokeStyle = RS.pal.ink; g.lineWidth = 3; g.stroke();
     if (b.pulse > 0) { g.globalAlpha = b.pulse; g.strokeStyle = b.good ? '#8fe0bd' : RS.pal.coral; g.lineWidth = 6; g.beginPath(); g.arc(px, py, m * 0.2 + (1 - b.pulse) * 60, 0, Math.PI * 2); g.stroke(); g.globalAlpha = 1; }
-    // A thin arc under the lotus: how long this phase has left.
-    g.strokeStyle = RS.pal.ink; g.lineWidth = 4; g.globalAlpha = 0.5; g.beginPath(); g.arc(px, py, m * 0.215, -Math.PI / 2, -Math.PI / 2 + u * Math.PI * 2); g.stroke(); g.globalAlpha = 1;
     petals(b.petals, g, w, h, dt);
   }
   function blossomEnded() {}

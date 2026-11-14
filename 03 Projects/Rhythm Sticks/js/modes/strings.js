@@ -36,6 +36,7 @@
 
   function pitch(k) { return RS.audio.mtof(strs[k].midi + LADDER[strs[k].fret]); }
   function pluck(k, v) {
+    if (RS.audio) RS.audio.wake();                                 // every pluck wakes a sleeping sound first
     var s = strs[k];
     s.amp = (n === 1 ? Math.min(S.h * 0.16, 120) : Math.min(S.h * 0.09, 64)) * (0.55 + 0.45 * v);
     s.t0 = performance.now() / 1000;

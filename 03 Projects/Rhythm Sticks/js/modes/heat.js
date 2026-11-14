@@ -38,7 +38,8 @@
   };
   M.stop = function () { RS.mic.stop(); };
   M.resize = function () { makeBuf(); };
-  M.setView = function (v) { view = v % 3; applyView(); };
+  var viewAt = -1e9;
+  M.setView = function (v) { view = v % 3; viewAt = performance.now(); applyView(); };
 
   // One tap freezes. A second finger landing right after the first changes the view instead (and undoes that freeze).
   M.down = function (id) {
@@ -226,9 +227,11 @@
       g.fillStyle = RS.pal.paper; g.strokeStyle = RS.pal.ink; g.lineWidth = 3;
       [28, 52].forEach(function (x) { g.beginPath(); g.rect(x, 24, 14, 40); g.fill(); g.stroke(); });
     }
-    for (var i = 0; i < 3; i++) {                               // which view: three dots at the top right
+    var since = (performance.now() - viewAt) / 1000, dotAl = since < 3 ? 1 : Math.max(0, 1 - (since - 3) / 1);   // shown 3 s after a switch, then fades
+    if (dotAl > 0) for (var i = 0; i < 3; i++) {               // which view: three dots at the top right
+      g.globalAlpha = dotAl * (i === view ? 1 : 0.5);
       g.beginPath(); g.arc(w - 130 + i * 22, 34, 7, 0, Math.PI * 2); g.fillStyle = i === view ? RS.pal.coral : 'rgba(255,255,255,0.8)'; g.fill();
-      g.strokeStyle = RS.pal.ink; g.lineWidth = 2.5; g.globalAlpha = i === view ? 1 : 0.5; g.stroke(); g.globalAlpha = 1;
+      g.strokeStyle = RS.pal.ink; g.lineWidth = 2.5; g.stroke(); g.globalAlpha = 1;
     }
     var ok = RS.mic.state === 'on';
     if (!ok) {                                                  // microphone off: crossed-out mic

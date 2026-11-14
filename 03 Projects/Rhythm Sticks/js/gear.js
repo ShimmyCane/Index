@@ -127,8 +127,8 @@
     RS.onMode(function (id) {
       syncModeRows(id);
       var mi = RS.modeInfo && RS.modeInfo[id];
-      $('modeHint').textContent = mi ? mi.text : '';
       RS.info.hide();
+      showNarr(id);
       if (window.AppNotes) AppNotes.setContext({ item: id, label: RS.modes[id].name });
     });
     $('homeLink').addEventListener('click', function (e) {          // a fresh page means a new random mode
@@ -139,7 +139,8 @@
     function micStatus() {
       var st = RS.mic.state, text = { on: 'The microphone is on. It is only listened to, never saved or sent.', starting: 'Waiting for the browser to answer…',
         off: 'The microphone is off until a microphone mode starts.', denied: 'The browser said no. Allow the microphone for this site in the browser settings, then tap the button.',
-        unsupported: 'This page cannot use the microphone here (it needs https).' }[st] || st;
+        unsupported: 'This page cannot use the microphone here (it needs https).',
+        rest: 'The microphone is resting: nothing was heard for 30 seconds, so it was let go. Tap the screen to wake it.' }[st] || st;
       var lines = RS.mic.diagnose ? RS.mic.diagnose() : [];
       $('micStatus').textContent = text + '\n' + lines.join('\n');
     }
@@ -159,14 +160,18 @@
     $('stopSound').addEventListener('click', function () { RS.modes.span.stopNote(); });
     $('newPattern').addEventListener('click', function () { RS.modes.ripples.newPattern(); });
     $('errClear').addEventListener('click', function () { RS.errors.length = 0; renderErrors(); });
-    RS.order.concat(RS.hidden).forEach(function (id) {
-      var m = RS.modeInfo[id]; if (!m) return;
-      var h = document.createElement('h4'); h.textContent = (RS.modes[id].icon || '') + ' ' + m.title + (RS.hidden.indexOf(id) >= 0 ? ' (hidden)' : '');
+    function showNarr(id) {                                     // one panel: only the mode you are in
+      var m = RS.modeInfo[id], list = $('narrList');
+      list.textContent = '';
+      if (!m) return;
+      var h = document.createElement('h4'); h.textContent = (RS.modes[id].icon || '') + ' ' + m.title;
       var p = document.createElement('p'); p.textContent = m.text;
-      $('narrList').appendChild(h); $('narrList').appendChild(p);
-    });
+      list.appendChild(h); list.appendChild(p);
+    }
+    RS.onMode(showNarr);
     $('versionText').textContent = 'v' + RS.version;
     [
+      '0.3.3: the microphone rests after 30 seconds with nothing heard (a tap wakes it) and names another app if it is busy; one panel explains the current mode; Ripples card is two sentences; Strings: every pluck wakes the sound; Heat view dots fade after 3 seconds; Breathing garden: no countdown arc, the sun crosses in five minutes; Dot loop: two taps clear the middle; Two fingers: a wider note range.',
       '0.3.2: fixes the iPhone "no microphone" error. An earlier audio setting ("playback") stopped the browser from capturing the microphone; it now asks for the "play-and-record" session when the microphone starts.',
       '0.3.1: notes marked done elsewhere show as done here, and notes from other devices appear; choose All to see the done ones.',
       '0.3.0: audio wakes from sleep and shows a crossed-out speaker when asleep; shorter error bar that fades; two fingers with colours, a volume slide and a pulse; desert Footsteps with a 15-rhythm road and tap-to-play objects; heat map with pitch and chord views; ripples up-and-down choice; more pad sounds with a seed number; dot loop with up to eight rings; Echo that learns your level, with a sung tone; what each mode does (upper-right corner and ⚙️).',
