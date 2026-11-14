@@ -11,7 +11,6 @@
     if (ctx) return ctx;
     var AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) { RS.err('Web Audio is not available in this browser'); return null; }
-    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* not on every browser */ }   // iPad: play even when the side switch is on mute
     try { ctx = new AC({ latencyHint: 'interactive' }); } catch (e) { ctx = new AC(); }
     echo = null; primed = false;
     ctx.onstatechange = function () { if (RS.onAudioState) RS.onAudioState(ctx ? ctx.state : 'closed'); };

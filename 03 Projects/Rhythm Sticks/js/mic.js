@@ -135,6 +135,8 @@
     }
     M.state = 'starting';
     diag.tries++; diag.last = 'asking the browser'; diag.lastAt = stamp();
+    // iPhone/iPad Safari: capturing the microphone needs the "play-and-record" audio session. ("playback" stops capture.)
+    try { if (navigator.audioSession && navigator.audioSession.type !== 'play-and-record') navigator.audioSession.type = 'play-and-record'; } catch (e) { /* not on every browser */ }
     return navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } })
       .then(function (s) {
         try { localStorage.setItem('rs.micOk', '1'); } catch (e) { /* storage blocked */ }
