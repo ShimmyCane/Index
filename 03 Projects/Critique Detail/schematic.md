@@ -4,6 +4,10 @@
 
 A command-line tool that reviews one architectural detail (PDF, PNG or JPEG) against a CSI-organized rulebook, and a page that shows the result. The review produces a report and a redlined copy of the drawing.
 
+## Purpose (Jimmy, 2026-11-14)
+
+A page that can review and critique architectural details, and in doing so show that it understands them. The MVP is the framework for that: a front-end GUI, and an adaptive QC list for each type of detail, built from the project's requirements. Later rounds, with Claude or a future version, use that framework to critique better and to improve.
+
 ## Track defaults
 
 | Setting | This project |

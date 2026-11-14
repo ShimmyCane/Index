@@ -48,3 +48,9 @@ Built from the master schematic in the request. What I assumed is listed first; 
 9. **Units and codes.** The sample uses IBC 2021, IECC 2021 and climate zone 5A, with inches first. What should the defaults be?
 
    Answer:
+
+## Jimmy, 2026-11-14
+
+Purpose: a page that can review and critique architectural details, and in a way show that it can understand details. The MVP is the framework: set up a front-end GUI, and develop an adaptive QC list based on project requirements for each type of detail. This can then be used with Claude or future versions to critique better and improve.
+
+"I think it is looking good." Answers to the questions come next round. Merged on request.
