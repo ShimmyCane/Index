@@ -1,7 +1,7 @@
 # Rhythm Sticks — schematic
 
 **Track: A. Family play** (confirmed, `convo/convo v0.2.md`)
-**Status: MVP 0.3.0 (not yet device-tested).** Written 2026-11-12; first build the same day, all six modes. Shared background: `context.md`. Answers: `convo/convo v0.2.md`, `convo/convo v0.3.md`.
+**Status: MVP 0.3.1 (not yet device-tested).** Written 2026-11-12; first build the same day, all six modes. Shared background: `context.md`. Answers: `convo/convo v0.2.md`, `convo/convo v0.3.md`.
 
 ## Purpose
 
@@ -110,4 +110,4 @@ Link to the Family project (`twvqvutrcobedvuhnzxq`) per `02 Refs/Skills/supabase
 
 ## Open questions
 
-See `convo/convo v0.7.md` (after a first play on the iPad).
+See `convo/convo v0.8.md` (after a first play on the iPad).

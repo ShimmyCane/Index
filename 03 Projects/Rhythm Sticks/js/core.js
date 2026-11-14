@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var RS = window.RS = {
-    version: '0.3.0',
+    version: '0.3.1',
     modes: {},
     order: ['ripples', 'beads', 'pads', 'strings', 'span', 'heat', 'echo', 'marbles', 'dotloop', 'footsteps', 'hum'],
     hidden: ['breathe'],                 // reachable only from the gear panel (or #breathe), never picked at random

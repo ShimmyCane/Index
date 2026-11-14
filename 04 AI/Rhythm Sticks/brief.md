@@ -1,7 +1,7 @@
 # Rhythm Sticks — brief
 
 **Updated:** 2026-11-12
-**Status:** MVP 0.3.0, not device-tested. All six modes built in one pass after `convo v0.2` answers.
+**Status:** MVP 0.3.1, not device-tested. All six modes built in one pass after `convo v0.2` answers.
 
 ## Goal
 
@@ -26,6 +26,10 @@ Six modes × three sizes: zero errors, no horizontal scroll; gear circle, fade, 
 ## Not verified
 
 Sound by ear on iPad; real two-finger touch; clap vs speech against the real onset detector (thresholds are a first guess); real sign-in; the SQL has not been run (checked only with `sql_paste_check.py`).
+
+## Version 0.3.1 (2026-11-13)
+
+All 14 notes of the round were marked done in `rs_notes` (Jimmy's yes; read back to confirm). The Notes panel now pulls the table (`Family.pullNotes` → `AppNotes.merge`): a status set in the table shows on the device, notes from other devices appear, Open hides done notes, All shows them. Pulled on load, after sign-in and each time the filter changes. Checked with a made-up table reply.
 
 ## Version 0.3.0 (2026-11-13)
 

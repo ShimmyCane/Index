@@ -46,9 +46,29 @@
       Family.pushNotes([note]).catch(function (e) { RS.err('Note not sent to the family database', e); });
     }
   }
+  // Rows from the family table: update the status of notes we have, and add notes we do not (saved on another device).
+  function merge(rows) {
+    var byId = {}, changed = false;
+    notes.forEach(function (n) { byId[n.id] = n; });
+    rows.forEach(function (r) {
+      var n = byId[r.id];
+      if (n) {
+        if (r.status && n.status !== r.status) { n.status = r.status; changed = true; }
+        if (r.status === 'done' && r.text && n.text !== r.text && /^Done- /.test(r.text)) { n.text = r.text; changed = true; }
+      } else {
+        notes.push({ id: r.id, at: new Date(r.noted_at).toISOString(), status: r.status || 'open', text: r.text,
+          where: { page: r.page || '', item: r.item || '', label: r.label || '' }, version: r.version || '' });
+        changed = true;
+      }
+    });
+    if (changed) { save(); render(); }
+  }
   document.addEventListener('DOMContentLoaded', function () {
     $('noteSave').addEventListener('click', addNote);
-    $('noteFilter').addEventListener('change', render);
+    $('noteFilter').addEventListener('change', function () {
+      render();
+      if (window.Family && Family.signedIn()) Family.pullNotes().catch(function (e) { RS.err('Could not read the family notes', e); });
+    });
     $('noteCopy').addEventListener('click', function () {
       var out = JSON.stringify(notes, null, 2);
       if (navigator.clipboard) navigator.clipboard.writeText(out).catch(function () { window.prompt('Copy the notes:', out); });
@@ -56,5 +76,5 @@
     });
     render();
   });
-  window.AppNotes = { setContext: setContext, add: addNote, all: function () { return notes.slice(); } };
+  window.AppNotes = { setContext: setContext, add: addNote, merge: merge, all: function () { return notes.slice(); } };
 })();
