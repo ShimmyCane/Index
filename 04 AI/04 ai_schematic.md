@@ -22,7 +22,6 @@ Projects with notes:
 - Living Room Scene/ — scene built from a photo over ten versions (V1–V10), render-and-compare loop. `brief.md` (version log), `lessons.md`.
 - Shimmy Specs/ — spec-writing process app; MVP planned (`mvp schematic.md`, `mvp tasks.md`). `brief.md`, `lessons.md`.
 - Critique Detail/ — MVP 0.2.0 (2026-11-14): results page and script around a written detail review; CSI rulebook library, adaptive QC list, hard gate, lean proof toggles; no AI call in the code. `brief.md`, `lessons.md`. Questions in `03 Projects/Critique Detail/convo/convo v0.2.md`.
-- Rhythm Sticks/ — MVP 0.3.0 (2026-11-13): wordless rhythm and sound toy, eleven modes plus a hidden breathing garden, random on load. `brief.md`, `lessons.md`. Questions in `03 Projects/Rhythm Sticks/convo/convo v0.7.md`.
 - Rhythm Sticks/ — MVP 0.3.1 (2026-11-13): wordless rhythm and sound toy, eleven modes plus a hidden breathing garden, random on load. `brief.md`, `lessons.md`. Questions in `03 Projects/Rhythm Sticks/convo/convo v0.8.md`.
 
 Notes:
