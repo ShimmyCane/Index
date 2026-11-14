@@ -1,0 +1,77 @@
+{
+  "key": "div_07_thermal_moisture/roof_parapet",
+  "csi_division": "07",
+  "title": "Low-slope roof parapet",
+  "keywords": [
+    "parapet",
+    "coping",
+    "low-slope roof",
+    "roof edge",
+    "cap flashing"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "RP-1",
+      "item": "Coping or cap slopes back to the roof side and has a drip edge clear of both wall faces.",
+      "why": "A flat or outward-sloping cap holds water and stains or wets the facade.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "flashing",
+        "slope"
+      ]
+    },
+    {
+      "id": "RP-2",
+      "item": "Roof membrane base flashing turns up the parapet at least 8 in (200 mm) above the finished roof surface and is terminated and counter-flashed.",
+      "why": "Low or unterminated base flashing is the most common parapet leak.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "membrane",
+        "flashing"
+      ]
+    },
+    {
+      "id": "RP-3",
+      "item": "A continuous membrane or sheet-metal underlayment runs over the top of the parapet, under the coping, lapped onto both faces.",
+      "why": "Coping joints leak; the layer below is what keeps water out of the wall.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "membrane",
+        "coping"
+      ]
+    },
+    {
+      "id": "RP-4",
+      "item": "Air and water barrier of the wall is shown continuous with the roof membrane across the parapet.",
+      "why": "A break here lets interior air into the parapet, where it condenses.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "air barrier",
+        "continuity"
+      ]
+    },
+    {
+      "id": "RP-5",
+      "item": "Continuous insulation wraps the parapet or the thermal break at the roof-to-wall line is shown; R-value meets the energy code for the project climate zone.",
+      "why": "An uninsulated parapet is a thermal bridge around the whole roof.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "thermal",
+        "energy code"
+      ]
+    },
+    {
+      "id": "RP-6",
+      "item": "Cant or tapered edge, fastening of the coping (continuous cleat) and the wood blocking are labelled, with a scale and material tags.",
+      "why": "The builder needs these to price and build it; missing labels become RFIs.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "labels",
+        "constructability"
+      ]
+    }
+  ]
+}

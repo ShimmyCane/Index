@@ -1,0 +1,76 @@
+{
+  "key": "div_08_openings/window_head_sill",
+  "csi_division": "08",
+  "title": "Window head and sill in a framed or cavity wall",
+  "keywords": [
+    "window",
+    "head",
+    "sill",
+    "jamb",
+    "opening",
+    "storefront"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "WH-1",
+      "item": "Sill has a sloped sub-sill pan flashing with a back dam and end dams, draining to the exterior.",
+      "why": "Windows leak at the corners of the sill; the pan is what catches it.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "flashing",
+        "sill"
+      ]
+    },
+    {
+      "id": "WH-2",
+      "item": "Head flashing (drip cap) laps under the water-resistive barrier above and extends past the jambs, with end dams.",
+      "why": "Reverse-lapped head flashing sends water into the opening.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "flashing",
+        "head"
+      ]
+    },
+    {
+      "id": "WH-3",
+      "item": "Water-resistive barrier and flashing membrane are lapped shingle fashion around the opening: sill first, jambs, then head.",
+      "why": "The lap order is the whole water management strategy.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "sequence",
+        "wrb"
+      ]
+    },
+    {
+      "id": "WH-4",
+      "item": "Air barrier is sealed to the window frame on all four sides, with backer rod and sealant or a transition membrane shown.",
+      "why": "The frame perimeter is the largest air leak in most walls.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "air barrier"
+      ]
+    },
+    {
+      "id": "WH-5",
+      "item": "The thermal break of the frame lines up with the wall insulation; lintel or sill angle does not bridge the insulation without a thermal break.",
+      "why": "Misaligned insulation makes a cold frame that condenses.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "thermal"
+      ]
+    },
+    {
+      "id": "WH-6",
+      "item": "Shim space, anchor type and spacing, sealant joint size, and a weep path at the sill are labelled.",
+      "why": "Unlabelled joints are sized on site, usually too small.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "labels",
+        "sealant"
+      ]
+    }
+  ]
+}

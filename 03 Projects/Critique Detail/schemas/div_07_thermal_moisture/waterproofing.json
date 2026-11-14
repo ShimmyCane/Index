@@ -1,0 +1,75 @@
+{
+  "key": "div_07_thermal_moisture/waterproofing",
+  "csi_division": "07",
+  "title": "Below-grade waterproofing at foundation wall",
+  "keywords": [
+    "waterproofing",
+    "foundation wall",
+    "below grade",
+    "footing",
+    "drainage board"
+  ],
+  "source": "seed",
+  "status": "active",
+  "version": 1,
+  "checklist": [
+    {
+      "id": "WP-1",
+      "item": "Waterproofing membrane is continuous from the top of the footing to at least 6 in (150 mm) above finished grade, with a termination bar or flashing at the top.",
+      "why": "An exposed or unsealed top edge lets surface water run behind the membrane.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "membrane",
+        "termination"
+      ]
+    },
+    {
+      "id": "WP-2",
+      "item": "The wall-to-footing joint has a cant or fillet and a reinforced membrane strip; a waterstop is shown at the cold joint.",
+      "why": "The footing joint is where hydrostatic pressure finds its way in.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "joint",
+        "waterstop"
+      ]
+    },
+    {
+      "id": "WP-3",
+      "item": "Drainage board and filter fabric lead to a perforated footing drain set below the slab, in washed stone, sloped to daylight or a sump.",
+      "why": "Without relief, water pressure builds against the membrane.",
+      "default_severity": "CRITICAL",
+      "tags": [
+        "drainage"
+      ]
+    },
+    {
+      "id": "WP-4",
+      "item": "A protection layer or insulation covers the membrane before backfill.",
+      "why": "Backfill punctures an unprotected membrane.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "protection"
+      ]
+    },
+    {
+      "id": "WP-5",
+      "item": "Below-grade insulation type, thickness and R-value are shown and meet the energy code for the climate zone.",
+      "why": "Basement walls are part of the thermal envelope.",
+      "default_severity": "MAJOR",
+      "tags": [
+        "thermal",
+        "energy code"
+      ]
+    },
+    {
+      "id": "WP-6",
+      "item": "Finished grade slopes away from the wall (5% for the first 10 ft / 3 m) and the vapour retarder under the slab laps to the wall membrane.",
+      "why": "Surface water is cheaper to turn away than to resist.",
+      "default_severity": "ADVISORY",
+      "tags": [
+        "grading",
+        "vapour"
+      ]
+    }
+  ]
+}

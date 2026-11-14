@@ -1,0 +1,9 @@
+# Real details never go in this public repo. Only the synthetic sample is tracked.
+inputs/*
+!inputs/detail_sample.png
+!inputs/detail_sample.mock.json
+outputs/reports/*
+!outputs/reports/detail_sample.json
+!outputs/reports/detail_sample.md
+outputs/markups/*
+!outputs/markups/detail_sample_markup.png
