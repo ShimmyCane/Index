@@ -8,6 +8,10 @@ Shared list of open work across the nursery. Project to-do lists stay in each pr
 - **#102 Version log panel inside the settings button.** Important. Waiting for a go-ahead.
 - **#119 Nursery: add What to Cook tile.** Probably a duplicate: the What to Cook link was added to the nursery list by #123. Check, then close or merge.
 
+## Merged on 2026-11-15
+
+- **Generate Clouds:** new seed, MVP 0.1.0 (3-D sky from weather data, time lapse, 360° view, PNG exports, research notes). Merged at Jimmy's request before questions. Open: first live Open-Meteo call and an iPad run (`03 Projects/Generate Clouds/todo.md`), answers to `convo/convo v0.1.md`, and whether to add a tile to the home page.
+
 ## Merged on 2026-11-09
 
 - **Bar Glide:** new seed, arcade bar game MVP 0.1.0 (⚙️, notes, scores, Family database SQL tested, not applied).

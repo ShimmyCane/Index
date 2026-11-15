@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Generate Clouds</title>
+<link rel="stylesheet" href="css/style.css?v=0.1.0">
+</head>
+<body data-panels="on">
+
+<canvas id="sky" aria-label="The generated sky. Drag to look around, pinch to zoom."></canvas>
+<div id="noGl" class="noGl" hidden>This device could not start the 3-D view (WebGL). Try another browser.</div>
+
+<header class="top">
+  <button class="btn square" id="panelsToggle" type="button" aria-label="Show or hide panels" aria-expanded="true">☰</button>
+  <div class="title">☁️ Generate Clouds</div>
+  <button class="pill" id="statusPill" type="button" title="Where the weather numbers came from">⏳ Loading</button>
+</header>
+<div class="hud" id="hud"></div>
+
+<main class="panels" id="panels">
+
+  <section class="panel" data-panel="place">
+    <button class="panelHead" type="button" aria-expanded="true" aria-controls="place-body">
+      <span class="panelIcon">📍</span><span class="panelTitle">Place and time</span><span class="panelMark">▾</span>
+    </button>
+    <div class="panelBody" id="place-body">
+      <div class="placeNow" id="placeNow">Tokyo, Japan</div>
+      <form class="row" id="searchForm">
+        <input type="search" id="searchText" placeholder="City or place name" autocomplete="off" aria-label="Search for a place">
+        <button class="btn" type="submit">Find</button>
+      </form>
+      <ul class="results" id="searchResults"></ul>
+      <div class="chips" id="placeChips"></div>
+      <div class="row">
+        <label class="mini">Lat <input type="number" id="lat" step="0.01" min="-90" max="90"></label>
+        <label class="mini">Lon <input type="number" id="lon" step="0.01" min="-180" max="180"></label>
+        <button class="btn" id="goLatLon" type="button">Go</button>
+      </div>
+      <button class="btn wide" id="myLocation" type="button">📡 Use where I am</button>
+      <label class="field">Local time at the place
+        <input type="datetime-local" id="when">
+      </label>
+      <div class="chips">
+        <button class="chip" data-time="now" type="button">Now</button>
+        <button class="chip" data-time="sunrise" type="button">Sunrise</button>
+        <button class="chip" data-time="noon" type="button">Noon</button>
+        <button class="chip" data-time="golden" type="button">Golden hour</button>
+        <button class="chip" data-time="sunset" type="button">Sunset</button>
+        <button class="chip" data-time="dusk" type="button">Dusk</button>
+      </div>
+      <button class="btn wide primary" id="loadSky" type="button">Generate this sky</button>
+      <p class="hint" id="loadNote"></p>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="reading">
+    <button class="panelHead" type="button" aria-expanded="true" aria-controls="reading-body">
+      <span class="panelIcon">📖</span><span class="panelTitle">How to read this sky</span><span class="panelMark">▾</span>
+    </button>
+    <div class="panelBody" id="reading-body">
+      <ul class="reading" id="reading"></ul>
+      <p class="hint"><b>What this is not:</b> a photograph of the real sky. The amounts, heights, wind, sun and haze follow the data. The exact shape of each cloud is generated, so it will not match the cloud outside your window.</p>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="atlas" data-open="false">
+    <button class="panelHead" type="button" aria-expanded="false" aria-controls="atlas-body">
+      <span class="panelIcon">🗂️</span><span class="panelTitle">Cloud atlas</span><span class="panelMark">▾</span>
+    </button>
+    <div class="panelBody" id="atlas-body">
+      <p class="hint">Sample skies, one per cloud type. They use the place and date above, with made-up weather.</p>
+      <div class="atlas" id="atlas"></div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="adjust" data-open="false">
+    <button class="panelHead" type="button" aria-expanded="false" aria-controls="adjust-body">
+      <span class="panelIcon">🎚️</span><span class="panelTitle">Adjust</span><span class="panelMark">▾</span>
+    </button>
+    <div class="panelBody" id="adjust-body">
+      <p class="hint">Start from the data, then change it by hand. A changed value is marked ✎.</p>
+      <label class="slider"><span>Low cloud <b id="ovLowV"></b></span><input type="range" id="ovLow" min="0" max="100" step="1"></label>
+      <label class="slider"><span>Mid cloud <b id="ovMidV"></b></span><input type="range" id="ovMid" min="0" max="100" step="1"></label>
+      <label class="slider"><span>High cloud <b id="ovHighV"></b></span><input type="range" id="ovHigh" min="0" max="100" step="1"></label>
+      <label class="field">Low cloud type
+        <select id="ovType">
+          <option value="">From the data</option>
+          <option value="cumulus">Cumulus</option>
+          <option value="congestus">Cumulus congestus</option>
+          <option value="cumulonimbus">Cumulonimbus</option>
+          <option value="stratocumulus">Stratocumulus</option>
+          <option value="stratus">Stratus</option>
+          <option value="nimbostratus">Nimbostratus</option>
+        </select>
+      </label>
+      <label class="slider"><span>Wind speed <b id="ovWindSV"></b></span><input type="range" id="ovWindS" min="0" max="40" step="1"></label>
+      <label class="slider"><span>Wind from <b id="ovWindDV"></b></span><input type="range" id="ovWindD" min="0" max="355" step="5"></label>
+      <label class="slider"><span>Haze <b id="ovHazeV"></b></span><input type="range" id="ovHaze" min="0.4" max="20" step="0.2"></label>
+      <label class="slider"><span>Field of view <b id="fovV"></b></span><input type="range" id="fov" min="20" max="110" step="1"></label>
+      <button class="btn wide" id="ovReset" type="button">Back to the data</button>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="export" data-open="false">
+    <button class="panelHead" type="button" aria-expanded="false" aria-controls="export-body">
+      <span class="panelIcon">📷</span><span class="panelTitle">Save pictures</span><span class="panelMark">▾</span>
+    </button>
+    <div class="panelBody" id="export-body">
+      <label class="field">This view
+        <select id="viewSize">
+          <option value="1920x1080">1920 × 1080</option>
+          <option value="2560x1440">2560 × 1440</option>
+          <option value="3840x2160">3840 × 2160 (4K)</option>
+          <option value="2048x2048">2048 × 2048 (square)</option>
+        </select>
+      </label>
+      <button class="btn wide" id="saveView" type="button">Save this view (PNG)</button>
+      <label class="field">Whole sky, 360°
+        <select id="panoSize">
+          <option value="2048">2048 × 1024</option>
+          <option value="4096" selected>4096 × 2048</option>
+          <option value="8192">8192 × 4096 (computer only)</option>
+        </select>
+      </label>
+      <button class="btn wide" id="savePano" type="button">Save 360° panorama (PNG)</button>
+      <p class="hint" id="exportNote">Pictures are drawn at a higher quality than the live view, at the moment shown on the time bar. The panorama is equirectangular (2:1), north in the middle, ready for a sky dome or HDRI slot.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="bar" id="bar">
+  <div class="barRow">
+    <button class="btn square" id="rewind" type="button" aria-label="Back to the start">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="4" y="5" width="3" height="14"/><path d="M20 5 L9 12 L20 19 Z"/></svg>
+    </button>
+    <button class="btn square primary" id="play" type="button" aria-label="Play or pause the time lapse">
+      <svg class="icoPlay" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M7 4 L20 12 L7 20 Z"/></svg>
+      <svg class="icoPause" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="5" y="4" width="5" height="16"/><rect x="14" y="4" width="5" height="16"/></svg>
+    </button>
+    <input type="range" id="time" min="0" max="900" step="1" value="0" aria-label="Time in the 15 minute time lapse">
+    <span class="clock" id="clock">00:00 / 15:00</span>
+  </div>
+  <div class="barRow">
+    <span class="barLabel" id="altLabel">✈️ 0 m</span>
+    <input type="range" id="alt" min="0" max="13" step="0.05" value="0" aria-label="Camera height">
+    <div class="chips tight">
+      <button class="chip" data-alt="ground" type="button">Ground</button>
+      <button class="chip" data-alt="inside" type="button">Inside</button>
+      <button class="chip" data-alt="above" type="button">Above</button>
+    </div>
+  </div>
+</footer>
+
+<button class="gear" id="gear" type="button" aria-label="Settings" aria-expanded="false" aria-controls="drawer">⚙️</button>
+<aside class="drawer" id="drawer" hidden>
+  <div class="drawerHead"><h2>Settings</h2><button class="btn square" id="closeDrawer" type="button" aria-label="Close">✖</button></div>
+
+  <div class="setting"><label>Picture quality</label>
+    <div class="seg" data-key="quality"><button data-v="low" type="button">Light</button><button data-v="med" type="button">Medium</button><button data-v="high" type="button">Fine</button></div>
+    <p class="hint">Fine is slower. The view lowers its sharpness by itself while the time lapse plays, to stay smooth.</p></div>
+  <div class="setting"><label>Time lapse speed</label>
+    <div class="seg" data-key="speed"><button data-v="30" type="button">30×</button><button data-v="60" type="button">60×</button><button data-v="120" type="button">120×</button><button data-v="300" type="button">300×</button></div>
+    <p class="hint">60× plays 15 minutes of sky in 15 seconds.</p></div>
+  <div class="setting"><label>Play when a sky loads</label>
+    <div class="seg" data-key="autoplay"><button data-v="1" type="button">Twice, then pause</button><button data-v="0" type="button">Off</button></div></div>
+  <div class="setting"><label>Compass line at the top</label>
+    <div class="seg" data-key="compass"><button data-v="1" type="button">Show</button><button data-v="0" type="button">Hide</button></div></div>
+
+  <div class="setting"><label>Weather data</label>
+    <p class="hint" id="dataLine">—</p>
+    <button class="btn wide" id="checkData" type="button">Check the data link</button>
+    <ul class="checks" id="checkList"></ul></div>
+
+  <section id="notesBox" class="notesBox">
+    <h3>Notes for improvement</h3>
+    <p class="hint" id="noteWhere"></p>
+    <textarea id="noteText" rows="3" placeholder="What would make this better?"></textarea>
+    <div class="row"><button class="btn" id="noteSave" type="button">Save note</button>
+      <button class="btn" id="noteCopy" type="button">Copy notes</button>
+      <select id="noteFilter" aria-label="Which notes to show"><option value="open">Open</option><option value="all">All</option></select></div>
+    <ul id="noteList"></ul>
+  </section>
+
+  <label class="toggle"><input type="checkbox" id="showErrors"> Show errors</label>
+  <p class="hint info" id="info"></p>
+</aside>
+<div id="errorsPanel" class="errorsPanel" hidden></div>
+
+<script src="js/vendor/three.min.js"></script>
+<script src="js/core.js?v=0.1.0"></script>
+<script src="js/sun.js?v=0.1.0"></script>
+<script src="js/presets.js?v=0.1.0"></script>
+<script src="js/weather.js?v=0.1.0"></script>
+<script src="js/skymodel.js?v=0.1.0"></script>
+<script src="js/shader.js?v=0.1.0"></script>
+<script src="js/renderer.js?v=0.1.0"></script>
+<script src="js/notes.js?v=0.1.0"></script>
+<script src="js/app.js?v=0.1.0"></script>
+</body>
+</html>
