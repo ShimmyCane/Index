@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Generate Clouds</title>
-<link rel="stylesheet" href="css/style.css?v=0.1.0">
+<link rel="stylesheet" href="css/style.css?v=0.2.0">
 </head>
 <body data-panels="on">
 
@@ -31,7 +31,9 @@
         <button class="btn" type="submit">Find</button>
       </form>
       <ul class="results" id="searchResults"></ul>
-      <div class="chips" id="placeChips"></div>
+      <div class="nowHead"><b>Skies right now</b><button class="chip" id="nowRefresh" type="button">Refresh</button></div>
+      <p class="hint" id="nowNote"></p>
+      <div id="nowSkies" class="nowSkies"></div>
       <div class="row">
         <label class="mini">Lat <input type="number" id="lat" step="0.01" min="-90" max="90"></label>
         <label class="mini">Lon <input type="number" id="lon" step="0.01" min="-180" max="180"></label>
@@ -97,7 +99,7 @@
       <label class="slider"><span>Wind speed <b id="ovWindSV"></b></span><input type="range" id="ovWindS" min="0" max="40" step="1"></label>
       <label class="slider"><span>Wind from <b id="ovWindDV"></b></span><input type="range" id="ovWindD" min="0" max="355" step="5"></label>
       <label class="slider"><span>Haze <b id="ovHazeV"></b></span><input type="range" id="ovHaze" min="0.4" max="20" step="0.2"></label>
-      <label class="slider"><span>Field of view <b id="fovV"></b></span><input type="range" id="fov" min="20" max="110" step="1"></label>
+      <label class="slider"><span>Zoom (field of view) <b id="fovV"></b></span><input type="range" id="fov" min="2" max="110" step="1"></label>
       <button class="btn wide" id="ovReset" type="button">Back to the data</button>
     </div>
   </section>
@@ -124,7 +126,7 @@
         </select>
       </label>
       <button class="btn wide" id="savePano" type="button">Save 360° panorama (PNG)</button>
-      <p class="hint" id="exportNote">Pictures are drawn at a higher quality than the live view, at the moment shown on the time bar. The panorama is equirectangular (2:1), north in the middle, ready for a sky dome or HDRI slot.</p>
+      <p class="hint" id="exportNote">Pictures are drawn at a higher quality than the moving view, at the moment shown on the time bar. The panorama is equirectangular (2:1), north in the middle, ready for a sky dome or HDRI slot.</p>
     </div>
   </section>
 
@@ -144,11 +146,12 @@
   </div>
   <div class="barRow">
     <span class="barLabel" id="altLabel">✈️ 0 m</span>
-    <input type="range" id="alt" min="0" max="13" step="0.05" value="0" aria-label="Camera height">
+    <input type="range" id="alt" min="0" max="1" step="0.001" value="0" aria-label="Camera height, from the ground to space">
     <div class="chips tight">
       <button class="chip" data-alt="ground" type="button">Ground</button>
       <button class="chip" data-alt="inside" type="button">Inside</button>
       <button class="chip" data-alt="above" type="button">Above</button>
+      <button class="chip" data-alt="space" type="button">Space</button>
     </div>
   </div>
 </footer>
@@ -159,7 +162,7 @@
 
   <div class="setting"><label>Picture quality</label>
     <div class="seg" data-key="quality"><button data-v="low" type="button">Light</button><button data-v="med" type="button">Medium</button><button data-v="high" type="button">Fine</button></div>
-    <p class="hint">Fine is slower. The view lowers its sharpness by itself while the time lapse plays, to stay smooth.</p></div>
+    <p class="hint">Fine is slower. The view lowers its sharpness by itself while the time lapse plays, to stay smooth. When the view is still, it is redrawn sharp with fine detail; zoom in to see the wisps.</p></div>
   <div class="setting"><label>Time lapse speed</label>
     <div class="seg" data-key="speed"><button data-v="30" type="button">30×</button><button data-v="60" type="button">60×</button><button data-v="120" type="button">120×</button><button data-v="300" type="button">300×</button></div>
     <p class="hint">60× plays 15 minutes of sky in 15 seconds.</p></div>
@@ -189,14 +192,14 @@
 <div id="errorsPanel" class="errorsPanel" hidden></div>
 
 <script src="js/vendor/three.min.js"></script>
-<script src="js/core.js?v=0.1.0"></script>
-<script src="js/sun.js?v=0.1.0"></script>
-<script src="js/presets.js?v=0.1.0"></script>
-<script src="js/weather.js?v=0.1.0"></script>
-<script src="js/skymodel.js?v=0.1.0"></script>
-<script src="js/shader.js?v=0.1.0"></script>
-<script src="js/renderer.js?v=0.1.0"></script>
-<script src="js/notes.js?v=0.1.0"></script>
-<script src="js/app.js?v=0.1.0"></script>
+<script src="js/core.js?v=0.2.0"></script>
+<script src="js/sun.js?v=0.2.0"></script>
+<script src="js/presets.js?v=0.2.0"></script>
+<script src="js/weather.js?v=0.2.0"></script>
+<script src="js/skymodel.js?v=0.2.0"></script>
+<script src="js/shader.js?v=0.2.0"></script>
+<script src="js/renderer.js?v=0.2.0"></script>
+<script src="js/notes.js?v=0.2.0"></script>
+<script src="js/app.js?v=0.2.0"></script>
 </body>
 </html>

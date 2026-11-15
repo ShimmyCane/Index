@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var GC = window.GC = window.GC || {};
-  GC.VERSION = '0.1.0';
+  GC.VERSION = '0.2.0';
 
   var KEY = 'gc.settings';
   GC.DEFAULTS = { quality: 'med', speed: 60, autoplay: 1, compass: 1, showErrors: false };
