@@ -23,3 +23,5 @@
 16. **Erosion needs contrast.** A ridged value-noise term sits near its mean and erodes evenly; a smoothstep around the middle gives visible wisps.
 17. **Sharpen a still view in strips** with the scissor and a kept drawing buffer; draw a quick full frame first so a resize does not flash. In tests, wait for the flag, not a time.
 18. **Jimmy expects the Earth's curve.** A correct flat horizon at ground level read as missing; give a way to go high enough to see it.
+
+19. **A shared sandbox address can be over a free service's daily limit.** Open-Meteo counts per network address; the forecast host returned 429 from the sandbox while its other hosts worked. Probe each host separately, and do not read a 429 there as a bug in the app. Running the page on the real network still found one: the timeout was shorter than the service's slow refusal.

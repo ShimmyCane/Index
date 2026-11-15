@@ -24,10 +24,14 @@
 
   function fetchJson(url, ms) {
     var ctl = ('AbortController' in window) ? new AbortController() : null;
-    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, ms || 9000);
+    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, ms || 15000);
     return fetch(url, ctl ? { signal: ctl.signal } : {}).then(function (r) {
       return r.json().catch(function () { return {}; }).then(function (j) {
-        if (!r.ok || j.error) { var e = new Error('HTTP ' + r.status + (j.reason ? ' ' + j.reason : '')); e.status = r.status; throw e; }
+        if (!r.ok || j.error) {
+          // 429: Open-Meteo counts requests per network address per day.
+          var e = new Error(r.status === 429 ? 'The weather service has reached its daily limit for this network. Try again tomorrow, or from another connection' : 'HTTP ' + r.status + (j.reason ? ' ' + j.reason : ''));
+          e.status = r.status; throw e;
+        }
         return j;
       });
     }).finally(function () { clearTimeout(timer); });
@@ -200,7 +204,7 @@
       GC.store.set(NOW_KEY, { at: Date.now(), rows: rows });
       return { groups: group(cities, rows, Date.now()), source: 'live', count: cities.length, at: Date.now() };
     }).catch(function (e) {
-      GC.logError('Skies right now: ' + ((e && e.message) || 'no connection'));
+      GC.logError('Skies right now: ' + ((e && e.name === 'AbortError') ? 'no answer in time' : (e && e.message) || 'no connection'));
       if (saved && saved.rows && saved.rows.length === cities.length) return { groups: group(cities, saved.rows, Date.now()), source: 'cache', count: cities.length, at: saved.at };
       return { groups: group(cities, null, Date.now()), source: 'none', count: cities.length, at: 0 };
     });

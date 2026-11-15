@@ -1,5 +1,9 @@
 # Generate Clouds — todo
 
+## Checked against the live service on 2026-11-15
+- [x] Air quality, place search and the archive service answer with the value names the page uses.
+- [ ] The forecast service refused every call from the build sandbox ("Daily API request limit exceeded": the limit is per network address, and the sandbox shares one). So the forecast call, its upper-wind names and the 72-city call are still unconfirmed.
+
 ## To confirm on a real device
 - [ ] Live Open-Meteo call returns data (pill says 🛰️ Live data; ⚙️ → Check the data link shows three ✅).
 - [ ] The upper-wind values arrive (the Wind line in the reading says "measured near 1.5 km").

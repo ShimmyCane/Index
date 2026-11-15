@@ -78,7 +78,7 @@ One call asks Open-Meteo for the current weather of 72 well-known cities (`GC.CI
 
 ## Data and fallback
 
-1. Live Open-Meteo (9 s limit). If the full list of values is refused, it asks again with the core list.
+1. Live Open-Meteo (15 s limit; a daily-limit refusal is said in plain words). If the full list of values is refused, it asks again with the core list.
 2. The copy saved on this device (last 10 place-days).
 3. A bundled sample sky. The pill says which one is showing: 🛰️ Live data · 💾 Saved copy · 📦 Sample sky · 🗂️ Atlas sample.
 
