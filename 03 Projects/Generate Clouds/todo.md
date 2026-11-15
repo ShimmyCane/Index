@@ -14,7 +14,11 @@
 - [ ] The multi-city call for "Skies right now" returns 72 rows (one request, comma-separated coordinates).
 - [ ] Sharpening time on iPad when zoomed in; no lost 3-D view.
 
-## Next candidates (waiting on convo v0.1)
+## Added in 0.3.0, to confirm on a real device
+- [ ] Orbit with real fingers: drag around, pinch closer; speed while turning.
+
+## Next candidates
+- [ ] Storm structure: a rotating updraught, wall cloud and funnel as a drawn sample (made-up, labelled as such); radar as the map of real cells. (waiting on convo v0.1)
 - [ ] Rounder cumulus: baked Perlin-Worley 3-D noise.
 - [ ] HDR panorama (.hdr) for lighting a render.
 - [ ] Flight path / fly-through camera.

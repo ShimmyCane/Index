@@ -25,3 +25,10 @@
 18. **Jimmy expects the Earth's curve.** A correct flat horizon at ground level read as missing; give a way to go high enough to see it.
 
 19. **A shared sandbox address can be over a free service's daily limit.** Open-Meteo counts per network address; the forecast host returned 429 from the sandbox while its other hosts worked. Probe each host separately, and do not read a 429 there as a bug in the app. Running the page on the real network still found one: the timeout was shorter than the service's slow refusal.
+
+## 2026-11-15 (0.3.0, orbit)
+
+20. **Move the world, not the camera.** The shader keeps the camera on one column of the planet; a camera position is a subtraction from each layer's wind offset. No shader change, and the sphere stays exact.
+21. **Orbit as distance, angle above, bearing.** Three numbers and one function that sets position, heading and pitch. Drag changes bearing and angle, pinch changes distance, the height slider changes the angle.
+22. **Check an orbit from four sides.** One of four views at 10 km sat inside a cloud and was white. Default the sample above the cloud tops.
+23. **When Jimmy names something the data cannot give (tornadoes), say so in the page and in the reply,** and offer the nearest true thing (storm towers) plus a question about a drawn sample.

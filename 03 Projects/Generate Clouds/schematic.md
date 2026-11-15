@@ -2,7 +2,7 @@
 
 **Track: B. Studio design** (a 3-D sky study and backdrop maker for renderings). Palette: sky-blue ink on cloud-white paper, because the subject is the sky. Panels collapsible, open on a large screen, closed on a phone.
 
-Status: MVP 0.2.0 (2026-11-15). Headless-tested with made-up weather replies. Not yet run against the live weather service, and not yet on an iPad.
+Status: MVP 0.3.0 (2026-11-15). Headless-tested with made-up weather replies. Not yet run against the live weather service, and not yet on an iPad.
 
 ## Purpose
 
@@ -14,7 +14,7 @@ Pick any point on Earth and any moment. The page reads the weather for that poin
 |---|---|
 | Words on screen | Full labels and units, in panels; the sky fills the screen |
 | Panels | Place and time · How to read this sky · Cloud atlas · Adjust · Save pictures. ☰ hides all of them |
-| Under the scene | Play, back to start, time slider; camera height slider |
+| Under the scene | Play, back to start, time slider; camera height slider; Ground, Inside, Above, Space, Orbit, Turn |
 | ⚙️ holds | Picture quality, time-lapse speed, autoplay, compass line, data check, notes, Show errors, version |
 | Database | None. Device storage only |
 | Private data | None in the repo. A chosen location stays on the device |
@@ -71,6 +71,15 @@ Three layers. Low and mid are volumes; high is a thin sheet.
 ## Height and the curve of the Earth (0.2.0)
 
 The planet has always been a sphere of 6371 km in the model. From the ground the horizon is flat, as in life. The height slider now runs to 400 km on a cube curve (the first third covers 0 to 13 km), and a **Space** chip jumps to 250 km looking down, where the limb, the thin blue line of air and the cloud deck wrapping the globe are visible. Clouds are drawn out to 260 km + 14 × height.
+
+## Orbit (0.3.0)
+
+- **Orbit** chip (beside the height chips): the camera circles a centre point in the clouds and always faces it. The centre is where the view was pointing, at the middle height of the low cloud. From the ground it first lifts the camera above the low cloud.
+- Drag sideways to go around, drag up or down to go over or lower, pinch or wheel to come closer or back away. The height slider changes the angle.
+- **Turn** goes around twice by itself, then waits (30, 60 or 120 s per turn, in ⚙️). A height chip or a new sky leaves orbit.
+- The camera now has a position (km east and south of the place), so the clouds are passed, not just looked at.
+- Atlas sample **Storm cells from the air**: separate thunderstorm towers (30% cover, CAPE 3200), opened in orbit at about 14 km and turning.
+- **Not drawn:** rotation inside a storm, wall clouds and tornado funnels. No free feed gives them, and the model has no cell-scale wind. The reading panel says so on every storm.
 
 ## Skies right now (0.2.0)
 

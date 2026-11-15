@@ -120,7 +120,7 @@
     if (covHigh > 0.02) R.push({ icon: '🪶', head: 'High: ' + highT.name, text: pct(covHigh) + ' at ' + km(highH) + ', ice crystals. Wind up there ' + Math.round(w300.s) + ' m/s.' });
     R.push({ icon: '💨', head: 'Wind', text: 'Low clouds drift toward ' + toward(wLow) + ' at ' + wLow.s.toFixed(0) + ' m/s' + (wx.w850 ? ' (measured near 1.5 km)' : ' (estimated from the ground wind)') + '. In 15 minutes they move ' + (wLow.s * 0.9).toFixed(1) + ' km; the high layer moves ' + (w300.s * 0.9).toFixed(0) + ' km.' });
     R.push({ icon: '🌫️', head: 'Haze', text: hzWhy + (wx.pm25 != null && wx.aod != null ? ', PM2.5 ' + Math.round(wx.pm25) + ' µg/m³' : '') + '. Haze is ' + hz.toFixed(1) + '× a clean sky' + (dirty > 0.3 ? ', tinted brown by pollution.' : dusty > 0.3 ? ', tinted by dust.' : '.') });
-    if (wx.precip > 0.1 || storm) R.push({ icon: storm ? '⛈️' : '🌧️', head: storm ? 'Storm' : 'Rain', text: wx.precip.toFixed(1) + ' mm in the hour' + (storm ? ', thunderstorm reported. Lightning flickers while the time lapse plays.' : '.') });
+    if (wx.precip > 0.1 || storm) R.push({ icon: storm ? '⛈️' : '🌧️', head: storm ? 'Storm' : 'Rain', text: wx.precip.toFixed(1) + ' mm in the hour' + (storm ? ', thunderstorm reported. Lightning flickers while the time lapse plays. Rotation inside a storm, wall clouds and tornado funnels are not in the data and are not drawn.' : '.') });
     R.push({ icon: '🌡️', head: 'Air', text: wx.t.toFixed(0) + '°C, humidity ' + Math.round(wx.rh) + '%' + (wx.frz != null ? ', freezing level ' + km(wx.frz) : '') + '.' });
 
     var model = {

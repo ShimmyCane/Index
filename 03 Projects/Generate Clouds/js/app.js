@@ -69,7 +69,7 @@
 
   function loadSky() {
     if (S.loading) return;
-    S.loading = true; S.preset = null; S.ov = {};
+    S.loading = true; S.preset = null; S.ov = {}; orbitOff(); R.cam.x = 0; R.cam.z = 0;
     setPill('loading', '⏳ Loading');
     GC.store.set('gc.last', { place: S.place, when: S.when });
     return W.load(S.place, S.when).then(function (res) {
@@ -88,13 +88,15 @@
     var dayStart = W.localToMs(day + 'T00:00') - off * 1000;
     var kind = p.sun === 'day' ? 'noon' : p.sun, ms = GC.Sun.find(kind, dayStart, S.place.lat, S.place.lon) || GC.Sun.find('noon', dayStart, S.place.lat, S.place.lon);
     if (p.sun === 'day') ms -= 2.5 * 3600000;        // mid-morning light shows the shapes better than high noon
-    S.preset = p; S.ov = {};
+    S.preset = p; S.ov = JSON.parse(JSON.stringify(p.ov || {}));
+    orbitOff(); R.cam.x = 0; R.cam.z = 0;
     R.cam.alt = p.cam.alt; R.cam.pitch = p.cam.pitch; R.cam.fov = 70;
     var sp = GC.Sun.pos(ms, S.place.lat, S.place.lon);
     R.cam.yaw = p.cam.toward === 'sun' ? sp.az : (sp.az + 110) % 360;
     setAltSlider(R.cam.alt);
     showData({ wx: JSON.parse(JSON.stringify(p.wx)), localStr: W.msToLocal(ms + off * 1000), offsetSec: off, utcMs: ms, source: 'sample', note: '', archive: false });
     restart(true);
+    if (p.cam.orbit) { orbitOn(p.cam.orbit); if (+GC.settings.autoplay) setTurning(true); }
   }
   GC.usePreset = function (id) { var p = GC.PRESETS.filter(function (x) { return x.id === id; })[0]; if (p) usePreset(p); };
 
@@ -211,6 +213,45 @@
     $('ovReset').addEventListener('click', function () { S.ov = {}; rebuild(); });
   }
 
+  // ---------- orbit: circle a point in the clouds ----------
+  // The camera sits D km from a centre point, phi degrees above it, on bearing th from it, and always faces it.
+  var O = { on: false, fx: 0, fz: 0, hF: 2, D: 20, phi: 20, th: 180, turning: false, turned: 0 };
+  GC.orbit = O;
+  function orbitApply() {
+    var ph = GC.rad(O.phi), th = GC.rad(O.th), r = O.D * Math.cos(ph);
+    R.cam.alt = Math.max(0.01, O.hF + O.D * Math.sin(ph));
+    R.cam.x = O.fx + r * Math.sin(th); R.cam.z = O.fz - r * Math.cos(th);
+    R.cam.yaw = (O.th + 180) % 360; R.cam.pitch = -O.phi;
+    setAltSlider(R.cam.alt); S.dirty = true;
+  }
+  function orbitButtons() {
+    $('orbitBtn').classList.toggle('on', O.on); $('orbitBtn').setAttribute('aria-pressed', String(O.on));
+    $('turnBtn').hidden = !O.on; $('turnBtn').classList.toggle('on', O.turning); $('turnBtn').setAttribute('aria-pressed', String(O.turning));
+    $('turnBtn').textContent = O.turning ? 'Stop' : 'Turn';
+  }
+  function setTurning(on) { O.turning = on && O.on; O.turned = 0; orbitButtons(); S.dirty = true; }
+  function orbitOn(fixed) {
+    var m = S.model && S.model.summary;
+    O.hF = fixed ? fixed.hF : m ? m.lowBase + Math.min(m.lowTop - m.lowBase, 3) / 2 : 2;
+    if (fixed) { O.fx = 0; O.fz = 0; O.D = fixed.D; O.phi = fixed.phi; O.th = (R.cam.yaw + 180) % 360; }
+    else {
+      var top = m ? Math.min(m.lowTop, m.lowBase + 4) : 3;
+      if (R.cam.alt < top + 1) R.cam.alt = top + 4;                       // orbiting is for the air: start above the low cloud
+      var up = R.cam.alt - O.hF, r0 = R.cam.pitch < -3 ? up / Math.tan(GC.rad(-R.cam.pitch)) : 2.5 * up;
+      r0 = GC.clamp(r0, 6, 220);
+      var y = GC.rad(R.cam.yaw);
+      O.fx = R.cam.x + r0 * Math.sin(y); O.fz = R.cam.z - r0 * Math.cos(y);
+      O.th = (R.cam.yaw + 180) % 360; O.D = Math.hypot(r0, up); O.phi = GC.clamp(GC.deg(Math.atan2(up, r0)), 2, 88);
+    }
+    O.on = true; O.turning = false; orbitApply(); orbitButtons();
+  }
+  function orbitOff() { O.on = false; O.turning = false; orbitButtons(); }
+  function initOrbit() {
+    $('orbitBtn').addEventListener('click', function () { if (O.on) orbitOff(); else orbitOn(null); S.dirty = true; });
+    $('turnBtn').addEventListener('click', function () { setTurning(!O.turning); });
+    orbitButtons();
+  }
+
   // ---------- time bar and camera height ----------
   function altText(a) { return '✈️ ' + (a < 1 ? Math.round(a * 1000) + ' m' : a < 20 ? a.toFixed(1) + ' km' : Math.round(a) + ' km'); }
   // The height slider runs 0..1 and maps to 0..400 km on a cube curve, so the first third covers the weather.
@@ -221,10 +262,15 @@
     $('play').addEventListener('click', function () { setPlaying(!S.playing); });
     $('rewind').addEventListener('click', function () { S.simT = 0; S.dirty = true; });
     $('time').addEventListener('input', function () { S.simT = +$('time').value; if (S.playing) setPlaying(false); S.dirty = true; });
-    $('alt').addEventListener('input', function () { R.cam.alt = altFromSlider(+$('alt').value); S.dirty = true; });
+    $('alt').addEventListener('input', function () {
+      R.cam.alt = altFromSlider(+$('alt').value);
+      if (O.on) { var r = O.D * Math.cos(GC.rad(O.phi)), up = Math.max(R.cam.alt - O.hF, r * 0.035); O.phi = GC.clamp(GC.deg(Math.atan2(up, r)), 2, 88); O.D = Math.hypot(r, up); R.cam.pitch = -O.phi; }
+      S.dirty = true;
+    });
     document.querySelectorAll('[data-alt]').forEach(function (b) {
       b.addEventListener('click', function () {
         var m = S.model && S.model.summary, k = b.dataset.alt;
+        orbitOff();
         var a = k === 'ground' ? 0.002 : k === 'space' ? 250 : !m ? 2 : k === 'inside' ? (m.lowBase + Math.min(m.lowTop, m.lowBase + 1.2)) / 2 : Math.min(12.5, Math.min(m.lowTop, m.lowBase + 3) + 1.2);
         R.cam.alt = a; setAltSlider(a);
         if (k === 'space') { R.cam.pitch = -38; R.cam.fov = 75; syncAdjust(); }
@@ -245,16 +291,29 @@
       var p = pts[e.pointerId]; if (!p) return;
       var dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
       if (n() === 1) {
-        var k = R.cam.fov / Math.max(cv.clientHeight, 1);
-        R.cam.yaw = (R.cam.yaw - dx * k + 360) % 360; R.cam.pitch = GC.clamp(R.cam.pitch + dy * k, -89, 89);
+        if (O.on) {                                  // go around and over the centre
+          O.th = (O.th - dx * 0.3 + 360) % 360; O.phi = GC.clamp(O.phi + dy * 0.2, 2, 88); orbitApply();
+        } else {
+          var k = R.cam.fov / Math.max(cv.clientHeight, 1);
+          R.cam.yaw = (R.cam.yaw - dx * k + 360) % 360; R.cam.pitch = GC.clamp(R.cam.pitch + dy * k, -89, 89);
+        }
       } else if (n() === 2) {
-        var d = dist(); if (pinch > 0 && d > 0) { R.cam.fov = GC.clamp(R.cam.fov * pinch / d, 2, 110); syncAdjust(); } pinch = d;
+        var d = dist();
+        if (pinch > 0 && d > 0) {
+          if (O.on) { O.D = GC.clamp(O.D * pinch / d, 2, 600); orbitApply(); }      // pinch comes closer
+          else { R.cam.fov = GC.clamp(R.cam.fov * pinch / d, 2, 110); syncAdjust(); }
+        }
+        pinch = d;
       }
       S.dirty = true;
     });
     function up(e) { delete pts[e.pointerId]; pinch = 0; if (!n()) cv.classList.remove('drag'); }
     cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
-    cv.addEventListener('wheel', function (e) { e.preventDefault(); R.cam.fov = GC.clamp(R.cam.fov * (e.deltaY > 0 ? 1.06 : 0.94), 2, 110); syncAdjust(); S.dirty = true; }, { passive: false });
+    cv.addEventListener('wheel', function (e) {
+      e.preventDefault(); var f = e.deltaY > 0 ? 1.06 : 0.94;
+      if (O.on) { O.D = GC.clamp(O.D * f, 2, 600); orbitApply(); } else { R.cam.fov = GC.clamp(R.cam.fov * f, 2, 110); syncAdjust(); }
+      S.dirty = true;
+    }, { passive: false });
     cv.addEventListener('gesturestart', function (e) { e.preventDefault(); });
     window.addEventListener('resize', function () { R.resize(); S.dirty = true; });
   }
@@ -338,7 +397,13 @@
       S.dirty = true;
       acc += dt * 1000; accN++;
       if (accN >= 20) { R.adapt(acc / accN); acc = 0; accN = 0; }
-      if (S.frame && S.frame.flashy && S.flash < 0.05 && Math.random() < 0.012) { S.flash = 1.6 + Math.random() * 2; R.flash(S.flash, (Math.random() - 0.5) * 50, (Math.random() - 0.5) * 50); }
+      if (S.frame && S.frame.flashy && S.flash < 0.05 && Math.random() < 0.012) { var cx = O.on ? O.fx : R.cam.x, cz = O.on ? O.fz : R.cam.z; S.flash = 1.6 + Math.random() * 2; R.flash(S.flash, cx + (Math.random() - 0.5) * 50, cz + (Math.random() - 0.5) * 50); }
+    }
+    if (O.on && O.turning) {
+      var step = dt * 360 / (+GC.settings.turn);
+      O.th = (O.th + step) % 360; O.turned += step; orbitApply();
+      if (O.turned >= 720) setTurning(false);            // twice around, then wait
+      if (!S.playing) { acc += dt * 1000; accN++; if (accN >= 20) { R.adapt(acc / accN); acc = 0; accN = 0; } }
     }
     if (S.flash > 0.02) { S.flash *= 0.8; if (S.flash <= 0.02) S.flash = 0; R.flash(S.flash, R._fx || 0, R._fz || 0); S.dirty = true; }
     if (!S.dirty) {
@@ -360,7 +425,7 @@
     $('clock').textContent = fmtClock(S.simT) + ' / 15:00 · ' + localAt(S.simT).slice(11);
     $('altLabel').textContent = altText(R.cam.alt);
     var f = S.frame; if (!f) return;
-    $('hud').textContent = 'Looking ' + GC.compass(R.cam.yaw) + ', ' + Math.abs(Math.round(R.cam.pitch)) + '° ' + (R.cam.pitch >= 0 ? 'up' : 'down') +
+    $('hud').textContent = (O.on ? 'Orbit ' + Math.round(O.D) + ' km out · ' : '') + 'Looking ' + GC.compass(R.cam.yaw) + ', ' + Math.abs(Math.round(R.cam.pitch)) + '° ' + (R.cam.pitch >= 0 ? 'up' : 'down') +
       ' · Sun ' + GC.compass(f.sunAz) + ' ' + Math.round(f.sunEl) + '°' + (R.cam.fov < 60 ? ' · zoom ' + (70 / R.cam.fov).toFixed(1) + '×' : '') +
       (S.sharp ? ' · sharp' : R.fineOn ? ' · sharpening ' + Math.round(R.fineProgress() * 100) + '%' : '');
   }
@@ -370,12 +435,12 @@
   GC.debug = function () {
     return { version: GC.VERSION, simT: S.simT, playing: S.playing, loops: S.loops, autoLeft: S.autoLeft, source: S.data && (S.preset ? 'atlas' : S.data.source),
       place: S.place, local: S.data && S.data.localStr, types: S.model && S.model.types, summary: S.model && S.model.summary,
-      cam: { yaw: R.cam.yaw, pitch: R.cam.pitch, fov: R.cam.fov, alt: R.cam.alt }, frames: R.frames, scale: R.scale, ok: R.ok, sharp: !!S.sharp, fine: R.fineProgress(), now: S.now && { source: S.now.source, groups: S.now.groups.map(function (g) { return [g.id, g.cities.length]; }) },
+      cam: { yaw: R.cam.yaw, pitch: R.cam.pitch, fov: R.cam.fov, alt: R.cam.alt }, orbit: { on: O.on, turning: O.turning, turned: O.turned, D: O.D, phi: O.phi, th: O.th, fx: O.fx, fz: O.fz, hF: O.hF }, camXZ: [R.cam.x, R.cam.z], frames: R.frames, scale: R.scale, ok: R.ok, sharp: !!S.sharp, fine: R.fineProgress(), now: S.now && { source: S.now.source, groups: S.now.groups.map(function (g) { return [g.id, g.cities.length]; }) },
       sunEl: S.frame && S.frame.sunEl, exposure: S.frame && S.frame.exposure, ov: S.ov, notes: GC.Notes.all().length };
   };
 
   function start() {
-    initPanels(); GC.Notes.init(); initGear(); initPlace(); initAdjust(); initBar(); initExport();
+    initPanels(); GC.Notes.init(); initGear(); initPlace(); initAdjust(); initBar(); initOrbit(); initExport();
     if (!R.init($('sky'))) { $('noGl').hidden = false; setPill('sample', '⚠️ No 3-D'); return; }
     initLook();
     var lastUsed = GC.store.get('gc.last', null);

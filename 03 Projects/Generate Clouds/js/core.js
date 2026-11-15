@@ -2,10 +2,10 @@
 (function () {
   'use strict';
   var GC = window.GC = window.GC || {};
-  GC.VERSION = '0.2.1';
+  GC.VERSION = '0.3.0';
 
   var KEY = 'gc.settings';
-  GC.DEFAULTS = { quality: 'med', speed: 60, autoplay: 1, compass: 1, showErrors: false };
+  GC.DEFAULTS = { quality: 'med', speed: 60, autoplay: 1, compass: 1, turn: 60, showErrors: false };
   GC.settings = {};
   (function load() {
     var saved = {};
@@ -13,6 +13,7 @@
     Object.keys(GC.DEFAULTS).forEach(function (k) { GC.settings[k] = (k in saved) ? saved[k] : GC.DEFAULTS[k]; });
     if (!{ low: 1, med: 1, high: 1 }[GC.settings.quality]) GC.settings.quality = 'med';
     if ([30, 60, 120, 300].indexOf(+GC.settings.speed) < 0) GC.settings.speed = 60;
+    if ([30, 60, 120].indexOf(+GC.settings.turn) < 0) GC.settings.turn = 60;
   })();
   GC.saveSettings = function () { try { localStorage.setItem(KEY, JSON.stringify(GC.settings)); } catch (e) { /* storage blocked */ } };
 
