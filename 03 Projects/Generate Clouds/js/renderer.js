@@ -14,7 +14,7 @@
   var EXPORT_Q = { steps: 200, lsteps: 7 };
   var FINE_Q = { steps: 320, lsteps: 8 }, STRIPS = 12, FINE_PIXELS = 2600000;
   var renderer, scene, camera, mat, canvas, U;
-  R.cam = { yaw: 0, pitch: 15, fov: 70, alt: 0.002 };
+  R.cam = { yaw: 0, pitch: 15, fov: 70, alt: 0.002, x: 0, z: 0 };     // x east, z south, km from the chosen place
   R.scale = 0.5; R.ok = false; R.frames = 0; R.busy = false;
 
   function noiseTexture() {
@@ -87,10 +87,10 @@
     function s3(u, a) { u.value.set(a[0], a[1], a[2]); } function s4(u, a) { u.value.set(a[0], a[1], a[2], a[3]); }
     s3(U.uSunDir, F.sunDir); s3(U.uSun0, F.sun0); s3(U.uSun1, F.sun1); s3(U.uSunC, F.sunC); s3(U.uAmbTop, F.ambTop); s3(U.uAmbBot, F.ambBot);
     U.uHaze.value = F.haze; s3(U.uHazeTint, F.tint); s3(U.uFogK, F.fogK);
-    s4(U.uL0a, F.L0a); s4(U.uL0b, F.L0b); s4(U.uL0w, F.L0w); s4(U.uL1a, F.L1a); s4(U.uL1b, F.L1b); s4(U.uL1w, F.L1w); s4(U.uC, F.C); s4(U.uCw, F.Cw);
+    s4(U.uL0a, F.L0a); s4(U.uL0b, F.L0b); s4(U.uL0w, F.L0w); U.uL0w.value.x -= R.cam.x; U.uL0w.value.y -= R.cam.z; s4(U.uL1a, F.L1a); s4(U.uL1b, F.L1b); s4(U.uL1w, F.L1w); U.uL1w.value.x -= R.cam.x; U.uL1w.value.y -= R.cam.z; s4(U.uC, F.C); s4(U.uCw, F.Cw); U.uCw.value.x -= R.cam.x; U.uCw.value.y -= R.cam.z;
     s3(U.uSeed, F.seed); U.uEvolve.value = F.evolve; U.uExposure.value = F.exposure; U.uNight.value = F.night; U.uRain.value = F.rain; U.uMS.value = F.ms;
   };
-  R.flash = function (amount, x, z) { U.uFlash.value = amount; U.uFlashPos.value.set(x, z); };
+  R.flash = function (amount, x, z) { U.uFlash.value = amount; U.uFlashPos.value.set(x - R.cam.x, z - R.cam.z); };
 
   R.render = function () {
     if (!R.ok || R.busy) return;

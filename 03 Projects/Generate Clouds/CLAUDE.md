@@ -12,7 +12,7 @@ Track: B. Studio design
 How to run: open `index.html` (no server or build). `index.html#atlas=cumulonimbus` opens a sample sky. "Use where I am" needs https or localhost.
 Zoom: a still view is redrawn sharp in strips (`R.fineStart/fineStep` in `js/renderer.js`); wait for `GC.debug().sharp` before a screenshot.
 Code map: `js/skymodel.js` (weather → sky; the rules), `js/shader.js` (the picture), `js/renderer.js` (three.js, export), `js/weather.js` (Open-Meteo, saved copies, fallback), `js/sun.js` (sun position, air model), `js/presets.js` (atlas content), `js/app.js` (page).
-Check: headless Chromium with the WebGL flags (`/smoke-test`). The sandbox cannot reach `open-meteo.com`, so route those hosts to made-up replies with Playwright `page.route`. Read state with `GC.debug()`. Keep test scripts out of the repo.
+Check: headless Chromium with the WebGL flags (`/smoke-test`). Route the `open-meteo.com` hosts to made-up replies with Playwright `page.route`: the forecast host refuses the sandbox's shared address (daily limit), and a session without those hosts allowed cannot reach them at all. Read state with `GC.debug()`. Keep test scripts out of the repo.
 
 Project rules:
 - Public repo. No home or family locations in code, notes or convo files; the place chips are well-known cities.

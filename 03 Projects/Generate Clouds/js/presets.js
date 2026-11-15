@@ -49,6 +49,10 @@
     { id: 'sea', icon: '✈️', name: 'Sea of clouds', level: 'Seen from above', sun: 'golden', cam: { alt: 3.2, pitch: -8, toward: 'sun' },
       text: 'A stratocumulus deck from 3 km up, the way it looks from a mountain top or an aeroplane window.',
       wx: wx({ low: 0.9, high: 0.25, code: 3, td: 14, cape: 20 }) },
+    { id: 'cells', icon: '🌀', name: 'Storm cells from the air', level: 'Seen while circling at 14 km', sun: 'day', ov: { low: 0.3 },
+      cam: { alt: 14, pitch: -8, orbit: { D: 55, phi: 8, hF: 6 } },
+      text: 'Separate thunderstorm towers with anvils, seen while circling them. Tornadoes form under rotating storms like these; the rotation and the funnel are not in the weather data and are not drawn.',
+      wx: wx({ low: 0.3, high: 0.2, code: 95, cape: 3200, t: 31, td: 22, precip: 8, gust: 24, w850: { s: 12, d: 200 }, w300: { s: 40, d: 250 } }) },
     { id: 'dusk', icon: '🌆', name: 'Hazy city dusk', level: 'Mixed', sun: 'dusk', cam: { alt: 0.002, pitch: 12, toward: 'sun' },
       text: 'Polluted air scatters more light, so the horizon glows orange and the blue above turns grey.',
       wx: wx({ low: 0.15, mid: 0.3, high: 0.5, code: 2, pm25: 85, pm10: 130, aod: 0.9, vis: 7 }) }

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Generate Clouds</title>
-<link rel="stylesheet" href="css/style.css?v=0.2.0">
+<link rel="stylesheet" href="css/style.css?v=0.3.0">
 </head>
 <body data-panels="on">
 
@@ -152,6 +152,8 @@
       <button class="chip" data-alt="inside" type="button">Inside</button>
       <button class="chip" data-alt="above" type="button">Above</button>
       <button class="chip" data-alt="space" type="button">Space</button>
+      <button class="chip" id="orbitBtn" type="button" aria-pressed="false">Orbit</button>
+      <button class="chip" id="turnBtn" type="button" aria-pressed="false" hidden>Turn</button>
     </div>
   </div>
 </footer>
@@ -168,6 +170,9 @@
     <p class="hint">60× plays 15 minutes of sky in 15 seconds.</p></div>
   <div class="setting"><label>Play when a sky loads</label>
     <div class="seg" data-key="autoplay"><button data-v="1" type="button">Twice, then pause</button><button data-v="0" type="button">Off</button></div></div>
+  <div class="setting"><label>Orbit: one full turn takes</label>
+    <div class="seg" data-key="turn"><button data-v="30" type="button">30 s</button><button data-v="60" type="button">60 s</button><button data-v="120" type="button">120 s</button></div>
+    <p class="hint">Orbit circles a point in the clouds. Drag to go around and over it, pinch to come closer. Turn goes around twice by itself, then waits.</p></div>
   <div class="setting"><label>Compass line at the top</label>
     <div class="seg" data-key="compass"><button data-v="1" type="button">Show</button><button data-v="0" type="button">Hide</button></div></div>
 
@@ -192,14 +197,14 @@
 <div id="errorsPanel" class="errorsPanel" hidden></div>
 
 <script src="js/vendor/three.min.js"></script>
-<script src="js/core.js?v=0.2.0"></script>
-<script src="js/sun.js?v=0.2.0"></script>
-<script src="js/presets.js?v=0.2.0"></script>
-<script src="js/weather.js?v=0.2.0"></script>
-<script src="js/skymodel.js?v=0.2.0"></script>
-<script src="js/shader.js?v=0.2.0"></script>
-<script src="js/renderer.js?v=0.2.0"></script>
-<script src="js/notes.js?v=0.2.0"></script>
-<script src="js/app.js?v=0.2.0"></script>
+<script src="js/core.js?v=0.3.0"></script>
+<script src="js/sun.js?v=0.3.0"></script>
+<script src="js/presets.js?v=0.3.0"></script>
+<script src="js/weather.js?v=0.3.0"></script>
+<script src="js/skymodel.js?v=0.3.0"></script>
+<script src="js/shader.js?v=0.3.0"></script>
+<script src="js/renderer.js?v=0.3.0"></script>
+<script src="js/notes.js?v=0.3.0"></script>
+<script src="js/app.js?v=0.3.0"></script>
 </body>
 </html>

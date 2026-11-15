@@ -14,4 +14,8 @@
 
 **0.2.0 (2026-11-15, round 2, merged at Jimmy's request):** zoom to 2° with a sharpening pass for still views (full resolution, 320 steps, 12 strips) and three close-up erosion layers; adaptive stepping (long in clear air, short in cloud); height to 400 km with a Space chip, so the Earth's curve shows; "Skies right now" (72 cities in one call, nine groups); nursery tile. 57 headless checks pass. Still unverified: any live Open-Meteo call, including the multi-city one; iPad.
 
+**0.2.1 (2026-11-15):** Open-Meteo hosts added to the session environment. Live results: air quality, geocoding and archive calls work with the names used. The forecast host answered 429 "Daily API request limit exceeded" for the sandbox's shared address, so the forecast call, the pressure-level wind names and the multi-city call remain unverified. Fixes from the live run: timeout 9 s → 15 s (the long forecast request timed out before its refusal arrived), and a plain message for 429.
+
+**0.3.0 (2026-11-15, round 3, merged at Jimmy's request):** orbit mode (camera circles a centre in the clouds; drag around and over, pinch closer; Turn goes around twice then waits), a camera position in km so clouds are passed, atlas sample "Storm cells from the air". Tornado rotation and funnels are not drawn and the page says so. 63 headless checks pass.
+
 **Next.** Answers to `03 Projects/Generate Clouds/convo/convo v0.1.md`; candidates in `todo.md`.
