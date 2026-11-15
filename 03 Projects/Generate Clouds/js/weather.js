@@ -156,6 +156,56 @@
     });
   };
 
+  // ---------- skies right now: one call for the current weather of many cities ----------
+  var NOW_KEY = 'gc.now';
+  var GROUPS = [
+    ['storm', '⛈️', 'Thunderstorm'], ['rain', '🌧️', 'Rain'], ['snow', '❄️', 'Snow'], ['fog', '🌫️', 'Fog'], ['overcast', '☁️', 'Overcast'],
+    ['broken', '⛅', 'Broken cloud'], ['wisps', '🪶', 'High wisps'], ['clear', '☀️', 'Clear'], ['golden', '🌇', 'Sunrise or sunset now']
+  ];
+  function classify(c) {
+    var code = c.weather_code || 0, cover = c.cloud_cover || 0, pr = c.precipitation || 0, day = c.is_day ? 20 : 0;
+    if (code >= 95) return ['storm', 100 + pr];
+    if ((code >= 71 && code <= 77) || code === 85 || code === 86) return ['snow', 10 + pr];
+    if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return ['rain', pr + (code >= 80 ? 1 : 0)];
+    if (code === 45 || code === 48) return ['fog', 1];
+    if (cover >= 88) return ['overcast', cover + day];
+    if ((c.cloud_cover_high || 0) >= 50 && (c.cloud_cover_low || 0) < 25 && (c.cloud_cover_mid || 0) < 40) return ['wisps', c.cloud_cover_high + day];
+    if (cover >= 30) return ['broken', 60 - Math.abs(cover - 55) + day];
+    return ['clear', 100 - cover + day];
+  }
+  function group(cities, rows, when) {
+    var out = GROUPS.map(function (g) { return { id: g[0], icon: g[1], name: g[2], cities: [] }; }), by = {};
+    out.forEach(function (g) { by[g.id] = g; });
+    cities.forEach(function (city, i) {
+      var el = GC.Sun.pos(when, city.lat, city.lon).el;
+      if (el > -6 && el < 7) by.golden.cities.push({ place: city, score: -Math.abs(el), info: 'sun ' + Math.round(el) + '°' });
+      var c = rows && rows[i]; if (!c) return;
+      var k = classify(c), info = k[0] === 'rain' || k[0] === 'snow' || k[0] === 'storm' ? (c.precipitation || 0).toFixed(1) + ' mm' : Math.round(c.cloud_cover || 0) + '% cloud';
+      by[k[0]].cities.push({ place: city, score: k[1], info: info });
+    });
+    out.forEach(function (g) { g.cities.sort(function (a, b) { return b.score - a.score; }); g.cities = g.cities.slice(0, 3); });
+    return out;
+  }
+  // Returns { groups, source: 'live' | 'cache' | 'none', count }. Without data only the sun group is filled (it needs no network).
+  W.conditions = function (force) {
+    var cities = GC.CITIES, saved = GC.store.get(NOW_KEY, null);
+    if (!force && saved && saved.rows && saved.rows.length === cities.length && Date.now() - saved.at < 30 * 60000)
+      return Promise.resolve({ groups: group(cities, saved.rows, Date.now()), source: 'live', count: cities.length, at: saved.at });
+    var url = HOSTS.forecast + '?latitude=' + cities.map(function (c) { return c.lat; }).join(',') + '&longitude=' + cities.map(function (c) { return c.lon; }).join(',') +
+      '&current=weather_code,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,precipitation,is_day';
+    return fetchJson(url, 12000).then(function (j) {
+      var list = Array.isArray(j) ? j : [j];
+      if (list.length !== cities.length) throw new Error('Expected ' + cities.length + ' cities, got ' + list.length);
+      var rows = list.map(function (x) { return x.current || null; });
+      GC.store.set(NOW_KEY, { at: Date.now(), rows: rows });
+      return { groups: group(cities, rows, Date.now()), source: 'live', count: cities.length, at: Date.now() };
+    }).catch(function (e) {
+      GC.logError('Skies right now: ' + ((e && e.message) || 'no connection'));
+      if (saved && saved.rows && saved.rows.length === cities.length) return { groups: group(cities, saved.rows, Date.now()), source: 'cache', count: cities.length, at: saved.at };
+      return { groups: group(cities, null, Date.now()), source: 'none', count: cities.length, at: 0 };
+    });
+  };
+
   W.check = function () {
     var q = '?latitude=0&longitude=0';
     var tests = [

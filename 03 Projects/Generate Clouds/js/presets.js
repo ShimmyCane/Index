@@ -55,6 +55,29 @@
   ];
   GC.SAMPLE_WX = GC.PRESETS[0].wx;
 
+  // Well-known cities across the climates. "Skies right now" asks for the current weather of all of them in one call
+  // and sorts them into groups, so the list always offers a storm, a clear sky, an overcast and so on when there is one.
+  GC.CITIES = [
+    ['Tokyo', 'Japan', 35.68, 139.65], ['Seoul', 'South Korea', 37.57, 126.98], ['Beijing', 'China', 39.90, 116.41], ['Shanghai', 'China', 31.23, 121.47],
+    ['Hong Kong', 'China', 22.32, 114.17], ['Taipei', 'Taiwan', 25.03, 121.57], ['Manila', 'Philippines', 14.60, 120.98], ['Bangkok', 'Thailand', 13.76, 100.50],
+    ['Singapore', 'Singapore', 1.35, 103.82], ['Kuala Lumpur', 'Malaysia', 3.14, 101.69], ['Jakarta', 'Indonesia', -6.21, 106.85], ['Darwin', 'Australia', -12.46, 130.84],
+    ['Sydney', 'Australia', -33.87, 151.21], ['Perth', 'Australia', -31.95, 115.86], ['Wellington', 'New Zealand', -41.29, 174.78], ['Honolulu', 'United States', 21.31, -157.86],
+    ['Delhi', 'India', 28.61, 77.21], ['Mumbai', 'India', 19.08, 72.88], ['Dhaka', 'Bangladesh', 23.81, 90.41], ['Kathmandu', 'Nepal', 27.72, 85.32],
+    ['Dubai', 'United Arab Emirates', 25.20, 55.27], ['Riyadh', 'Saudi Arabia', 24.71, 46.68], ['Tehran', 'Iran', 35.69, 51.39], ['Istanbul', 'Türkiye', 41.01, 28.98],
+    ['Cairo', 'Egypt', 30.04, 31.24], ['Nairobi', 'Kenya', -1.29, 36.82], ['Kampala', 'Uganda', 0.35, 32.58], ['Kinshasa', 'DR Congo', -4.44, 15.27],
+    ['Lagos', 'Nigeria', 6.52, 3.38], ['Accra', 'Ghana', 5.60, -0.19], ['Dakar', 'Senegal', 14.72, -17.47], ['Casablanca', 'Morocco', 33.57, -7.59],
+    ['Johannesburg', 'South Africa', -26.20, 28.05], ['Cape Town', 'South Africa', -33.92, 18.42], ['Antananarivo', 'Madagascar', -18.88, 47.51], ['Addis Ababa', 'Ethiopia', 9.03, 38.74],
+    ['Moscow', 'Russia', 55.76, 37.62], ['Helsinki', 'Finland', 60.17, 24.94], ['Tromsø', 'Norway', 69.65, 18.96], ['Reykjavik', 'Iceland', 64.15, -21.94],
+    ['London', 'United Kingdom', 51.51, -0.13], ['Paris', 'France', 48.86, 2.35], ['Berlin', 'Germany', 52.52, 13.40], ['Zurich', 'Switzerland', 47.37, 8.54],
+    ['Rome', 'Italy', 41.90, 12.50], ['Madrid', 'Spain', 40.42, -3.70], ['Lisbon', 'Portugal', 38.72, -9.14], ['Athens', 'Greece', 37.98, 23.73],
+    ['New York', 'United States', 40.71, -74.01], ['Miami', 'United States', 25.76, -80.19], ['Chicago', 'United States', 41.88, -87.63], ['Denver', 'United States', 39.74, -104.99],
+    ['Seattle', 'United States', 47.61, -122.33], ['Los Angeles', 'United States', 34.05, -118.24], ['Anchorage', 'United States', 61.22, -149.90], ['Vancouver', 'Canada', 49.28, -123.12],
+    ['Toronto', 'Canada', 43.65, -79.38], ['Mexico City', 'Mexico', 19.43, -99.13], ['Havana', 'Cuba', 23.11, -82.37], ['Panama City', 'Panama', 8.98, -79.52],
+    ['Bogotá', 'Colombia', 4.71, -74.07], ['Quito', 'Ecuador', -0.18, -78.47], ['Lima', 'Peru', -12.05, -77.04], ['Cusco', 'Peru', -13.53, -71.97],
+    ['Manaus', 'Brazil', -3.12, -60.02], ['Rio de Janeiro', 'Brazil', -22.91, -43.17], ['São Paulo', 'Brazil', -23.55, -46.63], ['Buenos Aires', 'Argentina', -34.60, -58.38],
+    ['Santiago', 'Chile', -33.45, -70.67], ['Ushuaia', 'Argentina', -54.80, -68.30], ['La Paz', 'Bolivia', -16.49, -68.12], ['Ulaanbaatar', 'Mongolia', 47.89, 106.91]
+  ].map(function (c) { return { name: c[0], region: c[1], lat: c[2], lon: c[3] }; });
+
   GC.PLACES = [
     { name: 'Tokyo', region: 'Japan', lat: 35.6762, lon: 139.6503 },
     { name: 'Reykjavik', region: 'Iceland', lat: 64.1466, lon: -21.9426 },

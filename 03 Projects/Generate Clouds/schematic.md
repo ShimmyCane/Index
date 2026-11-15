@@ -2,7 +2,7 @@
 
 **Track: B. Studio design** (a 3-D sky study and backdrop maker for renderings). Palette: sky-blue ink on cloud-white paper, because the subject is the sky. Panels collapsible, open on a large screen, closed on a phone.
 
-Status: MVP 0.1.0 (2026-11-15). Headless-tested with made-up weather replies. Not yet run against the live weather service, and not yet on an iPad.
+Status: MVP 0.2.0 (2026-11-15). Headless-tested with made-up weather replies. Not yet run against the live weather service, and not yet on an iPad.
 
 ## Purpose
 
@@ -60,6 +60,22 @@ Three layers. Low and mid are volumes; high is a thin sheet.
 - **Time lapse**: 900 s of sky. Each layer drifts with its wind, shapes change slowly, cover moves toward the next hour's value, and the sun moves.
 - **Same place and hour → same sky** (the noise seed comes from latitude, longitude and the hour).
 
+## Zoom and sharpness (0.2.0)
+
+- **Zoom** from 110° down to 2° (35×) by pinch, wheel, or the Zoom slider in Adjust.
+- **Moving view**: reduced sharpness, to stay smooth.
+- **Still view**: 0.45 s after the last change the view is redrawn at full sharpness, 320 steps per ray, one of 12 strips per frame. The compass line says "sharpening 40%" and then "sharp". Any touch stops it.
+- **Close-up detail**: three finer layers of erosion (13×, 41× and 127× the cloud's cell size, bent into wisps) fade in when one pixel is small enough to show them. From far away they are skipped.
+- **Stepping**: long steps through clear air; on touching cloud the ray steps back and crosses it in short steps.
+
+## Height and the curve of the Earth (0.2.0)
+
+The planet has always been a sphere of 6371 km in the model. From the ground the horizon is flat, as in life. The height slider now runs to 400 km on a cube curve (the first third covers 0 to 13 km), and a **Space** chip jumps to 250 km looking down, where the limb, the thin blue line of air and the cloud deck wrapping the globe are visible. Clouds are drawn out to 260 km + 14 × height.
+
+## Skies right now (0.2.0)
+
+One call asks Open-Meteo for the current weather of 72 well-known cities (`GC.CITIES` in `js/presets.js`). They are sorted into Thunderstorm, Rain, Snow, Fog, Overcast, Broken cloud, High wisps, Clear, and "Sunrise or sunset now" (from the sun's height, no network). Each group shows its three strongest; an empty group says so. Saved for 30 minutes; Refresh asks again. Without a connection, the last list is shown with its time, or the eight plain cities.
+
 ## Data and fallback
 
 1. Live Open-Meteo (9 s limit). If the full list of values is refused, it asks again with the core list.
@@ -85,5 +101,7 @@ Dates more than 85 days back use the archive service (no upper winds, CAPE or ai
 
 - Not a photo of the real sky: amounts, heights, wind, sun and haze follow the data; each cloud's shape is generated.
 - Three layers only. No moon, no terrain, no cloud shadows on the ground, no rain streaks.
+- Close-up detail is generated noise, not a simulation of real turbulence; at the deepest zoom, edges show some grain.
+- "Skies right now" covers 72 cities, not the whole world; a storm elsewhere is not listed.
 - Pictures are 8-bit PNG backdrops, not HDR light sources.
 - The live weather link has not been exercised yet (see `convo/convo v0.1.md`).

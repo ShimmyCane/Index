@@ -12,4 +12,6 @@
 
 **Decisions made without asking (in convo v0.1):** Track B with a sky palette; Open-Meteo; physical look; three layers; device storage only; no home-page tile.
 
+**0.2.0 (2026-11-15, round 2, merged at Jimmy's request):** zoom to 2° with a sharpening pass for still views (full resolution, 320 steps, 12 strips) and three close-up erosion layers; adaptive stepping (long in clear air, short in cloud); height to 400 km with a Space chip, so the Earth's curve shows; "Skies right now" (72 cities in one call, nine groups); nursery tile. 57 headless checks pass. Still unverified: any live Open-Meteo call, including the multi-city one; iPad.
+
 **Next.** Answers to `03 Projects/Generate Clouds/convo/convo v0.1.md`; candidates in `todo.md`.

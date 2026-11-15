@@ -89,21 +89,54 @@
     var kind = p.sun === 'day' ? 'noon' : p.sun, ms = GC.Sun.find(kind, dayStart, S.place.lat, S.place.lon) || GC.Sun.find('noon', dayStart, S.place.lat, S.place.lon);
     if (p.sun === 'day') ms -= 2.5 * 3600000;        // mid-morning light shows the shapes better than high noon
     S.preset = p; S.ov = {};
-    R.cam.alt = p.cam.alt; R.cam.pitch = p.cam.pitch;
+    R.cam.alt = p.cam.alt; R.cam.pitch = p.cam.pitch; R.cam.fov = 70;
     var sp = GC.Sun.pos(ms, S.place.lat, S.place.lon);
     R.cam.yaw = p.cam.toward === 'sun' ? sp.az : (sp.az + 110) % 360;
-    $('alt').value = R.cam.alt;
+    setAltSlider(R.cam.alt);
     showData({ wx: JSON.parse(JSON.stringify(p.wx)), localStr: W.msToLocal(ms + off * 1000), offsetSec: off, utcMs: ms, source: 'sample', note: '', archive: false });
     restart(true);
   }
   GC.usePreset = function (id) { var p = GC.PRESETS.filter(function (x) { return x.id === id; })[0]; if (p) usePreset(p); };
 
+  // ---------- skies right now: cities grouped by their current weather ----------
+  function loadNow(force) {
+    $('nowNote').textContent = 'Looking at ' + GC.CITIES.length + ' cities…';
+    return W.conditions(force).then(function (res) {
+      var box = $('nowSkies'); box.textContent = '';
+      S.now = res;
+      res.groups.forEach(function (g) {
+        if (res.source === 'none' && g.id !== 'golden') return;
+        var d = document.createElement('div'); d.className = 'grp'; d.dataset.group = g.id;
+        var h = document.createElement('div'); h.className = 'grpName'; h.textContent = g.icon + ' ' + g.name; d.appendChild(h);
+        if (!g.cities.length) { var n = document.createElement('div'); n.className = 'none'; n.textContent = 'None of the ' + res.count + ' cities right now.'; d.appendChild(n); }
+        else {
+          var row = document.createElement('div'); row.className = 'chips';
+          g.cities.forEach(function (c) {
+            var b = document.createElement('button'); b.className = 'chip'; b.type = 'button'; b.textContent = c.place.name;
+            var sm = document.createElement('small'); sm.textContent = c.info; b.appendChild(sm);
+            b.addEventListener('click', function () { S.when = { now: true }; setPlace(c.place); }); row.appendChild(b);
+          });
+          d.appendChild(row);
+        }
+        box.appendChild(d);
+      });
+      if (res.source === 'none') {
+        var d2 = document.createElement('div'); d2.className = 'grp'; var h2 = document.createElement('div'); h2.className = 'grpName'; h2.textContent = '📍 Cities'; d2.appendChild(h2);
+        var row2 = document.createElement('div'); row2.className = 'chips';
+        GC.PLACES.forEach(function (p) { var b = document.createElement('button'); b.className = 'chip'; b.type = 'button'; b.textContent = p.name; b.addEventListener('click', function () { setPlace(p); }); row2.appendChild(b); });
+        d2.appendChild(row2); box.appendChild(d2);
+      }
+      $('nowNote').textContent = res.source === 'live' ? 'The strongest of each kind among ' + res.count + ' cities, as of ' + new Date(res.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '. Tap one to generate its sky now.'
+        : res.source === 'cache' ? 'The weather service is not reachable. This list is from ' + new Date(res.at).toLocaleString() + '.'
+        : 'The weather service is not reachable, so cities cannot be sorted by weather. The sun group needs no connection.';
+    });
+  }
+  GC.loadNow = loadNow;
+
   // ---------- place and time panel ----------
   function initPlace() {
-    GC.PLACES.forEach(function (p) {
-      var b = document.createElement('button'); b.className = 'chip'; b.type = 'button'; b.textContent = p.name;
-      b.addEventListener('click', function () { setPlace(p); }); $('placeChips').appendChild(b);
-    });
+    $('nowRefresh').addEventListener('click', function () { loadNow(true); });
+    loadNow(false);
     $('searchForm').addEventListener('submit', function (e) {
       e.preventDefault();
       var q = $('searchText').value.trim(), ul = $('searchResults'); if (!q) return;
@@ -169,28 +202,33 @@
       $(a[0] + 'V').textContent = a[4](v) + (S.ov[a[1]] != null ? ' ✎' : '');
     });
     $('ovType').value = S.ov.lowType || '';
-    $('fov').value = R.cam.fov; $('fovV').textContent = Math.round(R.cam.fov) + '°';
+    $('fov').value = R.cam.fov; $('fovV').textContent = (70 / R.cam.fov).toFixed(1) + '× · ' + Math.round(R.cam.fov) + '°';
   }
   function initAdjust() {
     ADJ.forEach(function (a) { $(a[0]).addEventListener('input', function () { S.ov[a[1]] = a[2](parseFloat($(a[0]).value)); rebuild(); }); });
     $('ovType').addEventListener('change', function () { S.ov.lowType = $('ovType').value || null; rebuild(); });
-    $('fov').addEventListener('input', function () { R.cam.fov = +$('fov').value; $('fovV').textContent = Math.round(R.cam.fov) + '°'; S.dirty = true; });
+    $('fov').addEventListener('input', function () { R.cam.fov = +$('fov').value; $('fovV').textContent = (70 / R.cam.fov).toFixed(1) + '× · ' + Math.round(R.cam.fov) + '°'; S.dirty = true; });
     $('ovReset').addEventListener('click', function () { S.ov = {}; rebuild(); });
   }
 
   // ---------- time bar and camera height ----------
-  function altText(a) { return '✈️ ' + (a < 1 ? Math.round(a * 1000) + ' m' : a.toFixed(1) + ' km'); }
+  function altText(a) { return '✈️ ' + (a < 1 ? Math.round(a * 1000) + ' m' : a < 20 ? a.toFixed(1) + ' km' : Math.round(a) + ' km'); }
+  // The height slider runs 0..1 and maps to 0..400 km on a cube curve, so the first third covers the weather.
+  var ALT_MAX = 400;
+  function altFromSlider(s) { return Math.max(0.002, ALT_MAX * s * s * s); }
+  function setAltSlider(a) { $('alt').value = Math.cbrt(Math.max(a, 0) / ALT_MAX); }
   function initBar() {
     $('play').addEventListener('click', function () { setPlaying(!S.playing); });
     $('rewind').addEventListener('click', function () { S.simT = 0; S.dirty = true; });
     $('time').addEventListener('input', function () { S.simT = +$('time').value; if (S.playing) setPlaying(false); S.dirty = true; });
-    $('alt').addEventListener('input', function () { R.cam.alt = Math.max(0.002, +$('alt').value); S.dirty = true; });
+    $('alt').addEventListener('input', function () { R.cam.alt = altFromSlider(+$('alt').value); S.dirty = true; });
     document.querySelectorAll('[data-alt]').forEach(function (b) {
       b.addEventListener('click', function () {
         var m = S.model && S.model.summary, k = b.dataset.alt;
-        var a = k === 'ground' ? 0.002 : !m ? 2 : k === 'inside' ? (m.lowBase + Math.min(m.lowTop, m.lowBase + 1.2)) / 2 : Math.min(12.5, Math.min(m.lowTop, m.lowBase + 3) + 1.2);
-        R.cam.alt = a; $('alt').value = a;
-        if (k === 'above') R.cam.pitch = Math.min(R.cam.pitch, -6); else if (k === 'ground' && R.cam.pitch < 5) R.cam.pitch = 15;
+        var a = k === 'ground' ? 0.002 : k === 'space' ? 250 : !m ? 2 : k === 'inside' ? (m.lowBase + Math.min(m.lowTop, m.lowBase + 1.2)) / 2 : Math.min(12.5, Math.min(m.lowTop, m.lowBase + 3) + 1.2);
+        R.cam.alt = a; setAltSlider(a);
+        if (k === 'space') { R.cam.pitch = -38; R.cam.fov = 75; syncAdjust(); }
+        else if (k === 'above') R.cam.pitch = Math.min(R.cam.pitch, -6); else if (k === 'ground' && R.cam.pitch < 5) R.cam.pitch = 15;
         S.dirty = true;
       });
     });
@@ -210,13 +248,13 @@
         var k = R.cam.fov / Math.max(cv.clientHeight, 1);
         R.cam.yaw = (R.cam.yaw - dx * k + 360) % 360; R.cam.pitch = GC.clamp(R.cam.pitch + dy * k, -89, 89);
       } else if (n() === 2) {
-        var d = dist(); if (pinch > 0 && d > 0) { R.cam.fov = GC.clamp(R.cam.fov * pinch / d, 20, 110); syncAdjust(); } pinch = d;
+        var d = dist(); if (pinch > 0 && d > 0) { R.cam.fov = GC.clamp(R.cam.fov * pinch / d, 2, 110); syncAdjust(); } pinch = d;
       }
       S.dirty = true;
     });
     function up(e) { delete pts[e.pointerId]; pinch = 0; if (!n()) cv.classList.remove('drag'); }
     cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
-    cv.addEventListener('wheel', function (e) { e.preventDefault(); R.cam.fov = GC.clamp(R.cam.fov * (e.deltaY > 0 ? 1.06 : 0.94), 20, 110); syncAdjust(); S.dirty = true; }, { passive: false });
+    cv.addEventListener('wheel', function (e) { e.preventDefault(); R.cam.fov = GC.clamp(R.cam.fov * (e.deltaY > 0 ? 1.06 : 0.94), 2, 110); syncAdjust(); S.dirty = true; }, { passive: false });
     cv.addEventListener('gesturestart', function (e) { e.preventDefault(); });
     window.addEventListener('resize', function () { R.resize(); S.dirty = true; });
   }
@@ -226,6 +264,7 @@
     function run(btn, job) {
       if (R.busy || !S.model) return;
       var was = S.playing; setPlaying(false);
+      R.fineStop(); S.still = 0;
       S.frame = S.model.at(S.simT, R.cam.alt); R.apply(S.frame);
       btn.disabled = true; $('exportNote').textContent = 'Drawing… 0%';
       job(function (f) { $('exportNote').textContent = 'Drawing… ' + Math.round(f * 100) + '%'; }).then(function (info) {
@@ -302,8 +341,16 @@
       if (S.frame && S.frame.flashy && S.flash < 0.05 && Math.random() < 0.012) { S.flash = 1.6 + Math.random() * 2; R.flash(S.flash, (Math.random() - 0.5) * 50, (Math.random() - 0.5) * 50); }
     }
     if (S.flash > 0.02) { S.flash *= 0.8; if (S.flash <= 0.02) S.flash = 0; R.flash(S.flash, R._fx || 0, R._fz || 0); S.dirty = true; }
-    if (!S.dirty) return;
-    S.dirty = false;
+    if (!S.dirty) {
+      // Nothing is moving: after a short pause, redraw the still view sharp, one strip per frame.
+      if (S.playing || S.sharp) return;
+      if (!R.fineOn) { if (now - S.still > 450 && R.fineStart()) updateUi(); return; }
+      if (R.fineStep()) S.sharp = true;
+      updateUi();
+      return;
+    }
+    S.dirty = false; S.still = now; S.sharp = false;
+    R.fineStop();
     S.frame = S.model.at(S.simT, R.cam.alt);
     R.apply(S.frame); R.render();
     if (now - uiT > 120) { uiT = now; updateUi(); }
@@ -314,7 +361,8 @@
     $('altLabel').textContent = altText(R.cam.alt);
     var f = S.frame; if (!f) return;
     $('hud').textContent = 'Looking ' + GC.compass(R.cam.yaw) + ', ' + Math.abs(Math.round(R.cam.pitch)) + '° ' + (R.cam.pitch >= 0 ? 'up' : 'down') +
-      ' · Sun ' + GC.compass(f.sunAz) + ' ' + Math.round(f.sunEl) + '°';
+      ' · Sun ' + GC.compass(f.sunAz) + ' ' + Math.round(f.sunEl) + '°' + (R.cam.fov < 60 ? ' · zoom ' + (70 / R.cam.fov).toFixed(1) + '×' : '') +
+      (S.sharp ? ' · sharp' : R.fineOn ? ' · sharpening ' + Math.round(R.fineProgress() * 100) + '%' : '');
   }
   // keep R.flash position between frames
   var _flash = R.flash; R.flash = function (a, x, z) { R._fx = x; R._fz = z; _flash(a, x, z); };
@@ -322,7 +370,7 @@
   GC.debug = function () {
     return { version: GC.VERSION, simT: S.simT, playing: S.playing, loops: S.loops, autoLeft: S.autoLeft, source: S.data && (S.preset ? 'atlas' : S.data.source),
       place: S.place, local: S.data && S.data.localStr, types: S.model && S.model.types, summary: S.model && S.model.summary,
-      cam: { yaw: R.cam.yaw, pitch: R.cam.pitch, fov: R.cam.fov, alt: R.cam.alt }, frames: R.frames, scale: R.scale, ok: R.ok,
+      cam: { yaw: R.cam.yaw, pitch: R.cam.pitch, fov: R.cam.fov, alt: R.cam.alt }, frames: R.frames, scale: R.scale, ok: R.ok, sharp: !!S.sharp, fine: R.fineProgress(), now: S.now && { source: S.now.source, groups: S.now.groups.map(function (g) { return [g.id, g.cities.length]; }) },
       sunEl: S.frame && S.frame.sunEl, exposure: S.frame && S.frame.exposure, ov: S.ov, notes: GC.Notes.all().length };
   };
 

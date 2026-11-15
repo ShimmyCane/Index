@@ -7,11 +7,12 @@
   var GC = window.GC = window.GC || {};
   var R = GC.Renderer = {};
   var QUALITY = {
-    low:  { steps: 28, lsteps: 3, maxScale: 0.5 },
-    med:  { steps: 44, lsteps: 4, maxScale: 0.75 },
-    high: { steps: 72, lsteps: 6, maxScale: 1.0 }
+    low:  { steps: 40, lsteps: 3, maxScale: 0.5 },
+    med:  { steps: 64, lsteps: 4, maxScale: 0.75 },
+    high: { steps: 96, lsteps: 6, maxScale: 1.0 }
   };
-  var EXPORT_Q = { steps: 110, lsteps: 7 };
+  var EXPORT_Q = { steps: 200, lsteps: 7 };
+  var FINE_Q = { steps: 320, lsteps: 8 }, STRIPS = 12, FINE_PIXELS = 2600000;
   var renderer, scene, camera, mat, canvas, U;
   R.cam = { yaw: 0, pitch: 15, fov: 70, alt: 0.002 };
   R.scale = 0.5; R.ok = false; R.frames = 0; R.busy = false;
@@ -32,7 +33,7 @@
   R.init = function (cv) {
     canvas = cv;
     try {
-      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: false, alpha: false, powerPreference: 'high-performance' });
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: false, alpha: false, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
     } catch (e) { GC.logError('3-D could not start: ' + e.message); return false; }
     renderer.setPixelRatio(1);
     scene = new THREE.Scene(); camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -45,7 +46,7 @@
       uL0a: v4(), uL0b: v4(), uL0w: v4(), uL1a: v4(), uL1b: v4(), uL1w: v4(), uC: v4(), uCw: v4(),
       uSeed: v3(), uEvolve: { value: 0 }, uExposure: { value: 1 }, uNight: { value: 0 }, uRain: { value: 0 },
       uFlash: { value: 0 }, uFlashPos: { value: new THREE.Vector2() }, uGain: { value: 0.32 },
-      uSteps: { value: 44 }, uLSteps: { value: 4 }, uMS: { value: 0.28 }
+      uSteps: { value: 44 }, uLSteps: { value: 4 }, uMS: { value: 0.28 }, uPix: { value: 0.002 }, uFar: { value: 260 }, uFineK: { value: 0.5 }
     };
     mat = new THREE.ShaderMaterial({ uniforms: U, vertexShader: GC.VERT, fragmentShader: GC.FRAG, depthTest: false, depthWrite: false });
     scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
@@ -80,6 +81,7 @@
     var r = new THREE.Vector3(Math.cos(y), 0, Math.sin(y));
     U.uCamF.value.copy(f); U.uCamR.value.copy(r); U.uCamU.value.crossVectors(r, f);
     U.uTanFov.value = Math.tan(GC.rad(R.cam.fov) / 2); U.uAlt.value = R.cam.alt;
+    U.uFar.value = 260 + 14 * R.cam.alt;
   }
   R.apply = function (F) {
     function s3(u, a) { u.value.set(a[0], a[1], a[2]); } function s4(u, a) { u.value.set(a[0], a[1], a[2], a[3]); }
@@ -96,10 +98,36 @@
     U.uProj.value = 0; U.uTile.value.set(0, 0, 1, 1);
     U.uAspect.value = canvas.clientWidth / Math.max(canvas.clientHeight, 1);
     U.uSteps.value = R.q.steps; U.uLSteps.value = R.q.lsteps;
+    U.uPix.value = 2 * U.uTanFov.value / Math.max(renderer.domElement.height, 1); U.uFineK.value = 0.5;
     renderer.setRenderTarget(null);
     renderer.render(scene, camera);
     R.frames++;
   };
+
+  // Sharpen a still view: full sharpness and many more steps, drawn one strip per frame
+  // so the page stays responsive. Any change to the view stops it.
+  R.fine = 0;                                      // 0 = off, 1..STRIPS = strips drawn so far
+  R.fineStart = function () {
+    if (!R.ok || R.busy) return false;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2), w = canvas.clientWidth * dpr, h = canvas.clientHeight * dpr;
+    var k = Math.min(1, Math.sqrt(FINE_PIXELS / (w * h)));
+    renderer.setSize(Math.max(2, Math.round(w * k)), Math.max(2, Math.round(h * k)), false);
+    R.render();                                    // a quick full frame first, so nothing flashes
+    R.fine = 0; R.fineOn = true;
+    return true;
+  };
+  R.fineStep = function () {
+    if (!R.fineOn || R.fine >= STRIPS) return true;
+    var W = renderer.domElement.width, H = renderer.domElement.height, y0 = Math.floor(H * R.fine / STRIPS), y1 = Math.floor(H * (R.fine + 1) / STRIPS);
+    U.uSteps.value = FINE_Q.steps; U.uLSteps.value = FINE_Q.lsteps; U.uFineK.value = 0.2;
+    renderer.setScissorTest(true); renderer.setScissor(0, H - y1, W, y1 - y0);
+    renderer.render(scene, camera);
+    renderer.setScissorTest(false);
+    R.fine++;
+    return R.fine >= STRIPS;
+  };
+  R.fineStop = function () { if (!R.fineOn) return; R.fineOn = false; R.fine = 0; R.resize(); };
+  R.fineProgress = function () { return R.fineOn ? R.fine / STRIPS : 0; };
 
   // Draw the picture in tiles into a 2-D canvas. proj 0 = current view, 1 = 360° panorama.
   function renderTiles(W, H, proj, onProgress) {
@@ -111,6 +139,7 @@
     for (var ty = 0; ty < H; ty += TILE) for (var tx = 0; tx < W; tx += TILE) tiles.push([tx, ty]);
     setCam();
     U.uProj.value = proj; U.uAspect.value = W / H; U.uSteps.value = EXPORT_Q.steps; U.uLSteps.value = EXPORT_Q.lsteps;
+    U.uPix.value = proj ? Math.PI / H : 2 * U.uTanFov.value / H; U.uFineK.value = 0.3;
     R.busy = true;
     var i = 0;
     function done() { R.busy = false; rt.dispose(); renderer.setRenderTarget(null); }
