@@ -7,6 +7,9 @@
 - [ ] Tune from real play: heart period, tick counts, wave sizes (`research/balance.md` lists the knobs).
 
 ## Ideas
+- [ ] Voices for the Rust King and other characters (a cast, as in Adventure).
+- [ ] Real chariot for the Egyptian knight; a cannon for the Japanese siege unit.
+- [ ] Per-style music tint.
 - [ ] Gear that links lanes; two hearts on late levels.
 - [ ] More specials (frost, healing banner).
 - [ ] Per-style music tint (different mode per art style).

@@ -168,5 +168,21 @@
     if (m === 'off') { if (timer) { clearInterval(timer); timer = null; } } else startMusic();
   };
   A.stop = function () { A.mood('off'); };
+
+  // ---- story narration: recorded clips made by tools/make_voice.py -----------------------------
+  var voiceEl = null;
+  A.say = function (src, done) {
+    A.stopSay();
+    try {
+      var el = new Audio(src); voiceEl = el; el.volume = 1;
+      el.onended = function () { if (voiceEl === el) voiceEl = null; if (done) done(); };
+      el.onerror = function () { if (voiceEl === el) voiceEl = null; if (window.GW && GW.err) GW.err('Story audio did not load', src); if (done) done(); };
+      var pr = el.play(); if (pr && pr.catch) pr.catch(function (e) { if (voiceEl === el) voiceEl = null; if (window.GW && GW.err) GW.err('Story audio was blocked', e); if (done) done(); });
+      return true;
+    } catch (e) { if (window.GW && GW.err) GW.err('Story audio', e); return false; }
+  };
+  A.stopSay = function () { if (voiceEl) { try { voiceEl.pause(); } catch (e) { /* ignore */ } voiceEl = null; } };
+  A.speaking = function () { return !!voiceEl; };
+  A.voiceEl = function () { return voiceEl; };
   window.GAudio = A;
 })();

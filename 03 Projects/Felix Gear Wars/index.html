@@ -23,7 +23,7 @@
     <div class="storyBody">
       <h2 id="storyTitle"></h2><p id="storySub" class="sub"></p>
       <div id="storyText" class="storyText"></div><div id="storyTags" class="tags"></div>
-      <div class="row"><button id="storyPlay" type="button" class="big go">Play</button><button id="storyBack" type="button" class="big">Map</button></div>
+      <div class="row"><button id="storyPlay" type="button" class="big go">Play</button><button id="storyListen" type="button" class="big" aria-pressed="false"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> <span>Listen</span></button><button id="storyBack" type="button" class="big">Map</button></div>
     </div>
   </div>
 </section>
@@ -50,6 +50,7 @@
       <div class="setting"><label>Heart speed <small>how fast the heart turns <b id="heartSpeedVal">×1</b></small></label><input id="heartSpeed" type="range" min="0.5" max="4" step="0.25" value="1" aria-label="Heart speed"></div>
       <div class="setting"><label>Quick game <small>shorter waves (next level)</small></label><div class="seg" data-key="quick"><button data-v="0">Off</button><button data-v="1">On</button></div></div>
       <div class="setting"><label>Follow the fight <small>the view slides to the action</small></label><div class="seg" data-key="follow"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
+      <div class="setting"><label>Read aloud <small>narrator on the story card</small></label><div class="seg" data-key="voice"><button data-v="auto">Auto</button><button data-v="tap">Tap</button><button data-v="off">Off</button></div></div>
       <div class="setting"><label>Reading <small>story card words</small></label><div class="seg" data-key="reading"><button data-v="auto">Auto</button><button data-v="0">Pictures</button><button data-v="1">Short</button><button data-v="2">Story</button></div></div>
     </div>
   </section>
@@ -57,8 +58,8 @@
   <section class="panel" data-collapsed="false">
     <button class="pHead" type="button" aria-expanded="true"><span class="icon">🎨</span><span class="title">Art style</span><span class="mark">▾</span></button>
     <div class="pBody">
-      <div class="setting"><label>Style <small>restyles the whole campaign</small></label>
-        <div class="seg wide" data-key="theme"><button data-v="manuscript">Manuscript</button><button data-v="tapestry">Tapestry</button><button data-v="woodblock">Woodblock</button><button data-v="nouveau">Nouveau</button><button data-v="stained">Glass</button></div></div>
+      <div class="setting"><label>Style <small>restyles the campaign; fighters take the look of the place</small></label>
+        <div class="seg wide" data-key="theme"><button data-v="manuscript">Manuscript</button><button data-v="tapestry">Tapestry</button><button data-v="woodblock">Woodblock</button><button data-v="nouveau">Nouveau</button><button data-v="stained">Glass</button><button data-v="persian">Persian</button><button data-v="egyptian">Egyptian</button><button data-v="chinese">Chinese</button></div></div>
     </div>
   </section>
 
@@ -115,6 +116,7 @@
 <script src="js/sim.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/art.js"></script>
+<script src="js/audio_manifest.js"></script>
 <script src="js/notes.js"></script>
 <script src="js/family.js"></script>
 <script src="js/game.js"></script>

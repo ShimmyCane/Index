@@ -49,3 +49,59 @@ What it looked like and why it suits a game:
 - [Bayeux Tapestry art notes (Florilegium)](https://www.florilegium.org/files/TEXTILES/Bayeux-Tapsty-art.html)
 - [Bayeux Tapestry (New World Encyclopedia)](https://www.newworldencyclopedia.org/entry/Bayeux_Tapestry)
 - Styles 3–5 from general art-history knowledge; no outside page was read for them.
+
+---
+
+## Round 2 (2026-11-16): three more styles, and armies that look like their culture
+
+Jimmy's brief: keep adding styles, research them, and let the unit selection reflect the culture (assassins become ninjas in the Japanese style). A style now sets the **names and look of the fighters** as well as colours. The rules never change: a "Ninja" is the same fighter as an "Assassin".
+
+### 6. Persian miniature (Safavid manuscript painting, 16th century)
+
+- Flat, bright colour with no cast shadow and no perspective; the surface is treated as a pattern. Lapis blue, vermilion, emerald green and plenty of gold; gold skies and gold-sprinkled borders; borders with flowers, leaves and arabesques.
+- Game: turquoise and crimson sides, gold sky disc with rays, a border of alternating lapis and gold diamonds.
+- Army: Nayza guard (spear), Kaman archer, Swordsman (scimitar), Shadow scout (veiled; deliberately not called by a historical sect's name), Savar rider (cavalry with a tall *kulah* cap), Armoured guard, Sage (turbaned), Manjaniq (the siege engine's Persian name). Turbans, tall pointed caps, curved blades.
+
+### 7. Egyptian tomb painting (New Kingdom)
+
+- Flat colour, bold outline, figures in profile with the eye shown from the front, white linen, red-brown skin for men, blue, gold and red as accents. (From general art history; the search did not return a page on the painting conventions.)
+- Army, from the sources on the New Kingdom: archers were central and used the composite bow; the khopesh was a sickle-shaped sword and a status symbol; chariots were moving archery platforms.
+- Game: red sun disc in a gold ring, a border of red, blue and gold bars. Names: Spearman, Bowman, Khopesh fighter, Desert scout, Charioteer (the horse stands in for the chariot for now), Shield bearer, Priest, Stone hurler. Striped *nemes* headcloths, white linen caps, a hooked khopesh blade.
+
+### 8. Chinese silk painting (Song dynasty)
+
+- Ink and colour on silk, soft muted colour, black ink line, red collector's seals in the corner. (Painting conventions from general knowledge; the search returned a Freer Gallery record of a 12th-century Song scroll with seals, and no style description.)
+- Army, from the sources on the Song: crossbows were one of the major weapons; field formations put shield-and-pike troops in front, then archers, then crossbowmen; horses were armoured too.
+- Game: muted jade and red sides, a red sun disc, a red seal in the corner, a border with cloud scrolls. Names: Spear guard, Bowman, Dao fighter, Shadow sword, Cavalry, Iron guard, Taoist, Trebuchet. Bamboo-style conical hats, topknots with pins, a broad curved *dao* with a red tassel, Tang-style helmets with a spike and tassel, a tall Taoist cap.
+
+### Existing styles that gained a culture
+
+| Style | Culture | Fighter names (spearman, archer, fighter, assassin, knight, tank, mage, catapult) | Look |
+|---|---|---|---|
+| Illuminated manuscript | Medieval Europe | Spearman, Archer, Fighter, Assassin, Knight, Tank, Mage, Catapult | steel helmets, plumes |
+| Bayeux tapestry | Norman and English, 1066 | Fyrdman, Bowman, Housecarl, Scout, Horseman, Shield wall, Seer, Siege engine | as manuscript |
+| Woodblock print | Sengoku Japan | Ashigaru, Yumi archer, Samurai, Ninja, Mounted samurai, Armoured guard, Onmyoji, Siege cannon | straw *jingasa* hats, *kabuto* helmets with a gold crest, ninja hood and headband, *eboshi* court hat, katana |
+| Art Nouveau, Stained glass | storybook | as manuscript | style only |
+
+### Sengoku Japan, as researched
+
+- Ashigaru were the light foot soldiers, the most numerous and often the core of an army. *Yumi-gumi* were the bow troops and *yari-gumi* the spearmen; late in the period matchlock gunners (*teppō*) stood in front, with bows, spears and swordsmen behind. Samurai commanded the ashigaru and fought as cavalry, using spears more than bows from the saddle.
+- Kabuto helmets, ninja and onmyoji (court diviners) were not covered by the search; the game's versions come from general knowledge and are drawn as simple, friendly figures.
+
+### Honest limits
+
+- The figures are small cartoon figures with the headgear, blade and name of each culture, not museum-accurate reconstructions. The Charioteer is a rider on a horse. The Japanese siege unit is named a cannon but drawn as the same wheeled engine.
+- Not covered by the searches: kabuto, ninja and onmyoji details; the Egyptian and Chinese painting conventions. Those come from general knowledge.
+
+### Sources (round 2)
+
+- [Persian miniature painting: materials and techniques (BIPS)](https://bips.ac.uk/?p=2506)
+- [The Edge of Artifice: the Shāhnāmeh of Shah Tahmāsp (Courtauld)](https://courtauld.ac.uk/research/research-resources/publications/immeditations-postgraduate-journal/immediations-online/immediations-no-21-2024/the-edge-of-artifice-the-shahnameh-of-shah-tahmasp-and-interrogating-the-edge-in-early-safavid-manuscript-painting/)
+- [A deep dive into Safavid miniature paintings (Astaguru)](https://www.astaguru.com/blogs/a-deep-dive-into-the-history--evolution-of-safavid-miniature-paintings-878)
+- [Ashigaru (Wikipedia mirror)](https://www.wikipedia.com/wiki/Asigaru)
+- [Sengoku period warfare, part 1](https://dcmpx.remotevs.com/com/blogspot/gunbai-militaryhistory/PL/2018/03/sengoku-period-warfare-part-1-army-and.html)
+- [How the ancient Egyptian army was organised](https://www.historyskills.com/classroom/ancient-history/ancient-egyptian-army/)
+- [How Ancient Egypt waged war across the desert and the Nile](https://www.thecollector.com/ancient-egypt-warfare/)
+- [Egyptian chariot warfare](https://warhistory.org/@msw/article/egyptian-chariot-warfare)
+- [Crossbows in Song China (University of Washington)](https://depts.washington.edu/chinaciv/miltech/crossbow.htm)
+- [Removing the Saddle, Inspecting the Arrows, Song scroll (Freer Gallery)](https://asia.si.edu/explore-art-culture/collections/search/edanmdm:fsg_F1916.526/)
