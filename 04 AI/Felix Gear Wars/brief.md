@@ -1,21 +1,30 @@
 # Felix Gear Wars — brief
 
 **Updated:** 2026-11-16
-**Status:** idea. Folders and schematic set up; 25 questions open in `03 Projects/Felix Gear Wars/convo/convo v0.1.md`.
+**Status:** MVP 0.1.0, headless-tested, not device-tested. Everything Jimmy asked for in `convo v0.1` is built.
 
 ## Goal
 
-A gear-powered lane defense game for Felix on the iPad. A heart gear drives a chain of gears on a pegboard; each gear makes a fighter that drops to the battlefield and marches against waves of enemies. Campaign of 8 chapters × 3 levels, one new fighter per chapter. Graphics are the priority: jointed, animated creatures drawn in code.
+A gear-powered lane defense game for Felix on the iPad. A heart gear drives gears on a pegboard; each gear makes a fighter that drops to the battlefield and fights the Rust Horde. 8 chapters × 3 levels, a boss on each level 3, a free-for-all level, five historical art styles, a story card per level in three reading tiers. Track A.
 
-## Architecture (planned)
+## Architecture
 
-Plain HTML/CSS/JS, canvas, no build, Web Audio, GitHub Pages. Track A. Device storage first.
+Plain HTML/CSS/JS, one canvas, no build, `file://` works. `js/sim.js` holds every rule and has no DOM, so `tools/balance_sim.js` runs the same code in Node. The screen (`js/game.js`) reads sim state and drains `sim.events` (pop, hit, boom, coin, wave, end...) to make particles and sound. `js/art.js` draws everything; every colour goes through `Art.C()`, so an art style is a filter plus a border and a line weight. Fighters are jointed figures drawn from parts, with walk, attack, fall, get-up and death poses. Sound is Web Audio only (`js/audio.js`), including a procedural looping tune. Settings and progress live in localStorage (`fgw.settings`, `fgw.progress`, `fgw.notes`). Notes also go to `fgw_notes` when signed in to the Family project (SQL written, not applied).
 
-## Research (2026-11-16)
+## Rules in numbers (see `research/balance.md` for the report)
 
-Other gear games (Gear Wars, GearWarriors, Gear Plants, Gear Clash): gear placement sets where and how fast units spawn, meshing gears speeds production, equal gears merge to level up. None found with a "heart" driver; that part is Jimmy's. Keep ours original.
+Heart turns every 1.6 s, four ticks per turn. Gear ticks 3 to 6 (minus one per level, min 1). Merge ×2.2 stats per level, up to level 4. Multiplier gears ×1/2/4/8. Wave budget `62 + 20·idx` (× `1 + 0.42·wave`). Enemy scale `1 + 0.1·idx` health, `+0.06·idx` attack. Lives `20 + idx`. Coins `96 + 7·idx`.
+
+## Verified (headless Chromium, 2026-11-16)
+
+Three sizes (1180×820, 768×1024, 390×844) from `file://`: zero page errors, no horizontal scroll; touch drag of a card onto a peg buys and places a gear; touch pan of the battlefield does not scroll the page; ⚙️ drawer, Show errors panel at the bottom clear of the gear; notes save and survive a reload; all 25 sounds run without error; levels c1l3, c6l3 and free-for-all run to the end; star result screen; five art styles render; story cards; map unlocks; Free-for-all fortress cannot fall.
+
+## Not verified
+
+Real iPad touch and speed over a long battle; sound by ear; the family sign-in and `fgw_notes` (SQL not run); balance with a real child (the bot is the only player so far); the portrait layout is letterboxed (small), landscape is the target.
 
 ## Next steps
 
-1. Jimmy answers `convo v0.1.md`.
-2. Build chapter 1 (proposal in question 25), then smoke-test at three sizes.
+1. Jimmy plays it and answers `convo v0.2.md`.
+2. Read the first notes, tune the knobs.
+3. Apply the SQL when asked.

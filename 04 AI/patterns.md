@@ -111,3 +111,14 @@ Patterns that repeat often enough to become a template in `02 Refs/Templates/` o
 - **Open by link:** `?world=<id>&step=<n>`, and `#draft=` for unsaved edits (untrusted data). _(Growth, Increment Viewer)_
 - **State card** for a step that has no picture: bars scaled to each series' highest value. _(Increment Viewer)_
 - **Template candidate:** a skill that starts from this page (the `/simulate-decay` questions and sign-off are sections 1 to 3). Not written; needs Jimmy's go-ahead to edit `02 Refs/Skills/`.
+
+## Game with a rules core and a balance bot (Felix Gear Wars)
+
+- **Rules in a DOM-free file** (`sim.js`) with a fixed step, seeded random numbers and an event list that the screen drains for particles and sound. The same file runs in Node, so a bot plays every level and a matrix checks every counter. _(Felix Gear Wars)_
+- **Counters as data:** each unit has `vs: {type: multiplier}`, `shield`, `magic`, `hunts`; damage = attack × counter × 40/(40 + defence). Balance by editing numbers, not code. _(Felix Gear Wars)_
+- **Meshing gears on a grid:** tip = pitch + 4, root = pitch − 4, 12 teeth, neighbours alternate direction, odd parity gets a 15° phase. _(Felix Gear Wars)_
+- **Heart and chains:** ticks fan out over the gear graph with the best-path multiplier; a gear reached from several sides sums them. _(Felix Gear Wars)_
+- **Art styles by one colour filter:** `Art.C(hex)` (saturation, lightness, tint), a line weight, a pre-painted frame; the UI colours are CSS variables set by the same switch. _(Felix Gear Wars)_
+- **Jointed figures from parts in code:** legs, torso, head, arms with two segments, weapon; poses from a walk phase and an attack progress; team look by palette, hat, scarf and boots. _(Felix Gear Wars)_
+- **Canvas HUD with hit-tested buttons** and pointer capture for drag; pan, buy and sell are one pointer path. _(Felix Gear Wars)_
+- **Template candidate:** a skill for "game with a balance bot" (sim file, matrix, campaign bot). Not written; needs Jimmy's go-ahead to edit `02 Refs/Skills/`.

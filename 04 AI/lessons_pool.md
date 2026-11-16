@@ -307,3 +307,11 @@ Full build rules: `02 Refs/Skills/settings_gear.md` (run as `/settings-gear`).
 - Build the audio engine at page start (it stays suspended), resume it inside the first touch, play one silent sound then, and also try touchend and mousedown for Safari. Act on pointer-down. Compute nothing per sound that can be computed once (cache plucked-string buffers).
 - Microphone onsets: detect on the audio thread with an AudioWorklet (blocks of ~3 ms) rather than per animation frame, require a jump over the last ~12 ms so breath and speech do not trigger, and ignore a short window after the app's own noisy sounds.
 - Whatever remains is the device: microphone plus speaker is tens of milliseconds, and Bluetooth adds 100 to 200. Give the user a measuring button instead of guessing.
+
+## Games with a simulation core (Felix Gear Wars, 2026-11-16)
+
+1. **Keep the rules free of the DOM** so a Node bot can play every level and a matrix can test every counter. Balance problems show up in minutes. _(Felix Gear Wars)_
+2. **Space the test units out.** Splash damage on a clump makes every unit look broken. _(Felix Gear Wars)_
+3. **Make the ending impossible where it must be.** A mode that must not end (free-for-all) needs an unbreakable target and no "all waves cleared" win. _(Felix Gear Wars)_
+4. **Draw bigger than the logic.** A battlefield with small figures and lots of sky reads as empty; scale the art, not the rules. _(Felix Gear Wars)_
+5. **Log every swallowed error** to the opt-in panel, including sound, and then call every effect in a test. _(Felix Gear Wars)_
