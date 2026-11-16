@@ -1,7 +1,7 @@
 # Felix Gear Wars — brief
 
 **Updated:** 2026-11-16
-**Status:** MVP 0.5.0 (eight cultures with a ★ specialty fighter +25%, gears slowed and balanced by power, retuned difficulty; 0.4.0: boss gear, smooth heart and gears, 50-soldier cap, level flourishes, castle and tower defences, one-screen early maps; before that eight art styles with culture fighters and story narration), headless-tested, not device-tested. `convo v0.1` and the quick answers of `convo v0.2` are built (fortress wins, lives +5 per chapter, easier start, heart speed slider). Round 3 added Persian, Egyptian and Chinese styles, culture names/headgear/blades, and narrated story cards (75 Kokoro clips).
+**Status:** MVP 0.6.0 (a fun curve sizes each wave, gear prices creep up, castles worth 5 to 10 fighters, tower rebuild rule, six champions from the boss gear; 0.5.0: eight cultures with a ★ specialty fighter +25%, gears slowed and balanced by power, retuned difficulty; 0.4.0: boss gear, smooth heart and gears, 50-soldier cap, level flourishes, castle and tower defences, one-screen early maps; before that eight art styles with culture fighters and story narration), headless-tested, not device-tested. `convo v0.1` and the quick answers of `convo v0.2` are built (fortress wins, lives +5 per chapter, easier start, heart speed slider). Round 3 added Persian, Egyptian and Chinese styles, culture names/headgear/blades, and narrated story cards (75 Kokoro clips).
 
 ## Goal
 
@@ -14,7 +14,7 @@ Plain HTML/CSS/JS, one canvas, no build, `file://` works. `js/sim.js` holds ever
 ## Rules in numbers (see `research/balance.md` for the report)
 
 Heart: 3.2 s per turn (⚙️ ×0.5 to ×4); a quarter turn is one tick, shared out continuously. Gear ticks for one level-1 fighter: spearman 12, archer 12, fighter 17, assassin 16, knight 20, mage 18, tank 30, catapult 36; each merge level ×0.92 (stats ×2.2). Power per minute is about equal for every gear. Multiplier gears ×1/2/4/8. Boss gear: 100 heart turns (⚙️ 10 to 200). 50 soldiers per side. Lives `20 + 5·chapter`. Coins `120 + 7·idx`. Culture star fighter: +25% attack and health.
-Difficulty knobs in `F.TUNE` (`js/data.js`): wave budget `30 + 26·idx` (× `1 + 0.5·wave`, × 0.65 on a one-screen map, × 0.85 on one and a half), enemy health +9% and attack +5.5% per level, fortress `700 + 80·idx`. Towers from chapter 4. Win = the enemy fortress falls.
+Waves are made when they launch (`makeWave`): Felix's power (fighters alive + what the gears will make in the next wave gap) × a ratio on the fun curve (`rLow 0.4`, `rPeak 1.1` at the 3 minute peak, 0, eased to nothing at the 7 minute fade, × `1 + 1.1·level/23`, × 0.6 on one screen, × 0.85 on one and a half, × Challenge). After the fade the fortress loses 2% a second. Prices: `F.economy` gives the purse (`45 × max(3, ceil(0.35·G))`) and `creep = 1.5/G` where `G = 0.8 × (5 + level)`; each gear on the board adds `creep` to the price multiplier. Castles: `F.castleUnits` 5 to 10 fighters of damage; towers from chapter 4. Fortress `700 + 80·idx`; the fortress falling wins.
 
 ## Verified (headless Chromium, 2026-11-16)
 

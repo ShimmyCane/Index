@@ -22,9 +22,15 @@
     this.grid = {}; this.gears = []; this.units = []; this.proj = [];
     this.coins = cfg.coins; this.maxLives = cfg.lives; this.lives = cfg.lives;
     this.status = 'build';                     // build | running | won | lost
-    this.waveIdx = -1; this.queue = []; this.waveTimer = Infinity; this.waveCount = cfg.free ? Infinity : cfg.waves.length;
+    this.waveIdx = -1; this.queue = []; this.waveTimer = Infinity; this.waveCount = Infinity;
     this.leaks = 0; this.kills = 0; this.earned = 0; this.spent = 0; this.undo = [];
     this.es = F.enemyScale(cfg.idx);
+    var qk = cfg.quick ? 0.6 : 1;                // Quick game squeezes the whole hill
+    this.fun = { peak: (o.funPeak || F.FUN.peak) * 60 * qk, fade: (o.funFade || F.FUN.fade) * 60 * qk, ch: o.challenge || 1 };
+    this.gap = F.waveGap(cfg.idx) * (cfg.quick ? 0.8 : 1);
+    if (!cfg.free) this.waveCount = Math.max(2, Math.floor(this.fun.fade / this.gap));
+    this.bossWave = cfg.bossType ? Math.max(1, Math.round(this.fun.peak / this.gap)) : -1; this.bossDone = false;
+    this.startT = 0; this.faded = false;
     this.specialty = o.specialty || null;      // the culture's starred fighter (+25%); the screen sets it
     this.pool = cfg.pool.concat(cfg.specials || []);
     this.pool.push('mult');
@@ -45,21 +51,23 @@
   // Each side has a castle that shoots arrows and stones. From chapter 4 each side also builds a tower at 10% and one at 25%
   // of the way across. Towers can be destroyed and are rebuilt slowly. The enemy fortress falling wins the level.
   P.buildStructures = function () {
-    var cfg = this.cfg, idx = cfg.idx, pw = 1 + 0.1 * idx, es = this.es.atk, self = this;
+    var cfg = this.cfg, idx = cfg.idx, es = this.es.atk, self = this;
+    var rs = Math.max(0.55, Math.min(1, this.world / 2560));     // castle and tower ranges follow the length of the map
+    var D = F.castleUnits(idx) * 10;               // a castle shoots as hard as 5 fighters at first and 10 at the end (a spearman does about 10 damage a second)
     this.structs = [];
     function add(side, kind, x, hp, weapons, extra) {
       var k = side === 'enemy' ? es : 1;
       var s = Object.assign({ id: self.nid++, side: side, kind: kind, x: x, hp: hp, max: hp, alive: true, rebuild: 0, targetable: true, flash: 0, invuln: false,
-        weapons: weapons.map(function (w) { return { kind: w.kind, range: w.range, min: w.min || 0, cd: w.cd, t: w.cd * (0.4 + self.rnd() * 0.6), dmg: w.dmg * pw * k, splash: w.splash || 0 }; }) }, extra || {});
+        weapons: weapons.map(function (w) { return { kind: w.kind, range: w.range * rs, min: (w.min || 0) * rs, cd: w.cd, t: w.cd * (0.4 + self.rnd() * 0.6), dmg: w.dps * w.cd * k, splash: w.splash || 0 }; }) }, extra || {});
       self.structs.push(s); return s;
     }
-    var castleW = [{ kind: 'arrow', range: 440, cd: 1.6, dmg: 5 }, { kind: 'stone', range: 720, min: 180, cd: 6, dmg: 16, splash: 70 }];
+    var castleW = [{ kind: 'arrow', range: 440, cd: 0.5, dps: 0.6 * D }, { kind: 'stone', range: 720, min: 180, cd: 3.5, dps: 0.4 * D / 1.5, splash: 70 }];
     this.castle = add('ally', 'castle', 90, 1e9, castleW, { targetable: false, invuln: true });
     this.fort = add('enemy', 'fortress', this.ebx + 60, cfg.baseHp, castleW, { invuln: !!cfg.free });
     if (cfg.towers) {
       var thp = 220 + 40 * idx, a = Math.round(this.world * 0.10), b = Math.round(this.world * 0.25);
       [['ally', a, 'tower1'], ['ally', b, 'tower2'], ['enemy', this.world - a, 'tower1'], ['enemy', this.world - b, 'tower2']].forEach(function (t) {
-        add(t[0], t[2], t[1], thp, t[2] === 'tower1' ? [{ kind: 'arrow', range: 360, cd: 1.1, dmg: 4 }] : [{ kind: 'stone', range: 520, min: 140, cd: 4.2, dmg: 20, splash: 65 }], { tower: true });
+        add(t[0], t[2], t[1], thp, t[2] === 'tower1' ? [{ kind: 'arrow', range: 360, cd: 0.8, dps: 0.25 * D }] : [{ kind: 'stone', range: 520, min: 140, cd: 3.5, dps: 0.35 * D / 1.5, splash: 65 }], { tower: true });
       });
     }
   };
@@ -90,12 +98,20 @@
     }
     return best;
   };
+  // A fallen tower is rebuilt only when its owner has pushed the other side back beyond that place (plus a margin).
+  P.contested = function (s) {
+    for (var i = 0; i < this.units.length; i++) {
+      var o = this.units[i]; if (o.side === s.side || o.dead || o.state === 'dying') continue;
+      if (s.side === 'ally' ? o.x <= s.x + 320 : o.x >= s.x - 320) return true;
+    }
+    return false;
+  };
   P.updateStructs = function (dt) {
     for (var i = 0; i < this.structs.length; i++) {
       var s = this.structs[i];
       if (s.flash > 0) s.flash -= dt;
       if (!s.alive) {
-        if (s.tower) { s.rebuild += dt / TOWER_REBUILD; if (s.rebuild >= 1) { s.alive = true; s.hp = s.max; s.rebuild = 0; this.emit({ k: 'structup', id: s.id, x: s.x, kind: s.kind }); } }
+        if (s.tower && !this.contested(s)) { s.rebuild += dt / TOWER_REBUILD; if (s.rebuild >= 1) { s.alive = true; s.hp = s.max; s.rebuild = 0; this.emit({ k: 'structup', id: s.id, x: s.x, kind: s.kind }); } }
         continue;
       }
       for (var j = 0; j < s.weapons.length; j++) {
@@ -134,6 +150,12 @@
   };
   P.canMerge = function (a, b) {
     return a && b && a !== b && a.type === b.type && a.level === b.level && a.level < F.MAXLEVEL && !a.locked && !b.locked;
+  };
+  // Every gear you own makes the next one dearer (a level starts with a fixed purse and the price creeps up), so the number of gears
+  // you can afford by the end follows the size of the enemy's last wave. Merging and selling bring the price down again.
+  P.priceOf = function (type) {
+    var n = 0; for (var i = 0; i < this.gears.length; i++) if (!this.gears[i].locked) n++;
+    return Math.round(F.gearCost(type) * (1 + (this.cfg.creep || 0) * n));
   };
   P.sellValue = function (g) { return Math.floor(F.gearCost(g.type) * Math.pow(2, g.level - 1) * 0.5); };
 
@@ -183,7 +205,7 @@
     var type = this.tray[slot];
     if (!type) return 'none';
     if (!this.isFree(c, r)) return 'blocked';
-    var cost = F.gearCost(type);
+    var cost = this.priceOf(type);
     if (this.coins < cost) return 'poor';
     this.coins -= cost; this.spent += cost;
     var g = this.addGear(type, 1, c, r, false);
@@ -236,37 +258,65 @@
   P.undoLast = function () { var u = this.undo.pop(); if (u) { u(); return true; } return false; };
 
   // ---- waves -------------------------------------------------------------------------------
-  P.start = function () { if (this.status === 'build') { this.status = 'running'; this.waveTimer = 0; } };
+  P.start = function () { if (this.status === 'build') { this.status = 'running'; this.waveTimer = 0; this.startT = this.t; } };
   P.callNext = function () { if (this.status === 'running' && this.waveIdx + 1 < this.waveCount) this.waveTimer = 0; };
-  P.waveAt = function (k) {
-    if (this.cfg.free) {
-      var w = this.cfg.genWave(k);
-      if ((k + 1) % this.cfg.bossEvery === 0) {
-        var t = this.cfg.pool[this.cfg.pool.length - 1 - (k % 3)];
-        w.spawn.push({ type: t, boss: true, at: (w.spawn.length ? w.spawn[w.spawn.length - 1].at : 0) + 3 });
-      }
-      return w;
+  // How strong is Felix right now, and how strong will he be by the time a wave arrives? In "spearman power" units.
+  P.playerPower = function (window) {
+    var p = 0, i, u, g, need, perSec = 4 / this.heartPeriod;
+    for (i = 0; i < this.units.length; i++) {
+      u = this.units[i]; if (u.side !== 'ally' || u.dead || u.state === 'dying') continue;
+      p += F.unitPower(u.type) * (u.champ ? F.SM[0] * 1.6 : F.SM[u.level - 1]) * Math.max(0.2, u.hp / u.max) * (u.special ? F.SPECIALTY_BONUS : 1);
     }
-    return this.cfg.waves[k];
+    for (i = 0; i < this.gears.length; i++) {
+      g = this.gears[i]; if (g.rate <= 0 || !F.UNITS[g.type] || F.UNITS[g.type].champ) continue;
+      need = F.ticksNeeded(g.type, g.level); if (!need) continue;
+      p += F.unitPower(g.type) * F.SM[g.level - 1] * (g.rate * perSec / need) * window;
+    }
+    return p;
+  };
+  // The next wave is sized from the fun curve and from Felix's strength (the Candy-Crush idea: aim the hardest wave at the fun
+  // peak, keep it exciting but not unfair, and ease off as the level fades). Free-for-all just keeps growing.
+  P.makeWave = function (k) {
+    var cfg = this.cfg, t = Math.max(0, this.t - this.startT), tm = t / 60, c, ratio;
+    if (cfg.free) { c = Math.min(1, 0.4 + 0.08 * k); ratio = (0.6 + 0.09 * k) * this.fun.ch; }
+    else { c = F.funCurve(tm, this.fun.peak / 60, this.fun.fade / 60); ratio = (F.TUNE.rLow + (F.TUNE.rPeak - F.TUNE.rLow) * c) * (1 + F.TUNE.rIdx * Math.min(1, cfg.idx / 23)) * (cfg.len || 1) * this.fun.ch; }
+    var es = this.es, scale = Math.sqrt(es.hp * es.atk), pool = cfg.pool, i;
+    var E = this.playerPower(Math.min(30, this.gap)) * ratio;
+    var floor = F.unitPower(pool[0]) * scale * (k === 0 ? 2 : 1.5);
+    var boss = false;
+    if (!cfg.free && k === this.bossWave && !this.bossDone) { boss = true; this.bossDone = true; E = Math.max(floor, E - F.unitPower(cfg.bossType) * scale * 3); }
+    if (cfg.free && cfg.bossEvery && (k + 1) % cfg.bossEvery === 0) boss = true;
+    E = Math.max(floor, E);
+    var types = pool.map(function (tp, n) { return { t: tp, w: 1 + n * 0.35 + (n === pool.length - 1 ? 1.2 : 0) }; });
+    var list = [], got = 0, guard = 0;
+    while (got < E && list.length < 26 && guard++ < 80) {
+      var tp = F.weightedPick(this.rnd, types); list.push({ type: tp, boss: false }); got += F.unitPower(tp) * scale;
+    }
+    var at = 0; list.forEach(function (s2) { s2.at = at; at += 0.8 + this.rnd() * 0.9; }, this);
+    if (boss) list.push({ type: cfg.free ? pool[pool.length - 1 - (k % 3)] : cfg.bossType, boss: true, at: at + 3 });
+    return { spawn: list, size: list.length, power: got, ratio: ratio, fun: c };
   };
   P.launchWave = function () {
     this.waveIdx++;
-    var w = this.waveAt(this.waveIdx), self = this;
+    var w = this.makeWave(this.waveIdx), self = this;
+    this.lastWaveInfo = w;
     w.spawn.forEach(function (s) { self.queue.push({ at: self.t + s.at, type: s.type, boss: s.boss }); });
-    this.emit({ k: 'wave', n: this.waveIdx + 1, total: this.waveCount, boss: w.spawn.some(function (s) { return s.boss; }) });
-    this.waveTimer = this.waveIdx + 1 < this.waveCount ? F.waveGap(this.cfg.idx) * (this.cfg.quick ? 0.7 : 1) : Infinity;
+    this.emit({ k: 'wave', n: this.waveIdx + 1, total: this.waveCount, boss: w.spawn.some(function (s) { return s.boss; }), size: w.spawn.length });
+    var nextAt = (this.waveIdx + 1) * this.gap;
+    this.waveTimer = (this.waveIdx + 1 < this.waveCount && (this.cfg.free || nextAt < this.fun.fade)) ? this.gap : Infinity;
   };
 
   // ---- units -------------------------------------------------------------------------------
   P.makeUnit = function (side, type, level, x, boss) {
     var d = F.UNITS[type], sm = F.SM[level - 1], es = side === 'enemy' ? this.es : { hp: 1, atk: 1, def: 1 };
     var hp = d.hp * sm * es.hp, atk = d.atk * sm * es.atk, def = d.def * (1 + 0.4 * (level - 1)) * es.def, spd = d.speed, sc = 1 + (level - 1) * 0.1;
+    if (d.champ) sc = d.scale * (1 + (level - 1) * 0.08);
     var special = side === 'ally' && this.specialty === type;
     if (special) { hp *= F.SPECIALTY_BONUS; atk *= F.SPECIALTY_BONUS; }
     if (boss) { hp *= 9; atk *= 2.2; def *= 1.6; spd *= 0.85; sc = 2.8; }
     var u = { id: this.nid++, side: side, type: type, level: level, boss: !!boss, x: x, y: this.rnd() * 52, hp: hp, max: hp, atk: atk, def: def,
       range: d.range * (boss ? 1.25 : 1), minRange: d.minRange || 0, speed: spd, cdMax: d.cd, cd: 0.3 + this.rnd() * 0.4, state: 'fall', t: 0,
-      anim: 'fall', at: 0, hitDone: false, special: special, tgt: 0, dir: side === 'ally' ? 1 : -1, scale: sc, charged: false, flash: 0, phase: this.rnd() * 6.28, dead: false, vx: 0 };
+      anim: 'fall', at: 0, hitDone: false, special: special, champ: !!d.champ, fly: !!d.fly, slow: 0, healT: 1.2, tgt: 0, dir: side === 'ally' ? 1 : -1, scale: sc, charged: false, flash: 0, phase: this.rnd() * 6.28, dead: false, vx: 0 };
     this.units.push(u); return u;
   };
 
@@ -299,6 +349,7 @@
     var D = F.UNITS[u.type];
     for (i = 0; i < foes.length; i++) {
       o = foes[i]; dx = Math.abs(o.x - u.x);
+      if (o.fly && D.kind === 'melee' && !u.fly) continue;       // spears cannot reach a dragon
       if (u.minRange && dx < u.minRange) continue;
       var reach = D.hunts ? 480 : Math.max(u.range, 150);
       if (dx > reach) continue;
@@ -321,6 +372,11 @@
     if (u.state === 'fall') { if (u.t >= 0.55) { u.state = 'getup'; u.t = 0; this.emit({ k: 'land', x: u.x, y: u.y, side: u.side }); } return; }
     if (u.state === 'getup') { u.anim = 'getup'; if (u.t >= 0.45) { u.state = 'go'; u.t = 0; } return; }
     var D = F.UNITS[u.type];
+    if (u.slow > 0) u.slow -= dt;
+    var spd = u.speed * (u.slow > 0 ? 0.4 : 1);
+    if (D.power === 'rally') this.rally(u, dt);
+    if (D.power === 'heal') { u.healT -= dt; if (u.healT <= 0) { u.healT = 2.2; this.healAround(u); } }
+    if (D.power === 'pierce') this.cartHit(u, dt);
     if (u.anim === 'attack') {
       u.at += dt;
       var wind = Math.min(0.5, u.cdMax * 0.45) * 0.7;
@@ -328,20 +384,20 @@
       if (u.at >= Math.min(0.55, u.cdMax * 0.5)) { u.anim = 'idle'; }
       return;
     }
-    var target = this.pickTarget(u), dir = u.dir, dist;
+    var target = D.power === 'pierce' ? null : this.pickTarget(u), dir = u.dir, dist;
     var st = target ? null : this.pickStruct(u);
     if (target || st) {
       dist = st ? Math.abs(st.x - u.x) : Math.abs(target.x - u.x);
       if (!st && dist > u.range) {
-        u.x += dir * u.speed * dt; u.anim = 'walk';
+        u.x += dir * spd * dt; u.anim = 'walk';
       } else if (u.cd <= 0) {
         u.anim = 'attack'; u.at = 0; u.hitDone = false; u.tgt = st ? 0 : target.id; u.tgtS = st ? st.id : 0; u.cd = u.cdMax;
       } else u.anim = 'idle';
       u.facing = Math.sign((st ? st.x : target.x) - u.x) || u.dir;
     } else {
-      if (this.tooClose(u)) { u.x -= dir * u.speed * 0.6 * dt; u.anim = 'walk'; }
+      if (this.tooClose(u)) { u.x -= dir * spd * 0.6 * dt; u.anim = 'walk'; }
       else if (u.side === 'ally' && u.x >= this.ebx + 50) u.anim = 'idle';
-      else { u.x += dir * u.speed * dt; u.anim = 'walk'; }
+      else { u.x += dir * spd * dt; u.anim = 'walk'; }
     }
     if (u.side === 'enemy' && u.x <= F.BASE_X) {         // got through: one life
       var cost = u.boss ? 5 : 1; this.lives -= cost; this.leaks += cost; u.dead = true;
@@ -349,6 +405,45 @@
       if (this.lives <= 0) { this.lives = 0; this.status = 'lost'; this.emit({ k: 'end', win: false }); }
     }
     if (u.x < 40) u.x = 40; if (u.x > this.world - 20) u.x = this.world - 20;
+  };
+
+  // ---- champion powers --------------------------------------------------------------------------------------------
+  P.allies = function (u) { var s = u.side; return this.units.filter(function (o) { return o.side === s && !o.dead && o.state !== 'dying' && o.state !== 'fall'; }); };
+  P.rally = function (u, dt) {           // King: heals fighters near him
+    var al = this.allies(u);
+    for (var i = 0; i < al.length; i++) if (Math.abs(al[i].x - u.x) < 320 && al[i].hp < al[i].max) al[i].hp = Math.min(al[i].max, al[i].hp + 4 * dt * (al[i].champ ? 0.5 : 1));
+  };
+  P.rallyMult = function (u) {           // a King near an attacker gives +30% attack
+    var al = this.allies(u);
+    for (var i = 0; i < al.length; i++) if (al[i].type === 'king' && Math.abs(al[i].x - u.x) < 320) return 1.3;
+    return 1;
+  };
+  P.healAround = function (u) {          // Unicorn: a rainbow that heals everyone near it
+    var al = this.allies(u), n = 0;
+    for (var i = 0; i < al.length; i++) if (Math.abs(al[i].x - u.x) < 360 && al[i].hp < al[i].max) { al[i].hp = Math.min(al[i].max, al[i].hp + al[i].max * 0.07); n++; }
+    if (n) this.emit({ k: 'heal', x: u.x, y: u.y, r: 360 });
+  };
+  P.cartHit = function (u, dt) {         // Felix the Cart: everything it rolls over is hurt and knocked back
+    u.hitT = (u.hitT || 0) - dt; if (u.hitT > 0) return; u.hitT = 0.45;
+    var foes = this.foes(u), D = F.UNITS[u.type];
+    for (var i = 0; i < foes.length; i++) if (Math.abs(foes[i].x - u.x) < 60 * (u.scale / 1.6)) {
+      this.hurt(foes[i], dmgFrom(u.atk, { type: u.type }, foes[i]), u); foes[i].x += u.dir * 26; foes[i].slow = Math.max(foes[i].slow, 0.8);
+      this.emit({ k: 'slash', x: foes[i].x, y: foes[i].y, side: u.side, type: 'cart' });
+    }
+  };
+  P.breath = function (u, power, S2) {   // Dragon: fire on everything in front, in range
+    var foes = this.foes(u), n = 0;
+    for (var i = 0; i < foes.length; i++) {
+      var d = (foes[i].x - u.x) * u.dir; if (d < -30 || d > u.range) continue;
+      this.hurt(foes[i], dmgFrom(power, { type: u.type }, foes[i]) * (1 - 0.4 * d / u.range), u); n++;
+    }
+    for (var j = 0; j < this.structs.length; j++) { var s = this.structs[j]; if (s.side !== u.side && s.alive && s.targetable && (s.x - u.x) * u.dir > -30 && Math.abs(s.x - u.x) <= u.range + 30) this.hurtStruct(s, power * 1.5); }
+    this.emit({ k: 'breath', x: u.x, y: u.y, dir: u.dir, range: u.range, side: u.side });
+  };
+  P.quake = function (u, power) {        // Golem: a stomp that hurts and slows all near it
+    var foes = this.foes(u);
+    for (var i = 0; i < foes.length; i++) if (Math.abs(foes[i].x - u.x) < 130) { this.hurt(foes[i], dmgFrom(power * 0.6, { type: u.type }, foes[i]), u); foes[i].slow = 2.4; }
+    this.emit({ k: 'quake', x: u.x, y: u.y, r: 130 });
   };
 
   // the moment of a hit or a shot
@@ -359,12 +454,13 @@
     if (!t && !S2) return;
     if (t && (t.dead || t.state === 'dying')) return;
     if (S2 && !S2.alive) return;
-    var power = u.atk * (D.charge && !u.charged ? D.charge : 1);
+    var power = u.atk * (D.charge && !u.charged ? D.charge : 1) * this.rallyMult(u);
     if (D.charge) u.charged = true;
+    if (D.power === 'breath') { this.breath(u, power, S2); return; }
     if (D.kind === 'ranged') {
       var tx = S2 ? S2.x : t.x, ty = S2 ? 0 : t.y;
       var dist = Math.abs(tx - u.x);
-      var kind = u.type === 'archer' ? 'arrow' : u.type === 'mage' ? 'bolt' : 'stone';
+      var kind = u.type === 'archer' ? 'arrow' : (u.type === 'mage' || D.magic) ? 'bolt' : 'stone';
       var speed = kind === 'arrow' ? 520 : kind === 'bolt' ? 420 : 300;
       this.proj.push({ id: this.nid++, kind: kind, x0: u.x, y0: u.y, x1: tx, y1: ty, t: 0, dur: Math.max(0.2, dist / speed), side: u.side,
         owner: { type: u.type, atk: power, magic: !!D.magic }, tgt: t ? t.id : 0, tgtS: S2 ? S2.id : 0, base: false, splash: (D.splash || 0) * (u.boss ? 1.4 : 1), boss: u.boss });
@@ -375,6 +471,7 @@
     var dm = dmgFrom(power, { type: u.type }, t);
     this.hurt(t, dm, u);
     this.emit({ k: 'slash', x: t.x, y: t.y, from: u.x, side: u.side, type: u.type });
+    if (D.power === 'quake') this.quake(u, power);
   };
   P.hitBase = function (amount) { this.hurtStruct(this.fort, amount); };
 
@@ -435,8 +532,8 @@
         g.charge -= need;
       } else if (g.type === 'boss') {
         if (allies >= F.MAX_UNITS) { g.charge = need; return; }
-        var ct = this.cfg.pool[this.cfg.pool.length - 1], bu = this.makeUnit('ally', ct, g.level, this.dropX(g.c), true);
-        bu.champ = true; bu.scale = 2.4; bu.hp = bu.max = bu.max * 0.9; allies++;
+        var ct = F.CHAMP_ORDER[Math.floor(this.rnd() * F.CHAMP_ORDER.length)], bu = this.makeUnit('ally', ct, g.level, this.dropX(g.c), false);
+        allies++;
         this.emit({ k: 'pop', gear: g.id, c: g.c, r: g.r, unit: bu.id, type: ct, level: g.level, champ: true });
         g.charge -= need;
       } else if (!this.special(g)) { g.charge = need; g.ready = true; return; }
@@ -492,6 +589,10 @@
           this.emit({ k: 'enemy', unit: e.id, boss: q.boss });
         }
       }
+    }
+    if (this.status === 'running' && !this.cfg.free && this.t - this.startT >= this.fun.fade) {      // the level fades: the Horde loses heart
+      if (!this.faded) { this.faded = true; this.waveTimer = Infinity; this.emit({ k: 'fade' }); }
+      this.hurtStruct(this.fort, this.fort.max * 0.02 * dt);
     }
     this.updateStructs(dt);
     for (i = 0; i < this.units.length; i++) this.updateUnit(this.units[i], dt);

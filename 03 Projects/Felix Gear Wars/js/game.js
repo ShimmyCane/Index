@@ -20,7 +20,7 @@
   window.addEventListener('unhandledrejection', function (ev) { GW.err('Promise error', ev.reason); });
 
   // ---- settings and progress (device storage, always in try/catch) -----------------------------
-  var DEF = { bossRevs: 100, voice: 'auto', heartSpeed: 1, theme: 'manuscript', sfx: 0.8, music: 0.5, speed: 1, quick: 0, follow: 1, reading: 'auto', showErrors: 0 };
+  var DEF = { funPeak: 3, funFade: 7, challenge: 1, bossRevs: 100, voice: 'auto', heartSpeed: 1, theme: 'manuscript', sfx: 0.8, music: 0.5, speed: 1, quick: 0, follow: 1, reading: 'auto', showErrors: 0 };
   var S = Object.assign({}, DEF);
   try { var raw = JSON.parse(localStorage.getItem('fgw.settings') || '{}'); Object.keys(DEF).forEach(function (k) { if (raw[k] !== undefined) S[k] = raw[k]; }); } catch (e) { /* storage blocked */ }
   function saveSettings() { try { localStorage.setItem('fgw.settings', JSON.stringify(S)); } catch (e) { /* ignore */ } }
@@ -60,7 +60,7 @@
   var parts = [], bolts = [], falls = {}, banner = null, shake = 0, redFlash = 0, beat = 0, selSlot = -1, selGear = 0, info = null, toast = null, endTimer = 0, ended = false;
   var drag = null, hudBtns = [], pointers = {};
   function makeSim(c) {
-    cfg = c; sim = new F.Sim(c, { seed: (Math.random() * 1e9) | 0, heartSpeed: +S.heartSpeed || 1, specialty: Art.specialty() });
+    cfg = c; sim = new F.Sim(c, { seed: (Math.random() * 1e9) | 0, heartSpeed: +S.heartSpeed || 1, specialty: Art.specialty(), funPeak: +S.funPeak || 3, funFade: +S.funFade || 7, challenge: +S.challenge || 1 });
     sim.speed = +S.speed; scroll = 0; parts = []; bolts = []; falls = {}; banner = null; selSlot = -1; selGear = 0; info = null; ended = false; endTimer = 0; paused = false;
     layout();
   }
@@ -130,6 +130,10 @@
         case 'die': puff(e.x - scroll, Art.groundY(L.bf) - 20, e.boss ? 18 : 6, '#e8dfc8', 30, 30); if (e.boss) { shake = 12; Au.play('boom'); } break;
         case 'leak': redFlash = 1; shake = Math.max(shake, 6); Au.play('leak'); floatText(F.BASE_X, Art.groundY(L.bf) - 60, '-' + e.n, '#ff8a80'); break;
         case 'wave': banner = { text: e.boss ? 'Boss wave!' : 'Wave ' + e.n + ' of ' + (e.total === Infinity ? '∞' : e.total), t: 0, boss: e.boss }; Au.play('horn', e.boss); if (window.AppNotes) AppNotes.setContext({ label: cfg.title + ' ' + levelLabel() + ', wave ' + e.n }); Au.mood('battle', cfg.ch); break;
+        case 'breath': for (var bi = 0; bi < 30; bi++) parts.push({ k: 'spark', x: e.x - scroll + e.dir * (24 + Math.random() * e.range * 0.9), y: Art.groundY(L.bf) - 70 + Math.random() * 60, vx: e.dir * (50 + Math.random() * 120), vy: -10 - Math.random() * 40, g: -30, life: 0.5 + Math.random() * 0.4, max: 1, r: 5 + Math.random() * 8, col: ['#ffb02e', '#ff6a2e', '#ffe27a'][bi % 3] }); shake = Math.max(shake, 4); Au.play('launch'); break;
+        case 'heal': for (var hi = 0; hi < 14; hi++) parts.push({ k: 'spark', x: e.x - scroll + (Math.random() - 0.5) * e.r * 1.4, y: Art.groundY(L.bf) - 30 - Math.random() * 60, vx: 0, vy: -40 - Math.random() * 50, g: 0, life: 0.7, max: 1, r: 4, col: ['#6be07a', '#ffd24a', '#7ad0ff'][hi % 3] }); ring(e.x - scroll, Art.groundY(L.bf) - 20, e.r * 0.5, '#8be89a'); Au.play('merge'); break;
+        case 'quake': ring(e.x - scroll, Art.groundY(L.bf) + 10, e.r, '#d9c9a0'); puff(e.x - scroll, Art.groundY(L.bf), 12, '#a89878', e.r * 1.6, 20); shake = Math.max(shake, 7); Au.play('boom'); break;
+        case 'fade': banner = { text: 'The Horde loses heart!', t: 0, boss: false }; Au.play('horn', false); say('Break the fortress to finish!'); break;
         case 'structhit': if (e.kind === 'fortress' || e.kind.indexOf('tower') === 0) { sparks(e.x - scroll, Art.groundY(L.bf) - 50, 4, '#ffd090'); } Au.play('base'); break;
         case 'structdown': if (e.kind !== 'fortress') { puff(e.x - scroll, Art.groundY(L.bf) - 30, 22, '#8a7a68', 90, 40); sparks(e.x - scroll, Art.groundY(L.bf) - 40, 16, '#ffb050'); shake = Math.max(shake, 8); Au.play('boom'); say(e.side === 'enemy' ? 'An enemy tower fell!' : 'Your tower fell. It will be rebuilt.'); } break;
         case 'structup': ring(e.x - scroll, Art.groundY(L.bf) - 40, 60, '#fff2a0'); sparks(e.x - scroll, Art.groundY(L.bf) - 40, 12, '#fff2a0'); Au.play('merge'); break;
@@ -160,7 +164,7 @@
     hudBtns.forEach(function (b) { button(c, b); });
     // pace of the next wave
     if (sim.status === 'running' && sim.waveIdx + 1 < sim.waveCount && isFinite(sim.waveTimer)) {
-      var wt = Math.max(0, sim.waveTimer), fr = 1 - Math.min(1, wt / F.waveGap(cfg.idx));
+      var wt = Math.max(0, sim.waveTimer), fr = 1 - Math.min(1, wt / sim.gap);
       c.fillStyle = 'rgba(0,0,0,0.15)'; Art.rr(c, 560, 44, 150, 8, 4); c.fill(); c.fillStyle = Art.C('#e0a43a'); Art.rr(c, 560, 44, Math.max(3, 150 * fr), 8, 4); c.fill();
       txt(c, 'next wave', 560, 29, 14, Art.theme.text, 'left', '600');
     }
@@ -213,7 +217,7 @@
     var T = Art.theme, t = L.tray; panel(c, t.x, t.y, t.w, t.h, Art.C(T.panel), 18);
     var cards = cardRects(), i;
     for (i = 0; i < 3; i++) {
-      var r = cards[i], type = sim.tray[i], cost = type ? F.gearCost(type) : 0, can = type && sim.coins >= cost, sel = selSlot === i;
+      var r = cards[i], type = sim.tray[i], cost = type ? sim.priceOf(type) : 0, can = type && sim.coins >= cost, sel = selSlot === i;
       if (drag && drag.kind === 'card' && drag.slot === i && drag.moved) { c.globalAlpha = 0.4; }
       panel(c, r.x, r.y, r.w, r.h, sel ? Art.C(T.gold2) : Art.C(T.panel2), 14);
       if (type) {
@@ -241,6 +245,7 @@
   }
   function setInfoFor(type, level, extra) {
     var D = F.UNITS[type], nm = Art.unitName(type);
+    if (D && D.champ) { info = { until: tAnim + 6, a: 'Champion: ' + nm, b: D.info, c: extra || '' }; return; }
     if (!D) { info = { until: tAnim + 4, a: nm + (type === 'mult' ? ' ×' + F.MULTV[(level || 1) - 1] : ''), b: type === 'mult' ? 'Passes ticks on, times its number.' : type === 'boss' ? 'A crown gear: one champion every ' + Math.max(1, Math.round(F.ticksNeeded('boss', level || 1) / 4)) + ' heart turns.' : 'Special gear: acts when it fills.', c: extra || '' }; return; }
     var strong = [], weak = [];
     F.UNIT_ORDER.forEach(function (o) { if (D.vs && D.vs[o] >= 1.3) strong.push(Art.unitName(o)); if (F.UNITS[o].vs && F.UNITS[o].vs[type] >= 1.3) weak.push(Art.unitName(o)); });
@@ -267,7 +272,7 @@
       }
       Art.drawUnit(c, u, sx, sy, tAnim);
       if (u.state !== 'dying' && (u.hp < u.max || u.boss)) {
-        var bw = u.boss ? 100 : 34 + u.scale * 6, bx = sx - bw / 2, by = sy - 80 * u.scale * 1.3 - 4;
+        var bw = (u.boss || u.champ) ? 100 : 34 + u.scale * 6, bx = sx - bw / 2, by = sy - 80 * u.scale * 1.3 - 4 + Art.flyY(u, tAnim);
         c.fillStyle = 'rgba(0,0,0,0.45)'; Art.rr(c, bx - 1.5, by - 1.5, bw + 3, 8, 4); c.fill();
         c.fillStyle = u.side === 'enemy' ? Art.C('#d9443a') : Art.C('#4caf50'); Art.rr(c, bx, by, Math.max(2, bw * u.hp / u.max), 5, 2.5); c.fill();
       }
@@ -310,6 +315,29 @@
     c.restore();
   }
   function ease(t) { return t < 0 ? 0 : t > 1 ? 1 : t * t * (3 - 2 * t); }
+  // The small fun hill at the bottom left: where we are on the curve of this level.
+  function drawFunCurve(c, x, y, w, h, peak, fade, nowMin, label) {
+    var span = fade * 1.1, i, T = Art.theme;
+    c.save(); c.lineJoin = 'round';
+    c.beginPath(); for (i = 0; i <= 60; i++) { var tm = span * i / 60, v = F.funCurve(tm, peak, fade), px = x + 10 + (w - 20) * i / 60, py = y + h - 8 - (h - 18) * v; if (i) c.lineTo(px, py); else c.moveTo(px, py); }
+    c.lineTo(x + 10 + (w - 20) * (fade / span), y + h - 8); c.lineTo(x + 10, y + h - 8); c.closePath(); c.fillStyle = 'rgba(255,200,60,0.28)'; c.fill();
+    c.beginPath(); for (i = 0; i <= 60; i++) { var tm2 = span * i / 60, v2 = F.funCurve(tm2, peak, fade), qx = x + 10 + (w - 20) * i / 60, qy = y + h - 8 - (h - 18) * v2; if (i) c.lineTo(qx, qy); else c.moveTo(qx, qy); }
+    c.lineWidth = 3; c.strokeStyle = Art.C(T.gold); c.stroke(); c.lineWidth = 1.6; c.strokeStyle = Art.ink; c.stroke();
+    if (nowMin !== null) { var nx = x + 10 + (w - 20) * Math.min(1, nowMin / span), nv = F.funCurve(nowMin, peak, fade), ny = y + h - 8 - (h - 18) * nv; c.beginPath(); c.arc(nx, ny, 5, 0, TAU); c.fillStyle = Art.C('#d63a4a'); c.fill(); c.lineWidth = 2; c.strokeStyle = Art.ink; c.stroke(); }
+    c.fillStyle = Art.theme.text; c.font = '700 11px ' + SANS; c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+    c.fillText(label || '', x + 10, y + 11); c.textAlign = 'right'; c.fillText(peak + ' min peak · ' + fade + ' min fade', x + w - 8, y + 11);
+    c.restore();
+  }
+  function drawFun(c) {
+    if (!sim || cfg.free) return;
+    var x = 34, y = H - 50, w = 306, h = 40; panel(c, x, y, w, h, Art.C(Art.theme.panel), 10);
+    drawFunCurve(c, x, y, w, h, sim.fun.peak / 60, sim.fun.fade / 60, sim.status === 'build' ? 0 : Math.max(0, (sim.t - sim.startT) / 60), 'fun');
+  }
+  function drawFunPlot() {
+    var cv2 = $('funPlot'); if (!cv2) return; var c = cv2.getContext('2d'); c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, cv2.width, cv2.height);
+    c.fillStyle = Art.C(Art.theme.paper); c.fillRect(0, 0, cv2.width, cv2.height);
+    drawFunCurve(c, 0, 0, cv2.width, cv2.height, +S.funPeak, +S.funFade, null, 'fun over the level');
+  }
   function drawMini(c) {
     var m = L.mini, k = m.w / sim.world; panel(c, m.x - 8, m.y - 6, m.w + 16, m.h + 12, Art.C(Art.theme.panel), 10);
     c.fillStyle = Art.C('#7cb872'); c.fillRect(m.x, m.y + 6, m.w, m.h - 8);
@@ -327,7 +355,7 @@
     var sh = shake > 0.3 ? [(Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake] : [0, 0]; c.translate(sh[0], sh[1]);
     if (sim) {
       hudBtns = [];
-      drawBattle(c); drawBoard(c); drawTray(c); drawHUD(c); drawMini(c);
+      drawBattle(c); drawBoard(c); drawTray(c); drawHUD(c); drawMini(c); drawFun(c);
       if (drag && drag.moved) {
         if (drag.kind === 'gear') { var g = drag.gear; g.need = F.ticksNeeded(g.type, g.level); Art.drawGear(c, g, drag.x, drag.y - 12, L.cs / 2 * 1.08, gearAngle(g), { glow: true }); }
         else if (drag.kind === 'card') { var ty = sim.tray[drag.slot]; if (ty) Art.drawGear(c, { type: ty, level: 1, charge: 0, need: F.ticksNeeded(ty, 1), active: false, locked: false, pulse: 0 }, drag.x, drag.y - 12, L.cs / 2 * 1.08, tAnim, { glow: true }); }
@@ -395,7 +423,7 @@
     if (cell) { var g = sim.gearAt(cell[0], cell[1]); if (g) { drag = { kind: 'gear', gear: g, x: x, y: y, sx: x, sy: y, moved: false }; return; } drag = { kind: 'cell', cell: cell, x: x, y: y, sx: x, sy: y, moved: false }; return; }
     if (y >= L.bf.y && y < L.mini.y - 8) {   // pick a unit or pan the battlefield
       var best = null, bd = 40;
-      sim.units.forEach(function (u) { var d = Math.abs(ux(u) - x) + Math.abs(uy(u) - 40 - y) * 0.6; if (d < bd && u.state !== 'dying' && u.state !== 'fall') { bd = d; best = u; } });
+      sim.units.forEach(function (u) { var d = Math.abs(ux(u) - x) + Math.abs(uy(u) - 40 + Art.flyY(u, tAnim) - y) * 0.6; if (d < bd && u.state !== 'dying' && u.state !== 'fall') { bd = d; best = u; } });
       drag = { kind: 'pan', x: x, y: y, sx: x, sy: y, scroll0: scroll, moved: false, unit: best }; return;
     }
     if (hit({ x: L.mini.x - 8, y: L.mini.y - 8, w: L.mini.w + 16, h: L.mini.h + 16 }, x, y)) { scroll = Math.max(0, Math.min(sim.world - W, (x - L.mini.x) / L.mini.w * sim.world - W / 2)); manualUntil = tAnim + 4; }
@@ -541,6 +569,7 @@
       seg.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === cur)); });
     });
     var er = $('showErrors'); if (er) er.checked = !!+S.showErrors;
+    var fp = $('funPeak'); if (fp) { fp.value = S.funPeak; $('funFade').value = S.funFade; $('challenge').value = S.challenge; if (GW.applyFun) GW.applyFun(); }
     var br2 = $('bossRevs'); if (br2) { br2.value = S.bossRevs; $('bossRevsVal').textContent = '1 : ' + S.bossRevs; }
     F.BOSS_REVS = +S.bossRevs || 100;
     var hs = $('heartSpeed'); if (hs) { hs.value = S.heartSpeed; $('heartSpeedVal').textContent = '×' + (+S.heartSpeed).toFixed(2).replace(/0$/, ''); }
@@ -560,12 +589,21 @@
         if (k === 'quick') say(+S.quick ? 'Quick game: shorter waves' : 'Normal waves');
       });
     });
+    function applyFun() {
+      if (+S.funFade < +S.funPeak + 1) S.funFade = +S.funPeak + 1;
+      $('funFade').value = S.funFade; $('funPeakVal').textContent = S.funPeak; $('funFadeVal').textContent = S.funFade;
+      var ch = +S.challenge; $('challengeVal').textContent = ch < 0.9 ? 'softer (' + ch.toFixed(2) + ')' : ch > 1.1 ? 'harder (' + ch.toFixed(2) + ')' : 'normal';
+      saveSettings(); drawFunPlot();
+      if (sim) { var qk = cfg.quick ? 0.6 : 1; sim.fun.peak = S.funPeak * 60 * qk; sim.fun.fade = S.funFade * 60 * qk; sim.fun.ch = ch; if (!cfg.free) sim.waveCount = Math.max(sim.waveIdx + 1, Math.floor(sim.fun.fade / sim.gap)); }
+    }
+    ['funPeak', 'funFade', 'challenge'].forEach(function (k) { $(k).addEventListener('input', function () { S[k] = +this.value; applyFun(); }); });
+    GW.applyFun = applyFun;
     var br = $('bossRevs');
     br.addEventListener('input', function () { S.bossRevs = +br.value; F.BOSS_REVS = S.bossRevs; saveSettings(); $('bossRevsVal').textContent = '1 : ' + S.bossRevs; });
     var hs = $('heartSpeed');
     hs.addEventListener('input', function () { S.heartSpeed = +hs.value; saveSettings(); $('heartSpeedVal').textContent = '×' + (+hs.value).toFixed(2).replace(/0$/, ''); if (sim) sim.heartPeriod = F.HEART_PERIOD / S.heartSpeed; });
     $('showErrors').addEventListener('change', function () { S.showErrors = this.checked ? 1 : 0; saveSettings(); renderErrors(); });
-    $('gear').addEventListener('click', function () { var d = $('drawer'); d.hidden = !d.hidden; this.setAttribute('aria-expanded', String(!d.hidden)); Au.init(); });
+    $('gear').addEventListener('click', function () { var d = $('drawer'); d.hidden = !d.hidden; drawFunPlot(); this.setAttribute('aria-expanded', String(!d.hidden)); Au.init(); });
     $('closeDrawer').addEventListener('click', function () { $('drawer').hidden = true; $('gear').setAttribute('aria-expanded', 'false'); });
     document.querySelectorAll('.pHead').forEach(function (h) {
       h.addEventListener('click', function () { var sec = h.parentNode, open = sec.getAttribute('data-collapsed') === 'true'; sec.setAttribute('data-collapsed', String(!open)); h.setAttribute('aria-expanded', String(open)); h.querySelector('.mark').textContent = open ? '▾' : '▸'; });
