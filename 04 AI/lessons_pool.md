@@ -315,3 +315,7 @@ Full build rules: `02 Refs/Skills/settings_gear.md` (run as `/settings-gear`).
 3. **Make the ending impossible where it must be.** A mode that must not end (free-for-all) needs an unbreakable target and no "all waves cleared" win. _(Felix Gear Wars)_
 4. **Draw bigger than the logic.** A battlefield with small figures and lots of sky reads as empty; scale the art, not the rules. _(Felix Gear Wars)_
 5. **Log every swallowed error** to the opt-in panel, including sound, and then call every effect in a test. _(Felix Gear Wars)_
+
+## Content apps and outside links (Better Parenting, 2026-11-16)
+- **Only link a video that a search returned.** The sandbox cannot open YouTube, so an id from memory cannot be checked. Label search-found links as unwatched and add a search link as the fallback.
+- **Family details are a device setting, never content.** A child's grade drives a filter from ⚙️; the public repo holds nothing about the family.

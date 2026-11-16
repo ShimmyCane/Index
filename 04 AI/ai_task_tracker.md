@@ -30,5 +30,7 @@ Shared list of open work across the nursery. Project to-do lists stay in each pr
 
 ## Project items
 
+- **Better Parenting:** MVP 0.1.0 built 2026-11-16. Open: apply the `bp_*` tables, real sign-in, check video links, device test, answers to `convo v0.1`. See its `todo.md`.
+
 - **Athena's world, Bar Glide, Chinese Character Sudoku, Voice, What to Cook:** graduated to their own repos (`ShimmyCane/Athena-s-world`, `Bar-Glide`, `Chinese-Character-Sudoku`, `Voice`, `What-to-Cook`) and removed from the nursery on 2026-11-10. Their to-dos live there.
 - **Shimmy Specs, Adventure:** see their `todo.md` files.
