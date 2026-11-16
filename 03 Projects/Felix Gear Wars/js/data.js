@@ -13,7 +13,7 @@
   F.HEART_PERIOD = 3.2;        // seconds for one turn of the heart (half the first pace; the slider scales it)
   F.BOSS_REVS = 100;           // heart turns one boss-gear turn takes (⚙️ can change it): 1 to 100 against other gears
   // difficulty knobs, used by levelConfig and enemyScale (tools/balance_sim.js sweeps them)
-  F.TUNE = { base: 30, perLevel: 26, perWave: 0.5, hp: 0.09, atk: 0.055, fort: 700, fortPer: 80, short: 0.65, mid: 0.85 };   // short, mid: wave size on a one-screen and a one-and-a-half-screen map
+  F.TUNE = { base: 30, perLevel: 26, perWave: 0.5, hp: 0.09, atk: 0.055, fort: 700, fortPer: 80, short: 0.6, mid: 0.85, rLow: 0.4, rPeak: 1.1, rIdx: 1.1, gearsPerLast: 0.8 };   // rLow, rPeak: wave power against Felix's power at the start and at the fun peak; rIdx: extra pressure by the last level   // short, mid: wave size on a one-screen and a one-and-a-half-screen map
   F.MAX_UNITS = 50;            // soldiers on each side at once
 
   F.SM = [1, 2.2, 4.6, 9.4];   // stat multiplier per gear level (more than double per merge)
@@ -46,6 +46,42 @@
       vs: { tank: 1.3 }, splash: 80, siege: 2.2, order: 8 },
   };
   F.UNIT_ORDER = ['spearman', 'archer', 'fighter', 'assassin', 'knight', 'tank', 'mage', 'catapult'];
+
+  // ---- champions: what a boss gear makes. Each is a different awesome unit with its own power --------------------
+  F.CHAMPS = {
+    dragon:  { name: 'Dragon', hp: 420, atk: 36, def: 10, range: 300, speed: 70, cd: 2.4, kind: 'ranged', fly: true, power: 'breath', scale: 1.5, info: 'Flies and breathes fire on everything in front of it.' },
+    king:    { name: 'King', hp: 620, atk: 30, def: 22, range: 56, speed: 50, cd: 1.0, kind: 'melee', power: 'rally', scale: 1.5, info: 'Rallies fighters near him: +30% attack and he heals them.' },
+    cart:    { name: 'Felix the Cart', hp: 520, atk: 26, def: 28, range: 40, speed: 140, cd: 0.5, kind: 'melee', power: 'pierce', scale: 1.35, info: 'Rolls straight through the enemy and knocks them back.' },
+    griffin: { name: 'Griffin', hp: 300, atk: 40, def: 6, range: 50, speed: 150, cd: 0.9, kind: 'melee', fly: true, hunts: true, charge: 1.6, scale: 1.35, power: 'dive', info: 'Flies over spears and dives on the back line.' },
+    golem:   { name: 'Golem', hp: 1100, atk: 34, def: 40, range: 52, speed: 28, cd: 1.8, kind: 'melee', power: 'quake', scale: 1.9, info: 'Stomps the ground and slows every enemy near it.' },
+    unicorn: { name: 'Unicorn', hp: 360, atk: 20, def: 14, range: 220, speed: 70, cd: 1.4, kind: 'ranged', magic: true, power: 'heal', scale: 1.25, info: 'Heals the fighters near it with a rainbow.' },
+  };
+  F.CHAMP_ORDER = ['dragon', 'king', 'cart', 'griffin', 'golem', 'unicorn'];
+  Object.keys(F.CHAMPS).forEach(function (k) { F.UNITS[k] = Object.assign({ cost: 0, tick0: 0, vs: {}, champ: true }, F.CHAMPS[k]); });
+
+  // ---- how much power is a fighter? sqrt(effective health x damage per second) with range, splash and siege modifiers.
+  var powerCache = {};
+  F.unitPower = function (type) {
+    if (powerCache[type]) return powerCache[type];
+    var u = F.UNITS[type], ehp = u.hp * (1 + u.def / 40), dps = u.atk / u.cd, rm = u.kind === 'ranged' ? 1 + u.range / 600 : 1, sp = u.splash ? 1 + u.splash / 300 : 1, sg = u.siege ? 1.15 : 1;
+    return (powerCache[type] = Math.sqrt(ehp * dps) * rm * sp * sg);
+  };
+  // ---- the fun curve: a level is a hill. Calm start, most exciting at the peak, easing off to the fade time. Minutes in, 0 to 1 out.
+  F.FUN = { peak: 3, fade: 7 };
+  F.funCurve = function (t, peak, fade) {
+    if (t >= fade) return 0;
+    if (t <= peak) { var x = Math.max(0, t / peak); return 0.25 + 0.75 * (x * x * (3 - 2 * x)); }
+    var y = (t - peak) / (fade - peak); return 1 - y * y * (3 - 2 * y);
+  };
+  // ---- castles, fortresses and towers: the castle is worth 5 fighters on the first level and 10 on the last
+  F.castleUnits = function (idx) { return 5 + 5 * Math.min(1, idx / 23); };
+  // ---- gear economy: a level starts with a fixed purse, and every gear you own makes the next one dearer, so the number of gears
+  // you can have at the end follows the size of the enemy's last wave.
+  F.economy = function (idx) {
+    var lastWave = Math.round(5 + idx);                           // opponents in the expected last wave
+    var target = Math.max(4, Math.round(F.TUNE.gearsPerLast * lastWave));
+    return { lastWave: lastWave, gearTarget: target, creep: 1.5 / target, coins: 45 * Math.max(3, Math.ceil(0.35 * target)) };   // the target-th gear costs 2.5 times the first
+  };
 
   // ---- gears that are not fighters --------------------------------------------------------
   F.SPECIALS = {
@@ -221,7 +257,7 @@
     list.forEach(function (s) { s.at = at; at += 0.8 + rnd() * 0.9; });
     return { spawn: list, size: list.length };
   }
-  F.waveGap = function (idx) { return Math.max(15, 26 - idx * 0.4); };
+  F.waveGap = function (idx) { return Math.max(18, 32 - idx * 0.5); };
 
   F.levelConfig = function (ch, lv, o) {
     o = o || {};
@@ -230,16 +266,7 @@
     var rnd = F.rng(seed);
     var lay = layout(C.cols, C.rows, idx, rnd);
     var pool = F.unlockedFighters(ch);
-    var nWaves = 4 + Math.floor(idx / 6) - (o.quick ? 1 : 0);
-    var opts = { base: F.TUNE.base, perLevel: F.TUNE.perLevel, perWave: F.TUNE.perWave, quick: !!o.quick, len: C.screens <= 1 ? F.TUNE.short : C.screens < 2 ? F.TUNE.mid : 1 };
-    var waves = [];
-    for (var k = 0; k < nWaves; k++) waves.push(makeWave(rnd, k, idx, pool, opts));
-    var boss = null;
-    if (lv === 3) {
-      boss = { type: C.fighter };
-      var last = waves[waves.length - 1];
-      last.spawn.push({ type: C.fighter, boss: true, at: last.spawn.length ? last.spawn[last.spawn.length - 1].at + 3.5 : 0 });
-    }
+    var eco = F.economy(idx);
     // dormant bonus gears, far from the heart, wake when a chain reaches them
     var dorm = [];
     var nd = idx < 3 ? 0 : Math.min(4, 1 + Math.floor((idx - 3) / 5));
@@ -254,7 +281,7 @@
     return {
       id: 'c' + ch + 'l' + lv, ch: ch, lv: lv, idx: idx, seed: seed, free: false, world: Math.round(F.VIEW_W * C.screens), towers: idx >= 9, biome: C.biome, title: C.title,
       board: { cols: C.cols, rows: C.rows, heart: lay.heart, holes: lay.holes, dormant: dorm },
-      lives: 20 + 5 * ch, coins: 120 + 7 * idx, waves: waves, bossName: lv === 3 ? C.boss : null, bossType: lv === 3 ? C.fighter : null,
+      lives: 20 + 5 * ch, coins: eco.coins, creep: eco.creep, gearTarget: eco.gearTarget, lastWave: eco.lastWave, dynamic: true, len: C.screens <= 1 ? F.TUNE.short : C.screens < 2 ? F.TUNE.mid : 1, waves: [], bossName: lv === 3 ? C.boss : null, bossType: lv === 3 ? C.fighter : null,
       baseHp: F.TUNE.fort + F.TUNE.fortPer * idx, pool: pool, specials: F.unlockedSpecials(ch), quick: !!o.quick,
       story: F.STORIES[idx],
     };
@@ -266,11 +293,11 @@
     var idx = 20, rnd = F.rng(o.seed || (Date.now() % 100000));
     var lay = layout(9, 4, 8, rnd);
     var pool = F.UNIT_ORDER.slice();
-    var opts = { base: 60, perLevel: 12, perWave: 0.42, quick: !!o.quick };
+    var eco = F.economy(idx);
     return {
       id: 'free', ch: 0, lv: 0, idx: idx, seed: 7, free: true, world: F.WORLD, towers: true, biome: 'fortress', title: 'Free-for-all',
       board: { cols: 9, rows: 4, heart: lay.heart, holes: lay.holes, dormant: [] },
-      lives: 60, coins: 300, waves: [], genWave: function (k) { return makeWave(rnd, k, idx, pool, opts); },
+      lives: 60, coins: eco.coins, creep: eco.creep, gearTarget: eco.gearTarget, lastWave: eco.lastWave, dynamic: true, len: 1, waves: [],
       bossEvery: 5, bossName: null, baseHp: 99999, pool: pool, specials: ['boss', 'lightning', 'shuriken', 'rocket'],
       quick: !!o.quick,
       story: { cap: 'Free-for-all!', short: 'Every fighter, every gear. The Horde never stops. How long can you hold?',
@@ -278,6 +305,7 @@
     };
   };
 
+  F.weightedPick = weightedPick;
   F.enemyScale = function (idx) {
     return { hp: 1 + F.TUNE.hp * idx, atk: 1 + F.TUNE.atk * idx, def: 1 + 0.03 * idx };
   };

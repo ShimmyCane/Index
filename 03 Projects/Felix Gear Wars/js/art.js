@@ -451,13 +451,96 @@
     if (st.enemy) { seg(c, -28, -34, -28, -56, 2, dk); poly(c, [-28, -56, -12, -52, -28, -46], st.F(st.pal.hat)); }
   };
 
+
+  // ---- champions (what the boss gear makes) ---------------------------------------------------------------
+  Art.flyY = function (u, t) { return u.fly ? -(24 * u.scale * 1.3 + 5 * Math.sin(t * 3 + u.phase)) : 0; };
+  DRAW.dragon = function (c, st) {
+    var fl = Math.sin(st.t * 7) * 0.45, a = st.a, G = st.F('#3f9a4f'), G2 = st.F('#9bd96a'), R = st.F('#c0392b'), tl = Math.sin(st.t * 4) * 5;
+    c.beginPath(); c.moveTo(-24, -34); c.quadraticCurveTo(-56, -26, -70, -50 + tl); c.quadraticCurveTo(-52, -40, -22, -44); c.closePath(); fillStroke(c, G);
+    poly(c, [-70, -50 + tl, -82, -58, -66, -62], R);
+    c.save(); c.translate(-6, -54); c.rotate(-0.8 - fl); poly(c, [0, 0, -34, -52, -10, -66, 14, -52, 36, -40, 18, -14], R); c.restore();
+    c.beginPath(); c.ellipse(0, -36, 32, 20, 0, 0, TAU); fillStroke(c, G); c.beginPath(); c.ellipse(4, -27, 24, 10, 0, 0, TAU); fillStroke(c, G2);
+    [-12, 14].forEach(function (x) { seg(c, x, -22, x + 3, -8, 8, G); c.beginPath(); c.ellipse(x + 6, -6, 8, 3.6, 0, 0, TAU); fillStroke(c, G2); });
+    for (var i = 0; i < 5; i++) poly(c, [-22 + i * 11, -53 + Math.abs(i - 2) * 2, -17 + i * 11, -64 + Math.abs(i - 2) * 2, -12 + i * 11, -53 + Math.abs(i - 2) * 2], R);
+    c.beginPath(); c.moveTo(20, -48); c.quadraticCurveTo(44, -62, 48, -80); c.lineTo(62, -78); c.quadraticCurveTo(56, -52, 32, -34); c.closePath(); fillStroke(c, G);
+    var open = a >= 0 ? Math.sin(a * Math.PI) : 0.12;
+    poly(c, [46, -86, 76, -80, 74, -72, 50, -72], G); poly(c, [50, -72, 74, -72 + open * 14, 68, -64 + open * 14, 48, -66], G2);
+    poly(c, [48, -88, 40, -104, 56, -90], st.F('#f4efe6')); circ(c, 56, -82, 3.4, st.F('#fff3a0')); circ(c, 57, -82, 1.4, Art.ink);
+    c.save(); c.translate(8, -54); c.rotate(-0.4 + fl * 1.3); poly(c, [0, 0, -30, -50, -6, -62, 18, -48, 40, -36, 22, -12], st.F('#e0603c')); c.restore();
+    if (a >= 0 && a < 0.95) {
+      var len = Math.max(30, (st.range || 150) * Math.sin(a * Math.PI)), fy = -72;
+      [['#ff7a2e', 1, 20], ['#ffb02e', 0.72, 13], ['#fff0a0', 0.42, 7]].forEach(function (f) { poly(c, [74, fy, 74 + len * f[1], fy - f[2] + 4, 74 + len * f[1] * 0.9, fy + f[2] + 6, 74, fy + 6], st.F(f[0])); });
+    }
+  };
+  DRAW.king = function (c, st) {
+    var a = st.a, robe = st.F('#7a2a8a'), gold = st.F('#f2c94c'), fur = st.F('#f4efe6');
+    c.beginPath(); c.moveTo(-8, -54 + st.bob); c.quadraticCurveTo(-34, -30, -28 + Math.sin(st.t * 5) * 3, -4); c.lineTo(4, -8); c.closePath(); fillStroke(c, st.F('#b3263a'));
+    legs(c, st, { legCol: st.pal.dark, legW: 8 });
+    c.beginPath(); c.moveTo(-14, -56 + st.bob); c.lineTo(14, -56 + st.bob); c.lineTo(22, -18); c.lineTo(-22, -18); c.closePath(); fillStroke(c, robe);
+    c.beginPath(); c.moveTo(-20, -30); c.lineTo(20, -30); c.lineWidth = 4; c.strokeStyle = gold; c.stroke(); c.strokeStyle = Art.ink; c.lineWidth = Art.lw;
+    c.beginPath(); c.ellipse(0, -54 + st.bob, 18, 6.5, 0, 0, TAU); fillStroke(c, fur); for (var i = -2; i <= 2; i++) { c.fillStyle = Art.ink; c.fillRect(i * 6 - 1, -56 + st.bob, 2, 4); }
+    var h = head(c, st, 2, -68);
+    poly(c, [h.x - 7, h.y + 4, h.x + 8, h.y + 5, h.x + 2, h.y + 24], fur);
+    poly(c, [h.x - 9, h.y - 6, h.x - 12, h.y - 24, h.x - 5, h.y - 16, h.x, h.y - 28, h.x + 5, h.y - 16, h.x + 12, h.y - 24, h.x + 9, h.y - 6], gold);
+    circ(c, h.x, h.y - 12, 2.2, st.F('#d63a4a'));
+    var hand = arm(c, 9, -52 + st.bob, a >= 0 ? lerp(-2.2, 0.9, ease(a * 1.4)) : -0.9, 7, st.F(st.pal.skin));
+    seg(c, hand.x - Math.cos(hand.a) * 6, hand.y - Math.sin(hand.a) * 6, hand.x + Math.cos(hand.a) * 44, hand.y + Math.sin(hand.a) * 44, 5, st.F('#e6eaf2'));
+    seg(c, hand.x - Math.sin(hand.a) * 8, hand.y + Math.cos(hand.a) * 8, hand.x + Math.sin(hand.a) * 8, hand.y - Math.cos(hand.a) * 8, 4, gold);
+  };
+  DRAW.cart = function (c, st) {
+    var wood = st.F('#b8864a'), dk = st.F('#6e4a2a');
+    if (st.walk) for (var i = 0; i < 3; i++) { c.beginPath(); c.moveTo(-44 - i * 12, -40 + i * 8); c.lineTo(-64 - i * 14, -40 + i * 8); c.lineWidth = 3; c.strokeStyle = 'rgba(255,255,255,0.7)'; c.stroke(); } c.strokeStyle = Art.ink; c.lineWidth = Art.lw;
+    poly(c, [38, -40, 70, -34, 38, -28], st.F('#c3c9d4')); poly(c, [38, -52, 62, -46, 38, -44], st.F('#c3c9d4'));
+    c.beginPath(); c.moveTo(-36, -56); c.lineTo(36, -56); c.lineTo(40, -22); c.lineTo(-40, -22); c.closePath(); fillStroke(c, wood);
+    [-42, -32, -22].forEach(function (y) { c.beginPath(); c.moveTo(-37, y); c.lineTo(38, y); c.lineWidth = 1.6; c.stroke(); }); c.lineWidth = Art.lw;
+    seg(c, -26, -56, -26, -92, 3.4, dk); poly(c, [-26, -92, -4, -86 + Math.sin(st.t * 6) * 3, -26, -77], st.F('#d63a4a'));
+    c.beginPath(); c.arc(0, -56, 17, Math.PI, TAU); fillStroke(c, st.F('#c3c9d4'));
+    circ(c, 8, -38, 6, '#ffffff'); circ(c, 24, -38, 6, '#ffffff'); circ(c, 10, -38, 2.6, Art.ink); circ(c, 26, -38, 2.6, Art.ink);
+    c.beginPath(); c.arc(17, -31, 9, 0.15, Math.PI - 0.15); c.lineWidth = 2.4; c.stroke(); c.lineWidth = Art.lw;
+    [-22, 24].forEach(function (x) { c.save(); c.translate(x, -16); c.rotate(st.w * 0.9); circ(c, 0, 0, 18, wood); for (var k = 0; k < 6; k++) { c.beginPath(); c.moveTo(0, 0); c.lineTo(Math.cos(k * TAU / 6) * 17, Math.sin(k * TAU / 6) * 17); c.lineWidth = 2; c.stroke(); } c.lineWidth = Art.lw; circ(c, 0, 0, 4, dk); c.restore(); });
+  };
+  DRAW.griffin = function (c, st) {
+    var fl = Math.sin(st.t * 8) * 0.5, lion = st.F('#d9a441'), lion2 = st.F('#f0c76a'), wing = st.F('#f4efe6'), a = st.a;
+    c.save(); c.translate(-4, -52); c.rotate(-0.9 - fl); poly(c, [0, 0, -30, -46, -6, -62, 14, -52, 34, -44, 20, -16], wing); c.restore();
+    c.beginPath(); c.moveTo(-26, -34); c.quadraticCurveTo(-52, -34, -58, -54); c.quadraticCurveTo(-46, -50, -26, -42); c.closePath(); fillStroke(c, lion); circ(c, -58, -56, 6, st.F('#b3263a'));
+    c.beginPath(); c.ellipse(0, -36, 30, 17, 0, 0, TAU); fillStroke(c, lion); c.beginPath(); c.ellipse(4, -29, 22, 8, 0, 0, TAU); fillStroke(c, lion2);
+    [-14, 12].forEach(function (x, i) { seg(c, x, -26, x + (i ? 8 : -6), -10, 7, lion); poly(c, [x + (i ? 8 : -6) - 3, -10, x + (i ? 8 : -6) + 9, -9, x + (i ? 8 : -6) + 3, -3], st.F('#f2c94c')); });
+    var dv = a >= 0 ? Math.sin(a * Math.PI) * 14 : 0;
+    c.beginPath(); c.moveTo(18, -44); c.quadraticCurveTo(34, -58 + dv * 0.3, 40 + dv, -72 + dv); c.lineTo(54 + dv, -66 + dv); c.quadraticCurveTo(48, -46, 30, -30); c.closePath(); fillStroke(c, wing);
+    circ(c, 48 + dv, -72 + dv, 11, wing); poly(c, [56 + dv, -74 + dv, 74 + dv, -66 + dv, 58 + dv, -62 + dv], st.F('#f2c94c')); circ(c, 50 + dv, -74 + dv, 2.6, Art.ink);
+    poly(c, [42 + dv, -82 + dv, 38 + dv, -94 + dv, 50 + dv, -84 + dv], st.F('#d9a441'));
+    c.save(); c.translate(8, -52); c.rotate(-0.5 + fl * 1.3); poly(c, [0, 0, -26, -42, -4, -58, 16, -46, 38, -38, 22, -12], wing); c.restore();
+  };
+  DRAW.golem = function (c, st) {
+    var a = st.a, sw = a >= 0 ? lerp(-2.0, 1.2, ease(a * 1.3)) : -0.7, stone = st.F('#8a8f9a'), dk = st.F('#656a76'), moss = st.F('#6aa84f'), step = st.walk ? Math.sin(st.w) * 4 : 0;
+    c.beginPath(); c.rect(-24, -34 + Math.max(0, step), 18, 34 - Math.max(0, step)); fillStroke(c, dk); c.beginPath(); c.rect(6, -34 + Math.max(0, -step), 18, 34 - Math.max(0, -step)); fillStroke(c, dk);
+    c.beginPath(); c.moveTo(-30, -32); c.lineTo(-36, -80 + st.bob); c.lineTo(36, -80 + st.bob); c.lineTo(30, -32); c.closePath(); fillStroke(c, stone);
+    [[-18, -70, -6, -50], [10, -76, 20, -48], [-4, -44, 12, -36]].forEach(function (k) { c.beginPath(); c.moveTo(k[0], k[1]); c.lineTo(k[2], k[3]); c.lineWidth = 2; c.stroke(); }); c.lineWidth = Art.lw;
+    c.beginPath(); c.ellipse(-20, -78 + st.bob, 12, 5, 0, 0, TAU); fillStroke(c, moss); c.beginPath(); c.ellipse(16, -42, 8, 4, 0, 0, TAU); fillStroke(c, moss);
+    c.beginPath(); Art.rr(c, -15, -108 + st.bob, 32, 28, 6); fillStroke(c, stone);
+    var gl = 0.6 + 0.4 * Math.sin(st.t * 4); circ(c, -5, -96 + st.bob, 4, st.F('#ffb02e')); circ(c, 9, -96 + st.bob, 4, st.F('#ffb02e')); c.fillStyle = 'rgba(255,170,40,' + (0.25 * gl).toFixed(2) + ')'; c.beginPath(); c.arc(2, -96 + st.bob, 16, 0, TAU); c.fill();
+    c.beginPath(); c.moveTo(-6, -86 + st.bob); c.lineTo(10, -86 + st.bob); c.lineWidth = 3; c.strokeStyle = Art.ink; c.stroke(); c.lineWidth = Art.lw;
+    seg(c, -30, -70, -44, -40, 16, dk); circ(c, -44, -36, 11, dk);
+    var sx = 30, sy = -70; seg(c, sx, sy, sx + Math.cos(sw) * 36, sy + Math.sin(sw) * 36, 16, stone); circ(c, sx + Math.cos(sw) * 40, sy + Math.sin(sw) * 40, 12, stone);
+  };
+  DRAW.unicorn = function (c, st) {
+    var by = horse(c, st), a = st.a;
+    ['#e0405a', '#f2a03a', '#f2e04a', '#58c46a', '#4aa3e8', '#8a5ad6'].forEach(function (col, i) {
+      c.beginPath(); c.moveTo(24, by - 16); c.quadraticCurveTo(12 - i * 2, by - 38, -2 - i * 3, by - 22 + Math.sin(st.t * 6 + i) * 3); c.lineWidth = 3.2; c.strokeStyle = st.F(col); c.stroke();
+      c.beginPath(); c.moveTo(-26, by - 2); c.quadraticCurveTo(-40 - i * 2, by + 6 + Math.sin(st.t * 7 + i) * 3, -46 - i * 3, by + 18); c.stroke();
+    }); c.strokeStyle = Art.ink; c.lineWidth = Art.lw;
+    poly(c, [52, by - 32, 72, by - 60, 58, by - 26], st.F('#ffe27a'));
+    var gl = a >= 0 ? Math.sin(a * Math.PI) : 0.25; c.fillStyle = 'rgba(255,240,170,' + (0.25 + gl * 0.4).toFixed(2) + ')'; c.beginPath(); c.arc(72, by - 60, 6 + gl * 10, 0, TAU); c.fill();
+  };
+
+  var DRAW_END = 0;
   // Draw one unit. (sx, sy) is where its feet are on screen.
   Art.drawUnit = function (c, u, sx, sy, t) {
     var fn = DRAW[u.type]; if (!fn) return;
     var pal = palette(u), flash = u.flash > 0 ? Math.min(1, u.flash / 0.18) * 0.7 : 0;
     var moving = u.anim === 'walk';
     var att = u.anim === 'attack' ? Math.min(1, u.at / Math.min(0.55, u.cdMax * 0.5)) : -1;
-    var st = { pal: pal, enemy: u.side === 'enemy', id: u.id, t: t + u.phase, w: (t + u.phase) * (u.speed / 8 + 4), walk: moving, a: att, bob: moving ? Math.sin((t + u.phase) * (u.speed / 8 + 4) * 2) * 1.6 : Math.sin((t + u.phase) * 2.2) * 0.8,
+    var st = { pal: pal, enemy: u.side === 'enemy', id: u.id, range: u.range / (u.scale * 1.3), t: t + u.phase, w: (t + u.phase) * (u.speed / 8 + 4), walk: moving, a: att, bob: moving ? Math.sin((t + u.phase) * (u.speed / 8 + 4) * 2) * 1.6 : Math.sin((t + u.phase) * 2.2) * 0.8,
       F: function (col) { return flash ? mix(col, '#ffffff', flash) : col; } };
     var face = (u.facing || u.dir) < 0 ? -1 : 1, sc = u.scale * (u.noZoom ? 1 : 1.3), alpha = 1, rot = 0, dx = 0, dy = 0;
     if (u.anim === 'die') { var p = Math.min(1, u.t / 0.7); rot = -p * 1.35; alpha = 1 - p * p; dy = p * 4; }
@@ -472,10 +555,11 @@
       if (lvl >= 3) { var gl = c.createRadialGradient(0, -34 * sc, 2, 0, -34 * sc, 46 * sc); gl.addColorStop(0, 'rgba(255,220,100,' + (lvl === 3 ? 0.3 : 0.42) + ')'); gl.addColorStop(1, 'rgba(255,220,100,0)'); c.fillStyle = gl; c.beginPath(); c.arc(0, -34 * sc, 46 * sc, 0, TAU); c.fill(); }
       if (lvl >= 4) { c.lineWidth = 2; c.globalAlpha = alpha * (0.5 + 0.4 * Math.sin(tt * 4)); c.beginPath(); c.ellipse(0, 1, (30 + 3 * Math.sin(tt * 4)) * sc, 9 * sc, 0, 0, TAU); c.stroke(); }
     }
-    c.globalAlpha = alpha; c.scale(face * sc, sc); c.rotate(rot * face);
+    var fy = u.fly ? Art.flyY(u, t) : 0;
+    c.globalAlpha = alpha; c.translate(0, fy); c.scale(face * sc, sc); c.rotate(rot * face);
     inkStyle(c); fn(c, st); c.restore();
     if (u.anim !== 'die' && (lvl >= 2 || u.champ || u.special)) {   // above the head: one gold star per gear level above the first, a bigger star for the culture's specialty, a crown on a champion
-      c.save(); c.translate(sx, sy); inkStyle(c); var top = -80 * sc - 20, n = lvl - 1, startX = -((n - 1) * 15) / 2 - (u.special ? 11 : 0);
+      c.save(); c.translate(sx, sy); inkStyle(c); var top = -80 * sc - 20 + (u.fly ? Art.flyY(u, t) : 0), n = lvl - 1, startX = -((n - 1) * 15) / 2 - (u.special ? 11 : 0);
       for (var si = 0; si < n; si++) { var sx2 = startX + si * 15, sz = 6.5; c.beginPath();
         for (var k = 0; k < 10; k++) { var rr2 = k % 2 ? sz * 0.42 : sz, an = -Math.PI / 2 + k * Math.PI / 5; c.lineTo(sx2 + Math.cos(an) * rr2, top + Math.sin(an) * rr2); }
         c.closePath(); c.fillStyle = Art.C(Art.theme.gold2); c.fill(); c.lineWidth = 1.6; c.stroke(); }

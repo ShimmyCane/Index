@@ -7,7 +7,8 @@ var mode = process.argv[2] || 'all', RUNS = +(process.argv[3] || 8);
 
 // ---- unit against unit ------------------------------------------------------------------
 function duel(a, b, na, nb, la, lb) {
-  var sim = new F.Sim(F.levelConfig(1, 1), { noEvents: true, seed: 5 });
+  var sim = new F.Sim(F.levelConfig(8, 1), { noEvents: true, seed: 5 });
+  sim.structs.forEach(function (st) { st.weapons = []; });          // no castle or tower guns in a duel
   sim.es = { hp: 1, atk: 1, def: 1 }; sim.status = 'running'; sim.waveTimer = Infinity; sim.waveIdx = 99; sim.waveCount = 0;
   var i, u;
   for (i = 0; i < na; i++) { u = sim.makeUnit('ally', a, la || 1, 900 + i * 42, false); u.state = 'go'; u.anim = 'walk'; }
@@ -44,7 +45,7 @@ function bot(sim, rnd) {
   var order = [0, 1, 2].sort(function () { return rnd() - 0.5; });
   for (var k = 0; k < order.length; k++) {
     var slot = order[k], type = sim.tray[slot]; if (!type || type === 'boss') continue;
-    if (sim.coins < F.gearCost(type)) continue;
+    if (sim.coins < sim.priceOf(type)) continue;
     var cell = bestCell(sim, type); if (!cell) return;
     sim.buy(slot, cell[0], cell[1]); return;
   }
@@ -99,7 +100,7 @@ function difficulty() {
 // ---- a multiplier next to the heart must help, not explode the screen ---------------------------
 function stress() {
   function run(withMult) {
-    var sim = new F.Sim(F.levelConfig(1, 1), { noEvents: true, seed: 9 }); sim.fort.invuln = true; sim.coins = 9999; var h = sim.heart, c = h.c + 1, r = h.r;
+    var sim = new F.Sim(F.levelConfig(1, 1), { noEvents: true, seed: 9 }); sim.fort.invuln = true; sim.structs.forEach(function (st) { st.weapons = []; }); sim.coins = 9999; var h = sim.heart, c = h.c + 1, r = h.r;
     var g0 = null;
     if (withMult) { sim.tray = ['mult', 'mult', 'mult']; sim.buy(0, c, r); g0 = sim.gearAt(c, r); g0.level = 2; sim.recompute(); }    // a x2 gear on the east side
     else { sim.tray = ['spearman', 'spearman', 'spearman']; sim.buy(0, c, r); }
@@ -111,7 +112,7 @@ function stress() {
   var a = run(false), b = run(true);
   console.log('\nMultiplier stress test (one heart side, a chain of up to 4 spearman gears, one minute at normal speed):');
   console.log('  no multiplier: ' + a + ' fighters;  with a x2 gear first in the chain: ' + b + ' fighters');
-  var full = new F.Sim(F.levelConfig(1, 1), { noEvents: true, seed: 9 }); full.fort.invuln = true; full.coins = 9999; var hh = full.heart, n = 0;
+  var full = new F.Sim(F.levelConfig(1, 1), { noEvents: true, seed: 9 }); full.fort.invuln = true; full.structs.forEach(function (st) { st.weapons = []; }); full.coins = 9999; var hh = full.heart, n = 0;
   [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) { for (var i = 1; i < 3; i++) { var cc = hh.c + d[0] * i, rr = hh.r + d[1] * i; if (full.isFree(cc, rr)) { full.tray = ['spearman', 'spearman', 'spearman']; if (full.buy(0, cc, rr) === 'ok') n++; } } });
   full.start(); full.waveTimer = Infinity; for (var s = 0; s < 30 * 120; s++) full.step(1 / 30);
   console.log('  ' + n + ' spearman gears around the heart for two minutes: ' + full.alliesAlive() + ' fighters (the cap is ' + F.MAX_UNITS + ')');

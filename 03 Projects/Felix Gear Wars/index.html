@@ -56,6 +56,18 @@
     </div>
   </section>
 
+  <section class="panel" data-collapsed="true">
+    <button class="pHead" type="button" aria-expanded="false"><span class="icon">📈</span><span class="title">Fun curve</span><span class="mark">▸</span></button>
+    <div class="pBody">
+      <canvas id="funPlot" width="360" height="110" class="funPlot" aria-label="The fun curve of a level"></canvas>
+      <div class="setting"><label>Fun peak <small>the most exciting wave comes at <b id="funPeakVal">3</b> min</small></label><input id="funPeak" type="range" min="1" max="6" step="0.5" value="3" aria-label="Fun peak in minutes"></div>
+      <div class="setting"><label>Level fades <small>the Horde loses heart at <b id="funFadeVal">7</b> min</small></label><input id="funFade" type="range" min="4" max="12" step="0.5" value="7" aria-label="Fade time in minutes"></div>
+      <div class="setting"><label>Challenge <small>waves a little <b id="challengeVal">normal</b></small></label><input id="challenge" type="range" min="0.6" max="1.4" step="0.05" value="1" aria-label="Challenge"></div>
+      <p class="hint"><b>How it works.</b> Every level is shaped like a hill. Waves start gentle, the most exciting wave comes at the <b>fun peak</b>, and then waves ease off and stop at the <b>fade time</b>. After that the Horde loses heart and its fortress slowly crumbles, so a level lasts about as long as the fade time.</p>
+      <p class="hint">Each wave is sized from how many gears and fighters you have right now, plus what your gears will make before the wave arrives. Lots of gears means a bigger wave, so it stays exciting but never unfair. <b>Challenge</b> makes every wave a little softer or harder. The small curve at the bottom left of the game shows where you are on the hill.</p>
+    </div>
+  </section>
+
   <section class="panel" data-collapsed="false">
     <button class="pHead" type="button" aria-expanded="true"><span class="icon">🎨</span><span class="title">Culture and look</span><span class="mark">▾</span></button>
     <div class="pBody">

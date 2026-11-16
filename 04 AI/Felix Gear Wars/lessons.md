@@ -38,3 +38,14 @@
 - **A rush win is a design hole.** With the fortress as the win condition, seven spearmen broke a 500-point fortress in 28 seconds. Fortress health has to be set against what a small early army can do.
 - **Give every fighter type to exactly one culture.** Eight cultures and eight fighters, one star each, so changing culture changes which gear is worth buying.
 - **Search results can be wrong.** One page said the French blue came from crushed malachite (a green mineral). Check a claim against what you know before putting it in research notes.
+
+## 2026-11-16 (round 6: a fun curve, creeping prices, champions)
+
+- **Size each wave when it launches, from the player's strength.** `makeWave` measures Felix (fighters alive plus what his gears will make before the wave arrives) and multiplies by a target ratio from a hill-shaped fun curve. It is the Candy Crush idea in a tower-defence game: the most exciting wave at about 3 minutes, easing off, and the level fades at 7 minutes. It self-corrects: ten gears make a big wave, three a small one. Give the player the curve as sliders and a plot with a plain explanation.
+- **A fade needs a finish.** Stopping the waves is not enough; after the fade time the fortress crumbles (2% of its health a second) so a level always ends. Do not let the fun curve create a stalemate.
+- **Price creep keeps the board from filling.** Each gear on the board raises the next price, so the gear count follows the enemy's expected last wave. Merging and selling lower it, which rewards tidy play. Compute the purse and the creep from one function (`F.economy`) and show the price live (`priceOf`).
+- **Guns scale with the map.** A castle gun range of 440 to 720 px covers a whole one-screen map. Scale ranges by map length.
+- **A rule that depends on where the enemy is needs a test with an enemy that cannot die.** My first rebuild test failed because the castle shot the test enemy. Give test units huge health.
+- **Check the arguments before blaming the rule.** `makeUnit(side, type, level, x, boss)`: I passed `x` as the level and the unit ran off to the edge. A test that looks like a rule bug can be a call bug.
+- **Give each champion one clear power and test it numerically:** the dragon's fire hits three enemies in a row for about 30% each and spearmen do 0% to it; the cart knocks back 64 px; the golem slows; the unicorn heals; the king rallies.
+- **Duel tests must silence the structures.** Castle guns in the matrix made the mirror matches lopsided.
