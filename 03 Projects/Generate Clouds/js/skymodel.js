@@ -30,8 +30,8 @@
 
   function pct(x) { return Math.round(x * 100) + '%'; }
   function km(x) { return (x < 1 ? Math.round(x * 1000) + ' m' : x.toFixed(1) + ' km'); }
-  function seedFrom(place, utcMs) {
-    var h = Math.floor(utcMs / 3600000), a = Math.sin(place.lat * 12.9898 + place.lon * 78.233 + h * 0.618) * 43758.5453;
+  function seedFrom(place, utcMs, shuffle) {
+    var h = Math.floor(utcMs / 3600000) + (shuffle || 0) * 7919, a = Math.sin(place.lat * 12.9898 + place.lon * 78.233 + h * 0.618) * 43758.5453;
     var f = a - Math.floor(a), g = Math.sin(f * 91.7 + h) * 1000; g = g - Math.floor(g);
     return [f * 40, g * 40, (f + g) * 20];
   }
@@ -107,13 +107,48 @@
     var tint = [1, lerp(lerp(1, 0.92, dirty), 0.85, dusty), lerp(lerp(1, 0.80, dirty), 0.62, dusty)];
     var rain = (lowKey === 'nimbostratus' || lowKey === 'cumulonimbus') ? clamp(wx.precip / 4, 0.3, 1) : (wx.precip > 0.5 ? 0.25 : 0);
 
-    var seed = seedFrom(place, utcMs);
-    var flashy = lowKey === 'cumulonimbus';
+    var seed = seedFrom(place, utcMs, ov.shuffle);
+    function rnd(k) { var a = Math.sin(seed[0] * 12.9898 + seed[1] * 78.233 + k * 37.719) * 43758.5453; return a - Math.floor(a); }   // repeatable dice
+    // ----- a mixed sky: some low cells taller than the rest, ripples among the high streaks -----
+    var vary = [0, 1], mixNote = '';
+    if (lowKey === 'cumulus' && cape > 250) {
+      var tall = Math.min(lowT.thick * (1.6 + cape / 700), 3.2), share = clamp((cape - 150) / 2500, 0.06, 0.3) * (0.7 + 0.6 * rnd(1));
+      vary = [share, (lowTop - lowBase) / tall]; lowTop = lowBase + tall; mixNote = ', with about ' + pct(share) + ' of the heaps growing taller';
+    } else if (lowKey === 'stratocumulus') { vary = [0.2 + 0.15 * rnd(2), 0.7]; lowTop = lowBase + (lowTop - lowBase) / 0.7; mixNote = ', thicker in places'; }
+    else if (lowKey === 'congestus') { vary = [0.35 + 0.2 * rnd(3), 0.38]; mixNote = ', towers among smaller cumulus'; }
+    else if (lowKey === 'cumulonimbus') { vary = [0.32 + 0.16 * rnd(4), 0.28]; mixNote = ', storm towers among lower cumulus'; }
+    if (midOn && lowTop > midBase - 0.3 && lowKey !== 'cumulonimbus' && lowKey !== 'congestus') lowTop = Math.max(lowBase + 0.4, midBase - 0.3);
+    if (midOn && lowTop > midBase - 0.3) midOn = false;
+    highH = Math.max(highH, (midOn ? midTop : lowTop) + 0.8);
+    var cmix = (highKey === 'cirrus' && covHigh > 0.3 && rnd(5) < 0.6) ? 0.5 + 0.4 * rnd(6) : 0;
+
+    // ----- what falls: rain, snow or sleet -----
+    var pKind = 0, pWhy = '';
+    if (ov.precip === 'none') pKind = 0;
+    else if (ov.precip === 'rain') { pKind = 1; pWhy = 'set by hand'; }
+    else if (ov.precip === 'snow') { pKind = 2; pWhy = 'set by hand'; }
+    else if (ov.precip === 'sleet') { pKind = 3; pWhy = 'set by hand'; }
+    else if (wx.precip > 0.05 || steady || showers || storm) {
+      if ((code >= 71 && code <= 77) || code === 85 || code === 86) { pKind = 2; pWhy = 'the report says snow'; }
+      else if (code === 56 || code === 57 || code === 66 || code === 67) { pKind = 3; pWhy = 'the report says freezing rain'; }
+      else if (wx.t <= 0.5) { pKind = 2; pWhy = 'the air at the ground is ' + wx.t.toFixed(0) + '°C'; }
+      else if (wx.t < 2.5) { pKind = 3; pWhy = 'the air at the ground is just above freezing (' + wx.t.toFixed(0) + '°C)'; }
+      else { pKind = 1; pWhy = 'the air at the ground is ' + wx.t.toFixed(0) + '°C'; }
+    }
+    var pStrength = ov.precipI != null ? ov.precipI : clamp(0.3 + wx.precip / 6, 0.3, 1);
+    var pShare = (lowKey === 'nimbostratus' || lowKey === 'stratus') ? 1 : (lowKey === 'cumulonimbus' || lowKey === 'congestus') ? 0.45 : 0.6;
+    if (pKind && covLow < 0.05) { covLow = 0.5; }                 // something has to carry the rain
+    var snowLine = pKind === 2 ? -1 : (wx.frz != null ? wx.frz : Math.max(wx.t, 0) / 6.5) + 0.2;
+    var arid = clamp((52 - wx.rh) / 40, 0, 1);
+    var waveM = clamp(0.022 * wx.wind.s * wx.wind.s, 0.15, 5);    // significant wave height, metres
+    var v10 = vel(wx.wind), windHeading = Math.atan2(v10[1], v10[0]);
+
+    var flashy = lowKey === 'cumulonimbus' || !!ov.lightning;
 
     // ----- the reading -----
     var sp = GC.Sun.pos(utcMs, place.lat, place.lon);
     R.push({ icon: '☀️', head: 'Sun', text: (sp.el >= 0 ? Math.abs(sp.el).toFixed(0) + '° above' : Math.abs(sp.el).toFixed(0) + '° below') + ' the horizon, toward ' + GC.compass(sp.az) + ' (' + Math.round(sp.az) + '°). ' + GC.Sun.phase(sp.el) + '.' });
-    if (covLow > 0.02) R.push({ icon: '☁️', head: 'Low: ' + lowT.name, text: pct(covLow) + ' of the sky, from ' + km(lowBase) + ' to ' + km(lowTop) + '. Why this type: ' + why + '. Base height: air ' + wx.t.toFixed(0) + '°C and dew point ' + td.toFixed(0) + '°C are ' + spread.toFixed(0) + '° apart, × 125 m ≈ ' + km(0.125 * spread) + '.' });
+    if (covLow > 0.02) R.push({ icon: '☁️', head: 'Low: ' + lowT.name, text: pct(covLow) + ' of the sky' + mixNote + ', from ' + km(lowBase) + ' to ' + km(lowTop) + '. Why this type: ' + why + '. Base height: air ' + wx.t.toFixed(0) + '°C and dew point ' + td.toFixed(0) + '°C are ' + spread.toFixed(0) + '° apart, × 125 m ≈ ' + km(0.125 * spread) + '.' });
     else R.push({ icon: '☁️', head: 'Low', text: 'No low cloud in the data.' });
     if (midOn) R.push({ icon: '🌥️', head: 'Mid: ' + midT.name, text: pct(covMid) + ' at ' + km(midBase) + '. ' + (midKey === 'altostratus' ? 'Over 70% reads as one sheet.' : 'Under 70% reads as broken clumps.') });
     else if (covMid > 0.02) R.push({ icon: '🌥️', head: 'Mid', text: pct(covMid) + ' in the data, already inside the deep ' + lowT.name.toLowerCase() + '.' });
@@ -121,11 +156,15 @@
     R.push({ icon: '💨', head: 'Wind', text: 'Low clouds drift toward ' + toward(wLow) + ' at ' + wLow.s.toFixed(0) + ' m/s' + (wx.w850 ? ' (measured near 1.5 km)' : ' (estimated from the ground wind)') + '. In 15 minutes they move ' + (wLow.s * 0.9).toFixed(1) + ' km; the high layer moves ' + (w300.s * 0.9).toFixed(0) + ' km.' });
     R.push({ icon: '🌫️', head: 'Haze', text: hzWhy + (wx.pm25 != null && wx.aod != null ? ', PM2.5 ' + Math.round(wx.pm25) + ' µg/m³' : '') + '. Haze is ' + hz.toFixed(1) + '× a clean sky' + (dirty > 0.3 ? ', tinted brown by pollution.' : dusty > 0.3 ? ', tinted by dust.' : '.') });
     if (wx.precip > 0.1 || storm) R.push({ icon: storm ? '⛈️' : '🌧️', head: storm ? 'Storm' : 'Rain', text: wx.precip.toFixed(1) + ' mm in the hour' + (storm ? ', thunderstorm reported. Lightning flickers while the time lapse plays. Rotation inside a storm, wall clouds and tornado funnels are not in the data and are not drawn.' : '.') });
+    if (pKind) R.push({ icon: pKind === 2 ? '🌨️' : '🌧️', head: ['', 'Rain', 'Snow', 'Sleet'][pKind] + ' is drawn', text: 'Why this kind: ' + pWhy + '. It falls under ' + (pShare >= 1 ? 'the whole layer' : 'the thicker parts of the cloud') + ', slanted by the wind.' });
+    if (cmix > 0) R.push({ icon: '🪶', head: 'High mix', text: 'Patches of small ripples (cirrocumulus) sit among the cirrus streaks.' });
+    if (ov.feature) R.push({ icon: '🌪️', head: 'Made-up: ' + ({ tornado: 'tornado', waterspout: 'waterspout', microburst: 'microburst' })[ov.feature.kind], text: 'Placed by hand from the Weather maker. No weather feed reports these, so this one is drawn from how they are described, not from data.' });
+    R.push({ icon: '🌊', head: 'Sea', text: 'Wind ' + wx.wind.s.toFixed(0) + ' m/s at the ground gives waves about ' + waveM.toFixed(1) + ' m high (0.022 × wind²).' });
     R.push({ icon: '🌡️', head: 'Air', text: wx.t.toFixed(0) + '°C, humidity ' + Math.round(wx.rh) + '%' + (wx.frz != null ? ', freezing level ' + km(wx.frz) : '') + '.' });
 
     var model = {
       wx: wx, place: place, utcMs: utcMs, reading: R,
-      types: { low: lowKey, mid: midKey, high: highKey },
+      types: { low: lowKey, mid: midKey, high: highKey }, precipKind: ['none', 'rain', 'snow', 'sleet'][pKind], vary: vary, cmix: cmix,
       summary: { low: covLow, mid: midOn ? covMid : 0, high: covHigh, lowBase: lowBase, lowTop: lowTop, midBase: midBase, highH: highH, haze: hz, windS: wLow.s, windD: ((wLow.d % 360) + 360) % 360 }
     };
 
@@ -140,6 +179,8 @@
       var sunC = GC.Atmo.sunAt(highH, s, hz);
       var amb = GC.Atmo.ambient(1.0, s, hz, tint);
       var night = clamp((-4 - p.el) / 10, 0, 1);
+      var hor = [0, 0, 0];
+      for (var hk = 0; hk < 4; hk++) { var ha = hk * Math.PI / 2 + 0.6, hc = GC.Atmo.sky(0.002, [Math.sin(ha) * 0.9945, 0.1045, -Math.cos(ha) * 0.9945], s, hz, tint); hor[0] += hc[0] / 4; hor[1] += hc[1] / 4; hor[2] += hc[2] / 4; }
       var up = Math.max(s[1], 0);
       var overcast = 1 - 0.5 * Math.max(cl, cm * 0.7);
       var ambTop = amb.map(function (v, i) { return v * 1.15 * overcast + sun0[i] * 0.012 + [0.00022, 0.0004, 0.0008][i]; });
@@ -153,6 +194,10 @@
         L0a: [lowBase, lowTop, cl > 0.02 ? Math.pow(cl, 0.85) : 0, lowT.dens], L0b: [lowT.cell, lowT.soft, lowT.taper, lowT.anvil], L0w: [vLow[0] * simT, vLow[1] * simT, 0, lowT.detail],
         L1a: [midBase, midTop, cm > 0.02 ? Math.pow(cm, 0.85) : 0, midT.dens], L1b: [midT.cell, midT.soft, midT.taper, midT.anvil], L1w: [vMid[0] * simT, vMid[1] * simT, 0, midT.detail],
         C: [highH, ch > 0.02 ? ch : 0, highT.stretch, highT.opacity], Cw: [vHigh[0] * simT, vHigh[1] * simT, highT.scale, Math.atan2(vHigh[1], vHigh[0])],
+        regionMix: (ov.low == null && ov.mid == null && ov.high == null && !ov.noRegion) ? 1 : 0, midOn: midOn,
+        vary: vary, cmix: cmix, precip: [pKind, pKind ? pStrength : 0, pShare, clamp(wx.wind.s / 12, 0, 1.2)],
+        terr: [snowLine, arid], sea: [waveM / 1000, windHeading, wx.wind.s],
+        skyZen: GC.Atmo.sky(0.002, [0, 1, 0], s, hz, tint), skyHor: hor,
         seed: seed, evolve: simT / 900 * 0.55, exposure: clamp(0.26 / scene, 0.35, 110), night: night, rain: rain, flashy: flashy
       };
     };

@@ -23,7 +23,7 @@ Projects with notes:
 - Shimmy Specs/ — spec-writing process app; MVP planned (`mvp schematic.md`, `mvp tasks.md`). `brief.md`, `lessons.md`.
 - Critique Detail/ — MVP 0.2.0 (2026-11-14): results page and script around a written detail review; CSI rulebook library, adaptive QC list, hard gate, lean proof toggles; no AI call in the code. `brief.md`, `lessons.md`. Questions in `03 Projects/Critique Detail/convo/convo v0.2.md`.
 - Rhythm Sticks/ — MVP 0.3.1 (2026-11-13): wordless rhythm and sound toy, eleven modes plus a hidden breathing garden, random on load. `brief.md`, `lessons.md`. Questions in `03 Projects/Rhythm Sticks/convo/convo v0.8.md`.
-- Generate Clouds/ — MVP 0.3.0 (2026-11-15; orbit, zoom and sharp redraw, space height, cities by weather): 3-D volumetric sky from weather data for any place and time, time lapse, 360° view, PNG exports. `brief.md`, `lessons.md`. Questions in `03 Projects/Generate Clouds/convo/convo v0.1.md`.
+- Generate Clouds/ — MVP 0.4.0 (2026-11-16; ground, sea, map, weather maker, orbit, zoom and sharp redraw, space height, cities by weather): 3-D volumetric sky from weather data for any place and time, time lapse, 360° view, PNG exports. `brief.md`, `lessons.md`. Questions in `03 Projects/Generate Clouds/convo/convo v0.1.md`.
 - Felix Gear Wars/ — MVP 0.5.0 (2026-11-16): gear-powered lane defense game for Felix, eight art styles with culture fighters, narrated story cards; rules in a DOM-free sim run by a Node balance bot; five art styles through one colour filter. `brief.md`, `lessons.md`. Questions in `03 Projects/Felix Gear Wars/convo/convo v0.1.md` and `convo v0.2.md`.
 
 Notes:

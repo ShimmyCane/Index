@@ -5,7 +5,7 @@
   var LOOP = 900;                                   // seconds of sky in one time lapse (15 minutes)
   var S = {
     place: GC.PLACES[0], when: { now: true }, data: null, preset: null, ov: {}, model: null, frame: null,
-    simT: 0, playing: false, autoLeft: 0, loops: 0, dirty: true, flash: 0, loading: false
+    simT: 0, playing: false, autoLeft: 0, loops: 0, dirty: true, flash: 0, loading: false, clock: 0, spot: null, pendingCam: null, thunder: null
   };
   GC.state = S;
 
@@ -52,19 +52,48 @@
     setPlaying(S.autoLeft > 0);
     S.dirty = true;
   }
-  function setPlaying(on) { S.playing = on; $('play').classList.toggle('playing', on); if (!on) S.autoLeft = 0; S.dirty = true; }
+  function setPlaying(on) { if (on) GC.Audio.unlock(); S.playing = on; $('play').classList.toggle('playing', on); if (!on) S.autoLeft = 0; S.dirty = true; }
 
   function showData(res) {
     S.data = res;
     $('when').value = res.localStr;
-    $('placeNow').textContent = placeLabel();
+    showSpot();
     $('lat').value = S.place.lat.toFixed(2); $('lon').value = S.place.lon.toFixed(2);
     var src = S.preset ? 'atlas' : res.source;
     setPill(src, { live: '🛰️ Live data', cache: '💾 Saved copy', sample: '📦 Sample sky', atlas: '🗂️ Atlas sample' }[src] || src);
     $('loadNote').textContent = S.preset ? 'Made-up weather for "' + S.preset.name + '". Press Generate this sky for the real data.' : (res.note || (res.archive ? 'From the long-term archive: no pressure-level wind, storm energy or air quality that far back.' : ''));
     $('dataLine').textContent = (S.preset ? 'Atlas sample (made-up weather). ' : { live: 'Live from Open-Meteo. ', cache: 'Saved copy on this device. ', sample: 'Bundled sample sky. ' }[res.source]) + (res.note || '');
     document.querySelectorAll('#atlas button').forEach(function (b) { b.classList.toggle('on', !!S.preset && b.dataset.id === S.preset.id); });
-    rebuild();
+    R.feature = null;
+    if (S.pendingCam && !S.preset) { var c = S.pendingCam; S.pendingCam = null; R.cam.yaw = c.yaw; R.cam.pitch = c.pitch; R.cam.fov = c.fov; R.cam.alt = c.alt; R.cam.x = c.x || 0; R.cam.z = c.z || 0; setAltSlider(R.cam.alt); }
+    rebuild(); syncMaker();
+  }
+
+  // ---------- the ground and the region around the place ----------
+  function showSpot() {
+    var sp = S.spot, T = GC.Terrain;
+    $('placeNow').textContent = placeLabel();
+    $('spotKind').textContent = !sp ? '' : sp.kind + (sp.kind === 'Open water' ? '' : ' · ground ' + Math.round(sp.height * 1000) + ' m') + (T.source === 'made-up' ? ' · made-up land (no ground data)' : '');
+    var w = T.source === 'data' ? T.bearing('water', R.cam.x, R.cam.z) : null, h = T.source === 'data' ? T.bearing('high', R.cam.x, R.cam.z) : null;
+    $('faceWater').hidden = !w; $('faceHigh').hidden = !h || !sp || sp.kind === 'Open water';
+    if (w) $('faceWater').textContent = 'Face the water (' + (w.dist < 1 ? 'here' : Math.round(w.dist) + ' km ' + GC.compass(w.deg)) + ')';
+  }
+  function loadGround() {
+    var place = S.place, key = place.lat.toFixed(2) + ',' + place.lon.toFixed(2);
+    if (GC.Terrain.key === key && GC.Terrain.source === 'data') { S.spot = GC.Terrain.classify(); showSpot(); return Promise.resolve(); }
+    var stand = S.onGround;                              // a camera standing on the ground follows the ground when it changes
+    GC.Terrain.flat(place); R.setTerrain(GC.Terrain); S.spot = null; showSpot(); if (stand) R.cam.alt = 0;
+    return GC.Terrain.load(place).then(function (T) {
+      if (S.place !== place) return;
+      if (S.onGround) R.cam.alt = 0;
+      R.setTerrain(T); S.spot = T.classify(); showSpot(); S.dirty = true;
+    });
+  }
+  function loadRegion(res) {
+    R.setRegion(null);
+    var place = S.place;
+    if (res.source === 'sample') return Promise.resolve();
+    return W.region(place, res.utcMs).then(function (cells) { if (S.place === place && !S.preset) { R.setRegion(cells); S.region = !!cells; S.dirty = true; } });
   }
 
   function loadSky() {
@@ -76,11 +105,16 @@
       S.loading = false;
       if (res.source !== 'live' && res.note) GC.logError('Weather: ' + res.note);
       showData(res); restart(true);
+      S.groundJob = loadGround(); S.regionJob = loadRegion(res);
     }, function (e) { S.loading = false; GC.logError('Weather: ' + e.message); setPill('sample', '⚠️ Check'); });
   }
   GC.loadSky = loadSky;
 
-  function setPlace(p) { S.place = { name: p.name || 'Chosen point', region: p.region || '', lat: GC.clamp(+p.lat, -89.9, 89.9), lon: ((+p.lon + 540) % 360) - 180 }; $('searchResults').textContent = ''; loadSky(); }
+  function setPlace(p) {
+    S.place = { name: p.name || 'Chosen point', region: p.region || '', lat: GC.clamp(+p.lat, -89.9, 89.9), lon: ((+p.lon + 540) % 360) - 180, city: !!p.city };
+    $('searchResults').textContent = ''; $('mapGo').hidden = true; GC.Map.setPlace(S.place);
+    return loadSky();
+  }
 
   function usePreset(p) {
     var off = S.data ? S.data.offsetSec : W.guessOffset(S.place.lon);
@@ -88,7 +122,7 @@
     var dayStart = W.localToMs(day + 'T00:00') - off * 1000;
     var kind = p.sun === 'day' ? 'noon' : p.sun, ms = GC.Sun.find(kind, dayStart, S.place.lat, S.place.lon) || GC.Sun.find('noon', dayStart, S.place.lat, S.place.lon);
     if (p.sun === 'day') ms -= 2.5 * 3600000;        // mid-morning light shows the shapes better than high noon
-    S.preset = p; S.ov = JSON.parse(JSON.stringify(p.ov || {}));
+    S.preset = p; S.ov = JSON.parse(JSON.stringify(p.ov || {})); R.setRegion(null);
     orbitOff(); R.cam.x = 0; R.cam.z = 0;
     R.cam.alt = p.cam.alt; R.cam.pitch = p.cam.pitch; R.cam.fov = 70;
     var sp = GC.Sun.pos(ms, S.place.lat, S.place.lon);
@@ -116,7 +150,7 @@
           g.cities.forEach(function (c) {
             var b = document.createElement('button'); b.className = 'chip'; b.type = 'button'; b.textContent = c.place.name;
             var sm = document.createElement('small'); sm.textContent = c.info; b.appendChild(sm);
-            b.addEventListener('click', function () { S.when = { now: true }; setPlace(c.place); }); row.appendChild(b);
+            b.addEventListener('click', function () { S.when = { now: true }; c.place.city = true; setPlace(c.place); }); row.appendChild(b);
           });
           d.appendChild(row);
         }
@@ -125,7 +159,7 @@
       if (res.source === 'none') {
         var d2 = document.createElement('div'); d2.className = 'grp'; var h2 = document.createElement('div'); h2.className = 'grpName'; h2.textContent = '📍 Cities'; d2.appendChild(h2);
         var row2 = document.createElement('div'); row2.className = 'chips';
-        GC.PLACES.forEach(function (p) { var b = document.createElement('button'); b.className = 'chip'; b.type = 'button'; b.textContent = p.name; b.addEventListener('click', function () { setPlace(p); }); row2.appendChild(b); });
+        GC.PLACES.forEach(function (p) { var b = document.createElement('button'); b.className = 'chip'; b.type = 'button'; b.textContent = p.name; b.addEventListener('click', function () { p.city = true; setPlace(p); }); row2.appendChild(b); });
         d2.appendChild(row2); box.appendChild(d2);
       }
       $('nowNote').textContent = res.source === 'live' ? 'The strongest of each kind among ' + res.count + ' cities, as of ' + new Date(res.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '. Tap one to generate its sky now.'
@@ -149,7 +183,7 @@
         list.forEach(function (p) {
           var li = document.createElement('li'), b = document.createElement('button'); b.type = 'button';
           b.textContent = p.name + (p.region ? ' · ' + p.region : '') + '  (' + p.lat.toFixed(2) + ', ' + p.lon.toFixed(2) + ')';
-          b.addEventListener('click', function () { setPlace(p); }); li.appendChild(b); ul.appendChild(li);
+          b.addEventListener('click', function () { p.city = true; setPlace(p); }); li.appendChild(b); ul.appendChild(li);
         });
       }, function (e2) { ul.textContent = 'Place search is not reachable. Type a latitude and longitude below.'; GC.logError('Place search: ' + e2.message); });
     });
@@ -210,8 +244,94 @@
     ADJ.forEach(function (a) { $(a[0]).addEventListener('input', function () { S.ov[a[1]] = a[2](parseFloat($(a[0]).value)); rebuild(); }); });
     $('ovType').addEventListener('change', function () { S.ov.lowType = $('ovType').value || null; rebuild(); });
     $('fov').addEventListener('input', function () { R.cam.fov = +$('fov').value; $('fovV').textContent = (70 / R.cam.fov).toFixed(1) + '× · ' + Math.round(R.cam.fov) + '°'; S.dirty = true; });
-    $('ovReset').addEventListener('click', function () { S.ov = {}; rebuild(); });
+    $('ovReset').addEventListener('click', function () { S.ov = {}; rebuild(); syncMaker(); });
   }
+
+  // ---------- the map: pick the exact spot, keep the ones you like ----------
+  var favs = GC.store.get('gc.favs', []); if (!Array.isArray(favs)) favs = [];
+  function renderFavs() {
+    var ul = $('favList'); ul.textContent = '';
+    favs.forEach(function (f, i) {
+      var li = document.createElement('li'), go = document.createElement('button'), del = document.createElement('button');
+      go.type = 'button'; go.className = 'go'; go.textContent = '★ ' + f.name;
+      var sm = document.createElement('small'); sm.textContent = (f.kind || 'Spot') + ' · ' + f.lat.toFixed(2) + ', ' + f.lon.toFixed(2); go.appendChild(sm);
+      go.addEventListener('click', function () { S.pendingCam = f.cam || null; setPlace({ name: f.name, region: '', lat: f.lat, lon: f.lon, city: f.city }); });
+      del.type = 'button'; del.className = 'btn square'; del.textContent = '✖'; del.setAttribute('aria-label', 'Remove ' + f.name);
+      del.addEventListener('click', function () { favs.splice(i, 1); GC.store.set('gc.favs', favs); renderFavs(); });
+      li.appendChild(go); li.appendChild(del); ul.appendChild(li);
+    });
+    GC.Map.setFavs(favs);
+  }
+  function initMap() {
+    GC.Map.init($('map'));
+    GC.Map.onPick = function (pin) {
+      $('mapGo').hidden = false;
+      $('mapNote').textContent = 'Pin at ' + pin.lat.toFixed(3) + ', ' + pin.lon.toFixed(3) + '. Zoom in and tap again to be more exact.';
+    };
+    $('mapIn').addEventListener('click', function () { GC.Map.zoomBy(1); });
+    $('mapOut').addEventListener('click', function () { GC.Map.zoomBy(-1); });
+    $('mapWorld').addEventListener('click', function () { GC.Map.setView(20, S.place.lon, 1); });
+    $('mapHere').addEventListener('click', function () { GC.Map.setView(S.place.lat, S.place.lon, 11); });
+    $('mapGo').addEventListener('click', function () {
+      var p = GC.Map.pin; if (!p) return;
+      setPlace({ name: 'Point ' + p.lat.toFixed(2) + ', ' + p.lon.toFixed(2), lat: p.lat, lon: p.lon });
+    });
+    $('faceWater').addEventListener('click', function () { var b = GC.Terrain.bearing('water', R.cam.x, R.cam.z); if (!b) return; orbitOff(); R.cam.yaw = b.deg; R.cam.pitch = b.dist < 1 ? 4 : 2; S.dirty = true; });
+    $('faceHigh').addEventListener('click', function () { var b = GC.Terrain.bearing('high', R.cam.x, R.cam.z); if (!b) return; orbitOff(); R.cam.yaw = b.deg; R.cam.pitch = 4; S.dirty = true; });
+    $('favSave').addEventListener('click', function () {
+      var name = $('favName').value.trim() || (S.place.name + (S.spot ? ' · ' + S.spot.kind.toLowerCase() : ''));
+      favs.unshift({ name: name.slice(0, 40), lat: S.place.lat, lon: S.place.lon, city: !!S.place.city, kind: S.spot ? S.spot.kind : '',
+        cam: { yaw: R.cam.yaw, pitch: R.cam.pitch, fov: R.cam.fov, alt: R.cam.alt, x: R.cam.x, z: R.cam.z } });
+      if (favs.length > 30) favs.pop();
+      GC.store.set('gc.favs', favs); $('favName').value = ''; renderFavs();
+    });
+    renderFavs();
+  }
+
+  // ---------- weather maker: add weather by hand ----------
+  function syncMaker() {
+    $('mkPrecip').value = S.ov.precip || '';
+    $('mkStrength').value = S.ov.precipI != null ? S.ov.precipI : 0.6; $('mkStrengthV').textContent = Math.round(+$('mkStrength').value * 100) + '%' + (S.ov.precipI != null ? ' ✎' : '');
+    $('mkLightning').checked = !!S.ov.lightning;
+    document.querySelectorAll('[data-feature]').forEach(function (b) { b.classList.toggle('on', !!b.dataset.feature && !!S.ov.feature && S.ov.feature.kind === b.dataset.feature); });
+  }
+  function placeFeature(kind) {
+    var T = GC.Terrain, y = GC.rad(R.cam.yaw), dist = kind === 'microburst' ? 9 : 5, x, z, found = false;
+    if (kind === 'waterspout') {
+      for (var d = 3; d <= 26 && !found; d += 1.5) for (var k = 0; k < 9 && !found; k++) {
+        var a = y + GC.rad([0, -12, 12, -25, 25, -40, 40, -60, 60][k]); x = R.cam.x + Math.sin(a) * d; z = R.cam.z - Math.cos(a) * d;
+        if (T.isSea(x, z) && T.maskAt(x, z) < 0.2) found = true;
+      }
+      if (!found) { $('mkNote').textContent = 'No open water within 26 km of this view. Pick a coast or a spot at sea on the map, face the water, and try again.'; return false; }
+    } else { x = R.cam.x + Math.sin(y) * dist; z = R.cam.z - Math.cos(y) * dist; }
+    var sea = T.isSea(x, z);
+    if (kind === 'tornado' && sea) kind = 'waterspout';
+    S.ov.feature = { kind: kind, x: x, z: z, strength: kind === 'waterspout' ? 0.8 : 1, seed: 1 + Math.random() * 50, ground: T.heightAt(x, z), sea: sea };
+    var lt = S.model && S.model.types.low;
+    if (lt !== 'cumulonimbus' && !(kind === 'waterspout' && lt === 'congestus')) { S.ov.lowType = kind === 'waterspout' ? 'congestus' : 'cumulonimbus'; S.ov.forcedType = true; }
+    if (kind === 'microburst' && !S.ov.precip && S.model && S.model.precipKind === 'none') { S.ov.precip = 'rain'; S.ov.forcedRain = true; }
+    $('mkNote').textContent = { tornado: 'A tornado', waterspout: 'A waterspout', microburst: 'A microburst' }[kind] + ' stands ' + Math.round(Math.hypot(x - R.cam.x, z - R.cam.z)) + ' km away' + (sea ? ', over water' : '') +
+      '. Press play to see it turn. Made-up: no weather feed reports these.';
+    return true;
+  }
+  function initMaker() {
+    $('mkPrecip').addEventListener('change', function () { S.ov.precip = $('mkPrecip').value || null; S.ov.forcedRain = false; rebuild(); syncMaker(); });
+    $('mkStrength').addEventListener('input', function () { S.ov.precipI = +$('mkStrength').value; rebuild(); syncMaker(); });
+    $('mkLightning').addEventListener('change', function () { S.ov.lightning = $('mkLightning').checked; rebuild(); });
+    document.querySelectorAll('[data-feature]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (S.ov.forcedType) { S.ov.lowType = null; S.ov.forcedType = false; }
+        if (S.ov.forcedRain) { S.ov.precip = null; S.ov.forcedRain = false; }
+        S.ov.feature = null;
+        if (b.dataset.feature) { rebuild(); placeFeature(b.dataset.feature); }
+        else $('mkNote').textContent = 'Cleared.';
+        rebuild(); syncMaker();
+      });
+    });
+    $('shuffle').addEventListener('click', function () { S.ov.shuffle = (S.ov.shuffle || 0) + 1; rebuild(); });
+    syncMaker();
+  }
+  GC.placeFeature = function (k) { var ok = placeFeature(k); rebuild(); syncMaker(); return ok; };
 
   // ---------- orbit: circle a point in the clouds ----------
   // The camera sits D km from a centre point, phi degrees above it, on bearing th from it, and always faces it.
@@ -389,6 +509,7 @@
     var dt = Math.min((now - last) / 1000, 0.25); if (!last) dt = 0; last = now;
     if (!S.model || R.busy) return;
     if (S.playing) {
+      S.clock += dt;                                    // waves, rain and funnels move in real seconds
       S.simT += dt * (+GC.settings.speed);
       if (S.simT >= LOOP) {
         S.simT = 0; S.loops++;
@@ -397,7 +518,12 @@
       S.dirty = true;
       acc += dt * 1000; accN++;
       if (accN >= 20) { R.adapt(acc / accN); acc = 0; accN = 0; }
-      if (S.frame && S.frame.flashy && S.flash < 0.05 && Math.random() < 0.012) { var cx = O.on ? O.fx : R.cam.x, cz = O.on ? O.fz : R.cam.z; S.flash = 1.6 + Math.random() * 2; R.flash(S.flash, cx + (Math.random() - 0.5) * 50, cz + (Math.random() - 0.5) * 50); }
+      if (S.frame && S.frame.flashy && S.flash < 0.05 && Math.random() < 0.012) {
+        var ft = R.feature, cx = ft ? ft.x : O.on ? O.fx : R.cam.x, cz = ft ? ft.z : O.on ? O.fz : R.cam.z, spread = ft ? 14 : 44;
+        var bx = cx + (Math.random() - 0.5) * spread, bz = cz + (Math.random() - 0.5) * spread, km = Math.hypot(bx - R.cam.x, bz - R.cam.z, R.cam.alt);
+        S.flash = 1.6 + Math.random() * 2; R.flash(S.flash, bx, bz, Math.random() * 90);
+        var wait = GC.Audio.thunder(km); S.thunder = { km: km, at: now + wait * 1000 }; S.bolts = (S.bolts || 0) + 1;
+      }
     }
     if (O.on && O.turning) {
       var step = dt * 360 / (+GC.settings.turn);
@@ -416,6 +542,12 @@
     }
     S.dirty = false; S.still = now; S.sharp = false;
     R.fineStop();
+    // never under the ground or the waves
+    var floor = GC.Terrain.ceilAt(R.cam.x, R.cam.z) + 0.002 + (GC.Terrain.isSea(R.cam.x, R.cam.z) && S.frame ? S.frame.sea[0] * 0.9 : 0);
+    S.onGround = R.cam.alt <= floor + 1e-6;
+    if (R.cam.alt < floor) R.cam.alt = floor;
+    R.clock = S.clock; R.city = S.place.city ? 1 : 0;
+    var ftr = S.ov.feature; R.feature = ftr || null;
     S.frame = S.model.at(S.simT, R.cam.alt);
     R.apply(S.frame); R.render();
     if (now - uiT > 120) { uiT = now; updateUi(); }
@@ -424,10 +556,11 @@
     if (document.activeElement !== $('time')) $('time').value = S.simT;
     $('clock').textContent = fmtClock(S.simT) + ' / 15:00 · ' + localAt(S.simT).slice(11);
     $('altLabel').textContent = altText(R.cam.alt);
+    var th = S.thunder && performance.now() < S.thunder.at + 1500 ? ' · ⚡ ' + S.thunder.km.toFixed(0) + ' km away, thunder ' + (performance.now() < S.thunder.at ? 'in ' + Math.ceil((S.thunder.at - performance.now()) / 1000) + ' s' : 'now') : '';
     var f = S.frame; if (!f) return;
     $('hud').textContent = (O.on ? 'Orbit ' + Math.round(O.D) + ' km out · ' : '') + 'Looking ' + GC.compass(R.cam.yaw) + ', ' + Math.abs(Math.round(R.cam.pitch)) + '° ' + (R.cam.pitch >= 0 ? 'up' : 'down') +
       ' · Sun ' + GC.compass(f.sunAz) + ' ' + Math.round(f.sunEl) + '°' + (R.cam.fov < 60 ? ' · zoom ' + (70 / R.cam.fov).toFixed(1) + '×' : '') +
-      (S.sharp ? ' · sharp' : R.fineOn ? ' · sharpening ' + Math.round(R.fineProgress() * 100) + '%' : '');
+      (S.sharp ? ' · sharp' : R.fineOn ? ' · sharpening ' + Math.round(R.fineProgress() * 100) + '%' : '') + th;
   }
   // keep R.flash position between frames
   var _flash = R.flash; R.flash = function (a, x, z) { R._fx = x; R._fz = z; _flash(a, x, z); };
@@ -435,17 +568,19 @@
   GC.debug = function () {
     return { version: GC.VERSION, simT: S.simT, playing: S.playing, loops: S.loops, autoLeft: S.autoLeft, source: S.data && (S.preset ? 'atlas' : S.data.source),
       place: S.place, local: S.data && S.data.localStr, types: S.model && S.model.types, summary: S.model && S.model.summary,
-      cam: { yaw: R.cam.yaw, pitch: R.cam.pitch, fov: R.cam.fov, alt: R.cam.alt }, orbit: { on: O.on, turning: O.turning, turned: O.turned, D: O.D, phi: O.phi, th: O.th, fx: O.fx, fz: O.fz, hF: O.hF }, camXZ: [R.cam.x, R.cam.z], frames: R.frames, scale: R.scale, ok: R.ok, sharp: !!S.sharp, fine: R.fineProgress(), now: S.now && { source: S.now.source, groups: S.now.groups.map(function (g) { return [g.id, g.cities.length]; }) },
+      cam: { yaw: R.cam.yaw, pitch: R.cam.pitch, fov: R.cam.fov, alt: R.cam.alt }, orbit: { on: O.on, turning: O.turning, turned: O.turned, D: O.D, phi: O.phi, th: O.th, fx: O.fx, fz: O.fz, hF: O.hF }, camXZ: [R.cam.x, R.cam.z], spot: S.spot, terrain: { source: GC.Terrain.source, max: GC.Terrain.max }, region: !!R.regionOn, precip: S.model && S.model.precipKind, vary: S.model && S.model.vary,
+      feature: S.ov.feature || null, bolts: S.bolts || 0, favs: favs.length, mapPin: GC.Map.pin, mapTiles: GC.Map.tilesOk, onGround: !!S.onGround, clock: S.clock, sound: GC.Audio.ready(), frames: R.frames, scale: R.scale, ok: R.ok, sharp: !!S.sharp, fine: R.fineProgress(), now: S.now && { source: S.now.source, groups: S.now.groups.map(function (g) { return [g.id, g.cities.length]; }) },
       sunEl: S.frame && S.frame.sunEl, exposure: S.frame && S.frame.exposure, ov: S.ov, notes: GC.Notes.all().length };
   };
 
   function start() {
-    initPanels(); GC.Notes.init(); initGear(); initPlace(); initAdjust(); initBar(); initOrbit(); initExport();
+    initPanels(); GC.Notes.init(); initGear(); initPlace(); initMap(); initMaker(); initAdjust(); initBar(); initOrbit(); initExport();
     if (!R.init($('sky'))) { $('noGl').hidden = false; setPill('sample', '⚠️ No 3-D'); return; }
     initLook();
     var lastUsed = GC.store.get('gc.last', null);
     if (lastUsed && lastUsed.place && typeof lastUsed.place.lat === 'number') { S.place = lastUsed.place; if (lastUsed.when && (lastUsed.when.now || lastUsed.when.local)) S.when = lastUsed.when; }
     var m = /[#&]atlas=([a-z]+)/.exec(location.hash);
+    GC.Map.setPlace(S.place, 3);
     requestAnimationFrame(tick);
     var first = loadSky();
     if (m && first) first.then(function () { GC.usePreset(m[1]); });

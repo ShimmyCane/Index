@@ -18,4 +18,6 @@
 
 **0.3.0 (2026-11-15, round 3, merged at Jimmy's request):** orbit mode (camera circles a centre in the clouds; drag around and over, pinch closer; Turn goes around twice then waits), a camera position in km so clouds are passed, atlas sample "Storm cells from the air". Tornado rotation and funnels are not drawn and the page says so. 63 headless checks pass.
 
+**0.4.0 (2026-11-16, round 4, on a PR, not merged):** ground from a 24 × 24 height map (Open-Meteo elevation, 5 km grid) with made-up relief, colours, cloud shadows, camera kept above it; sea with a traced wave surface near the camera, reflections, glitter, surf and whitecaps; map panel (own tile code, OSM tiles, pin, kept spots with the view); regional cover from a 25-point call plus far variation; mixed low and high layers and Shuffle; Weather maker (rain, snow, sleet veils and near drops, bolt with timed synthesized thunder, funnel with wall cloud and dust or spray, microburst). Shader rewritten as one template string; the ground works in camera-column coordinates. 80 headless checks pass with made-up replies. Unverified live: elevation, region and forecast calls (the forecast host still refuses the sandbox), OSM tiles from Pages, iPad speed.
+
 **Next.** Answers to `03 Projects/Generate Clouds/convo/convo v0.1.md`; candidates in `todo.md`.

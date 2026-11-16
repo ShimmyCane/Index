@@ -68,6 +68,23 @@ textarea { width: 100%; padding: 8px 10px; }
 .nowSkies .chips { margin-top: 4px; }
 .nowSkies .chip small { font-weight: 600; color: var(--deep); margin-left: 4px; }
 .nowSkies .none { font-size: 13px; color: #5d7690; }
+.map { position: relative; height: 210px; border: var(--line); border-radius: 12px; overflow: hidden; background: #cfe3f1; touch-action: none; cursor: crosshair; }
+.map.plain { background-image: linear-gradient(#b5cfe2 1px, transparent 1px), linear-gradient(90deg, #b5cfe2 1px, transparent 1px); background-size: 32px 32px; }
+.map .tiles, .map .marks { position: absolute; inset: 0; }
+.map .tile { position: absolute; width: 256px; height: 256px; }
+.map .tile img { width: 256px; height: 256px; display: block; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+.map .mk { position: absolute; transform: translate(-50%, -50%); font: 700 13px system-ui, sans-serif; color: var(--ink); white-space: nowrap; pointer-events: none; text-shadow: 0 0 3px #fff, 0 0 3px #fff; }
+.map .mk.city { transform: translate(-3px, -50%); font-weight: 600; font-size: 11px; }
+.map .mk.here { color: #d1495b; font-size: 20px; }
+.map .mk.fav { color: #b8860b; font-size: 18px; }
+.map .mk.pin { font-size: 22px; transform: translate(-50%, -90%); }
+.mapBtns .btn.square { font-size: 22px; }
+.spot { margin-top: 8px; font-weight: 800; font-size: 14px; }
+input[type="text"] { min-height: 48px; border: var(--line); border-radius: 12px; background: #fff; color: var(--ink); font: 16px system-ui, sans-serif; padding: 0 10px; flex: 1; min-width: 0; }
+.favs { list-style: none; margin: 8px 0 0; padding: 0; }
+.favs li { display: flex; gap: 6px; margin-bottom: 6px; }
+.favs .go { flex: 1; min-height: 48px; text-align: left; border: 2px solid var(--ink); border-radius: 12px; background: #fff; color: var(--ink); font: 14px system-ui, sans-serif; padding: 4px 10px; cursor: pointer; }
+.favs .go small { display: block; color: var(--deep); font-weight: 700; }
 .hint { font-size: 13px; margin: 8px 0 0; color: #33506f; }
 .reading { list-style: none; margin: 0; padding: 0; }
 .reading li { padding: 6px 0; border-bottom: 1.5px dashed #b8cfe4; font-size: 14px; }
