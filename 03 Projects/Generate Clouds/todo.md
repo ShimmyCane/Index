@@ -17,7 +17,15 @@
 ## Added in 0.3.0, to confirm on a real device
 - [ ] Orbit with real fingers: drag around, pinch closer; speed while turning.
 
+## Added in 0.4.0, to confirm on a real device
+- [ ] The elevation service returns 576 heights (6 calls) and a real coast looks right at a known beach.
+- [ ] The 25-point regional call works; the view from Space shows different cover in different parts.
+- [ ] Map tiles load from the Pages site; tap-to-pin with a finger.
+- [ ] Speed on iPad with terrain and waves; thunder sound after pressing play.
+
 ## Next candidates
+- [ ] Finer ground near the camera (a second, closer height grid), rivers and lakes, buildings for a city view.
+- [ ] Rain and surf sound; rainbow; wet ground.
 - [ ] Storm structure: a rotating updraught, wall cloud and funnel as a drawn sample (made-up, labelled as such); radar as the map of real cells. (waiting on convo v0.1)
 - [ ] Rounder cumulus: baked Perlin-Worley 3-D noise.
 - [ ] HDR panorama (.hdr) for lighting a render.

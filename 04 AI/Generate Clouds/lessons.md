@@ -32,3 +32,15 @@
 21. **Orbit as distance, angle above, bearing.** Three numbers and one function that sets position, heading and pitch. Drag changes bearing and angle, pinch changes distance, the height slider changes the angle.
 22. **Check an orbit from four sides.** One of four views at 10 km sat inside a cloud and was white. Default the sample above the cloud tops.
 23. **When Jimmy names something the data cannot give (tornadoes), say so in the page and in the reply,** and offer the nearest true thing (storm towers) plus a question about a drawn sample.
+
+## 2026-11-16 (0.4.0, ground, sea, weather)
+
+24. **Near-ground geometry needs local coordinates.** Planet-centred floats have about half a metre of error at 6371 km. Height above the round sea as y + (x² + z²) / 2R, in km from the camera's column, keeps waves and beaches exact, and the conjugate form of the quadratic (2c / (−b + √disc)) avoids cancellation for the sea hit.
+25. **Half-float texture for heights.** WebGL2 filters RGBA16F without an extension; convert on the CPU. Eight bits would terrace the land.
+26. **A placeholder ground must not strand the camera.** Made-up hills raised the camera 200 m, then the real coast loaded lower. A camera that stands on the ground follows the ground when it changes.
+27. **Ties in a nearest-direction scan pick the first angle.** Average the directions that reach water equally soon.
+28. **Regional data ends in a hard edge if clamped.** Fade the data's weight to zero past its grid and let slow noise carry on.
+29. **Order under-cloud weather by the camera:** below the base it is in front of the clouds, above the base it is behind them.
+30. **A funnel is darker than it first looks.** Lit like a cloud top it read as a white lens; ambient-from-below lighting made it read as a tornado.
+31. **Lightning must scale by exposure,** or a flash that reads at dusk whites out a day scene; keep the bolt's sideways wander well under its height.
+32. **Jimmy asks for whole worlds in one message.** Build every part to a working level, say which parts follow data and which are drawn from descriptions, and ask one question per part.

@@ -160,6 +160,54 @@
     });
   };
 
+  // ---------- the ground: heights for a grid of points (metres; 0 means sea) ----------
+  W.elevations = function (pts) {
+    var calls = [];
+    for (var i = 0; i < pts.length; i += 100) {
+      var part = pts.slice(i, i + 100);
+      calls.push(fetchJson('https://api.open-meteo.com/v1/elevation?latitude=' + part.map(function (p) { return p.lat.toFixed(4); }).join(',') +
+        '&longitude=' + part.map(function (p) { return p.lon.toFixed(4); }).join(','), 15000));
+    }
+    return Promise.all(calls).then(function (res) {
+      var out = [];
+      res.forEach(function (j) { if (!j.elevation) throw new Error('Elevation reply had no heights'); out = out.concat(j.elevation); });
+      if (out.length !== pts.length) throw new Error('Expected ' + pts.length + ' heights, got ' + out.length);
+      return out.map(function (m) { return (m == null || isNaN(m)) ? 0 : Math.round(m); });
+    });
+  };
+
+  // ---------- the region: cloud cover on a 5 x 5 grid, 100 km apart, for the same hour ----------
+  // Returns 25 x [low, mid, high] as 0..1 (rows north to south), or null when it cannot be had.
+  var REG_KEY = 'gc.region';
+  W.REGION = { N: 5, STEP: 100 };
+  W.region = function (place, utcMs) {
+    var hour = new Date(utcMs).toISOString().slice(0, 13) + ':00', key = placeKey(place) + '@' + hour, saved = GC.store.get(REG_KEY, []);
+    if (!Array.isArray(saved)) saved = [];
+    for (var i = 0; i < saved.length; i++) if (saved[i].key === key) return Promise.resolve(saved[i].cells);
+    var ageDays = (Date.now() - utcMs) / 86400000;
+    if (ageDays < -15) return Promise.resolve(null);
+    var lats = [], lons = [], kx = Math.max(111.2 * Math.cos(GC.rad(place.lat)), 5), n = W.REGION.N, half = (n - 1) / 2;
+    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) {
+      lats.push(GC.clamp(place.lat - (r - half) * W.REGION.STEP / 111.2, -89, 89).toFixed(3));
+      lons.push((((place.lon + (c - half) * W.REGION.STEP / kx + 540) % 360) - 180).toFixed(3));
+    }
+    var day = hour.slice(0, 10);
+    var url = (ageDays > 85 ? HOSTS.archive : HOSTS.forecast) + '?latitude=' + lats.join(',') + '&longitude=' + lons.join(',') +
+      '&hourly=cloud_cover_low,cloud_cover_mid,cloud_cover_high&timezone=GMT&start_date=' + day + '&end_date=' + day;
+    return fetchJson(url, 12000).then(function (j) {
+      var list = Array.isArray(j) ? j : [j];
+      if (list.length !== n * n) throw new Error('Expected ' + (n * n) + ' places, got ' + list.length);
+      var cells = list.map(function (x) {
+        var k = x.hourly && x.hourly.time ? x.hourly.time.indexOf(hour) : -1;
+        function v(name) { var a = x.hourly[name]; return (k < 0 || !a || a[k] == null) ? 0 : a[k] / 100; }
+        return k < 0 ? [0, 0, 0] : [v('cloud_cover_low'), v('cloud_cover_mid'), v('cloud_cover_high')];
+      });
+      saved.unshift({ key: key, cells: cells }); while (saved.length > 6) saved.pop();
+      GC.store.set(REG_KEY, saved);
+      return cells;
+    }).catch(function (e) { GC.logError('Region: ' + ((e && e.name === 'AbortError') ? 'no answer in time' : (e && e.message) || 'no connection')); return null; });
+  };
+
   // ---------- skies right now: one call for the current weather of many cities ----------
   var NOW_KEY = 'gc.now';
   var GROUPS = [
@@ -215,7 +263,8 @@
     var tests = [
       ['Weather forecast', HOSTS.forecast + q + '&hourly=cloud_cover&forecast_days=1'],
       ['Air quality', HOSTS.air + q + '&hourly=pm2_5&forecast_days=1'],
-      ['Place search', HOSTS.geo + '?name=Paris&count=1']
+      ['Place search', HOSTS.geo + '?name=Paris&count=1'],
+      ['Ground heights', 'https://api.open-meteo.com/v1/elevation?latitude=0&longitude=0']
     ];
     return Promise.all(tests.map(function (t) {
       return fetchJson(t[1], 7000).then(function () { return { name: t[0], ok: true, msg: 'reachable' }; },

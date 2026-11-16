@@ -2,10 +2,10 @@
 (function () {
   'use strict';
   var GC = window.GC = window.GC || {};
-  GC.VERSION = '0.3.0';
+  GC.VERSION = '0.4.0';
 
   var KEY = 'gc.settings';
-  GC.DEFAULTS = { quality: 'med', speed: 60, autoplay: 1, compass: 1, turn: 60, showErrors: false };
+  GC.DEFAULTS = { quality: 'med', speed: 60, autoplay: 1, compass: 1, turn: 60, sound: 1, showErrors: false };
   GC.settings = {};
   (function load() {
     var saved = {};

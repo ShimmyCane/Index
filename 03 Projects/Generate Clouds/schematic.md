@@ -2,7 +2,7 @@
 
 **Track: B. Studio design** (a 3-D sky study and backdrop maker for renderings). Palette: sky-blue ink on cloud-white paper, because the subject is the sky. Panels collapsible, open on a large screen, closed on a phone.
 
-Status: MVP 0.3.0 (2026-11-15). Headless-tested with made-up weather replies. Not yet run against the live weather service, and not yet on an iPad.
+Status: MVP 0.4.0 (2026-11-16). Headless-tested with made-up weather replies. Not yet run against the live weather service, and not yet on an iPad.
 
 ## Purpose
 
@@ -13,7 +13,7 @@ Pick any point on Earth and any moment. The page reads the weather for that poin
 | Setting | This project |
 |---|---|
 | Words on screen | Full labels and units, in panels; the sky fills the screen |
-| Panels | Place and time · How to read this sky · Cloud atlas · Adjust · Save pictures. ☰ hides all of them |
+| Panels | Map · Place and time · How to read this sky · Cloud atlas · Weather maker · Adjust · Save pictures. ☰ hides all of them |
 | Under the scene | Play, back to start, time slider; camera height slider; Ground, Inside, Above, Space, Orbit, Turn |
 | ⚙️ holds | Picture quality, time-lapse speed, autoplay, compass line, data check, notes, Show errors, version |
 | Database | None. Device storage only |
@@ -31,6 +31,9 @@ Pick any point on Earth and any moment. The page reads the weather for that poin
 | `js/skymodel.js` | Weather numbers → cloud types, heights, amounts, wind, haze, and the plain-words reading |
 | `js/shader.js` | The sky shader (air, two cloud volumes, cirrus, sun, stars) |
 | `js/renderer.js` | three.js set-up, camera, quality, tiled picture export |
+| `js/terrain.js` | The height map: loading, smoothing, what kind of spot it is, where the water is |
+| `js/map.js` | The map panel (tiles, pin, markers), no library |
+| `js/audio.js` | Thunder, made with Web Audio |
 | `js/notes.js` | Notes for improvement |
 | `js/app.js` | Panels, time lapse, camera, saving, ⚙️ |
 | `js/vendor/three.min.js` | three.js r128 (MIT), copied in so the page works from `file://` |
@@ -72,6 +75,34 @@ Three layers. Low and mid are volumes; high is a thin sheet.
 
 The planet has always been a sphere of 6371 km in the model. From the ground the horizon is flat, as in life. The height slider now runs to 400 km on a cube curve (the first third covers 0 to 13 km), and a **Space** chip jumps to 250 km looking down, where the limb, the thin blue line of air and the cloud deck wrapping the globe are visible. Clouds are drawn out to 260 km + 14 × height.
 
+## The ground, the sea and the map (0.4.0)
+
+- **Ground.** A height map of 24 × 24 points, 5 km apart (120 km across), from Open-Meteo's elevation service (6 calls, saved per place). 0 m means sea. It is smoothed for the shader, which adds small made-up relief. Colours by height and slope: beach, grass, woods, dry ground, rock, snow above the freezing level; a grey built-up patch with night lights around a named city. Cloud shadows fall on it. The camera cannot go under it. This is the general shape of land and coast, not a survey.
+- **Sea.** Where the height is 0. Near the camera the waves are a real surface (five layers of moving swell and chop, height 0.022 × wind² metres, running with the wind); farther away they become a rougher mirror. The water reflects the sky colours, shows the sun's glitter path, goes paler in the shallows, breaks in lines near the shore and shows whitecaps above about 8 m/s. Waves, rain and funnels move in real seconds while the time lapse plays.
+- **Without ground data** the land is made-up rolling hills with no sea, and the map panel says so.
+- **Map panel** (top of the left column). OpenStreetMap tiles; drag, + and −, World, This spot. Tap to drop a pin, then "Generate the sky at the pin". If tiles cannot load, a plain grid with city dots. The panel names the spot (Open water, Coast, Lowland, Hills, Mountains) with its height, and offers "Face the water" and "Face the high ground".
+- **Kept spots.** ⭐ Keep saves the place with the way you were looking (heading, tilt, zoom, height, position). Up to 30, on this device (`gc.favs`).
+
+## Weather across the region, and mixed skies (0.4.0)
+
+- **Region.** One call fetches low, mid and high cover for 25 points (5 × 5, 100 km apart) at the same hour. Cover varies across the view accordingly; beyond 500 km it fades back to the place's own value with slow made-up variation, so a view from high up is not one repeated pattern. Not used for atlas samples or when cover is set by hand.
+- **Mixed low layer.** A share of the cells grows taller than the rest: cumulus with some taller heaps (share from CAPE), stratocumulus thicker in places, congestus towers among small cumulus, storm towers among lower cumulus.
+- **Mixed high layer.** Patches of small ripples among the cirrus streaks, on some skies.
+- **Shuffle** (Weather maker) keeps the weather and deals new shapes and a new mix. The same place, hour and shuffle count always give the same sky.
+
+## Weather maker (0.4.0)
+
+| Weather | From the data | By hand |
+|---|---|---|
+| Rain, snow, sleet | Yes: when the hour has precipitation. Kind from the weather code, else the ground temperature (snow at 0.5 °C or less, sleet under 2.5 °C) | "What falls" and "How hard" |
+| Lightning and thunder | With a thunderstorm code | Tick box |
+| Tornado, waterspout, microburst | Never: no feed reports them | Chips; placed 5 to 9 km ahead of the view |
+
+- Rain and snow are a veil under the thicker cloud, slanted by the wind, plus drops or flakes close to the lens when the camera stands in it.
+- A bolt is drawn from the cloud base to the ground; the cloud lights up; the top line counts down to the thunder (distance ÷ 0.343 km/s), which is made in the page.
+- A funnel hangs from a lowered wall cloud, leans and turns, with dust at the ground or spray over water (a tornado placed over water becomes a waterspout). A microburst is a rain shaft that flares at the ground with a curl at its edge. Placing one puts a storm cloud above it.
+- These three are **drawn from descriptions, not simulated**: no wind field, no damage, no size taken from data. The reading panel labels them "Made-up".
+
 ## Orbit (0.3.0)
 
 - **Orbit** chip (beside the height chips): the camera circles a centre point in the clouds and always faces it. The centre is where the view was pointing, at the middle height of the low cloud. From the ground it first lifts the camera above the low cloud.
@@ -109,7 +140,8 @@ Dates more than 85 days back use the archive service (no upper winds, CAPE or ai
 ## What it is not (known limits)
 
 - Not a photo of the real sky: amounts, heights, wind, sun and haze follow the data; each cloud's shape is generated.
-- Three layers only. No moon, no terrain, no cloud shadows on the ground, no rain streaks.
+- Three layers only. No moon. The ground is a coarse height map: no buildings, trees, roads, rivers or lakes, and coasts are only right to a few kilometres. Below-sea-level land reads as sea.
+- Tornadoes, waterspouts and microbursts are drawn from descriptions and placed by hand.
 - Close-up detail is generated noise, not a simulation of real turbulence; at the deepest zoom, edges show some grain.
 - "Skies right now" covers 72 cities, not the whole world; a storm elsewhere is not listed.
 - Pictures are 8-bit PNG backdrops, not HDR light sources.

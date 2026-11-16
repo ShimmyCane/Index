@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Generate Clouds</title>
-<link rel="stylesheet" href="css/style.css?v=0.3.0">
+<link rel="stylesheet" href="css/style.css?v=0.4.0">
 </head>
 <body data-panels="on">
 
@@ -19,6 +19,34 @@
 <div class="hud" id="hud"></div>
 
 <main class="panels" id="panels">
+
+  <section class="panel" data-panel="map">
+    <button class="panelHead" type="button" aria-expanded="true" aria-controls="map-body">
+      <span class="panelIcon">🗺️</span><span class="panelTitle">Map</span><span class="panelMark">▾</span>
+    </button>
+    <div class="panelBody" id="map-body">
+      <div class="map" id="map" aria-label="World map. Drag to move, tap to drop a pin."></div>
+      <div class="row mapBtns">
+        <button class="btn square" id="mapOut" type="button" aria-label="Zoom the map out">−</button>
+        <button class="btn square" id="mapIn" type="button" aria-label="Zoom the map in">+</button>
+        <button class="btn" id="mapWorld" type="button">World</button>
+        <button class="btn" id="mapHere" type="button">This spot</button>
+      </div>
+      <p class="hint" id="mapNote">Tap the map to drop a pin on a beach, the open sea, a city or a mountain.</p>
+      <button class="btn wide primary" id="mapGo" type="button" hidden>Generate the sky at the pin</button>
+      <div class="spot" id="spotKind"></div>
+      <div class="chips">
+        <button class="chip" id="faceWater" type="button" hidden>Face the water</button>
+        <button class="chip" id="faceHigh" type="button" hidden>Face the high ground</button>
+      </div>
+      <div class="row">
+        <input type="text" id="favName" placeholder="Name this spot" aria-label="A name for this spot" maxlength="40">
+        <button class="btn" id="favSave" type="button">⭐ Keep</button>
+      </div>
+      <ul class="favs" id="favList"></ul>
+      <p class="hint">A kept spot remembers the place and the way you were looking. Kept on this device only. Map © OpenStreetMap contributors.</p>
+    </div>
+  </section>
 
   <section class="panel" data-panel="place">
     <button class="panelHead" type="button" aria-expanded="true" aria-controls="place-body">
@@ -62,7 +90,7 @@
     </button>
     <div class="panelBody" id="reading-body">
       <ul class="reading" id="reading"></ul>
-      <p class="hint"><b>What this is not:</b> a photograph of the real sky. The amounts, heights, wind, sun and haze follow the data. The exact shape of each cloud is generated, so it will not match the cloud outside your window.</p>
+      <p class="hint"><b>What this is not:</b> a photograph of the real place. The amounts, heights, wind, sun and haze follow the data. The exact shape of each cloud is generated. The ground is a coarse height map (one point every 5 km) with made-up small relief, so coasts and hills are in roughly the right place and nothing more; buildings and trees are not drawn.</p>
     </div>
   </section>
 
@@ -73,6 +101,35 @@
     <div class="panelBody" id="atlas-body">
       <p class="hint">Sample skies, one per cloud type. They use the place and date above, with made-up weather.</p>
       <div class="atlas" id="atlas"></div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="maker" data-open="false">
+    <button class="panelHead" type="button" aria-expanded="false" aria-controls="maker-body">
+      <span class="panelIcon">🌩️</span><span class="panelTitle">Weather maker</span><span class="panelMark">▾</span>
+    </button>
+    <div class="panelBody" id="maker-body">
+      <p class="hint">Start from the data, then add weather by hand. Tornadoes, waterspouts and microbursts are never in the data: they are drawn from descriptions.</p>
+      <label class="field">What falls
+        <select id="mkPrecip">
+          <option value="">From the data</option>
+          <option value="none">Nothing</option>
+          <option value="rain">Rain</option>
+          <option value="snow">Snow</option>
+          <option value="sleet">Sleet</option>
+        </select>
+      </label>
+      <label class="slider"><span>How hard <b id="mkStrengthV"></b></span><input type="range" id="mkStrength" min="0.2" max="1" step="0.05" value="0.6"></label>
+      <label class="toggle"><input type="checkbox" id="mkLightning"> Lightning and thunder</label>
+      <div class="chips">
+        <button class="chip" data-feature="tornado" type="button">Tornado</button>
+        <button class="chip" data-feature="waterspout" type="button">Waterspout</button>
+        <button class="chip" data-feature="microburst" type="button">Microburst</button>
+        <button class="chip" data-feature="" type="button">Clear it</button>
+      </div>
+      <p class="hint" id="mkNote">A funnel or microburst is placed 5 to 9 km ahead of where you are looking. Press play to see it move.</p>
+      <button class="btn wide" id="shuffle" type="button">🎲 Shuffle the sky</button>
+      <p class="hint">Shuffle keeps the weather and deals new cloud shapes and a new mix of types.</p>
     </div>
   </section>
 
@@ -173,6 +230,9 @@
   <div class="setting"><label>Orbit: one full turn takes</label>
     <div class="seg" data-key="turn"><button data-v="30" type="button">30 s</button><button data-v="60" type="button">60 s</button><button data-v="120" type="button">120 s</button></div>
     <p class="hint">Orbit circles a point in the clouds. Drag to go around and over it, pinch to come closer. Turn goes around twice by itself, then waits.</p></div>
+  <div class="setting"><label>Thunder sound</label>
+    <div class="seg" data-key="sound"><button data-v="1" type="button">On</button><button data-v="0" type="button">Off</button></div>
+    <p class="hint">Starts after you press play once. The rumble arrives late, as in life: 3 seconds for each kilometre.</p></div>
   <div class="setting"><label>Compass line at the top</label>
     <div class="seg" data-key="compass"><button data-v="1" type="button">Show</button><button data-v="0" type="button">Hide</button></div></div>
 
@@ -197,14 +257,17 @@
 <div id="errorsPanel" class="errorsPanel" hidden></div>
 
 <script src="js/vendor/three.min.js"></script>
-<script src="js/core.js?v=0.3.0"></script>
-<script src="js/sun.js?v=0.3.0"></script>
-<script src="js/presets.js?v=0.3.0"></script>
-<script src="js/weather.js?v=0.3.0"></script>
-<script src="js/skymodel.js?v=0.3.0"></script>
-<script src="js/shader.js?v=0.3.0"></script>
-<script src="js/renderer.js?v=0.3.0"></script>
-<script src="js/notes.js?v=0.3.0"></script>
-<script src="js/app.js?v=0.3.0"></script>
+<script src="js/core.js?v=0.4.0"></script>
+<script src="js/sun.js?v=0.4.0"></script>
+<script src="js/presets.js?v=0.4.0"></script>
+<script src="js/weather.js?v=0.4.0"></script>
+<script src="js/skymodel.js?v=0.4.0"></script>
+<script src="js/terrain.js?v=0.4.0"></script>
+<script src="js/map.js?v=0.4.0"></script>
+<script src="js/audio.js?v=0.4.0"></script>
+<script src="js/shader.js?v=0.4.0"></script>
+<script src="js/renderer.js?v=0.4.0"></script>
+<script src="js/notes.js?v=0.4.0"></script>
+<script src="js/app.js?v=0.4.0"></script>
 </body>
 </html>
