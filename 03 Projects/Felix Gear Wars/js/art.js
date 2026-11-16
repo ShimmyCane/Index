@@ -33,20 +33,38 @@
   THEMES.chinese = { name: 'Chinese silk painting', short: 'Chinese', ink: '#232323', line: 0.9, sat: 0.6, light: 0.05, tint: '#d8d1b6', tintAmt: 0.2,
     gold: '#b8923a', gold2: '#dcc476', paper: '#f0e8d2', paper2: '#e0d6b8', panel: '#f4edd9', panel2: '#e2d8bb', text: '#232323', btn: '#e4c46e', dark: false,
     ally: '#2b7a70', enemy: '#b0302a' };
+  THEMES.aztec = { name: 'Aztec codex', short: 'Aztec', ink: '#1b1b1b', line: 1.15, sat: 1.1, light: 0, tint: '#e6c88a', tintAmt: 0.1,
+    gold: '#d4a021', gold2: '#f0cd6a', paper: '#e8d7b0', paper2: '#d6c08e', panel: '#efe0bb', panel2: '#ddc895', text: '#2a1c10', btn: '#e0b04a', dark: false,
+    ally: '#1f8a7a', enemy: '#b8402a' };
+  THEMES.indian = { name: 'Mughal miniature', short: 'Indian', ink: '#3a1f12', line: 0.95, sat: 1.2, light: 0.01, tint: '#f0c98a', tintAmt: 0.08,
+    gold: '#d29a1e', gold2: '#f5d66c', paper: '#f3dfb4', paper2: '#e3c68c', panel: '#f8ebcb', panel2: '#e8cf96', text: '#3a1f12', btn: '#e9b94d', dark: false,
+    ally: '#2a7f62', enemy: '#b32c3a' };
+  THEMES.spanish = { name: 'Spanish illumination', short: 'Spanish', ink: '#2f1d14', line: 1.05, sat: 1.1, light: 0, tint: '#e8b878', tintAmt: 0.1,
+    gold: '#cf9a22', gold2: '#f3d36a', paper: '#f0dcb4', paper2: '#e0c28a', panel: '#f6e8c8', panel2: '#e6cc96', text: '#2f1d14', btn: '#e8b84a', dark: false,
+    ally: '#c9941a', enemy: '#a8342a' };
   // Each culture renames the fighters and changes headgear and blades, so the army looks like the place it comes from.
   var CULTURES = {
+    france: { label: 'French', star: 'knight', names: { spearman: 'Pikeman', archer: 'Archer', fighter: 'Man-at-arms', assassin: 'Brigand', knight: 'Chevalier', tank: 'Armoured guard', mage: 'Alchemist', catapult: 'Trebuchet' }, head: {} },
     norman: { names: { spearman: 'Fyrdman', archer: 'Bowman', fighter: 'Housecarl', assassin: 'Scout', knight: 'Horseman', tank: 'Shield wall', mage: 'Seer', catapult: 'Siege engine' }, head: {} },
-    japan: { names: { spearman: 'Ashigaru', archer: 'Yumi archer', fighter: 'Samurai', assassin: 'Ninja', knight: 'Mounted samurai', tank: 'Armoured guard', mage: 'Onmyoji', catapult: 'Siege cannon' },
+    spain: { label: 'Spanish', star: 'tank', names: { spearman: 'Peon', archer: 'Ballestero', fighter: 'Rodelero', assassin: 'Almogavar', knight: 'Caballero', tank: 'Conquistador', mage: 'Alquimista', catapult: 'Bombard' },
+      head: { spearman: 'morion', archer: 'montera', fighter: 'morion', assassin: 'beret', knight: 'morion', tank: 'morionBig', mage: 'beret' } },
+    aztec: { label: 'Aztec', star: 'fighter', names: { spearman: 'Spear warrior', archer: 'Atlatl thrower', fighter: 'Jaguar warrior', assassin: 'Eagle scout', knight: 'Eagle warrior', tank: 'Shield bearer', mage: 'Priest', catapult: 'Stone thrower' },
+      head: { spearman: 'feather', archer: 'feather', fighter: 'jaguar', assassin: 'feather', knight: 'eagleHelm', tank: 'jaguar', mage: 'quetzal' }, blade: 'macuahuitl' },
+    india: { label: 'Indian', star: 'catapult', names: { spearman: 'Bhala guard', archer: 'Dhanush archer', fighter: 'Talwar fighter', assassin: 'Swift scout', knight: 'Rajput rider', tank: 'Shield guard', mage: 'Yogi', catapult: 'Mughal cannon' },
+      head: { spearman: 'pagri', archer: 'pagri', fighter: 'pagri', assassin: 'wrap', knight: 'aventail', tank: 'pagriBig', mage: 'yogi' }, blade: 'scimitar' },
+    japan: { label: 'Japanese', star: 'assassin', names: { spearman: 'Ashigaru', archer: 'Yumi archer', fighter: 'Samurai', assassin: 'Ninja', knight: 'Mounted samurai', tank: 'Armoured guard', mage: 'Onmyoji', catapult: 'Siege cannon' },
       head: { spearman: 'jingasa', archer: 'jingasa', fighter: 'kabuto', assassin: 'ninja', knight: 'kabuto', tank: 'kabutoBig', mage: 'eboshi' }, blade: 'katana' },
-    persia: { names: { spearman: 'Nayza guard', archer: 'Kaman archer', fighter: 'Swordsman', assassin: 'Shadow scout', knight: 'Savar rider', tank: 'Armoured guard', mage: 'Sage', catapult: 'Manjaniq' },
+    persia: { label: 'Persian', star: 'mage', names: { spearman: 'Nayza guard', archer: 'Kaman archer', fighter: 'Swordsman', assassin: 'Shadow scout', knight: 'Savar rider', tank: 'Armoured guard', mage: 'Magus', catapult: 'Manjaniq' },
       head: { spearman: 'kulah', archer: 'turban', fighter: 'turban', assassin: 'ninja', knight: 'kulah', tank: 'kulahHelm', mage: 'turban' }, blade: 'scimitar' },
-    egypt: { names: { spearman: 'Spearman', archer: 'Bowman', fighter: 'Khopesh fighter', assassin: 'Desert scout', knight: 'Charioteer', tank: 'Shield bearer', mage: 'Priest', catapult: 'Stone hurler' },
+    egypt: { label: 'Egyptian', star: 'spearman', names: { spearman: 'Spearman', archer: 'Bowman', fighter: 'Khopesh fighter', assassin: 'Desert scout', knight: 'Charioteer', tank: 'Shield bearer', mage: 'Priest', catapult: 'Stone hurler' },
       head: { spearman: 'khat', archer: 'khat', fighter: 'nemes', assassin: 'wrap', knight: 'nemes', tank: 'nemes', mage: 'priest' }, blade: 'khopesh' },
-    china: { names: { spearman: 'Spear guard', archer: 'Bowman', fighter: 'Dao fighter', assassin: 'Shadow sword', knight: 'Cavalry', tank: 'Iron guard', mage: 'Taoist', catapult: 'Trebuchet' },
+    china: { label: 'Chinese', star: 'archer', names: { spearman: 'Spear guard', archer: 'Crossbowman', fighter: 'Dao fighter', assassin: 'Shadow sword', knight: 'Cavalry', tank: 'Iron guard', mage: 'Taoist', catapult: 'Trebuchet' },
       head: { spearman: 'conical', archer: 'conical', fighter: 'topknot', assassin: 'ninja', knight: 'tangHelm', tank: 'tangHelmBig', mage: 'taoist' }, blade: 'dao' },
   };
-  THEMES.tapestry.culture = CULTURES.norman; THEMES.woodblock.culture = CULTURES.japan; THEMES.persian.culture = CULTURES.persia;
-  THEMES.egyptian.culture = CULTURES.egypt; THEMES.chinese.culture = CULTURES.china;
+  THEMES.manuscript.culture = CULTURES.france; THEMES.tapestry.culture = CULTURES.norman; THEMES.woodblock.culture = CULTURES.japan; THEMES.persian.culture = CULTURES.persia;
+  THEMES.egyptian.culture = CULTURES.egypt; THEMES.chinese.culture = CULTURES.china; THEMES.aztec.culture = CULTURES.aztec; THEMES.indian.culture = CULTURES.india; THEMES.spanish.culture = CULTURES.spain;
+  Art.specialty = function () { var cu = Art.theme.culture; return (cu && cu.star) || null; };
+  Art.cultureLabel = function () { var cu = Art.theme.culture; return (cu && cu.label) || null; };
   Art.unitName = function (type) {
     var cu = Art.theme.culture, n = cu && cu.names && cu.names[type];
     return n || (F.gearInfo(type) || {}).name || type;
@@ -210,6 +228,40 @@
         c.beginPath(); c.rect(x - r * 0.85, y - r * 2.2, r * 1.8, r * 1.6); fillStroke(c, F2('#24242b'));
         c.beginPath(); c.moveTo(x - r * 0.85, y - r * 1.5); c.lineTo(x + r * 0.95, y - r * 1.5); c.lineWidth = 2; c.strokeStyle = F2('#e8c14a'); c.stroke(); c.strokeStyle = Art.ink; c.lineWidth = Art.lw;
         seg(c, x - r, y - r * 0.8, x + r, y - r * 0.9, 2.4, F2('#e8c14a')); break;
+      case 'morion': case 'morionBig':
+        c.beginPath(); c.arc(x, y - 1, (r + 1.6) * big, Math.PI, TAU); c.lineTo(x + (r + 6) * big, y + 1); c.lineTo(x - (r + 6) * big, y + 1); c.closePath(); fillStroke(c, F2(P.steel));
+        c.beginPath(); c.moveTo(x - (r + 1) * big, y - r * 0.4 * big - 2); c.quadraticCurveTo(x, y - (r + 12) * big, x + (r + 1) * big, y - r * 0.4 * big - 2); c.lineWidth = 3; c.strokeStyle = acc; c.stroke(); c.strokeStyle = Art.ink; c.lineWidth = Art.lw;
+        if (kind === 'morionBig') seg(c, x - 2, y - (r + 8) * big, x - 8, y - (r + 16) * big, 3, acc); break;
+      case 'montera':
+        c.beginPath(); c.ellipse(x, y - r * 0.6, r * 1.15, r * 0.8, 0, 0, TAU); fillStroke(c, F2(st.enemy ? P.dark : '#3a2b24')); c.beginPath(); c.ellipse(x, y - r * 0.15, r * 1.25, r * 0.35, 0, 0, TAU); fillStroke(c, acc); break;
+      case 'beret':
+        c.beginPath(); c.ellipse(x + 1, y - r * 0.75, r * 1.3, r * 0.6, -0.2, 0, TAU); fillStroke(c, F2(st.enemy ? P.dark : '#8a2f3a'));
+        c.beginPath(); c.moveTo(x - 2, y - r); c.quadraticCurveTo(x - r * 1.6, y - r * 2.2, x - r * 2.3, y - r * 1.3 + Math.sin(st.t * 6) * 2); c.lineWidth = 3; c.strokeStyle = F2('#f4f0e0'); c.stroke(); c.strokeStyle = Art.ink; c.lineWidth = Art.lw; break;
+      case 'feather': case 'headband':
+        c.beginPath(); c.moveTo(x - r, y - r * 0.5); c.lineTo(x + r, y - r * 0.6); c.lineWidth = 4; c.strokeStyle = F2(st.enemy ? P.dark : '#1f8a7a'); c.stroke(); c.strokeStyle = Art.ink; c.lineWidth = Art.lw;
+        if (kind === 'feather') for (k = -1; k <= 1; k++) { c.beginPath(); c.moveTo(x + k * 5, y - r * 0.6); c.quadraticCurveTo(x + k * 10, y - r * 2, x + k * 14, y - r * 2.6); c.lineWidth = 4.5; c.strokeStyle = F2(['#2aa86a', '#e04a3a', '#2a8ad0'][k + 1]); c.stroke(); } c.strokeStyle = Art.ink; c.lineWidth = Art.lw; break;
+      case 'jaguar':
+        c.beginPath(); c.arc(x, y - 1, r + 2, Math.PI * 0.95, TAU * 1.03); c.lineTo(x + r, y - r * 0.3); c.lineTo(x - r, y - r * 0.3); c.closePath(); fillStroke(c, F2('#e0a03a'));
+        [-1, 1].forEach(function (sg) { circ(c, x + sg * r * 0.8, y - r - 1, 3.4, F2('#e0a03a')); });
+        for (k = 0; k < 5; k++) { c.fillStyle = Art.ink; c.beginPath(); c.arc(x - r * 0.7 + k * r * 0.35, y - r * (0.8 + (k % 2) * 0.35), 1.7, 0, TAU); c.fill(); } break;
+      case 'eagleHelm':
+        c.beginPath(); c.arc(x, y - 1, r + 2, Math.PI, TAU); c.lineTo(x + r + 2, y + 1); c.lineTo(x - r - 2, y + 1); c.closePath(); fillStroke(c, F2('#e8e0c8'));
+        poly(c, [x + r * 0.2, y - r * 0.9, x + r + 9, y - r * 0.2, x + r * 0.4, y + r * 0.1], F2('#e0a03a'));
+        for (k = -2; k <= 2; k++) { c.beginPath(); c.moveTo(x - r * 0.4, y - r); c.quadraticCurveTo(x - r * 1.3 + k * 4, y - r * 2.2, x - r * 1.5 + k * 7, y - r * 1.8 + Math.abs(k) * 3); c.lineWidth = 4; c.strokeStyle = F2(k % 2 ? '#e8e0c8' : '#d8c8a0'); c.stroke(); } c.strokeStyle = Art.ink; c.lineWidth = Art.lw; break;
+      case 'quetzal':
+        c.beginPath(); c.moveTo(x - r, y - r * 0.5); c.lineTo(x + r, y - r * 0.6); c.lineWidth = 4; c.strokeStyle = F2('#e8c14a'); c.stroke();
+        for (k = -3; k <= 3; k++) { c.beginPath(); c.moveTo(x + k * 3.5, y - r * 0.6); c.quadraticCurveTo(x + k * 9, y - r * 2.2 - Math.abs(k) * -2, x + k * 12, y - r * 3 + Math.abs(k) * 4); c.lineWidth = 4; c.strokeStyle = F2(['#2aa86a', '#2a8ad0', '#2aa86a', '#e04a3a'][Math.abs(k)]); c.stroke(); } c.strokeStyle = Art.ink; c.lineWidth = Art.lw; break;
+      case 'pagri': case 'pagriBig':
+        c.beginPath(); c.ellipse(x, y - r * 0.55, r * 1.3 * big, r * 0.9 * big, 0, 0, TAU); fillStroke(c, F2(st.enemy ? st.pal.hat : '#e8863a'));
+        c.beginPath(); c.arc(x, y - r * 0.4, r * 1.05 * big, Math.PI * 1.1, Math.PI * 1.9); c.lineWidth = 1.5; c.stroke(); c.lineWidth = Art.lw;
+        circ(c, x + r * 0.2, y - r * 1.05, 2.6, F2('#d63a4a')); seg(c, x + r * 0.2, y - r * 1.2, x + r * 0.1, y - r * 2.1, 2.2, F2('#f4f0e0')); break;
+      case 'aventail':
+        poly(c, [x - r - 1, y - 1, x - r - 5, y + r + 6, x + r * 0.2, y + r + 4, x + r * 0.6, y + 2], F2('#b8bcc6'));
+        c.beginPath(); c.arc(x, y - 1, r + 1.8, Math.PI, TAU); c.lineTo(x + r + 1.8, y + 1); c.lineTo(x - r - 1.8, y + 1); c.closePath(); fillStroke(c, F2(P.steel));
+        seg(c, x, y - r - 1, x, y - r - 10, 2.4, F2(P.steel)); circ(c, x, y - r - 11, 2.4, acc); break;
+      case 'yogi':
+        c.beginPath(); c.arc(x, y - 1, r + 1.2, Math.PI * 1.05, TAU * 0.98); c.lineTo(x + r, y - r * 0.4); c.lineTo(x - r, y - r * 0.4); c.closePath(); fillStroke(c, F2('#2a2a30'));
+        circ(c, x - 2, y - r - 4, r * 0.55, F2('#2a2a30')); c.beginPath(); c.moveTo(x - r, y - r * 0.4); c.lineTo(x + r, y - r * 0.5); c.lineWidth = 3.4; c.strokeStyle = F2('#e8863a'); c.stroke(); c.strokeStyle = Art.ink; c.lineWidth = Art.lw; break;
       default: return false;
     }
     return true;
@@ -219,6 +271,10 @@
     var cu = Art.theme.culture, kind = cu && cu.blade, ux = Math.cos(ang), uy = Math.sin(ang), nx = -uy, ny = ux, col = st.F('#d9dde6');
     function stroke(w, color, path) { c.strokeStyle = color; c.lineWidth = w; c.lineCap = 'round'; c.beginPath(); path(); c.stroke(); }
     if (!kind) { seg(c, bx - ux * 6, by - uy * 6, bx + ux * len, by + uy * len, 4.4, col); }
+    else if (kind === 'macuahuitl') {
+      seg(c, bx - ux * 6, by - uy * 6, bx + ux * len * 0.95, by + uy * len * 0.95, 9, st.F('#a8794a'));
+      for (var q = 1; q <= 5; q++) { var px = bx + ux * len * q * 0.17, py = by + uy * len * q * 0.17; [-1, 1].forEach(function (sg) { poly(c, [px - ux * 3 + nx * sg * 4, py - uy * 3 + ny * sg * 4, px + nx * sg * 9, py + ny * sg * 9, px + ux * 3 + nx * sg * 4, py + uy * 3 + ny * sg * 4], st.F('#2a2a30')); }); }
+    }
     else {
       var L2 = kind === 'katana' ? len * 1.2 : kind === 'dao' ? len * 1.05 : len, w = kind === 'scimitar' ? 5.4 : kind === 'dao' ? 6 : kind === 'katana' ? 3.4 : 4;
       var path;
@@ -418,12 +474,13 @@
     }
     c.globalAlpha = alpha; c.scale(face * sc, sc); c.rotate(rot * face);
     inkStyle(c); fn(c, st); c.restore();
-    if (u.anim !== 'die' && (lvl >= 2 || u.champ)) {   // gold stars above the head: one per gear level above the first; a crown on a champion
-      c.save(); c.translate(sx, sy); inkStyle(c); var top = -80 * sc - 20;
-      for (var si = 0; si < lvl - 1; si++) { var sx2 = (si - (lvl - 2) / 2) * 15, sz = 6.5; c.beginPath();
+    if (u.anim !== 'die' && (lvl >= 2 || u.champ || u.special)) {   // above the head: one gold star per gear level above the first, a bigger star for the culture's specialty, a crown on a champion
+      c.save(); c.translate(sx, sy); inkStyle(c); var top = -80 * sc - 20, n = lvl - 1, startX = -((n - 1) * 15) / 2 - (u.special ? 11 : 0);
+      for (var si = 0; si < n; si++) { var sx2 = startX + si * 15, sz = 6.5; c.beginPath();
         for (var k = 0; k < 10; k++) { var rr2 = k % 2 ? sz * 0.42 : sz, an = -Math.PI / 2 + k * Math.PI / 5; c.lineTo(sx2 + Math.cos(an) * rr2, top + Math.sin(an) * rr2); }
         c.closePath(); c.fillStyle = Art.C(Art.theme.gold2); c.fill(); c.lineWidth = 1.6; c.stroke(); }
-      if (u.champ) { c.save(); c.translate(0, top - 12); c.scale(1.2, 1.2); Art.icon(c, 'boss', 0, 0, 1, Art.C('#ffd75a')); c.restore(); }
+      if (u.special) Art.starBadge(c, n ? startX + n * 15 + 2 : 0, top - 1, 10);
+      if (u.champ) { c.save(); c.translate(0, top - 14); c.scale(1.2, 1.2); Art.icon(c, 'boss', 0, 0, 1, Art.C('#ffd75a')); c.restore(); }
       c.restore();
     }
   };
@@ -515,6 +572,7 @@
     c.restore();
     // level pips are drawn upright, not turning
     c.save(); c.translate(x, y);
+    if (opts.star) Art.starBadge(c, -r * 0.78, -r * 0.78, 9);
     for (var i = 0; i < g.level; i++) { var px = (i - (g.level - 1) / 2) * 9, py = r * 0.86; c.beginPath(); c.arc(px, py, 3.4, 0, TAU); c.fillStyle = Art.theme.gold2; c.fill(); c.strokeStyle = Art.ink; c.lineWidth = 1.4; c.stroke(); }
     if (g.type === 'mult' || !need) { /* no ticks to show */ }
     c.restore();
@@ -724,6 +782,9 @@
         if (key === 'manuscript') { c.beginPath(); c.ellipse(x, y, 5, 3, side % 2 ? 1.57 : 0, 0, TAU); c.fill(); c.fillStyle = C(T.gold); c.beginPath(); c.arc(x + (side % 2 ? 0 : step / 2), y + (side % 2 ? step / 2 : 0), 2.4, 0, TAU); c.fill(); }
         else if (key === 'tapestry') { c.fillRect(x - 3, y - 3, 6, 6); }
         else if (key === 'woodblock') { c.fillStyle = C('#c5392c'); if (((s / step) | 0) % 4 === 0) c.fillRect(x - 3, y - 3, 6, 6); }
+        else if (key === 'aztec') { c.fillStyle = ((s / step) | 0) % 2 ? C('#1f8a7a') : C('#b8402a'); c.fillRect(x - 5, y - 2, 10, 4); c.fillRect(x - 2, y - 5, 4, 10); }
+        else if (key === 'indian') { c.fillStyle = ((s / step) | 0) % 2 ? C('#b32c3a') : C(T.gold); for (var pt = 0; pt < 5; pt++) { c.beginPath(); c.arc(x + Math.cos(pt * 1.2566) * 3.6, y + Math.sin(pt * 1.2566) * 3.6, 2.2, 0, TAU); c.fill(); } }
+        else if (key === 'spanish') { c.fillStyle = ((s / step) | 0) % 2 ? C('#2a6f8a') : C(T.gold); c.save(); c.translate(x, y); for (var sq = 0; sq < 2; sq++) { c.rotate(Math.PI / 4); c.fillRect(-3.5, -3.5, 7, 7); } c.restore(); }
         else if (key === 'persian') { c.fillStyle = ((s / step) | 0) % 2 ? C('#1f6f8a') : C(T.gold); c.save(); c.translate(x, y); c.rotate(Math.PI / 4); c.fillRect(-3.5, -3.5, 7, 7); c.restore(); }
         else if (key === 'egyptian') { c.fillStyle = [C('#b6502a'), C('#2a6fb0'), C(T.gold)][((s / step) | 0) % 3]; c.fillRect(x - 3, y - 6, 6, 12); }
         else if (key === 'chinese') { c.strokeStyle = C('#b0302a'); c.lineWidth = 1.8; c.beginPath(); c.arc(x, y, 4, 0, Math.PI * 1.5); c.arc(x + 4, y, 3, Math.PI, Math.PI * 2.4); c.stroke(); }
@@ -740,6 +801,12 @@
     if (key === 'chinese') { c.fillStyle = C('#b0302a'); c.fillRect(w - 60, h - 70, 26, 26); c.fillStyle = '#f0e8d2'; c.font = '900 16px Georgia'; c.fillText('兵', w - 55, h - 50); }
     if (key === 'woodblock') { c.fillStyle = C('#c5392c'); c.fillRect(w - 60, h - 70, 26, 26); c.fillStyle = '#f1e6cf'; c.font = '900 16px Georgia'; c.fillText('ギ', w - 54, h - 50); }
     frames[k] = cv; return cv;
+  };
+  // the gold star that marks a culture's specialty fighter (+25%)
+  Art.starBadge = function (c, x, y, size) {
+    c.save(); c.translate(x, y); c.lineJoin = 'round'; c.beginPath();
+    for (var k = 0; k < 10; k++) { var rr2 = k % 2 ? size * 0.45 : size, an = -Math.PI / 2 + k * Math.PI / 5; c.lineTo(Math.cos(an) * rr2, Math.sin(an) * rr2); }
+    c.closePath(); c.fillStyle = Art.C('#ffd23c'); c.fill(); c.lineWidth = 2; c.strokeStyle = Art.ink; c.stroke(); c.restore();
   };
   Art.stars = function (c, x, y, n, size, filled) {
     for (var i = 0; i < 3; i++) {

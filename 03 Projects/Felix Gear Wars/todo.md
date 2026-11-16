@@ -1,6 +1,8 @@
 # Felix Gear Wars — todo
 
 ## Next (after Jimmy plays it)
+- [ ] Answer `convo v0.5.md` (which fighter is each culture's star, a bigger look for the star, the pace of a spearman gear, culture enemies).
+- [ ] Elephant for the Indian tank, chariot for the Egyptian knight, horses off for the Aztecs.
 - [ ] Answer `convo v0.4.md` (champion wait, castle strength, tower rebuild).
 - [ ] Push the late game harder (the bot still wins chapters 6 to 8 with no leaks).
 - [ ] Device test on iPad: touch drag, pinch, sound, battery, speed on long battles.

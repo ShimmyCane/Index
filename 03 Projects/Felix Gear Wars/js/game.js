@@ -60,7 +60,7 @@
   var parts = [], bolts = [], falls = {}, banner = null, shake = 0, redFlash = 0, beat = 0, selSlot = -1, selGear = 0, info = null, toast = null, endTimer = 0, ended = false;
   var drag = null, hudBtns = [], pointers = {};
   function makeSim(c) {
-    cfg = c; sim = new F.Sim(c, { seed: (Math.random() * 1e9) | 0, heartSpeed: +S.heartSpeed || 1 });
+    cfg = c; sim = new F.Sim(c, { seed: (Math.random() * 1e9) | 0, heartSpeed: +S.heartSpeed || 1, specialty: Art.specialty() });
     sim.speed = +S.speed; scroll = 0; parts = []; bolts = []; falls = {}; banner = null; selSlot = -1; selGear = 0; info = null; ended = false; endTimer = 0; paused = false;
     layout();
   }
@@ -201,7 +201,7 @@
     for (i = 0; i < sim.gears.length; i++) {
       var g = sim.gears[i]; if (drag && drag.kind === 'gear' && drag.gear === g && drag.moved) continue;
       g.need = F.ticksNeeded(g.type, g.level);
-      Art.drawGear(c, g, cellX(g.c), cellY(g.r), cs, gearAngle(g), { glow: g.ready || (selGear === g.id) });
+      Art.drawGear(c, g, cellX(g.c), cellY(g.r), cs, gearAngle(g), { glow: g.ready || (selGear === g.id), star: g.type === Art.specialty() });
     }
   }
   function cardRects() {
@@ -220,7 +220,7 @@
         var fake = { type: type, level: 1, charge: 0, need: F.ticksNeeded(type, 1), active: false, locked: false, pulse: 0 };
         var gr = Math.min(r.w * 0.3, 34);
         c.save(); if (!can) c.globalAlpha *= 0.55;
-        Art.drawGear(c, fake, r.x + r.w / 2, r.y + 14 + gr + 6, gr, tAnim * 0.6 * (i % 2 ? -1 : 1), {});
+        Art.drawGear(c, fake, r.x + r.w / 2, r.y + 14 + gr + 6, gr, tAnim * 0.6 * (i % 2 ? -1 : 1), { star: type === Art.specialty() });
         c.restore();
         var nm = Art.unitName(type); txt(c, nm, r.x + r.w / 2, r.y + r.h - 44, 15, T.text, 'center', '800');
         coinIcon(c, r.x + r.w / 2 - 20, r.y + r.h - 20, 10); txt(c, String(cost), r.x + r.w / 2 - 6, r.y + r.h - 19, 20, can ? T.text : Art.C('#c0392b'), 'left', '900');
@@ -245,7 +245,7 @@
     var strong = [], weak = [];
     F.UNIT_ORDER.forEach(function (o) { if (D.vs && D.vs[o] >= 1.3) strong.push(Art.unitName(o)); if (F.UNITS[o].vs && F.UNITS[o].vs[type] >= 1.3) weak.push(Art.unitName(o)); });
     if (D.hunts) strong.push('back line');
-    info = { until: tAnim + 5, a: nm + (level ? '  level ' + level : ''), b: 'Strong against: ' + (strong.join(', ') || 'none'), c: 'Beaten by: ' + (weak.join(', ') || 'few') };
+    info = { until: tAnim + 5, a: (type === Art.specialty() ? '★ ' : '') + nm + (level ? '  level ' + level : '') + (type === Art.specialty() ? '  +25%' : ''), b: 'Strong against: ' + (strong.join(', ') || 'none'), c: 'Beaten by: ' + (weak.join(', ') || 'few') };
     if (extra) info.c = extra;
   }
 
@@ -545,6 +545,9 @@
     F.BOSS_REVS = +S.bossRevs || 100;
     var hs = $('heartSpeed'); if (hs) { hs.value = S.heartSpeed; $('heartSpeedVal').textContent = '×' + (+S.heartSpeed).toFixed(2).replace(/0$/, ''); }
     Art.setTheme(S.theme); Au.setVolumes(+S.sfx, +S.music);
+    if (sim) sim.specialty = Art.specialty();
+    var ch = $('cultureHint');
+    if (ch) { var lab = Art.cultureLabel(), st = Art.specialty(); ch.textContent = lab && st ? lab + ': ★ ' + Art.unitName(st) + ' gets +25% attack and health.' : 'A storybook look: no culture, no star fighter.'; }
     renderErrors();
   }
   function bindSettings() {
