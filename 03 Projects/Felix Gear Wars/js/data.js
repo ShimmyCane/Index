@@ -10,7 +10,9 @@
   F.BASE_X = 150;              // our wall: enemies that cross it cost a life
   F.ENEMY_BASE_X = 2400;       // the enemy fortress
   F.DROP_X0 = 130; F.DROP_SPAN = 860;   // pegboard columns map onto this stretch of ground
-  F.HEART_PERIOD = 1.6;        // seconds for one turn of the heart
+  F.HEART_PERIOD = 3.2;        // seconds for one turn of the heart (half the first pace; the slider scales it)
+  F.BOSS_REVS = 100;           // heart turns one boss-gear turn takes (⚙️ can change it): 1 to 100 against other gears
+  F.MAX_UNITS = 50;            // soldiers on each side at once
 
   F.SM = [1, 2.2, 4.8, 10.5];  // stat multiplier per gear level (more than double per merge)
   F.MULTV = [1, 2, 4, 8];      // multiplier gear values
@@ -41,6 +43,7 @@
   // ---- gears that are not fighters --------------------------------------------------------
   F.SPECIALS = {
     mult:      { name: 'Multiplier', cost: 15, icon: 'mult', note: 'Passes ticks on, times 1, 2, 4 or 8' },
+    boss:      { name: 'Boss gear', cost: 120, icon: 'boss', note: 'Turns very slowly, then a champion steps out' },
     lightning: { name: 'Lightning', cost: 60, tick0: 5, icon: 'lightning', dmg: 30, strikes: 2 },
     rocket:    { name: 'Rockets', cost: 70, tick0: 5, icon: 'rocket', dmg: 40, splash: 95 },
     shuriken:  { name: 'Shuriken', cost: 60, tick0: 5, icon: 'shuriken', dmg: 22 },
@@ -48,6 +51,7 @@
   F.gearInfo = function (type) { return F.UNITS[type] || F.SPECIALS[type]; };
   F.gearCost = function (type) { return F.gearInfo(type).cost; };
   F.ticksNeeded = function (type, level) {
+    if (type === 'boss') return Math.max(1, Math.ceil(4 * F.BOSS_REVS * Math.pow(0.75, level - 1)));   // a quarter turn of the heart = 1
     var g = F.gearInfo(type); if (!g.tick0) return 0;
     return Math.max(1, g.tick0 - (level - 1));
   };
@@ -58,14 +62,14 @@
 
   // ---- chapters ---------------------------------------------------------------------------
   F.CHAPTERS = [
-    { n: 1, title: 'The Waking Heart',    fighter: 'spearman', cols: 7, rows: 3, biome: 'meadow',   boss: 'Rust Pike Lord',  special: null },
-    { n: 2, title: 'The Whistling Wood',  fighter: 'archer',   cols: 7, rows: 3, biome: 'forest',   boss: 'The Whistle Thief', special: null },
-    { n: 3, title: 'Brass and Shield',    fighter: 'fighter',  cols: 8, rows: 3, biome: 'hills',    boss: 'Baron Brassback', special: 'lightning' },
-    { n: 4, title: 'Shadows in the Mist', fighter: 'assassin', cols: 8, rows: 3, biome: 'marsh',    boss: 'Fogblade',        special: null },
-    { n: 5, title: 'The Iron Gallop',     fighter: 'knight',   cols: 8, rows: 4, biome: 'plains',   boss: 'Captain Clatter', special: 'shuriken' },
-    { n: 6, title: 'The Mountain Wall',   fighter: 'tank',     cols: 8, rows: 4, biome: 'mountain', boss: 'The Walking Wall', special: null },
-    { n: 7, title: 'Tower of Stars',      fighter: 'mage',     cols: 9, rows: 4, biome: 'night',    boss: 'The Ash Wizard',  special: 'rocket' },
-    { n: 8, title: 'The Rust Throne',     fighter: 'catapult', cols: 9, rows: 4, biome: 'fortress', boss: 'The Rust King',   special: null },
+    { n: 1, screens: 1, title: 'The Waking Heart',    fighter: 'spearman', cols: 7, rows: 3, biome: 'meadow',   boss: 'Rust Pike Lord',  special: null },
+    { n: 2, screens: 1, title: 'The Whistling Wood',  fighter: 'archer',   cols: 7, rows: 3, biome: 'forest',   boss: 'The Whistle Thief', special: null },
+    { n: 3, screens: 1, title: 'Brass and Shield',    fighter: 'fighter',  cols: 8, rows: 3, biome: 'hills',    boss: 'Baron Brassback', special: 'lightning' },
+    { n: 4, screens: 1.5, title: 'Shadows in the Mist', fighter: 'assassin', cols: 8, rows: 3, biome: 'marsh',    boss: 'Fogblade',        special: null },
+    { n: 5, screens: 1.5, title: 'The Iron Gallop',     fighter: 'knight',   cols: 8, rows: 4, biome: 'plains',   boss: 'Captain Clatter', special: 'shuriken' },
+    { n: 6, screens: 2, title: 'The Mountain Wall',   fighter: 'tank',     cols: 8, rows: 4, biome: 'mountain', boss: 'The Walking Wall', special: null },
+    { n: 7, screens: 2, title: 'Tower of Stars',      fighter: 'mage',     cols: 9, rows: 4, biome: 'night',    boss: 'The Ash Wizard',  special: 'rocket' },
+    { n: 8, screens: 2, title: 'The Rust Throne',     fighter: 'catapult', cols: 9, rows: 4, biome: 'fortress', boss: 'The Rust King',   special: null },
   ];
 
   // Colours per place (the art style filters them). sky top, sky bottom, far hills, near hills, ground, accent.
@@ -158,7 +162,7 @@
     return res;
   };
   F.unlockedSpecials = function (ch) {
-    var res = [];
+    var res = ch >= 2 ? ['boss'] : [];
     for (var i = 0; i < ch; i++) if (F.CHAPTERS[i].special) res.push(F.CHAPTERS[i].special);
     return res;
   };
@@ -220,7 +224,7 @@
     var lay = layout(C.cols, C.rows, idx, rnd);
     var pool = F.unlockedFighters(ch);
     var nWaves = 4 + Math.floor(idx / 6) - (o.quick ? 1 : 0);
-    var opts = { base: 46, perLevel: 14, perWave: 0.4, quick: !!o.quick };
+    var opts = { base: 48, perLevel: 60, perWave: 0.5, quick: !!o.quick };
     var waves = [];
     for (var k = 0; k < nWaves; k++) waves.push(makeWave(rnd, k, idx, pool, opts));
     var boss = null;
@@ -241,10 +245,10 @@
       dorm.push({ type: pool[Math.floor(rnd() * pool.length)], level: idx > 12 ? 2 : 1, c: c, r: r });
     }
     return {
-      id: 'c' + ch + 'l' + lv, ch: ch, lv: lv, idx: idx, seed: seed, free: false, biome: C.biome, title: C.title,
+      id: 'c' + ch + 'l' + lv, ch: ch, lv: lv, idx: idx, seed: seed, free: false, world: Math.round(F.VIEW_W * C.screens), towers: idx >= 9, biome: C.biome, title: C.title,
       board: { cols: C.cols, rows: C.rows, heart: lay.heart, holes: lay.holes, dormant: dorm },
       lives: 20 + 5 * ch, coins: 120 + 7 * idx, waves: waves, bossName: lv === 3 ? C.boss : null, bossType: lv === 3 ? C.fighter : null,
-      baseHp: 400 + 110 * idx, pool: pool, specials: F.unlockedSpecials(ch), quick: !!o.quick,
+      baseHp: 500 + 240 * idx, pool: pool, specials: F.unlockedSpecials(ch), quick: !!o.quick,
       story: F.STORIES[idx],
     };
   };
@@ -257,10 +261,10 @@
     var pool = F.UNIT_ORDER.slice();
     var opts = { base: 60, perLevel: 12, perWave: 0.42, quick: !!o.quick };
     return {
-      id: 'free', ch: 0, lv: 0, idx: idx, seed: 7, free: true, biome: 'fortress', title: 'Free-for-all',
+      id: 'free', ch: 0, lv: 0, idx: idx, seed: 7, free: true, world: F.WORLD, towers: true, biome: 'fortress', title: 'Free-for-all',
       board: { cols: 9, rows: 4, heart: lay.heart, holes: lay.holes, dormant: [] },
       lives: 60, coins: 300, waves: [], genWave: function (k) { return makeWave(rnd, k, idx, pool, opts); },
-      bossEvery: 5, bossName: null, baseHp: 99999, pool: pool, specials: ['lightning', 'shuriken', 'rocket'],
+      bossEvery: 5, bossName: null, baseHp: 99999, pool: pool, specials: ['boss', 'lightning', 'shuriken', 'rocket'],
       quick: !!o.quick,
       story: { cap: 'Free-for-all!', short: 'Every fighter, every gear. The Horde never stops. How long can you hold?',
         story: 'No chapter, no rules, no end. Every fighter and every gear is ready, and so is the Horde. Waves keep coming and keep growing. How many can you hold back?' },
@@ -268,6 +272,6 @@
   };
 
   F.enemyScale = function (idx) {
-    return { hp: 1 + 0.07 * idx, atk: 1 + 0.045 * idx, def: 1 + 0.03 * idx };
+    return { hp: 1 + 0.11 * idx, atk: 1 + 0.065 * idx, def: 1 + 0.03 * idx };
   };
 })();

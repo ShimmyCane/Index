@@ -1,7 +1,7 @@
 # Felix Gear Wars — brief
 
 **Updated:** 2026-11-16
-**Status:** MVP 0.3.0 (eight art styles with culture fighters, story narration), headless-tested, not device-tested. `convo v0.1` and the quick answers of `convo v0.2` are built (fortress wins, lives +5 per chapter, easier start, heart speed slider). Round 3 added Persian, Egyptian and Chinese styles, culture names/headgear/blades, and narrated story cards (75 Kokoro clips).
+**Status:** MVP 0.4.0 (boss gear, smooth heart and gears, 50-soldier cap, level flourishes, castle and tower defences, one-screen early maps; before that eight art styles with culture fighters and story narration), headless-tested, not device-tested. `convo v0.1` and the quick answers of `convo v0.2` are built (fortress wins, lives +5 per chapter, easier start, heart speed slider). Round 3 added Persian, Egyptian and Chinese styles, culture names/headgear/blades, and narrated story cards (75 Kokoro clips).
 
 ## Goal
 
@@ -13,7 +13,7 @@ Plain HTML/CSS/JS, one canvas, no build, `file://` works. `js/sim.js` holds ever
 
 ## Rules in numbers (see `research/balance.md` for the report)
 
-Heart turns every 1.6 s, four ticks per turn. Gear ticks 3 to 6 (minus one per level, min 1). Merge ×2.2 stats per level, up to level 4. Multiplier gears ×1/2/4/8. Wave budget `46 + 14·idx` (× `1 + 0.4·wave`). Enemy scale `1 + 0.07·idx` health, `+0.045·idx` attack. Lives `20 + 5·chapter`. Coins `120 + 7·idx`. Fortress `400 + 110·idx`. Heart speed slider ×0.5 to ×4. Win = fortress falls.
+Heart turns every 1.6 s, four ticks per turn. Gear ticks 3 to 6 (minus one per level, min 1). Merge ×2.2 stats per level, up to level 4. Multiplier gears ×1/2/4/8. Wave budget `46 + 14·idx` (× `1 + 0.4·wave`). Enemy scale `1 + 0.07·idx` health, `+0.045·idx` attack. Lives `20 + 5·chapter`. Coins `120 + 7·idx`. Fortress `400 + 110·idx`. Heart 3.2 s per turn, slider ×0.5 to ×4; boss gear 100 heart turns (slider 10 to 200); 50 soldiers per side; towers from chapter 4. Win = fortress falls.
 
 ## Verified (headless Chromium, 2026-11-16)
 

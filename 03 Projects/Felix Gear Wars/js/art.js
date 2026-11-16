@@ -110,8 +110,8 @@
     var C = Art.C, en = u.side === 'enemy', k = u.id % 5;
     return en ? { tunic: C(Art.theme.enemy), trim: C('#e0b34a'), skin: C(['#f1c9a0', '#e3b186', '#d79c72', '#f5d5b4', '#c98c66'][k]),
       hat: C(HATS[k]), scarf: C(SCARF[(k + 2) % 5]), boot: C(BOOT[k]), steel: C('#a8a4a0'), dark: C('#4a2420'), cloth: C('#7a2d24') }
-      : { tunic: C(Art.theme.ally), trim: C('#e8b923'), skin: C(['#f3d0a8', '#e8b98d', '#d9a37a', '#f6dcc0'][u.id % 4]),
-        hat: C('#e8b923'), scarf: C('#e8b923'), boot: C('#5a3a22'), steel: C('#c3c9d4'), dark: C('#1f3777'), cloth: C('#2c4a9c') };
+      : { tunic: C(Art.theme.ally), trim: C('#e8b923'), skin: C(['#f3d0a8', '#e8b98d', '#d9a37a', '#f6dcc0'][u.id % 4]), lvl: u.level,
+        hat: C('#e8b923'), scarf: C('#e8b923'), boot: C('#5a3a22'), steel: C(['#c3c9d4', '#e6ebf5', '#f0d98a', '#ffd75a'][Math.min(3, (u.level || 1) - 1)]), dark: C('#1f3777'), cloth: C('#2c4a9c') };
   }
   function arm(c, sx, sy, a, w, col) {      // two-segment arm, returns the hand
     var l1 = 11, l2 = 11, ex = sx + Math.cos(a) * l1, ey = sy + Math.sin(a) * l1, b = a + 0.5;
@@ -406,11 +406,26 @@
     var face = (u.facing || u.dir) < 0 ? -1 : 1, sc = u.scale * (u.noZoom ? 1 : 1.3), alpha = 1, rot = 0, dx = 0, dy = 0;
     if (u.anim === 'die') { var p = Math.min(1, u.t / 0.7); rot = -p * 1.35; alpha = 1 - p * p; dy = p * 4; }
     if (u.state === 'getup') { var q = Math.min(1, u.t / 0.45); rot = (1 - ease(q)) * -1.55; dy = (1 - ease(q)) * 6; st.walk = false; }
+    var lvl = u.level || 1, tt = performance.now() / 1000;
     c.save(); c.translate(sx + dx, sy + dy);
     // shadow
     c.globalAlpha = 0.25 * alpha; c.fillStyle = '#000'; c.beginPath(); c.ellipse(0, 1, 20 * sc, 5 * sc, 0, 0, TAU); c.fill();
+    if (lvl >= 2 && u.anim !== 'die') {      // each level of gear gives its fighter a new flourish: ring, glow, then golden sparkle
+      c.globalAlpha = alpha; c.lineWidth = 3; c.strokeStyle = Art.C(['', '#d5dbe8', '#f2c94c', '#ffd75a'][lvl - 1]);
+      c.beginPath(); c.ellipse(0, 1, 25 * sc, 7 * sc, 0, 0, TAU); c.stroke();
+      if (lvl >= 3) { var gl = c.createRadialGradient(0, -34 * sc, 2, 0, -34 * sc, 46 * sc); gl.addColorStop(0, 'rgba(255,220,100,' + (lvl === 3 ? 0.3 : 0.42) + ')'); gl.addColorStop(1, 'rgba(255,220,100,0)'); c.fillStyle = gl; c.beginPath(); c.arc(0, -34 * sc, 46 * sc, 0, TAU); c.fill(); }
+      if (lvl >= 4) { c.lineWidth = 2; c.globalAlpha = alpha * (0.5 + 0.4 * Math.sin(tt * 4)); c.beginPath(); c.ellipse(0, 1, (30 + 3 * Math.sin(tt * 4)) * sc, 9 * sc, 0, 0, TAU); c.stroke(); }
+    }
     c.globalAlpha = alpha; c.scale(face * sc, sc); c.rotate(rot * face);
     inkStyle(c); fn(c, st); c.restore();
+    if (u.anim !== 'die' && (lvl >= 2 || u.champ)) {   // gold stars above the head: one per gear level above the first; a crown on a champion
+      c.save(); c.translate(sx, sy); inkStyle(c); var top = -80 * sc - 20;
+      for (var si = 0; si < lvl - 1; si++) { var sx2 = (si - (lvl - 2) / 2) * 15, sz = 6.5; c.beginPath();
+        for (var k = 0; k < 10; k++) { var rr2 = k % 2 ? sz * 0.42 : sz, an = -Math.PI / 2 + k * Math.PI / 5; c.lineTo(sx2 + Math.cos(an) * rr2, top + Math.sin(an) * rr2); }
+        c.closePath(); c.fillStyle = Art.C(Art.theme.gold2); c.fill(); c.lineWidth = 1.6; c.stroke(); }
+      if (u.champ) { c.save(); c.translate(0, top - 12); c.scale(1.2, 1.2); Art.icon(c, 'boss', 0, 0, 1, Art.C('#ffd75a')); c.restore(); }
+      c.restore();
+    }
   };
   // a falling fighter, tumbling out of its gear
   Art.drawFalling = function (c, u, sx, sy, spin) {
@@ -422,7 +437,7 @@
 
   // ---- gears -------------------------------------------------------------------------------
   var GEAR_COL = { spearman: '#c98d4b', archer: '#86b25c', fighter: '#b8bfc9', assassin: '#8d78b8', knight: '#d6aa3a', tank: '#8d97ab', mage: '#6586d4', catapult: '#b07a4e',
-    mult: '#e3c675', lightning: '#f3dc52', rocket: '#e5785a', shuriken: '#a5b2c0' };
+    mult: '#e3c675', boss: '#9b6bd1', lightning: '#f3dc52', rocket: '#e5785a', shuriken: '#a5b2c0' };
   Art.gearColor = function (type) { return Art.C(GEAR_COL[type] || '#c79a52'); };
   function teethPath(c, r, n, ang, depth) {
     var h = Math.PI / n; c.beginPath();
@@ -447,6 +462,8 @@
       case 'lightning': c.beginPath(); c.moveTo(3, -12); c.lineTo(-7, 2); c.lineTo(-1, 2); c.lineTo(-4, 12); c.lineTo(8, -3); c.lineTo(1, -3); c.closePath(); c.fill(); c.stroke(); break;
       case 'rocket': c.beginPath(); c.moveTo(0, -12); c.quadraticCurveTo(7, -3, 5, 8); c.lineTo(-5, 8); c.quadraticCurveTo(-7, -3, 0, -12); c.closePath(); c.fill(); c.stroke(); c.beginPath(); c.moveTo(-5, 8); c.lineTo(-9, 12); c.lineTo(-3, 9); c.moveTo(5, 8); c.lineTo(9, 12); c.lineTo(3, 9); c.stroke(); break;
       case 'shuriken': c.beginPath(); for (var j = 0; j < 8; j++) { var r3 = j % 2 ? 4 : 12, a3 = j * Math.PI / 4; c.lineTo(Math.cos(a3) * r3, Math.sin(a3) * r3); } c.closePath(); c.fill(); c.stroke(); c.beginPath(); c.arc(0, 0, 2, 0, TAU); c.stroke(); break;
+      case 'boss': c.beginPath(); c.moveTo(-11, 7); c.lineTo(-13, -8); c.lineTo(-5, -2); c.lineTo(0, -12); c.lineTo(5, -2); c.lineTo(13, -8); c.lineTo(11, 7); c.closePath(); c.fillStyle = '#ffd75a'; c.fill(); c.stroke();
+        c.fillStyle = '#d63a4a'; c.beginPath(); c.arc(0, 1, 2.6, 0, TAU); c.fill(); c.beginPath(); c.moveTo(-11, 7); c.lineTo(11, 7); c.stroke(); break;
       case 'lock': c.beginPath(); c.arc(0, -3, 5, Math.PI, 0); c.stroke(); c.beginPath(); c.rect(-7, -3, 14, 11); c.fill(); c.stroke(); break;
     }
     c.restore();
@@ -455,11 +472,27 @@
   Art.drawGear = function (c, g, x, y, r, angle, opts) {
     opts = opts || {};
     var col = g.locked && !g.active ? Art.C('#9a948c') : Art.gearColor(g.type), dark = mix(col, '#000000', 0.35), light = mix(col, '#ffffff', 0.45);
+    var lv = g.level || 1, gold = Art.C(Art.theme.gold2), tt = performance.now() / 1000, i, unlocked = !(g.locked && !g.active);
+    if (lv >= 3 && unlocked) { col = mix(col, Art.C('#f2c94c'), lv === 3 ? 0.28 : 0.5); light = mix(col, '#ffffff', 0.45); dark = mix(col, '#000000', 0.35); }
     c.save(); c.translate(x, y); inkStyle(c);
+    if (lv >= 4 && unlocked) {                       // level 4: a crown of golden rays behind the teeth
+      c.fillStyle = gold; c.lineWidth = 1.6;
+      for (i = 0; i < 12; i++) { var ra = angle + i * TAU / 12 + TAU / 24; c.beginPath(); c.moveTo(Math.cos(ra - 0.13) * (r + 3), Math.sin(ra - 0.13) * (r + 3)); c.lineTo(Math.cos(ra) * (r + 12), Math.sin(ra) * (r + 12)); c.lineTo(Math.cos(ra + 0.13) * (r + 3), Math.sin(ra + 0.13) * (r + 3)); c.closePath(); c.fill(); c.stroke(); }
+    }
     if (g.active && g.pulse > 0) { c.fillStyle = 'rgba(255,240,170,' + (g.pulse * 0.5).toFixed(2) + ')'; c.beginPath(); c.arc(0, 0, r + 8 + g.pulse * 4, 0, TAU); c.fill(); }
     if (opts.glow) { c.shadowColor = Art.C('#fff1a8'); c.shadowBlur = 16; }
     teethPath(c, r, 12, angle, 4); var gr = c.createRadialGradient(-r * 0.3, -r * 0.3, 2, 0, 0, r + 4); gr.addColorStop(0, light); gr.addColorStop(1, col);
     c.fillStyle = gr; c.fill(); c.stroke(); c.shadowBlur = 0;
+    if (lv >= 2 && unlocked) {                       // level 2: a gold rim and studs
+      c.lineWidth = 2.4; c.strokeStyle = gold; teethPath(c, r, 12, angle, 4); c.stroke(); c.strokeStyle = Art.ink; c.lineWidth = Art.lw;
+      for (i = 0; i < 12; i++) { var sa = angle + i * TAU / 12 + TAU / 24; c.beginPath(); c.arc(Math.cos(sa) * r * 0.84, Math.sin(sa) * r * 0.84, lv > 2 ? 2.4 : 1.9, 0, TAU); c.fillStyle = gold; c.fill(); }
+    }
+    if (lv >= 3 && unlocked) {                       // level 3: jewels around the hub
+      var gems = ['#e0405a', '#4aa3e8', '#58c46a'];
+      for (i = 0; i < 6; i++) { var ga = angle + i * TAU / 6, gx = Math.cos(ga) * r * 0.84, gy = Math.sin(ga) * r * 0.84;
+        c.beginPath(); c.moveTo(gx, gy - 4.6); c.lineTo(gx + 3.6, gy); c.lineTo(gx, gy + 4.6); c.lineTo(gx - 3.6, gy); c.closePath(); c.fillStyle = Art.C(gems[i % 3]); c.fill(); c.lineWidth = 1.2; c.stroke(); }
+      c.lineWidth = Art.lw;
+    }
     c.beginPath(); c.arc(0, 0, r * 0.72, 0, TAU); c.fillStyle = dark; c.fill(); c.lineWidth = Art.lw * 0.7; c.stroke();
     // charge ring
     var need = g.need || 0;
@@ -475,6 +508,10 @@
       c.fillText('×' + F.MULTV[g.level - 1], 0, 1);
     } else Art.icon(c, g.type, 0, 0, r / 28, Art.C('#fff7e0'));
     if (g.locked && !g.active) Art.icon(c, 'lock', r * 0.45, r * 0.5, r / 48, Art.C('#e0d8c8'));
+    if (lv >= 4 && unlocked) {                       // level 4 also twinkles
+      for (i = 0; i < 3; i++) { var ta = tt * 1.6 + i * 2.1, tw = 0.5 + 0.5 * Math.sin(tt * 5 + i * 2), tx = Math.cos(ta) * r * 0.92, ty = Math.sin(ta) * r * 0.92, sz = 2.5 + 3.5 * tw;
+        c.fillStyle = '#ffffff'; c.beginPath(); c.moveTo(tx, ty - sz); c.lineTo(tx + sz * 0.3, ty - sz * 0.3); c.lineTo(tx + sz, ty); c.lineTo(tx + sz * 0.3, ty + sz * 0.3); c.lineTo(tx, ty + sz); c.lineTo(tx - sz * 0.3, ty + sz * 0.3); c.lineTo(tx - sz, ty); c.lineTo(tx - sz * 0.3, ty - sz * 0.3); c.closePath(); c.fill(); }
+    }
     c.restore();
     // level pips are drawn upright, not turning
     c.save(); c.translate(x, y);
@@ -486,7 +523,7 @@
     var T = Art.theme; c.save(); c.translate(x, y); inkStyle(c);
     teethPath(c, r, 12, a, 4); var gr = c.createRadialGradient(-r * 0.3, -r * 0.3, 2, 0, 0, r + 4); gr.addColorStop(0, Art.C(T.gold2)); gr.addColorStop(1, Art.C(T.gold)); c.fillStyle = gr; c.fill(); c.stroke();
     c.beginPath(); c.arc(0, 0, r * 0.74, 0, TAU); c.fillStyle = Art.C('#7a1f2a'); c.fill(); c.lineWidth = Art.lw * 0.7; c.stroke();
-    var s = 1 + beat * 0.12; c.scale(s * r / 34, s * r / 34);
+    c.scale(r / 34, r / 34);
     c.beginPath(); c.moveTo(0, 22); c.bezierCurveTo(-34, -2, -22, -26, -2, -12); c.bezierCurveTo(-1, -14, 0, -15, 0, -13); c.bezierCurveTo(0, -15, 1, -14, 2, -12); c.bezierCurveTo(22, -26, 34, -2, 0, 22); c.closePath();
     var hg = c.createRadialGradient(-8, -8, 2, 0, 0, 30); hg.addColorStop(0, Art.C('#ff7a7a')); hg.addColorStop(1, Art.C('#c42b3c')); c.fillStyle = hg; c.fill(); c.lineWidth = 2.6; c.stroke();
     c.beginPath(); c.ellipse(-10, -9, 5.5, 3.4, -0.6, 0, TAU); c.fillStyle = 'rgba(255,255,255,0.55)'; c.fill();
@@ -553,7 +590,7 @@
     c.lineTo(bf.x + bf.w, bf.y + bf.h); c.lineTo(bf.x, bf.y + bf.h); c.closePath(); c.fillStyle = gg; c.fill(); c.stroke();
     // grass, flowers, pebbles at world positions
     for (i = 0; i < 70; i++) {
-      var gx = ((noise1(i + 7) * F.WORLD) - scroll), gyy = gy + 6 + noise1(i + 200) * (bf.y + bf.h - gy - 14);
+      var gx = ((noise1(i + 7) * ((castle && castle.world) || F.WORLD)) - scroll), gyy = gy + 6 + noise1(i + 200) * (bf.y + bf.h - gy - 14);
       if (gx < -20 || gx > bf.w + 20) continue;
       if (i % 3 === 0) { seg(c, bf.x + gx, gyy, bf.x + gx - 4, gyy - 9, 2, C('#4c8b4c')); seg(c, bf.x + gx, gyy, bf.x + gx + 4, gyy - 8, 2, C('#4c8b4c')); }
       else if (i % 3 === 1) { seg(c, bf.x + gx, gyy, bf.x + gx, gyy - 9, 2, C('#4c8b4c')); circ(c, bf.x + gx, gyy - 11, 3.4, C(B[5])); }
@@ -561,11 +598,53 @@
     }
     // path
     c.fillStyle = 'rgba(120,90,50,0.16)'; c.fillRect(bf.x, gy + 12, bf.w, 38);
-    if (castle) { Art.drawBase(c, bf, scroll, false, 1, t); Art.drawBase(c, bf, scroll, true, castle.hpFrac, t); }
+    if (castle) {
+      Art.drawBase(c, bf, scroll, false, 1, t, castle.ebx);
+      Art.drawBase(c, bf, scroll, true, castle.hpFrac, t, castle.ebx);
+      (castle.towers || []).forEach(function (s) { Art.drawTower(c, bf, s.x - scroll + bf.x, s, t); });
+    }
     c.restore();
   };
-  Art.drawBase = function (c, bf, scroll, enemy, hpFrac, t) {
-    var gy = Art.groundY(bf) + 14, C = Art.C, T = Art.theme, x = (enemy ? F.ENEMY_BASE_X : 0) - scroll + bf.x;
+  // a small stone-thrower standing on a wall or tower
+  function miniCatapult(c, x, y, flip, enemy, t, kick) {
+    c.save(); c.translate(x, y); c.scale(flip, 1); inkStyle(c);
+    var wood = Art.C(enemy ? '#7a4a38' : '#a8794a'), dk = Art.C(enemy ? '#4a2c24' : '#6e4a2a');
+    poly(c, [-16, 0, 16, 0, 12, -9, -12, -9], wood);
+    var ang = -2.3 + kick * 1.7; seg(c, 2, -14, 2 + Math.cos(ang) * 22, -14 + Math.sin(ang) * 22, 3.4, dk);
+    circ(c, 2 + Math.cos(ang) * 22, -14 + Math.sin(ang) * 22, 3.6, Art.C('#8f8b82'));
+    circ(c, -9, 3, 5, wood); circ(c, 10, 3, 5, wood); c.restore();
+  }
+  // a tower at 10% or 25% of the way across. A destroyed tower is rubble, then a scaffold that grows as it is rebuilt.
+  Art.drawTower = function (c, bf, x, s, t) {
+    if (x < bf.x - 120 || x > bf.x + bf.w + 120) return;
+    var gy = Art.groundY(bf) + 18, C = Art.C, enemy = s.side === 'enemy', big = s.kind === 'tower2', w = big ? 62 : 48, h = big ? 138 : 100;
+    var stone = C(enemy ? '#7d5a55' : '#d6c9a6'), dark = C(enemy ? '#5a3e3a' : '#b6a77f');
+    c.save(); inkStyle(c);
+    if (!s.alive) {
+      var p = s.rebuild || 0;
+      for (var i = 0; i < 7; i++) { var rx = x + (i - 3) * 9 + Math.sin(i * 7) * 3, rh = 6 + (i % 3) * 5; c.beginPath(); c.moveTo(rx - 7, gy); c.lineTo(rx - 3, gy - rh); c.lineTo(rx + 5, gy - rh * 0.8); c.lineTo(rx + 8, gy); c.closePath(); fillStroke(c, i % 2 ? stone : dark); }
+      if (p > 0.02) {   // scaffold and the wall rising behind it
+        var rh2 = h * p; c.beginPath(); c.rect(x - w / 2 + 4, gy - rh2, w - 8, rh2); fillStroke(c, stone);
+        [-w / 2, w / 2].forEach(function (dx) { seg(c, x + dx, gy, x + dx, gy - Math.max(24, rh2 + 14), 3, C('#8a5a2e')); });
+        seg(c, x - w / 2, gy - rh2 * 0.5, x + w / 2, gy - rh2 * 0.5, 2.6, C('#8a5a2e'));
+        c.fillStyle = 'rgba(0,0,0,0.5)'; Art.rr(c, x - 24, gy + 6, 48, 7, 3.5); c.fill(); c.fillStyle = C('#e0a43a'); Art.rr(c, x - 22, gy + 8, 44 * p, 3.5, 2); c.fill();
+      }
+      c.restore(); return;
+    }
+    c.beginPath(); c.moveTo(x - w / 2, gy); c.lineTo(x - w / 2 + 3, gy - h); c.lineTo(x + w / 2 - 3, gy - h); c.lineTo(x + w / 2, gy); c.closePath(); fillStroke(c, stone);
+    for (var j = 0; j < 4; j++) { c.beginPath(); c.rect(x - w / 2 + 1 + j * ((w - 2) / 4) + 1, gy - h - 11, (w - 2) / 4 - 3, 11); fillStroke(c, stone); }
+    c.beginPath(); c.rect(x - 4, gy - h * 0.62, 8, 20); fillStroke(c, C('#2d1c18'));
+    c.beginPath(); c.moveTo(x - 10, gy); c.lineTo(x - 10, gy - 22); c.arc(x, gy - 22, 10, Math.PI, 0); c.lineTo(x + 10, gy); c.closePath(); fillStroke(c, C('#4a2f1c'));
+    seg(c, x, gy - h - 11, x, gy - h - 36, 2.6, C('#3a2a20'));
+    var wv = Math.sin(t * 3 + x) * 3; poly(c, [x, gy - h - 35, x + 22, gy - h - 29 + wv, x, gy - h - 22], C(enemy ? '#b3402f' : Art.theme.ally));
+    if (big) miniCatapult(c, x, gy - h - 11, enemy ? -1 : 1, enemy, t, (s.weapons[0] && s.weapons[0].t < 0.5) ? 1 : 0);
+    else { c.fillStyle = C('#d9dde6'); c.beginPath(); c.moveTo(x - w / 2 + 4, gy - h - 14); c.lineTo(x - w / 2 + 12, gy - h - 22); c.stroke(); }
+    if (s.flash > 0) { c.fillStyle = 'rgba(255,255,255,' + Math.min(0.6, s.flash * 4) + ')'; c.fillRect(x - w / 2, gy - h, w, h); }
+    if (s.hp < s.max) { var bw = 56, by = gy - h - 52; c.fillStyle = 'rgba(0,0,0,0.5)'; Art.rr(c, x - bw / 2 - 1.5, by - 1.5, bw + 3, 9, 4); c.fill(); c.fillStyle = enemy ? C('#d9443a') : C('#4caf50'); Art.rr(c, x - bw / 2, by, Math.max(2, bw * s.hp / s.max), 6, 3); c.fill(); }
+    c.restore();
+  };
+  Art.drawBase = function (c, bf, scroll, enemy, hpFrac, t, ebx) {
+    var gy = Art.groundY(bf) + 14, C = Art.C, T = Art.theme, x = (enemy ? (ebx || F.ENEMY_BASE_X) : 0) - scroll + bf.x;
     if (x > bf.x + bf.w + 260 || x < bf.x - 300) return;
     c.save(); inkStyle(c);
     if (!enemy) {
@@ -577,6 +656,8 @@
       seg(c, x + 108, gy - 176, x + 108, gy - 210, 3, C('#3a2a20'));
       var w = Math.sin(t * 3) * 3; poly(c, [x + 108, gy - 208, x + 140, gy - 200 + w, x + 108, gy - 190], C(T.gold));
       c.beginPath(); c.moveTo(x + 18, gy); c.lineTo(x + 18, gy - 34); c.arc(x + 38, gy - 34, 20, Math.PI, 0); c.lineTo(x + 58, gy); c.closePath(); fillStroke(c, C('#5a3a22'));
+      miniCatapult(c, x + 44, gy - 92, 1, false, t, 0);
+      for (var sl = 0; sl < 3; sl++) { c.beginPath(); c.rect(x + 14 + sl * 30, gy - 66, 5, 14); fillStroke(c, C('#2d1c18')); }
     } else {
       var lean = 1 - hpFrac;
       c.beginPath(); c.moveTo(x + 6, gy); c.lineTo(x + 6, gy - 120 + lean * 50); c.lineTo(x + 26, gy - 130 + lean * 50); c.lineTo(x + 56, gy - 120 + lean * 50); c.lineTo(x + 56, gy); c.closePath(); fillStroke(c, C('#6e4a46'));
@@ -586,6 +667,8 @@
       poly(c, [x + 94, gy - 160 + lean * 60, x + 162, gy - 160 + lean * 60, x + 128, gy - 206 + lean * 60], C('#8a2f24'));
       c.beginPath(); c.moveTo(x + 66, gy); c.lineTo(x + 66, gy - 36); c.arc(x + 84, gy - 36, 18, Math.PI, 0); c.lineTo(x + 102, gy); c.closePath(); fillStroke(c, C('#2d1c18'));
       for (var r = 0; r < 6; r++) { c.fillStyle = 'rgba(180,90,40,0.55)'; c.beginPath(); c.ellipse(x + 20 + r * 24, gy - 40 - (r % 3) * 24, 7, 4, 0, 0, TAU); c.fill(); }   // rust patches
+      miniCatapult(c, x + 88, gy - 100 + lean * 40, -1, true, t, 0);
+      for (var sl2 = 0; sl2 < 3; sl2++) { c.beginPath(); c.rect(x + 66 + sl2 * 26, gy - 70 + lean * 40, 5, 14); fillStroke(c, C('#2d1c18')); }
       seg(c, x + 128, gy - 206 + lean * 60, x + 128, gy - 236 + lean * 60, 3, C('#3a2a20'));
       poly(c, [x + 128, gy - 234 + lean * 60, x + 98, gy - 224 + lean * 60 + Math.sin(t * 3) * 3, x + 128, gy - 214 + lean * 60], C('#e0b34a'));
       if (hpFrac < 0.5) { c.fillStyle = 'rgba(60,50,50,' + (0.5 - hpFrac).toFixed(2) + ')'; for (var s = 0; s < 4; s++) { c.beginPath(); c.arc(x + 60 + s * 30 + Math.sin(t * 2 + s) * 5, gy - 150 - ((t * 20 + s * 20) % 60), 10 + s * 3, 0, TAU); c.fill(); } }

@@ -20,7 +20,7 @@
   window.addEventListener('unhandledrejection', function (ev) { GW.err('Promise error', ev.reason); });
 
   // ---- settings and progress (device storage, always in try/catch) -----------------------------
-  var DEF = { voice: 'auto', heartSpeed: 1, theme: 'manuscript', sfx: 0.8, music: 0.5, speed: 1, quick: 0, follow: 1, reading: 'auto', showErrors: 0 };
+  var DEF = { bossRevs: 100, voice: 'auto', heartSpeed: 1, theme: 'manuscript', sfx: 0.8, music: 0.5, speed: 1, quick: 0, follow: 1, reading: 'auto', showErrors: 0 };
   var S = Object.assign({}, DEF);
   try { var raw = JSON.parse(localStorage.getItem('fgw.settings') || '{}'); Object.keys(DEF).forEach(function (k) { if (raw[k] !== undefined) S[k] = raw[k]; }); } catch (e) { /* storage blocked */ }
   function saveSettings() { try { localStorage.setItem('fgw.settings', JSON.stringify(S)); } catch (e) { /* ignore */ } }
@@ -114,14 +114,14 @@
     for (var i = 0; i < ev.length; i++) {
       var e = ev[i], p;
       switch (e.k) {
-        case 'tick': beat = 1; Au.play('tick', e.side); break;
+        
         case 'place': Au.play('place'); break;
         case 'merge': Au.play('merge'); var gm = sim.gearById(e.id); if (gm) { p = gearPos(gm.c, gm.r); sparks(p[0], p[1], 22, '#fff2a0'); ring(p[0], p[1], 50); } break;
-        case 'pop': p = gearPos(e.c, e.r); falls[e.unit] = { sx: p[0], sy: p[1] }; Au.play('pop', e.type); sparks(p[0], p[1] + 20, 8, '#fff7c8'); puff(p[0], p[1] + 28, 4, '#fff7e0', 20, 10); break;
+        case 'pop': if (e.champ) { banner = { text: 'A champion!', t: 0, boss: false }; Au.play('horn', false); } p = gearPos(e.c, e.r); falls[e.unit] = { sx: p[0], sy: p[1] }; Au.play('pop', e.type); sparks(p[0], p[1] + 20, 8, '#fff7c8'); puff(p[0], p[1] + 28, 4, '#fff7e0', 20, 10); break;
         case 'land': puff(e.x - scroll, Art.groundY(L.bf) + 14 + e.y, 7, '#cdbf9e', 28, 10); Au.play('land'); break;
         case 'slash': sparks(e.x - scroll, Art.groundY(L.bf) - 30 + (e.y || 0), 6, e.side === 'ally' ? '#fff2a0' : '#ffb0a0'); Au.play('slash', e.type); break;
         case 'hit': if (e.x - scroll > -60 && e.x - scroll < W + 60) { if (e.dmg > 6 && parts.length < 120 && Math.random() < 0.5) floatText(e.x - scroll, Art.groundY(L.bf) - 80 + e.y, String(Math.round(e.dmg)), e.side === 'enemy' ? '#fff3b0' : '#ffb3a8'); } Au.play('hit', e.big); break;
-        case 'shot': Au.play(e.kind === 'arrow' ? 'arrow' : e.kind === 'bolt' ? 'bolt' : 'stone'); break;
+        case 'shot': if (!e.struct || (e.x - scroll > -100 && e.x - scroll < W + 100)) Au.play(e.kind === 'arrow' ? 'arrow' : e.kind === 'bolt' ? 'bolt' : 'stone'); break;
         case 'arrowhit': sparks(e.x - scroll, Art.groundY(L.bf) - 24 + (e.y || 0), 4, '#ffffff'); break;
         case 'boom': var bx = e.x - scroll, by = Art.groundY(L.bf) + 10; ring(bx, by - 20, e.r * 0.7, '#ffcf70'); puff(bx, by - 10, 10, '#8b7d6a', e.r, 30); sparks(bx, by - 20, 14, '#ffb050'); Au.play('boom'); shake = Math.max(shake, e.kind === 'rocket' ? 5 : 8); break;
         case 'bolt': p = gearPos(e.c, e.r); bolts.push({ x1: e.x - scroll + (Math.random() - 0.5) * 30, y1: L.bf.y - 20, x2: e.x - scroll, y2: Art.groundY(L.bf) + 10 + e.y, t: 0 }); Au.play('lightning'); ring(e.x - scroll, Art.groundY(L.bf), 40, '#fffbc0'); sparks(e.x - scroll, Art.groundY(L.bf) - 20, 10, '#fffbc0'); break;
@@ -130,8 +130,11 @@
         case 'die': puff(e.x - scroll, Art.groundY(L.bf) - 20, e.boss ? 18 : 6, '#e8dfc8', 30, 30); if (e.boss) { shake = 12; Au.play('boom'); } break;
         case 'leak': redFlash = 1; shake = Math.max(shake, 6); Au.play('leak'); floatText(F.BASE_X, Art.groundY(L.bf) - 60, '-' + e.n, '#ff8a80'); break;
         case 'wave': banner = { text: e.boss ? 'Boss wave!' : 'Wave ' + e.n + ' of ' + (e.total === Infinity ? '∞' : e.total), t: 0, boss: e.boss }; Au.play('horn', e.boss); if (window.AppNotes) AppNotes.setContext({ label: cfg.title + ' ' + levelLabel() + ', wave ' + e.n }); Au.mood('battle', cfg.ch); break;
-        case 'basehit': Au.play('base'); sparks(F.ENEMY_BASE_X - scroll + 60, Art.groundY(L.bf) - 40, 6, '#ffd090'); break;
-        case 'basefall': shake = 14; Au.play('boom'); puff(F.ENEMY_BASE_X - scroll + 80, Art.groundY(L.bf) - 50, 30, '#7a6a60', 160, 40); break;
+        case 'structhit': if (e.kind === 'fortress' || e.kind.indexOf('tower') === 0) { sparks(e.x - scroll, Art.groundY(L.bf) - 50, 4, '#ffd090'); } Au.play('base'); break;
+        case 'structdown': if (e.kind !== 'fortress') { puff(e.x - scroll, Art.groundY(L.bf) - 30, 22, '#8a7a68', 90, 40); sparks(e.x - scroll, Art.groundY(L.bf) - 40, 16, '#ffb050'); shake = Math.max(shake, 8); Au.play('boom'); say(e.side === 'enemy' ? 'An enemy tower fell!' : 'Your tower fell. It will be rebuilt.'); } break;
+        case 'structup': ring(e.x - scroll, Art.groundY(L.bf) - 40, 60, '#fff2a0'); sparks(e.x - scroll, Art.groundY(L.bf) - 40, 12, '#fff2a0'); Au.play('merge'); break;
+        case 'basehit': Au.play('base'); sparks(sim.ebx - scroll + 60, Art.groundY(L.bf) - 40, 6, '#ffd090'); break;
+        case 'basefall': shake = 14; Au.play('boom'); puff(sim.ebx - scroll + 80, Art.groundY(L.bf) - 50, 30, '#7a6a60', 160, 40); break;
         case 'end': ended = true; endTimer = 1.2; Au.mood('off'); Au.play(e.win ? 'win' : 'lose'); break;
       }
     }
@@ -148,6 +151,7 @@
     coinIcon(c, 196, hy + 28, 13); txt(c, String(Math.floor(sim.coins)), 216, hy + 29, 28, T.text);
     var title = cfg.free ? 'Free-for-all' : 'Chapter ' + cfg.ch + ' · Level ' + cfg.lv;
     txt(c, title, 340, hy + 17, 18, T.text, 'left', '800'); txt(c, cfg.free ? 'Wave ' + Math.max(0, sim.waveIdx + 1) + '  (best ' + P.freeBest + ')' : 'Wave ' + Math.max(0, sim.waveIdx + 1) + ' / ' + sim.waveCount, 340, hy + 39, 16, T.text, 'left', '600');
+    var army = sim.alliesAlive(); txt(c, 'Army ' + army + '/' + F.MAX_UNITS, 450, hy + 39, 16, army >= F.MAX_UNITS ? Art.C('#c0392b') : T.text, 'left', '700');
     var bx = W - 34 - 68;
     function add(id, icon, w, fill) { var b = { id: id, icon: icon, x: bx - (w - 64), y: hy + 4, w: w, h: 48, fill: fill }; bx -= w + 8; hudBtns.push(b); return b; }
     add('home', 'home', 64); add('pause', paused ? 'play' : 'pause', 64); add('speed', 'speed', 64); add('undo', 'undo', 64);
@@ -166,7 +170,9 @@
   function gearAngle(g) {
     var par = (g.c + g.r + sim.heart.c + sim.heart.r) % 2, th = sim.heartA;
     var a = par ? -th + Math.PI / 12 : th;
-    if (g.active) g.rot = a; else if (g.rot === undefined) g.rot = par ? Math.PI / 12 : 0;
+    if (g.type === 'boss' && g.active) { g.rot = (par ? Math.PI / 12 : 0) + TAU * Math.min(1, (g.charge || 0) / Math.max(1, F.ticksNeeded('boss', g.level))); return g.rot; }
+    if (g.rot === undefined) g.rot = par ? Math.PI / 12 : 0;
+    if (g.active) { var d = Math.atan2(Math.sin(a - g.rot), Math.cos(a - g.rot)); g.rot += d * Math.min(1, 0.25 + Math.abs(d)); }
     return g.rot;
   }
   function drawBoard(c) {
@@ -191,7 +197,7 @@
       }
     }
     var cs = L.cs / 2, i;
-    Art.drawHeart(c, cellX(sim.heart.c), cellY(sim.heart.r), cs, sim.heartA, beat);
+    Art.drawHeart(c, cellX(sim.heart.c), cellY(sim.heart.r), cs, sim.heartA, 0);
     for (i = 0; i < sim.gears.length; i++) {
       var g = sim.gears[i]; if (drag && drag.kind === 'gear' && drag.gear === g && drag.moved) continue;
       g.need = F.ticksNeeded(g.type, g.level);
@@ -235,7 +241,7 @@
   }
   function setInfoFor(type, level, extra) {
     var D = F.UNITS[type], nm = Art.unitName(type);
-    if (!D) { info = { until: tAnim + 4, a: nm + (type === 'mult' ? ' ×' + F.MULTV[(level || 1) - 1] : ''), b: type === 'mult' ? 'Passes ticks on, times its number.' : 'Special gear: acts when it fills.', c: extra || '' }; return; }
+    if (!D) { info = { until: tAnim + 4, a: nm + (type === 'mult' ? ' ×' + F.MULTV[(level || 1) - 1] : ''), b: type === 'mult' ? 'Passes ticks on, times its number.' : type === 'boss' ? 'A crown gear: one champion every ' + Math.max(1, Math.round(F.ticksNeeded('boss', level || 1) / 4)) + ' heart turns.' : 'Special gear: acts when it fills.', c: extra || '' }; return; }
     var strong = [], weak = [];
     F.UNIT_ORDER.forEach(function (o) { if (D.vs && D.vs[o] >= 1.3) strong.push(Art.unitName(o)); if (F.UNITS[o].vs && F.UNITS[o].vs[type] >= 1.3) weak.push(Art.unitName(o)); });
     if (D.hunts) strong.push('back line');
@@ -246,7 +252,7 @@
   // ---- drawing: battlefield --------------------------------------------------------------------
   function drawBattle(c) {
     var bf = L.bf, gy = Art.groundY(bf), i;
-    Art.drawBattlefield(c, bf, scroll, cfg.biome, tAnim, { hpFrac: cfg.free ? 1 : sim.baseHp / sim.baseMax });
+    Art.drawBattlefield(c, bf, scroll, cfg.biome, tAnim, { hpFrac: cfg.free ? 1 : sim.baseHp / sim.baseMax, ebx: sim.ebx, world: sim.world, towers: sim.structs.filter(function (s) { return s.tower; }) });
     c.save(); c.beginPath(); c.rect(bf.x, bf.y, bf.w, bf.h); c.clip();
     var list = sim.units.slice().sort(function (a, b) { return uy(a) - uy(b); });
     for (i = 0; i < list.length; i++) {
@@ -298,16 +304,17 @@
     }
     // the two bases' health
     if (!cfg.free) {
-      var ex = F.ENEMY_BASE_X - scroll + 70;
+      var ex = sim.ebx - scroll + 70;
       if (ex > -80 && ex < W + 80) { var fr = sim.baseHp / sim.baseMax; c.fillStyle = 'rgba(0,0,0,0.5)'; Art.rr(c, ex - 62, gy - 262 + (1 - fr) * 55 - 8, 124, 14, 7); c.fill(); c.fillStyle = Art.C('#d9443a'); Art.rr(c, ex - 59, gy - 259 + (1 - fr) * 55 - 8, Math.max(3, 118 * fr), 8, 4); c.fill(); }
     }
     c.restore();
   }
   function ease(t) { return t < 0 ? 0 : t > 1 ? 1 : t * t * (3 - 2 * t); }
   function drawMini(c) {
-    var m = L.mini, k = m.w / F.WORLD; panel(c, m.x - 8, m.y - 6, m.w + 16, m.h + 12, Art.C(Art.theme.panel), 10);
+    var m = L.mini, k = m.w / sim.world; panel(c, m.x - 8, m.y - 6, m.w + 16, m.h + 12, Art.C(Art.theme.panel), 10);
     c.fillStyle = Art.C('#7cb872'); c.fillRect(m.x, m.y + 6, m.w, m.h - 8);
     c.fillStyle = Art.C('#2f55b5'); c.fillRect(m.x, m.y - 2, 12, m.h + 4); c.fillStyle = Art.C('#8a2f24'); c.fillRect(m.x + m.w - 14, m.y - 2, 14, m.h + 4);
+    sim.structs.forEach(function (s) { if (!s.tower) return; c.fillStyle = s.alive ? (s.side === 'ally' ? '#2d6cdf' : '#d9302a') : '#777'; c.fillRect(m.x + s.x * k - 2, m.y - 4, 4, m.h + 8); });
     sim.units.forEach(function (u) { if (u.state === 'dying') return; c.fillStyle = u.side === 'ally' ? '#2d6cdf' : '#d9302a'; c.fillRect(m.x + u.x * k - 2, m.y + (u.side === 'ally' ? 4 : 10), u.boss ? 6 : 4, 5); });
     c.strokeStyle = Art.ink; c.lineWidth = 2.5; c.strokeRect(m.x + scroll * k, m.y - 3, W * k, m.h + 6);
   }
@@ -369,7 +376,7 @@
     if (allies.length && foes.length) center = me - ma > 1000 ? ma + 420 : (ma + me) / 2;
     else if (allies.length) center = ma + 300;
     else if (foes.length) center = Math.max(640, Math.min(me, 1400));
-    var target = Math.max(0, Math.min(F.WORLD - W, center - W / 2));
+    var target = Math.max(0, Math.min(sim.world - W, center - W / 2));
     scroll += (target - scroll) * Math.min(1, dt * 2.2);
   }
 
@@ -391,13 +398,13 @@
       sim.units.forEach(function (u) { var d = Math.abs(ux(u) - x) + Math.abs(uy(u) - 40 - y) * 0.6; if (d < bd && u.state !== 'dying' && u.state !== 'fall') { bd = d; best = u; } });
       drag = { kind: 'pan', x: x, y: y, sx: x, sy: y, scroll0: scroll, moved: false, unit: best }; return;
     }
-    if (hit({ x: L.mini.x - 8, y: L.mini.y - 8, w: L.mini.w + 16, h: L.mini.h + 16 }, x, y)) { scroll = Math.max(0, Math.min(F.WORLD - W, (x - L.mini.x) / L.mini.w * F.WORLD - W / 2)); manualUntil = tAnim + 4; }
+    if (hit({ x: L.mini.x - 8, y: L.mini.y - 8, w: L.mini.w + 16, h: L.mini.h + 16 }, x, y)) { scroll = Math.max(0, Math.min(sim.world - W, (x - L.mini.x) / L.mini.w * sim.world - W / 2)); manualUntil = tAnim + 4; }
   });
   cv.addEventListener('pointermove', function (e) {
     if (!drag) return; var p = toLogical(e); drag.x = p[0]; drag.y = p[1];
     if (drag.kind === 'btn') return;
     if (!drag.moved && Math.hypot(drag.x - drag.sx, drag.y - drag.sy) > 9) drag.moved = true;
-    if (drag.kind === 'pan' && drag.moved) { scroll = Math.max(0, Math.min(F.WORLD - W, drag.scroll0 - (drag.x - drag.sx))); manualUntil = tAnim + 4; }
+    if (drag.kind === 'pan' && drag.moved) { scroll = Math.max(0, Math.min(sim.world - W, drag.scroll0 - (drag.x - drag.sx))); manualUntil = tAnim + 4; }
   });
   function endDrag(e) {
     if (!drag) return; var d = drag; drag = null; var p = toLogical(e), x = p[0], y = p[1];
@@ -534,6 +541,8 @@
       seg.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === cur)); });
     });
     var er = $('showErrors'); if (er) er.checked = !!+S.showErrors;
+    var br2 = $('bossRevs'); if (br2) { br2.value = S.bossRevs; $('bossRevsVal').textContent = '1 : ' + S.bossRevs; }
+    F.BOSS_REVS = +S.bossRevs || 100;
     var hs = $('heartSpeed'); if (hs) { hs.value = S.heartSpeed; $('heartSpeedVal').textContent = '×' + (+S.heartSpeed).toFixed(2).replace(/0$/, ''); }
     Art.setTheme(S.theme); Au.setVolumes(+S.sfx, +S.music);
     renderErrors();
@@ -548,6 +557,8 @@
         if (k === 'quick') say(+S.quick ? 'Quick game: shorter waves' : 'Normal waves');
       });
     });
+    var br = $('bossRevs');
+    br.addEventListener('input', function () { S.bossRevs = +br.value; F.BOSS_REVS = S.bossRevs; saveSettings(); $('bossRevsVal').textContent = '1 : ' + S.bossRevs; });
     var hs = $('heartSpeed');
     hs.addEventListener('input', function () { S.heartSpeed = +hs.value; saveSettings(); $('heartSpeedVal').textContent = '×' + (+hs.value).toFixed(2).replace(/0$/, ''); if (sim) sim.heartPeriod = F.HEART_PERIOD / S.heartSpeed; });
     $('showErrors').addEventListener('change', function () { S.showErrors = this.checked ? 1 : 0; saveSettings(); renderErrors(); });
