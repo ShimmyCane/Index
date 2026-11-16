@@ -1,7 +1,7 @@
 # Felix Gear Wars — brief
 
 **Updated:** 2026-11-16
-**Status:** MVP 0.2.0, headless-tested, not device-tested. `convo v0.1` and the quick answers of `convo v0.2` are built (fortress wins, lives +5 per chapter, easier start, heart speed slider). Still to build: more art styles with culture units, story audio.
+**Status:** MVP 0.3.0 (eight art styles with culture fighters, story narration), headless-tested, not device-tested. `convo v0.1` and the quick answers of `convo v0.2` are built (fortress wins, lives +5 per chapter, easier start, heart speed slider). Round 3 added Persian, Egyptian and Chinese styles, culture names/headgear/blades, and narrated story cards (75 Kokoro clips).
 
 ## Goal
 

@@ -1,7 +1,7 @@
 # Felix Gear Wars — schematic
 
 **Track:** A. Family play (Felix plays on the iPad, landscape).
-**Status:** MVP 0.2.0 (headless-tested, not device-tested). Answers from `convo/convo v0.1.md` and `convo v0.2.md` are built, except the extra art styles with culture units and the story audio (next round).
+**Status:** MVP 0.3.0 (headless-tested, not device-tested). Answers from `convo/convo v0.1.md` and `convo v0.2.md` are built, including eight art styles with culture fighters and narrated story cards.
 
 ## Track defaults
 
@@ -26,7 +26,8 @@
 - **Campaign.** 8 chapters × 3 levels. Each chapter brings one fighter; the third level ends with a boss, a 3× scale enemy with far more health and attack. Specials arrive in chapters 3, 5 and 7.
 - **Stars.** 3 stars for losing 10% of lives or fewer, 2 for 40% or fewer, else 1. After a failed try, the next try gives +20 coins (up to +60). Unlock: a level opens when the one before has at least one star.
 - **Story and reading.** Each level opens with a story card in three reading tiers (picture and caption; short sentences; a paragraph). Auto picks the tier by level; ⚙️ can force one.
-- **Art styles.** Illuminated manuscript (default), Bayeux tapestry, woodblock print, Art Nouveau, stained glass. A style is a colour filter, line weight, border and texture. Research in `research/art_styles.md`.
+- **Art styles.** Illuminated manuscript (default), Bayeux tapestry, woodblock print, Art Nouveau, stained glass, Persian miniature, Egyptian tomb painting, Chinese silk painting. A style is a colour filter, line weight, border and texture. Tapestry, woodblock, Persian, Egyptian and Chinese also give the fighters their culture's names, headgear and blades (assassins become ninjas in the Japanese style). Research in `research/art_styles.md`.
+- **Story narration.** A narrator (Kokoro, the voice Adventure uses) reads each story card in the tier shown; ⚙️ Read aloud: Auto, Tap or Off; a Listen button on the card. 75 clips in `audio/` (8.5 minutes, 3 MB), made by `tools/make_voice.py`.
 - **Sound.** Web Audio only: gear ticks, pops, thuds, clangs, arrows, bolts, stones, booms, lightning, rockets, coins, horns, fanfares; a looping tune that is calm while building and drums in for battle.
 
 ## Screen (iPad landscape)

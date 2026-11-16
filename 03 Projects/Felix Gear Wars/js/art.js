@@ -24,6 +24,33 @@
       gold: '#e3b42c', gold2: '#ffe27a', paper: '#2b2540', paper2: '#3a3256', panel: '#352d52', panel2: '#241e3b', text: '#fdf1d4', btn: '#e3a12c', dark: true,
       ally: '#2a5fd1', enemy: '#c93a3a' },
   };
+  THEMES.persian = { name: 'Persian miniature', short: 'Persian', ink: '#1f2a44', line: 1, sat: 1.15, light: 0, tint: '#f1d7a0', tintAmt: 0.08,
+    gold: '#d9a521', gold2: '#f7dd7e', paper: '#f2e2b8', paper2: '#e0c88e', panel: '#f7ebc9', panel2: '#e5cf98', text: '#1f2a44', btn: '#e8bf55', dark: false,
+    ally: '#1f8a8a', enemy: '#b0302f' };
+  THEMES.egyptian = { name: 'Egyptian tomb painting', short: 'Egyptian', ink: '#3a2414', line: 1.15, sat: 0.95, light: 0.02, tint: '#e6c27a', tintAmt: 0.12,
+    gold: '#c99a2e', gold2: '#efd078', paper: '#eedcae', paper2: '#dcc48c', panel: '#f3e6bf', panel2: '#e0cc92', text: '#3a2414', btn: '#e3b94f', dark: false,
+    ally: '#2a6fb0', enemy: '#b6502a' };
+  THEMES.chinese = { name: 'Chinese silk painting', short: 'Chinese', ink: '#232323', line: 0.9, sat: 0.6, light: 0.05, tint: '#d8d1b6', tintAmt: 0.2,
+    gold: '#b8923a', gold2: '#dcc476', paper: '#f0e8d2', paper2: '#e0d6b8', panel: '#f4edd9', panel2: '#e2d8bb', text: '#232323', btn: '#e4c46e', dark: false,
+    ally: '#2b7a70', enemy: '#b0302a' };
+  // Each culture renames the fighters and changes headgear and blades, so the army looks like the place it comes from.
+  var CULTURES = {
+    norman: { names: { spearman: 'Fyrdman', archer: 'Bowman', fighter: 'Housecarl', assassin: 'Scout', knight: 'Horseman', tank: 'Shield wall', mage: 'Seer', catapult: 'Siege engine' }, head: {} },
+    japan: { names: { spearman: 'Ashigaru', archer: 'Yumi archer', fighter: 'Samurai', assassin: 'Ninja', knight: 'Mounted samurai', tank: 'Armoured guard', mage: 'Onmyoji', catapult: 'Siege cannon' },
+      head: { spearman: 'jingasa', archer: 'jingasa', fighter: 'kabuto', assassin: 'ninja', knight: 'kabuto', tank: 'kabutoBig', mage: 'eboshi' }, blade: 'katana' },
+    persia: { names: { spearman: 'Nayza guard', archer: 'Kaman archer', fighter: 'Swordsman', assassin: 'Shadow scout', knight: 'Savar rider', tank: 'Armoured guard', mage: 'Sage', catapult: 'Manjaniq' },
+      head: { spearman: 'kulah', archer: 'turban', fighter: 'turban', assassin: 'ninja', knight: 'kulah', tank: 'kulahHelm', mage: 'turban' }, blade: 'scimitar' },
+    egypt: { names: { spearman: 'Spearman', archer: 'Bowman', fighter: 'Khopesh fighter', assassin: 'Desert scout', knight: 'Charioteer', tank: 'Shield bearer', mage: 'Priest', catapult: 'Stone hurler' },
+      head: { spearman: 'khat', archer: 'khat', fighter: 'nemes', assassin: 'wrap', knight: 'nemes', tank: 'nemes', mage: 'priest' }, blade: 'khopesh' },
+    china: { names: { spearman: 'Spear guard', archer: 'Bowman', fighter: 'Dao fighter', assassin: 'Shadow sword', knight: 'Cavalry', tank: 'Iron guard', mage: 'Taoist', catapult: 'Trebuchet' },
+      head: { spearman: 'conical', archer: 'conical', fighter: 'topknot', assassin: 'ninja', knight: 'tangHelm', tank: 'tangHelmBig', mage: 'taoist' }, blade: 'dao' },
+  };
+  THEMES.tapestry.culture = CULTURES.norman; THEMES.woodblock.culture = CULTURES.japan; THEMES.persian.culture = CULTURES.persia;
+  THEMES.egyptian.culture = CULTURES.egypt; THEMES.chinese.culture = CULTURES.china;
+  Art.unitName = function (type) {
+    var cu = Art.theme.culture, n = cu && cu.names && cu.names[type];
+    return n || (F.gearInfo(type) || {}).name || type;
+  };
   Art.THEMES = THEMES; Art.theme = THEMES.manuscript; Art.themeKey = 'manuscript';
   var cache = {};
   function hexRgb(h) { h = h.replace('#', ''); if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2]; return [parseInt(h.substr(0, 2), 16), parseInt(h.substr(2, 2), 16), parseInt(h.substr(4, 2), 16)]; }
@@ -81,9 +108,9 @@
   var BOOT = ['#6b4528', '#2d2d3a', '#8a3b2e', '#3c5a3a', '#4a3a6b'];
   function palette(u) {
     var C = Art.C, en = u.side === 'enemy', k = u.id % 5;
-    return en ? { tunic: C('#b3402f'), trim: C('#e0b34a'), skin: C(['#f1c9a0', '#e3b186', '#d79c72', '#f5d5b4', '#c98c66'][k]),
+    return en ? { tunic: C(Art.theme.enemy), trim: C('#e0b34a'), skin: C(['#f1c9a0', '#e3b186', '#d79c72', '#f5d5b4', '#c98c66'][k]),
       hat: C(HATS[k]), scarf: C(SCARF[(k + 2) % 5]), boot: C(BOOT[k]), steel: C('#a8a4a0'), dark: C('#4a2420'), cloth: C('#7a2d24') }
-      : { tunic: C('#2f55b5'), trim: C('#e8b923'), skin: C(['#f3d0a8', '#e8b98d', '#d9a37a', '#f6dcc0'][u.id % 4]),
+      : { tunic: C(Art.theme.ally), trim: C('#e8b923'), skin: C(['#f3d0a8', '#e8b98d', '#d9a37a', '#f6dcc0'][u.id % 4]),
         hat: C('#e8b923'), scarf: C('#e8b923'), boot: C('#5a3a22'), steel: C('#c3c9d4'), dark: C('#1f3777'), cloth: C('#2c4a9c') };
   }
   function arm(c, sx, sy, a, w, col) {      // two-segment arm, returns the hand
@@ -134,11 +161,82 @@
     if (plume) { c.beginPath(); c.moveTo(h.x - 2, h.y - h.r - 1); c.quadraticCurveTo(h.x - 10, h.y - h.r - 12 + Math.sin(st.t * 6) * 2, h.x - 18, h.y - h.r - 3 + Math.sin(st.t * 6 + 1) * 2); c.quadraticCurveTo(h.x - 8, h.y - h.r - 5, h.x + 2, h.y - h.r + 1); c.closePath(); fillStroke(c, st.F(plume)); }
   }
 
+  // culture headgear: returns true when it drew the head, so the caller skips its own helmet
+  function cultHead(c, st, h, type) {
+    var cu = Art.theme.culture, kind = cu && cu.head && cu.head[type]; if (!kind) return false;
+    var x = h.x, y = h.y, r = h.r, F2 = st.F, acc = F2(st.enemy ? st.pal.hat : '#e8b923'), iron = F2(st.enemy ? '#5a5560' : '#3b3d4a'), P = st.pal;
+    var big = /Big$/.test(kind) ? 1.25 : 1, cloth = F2(st.enemy ? st.pal.hat : '#f2efe6'), k;
+    switch (kind) {
+      case 'kabuto': case 'kabutoBig':
+        poly(c, [x - r - 1, y - 2, x - r - 9 * big, y + 10, x - 2, y + 8], iron);
+        c.beginPath(); c.arc(x, y - 1, (r + 1.8) * big, Math.PI, TAU); c.lineTo(x + (r + 3) * big, y + 1); c.lineTo(x - (r + 1.8) * big, y + 1); c.closePath(); fillStroke(c, iron);
+        c.beginPath(); c.moveTo(x + 2, y - r * big - 1); c.quadraticCurveTo(x - 8 * big, y - r * big - 14 * big, x - 14 * big, y - r * big - 10 * big); c.moveTo(x + 2, y - r * big - 1); c.quadraticCurveTo(x + 12 * big, y - r * big - 16 * big, x + 16 * big, y - r * big - 9 * big);
+        c.lineWidth = 3.2; c.strokeStyle = acc; c.stroke(); c.strokeStyle = Art.ink; c.lineWidth = Art.lw; break;
+      case 'jingasa': case 'conical':
+        poly(c, [x - r * 1.8, y - r * 0.1, x + 1, y - r * 2.2, x + r * 1.8, y - r * 0.1], kind === 'conical' ? F2(st.enemy ? '#a8803a' : '#d8b868') : (st.enemy ? acc : F2('#2c2c3a')));
+        c.beginPath(); c.moveTo(x - r * 1.1, y - r * 0.8); c.lineTo(x + r * 1.1, y - r * 0.8); c.lineWidth = 1.4; c.stroke(); c.lineWidth = Art.lw; break;
+      case 'ninja':
+        c.beginPath(); c.arc(x, y, r + 2.2, 0, TAU); fillStroke(c, F2(st.enemy ? P.dark : '#2e2a44'));
+        c.fillStyle = F2(P.skin); c.fillRect(x - 1, y - 4, r + 1.5, 4.5); c.fillStyle = Art.ink; c.beginPath(); c.arc(x + r * 0.45, y - 2, 1.5, 0, TAU); c.fill();
+        c.beginPath(); c.moveTo(x - r, y - 4); c.lineTo(x - r - 13, y - 2 + Math.sin(st.t * 9) * 3); c.lineTo(x - r - 12, y - 8 + Math.sin(st.t * 9) * 3); c.closePath(); fillStroke(c, acc); break;
+      case 'eboshi':
+        poly(c, [x - 6, y - r + 1, x - 4, y - r - 20, x + 6, y - r - 15, x + r - 1, y - r + 2], F2('#25252e'));
+        c.beginPath(); c.moveTo(x - 5, y - r - 6); c.lineTo(x + 7, y - r - 5); c.lineWidth = 1.6; c.strokeStyle = acc; c.stroke(); c.strokeStyle = Art.ink; c.lineWidth = Art.lw; break;
+      case 'turban':
+        c.beginPath(); c.ellipse(x, y - r * 0.55, r * 1.35, r * 0.85, 0, 0, TAU); fillStroke(c, cloth);
+        c.beginPath(); c.arc(x, y - r * 0.4, r * 1.05, Math.PI * 1.15, Math.PI * 1.85); c.lineWidth = 1.5; c.stroke(); c.lineWidth = Art.lw;
+        circ(c, x + r * 0.5, y - r * 0.9, 2.4, F2('#d63a4a')); seg(c, x + r * 0.5, y - r, x + r * 0.2, y - r * 1.9, 2, F2('#f4f0e0')); break;
+      case 'kulah': case 'kulahHelm':
+        poly(c, [x - r, y - r * 0.4, x - 2, y - r * 2.9, x + r, y - r * 0.4], kind === 'kulah' ? acc : iron);
+        c.beginPath(); c.ellipse(x, y - r * 0.5, r * 1.15, r * 0.4, 0, 0, TAU); fillStroke(c, cloth); if (kind === 'kulahHelm') seg(c, x - 2, y - r * 2.9, x - 2, y - r * 3.4, 2.4, F2(P.steel)); break;
+      case 'khat': case 'wrap':
+        c.beginPath(); c.arc(x, y - 1, r + 1.4, Math.PI, TAU); c.lineTo(x + r + 1, y - 1); c.lineTo(x - r - 1, y - 1); c.closePath(); fillStroke(c, kind === 'wrap' ? F2(st.enemy ? P.dark : '#3a6ea8') : F2('#f2efe6'));
+        c.beginPath(); c.moveTo(x - r, y - 4); c.lineTo(x - r - 7, y + 8); c.lineTo(x - 2, y + 4); c.closePath(); fillStroke(c, kind === 'wrap' ? F2(st.enemy ? P.dark : '#3a6ea8') : F2('#f2efe6')); break;
+      case 'nemes':
+        poly(c, [x - 2, y - 3, x - r - 8, y + r + 9, x + 1, y + r + 6], F2(st.enemy ? '#8a3a2a' : '#2a6fb0'));
+        c.beginPath(); c.arc(x, y - 1, r + 1.8, Math.PI, TAU); c.lineTo(x + r + 2, y + 0); c.lineTo(x - r - 2, y + 0); c.closePath(); fillStroke(c, F2(st.enemy ? '#8a3a2a' : '#2a6fb0'));
+        for (k = -2; k <= 2; k++) { c.beginPath(); c.moveTo(x + k * 4, y - r - 1); c.lineTo(x + k * 4 + 1, y); c.lineWidth = 1.6; c.strokeStyle = F2('#e8c14a'); c.stroke(); }
+        c.strokeStyle = Art.ink; c.lineWidth = Art.lw; circ(c, x + r + 1, y - r * 0.6, 2.4, F2('#e8c14a')); break;
+      case 'priest':
+        c.beginPath(); c.arc(x, y - 1, r + 1.2, Math.PI * 1.05, TAU * 0.98); c.lineTo(x + r, y - r * 0.5); c.lineTo(x - r, y - r * 0.5); c.closePath(); fillStroke(c, F2('#2a2a30'));
+        c.beginPath(); c.moveTo(x - r, y - r * 0.5); c.lineTo(x + r, y - r * 0.5); c.lineWidth = 3; c.strokeStyle = F2('#e8c14a'); c.stroke(); c.strokeStyle = Art.ink; c.lineWidth = Art.lw; circ(c, x + r * 0.9, y - r * 0.8, 2.4, F2('#d63a4a')); break;
+      case 'topknot':
+        c.beginPath(); c.arc(x, y - 1, r + 1.2, Math.PI * 1.05, TAU * 0.98); c.lineTo(x + r, y - r * 0.5); c.lineTo(x - r, y - r * 0.5); c.closePath(); fillStroke(c, F2('#26262c'));
+        circ(c, x - 1, y - r - 4, r * 0.5, F2('#26262c')); seg(c, x - 7, y - r - 4, x + 5, y - r - 5, 2, F2('#e8c14a')); seg(c, x - r, y - r * 0.5, x - r - 10, y + 2 + Math.sin(st.t * 8) * 2, 3, acc); break;
+      case 'tangHelm': case 'tangHelmBig':
+        steelHelm(c, st, h, st.enemy ? st.pal.hat : '#c0392b'); poly(c, [x - r - 1, y - 1, x - r - 6, y + 8, x - r + 2, y + 6], F2(P.steel));
+        seg(c, x, y - r * big - 2, x, y - r * big - 11, 2.4, F2(P.steel)); seg(c, x, y - r * big - 11, x - 3, y - r * big - 6, 2.4, acc); break;
+      case 'taoist':
+        c.beginPath(); c.rect(x - r * 0.85, y - r * 2.2, r * 1.8, r * 1.6); fillStroke(c, F2('#24242b'));
+        c.beginPath(); c.moveTo(x - r * 0.85, y - r * 1.5); c.lineTo(x + r * 0.95, y - r * 1.5); c.lineWidth = 2; c.strokeStyle = F2('#e8c14a'); c.stroke(); c.strokeStyle = Art.ink; c.lineWidth = Art.lw;
+        seg(c, x - r, y - r * 0.8, x + r, y - r * 0.9, 2.4, F2('#e8c14a')); break;
+      default: return false;
+    }
+    return true;
+  }
+  // blades: straight by default, curved for katana, scimitar, dao and the khopesh's hooked sickle
+  function blade(c, st, bx, by, ang, len) {
+    var cu = Art.theme.culture, kind = cu && cu.blade, ux = Math.cos(ang), uy = Math.sin(ang), nx = -uy, ny = ux, col = st.F('#d9dde6');
+    function stroke(w, color, path) { c.strokeStyle = color; c.lineWidth = w; c.lineCap = 'round'; c.beginPath(); path(); c.stroke(); }
+    if (!kind) { seg(c, bx - ux * 6, by - uy * 6, bx + ux * len, by + uy * len, 4.4, col); }
+    else {
+      var L2 = kind === 'katana' ? len * 1.2 : kind === 'dao' ? len * 1.05 : len, w = kind === 'scimitar' ? 5.4 : kind === 'dao' ? 6 : kind === 'katana' ? 3.4 : 4;
+      var path;
+      if (kind === 'khopesh') path = function () { var p1x = bx + ux * L2 * 0.6, p1y = by + uy * L2 * 0.6; c.moveTo(bx - ux * 6, by - uy * 6); c.lineTo(p1x, p1y); c.bezierCurveTo(p1x + ux * L2 * 0.5 + nx * 16, p1y + uy * L2 * 0.5 + ny * 16, p1x + ux * L2 * 0.6 + nx * 4, p1y + uy * L2 * 0.6 + ny * 4, p1x + ux * L2 * 0.18 - nx * 12, p1y + uy * L2 * 0.18 - ny * 12); };
+      else { var cv = kind === 'katana' ? 6 : 9; path = function () { c.moveTo(bx - ux * 6, by - uy * 6); c.quadraticCurveTo(bx + ux * L2 * 0.5 + nx * cv, by + uy * L2 * 0.5 + ny * cv, bx + ux * L2 + nx * cv * 0.4, by + uy * L2 + ny * cv * 0.4); }; }
+      stroke(w + Art.lw * 1.5, Art.ink, path); stroke(w, kind === 'khopesh' ? st.F('#d8b050') : col, path);
+      if (kind === 'dao') seg(c, bx - ux * 6, by - uy * 6, bx - ux * 12 - nx * 2, by - uy * 12 - ny * 2 + 4, 3, st.F(st.enemy ? st.pal.hat : '#d63a4a'));
+      c.strokeStyle = Art.ink; c.lineWidth = Art.lw;
+      if (kind === 'katana') circ(c, bx, by, 4.4, st.F('#2c2c3a'));
+    }
+    seg(c, bx - uy * 6, by + ux * 6, bx + uy * 6, by - ux * 6, 3, st.F(st.pal.trim));
+  }
+
   var DRAW = {};
   DRAW.spearman = function (c, st) {
     var a = st.a, th = a >= 0 ? Math.sin(a * Math.PI) * 18 : 0;
     legs(c, st); var back = arm(c, -4, -46 + st.bob, 1.9, 6, st.F(st.pal.skin)); torso(c, st);
-    var h = head(c, st, 1, -61); steelHelm(c, st, h); enemyHat(c, st, h);
+    var h = head(c, st, 1, -61); if (!cultHead(c, st, h, 'spearman')) { steelHelm(c, st, h); enemyHat(c, st, h); }
     var ay = a >= 0 ? -0.2 : 0.6, hand = arm(c, 6, -46 + st.bob, ay + (a >= 0 ? 0 : 0), 6.5, st.F(st.pal.skin));
     var ang = a >= 0 ? -0.1 : -0.55, sx = hand.x - 14 + th, sy = hand.y + 5;
     seg(c, sx, sy + 6, sx + Math.cos(ang) * 66, sy + Math.sin(ang) * 66 + 6, 3.6, st.F('#8a5a2e'));
@@ -152,9 +250,11 @@
     c.beginPath(); c.moveTo(-9, -52 + st.bob); c.lineTo(-17, -33 + st.bob); c.lineTo(-11, -31 + st.bob); c.lineTo(-5, -48 + st.bob); c.closePath(); fillStroke(c, st.F('#8a5a2e'));   // quiver
     [-15, -12].forEach(function (x, i) { seg(c, x, -52 + st.bob, x - 1 + i * 2, -58 + st.bob, 1.6, st.F('#f4f0e0')); });
     var h = head(c, st, 1, -61);
+    if (!cultHead(c, st, h, 'archer')) {
     c.beginPath(); c.arc(h.x, h.y - 1, h.r + 1.4, Math.PI * 0.95, TAU * 1.02); c.lineTo(h.x + 2, h.y - 4); c.closePath(); fillStroke(c, st.F(st.enemy ? '#7a2d24' : '#4e8f4a'));
     seg(c, h.x - 3, h.y - h.r - 1, h.x - 12, h.y - h.r - 9, 2, st.F('#f4f0e0'));
     enemyHat(c, st, h);
+    }
     var bx = 18, by = -45 + st.bob;
     var hand = arm(c, 6, -46 + st.bob, -0.05, 6, st.F(st.pal.skin));
     c.strokeStyle = Art.ink; c.lineWidth = 3; c.beginPath(); c.arc(bx - 9, by, 20, -1.1, 1.1); c.stroke();
@@ -168,11 +268,10 @@
   DRAW.fighter = function (c, st) {
     var a = st.a, sw = a >= 0 ? lerp(-2.3, 0.7, ease(a * 1.4)) : -0.9;
     legs(c, st); torso(c, st, { w: 26 });
-    var h = head(c, st, 1, -61); steelHelm(c, st, h, st.enemy ? st.pal.hat : '#d63a3a'); enemyHat(c, st, h);
+    var h = head(c, st, 1, -61); if (!cultHead(c, st, h, 'fighter')) { steelHelm(c, st, h, st.enemy ? st.pal.hat : '#d63a3a'); enemyHat(c, st, h); }
     var hand = arm(c, 7, -46 + st.bob, sw, 6.5, st.F(st.pal.skin));
     var bl = 36, bx = hand.x, by = hand.y;
-    seg(c, bx - Math.cos(hand.a) * 6, by - Math.sin(hand.a) * 6, bx + Math.cos(hand.a) * bl, by + Math.sin(hand.a) * bl, 4.4, st.F('#d9dde6'));
-    seg(c, bx - Math.sin(hand.a) * 6, by + Math.cos(hand.a) * 6, bx + Math.sin(hand.a) * 6, by - Math.cos(hand.a) * 6, 3, st.F(st.pal.trim));
+    blade(c, st, bx, by, hand.a, bl);
     // round shield on the back arm
     var sh = arm(c, -2, -46 + st.bob, 0.3, 6, st.F(st.pal.skin));
     circ(c, sh.x + 8, sh.y - 2, 15, st.F(st.pal.tunic)); circ(c, sh.x + 8, sh.y - 2, 5.5, st.F(st.pal.trim));
@@ -185,9 +284,11 @@
     var dark = st.enemy ? st.pal.dark : '#3a3350';
     legs(c, st, { legCol: dark, legW: 6 }); torso(c, st, { w: 20, col: dark });
     var h = head(c, st, 2, -60);
+    if (!cultHead(c, st, h, 'assassin')) {
     c.beginPath(); c.arc(h.x - 1, h.y - 1, h.r + 2, Math.PI * 0.6, TAU * 1.15); c.lineTo(h.x + 6, h.y + 2); c.closePath(); fillStroke(c, st.F(dark));
     c.beginPath(); c.moveTo(h.x + 6, h.y + 0.5); c.lineTo(h.x - 8, h.y + 0.5); c.lineTo(h.x - 8, h.y + 8); c.lineTo(h.x + 7, h.y + 6); c.closePath(); fillStroke(c, st.F(st.enemy ? st.pal.scarf : '#9b4fc4'));
     enemyHat(c, st, { x: h.x, y: h.y - 3, r: h.r - 1 });
+    }
     var fl = Math.sin(st.t * 12) * 5;      // long scarf
     c.beginPath(); c.moveTo(-3, -50 + st.bob); c.quadraticCurveTo(-22, -52 + fl, -40, -46 + fl * 1.6); c.lineTo(-38, -39 + fl * 1.6); c.quadraticCurveTo(-20, -44 + fl, -2, -43 + st.bob); c.closePath(); fillStroke(c, st.F(st.enemy ? st.pal.scarf : '#9b4fc4'));
     var s1 = a >= 0 ? lerp(-2.2, 0.9, ease(a * 1.5)) : -0.9, s2 = a >= 0 ? lerp(-1.8, 1.2, ease(a * 1.5 - 0.1)) : -0.2;
@@ -221,7 +322,7 @@
     c.save(); c.translate(2, by - 8); st.bob = 0;
     c.beginPath(); c.moveTo(-9, -12); c.quadraticCurveTo(0, -17, 9, -12); c.lineTo(11, 8); c.lineTo(-11, 8); c.closePath(); fillStroke(c, st.F(st.enemy ? st.pal.tunic : '#d5dae5'));
     c.beginPath(); c.moveTo(-9, -4); c.lineTo(9, -4); c.lineTo(10, 3); c.lineTo(-10, 3); c.closePath(); fillStroke(c, st.F(st.pal.tunic));
-    var h = head(c, st, 1, -25); steelHelm(c, st, h, st.enemy ? st.pal.hat : '#2f55b5'); enemyHat(c, st, h);
+    var h = head(c, st, 1, -25); if (!cultHead(c, st, h, 'knight')) { steelHelm(c, st, h, st.enemy ? st.pal.hat : '#2f55b5'); enemyHat(c, st, h); }
     var hand = arm(c, 5, -10, a >= 0 ? -0.1 : 0.15, 6, st.F(st.pal.skin));
     var lx = hand.x - 18 + (a >= 0 ? Math.sin(a * Math.PI) * 14 : 0), ly = hand.y + 4;
     seg(c, lx, ly, lx + 62, ly - 5, 3.6, st.F('#8a5a2e'));
@@ -235,9 +336,11 @@
     torso(c, st, { w: 36, top: -54, col: st.F(st.enemy ? '#7d5a55' : '#8c95a8') });
     c.beginPath(); c.ellipse(-14, -52 + st.bob, 11, 8, 0, 0, TAU); fillStroke(c, st.F(st.pal.steel)); c.beginPath(); c.ellipse(14, -52 + st.bob, 11, 8, 0, 0, TAU); fillStroke(c, st.F(st.pal.steel));
     var h = head(c, st, 2, -64, 9);
+    if (!cultHead(c, st, h, 'tank')) {
     c.beginPath(); c.arc(h.x, h.y - 1, h.r + 3.5, Math.PI, TAU); c.lineTo(h.x + h.r + 3.5, h.y + 6); c.lineTo(h.x - h.r - 3.5, h.y + 6); c.closePath(); fillStroke(c, st.F(st.enemy ? '#7d5a55' : '#9aa3b6'));
     c.beginPath(); c.moveTo(h.x + 1, h.y - 2); c.lineTo(h.x + h.r + 3, h.y - 2); c.lineWidth = 3.4; c.stroke(); c.lineWidth = Art.lw;
     poly(c, [h.x - 3, h.y - h.r - 3, h.x + 3, h.y - h.r - 3, h.x, h.y - h.r - 11], st.F(st.enemy ? st.pal.hat : '#e8b923')); enemyHat(c, st, { x: h.x, y: h.y - 4, r: h.r });
+    }
     var hand = arm(c, 14, -48 + st.bob, sw, 8, st.F(st.pal.steel));
     seg(c, hand.x, hand.y, hand.x + Math.cos(hand.a) * 30, hand.y + Math.sin(hand.a) * 30, 5, st.F('#6b4528'));
     var mx = hand.x + Math.cos(hand.a) * 32, my = hand.y + Math.sin(hand.a) * 32;
@@ -253,11 +356,14 @@
     c.beginPath(); c.moveTo(-17, -12); c.lineTo(17, -12); c.lineWidth = 2.4; c.strokeStyle = st.F(st.pal.trim); c.stroke(); c.strokeStyle = Art.ink; c.lineWidth = Art.lw;
     for (var i = 0; i < 4; i++) { c.fillStyle = st.F('#ffe69a'); c.beginPath(); c.arc(-9 + i * 6 + (i % 2) * 2, -30 + (i % 3) * 6, 1.6, 0, TAU); c.fill(); }
     var h = head(c, st, 2, -61);
+    var ch = cultHead(c, st, h, 'mage');
+    if (!ch) {
     c.beginPath(); c.ellipse(h.x - 1, h.y - h.r + 1, h.r + 8, 3.6, 0, 0, TAU); fillStroke(c, st.F(robe));
     poly(c, [h.x - h.r + 1, h.y - h.r + 1, h.x + h.r - 2, h.y - h.r + 1, h.x - 3 + Math.sin(st.t * 3) * 2, h.y - h.r - 24], st.F(robe));
     circ(c, h.x - 3, h.y - h.r - 10, 2, st.F('#ffe69a'));
+    }
     c.beginPath(); c.moveTo(h.x + 2, h.y + 5); c.quadraticCurveTo(h.x + 3, h.y + 18, h.x - 3, h.y + 20); c.quadraticCurveTo(h.x - 8, h.y + 12, h.x - 4, h.y + 6); c.closePath(); fillStroke(c, st.F('#f0eee6'));
-    enemyHat(c, st, { x: h.x, y: h.y - 4, r: h.r - 2 });
+    if (!ch) enemyHat(c, st, { x: h.x, y: h.y - 4, r: h.r - 2 });
     var up = a >= 0 ? lerp(-0.2, -1.0, ease(a)) : -0.1, hand = arm(c, 8, -46 + st.bob, up, 6, st.F(st.pal.skin));
     var sx = hand.x + 4, sy = hand.y;
     seg(c, sx - 3, sy + 34, sx + 3, sy - 26, 3.6, st.F('#7a4e2a'));
@@ -418,8 +524,10 @@
       for (i = 0; i < 40; i++) { c.fillStyle = 'rgba(255,240,180,' + (0.4 + 0.5 * Math.abs(Math.sin(t * 1.5 + i))).toFixed(2) + ')'; c.fillRect(bf.x + noise1(i) * bf.w, bf.y + noise1(i + 90) * (gy - bf.y) * 0.8, 2, 2); }
       c.beginPath(); c.arc(sx, sy, 24, 0, TAU); fillStroke(c, C('#fff0b8')); c.beginPath(); c.arc(sx + 9, sy - 4, 20, 0, TAU); c.fillStyle = C(B[0]); c.fill();
     } else {
-      c.beginPath(); c.arc(sx, sy, 26, 0, TAU); fillStroke(c, C(T.gold2));
-      for (i = 0; i < 12; i++) { var a = i * TAU / 12 + t * 0.05; c.beginPath(); c.moveTo(sx + Math.cos(a) * 31, sy + Math.sin(a) * 31); c.lineTo(sx + Math.cos(a) * 40, sy + Math.sin(a) * 40); c.stroke(); }
+      var disc = Art.themeKey === 'woodblock' || Art.themeKey === 'chinese' || Art.themeKey === 'egyptian';
+      c.beginPath(); c.arc(sx, sy, 26, 0, TAU); fillStroke(c, disc ? C('#d9402e') : C(T.gold2));
+      if (Art.themeKey === 'egyptian') { c.beginPath(); c.arc(sx, sy, 34, 0, TAU); c.strokeStyle = C(T.gold); c.lineWidth = 3; c.stroke(); c.strokeStyle = Art.ink; c.lineWidth = Art.lw; }
+      if (!disc) for (i = 0; i < 12; i++) { var a = i * TAU / 12 + t * 0.05; c.beginPath(); c.moveTo(sx + Math.cos(a) * 31, sy + Math.sin(a) * 31); c.lineTo(sx + Math.cos(a) * 40, sy + Math.sin(a) * 40); c.stroke(); }
     }
     // little clouds
     c.fillStyle = C('#ffffff'); c.globalAlpha = 0.7;
@@ -533,6 +641,9 @@
         if (key === 'manuscript') { c.beginPath(); c.ellipse(x, y, 5, 3, side % 2 ? 1.57 : 0, 0, TAU); c.fill(); c.fillStyle = C(T.gold); c.beginPath(); c.arc(x + (side % 2 ? 0 : step / 2), y + (side % 2 ? step / 2 : 0), 2.4, 0, TAU); c.fill(); }
         else if (key === 'tapestry') { c.fillRect(x - 3, y - 3, 6, 6); }
         else if (key === 'woodblock') { c.fillStyle = C('#c5392c'); if (((s / step) | 0) % 4 === 0) c.fillRect(x - 3, y - 3, 6, 6); }
+        else if (key === 'persian') { c.fillStyle = ((s / step) | 0) % 2 ? C('#1f6f8a') : C(T.gold); c.save(); c.translate(x, y); c.rotate(Math.PI / 4); c.fillRect(-3.5, -3.5, 7, 7); c.restore(); }
+        else if (key === 'egyptian') { c.fillStyle = [C('#b6502a'), C('#2a6fb0'), C(T.gold)][((s / step) | 0) % 3]; c.fillRect(x - 3, y - 6, 6, 12); }
+        else if (key === 'chinese') { c.strokeStyle = C('#b0302a'); c.lineWidth = 1.8; c.beginPath(); c.arc(x, y, 4, 0, Math.PI * 1.5); c.arc(x + 4, y, 3, Math.PI, Math.PI * 2.4); c.stroke(); }
         else if (key === 'nouveau') { c.strokeStyle = C(T.gold); c.lineWidth = 1.6; c.beginPath(); c.arc(x, y, 5, 0, Math.PI * 1.3); c.stroke(); }
         else { c.fillRect(x - 5, y - 5, 10, 10); c.strokeStyle = T.ink; c.lineWidth = 2; c.strokeRect(x - 5, y - 5, 10, 10); }
       }
@@ -543,6 +654,7 @@
       c.fillStyle = pat[ci % 3]; c.beginPath(); c.arc(p[0], p[1], 7, 0, TAU); c.fill(); c.stroke();
       c.fillStyle = C(T.gold2); c.beginPath(); c.arc(p[0] - 2, p[1] - 2, 2.2, 0, TAU); c.fill();
     });
+    if (key === 'chinese') { c.fillStyle = C('#b0302a'); c.fillRect(w - 60, h - 70, 26, 26); c.fillStyle = '#f0e8d2'; c.font = '900 16px Georgia'; c.fillText('兵', w - 55, h - 50); }
     if (key === 'woodblock') { c.fillStyle = C('#c5392c'); c.fillRect(w - 60, h - 70, 26, 26); c.fillStyle = '#f1e6cf'; c.font = '900 16px Georgia'; c.fillText('ギ', w - 54, h - 50); }
     frames[k] = cv; return cv;
   };

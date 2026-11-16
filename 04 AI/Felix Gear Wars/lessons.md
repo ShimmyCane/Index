@@ -11,3 +11,11 @@
 - **Log sound errors.** A try/catch around sound hid nothing only because errors now go to the opt-in error panel; test every effect by calling it.
 - **A non-homing projectile is a counter.** Stones that land where the target was punish slow units and let assassins and knights escape.
 - **A "win" that cannot happen.** Free-for-all inherited "knock down the fortress" and ended itself; make the base unbreakable when the mode must not end.
+
+## 2026-11-16 (round 3: cultures, narration, quick answers)
+
+- **A style can be more than colours.** A table per culture (names, headgear kind, blade kind) plus two small functions (`cultHead`, `blade`) re-dressed all eight fighters in four cultures without touching the rules. A fighter keeps its role; only its name and look change. Say so in the research, so a "Ninja" is not mistaken for a new unit.
+- **Be careful with names for historical groups.** The Persian assassin is a "Shadow scout", not the name of a real sect. Say in the research what the searches did not cover (kabuto, ninja, tomb-painting conventions) and mark those as general knowledge.
+- **Narration is cheap with the Adventure recipe.** Kokoro runs in the cloud container (pip and npm registries are reachable); 25 cards × 3 reading tiers took a few minutes and 3 MB. Record every tier so the voice reads exactly what the card shows; keep a text hash in the manifest so only changed texts are re-recorded.
+- **Test audio with the element, not `fetch`.** `fetch()` of a `file://` mp3 fails; `new Audio(src)` plays. Check `currentTime` advances.
+- **Parents and children answer in a different order than you ask.** Jimmy's first message asked for the link, a merge and quick fixes before the bigger items; doing the quick items, merging, then the rest let him test while the rest was built.

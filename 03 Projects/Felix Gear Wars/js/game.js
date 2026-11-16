@@ -20,7 +20,7 @@
   window.addEventListener('unhandledrejection', function (ev) { GW.err('Promise error', ev.reason); });
 
   // ---- settings and progress (device storage, always in try/catch) -----------------------------
-  var DEF = { heartSpeed: 1, theme: 'manuscript', sfx: 0.8, music: 0.5, speed: 1, quick: 0, follow: 1, reading: 'auto', showErrors: 0 };
+  var DEF = { voice: 'auto', heartSpeed: 1, theme: 'manuscript', sfx: 0.8, music: 0.5, speed: 1, quick: 0, follow: 1, reading: 'auto', showErrors: 0 };
   var S = Object.assign({}, DEF);
   try { var raw = JSON.parse(localStorage.getItem('fgw.settings') || '{}'); Object.keys(DEF).forEach(function (k) { if (raw[k] !== undefined) S[k] = raw[k]; }); } catch (e) { /* storage blocked */ }
   function saveSettings() { try { localStorage.setItem('fgw.settings', JSON.stringify(S)); } catch (e) { /* ignore */ } }
@@ -216,7 +216,7 @@
         c.save(); if (!can) c.globalAlpha *= 0.55;
         Art.drawGear(c, fake, r.x + r.w / 2, r.y + 14 + gr + 6, gr, tAnim * 0.6 * (i % 2 ? -1 : 1), {});
         c.restore();
-        var nm = F.gearInfo(type).name; txt(c, nm, r.x + r.w / 2, r.y + r.h - 44, 15, T.text, 'center', '800');
+        var nm = Art.unitName(type); txt(c, nm, r.x + r.w / 2, r.y + r.h - 44, 15, T.text, 'center', '800');
         coinIcon(c, r.x + r.w / 2 - 20, r.y + r.h - 20, 10); txt(c, String(cost), r.x + r.w / 2 - 6, r.y + r.h - 19, 20, can ? T.text : Art.C('#c0392b'), 'left', '900');
       }
       c.globalAlpha = 1;
@@ -234,10 +234,10 @@
     if (drag && drag.kind === 'gear' && drag.moved) { c.lineWidth = 4; c.setLineDash([8, 6]); c.strokeStyle = Art.C('#c0392b'); Art.rr(c, t.x + 4, t.y + 4, t.w - 8, t.h - 8, 16); c.stroke(); c.setLineDash([]); txt(c, 'Sell for ' + sim.sellValue(drag.gear), t.x + t.w / 2, t.y + t.h / 2, 24, Art.C('#c0392b'), 'center', '900'); }
   }
   function setInfoFor(type, level, extra) {
-    var D = F.UNITS[type], nm = F.gearInfo(type).name;
+    var D = F.UNITS[type], nm = Art.unitName(type);
     if (!D) { info = { until: tAnim + 4, a: nm + (type === 'mult' ? ' ×' + F.MULTV[(level || 1) - 1] : ''), b: type === 'mult' ? 'Passes ticks on, times its number.' : 'Special gear: acts when it fills.', c: extra || '' }; return; }
     var strong = [], weak = [];
-    F.UNIT_ORDER.forEach(function (o) { if (D.vs && D.vs[o] >= 1.3) strong.push(F.UNITS[o].name); if (F.UNITS[o].vs && F.UNITS[o].vs[type] >= 1.3) weak.push(F.UNITS[o].name); });
+    F.UNIT_ORDER.forEach(function (o) { if (D.vs && D.vs[o] >= 1.3) strong.push(Art.unitName(o)); if (F.UNITS[o].vs && F.UNITS[o].vs[type] >= 1.3) weak.push(Art.unitName(o)); });
     if (D.hunts) strong.push('back line');
     info = { until: tAnim + 5, a: nm + (level ? '  level ' + level : ''), b: 'Strong against: ' + (strong.join(', ') || 'none'), c: 'Beaten by: ' + (weak.join(', ') || 'few') };
     if (extra) info.c = extra;
@@ -457,7 +457,7 @@
     Art.drawUnit(c, foe, w * 0.7, gy, tAnim);
   }
   function showMap() {
-    Au.mood('off'); sim = null; paused = false;
+    Au.stopSay(); Au.mood('off'); sim = null; paused = false;
     var box = $('mapGrid'); box.textContent = '';
     F.CHAPTERS.forEach(function (C) {
       var card = document.createElement('section'); card.className = 'chapter';
@@ -485,13 +485,21 @@
     var p = document.createElement('p'); p.className = 'tier' + tier; p.textContent = tier === 0 ? st.cap : tier === 1 ? st.short : st.story; box.appendChild(p);
     var tag = $('storyTags'); tag.textContent = '';
     function chip(t) { var s = document.createElement('span'); s.className = 'chip'; s.textContent = t; tag.appendChild(s); }
-    if (!c.free) { if (c.lv === 1) chip('New fighter: ' + F.UNITS[F.CHAPTERS[c.ch - 1].fighter].name); if (c.bossName) chip('Boss: ' + c.bossName); var sp = F.CHAPTERS[c.ch - 1].special; if (sp && c.lv === 1) chip('New gear: ' + F.SPECIALS[sp].name); chip('Lives ' + c.lives); chip('Coins ' + c.coins); }
+    if (!c.free) { if (c.lv === 1) chip('New fighter: ' + Art.unitName(F.CHAPTERS[c.ch - 1].fighter)); if (c.bossName) chip('Boss: ' + c.bossName); var sp = F.CHAPTERS[c.ch - 1].special; if (sp && c.lv === 1) chip('New gear: ' + F.SPECIALS[sp].name); chip('Lives ' + c.lives); chip('Coins ' + c.coins); }
     else chip('Lives ' + c.lives);
+    var tkey = ['cap', 'short', 'story'][tier], clip = window.FGW_AUDIO && FGW_AUDIO[c.id] && FGW_AUDIO[c.id][tkey];
+    narr = clip ? clip.src : null; listenState(false); Au.stopSay();
+    $('storyListen').hidden = !narr || S.voice === 'off';
+    if (narr && S.voice === 'auto') { Au.init(); setTimeout(function () { if (screen === 'story' && cfg === c) playNarration(); }, 350); }
     var cp = $('storyPic');
     requestAnimationFrame(function () { try { c.free ? portrait(cp, 8, 340, 200, true) : portrait(cp, c.ch, 340, 200, !!c.bossName); } catch (e) { GW.err('Story picture', e); } });
     show('story'); if (window.AppNotes) AppNotes.setContext({ item: c.id, label: c.title + ' ' + levelLabel() });
   }
+  var narr = null;
+  function listenState(on) { var b = $('storyListen'); if (b) { b.setAttribute('aria-pressed', String(on)); b.querySelector('span').textContent = on ? 'Stop' : 'Listen'; } }
+  function playNarration() { if (!narr) return; Au.init(); listenState(true); Au.say(narr, function () { listenState(false); }); }
   function startLevel() {
+    Au.stopSay();
     var c = cfg; var bonus = Math.min(60, (P.fails[c.id] || 0) * 20);
     var fresh = c.free ? F.freeConfig({ quick: +S.quick }) : F.levelConfig(c.ch, c.lv, { quick: +S.quick }); fresh.coins += bonus; fresh.story = c.story;
     makeSim(fresh); show('play'); Au.init(); Au.mood('calm', fresh.ch);
@@ -533,9 +541,10 @@
   function bindSettings() {
     document.querySelectorAll('.seg button').forEach(function (b) {
       b.addEventListener('click', function () {
-        var k = b.parentNode.getAttribute('data-key'), v = b.getAttribute('data-v'); S[k] = (k === 'theme' || k === 'reading') ? v : +v; saveSettings(); syncSettings();
+        var k = b.parentNode.getAttribute('data-key'), v = b.getAttribute('data-v'); S[k] = (k === 'theme' || k === 'reading' || k === 'voice') ? v : +v; saveSettings(); syncSettings();
         if (k === 'speed' && sim) sim.speed = +S.speed; Au.init(); Au.play('tap');
         if (k === 'theme') { if (screen === 'map') showMap(); }
+        if (k === 'voice' && S.voice === 'off') Au.stopSay();
         if (k === 'quick') say(+S.quick ? 'Quick game: shorter waves' : 'Normal waves');
       });
     });
@@ -555,7 +564,8 @@
       P.stars = {}; P.fails = {}; P.freeBest = 0; saveProgress(); $('drawer').hidden = true; showMap();
     });
     $('storyPlay').addEventListener('click', function () { Au.init(); startLevel(); });
-    $('storyBack').addEventListener('click', function () { showMap(); });
+    $('storyBack').addEventListener('click', function () { Au.stopSay(); showMap(); });
+    $('storyListen').addEventListener('click', function () { if (Au.speaking()) { Au.stopSay(); listenState(false); } else playNarration(); });
     $('resNext').addEventListener('click', function () { var i = cfg.idx + 1, ch = Math.floor(i / 3) + 1, lv = i % 3 + 1; showStory(F.levelConfig(ch, lv, { quick: +S.quick })); });
     $('resRetry').addEventListener('click', function () { showStory(cfg.free ? F.freeConfig({ quick: +S.quick }) : F.levelConfig(cfg.ch, cfg.lv, { quick: +S.quick })); });
     $('resMap').addEventListener('click', function () { showMap(); });
