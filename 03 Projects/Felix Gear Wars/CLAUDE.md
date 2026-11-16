@@ -1,6 +1,6 @@
 # Felix Gear Wars — Claude Code pointer
 
-Purpose: a gear-powered lane defense game for Felix. A turning heart gear drives the gears he places on a pegboard; each gear makes a fighter, and the fighters drop to the battlefield and fight waves of the Rust Horde before they reach the wall. Campaign: 8 chapters × 3 levels (a new fighter each chapter, a boss on level 3), a free-for-all level, eight historical art styles with culture-specific fighters (names, headgear, blades), narrated story cards.
+Purpose: a gear-powered lane defense game for Felix. A turning heart gear drives the gears he places on a pegboard; each gear makes a fighter, and the fighters drop to the battlefield and fight waves of the Rust Horde before they reach the wall. Campaign: 8 chapters × 3 levels (a new fighter each chapter, a boss on level 3), a free-for-all level, a crown boss gear, castles and towers that shoot, shorter maps early, eight historical art styles with culture-specific fighters (names, headgear, blades), narrated story cards.
 
 Track: A. Family play
 

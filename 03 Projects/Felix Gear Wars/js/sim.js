@@ -5,7 +5,7 @@
   var F = globalThis.FGW;
   var DIRS = [[1, 0], [0, 1], [-1, 0], [0, -1]];   // heart sides: E, S, W, N (clockwise from east)
   var STEP = 1 / 30;
-  var MAX_ALLIES = 90;
+  var TOWER_REBUILD = 45;           // seconds for a destroyed tower to be rebuilt
 
   function Sim(cfg, o) {
     o = o || {};
@@ -15,15 +15,14 @@
     this.t = 0; this.acc = 0; this.speed = 1; this.nid = 1; this.events = [];
     this.cols = cfg.board.cols; this.rows = cfg.board.rows;
     this.heart = { c: cfg.board.heart.c, r: cfg.board.heart.r };
-    this.heartA = -0.35;                       // total angle turned (radians); the mark ticks every quarter turn
-    this.lastBoundary = Math.floor(this.heartA / (Math.PI / 2));
+    this.heartA = -0.35;                       // total angle turned (radians); gears fill smoothly as it turns
+    this.world = cfg.world || F.WORLD; this.ebx = this.world - 160;   // width of the battlefield and the enemy fortress
     this.heartPeriod = o.heartPeriod || F.HEART_PERIOD / (o.heartSpeed || 1);
     this.holes = {}; cfg.board.holes.forEach(function (h) { this.holes[h[0] + ',' + h[1]] = true; }, this);
     this.grid = {}; this.gears = []; this.units = []; this.proj = [];
     this.coins = cfg.coins; this.maxLives = cfg.lives; this.lives = cfg.lives;
     this.status = 'build';                     // build | running | won | lost
     this.waveIdx = -1; this.queue = []; this.waveTimer = Infinity; this.waveCount = cfg.free ? Infinity : cfg.waves.length;
-    this.baseMax = cfg.baseHp; this.baseHp = cfg.baseHp;
     this.leaks = 0; this.kills = 0; this.earned = 0; this.spent = 0; this.undo = [];
     this.es = F.enemyScale(cfg.idx);
     this.pool = cfg.pool.concat(cfg.specials || []);
@@ -34,9 +33,86 @@
     var self = this;
     cfg.board.dormant.forEach(function (d) { self.addGear(d.type, d.level, d.c, d.r, true); });
     this.recompute();
+    this.buildStructures();
   }
 
   var P = Sim.prototype;
+  Object.defineProperty(P, 'baseHp', { get: function () { return this.fort.hp; } });
+  Object.defineProperty(P, 'baseMax', { get: function () { return this.fort.max; } });
+
+  // ---- castles, towers and the enemy fortress ------------------------------------------------
+  // Each side has a castle that shoots arrows and stones. From chapter 4 each side also builds a tower at 10% and one at 25%
+  // of the way across. Towers can be destroyed and are rebuilt slowly. The enemy fortress falling wins the level.
+  P.buildStructures = function () {
+    var cfg = this.cfg, idx = cfg.idx, pw = 1 + 0.1 * idx, es = this.es.atk, self = this;
+    this.structs = [];
+    function add(side, kind, x, hp, weapons, extra) {
+      var k = side === 'enemy' ? es : 1;
+      var s = Object.assign({ id: self.nid++, side: side, kind: kind, x: x, hp: hp, max: hp, alive: true, rebuild: 0, targetable: true, flash: 0, invuln: false,
+        weapons: weapons.map(function (w) { return { kind: w.kind, range: w.range, min: w.min || 0, cd: w.cd, t: w.cd * (0.4 + self.rnd() * 0.6), dmg: w.dmg * pw * k, splash: w.splash || 0 }; }) }, extra || {});
+      self.structs.push(s); return s;
+    }
+    var castleW = [{ kind: 'arrow', range: 440, cd: 1.6, dmg: 5 }, { kind: 'stone', range: 720, min: 180, cd: 6, dmg: 16, splash: 70 }];
+    this.castle = add('ally', 'castle', 90, 1e9, castleW, { targetable: false, invuln: true });
+    this.fort = add('enemy', 'fortress', this.ebx + 60, cfg.baseHp, castleW, { invuln: !!cfg.free });
+    if (cfg.towers) {
+      var thp = 220 + 40 * idx, a = Math.round(this.world * 0.10), b = Math.round(this.world * 0.25);
+      [['ally', a, 'tower1'], ['ally', b, 'tower2'], ['enemy', this.world - a, 'tower1'], ['enemy', this.world - b, 'tower2']].forEach(function (t) {
+        add(t[0], t[2], t[1], thp, t[2] === 'tower1' ? [{ kind: 'arrow', range: 360, cd: 1.1, dmg: 4 }] : [{ kind: 'stone', range: 520, min: 140, cd: 4.2, dmg: 20, splash: 65 }], { tower: true });
+      });
+    }
+  };
+  P.structById = function (id) { for (var i = 0; i < this.structs.length; i++) if (this.structs[i].id === id) return this.structs[i]; return null; };
+  P.hurtStruct = function (s, amount) {
+    if (!s || !s.alive || s.invuln) return;
+    s.hp -= amount; s.flash = 0.15; this.emit({ k: 'structhit', id: s.id, x: s.x, kind: s.kind });
+    if (s.hp <= 0) {
+      s.hp = 0; s.alive = false; s.rebuild = 0; this.emit({ k: 'structdown', id: s.id, x: s.x, kind: s.kind, side: s.side });
+      if (s.kind === 'fortress') {
+        this.emit({ k: 'basefall' });
+        if (this.status === 'running') { this.status = 'won'; this.emit({ k: 'end', win: true, base: true }); }
+      }
+    }
+  };
+  P.hurtStructsAt = function (x, r, amount, projSide) {
+    for (var i = 0; i < this.structs.length; i++) {
+      var s = this.structs[i];
+      if (s.side !== projSide && s.alive && s.targetable && Math.abs(s.x - x) <= r + 30) this.hurtStruct(s, amount);
+    }
+  };
+  P.pickStruct = function (u) {
+    var best = null, bd = 1e9;
+    for (var i = 0; i < this.structs.length; i++) {
+      var s = this.structs[i]; if (s.side === u.side || !s.alive || !s.targetable) continue;
+      var d = Math.abs(s.x - u.x);
+      if (d <= u.range + 24 && !(u.minRange && d < u.minRange) && d < bd) { bd = d; best = s; }
+    }
+    return best;
+  };
+  P.updateStructs = function (dt) {
+    for (var i = 0; i < this.structs.length; i++) {
+      var s = this.structs[i];
+      if (s.flash > 0) s.flash -= dt;
+      if (!s.alive) {
+        if (s.tower) { s.rebuild += dt / TOWER_REBUILD; if (s.rebuild >= 1) { s.alive = true; s.hp = s.max; s.rebuild = 0; this.emit({ k: 'structup', id: s.id, x: s.x, kind: s.kind }); } }
+        continue;
+      }
+      for (var j = 0; j < s.weapons.length; j++) {
+        var w = s.weapons[j]; w.t -= dt; if (w.t > 0) continue;
+        var foe = null, bd = 1e9;
+        for (var k = 0; k < this.units.length; k++) {
+          var o = this.units[k]; if (o.side === s.side || o.state === 'dying' || o.state === 'fall' || o.dead) continue;
+          var d = Math.abs(o.x - s.x); if (d <= w.range && d >= w.min && d < bd) { bd = d; foe = o; }
+        }
+        if (!foe) { w.t = 0.25; continue; }
+        w.t = w.cd;
+        var stone = w.kind === 'stone', dist = Math.abs(foe.x - s.x);
+        this.proj.push({ id: this.nid++, kind: w.kind, x0: s.x, y0: s.tower ? -78 : -70, x1: foe.x, y1: foe.y, t: 0, dur: Math.max(0.25, dist / (stone ? 300 : 520)), side: s.side,
+          owner: { type: stone ? 'catapult' : 'archer', atk: w.dmg, magic: false }, tgt: stone ? 0 : foe.id, base: false, splash: w.splash, fromStruct: s.id });
+        this.emit({ k: 'shot', kind: w.kind, x: s.x, y: 0, side: s.side, struct: true });
+      }
+    }
+  };
   P.emit = function (e) { if (!this.noEvents) { this.events.push(e); if (this.events.length > 400) this.events.shift(); } };
   P.key = function (c, r) { return c + ',' + r; };
   P.inBoard = function (c, r) { return c >= 0 && r >= 0 && c < this.cols && r < this.rows; };
@@ -86,7 +162,7 @@
 
   // ---- the tray and the shop ---------------------------------------------------------------
   P.rollOne = function () {
-    var pool = this.pool, w = pool.map(function (t) { return t === 'mult' ? 0.7 : F.UNITS[t] ? 1 : 0.8; });
+    var pool = this.pool, w = pool.map(function (t) { return t === 'mult' ? 0.7 : t === 'boss' ? 0.35 : F.UNITS[t] ? 1 : 0.8; });
     var tot = w.reduce(function (a, b) { return a + b; }, 0), x = this.rnd() * tot;
     for (var i = 0; i < pool.length; i++) { x -= w[i]; if (x <= 0) return pool[i]; }
     return pool[0];
@@ -250,22 +326,18 @@
       return;
     }
     var target = this.pickTarget(u), dir = u.dir, dist;
-    var baseTarget = false;
-    if (!target && u.side === 'ally') {
-      var bd = F.ENEMY_BASE_X - u.x;
-      if (bd <= u.range && this.baseHp > 0 && !(u.minRange && bd < u.minRange)) baseTarget = true;
-    }
-    if (target || baseTarget) {
-      dist = baseTarget ? F.ENEMY_BASE_X - u.x : Math.abs(target.x - u.x);
-      if (dist > u.range && !baseTarget) {
+    var st = target ? null : this.pickStruct(u);
+    if (target || st) {
+      dist = st ? Math.abs(st.x - u.x) : Math.abs(target.x - u.x);
+      if (!st && dist > u.range) {
         u.x += dir * u.speed * dt; u.anim = 'walk';
       } else if (u.cd <= 0) {
-        u.anim = 'attack'; u.at = 0; u.hitDone = false; u.tgt = baseTarget ? -1 : target.id; u.cd = u.cdMax;
+        u.anim = 'attack'; u.at = 0; u.hitDone = false; u.tgt = st ? 0 : target.id; u.tgtS = st ? st.id : 0; u.cd = u.cdMax;
       } else u.anim = 'idle';
-      if (target) u.facing = Math.sign(target.x - u.x) || u.dir;
+      u.facing = Math.sign((st ? st.x : target.x) - u.x) || u.dir;
     } else {
       if (this.tooClose(u)) { u.x -= dir * u.speed * 0.6 * dt; u.anim = 'walk'; }
-      else if (u.side === 'ally' && u.x >= F.ENEMY_BASE_X - 30) u.anim = 'idle';
+      else if (u.side === 'ally' && u.x >= this.ebx + 50) u.anim = 'idle';
       else { u.x += dir * u.speed * dt; u.anim = 'walk'; }
     }
     if (u.side === 'enemy' && u.x <= F.BASE_X) {         // got through: one life
@@ -273,41 +345,35 @@
       this.emit({ k: 'leak', x: u.x, n: cost, boss: u.boss });
       if (this.lives <= 0) { this.lives = 0; this.status = 'lost'; this.emit({ k: 'end', win: false }); }
     }
-    if (u.x < 40) u.x = 40; if (u.x > F.WORLD - 20) u.x = F.WORLD - 20;
+    if (u.x < 40) u.x = 40; if (u.x > this.world - 20) u.x = this.world - 20;
   };
 
   // the moment of a hit or a shot
   P.fire = function (u) {
     var D = F.UNITS[u.type], t = null, i;
     if (u.tgt > 0) for (i = 0; i < this.units.length; i++) if (this.units[i].id === u.tgt) t = this.units[i];
-    var base = u.tgt === -1;
-    if (!t && !base) return;
+    var S2 = u.tgtS ? this.structById(u.tgtS) : null;
+    if (!t && !S2) return;
     if (t && (t.dead || t.state === 'dying')) return;
+    if (S2 && !S2.alive) return;
     var power = u.atk * (D.charge && !u.charged ? D.charge : 1);
     if (D.charge) u.charged = true;
     if (D.kind === 'ranged') {
-      var tx = base ? F.ENEMY_BASE_X : t.x, ty = base ? 0 : t.y;
+      var tx = S2 ? S2.x : t.x, ty = S2 ? 0 : t.y;
       var dist = Math.abs(tx - u.x);
       var kind = u.type === 'archer' ? 'arrow' : u.type === 'mage' ? 'bolt' : 'stone';
       var speed = kind === 'arrow' ? 520 : kind === 'bolt' ? 420 : 300;
       this.proj.push({ id: this.nid++, kind: kind, x0: u.x, y0: u.y, x1: tx, y1: ty, t: 0, dur: Math.max(0.2, dist / speed), side: u.side,
-        owner: { type: u.type, atk: power, magic: !!D.magic }, tgt: t ? t.id : 0, base: base, splash: (D.splash || 0) * (u.boss ? 1.4 : 1), boss: u.boss });
+        owner: { type: u.type, atk: power, magic: !!D.magic }, tgt: t ? t.id : 0, tgtS: S2 ? S2.id : 0, base: false, splash: (D.splash || 0) * (u.boss ? 1.4 : 1), boss: u.boss });
       this.emit({ k: 'shot', kind: kind, x: u.x, y: u.y, side: u.side });
       return;
     }
-    if (base) { this.hitBase(power * (D.siege || 1)); this.emit({ k: 'slash', x: F.ENEMY_BASE_X, y: 0, side: u.side }); return; }
+    if (S2) { this.hurtStruct(S2, power * (D.siege || 1.3)); this.emit({ k: 'slash', x: S2.x, y: 0, side: u.side }); return; }
     var dm = dmgFrom(power, { type: u.type }, t);
     this.hurt(t, dm, u);
     this.emit({ k: 'slash', x: t.x, y: t.y, from: u.x, side: u.side, type: u.type });
   };
-  P.hitBase = function (amount) {
-    if (this.baseHp <= 0 || this.cfg.free) return;
-    this.baseHp -= amount; this.emit({ k: 'basehit', n: amount });
-    if (this.baseHp <= 0) {
-      this.baseHp = 0; this.emit({ k: 'basefall' });
-      if (this.status === 'running') { this.status = 'won'; this.emit({ k: 'end', win: true, base: true }); }
-    }
-  };
+  P.hitBase = function (amount) { this.hurtStruct(this.fort, amount); };
 
   P.updateProj = function (p, dt) {
     p.t += dt;
@@ -320,8 +386,8 @@
           p.hit[o.id] = this.t; this.hurt(o, p.dmg * 40 / (40 + o.def), null); this.emit({ k: 'slash', x: o.x, y: o.y, side: 'ally', type: 'shuriken' });
         }
       }
-      if (p.x0 >= F.ENEMY_BASE_X - 40 && !p.hitBase) { p.hitBase = true; this.hitBase(p.dmg * 3); }
-      if (p.life <= 0 || p.x0 >= F.ENEMY_BASE_X - 30) p.done = true;
+      for (var si = 0; si < this.structs.length; si++) { var ss = this.structs[si]; if (ss.side === 'enemy' && ss.alive && ss.targetable && !p.hitS[ss.id] && Math.abs(ss.x - p.x0) < 50) { p.hitS[ss.id] = true; this.hurtStruct(ss, p.dmg * 3); } }
+      if (p.life <= 0 || p.x0 >= this.world - 60) p.done = true;
       return;
     }
     if (p.tgt && p.kind !== 'stone') { for (var j = 0; j < this.units.length; j++) if (this.units[j].id === p.tgt && !this.units[j].dead && this.units[j].state !== 'dying') { p.x1 = this.units[j].x; p.y1 = this.units[j].y; } }
@@ -335,26 +401,22 @@
         var fall = 1 - Math.abs(o.x - p.x1) / (p.splash * 1.4);
         L.hurt(o, dmgFrom(p.owner.atk, p.owner, o) * fall, null);
       });
-      if (p.side === 'ally' && Math.abs(F.ENEMY_BASE_X - p.x1) <= p.splash + 60) this.hitBase(p.owner.atk * (F.UNITS[p.owner.type].siege || 1));
+      this.hurtStructsAt(p.x1, p.splash, p.owner.atk * (F.UNITS[p.owner.type].siege || 1) * (p.fromStruct ? 0.5 : 1), p.side);
     } else {
       var tu = null; for (var m = 0; m < this.units.length; m++) if (this.units[m].id === p.tgt) tu = this.units[m];
       if (tu && !tu.dead && tu.state !== 'dying') this.hurt(tu, dmgFrom(p.owner.atk, p.owner, tu), null);
-      else if (p.base) this.hitBase(p.owner.atk);
+      else if (p.tgtS) this.hurtStruct(this.structById(p.tgtS), p.owner.atk * (F.UNITS[p.owner.type].siege || 1));
       this.emit({ k: 'arrowhit', x: p.x1, y: p.y1, kind: p.kind });
     }
   };
 
   // ---- gears produce things -----------------------------------------------------------------
-  P.heartTick = function (side) {
-    var gain = this.sideGain[side], id, g;
-    this.emit({ k: 'tick', side: side });
-    for (id in gain) {
-      g = this.gearById(+id); if (!g) continue;
-      g.pulse = 1;
-      if (g.type === 'mult') continue;
-      g.charge += gain[id];
+  // Gears fill smoothly as the heart turns: a quarter turn is one tick, and a gear gets `rate` ticks per quarter turn.
+  P.fillGears = function (qt) {
+    for (var i = 0; i < this.gears.length; i++) {
+      var g = this.gears[i];
+      if (g.rate > 0 && g.type !== 'mult') { g.charge += g.rate * qt; this.produce(g); }
     }
-    for (id in gain) { g = this.gearById(+id); if (g) this.produce(g); }
   };
   P.produce = function (g) {
     var need = F.ticksNeeded(g.type, g.level); if (!need) return;
@@ -362,11 +424,17 @@
     var guard = 0;
     while (g.charge >= need && guard++ < 6) {
       if (F.UNITS[g.type]) {
-        if (allies >= MAX_ALLIES) { g.charge = need; return; }
+        if (allies >= F.MAX_UNITS) { g.charge = need; return; }
         var x = this.dropX(g.c) + (this.rnd() - 0.5) * 24;
         var u = this.makeUnit('ally', g.type, g.level, x, false);
         u.gc = g.c; u.gr = g.r; allies++;
         this.emit({ k: 'pop', gear: g.id, c: g.c, r: g.r, unit: u.id, type: g.type, level: g.level });
+        g.charge -= need;
+      } else if (g.type === 'boss') {
+        if (allies >= F.MAX_UNITS) { g.charge = need; return; }
+        var ct = this.cfg.pool[this.cfg.pool.length - 1], bu = this.makeUnit('ally', ct, g.level, this.dropX(g.c), true);
+        bu.champ = true; bu.scale = 2.4; bu.hp = bu.max = bu.max * 0.9; allies++;
+        this.emit({ k: 'pop', gear: g.id, c: g.c, r: g.r, unit: bu.id, type: ct, level: g.level, champ: true });
         g.charge -= need;
       } else if (!this.special(g)) { g.charge = need; g.ready = true; return; }
       else { g.charge -= need; g.ready = false; }
@@ -395,7 +463,7 @@
       return true;
     }
     if (g.type === 'shuriken') {
-      this.proj.push({ id: this.nid++, kind: 'shuriken', x0: this.dropX(g.c), y0: 0, t: 0, life: 9, dmg: S.dmg * sm, hit: {}, scale: 1 + (g.level - 1) * 0.25, side: 'ally' });
+      this.proj.push({ id: this.nid++, kind: 'shuriken', x0: this.dropX(g.c), y0: 0, t: 0, life: 9, dmg: S.dmg * sm, hit: {}, hitS: {}, scale: 1 + (g.level - 1) * 0.25, side: 'ally' });
       this.emit({ k: 'launch', c: g.c, r: g.r });
       return true;
     }
@@ -407,23 +475,22 @@
     if (this.status === 'won' || this.status === 'lost') return;
     var i;
     this.t += dt;
-    // the heart turns and ticks (even before the first wave, so Felix sees it work)
-    this.heartA += dt * 2 * Math.PI / this.heartPeriod;
-    var b = Math.floor(this.heartA / (Math.PI / 2));
-    while (this.lastBoundary < b) { this.lastBoundary++; this.heartTick(((this.lastBoundary % 4) + 4) % 4); }
-    for (i = 0; i < this.gears.length; i++) { var g = this.gears[i]; if (g.pulse > 0) g.pulse -= dt * 3; }
+    // the heart turns smoothly (even before the first wave, so Felix sees it work) and the gears fill as it turns
+    var dA = dt * 2 * Math.PI / this.heartPeriod; this.heartA += dA;
+    this.fillGears(dA / (Math.PI / 2));
     if (this.status === 'running') {
       this.waveTimer -= dt;
       if (this.waveTimer <= 0 && this.waveIdx + 1 < this.waveCount) this.launchWave();
       for (i = this.queue.length - 1; i >= 0; i--) {
         var q = this.queue[i];
-        if (this.t >= q.at) {
-          var e = this.makeUnit('enemy', q.type, 1, F.ENEMY_BASE_X + 20, q.boss);
+        if (this.t >= q.at && this.enemiesAlive() < F.MAX_UNITS) {
+          var e = this.makeUnit('enemy', q.type, 1, this.ebx + 20, q.boss);
           e.state = 'go'; e.anim = 'walk'; this.queue.splice(i, 1);
           this.emit({ k: 'enemy', unit: e.id, boss: q.boss });
         }
       }
     }
+    this.updateStructs(dt);
     for (i = 0; i < this.units.length; i++) this.updateUnit(this.units[i], dt);
     for (i = 0; i < this.proj.length; i++) this.updateProj(this.proj[i], dt);
     this.units = this.units.filter(function (u) { return !u.dead; });

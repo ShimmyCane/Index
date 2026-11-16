@@ -40,7 +40,7 @@ function bot(sim, rnd) {
   // buy the best affordable thing
   var order = [0, 1, 2].sort(function () { return rnd() - 0.5; });
   for (var k = 0; k < order.length; k++) {
-    var slot = order[k], type = sim.tray[slot]; if (!type) continue;
+    var slot = order[k], type = sim.tray[slot]; if (!type || type === 'boss') continue;
     if (sim.coins < F.gearCost(type)) continue;
     var cell = bestCell(sim, type); if (!cell) return;
     sim.buy(slot, cell[0], cell[1]); return;
