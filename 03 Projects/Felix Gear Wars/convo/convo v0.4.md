@@ -17,10 +17,10 @@ Round 4 is built (version 0.4.0). Your list, and how I read it:
 ## Questions
 
 1. Is a champion every 100 heart turns (about 5 minutes at normal speed with one chain) the right wait? Shall the champion be a giant of the newest fighter, or something else (a dragon, a cart)?
-   A:
+   A: A dragon sounds awesome, but in reality the boss gear should give a random, awesome, different unit: dragon, king, cart, Felix the Cart, and a few others, each with their own amazing powers.
 2. Are the castles' arrows and stones strong enough to feel useful, and not so strong that they play the game for him?
-   A:
+   A: They should be the equivalent of 5 to 10 units, depending on the level.
 3. Tower rebuild time is 45 seconds. Shorter or longer? Should a tower come back at full health or half?
-   A:
+   A: OK: only rebuild when the defence is able to push the enemy back beyond that space.
 4. Should towers also appear in chapters 1 to 3, scaled for one screen, or stay a later surprise?
-   A:
+   A: No.
