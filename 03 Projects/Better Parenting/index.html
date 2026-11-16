@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Better Parenting</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Patrick+Hand&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Better Parenting <small>K to grade 5</small></h1>
+    <button class="pill" id="statusPill" type="button" aria-label="Database status">💾 this device</button>
+  </header>
+
+  <main class="wrap">
+    <section class="filters" aria-label="Filters">
+      <div class="chips" id="gradeChips" role="group" aria-label="Grade"></div>
+      <div class="searchRow">
+        <input id="search" type="search" placeholder="Search a situation: bedtime, lying, hitting…" aria-label="Search scenarios">
+        <button class="btn small" id="favOnly" type="button" aria-pressed="false">⭐ Saved</button>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="practice">
+      <button class="panelHead" type="button" aria-controls="practice-body"><span class="panelIcon">🎯</span><span class="panelTitle">Practice</span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="practice-body">
+        <p class="hint" id="practiceStats"></p>
+        <div id="practiceArea"></div>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="scenarios">
+      <button class="panelHead" type="button" aria-controls="scenarios-body"><span class="panelIcon">🔎</span><span class="panelTitle">Scenarios by topic</span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="scenarios-body">
+        <div class="topicGrid" id="topicGrid"></div>
+        <div id="topicCard"></div>
+        <p class="hint" id="listCount"></p>
+        <div class="list" id="scenarioList"></div>
+        <button class="btn small" id="moreBtn" type="button" hidden>Show more</button>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="own" data-open="false">
+      <button class="panelHead" type="button" aria-controls="own-body"><span class="panelIcon">✍️</span><span class="panelTitle">My own scenario</span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="own-body">
+        <p class="hint">Describe exactly what happened. You get a plan built from the topic and the stage, and you can ask any AI chat to sharpen it. Leave names out.</p>
+        <form id="ownForm" class="ownForm">
+          <input id="ownTitle" type="text" maxlength="80" placeholder="Short title (e.g. Refuses piano practice)" required>
+          <textarea id="ownText" rows="4" maxlength="1200" placeholder="What happened? What did they do and say? What did you try?" required></textarea>
+          <div class="row">
+            <label>Grade <select id="ownGrade"></select></label>
+            <label>Topic <select id="ownTopic"></select></label>
+            <button class="btn go" type="submit">Build a plan</button>
+          </div>
+        </form>
+        <div class="list" id="ownList"></div>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="toolkit" data-open="false">
+      <button class="panelHead" type="button" aria-controls="toolkit-body"><span class="panelIcon">🧰</span><span class="panelTitle">Toolkit: 18 skills</span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="toolkit-body"><div class="skillGrid" id="skillGrid"></div></div>
+    </section>
+
+    <section class="panel" data-panel="stages" data-open="false">
+      <button class="panelHead" type="button" aria-controls="stages-body"><span class="panelIcon">🌱</span><span class="panelTitle">Stages: what changes each year</span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="stages-body"><div id="stageCards"></div></div>
+    </section>
+
+    <section class="panel" data-panel="library" data-open="false">
+      <button class="panelHead" type="button" aria-controls="library-body"><span class="panelIcon">📺</span><span class="panelTitle">Watch and read</span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="library-body"><div id="libraryList"></div></div>
+    </section>
+
+    <p class="fine">General guidance drawn from published parenting programmes. It is not medical advice. If a problem lasts for weeks, gets in the way of daily life, or involves a risk of harm, talk to your pediatrician.</p>
+  </main>
+
+  <button class="pauseBtn" id="pauseBtn" type="button" aria-label="I need a minute">🫁</button>
+  <button class="gear" id="gear" type="button" aria-label="Settings" aria-expanded="false" aria-controls="drawer">⚙️</button>
+
+  <div class="sheetWrap" id="sheetWrap" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+      <div class="sheetHead"><h2 id="sheetTitle"></h2><button class="mini" id="sheetClose" type="button" aria-label="Close">✖</button></div>
+      <div id="sheetBody"></div>
+    </div>
+  </div>
+
+  <div class="sheetWrap" id="pauseWrap" hidden>
+    <div class="sheet pauseSheet" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+      <div class="sheetHead"><h2 id="pauseTitle">One minute for you</h2><button class="mini" id="pauseClose" type="button" aria-label="Close">✖</button></div>
+      <div class="breath"><div class="breathDot"></div></div>
+      <p class="breathWord" id="breathWord">Breathe in…</p>
+      <p class="count" id="pauseCount">60</p>
+      <ol class="steps">
+        <li>Stop talking. Out-breath longer than in-breath.</li>
+        <li>Drop your shoulders. Lower your voice.</li>
+        <li>Ask: what does this child need right now?</li>
+      </ol>
+    </div>
+  </div>
+
+  <aside class="drawer" id="drawer" hidden>
+    <div class="drawerHead"><h2>Settings</h2><button class="mini" id="closeDrawer" type="button" aria-label="Close">✖</button></div>
+
+    <div class="setting col"><label>My kids' grades <small>Stays on this device. Powers the ★ Mine filter.</small></label>
+      <div class="seg multi" id="myGrades"></div></div>
+    <div class="setting col"><label>Scenarios per practice</label>
+      <div class="seg" data-key="setSize"><button data-v="1">1</button><button data-v="3">3</button><button data-v="5">5</button></div></div>
+    <div class="setting col"><label>Text size</label>
+      <div class="seg" data-key="textSize"><button data-v="m">Regular</button><button data-v="l">Large</button></div></div>
+    <div class="setting col"><label>Show errors</label>
+      <div class="seg" data-key="showErrors"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
+
+    <div class="setting col">
+      <label>Notes for improvement <small>Saved with the scenario on screen</small></label>
+      <section id="notesBox" class="notesBox">
+        <textarea id="noteText" rows="3" placeholder="What would make this better?"></textarea>
+        <div class="row"><button class="btn small" id="noteSave" type="button">Save note</button>
+          <button class="btn small" id="noteCopy" type="button">Copy notes</button>
+          <select id="noteFilter" aria-label="Which notes"><option value="open">Open</option><option value="all">All</option></select></div>
+        <ul id="noteList"></ul>
+      </section>
+    </div>
+
+    <div class="setting col">
+      <label>Family sign-in <small>Signed in, your scenarios, practice and notes are also saved to the family database</small></label>
+      <p class="note" id="familyStatus"></p>
+      <form class="notesBox" id="familyForm">
+        <input id="familyEmail" type="email" autocomplete="username" placeholder="Email" required>
+        <input id="familyPassword" type="password" autocomplete="current-password" placeholder="Password" required>
+        <button class="btn small" type="submit">🔑 Sign in</button>
+      </form>
+      <div class="row">
+        <button class="btn small" id="familySync" type="button" hidden>🔄 Sync</button>
+        <button class="btn small" id="familyOut" type="button" hidden>🚪 Sign out</button>
+        <button class="btn small" id="familyCheck" type="button">🔎 Check database</button>
+      </div>
+      <p class="note" id="dbCheck"></p>
+    </div>
+
+    <div class="setting col"><label>Practice record</label>
+      <div class="row"><span id="practiceCount">0</span>&nbsp;practised <button class="mini wide" id="resetPractice" type="button">Clear</button></div></div>
+
+    <div class="setting col"><label>Version <span class="ver" id="version"></span></label>
+      <p class="note" id="dataCounts"></p>
+      <ul class="changelog" id="changelog"></ul></div>
+  </aside>
+
+  <div id="errorsPanel" class="errorsPanel" hidden></div>
+
+  <script src="data/core.js"></script>
+  <script src="data/scenarios_1.js"></script>
+  <script src="data/scenarios_2.js"></script>
+  <script src="data/scenarios_3.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/notes.js"></script>
+  <script src="js/family.js"></script>
+</body>
+</html>
