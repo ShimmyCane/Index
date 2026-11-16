@@ -12,30 +12,37 @@
   F.DROP_X0 = 130; F.DROP_SPAN = 860;   // pegboard columns map onto this stretch of ground
   F.HEART_PERIOD = 3.2;        // seconds for one turn of the heart (half the first pace; the slider scales it)
   F.BOSS_REVS = 100;           // heart turns one boss-gear turn takes (⚙️ can change it): 1 to 100 against other gears
+  // difficulty knobs, used by levelConfig and enemyScale (tools/balance_sim.js sweeps them)
+  F.TUNE = { base: 30, perLevel: 26, perWave: 0.5, hp: 0.09, atk: 0.055, fort: 700, fortPer: 80, short: 0.65, mid: 0.85 };   // short, mid: wave size on a one-screen and a one-and-a-half-screen map
   F.MAX_UNITS = 50;            // soldiers on each side at once
 
-  F.SM = [1, 2.2, 4.8, 10.5];  // stat multiplier per gear level (more than double per merge)
+  F.SM = [1, 2.2, 4.6, 9.4];   // stat multiplier per gear level (more than double per merge)
+  F.SPECIALTY_BONUS = 1.25;    // a culture's starred fighter gets +25% attack and health
+  F.LEVEL_SPEED = 0.92;        // each merge level needs this much of the ticks: stats x2.2 for 8% less time, about 20% better than two side by side
   F.MULTV = [1, 2, 4, 8];      // multiplier gear values
   F.MAXLEVEL = 4;
 
   // ---- fighters ---------------------------------------------------------------------------
+  // tick0 = quarter turns of the heart one gear needs for one level-1 fighter. The spearman is the reference (12). The others follow
+  // their power, so every gear makes about the same amount of attack, defence and health per minute: the archer matches the spearman,
+  // the fighter, assassin, knight and mage take 1.4 to 1.7 times as long, the tank 2.5 times and the catapult 3 times.
   // kind: melee | ranged. vs = damage multiplier against a type. shield = multiplier on incoming ranged damage.
   F.UNITS = {
-    spearman: { name: 'Spearman', cost: 30, tick0: 3, hp: 70, atk: 10, def: 5, range: 46, speed: 46, cd: 1.0, kind: 'melee',
+    spearman: { name: 'Spearman', cost: 30, tick0: 12, hp: 70, atk: 10, def: 5, range: 46, speed: 46, cd: 1.0, kind: 'melee',
       vs: { knight: 2.6 }, order: 1 },
-    archer:   { name: 'Archer', cost: 40, tick0: 4, hp: 40, atk: 9, def: 1, range: 330, speed: 40, cd: 1.1, kind: 'ranged',
+    archer:   { name: 'Archer', cost: 40, tick0: 12, hp: 40, atk: 9, def: 1, range: 330, speed: 40, cd: 1.1, kind: 'ranged',
       vs: { spearman: 1.4, fighter: 1.1, tank: 0.6, knight: 0.9 }, order: 2 },
-    fighter:  { name: 'Fighter', cost: 45, tick0: 4, hp: 105, atk: 11, def: 9, range: 46, speed: 42, cd: 0.95, kind: 'melee',
+    fighter:  { name: 'Fighter', cost: 45, tick0: 17, hp: 105, atk: 11, def: 9, range: 46, speed: 42, cd: 0.95, kind: 'melee',
       vs: { archer: 1.5, mage: 1.4, catapult: 1.3 }, shield: 0.55, order: 3 },
-    assassin: { name: 'Assassin', cost: 50, tick0: 4, hp: 46, atk: 18, def: 2, range: 40, speed: 98, cd: 0.6, kind: 'melee',
+    assassin: { name: 'Assassin', cost: 50, tick0: 16, hp: 46, atk: 18, def: 2, range: 40, speed: 98, cd: 0.6, kind: 'melee',
       vs: { archer: 2.0, mage: 2.0, catapult: 2.0, fighter: 0.6, tank: 0.4 }, hunts: true, order: 4 },
-    knight:   { name: 'Knight', cost: 65, tick0: 5, hp: 125, atk: 15, def: 10, range: 56, speed: 92, cd: 1.1, kind: 'melee',
+    knight:   { name: 'Knight', cost: 65, tick0: 20, hp: 125, atk: 15, def: 10, range: 56, speed: 92, cd: 1.1, kind: 'melee',
       vs: { archer: 1.6, mage: 1.5, catapult: 1.6, assassin: 1.2, spearman: 0.8, tank: 0.6 }, charge: 1.8, order: 5 },
-    tank:     { name: 'Tank', cost: 70, tick0: 6, hp: 290, atk: 12, def: 26, range: 50, speed: 26, cd: 1.4, kind: 'melee',
+    tank:     { name: 'Tank', cost: 70, tick0: 30, hp: 290, atk: 12, def: 26, range: 50, speed: 26, cd: 1.4, kind: 'melee',
       vs: {}, order: 6 },
-    mage:     { name: 'Mage', cost: 70, tick0: 5, hp: 44, atk: 22, def: 1, range: 280, speed: 36, cd: 1.7, kind: 'ranged',
+    mage:     { name: 'Mage', cost: 70, tick0: 18, hp: 44, atk: 22, def: 1, range: 280, speed: 36, cd: 1.7, kind: 'ranged',
       vs: { tank: 1.6, knight: 1.3 }, magic: true, splash: 70, order: 7 },
-    catapult: { name: 'Catapult', cost: 90, tick0: 6, hp: 95, atk: 30, def: 6, range: 560, minRange: 170, speed: 22, cd: 3.2, kind: 'ranged',
+    catapult: { name: 'Catapult', cost: 90, tick0: 36, hp: 95, atk: 30, def: 6, range: 560, minRange: 170, speed: 22, cd: 3.2, kind: 'ranged',
       vs: { tank: 1.3 }, splash: 80, siege: 2.2, order: 8 },
   };
   F.UNIT_ORDER = ['spearman', 'archer', 'fighter', 'assassin', 'knight', 'tank', 'mage', 'catapult'];
@@ -44,16 +51,16 @@
   F.SPECIALS = {
     mult:      { name: 'Multiplier', cost: 15, icon: 'mult', note: 'Passes ticks on, times 1, 2, 4 or 8' },
     boss:      { name: 'Boss gear', cost: 120, icon: 'boss', note: 'Turns very slowly, then a champion steps out' },
-    lightning: { name: 'Lightning', cost: 60, tick0: 5, icon: 'lightning', dmg: 30, strikes: 2 },
-    rocket:    { name: 'Rockets', cost: 70, tick0: 5, icon: 'rocket', dmg: 40, splash: 95 },
-    shuriken:  { name: 'Shuriken', cost: 60, tick0: 5, icon: 'shuriken', dmg: 22 },
+    lightning: { name: 'Lightning', cost: 60, tick0: 20, icon: 'lightning', dmg: 30, strikes: 2 },
+    rocket:    { name: 'Rockets', cost: 70, tick0: 24, icon: 'rocket', dmg: 40, splash: 95 },
+    shuriken:  { name: 'Shuriken', cost: 60, tick0: 20, icon: 'shuriken', dmg: 22 },
   };
   F.gearInfo = function (type) { return F.UNITS[type] || F.SPECIALS[type]; };
   F.gearCost = function (type) { return F.gearInfo(type).cost; };
   F.ticksNeeded = function (type, level) {
     if (type === 'boss') return Math.max(1, Math.ceil(4 * F.BOSS_REVS * Math.pow(0.75, level - 1)));   // a quarter turn of the heart = 1
     var g = F.gearInfo(type); if (!g.tick0) return 0;
-    return Math.max(1, g.tick0 - (level - 1));
+    return Math.max(1, Math.round(g.tick0 * Math.pow(F.LEVEL_SPEED, level - 1)));
   };
   F.bounty = function (type, boss) {
     var u = F.UNITS[type]; var b = Math.ceil(u.cost * 0.24);
@@ -201,7 +208,7 @@
     return types[types.length - 1].t;
   }
   function makeWave(rnd, k, idx, pool, opts) {
-    var budget = (opts.base + opts.perLevel * idx) * (1 + opts.perWave * k) * (opts.quick ? 0.6 : 1);
+    var budget = (opts.base + opts.perLevel * idx) * (1 + opts.perWave * k) * (opts.quick ? 0.6 : 1) * (opts.len || 1);
     var types = pool.map(function (t, i) { return { t: t, w: 1 + i * 0.35 + (t === pool[pool.length - 1] ? 1.2 : 0) }; });
     var list = [], spent = 0, guard = 0;
     while (spent < budget && guard++ < 60) {
@@ -224,7 +231,7 @@
     var lay = layout(C.cols, C.rows, idx, rnd);
     var pool = F.unlockedFighters(ch);
     var nWaves = 4 + Math.floor(idx / 6) - (o.quick ? 1 : 0);
-    var opts = { base: 48, perLevel: 60, perWave: 0.5, quick: !!o.quick };
+    var opts = { base: F.TUNE.base, perLevel: F.TUNE.perLevel, perWave: F.TUNE.perWave, quick: !!o.quick, len: C.screens <= 1 ? F.TUNE.short : C.screens < 2 ? F.TUNE.mid : 1 };
     var waves = [];
     for (var k = 0; k < nWaves; k++) waves.push(makeWave(rnd, k, idx, pool, opts));
     var boss = null;
@@ -248,7 +255,7 @@
       id: 'c' + ch + 'l' + lv, ch: ch, lv: lv, idx: idx, seed: seed, free: false, world: Math.round(F.VIEW_W * C.screens), towers: idx >= 9, biome: C.biome, title: C.title,
       board: { cols: C.cols, rows: C.rows, heart: lay.heart, holes: lay.holes, dormant: dorm },
       lives: 20 + 5 * ch, coins: 120 + 7 * idx, waves: waves, bossName: lv === 3 ? C.boss : null, bossType: lv === 3 ? C.fighter : null,
-      baseHp: 500 + 240 * idx, pool: pool, specials: F.unlockedSpecials(ch), quick: !!o.quick,
+      baseHp: F.TUNE.fort + F.TUNE.fortPer * idx, pool: pool, specials: F.unlockedSpecials(ch), quick: !!o.quick,
       story: F.STORIES[idx],
     };
   };
@@ -272,6 +279,6 @@
   };
 
   F.enemyScale = function (idx) {
-    return { hp: 1 + 0.11 * idx, atk: 1 + 0.065 * idx, def: 1 + 0.03 * idx };
+    return { hp: 1 + F.TUNE.hp * idx, atk: 1 + F.TUNE.atk * idx, def: 1 + 0.03 * idx };
   };
 })();

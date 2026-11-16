@@ -28,3 +28,13 @@
 - **A cap needs a queue.** The 50-soldier cap holds a full gear's charge and holds enemy spawns back; nothing is lost, and the screen stays readable.
 - **Test fixtures must use real names.** A headless test that put a fake gear name in the tray made the draw loop throw every frame, which looked like a missing HUD and frame. A blank frame can mean an exception in the loop; read `GW.errors` first.
 - **The late game was easy for the bot even after the changes.** The castle and towers help the player as much as the enemy. Tune with the bot after any rule that helps both sides.
+
+## 2026-11-16 (round 5: cultures with a star fighter, gears balanced by power)
+
+- **Tie the speed of a gear to the power of its fighter.** Power = sqrt(effective health × damage per second) × range, splash and siege modifiers. Setting each gear's ticks from that number made power per minute equal within about 10% for all eight gears (`node tools/balance_sim.js power`), so no gear is the obvious best buy. The reference is the spearman; the catapult is three times slower and the tank two and a half.
+- **Slowing production means shrinking everything else.** Gears four times slower made every wave four times harder; waves, fortress health and map length all had to come down. Sweep the knobs in-process (`F.TUNE`) instead of editing the file for every try.
+- **The test bot can be the bug.** The bot merged two gears into the one farther from the heart, stranding the merged gear, so it "lost" levels for no game reason. Check the losing runs (state at the end: gears, active gears, coins) before changing difficulty.
+- **A short map is harder, not easier.** On a one-screen map the enemy reaches the wall in 25 seconds, so the early levels needed a length factor on wave size (×0.6 on one screen, ×0.8 on one and a half).
+- **A rush win is a design hole.** With the fortress as the win condition, seven spearmen broke a 500-point fortress in 28 seconds. Fortress health has to be set against what a small early army can do.
+- **Give every fighter type to exactly one culture.** Eight cultures and eight fighters, one star each, so changing culture changes which gear is worth buying.
+- **Search results can be wrong.** One page said the French blue came from crushed malachite (a green mineral). Check a claim against what you know before putting it in research notes.

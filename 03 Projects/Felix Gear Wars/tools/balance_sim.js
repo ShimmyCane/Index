@@ -1,4 +1,4 @@
-// Felix Gear Wars: balance test without playing the game. Run: node tools/balance_sim.js [matchups|levels|all] [runs]
+// Felix Gear Wars: balance test without playing the game. Run: node tools/balance_sim.js [matchups|levels|difficulty|stress|power|all] [runs]
 // It loads the same rules the game uses (js/data.js, js/sim.js) and plays them with a simple bot.
 'use strict';
 require('../js/data.js'); require('../js/sim.js');
@@ -36,7 +36,10 @@ function matchups() {
 function bot(sim, rnd) {
   // merge any pair that exists
   var g = sim.gears, i, j;
-  outer: for (i = 0; i < g.length; i++) for (j = i + 1; j < g.length; j++) if (sim.canMerge(g[i], g[j])) { sim.moveGear(g[i], g[j].c, g[j].r); break outer; }
+  outer: for (i = 0; i < g.length; i++) for (j = i + 1; j < g.length; j++) if (sim.canMerge(g[i], g[j])) {
+    var keep = g[i].rate >= g[j].rate ? g[i] : g[j], other = keep === g[i] ? g[j] : g[i];      // keep the gear that is better connected to the heart
+    sim.moveGear(other, keep.c, keep.r); break outer;
+  }
   // buy the best affordable thing
   var order = [0, 1, 2].sort(function () { return rnd() - 0.5; });
   for (var k = 0; k < order.length; k++) {
@@ -64,11 +67,13 @@ function bestCell(sim, type) {
 function playLevel(cfg, seed) {
   var sim = new F.Sim(cfg, { noEvents: true, seed: seed }), rnd = F.rng(seed * 31 + 7);
   sim.start();
-  for (var s = 0; s < 30 * 420 && sim.status === 'running'; s++) {
+  var peak = 0, army = [];
+  for (var s = 0; s < 30 * 600 && sim.status === 'running'; s++) {
     if (s % 20 === 0) bot(sim, rnd);
     sim.step(1 / 30);
+    if (s % 30 === 0) { var a = sim.alliesAlive(); if (a > peak) peak = a; if (s % (30 * 60) === 0) army.push(a); }
   }
-  return { status: sim.status, leaks: sim.leaks, stars: sim.stars(), time: sim.t, gears: sim.gears.length, coins: sim.coins, kills: sim.kills };
+  return { status: sim.status, leaks: sim.leaks, stars: sim.stars(), time: sim.t, gears: sim.gears.length, coins: sim.coins, kills: sim.kills, peak: peak, army: army };
 }
 function levels() {
   console.log('\nBot campaign test: ' + RUNS + ' runs per level. A simple bot buys and merges, never repositions.');
@@ -80,5 +85,64 @@ function levels() {
       (w ? (stars / w).toFixed(2) : '  -').padStart(9) + String(Math.round(time / RUNS)).padStart(10));
   }
 }
+// ---- difficulty at the first and the last chapter ---------------------------------------------
+function difficulty() {
+  var picks = [[1, 1, 'level 1 (chapter 1)'], [3, 2, 'level 8 (the eighth level, chapter 3)'], [8, 1, 'chapter 8, first level'], [8, 3, 'chapter 8, boss level']];
+  console.log('\nDifficulty test, ' + RUNS + ' runs each. The bot buys, merges, never moves a gear and never uses the boss gear.');
+  console.log('level                                   win%  leaks/lives  fortress at (s)  peak army  army each minute');
+  picks.forEach(function (p) {
+    var cfg = F.levelConfig(p[0], p[1]), w = 0, leaks = 0, time = 0, peak = 0, armies = [];
+    for (var k = 0; k < RUNS; k++) { var r = playLevel(F.levelConfig(p[0], p[1]), 200 + k); if (r.status === 'won') w++; leaks += r.leaks; time += r.time; peak = Math.max(peak, r.peak); if (k === 0) armies = r.army; }
+    console.log((p[2] + '                                        ').slice(0, 40) + String(Math.round(w / RUNS * 100)).padStart(4) + '%  ' + ((leaks / RUNS).toFixed(1) + '/' + cfg.lives).padStart(11) + String(Math.round(time / RUNS)).padStart(16) + String(peak).padStart(11) + '  ' + armies.join(' '));
+  });
+}
+// ---- a multiplier next to the heart must help, not explode the screen ---------------------------
+function stress() {
+  function run(withMult) {
+    var sim = new F.Sim(F.levelConfig(1, 1), { noEvents: true, seed: 9 }); sim.fort.invuln = true; sim.coins = 9999; var h = sim.heart, c = h.c + 1, r = h.r;
+    var g0 = null;
+    if (withMult) { sim.tray = ['mult', 'mult', 'mult']; sim.buy(0, c, r); g0 = sim.gearAt(c, r); g0.level = 2; sim.recompute(); }    // a x2 gear on the east side
+    else { sim.tray = ['spearman', 'spearman', 'spearman']; sim.buy(0, c, r); }
+    // a row of spearman gears behind it
+    for (var i = 1; i <= 3; i++) { var cc = c + i; if (cc >= sim.cols) break; sim.tray = ['spearman', 'spearman', 'spearman']; sim.buy(0, cc, r); }
+    var made = 0; sim.start(); sim.waveTimer = Infinity;
+    for (var s = 0; s < 30 * 60; s++) { sim.step(1 / 30); } made = sim.alliesAlive() + 0; return made;
+  }
+  var a = run(false), b = run(true);
+  console.log('\nMultiplier stress test (one heart side, a chain of up to 4 spearman gears, one minute at normal speed):');
+  console.log('  no multiplier: ' + a + ' fighters;  with a x2 gear first in the chain: ' + b + ' fighters');
+  var full = new F.Sim(F.levelConfig(1, 1), { noEvents: true, seed: 9 }); full.fort.invuln = true; full.coins = 9999; var hh = full.heart, n = 0;
+  [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) { for (var i = 1; i < 3; i++) { var cc = hh.c + d[0] * i, rr = hh.r + d[1] * i; if (full.isFree(cc, rr)) { full.tray = ['spearman', 'spearman', 'spearman']; if (full.buy(0, cc, rr) === 'ok') n++; } } });
+  full.start(); full.waveTimer = Infinity; for (var s = 0; s < 30 * 120; s++) full.step(1 / 30);
+  console.log('  ' + n + ' spearman gears around the heart for two minutes: ' + full.alliesAlive() + ' fighters (the cap is ' + F.MAX_UNITS + ')');
+}
+// ---- every gear should make about the same power per minute ------------------------------------
+function power() {
+  console.log('\nPower per minute of one level-1 gear on one heart side (heart at 3.2 s a turn). Power = sqrt(effective health x damage per second), times a range, splash and siege modifier.');
+  console.log('type       ticks  secs/fighter  power  power/min  slower than spearman');
+  F.UNIT_ORDER.forEach(function (t) {
+    var u = F.UNITS[t], ehp = u.hp * (1 + u.def / 40), dps = u.atk / u.cd, rm = u.kind === 'ranged' ? 1 + u.range / 600 : 1, sp = u.splash ? 1 + u.splash / 300 : 1, sg = u.siege ? 1.15 : 1;
+    var pw = Math.sqrt(ehp * dps) * rm * sp * sg, secs = F.ticksNeeded(t, 1) * 3.2 / 4;
+    console.log((t + '          ').slice(0, 10) + String(F.ticksNeeded(t, 1)).padStart(5) + secs.toFixed(1).padStart(14) + pw.toFixed(1).padStart(8) + (pw / secs * 60).toFixed(0).padStart(11) + (F.ticksNeeded(t, 1) / F.ticksNeeded('spearman', 1)).toFixed(2).padStart(14) + 'x');
+  });
+}
+function sweep() {
+  // node tools/balance_sim.js sweep 4 '{"base":30,"perLevel":20}' ...   each JSON is tried on levels 1, 8, 22 and 24
+  var tries = process.argv.slice(4).map(function (j) { return JSON.parse(j); });
+  var picks = [[1, 1], [3, 2], [8, 1], [8, 3]], keep = Object.assign({}, F.TUNE);
+  tries.forEach(function (t) {
+    F.TUNE = Object.assign({}, keep, t); var row = [];
+    picks.forEach(function (p) {
+      var w = 0, leaks = 0, time = 0, lives = 0;
+      for (var k = 0; k < RUNS; k++) { var cfg = F.levelConfig(p[0], p[1]); lives = cfg.lives; var r = playLevel(cfg, 300 + k); if (r.status === 'won') w++; leaks += r.leaks; time += r.time; }
+      row.push('c' + p[0] + 'l' + p[1] + ' ' + Math.round(w / RUNS * 100) + '% leaks ' + (leaks / RUNS).toFixed(0) + '/' + lives + ' ' + Math.round(time / RUNS) + 's');
+    });
+    console.log(JSON.stringify(t) + '  ->  ' + row.join(' | '));
+  });
+}
+if (mode === 'sweep') sweep();
+if (mode === 'power' || mode === 'all') power();
+if (mode === 'stress' || mode === 'all') stress();
+if (mode === 'difficulty' || mode === 'all') difficulty();
 if (mode === 'matchups' || mode === 'all') matchups();
 if (mode === 'levels' || mode === 'all') levels();

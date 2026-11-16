@@ -105,3 +105,45 @@ Jimmy's brief: keep adding styles, research them, and let the unit selection ref
 - [Egyptian chariot warfare](https://warhistory.org/@msw/article/egyptian-chariot-warfare)
 - [Crossbows in Song China (University of Washington)](https://depts.washington.edu/chinaciv/miltech/crossbow.htm)
 - [Removing the Saddle, Inspecting the Arrows, Song scroll (Freer Gallery)](https://asia.si.edu/explore-art-culture/collections/search/edanmdm:fsg_F1916.526/)
+
+---
+
+## Round 3 (2026-11-16): cultures with a specialty fighter
+
+Jimmy's brief: eight cultures (Aztec, Japanese, Indian, Spanish, French, and so on). Each has one **specialty fighter, marked with a star, with a 25% bonus** (attack and health). The picker in ⚙️ is now **Culture**: French, Spanish, Aztec, Indian, Japanese, Chinese, Persian, Egyptian. Tapestry, Art Nouveau and stained glass remain as **storybook looks** with no culture and no star.
+
+| Culture | Look (style) | Specialty ★ | Why | Names (spearman, archer, fighter, assassin, knight, tank, mage, catapult) |
+|---|---|---|---|---|
+| French | Illuminated manuscript (blue, gold and red; the Limbourg brothers' pages) | Knight (Chevalier) | chivalry, the armoured horseman | Pikeman, Archer, Man-at-arms, Brigand, **Chevalier**, Armoured guard, Alchemist, Trebuchet |
+| Spanish | Spanish illumination: gold and terracotta, tile-star border | Tank (Conquistador) | the heavily armoured soldier with the crested *morion* helmet | Peon, Ballestero, Rodelero, Almogavar, Caballero, **Conquistador**, Alquimista, Bombard |
+| Aztec | Codex: black outline, bright flat colour on bark paper, step-fret border | Fighter (Jaguar warrior) | the jaguar warriors, an elite rank, fought with the *macuahuitl* | Spear warrior, Atlatl thrower, **Jaguar warrior**, Eagle scout, Eagle warrior, Shield bearer, Priest, Stone thrower |
+| Indian | Mughal miniature: rich colour, flowers in the border | Catapult (Mughal cannon) | the Mughal armies were known for artillery (from general knowledge) | Bhala guard, Dhanush archer, Talwar fighter, Swift scout, Rajput rider, Shield guard, Yogi, **Mughal cannon** |
+| Japanese | Woodblock print | Assassin (Ninja) | the ninja | Ashigaru, Yumi archer, Samurai, **Ninja**, Mounted samurai, Armoured guard, Onmyoji, Siege cannon |
+| Chinese | Silk painting with red seal | Archer (Crossbowman) | crossbows were a major Song weapon | Spear guard, **Crossbowman**, Dao fighter, Shadow sword, Cavalry, Iron guard, Taoist, Trebuchet |
+| Persian | Safavid miniature | Mage (Magus) | the magi | Nayza guard, Kaman archer, Swordsman, Shadow scout, Savar rider, Armoured guard, **Magus**, Manjaniq |
+| Egyptian | Tomb painting | Spearman | the foot soldiers of the New Kingdom (the khopesh is the fighter's sword) | **Spearman**, Bowman, Khopesh fighter, Desert scout, Charioteer, Shield bearer, Priest, Stone hurler |
+
+Every fighter type is the specialty of exactly one culture, so changing culture changes which gear is worth more.
+
+### What the searches said (round 3)
+
+- **Aztec:** eagle and jaguar warriors were the top two ranks; the jaguar warrior wore a jaguar hide with the face in the open mouth, the eagle warrior eagle feathers and an eagle-head helmet; both carried the *macuahuitl*, a wooden club edged with obsidian; the *atlatl* threw darts from a distance. The search returned nothing about the Codex Mendoza's painting technique, so the codex look (flat colour, black outline) is from general knowledge.
+- **Mughal:** Mughal painting grew out of Persian miniature with Indian and Islamic influences; small paintings in opaque water colour on paper; Akbar's workshop made large illustrated manuscripts; foreshortening and profile portraits appear. Nothing came back on Rajput armies or artillery; the cannon as the specialty is general knowledge.
+- **Spanish:** the *morion* is an open helmet with a comb along the crown, in use from the early 1500s; the conquistador link is partly a later film image. Nothing came back on the *Cantigas de Santa Maria* illumination; the Spanish look (gold and terracotta, tile-star border) is an invention in the spirit of Mudéjar tile work.
+- **French:** the Très Riches Heures: blue carries most of the structure, gold and red as highlights; the Duke of Berry's arms are blue with gold fleurs-de-lis on red. One search page claimed the blue came from crushed malachite; malachite is a green pigment, so that claim was not used.
+
+### Honest limits
+
+- The figures are cartoon figures with a culture's headgear and weapon, not reconstructions. The Spanish "Bombard", Japanese "cannon" and Indian "cannon" are drawn as the same wheeled engine; the Aztec army has no horses, so "Eagle warrior" is drawn on a horse for now; the Indian "Shield guard" is not an elephant.
+- The star bonus is +25% attack and health on that fighter type for Felix's side only; it is part of the culture, not of the art.
+
+### Sources (round 3)
+
+- [Eagle warrior (Wikipedia)](https://wikipedia.com/wiki/Eagle_Warrior)
+- [Aztec warriors: a detailed summary (History Crunch)](https://historycrunch.com/aztec-warriors/)
+- [Aztec warfare](https://en.wikipedia.com/wiki/Aztec_army)
+- [Mughal painting (Wikipedia)](https://en.wikipedia.org/wiki/Mughal_painting)
+- [Mughal miniatures (Memeraki)](https://memeraki.com/blogs/news/mughal-miniatures)
+- [Morion (helmet) (Wikipedia)](https://en.wikipedia.org/wiki/Morion_(helmet))
+- [The Morion: an introduction (American Society of Arms Collectors)](https://americansocietyofarmscollectors.org/wp-content/uploads/2022/04/2012-B105-The-Morion-An-Introduction-to-its-Develo.pdf)
+- [Limbourg brothers, Très Riches Heures du Duc de Berry (Smarthistory)](https://smarthistory.org/limbourg-brothers-tres-riches-heures-du-duc-de-berry)
