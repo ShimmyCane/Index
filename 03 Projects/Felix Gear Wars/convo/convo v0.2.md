@@ -18,16 +18,16 @@ Round 1 is answered and built (MVP 0.1.0). Where your answers left room, I chose
 ## Questions
 
 1. Is the heart's pace right (one turn every 1.6 seconds, a spearman gear next to the heart every 3 turns)? Faster, slower, or fine?
-   A:
+   A: Start with this for now. Add a setting with a drag slider to scale it from 0.5x to 4x speed.
 2. Should the enemy fortress win the level when it falls, or should you have to hold every wave too?
-   A:
+   A: Win when the opponent's fortress falls.
 3. Are bosses too hard or too easy? (The bot test says chapters 5 to 8 are tougher; a child with counters should do better than the bot.)
-   A:
+   A: Start the game easy for now; adjust later.
 4. Lives grow by one a level (20 up to 43). Enough? Should a lost life sound as scary as it does now?
-   A:
+   A: Every chapter gives five more lives, so chapter 8 has a total of 60. The enemy waves get more aggressive, expecting you to lose a significant number of lives, build up, fight the later waves, and win the battle.
 5. Which art style do you like best for the whole campaign? Should I add a sixth (for example Persian miniature or Japanese scroll)?
-   A:
+   A: Keep adding styles. Add them to the research folder too, with research. The unit selection should reflect the culture (for example, assassins become ninjas in the Japanese style).
 6. Should story cards be read aloud in a later round (the Adventure project has a voice recorder)?
-   A:
+   A: Yes, build the audio for the stories, similar to how Adventure works.
 7. Anything that felt wrong on the iPad (drag, size of buttons, speed, sound)?
-   A:
+   A: No.

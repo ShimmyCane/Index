@@ -1,4 +1,4 @@
-# Felix Gear Wars: balance report (MVP 0.1.0)
+# Felix Gear Wars: balance report (MVP 0.2.0)
 
 Made by `node tools/balance_sim.js all 10` (the same rules the game uses, played by a simple bot). Re-run it after any change to `js/data.js` or `js/sim.js`.
 
@@ -27,37 +27,37 @@ One merged level-2 unit against two level-1 units of the same kind (survivor hea
 
 Bot campaign test: 10 runs per level. A simple bot buys and merges, never repositions.
 level  win%  avgLeaks/lives  avg stars  avg secs
-c1l1   100%     0.0/20        3.00        81
-c1l2   100%     2.6/21        2.60        78
-c1l3   100%     0.0/22        3.00        71
-c2l1   100%     1.7/23        2.80        95
-c2l2   100%     2.1/24        2.80       106
-c2l3   100%     2.1/25        2.80       105
-c3l1   100%     1.2/26        2.80       107
-c3l2    70%     8.1/27        3.00       121
-c3l3   100%     0.0/28        3.00        93
-c4l1   100%     0.0/29        3.00        61
-c4l2   100%     0.0/30        3.00        80
-c4l3   100%     0.0/31        3.00        78
-c5l1   100%     0.3/32        3.00        94
-c5l2    80%     8.1/33        2.75        95
-c5l3    80%     9.0/34        2.75       110
-c6l1    50%    18.0/35        2.80       143
-c6l2   100%     0.0/36        3.00        93
-c6l3    70%    11.7/37        3.00       123
-c7l1    80%     7.6/38        3.00       125
-c7l2   100%     0.0/39        3.00       110
-c7l3   100%     0.0/40        3.00       107
-c8l1    80%     8.2/41        3.00       152
-c8l2   100%     0.0/42        3.00       125
-c8l3    90%     7.7/43        2.78       136
+c1l1    80%     1.8/25        3.00       138
+c1l2    90%     1.1/25        3.00       105
+c1l3    70%    10.4/25        2.43       206
+c2l1    90%     1.8/30        3.00        96
+c2l2   100%     0.0/30        3.00        74
+c2l3   100%     1.3/30        2.80        82
+c3l1   100%     0.0/35        3.00        85
+c3l2   100%     0.7/35        2.90        97
+c3l3   100%     0.0/35        3.00        85
+c4l1   100%     0.0/40        3.00        56
+c4l2   100%     0.0/40        3.00        74
+c4l3   100%     0.0/40        3.00        54
+c5l1   100%     0.0/45        3.00        73
+c5l2   100%     0.0/45        3.00        77
+c5l3    70%    17.3/45        2.71       134
+c6l1    90%     5.0/50        3.00       141
+c6l2   100%     0.0/50        3.00        95
+c6l3   100%     0.0/50        3.00        95
+c7l1   100%     0.0/55        3.00        92
+c7l2   100%     0.0/55        3.00       115
+c7l3   100%     0.0/55        3.00        95
+c8l1   100%     0.0/60        3.00       119
+c8l2   100%     0.0/60        3.00       163
+c8l3   100%     0.0/60        3.00       119
 ```
 
 ## How to read it
 
 - **Unit against unit.** Six against six at level 1, spaced out. A number above 0 means the row team won. The counters show: archers beat spearmen, knights beat archers, assassins beat archers and mages, mages and catapults beat groups, tanks beat nearly everything but mages. Spearmen are the cheapest answer to knights (cost 30 against 65).
 - **Merged against side by side.** One level-2 gear unit against two level-1 units: the merged one wins every time except archers, where both sides die. That is the intended reward for merging, balanced against the strategic value of keeping gears side by side to extend a chain.
-- **Bot campaign.** The bot never moves a gear and buys the first affordable thing, so it is a weak player. If it wins most levels, a child who uses counters and merges should win comfortably. Levels where it loses sometimes (about c3l2, c5l2, c8l3) are the ones to watch in a real test.
+- **Bot campaign.** The bot never moves a gear and buys the first affordable thing, so it is a weak player. If it wins most levels, a child who uses counters and merges should win comfortably. The campaign starts easy on purpose (Jimmy's call). A run that does not bring down the fortress within 7 minutes counts as not won, which is why the weak bot loses some chapter 1 runs. Watch c1l3 and c5l3 in a real test.
 
 ## Knobs
 

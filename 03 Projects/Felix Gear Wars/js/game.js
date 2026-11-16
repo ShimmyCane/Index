@@ -20,7 +20,7 @@
   window.addEventListener('unhandledrejection', function (ev) { GW.err('Promise error', ev.reason); });
 
   // ---- settings and progress (device storage, always in try/catch) -----------------------------
-  var DEF = { theme: 'manuscript', sfx: 0.8, music: 0.5, speed: 1, quick: 0, follow: 1, reading: 'auto', showErrors: 0 };
+  var DEF = { heartSpeed: 1, theme: 'manuscript', sfx: 0.8, music: 0.5, speed: 1, quick: 0, follow: 1, reading: 'auto', showErrors: 0 };
   var S = Object.assign({}, DEF);
   try { var raw = JSON.parse(localStorage.getItem('fgw.settings') || '{}'); Object.keys(DEF).forEach(function (k) { if (raw[k] !== undefined) S[k] = raw[k]; }); } catch (e) { /* storage blocked */ }
   function saveSettings() { try { localStorage.setItem('fgw.settings', JSON.stringify(S)); } catch (e) { /* ignore */ } }
@@ -60,7 +60,7 @@
   var parts = [], bolts = [], falls = {}, banner = null, shake = 0, redFlash = 0, beat = 0, selSlot = -1, selGear = 0, info = null, toast = null, endTimer = 0, ended = false;
   var drag = null, hudBtns = [], pointers = {};
   function makeSim(c) {
-    cfg = c; sim = new F.Sim(c, { seed: (Math.random() * 1e9) | 0 });
+    cfg = c; sim = new F.Sim(c, { seed: (Math.random() * 1e9) | 0, heartSpeed: +S.heartSpeed || 1 });
     sim.speed = +S.speed; scroll = 0; parts = []; bolts = []; falls = {}; banner = null; selSlot = -1; selGear = 0; info = null; ended = false; endTimer = 0; paused = false;
     layout();
   }
@@ -506,7 +506,7 @@
     if (cfg.free) P.freeBest = Math.max(P.freeBest, sim.waveIdx + 1);
     saveProgress();
     var R = $('screenResult');
-    $('resTitle').textContent = cfg.free ? 'Waves held: ' + Math.max(0, sim.waveIdx) : win ? (sim.baseHp <= 0 ? 'The fortress falls!' : 'You held the road!') : 'The Horde got through';
+    $('resTitle').textContent = cfg.free ? 'Waves held: ' + Math.max(0, sim.waveIdx) : win ? 'The fortress falls!' : 'The Horde got through';
     $('resStars').textContent = win ? '★'.repeat(stars) + '☆'.repeat(3 - stars) : '';
     $('resStars').hidden = !win;
     $('resText').textContent = cfg.free ? 'Best: wave ' + P.freeBest : win ? 'Lives left ' + sim.lives + ' of ' + sim.maxLives + ' · Coins earned ' + sim.earned + ' · Enemies beaten ' + sim.kills
@@ -526,6 +526,7 @@
       seg.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === cur)); });
     });
     var er = $('showErrors'); if (er) er.checked = !!+S.showErrors;
+    var hs = $('heartSpeed'); if (hs) { hs.value = S.heartSpeed; $('heartSpeedVal').textContent = '×' + (+S.heartSpeed).toFixed(2).replace(/0$/, ''); }
     Art.setTheme(S.theme); Au.setVolumes(+S.sfx, +S.music);
     renderErrors();
   }
@@ -538,6 +539,8 @@
         if (k === 'quick') say(+S.quick ? 'Quick game: shorter waves' : 'Normal waves');
       });
     });
+    var hs = $('heartSpeed');
+    hs.addEventListener('input', function () { S.heartSpeed = +hs.value; saveSettings(); $('heartSpeedVal').textContent = '×' + (+hs.value).toFixed(2).replace(/0$/, ''); if (sim) sim.heartPeriod = F.HEART_PERIOD / S.heartSpeed; });
     $('showErrors').addEventListener('change', function () { S.showErrors = this.checked ? 1 : 0; saveSettings(); renderErrors(); });
     $('gear').addEventListener('click', function () { var d = $('drawer'); d.hidden = !d.hidden; this.setAttribute('aria-expanded', String(!d.hidden)); Au.init(); });
     $('closeDrawer').addEventListener('click', function () { $('drawer').hidden = true; $('gear').setAttribute('aria-expanded', 'false'); });

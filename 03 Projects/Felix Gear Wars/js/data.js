@@ -220,7 +220,7 @@
     var lay = layout(C.cols, C.rows, idx, rnd);
     var pool = F.unlockedFighters(ch);
     var nWaves = 4 + Math.floor(idx / 6) - (o.quick ? 1 : 0);
-    var opts = { base: 62, perLevel: 20, perWave: 0.42, quick: !!o.quick };
+    var opts = { base: 46, perLevel: 14, perWave: 0.4, quick: !!o.quick };
     var waves = [];
     for (var k = 0; k < nWaves; k++) waves.push(makeWave(rnd, k, idx, pool, opts));
     var boss = null;
@@ -243,8 +243,8 @@
     return {
       id: 'c' + ch + 'l' + lv, ch: ch, lv: lv, idx: idx, seed: seed, free: false, biome: C.biome, title: C.title,
       board: { cols: C.cols, rows: C.rows, heart: lay.heart, holes: lay.holes, dormant: dorm },
-      lives: 20 + idx, coins: 96 + 7 * idx, waves: waves, bossName: lv === 3 ? C.boss : null, bossType: lv === 3 ? C.fighter : null,
-      baseHp: 520 + 160 * idx, pool: pool, specials: F.unlockedSpecials(ch), quick: !!o.quick,
+      lives: 20 + 5 * ch, coins: 120 + 7 * idx, waves: waves, bossName: lv === 3 ? C.boss : null, bossType: lv === 3 ? C.fighter : null,
+      baseHp: 400 + 110 * idx, pool: pool, specials: F.unlockedSpecials(ch), quick: !!o.quick,
       story: F.STORIES[idx],
     };
   };
@@ -259,7 +259,7 @@
     return {
       id: 'free', ch: 0, lv: 0, idx: idx, seed: 7, free: true, biome: 'fortress', title: 'Free-for-all',
       board: { cols: 9, rows: 4, heart: lay.heart, holes: lay.holes, dormant: [] },
-      lives: 30, coins: 300, waves: [], genWave: function (k) { return makeWave(rnd, k, idx, pool, opts); },
+      lives: 60, coins: 300, waves: [], genWave: function (k) { return makeWave(rnd, k, idx, pool, opts); },
       bossEvery: 5, bossName: null, baseHp: 99999, pool: pool, specials: ['lightning', 'shuriken', 'rocket'],
       quick: !!o.quick,
       story: { cap: 'Free-for-all!', short: 'Every fighter, every gear. The Horde never stops. How long can you hold?',
@@ -268,6 +268,6 @@
   };
 
   F.enemyScale = function (idx) {
-    return { hp: 1 + 0.1 * idx, atk: 1 + 0.06 * idx, def: 1 + 0.03 * idx };
+    return { hp: 1 + 0.07 * idx, atk: 1 + 0.045 * idx, def: 1 + 0.03 * idx };
   };
 })();

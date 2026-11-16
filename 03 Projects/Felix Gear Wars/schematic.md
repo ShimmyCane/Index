@@ -1,7 +1,7 @@
 # Felix Gear Wars — schematic
 
 **Track:** A. Family play (Felix plays on the iPad, landscape).
-**Status:** MVP 0.1.0 (headless-tested, not device-tested). All answers from `convo/convo v0.1.md` are built. Open questions in `convo/convo v0.2.md`.
+**Status:** MVP 0.2.0 (headless-tested, not device-tested). Answers from `convo/convo v0.1.md` and `convo v0.2.md` are built, except the extra art styles with culture units and the story audio (next round).
 
 ## Track defaults
 
@@ -17,9 +17,9 @@
 
 ## The game (as built)
 
-- **Goal.** Enemies (the Rust Horde) walk from their fortress on the right toward our wall on the left. Each enemy that gets through costs a life (a boss costs 5). Lives start at 20 and grow by one per level. Win by holding the road through every wave, or by knocking down the enemy fortress with the fighters that reach it. Free-for-all has no end except losing.
+- **Goal.** Enemies (the Rust Horde) walk from their fortress on the right toward our wall on the left. Each enemy that gets through costs a life (a boss costs 5). Lives are 20 plus 5 per chapter (25 in chapter 1, 60 in chapter 8), and the waves expect you to lose a good share of them. **The level is won when the enemy fortress falls**; waves keep coming until then. Free-for-all has an unbreakable fortress and ends only when the lives run out. The game starts easy (smaller waves, weaker foes).
 - **Screen.** A pegboard on top (7×3 growing to 9×4), a tray of three gears beside it, the battlefield below. The battlefield is two screens wide (drag to pan, a minimap to jump, and the view follows the fight). The fortress is on the second screen.
-- **The heart.** Fixed at one spot per level. It turns once every 1.6 s. A mark passes its four sides (east, south, west, north); each side that touches a gear gives that gear and its whole chain one tick. A gear reached from two sides (a loop) gets two ticks per turn. Gaps (holes) and dormant bonus gears (greyed, locked) force the layout; a dormant gear wakes when a chain reaches it.
+- **The heart.** Fixed at one spot per level. It turns once every 1.6 s (⚙️ has a Heart speed slider, ×0.5 to ×4). A mark passes its four sides (east, south, west, north); each side that touches a gear gives that gear and its whole chain one tick. A gear reached from two sides (a loop) gets two ticks per turn. Gaps (holes) and dormant bonus gears (greyed, locked) force the layout; a dormant gear wakes when a chain reaches it.
 - **Gears.** A fighter gear needs a few ticks (3 to 6, down by one per merge level, never below 1) and then a fighter pops out, tumbles to the ground, gets up and marches. Two same gears side by side each make their own fighter. Dropped on each other they merge: a stronger fighter (about 2.2× per level) and fewer ticks. Levels 1 to 4. Multiplier gears make nothing: they pass ticks on, times 1, 2, 4 or 8. Special gears: Lightning, Shuriken, Rockets.
 - **Coins.** A level starts with coins. Every gear costs coins; every enemy beaten pays coins. A refresh of the tray costs 10. Selling a gear gives half its price. Undo reverses placing, moving, merging, selling and refreshing.
 - **Fighters and counters.** Spearman (beats knights), Archer (beats spearmen and fighters from far away), Fighter (shield, beats archers and mages), Assassin (hunts the back line), Knight (charges, beats archers and mages), Tank (armour; magic fears nothing less), Mage (burns armour, hits groups), Catapult (huge range, hits groups, cannot hit close). The battle is a free-for-all once it starts; gears are the only strategy.

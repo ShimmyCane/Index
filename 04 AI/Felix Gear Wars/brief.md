@@ -1,7 +1,7 @@
 # Felix Gear Wars — brief
 
 **Updated:** 2026-11-16
-**Status:** MVP 0.1.0, headless-tested, not device-tested. Everything Jimmy asked for in `convo v0.1` is built.
+**Status:** MVP 0.2.0, headless-tested, not device-tested. `convo v0.1` and the quick answers of `convo v0.2` are built (fortress wins, lives +5 per chapter, easier start, heart speed slider). Still to build: more art styles with culture units, story audio.
 
 ## Goal
 
@@ -13,7 +13,7 @@ Plain HTML/CSS/JS, one canvas, no build, `file://` works. `js/sim.js` holds ever
 
 ## Rules in numbers (see `research/balance.md` for the report)
 
-Heart turns every 1.6 s, four ticks per turn. Gear ticks 3 to 6 (minus one per level, min 1). Merge ×2.2 stats per level, up to level 4. Multiplier gears ×1/2/4/8. Wave budget `62 + 20·idx` (× `1 + 0.42·wave`). Enemy scale `1 + 0.1·idx` health, `+0.06·idx` attack. Lives `20 + idx`. Coins `96 + 7·idx`.
+Heart turns every 1.6 s, four ticks per turn. Gear ticks 3 to 6 (minus one per level, min 1). Merge ×2.2 stats per level, up to level 4. Multiplier gears ×1/2/4/8. Wave budget `46 + 14·idx` (× `1 + 0.4·wave`). Enemy scale `1 + 0.07·idx` health, `+0.045·idx` attack. Lives `20 + 5·chapter`. Coins `120 + 7·idx`. Fortress `400 + 110·idx`. Heart speed slider ×0.5 to ×4. Win = fortress falls.
 
 ## Verified (headless Chromium, 2026-11-16)
 

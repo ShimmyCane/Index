@@ -17,7 +17,7 @@
     this.heart = { c: cfg.board.heart.c, r: cfg.board.heart.r };
     this.heartA = -0.35;                       // total angle turned (radians); the mark ticks every quarter turn
     this.lastBoundary = Math.floor(this.heartA / (Math.PI / 2));
-    this.heartPeriod = o.heartPeriod || F.HEART_PERIOD;
+    this.heartPeriod = o.heartPeriod || F.HEART_PERIOD / (o.heartSpeed || 1);
     this.holes = {}; cfg.board.holes.forEach(function (h) { this.holes[h[0] + ',' + h[1]] = true; }, this);
     this.grid = {}; this.gears = []; this.units = []; this.proj = [];
     this.coins = cfg.coins; this.maxLives = cfg.lives; this.lives = cfg.lives;
@@ -428,10 +428,6 @@
     for (i = 0; i < this.proj.length; i++) this.updateProj(this.proj[i], dt);
     this.units = this.units.filter(function (u) { return !u.dead; });
     this.proj = this.proj.filter(function (p) { return !p.done; });
-    if (this.status === 'running' && this.waveIdx + 1 >= this.waveCount && !this.queue.length && this.waveTimer === Infinity) {
-      var enemies = this.units.some(function (u) { return u.side === 'enemy'; });
-      if (!enemies) { this.status = 'won'; this.emit({ k: 'end', win: true }); }
-    }
   };
   P.update = function (dt) {
     this.acc += dt * this.speed;
