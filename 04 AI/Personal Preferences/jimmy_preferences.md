@@ -88,3 +88,13 @@
 * **Rotate the view.** Show a 3-D model from several angles, not only the default camera. The first look can hide the layout.
 * **Sweep when he asks for curves.** Arcs and curves on a moulding are a sweep along the path, not stepped slices.
 * **Walls meet the floor and the ceiling line.** Nothing should float under a cornice; if he says it looks off, check for a gap first.
+
+## 8. Games he treats as full games (Felix Gear Wars, 2026-11-16)
+
+* **"Full-fledged game": do everything asked in the first MVP,** not a first slice. Graphics are the priority, with articulated, animated creatures, arcing arrows, galloping knights and catapults.
+* **Sound and music should be exciting,** made in the page.
+* **Adaptive for a child:** reading level rises with the level; stars adapt; lives grow as foes get harder.
+* **Give him a test cheat** (+25 coins per tap in ⚙️) and a **balance test that runs without playing**.
+* **Art-style option from real research:** start with medieval manuscript and let ⚙️ switch the whole campaign to other historical styles.
+* **A story per level,** with a research folder that plans the plot line.
+* **Counters are the point:** ranged units strong when stacked, assassins and fighters counter them; battle is a free-for-all once it starts.

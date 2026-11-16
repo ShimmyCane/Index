@@ -1,0 +1,22 @@
+# Felix Gear Wars — Claude Code pointer
+
+Purpose: a gear-powered lane defense game for Felix. A turning heart gear drives the gears he places on a pegboard; each gear makes a fighter, and the fighters drop to the battlefield and fight waves of the Rust Horde before they reach the wall. Campaign: 8 chapters × 3 levels (a new fighter each chapter, a boss on level 3), a free-for-all level, five historical art styles.
+
+Track: A. Family play
+
+- Design: `schematic.md` · Story plan: `research/story.md` · Art research: `research/art_styles.md` · Balance: `research/balance.md`
+- Q&A history: `convo/` (never compact; start a new version instead)
+- AI notes: `04 AI/Felix Gear Wars/brief.md` and `lessons.md`
+- Shared conventions: root `CLAUDE.md` (public repo, privacy)
+
+How to run: open `index.html` (no server or build; works from `file://`).
+Code map: `js/data.js` (units, counters, chapters, stories, level builder) · `js/sim.js` (all rules, no DOM; the screen reads `sim.units/gears/proj` and drains `sim.events`) · `js/art.js` (drawing, five styles through `Art.C()`) · `js/audio.js` · `js/game.js` (layout, input, camera, HUD, map, story, results, ⚙️; `GW.test` has hooks for headless tests) · `js/notes.js`, `js/family.js`.
+Check: `node tools/balance_sim.js all 10` (balance, no browser). Headless Chromium for the page: drive it with `GW.test` (`showStory`, `startLevel`, `sim()`, `cards()`, `cellXY()`, `view()`). Keep test scripts out of the repo.
+
+Project rules:
+- Public repo. First names only; no photos, school or location details.
+- Original game: our own names, characters and art, drawn in code. Mechanics like other gear games are fine; copying their names, art or levels is not.
+- Web Audio synthesis only; no audio or image files unless Jimmy asks.
+- Art inspiration from historical artists and traditions only, never a living artist's style.
+- Supabase: Family project, table `fgw_notes`, publishable key only. SQL in `supabase/` (run `test_001_`, then `001_`, then `verify_001_`); nothing is applied until Jimmy asks.
+- Rules go in `js/sim.js` and `js/data.js` only (so the balance tool sees them). Drawing never changes the rules.

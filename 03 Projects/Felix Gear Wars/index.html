@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Felix Gear Wars</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-screen="map">
+<canvas id="cv" aria-label="Felix Gear Wars game board"></canvas>
+
+<!-- campaign map -->
+<main id="screenMap" class="screen">
+  <header class="screenHead"><h1>Felix Gear Wars</h1><p>Pick a level. Each chapter brings a new fighter.</p></header>
+  <div id="mapGrid" class="mapGrid"></div>
+  <div class="mapFoot"><button id="mapFree" type="button" class="big">Free-for-all <small id="freeBest"></small></button></div>
+</main>
+
+<!-- story card -->
+<section id="screenStory" class="screen" hidden>
+  <div class="card storyCard">
+    <canvas id="storyPic" class="storyPic" width="680" height="400"></canvas>
+    <div class="storyBody">
+      <h2 id="storyTitle"></h2><p id="storySub" class="sub"></p>
+      <div id="storyText" class="storyText"></div><div id="storyTags" class="tags"></div>
+      <div class="row"><button id="storyPlay" type="button" class="big go">Play</button><button id="storyBack" type="button" class="big">Map</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- result -->
+<section id="screenResult" class="screen" hidden>
+  <div class="card resCard">
+    <h2 id="resTitle"></h2><div id="resStars" class="resStars"></div><p id="resText"></p>
+    <div class="row"><button id="resNext" type="button" class="big go">Next level</button><button id="resRetry" type="button" class="big">Try again</button><button id="resMap" type="button" class="big">Map</button></div>
+  </div>
+</section>
+
+<!-- the gear and its drawer -->
+<button class="gear" id="gear" aria-label="Settings" aria-expanded="false" aria-controls="drawer">⚙️</button>
+<aside class="drawer" id="drawer" hidden>
+  <div class="drawerHead"><h2>Settings</h2><button class="mini" id="closeDrawer" aria-label="Close" type="button">✖</button></div>
+
+  <section class="panel" data-collapsed="false">
+    <button class="pHead" type="button" aria-expanded="true"><span class="icon">🎮</span><span class="title">Play</span><span class="mark">▾</span></button>
+    <div class="pBody">
+      <div class="setting"><label>Sound effects</label><div class="seg" data-key="sfx"><button data-v="0">Off</button><button data-v="0.4">Low</button><button data-v="0.8">Med</button><button data-v="1">High</button></div></div>
+      <div class="setting"><label>Music</label><div class="seg" data-key="music"><button data-v="0">Off</button><button data-v="0.3">Low</button><button data-v="0.5">Med</button><button data-v="0.8">High</button></div></div>
+      <div class="setting"><label>Game speed</label><div class="seg" data-key="speed"><button data-v="1">×1</button><button data-v="2">×2</button><button data-v="3">×3</button></div></div>
+      <div class="setting"><label>Heart speed <small>how fast the heart turns <b id="heartSpeedVal">×1</b></small></label><input id="heartSpeed" type="range" min="0.5" max="4" step="0.25" value="1" aria-label="Heart speed"></div>
+      <div class="setting"><label>Quick game <small>shorter waves (next level)</small></label><div class="seg" data-key="quick"><button data-v="0">Off</button><button data-v="1">On</button></div></div>
+      <div class="setting"><label>Follow the fight <small>the view slides to the action</small></label><div class="seg" data-key="follow"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
+      <div class="setting"><label>Reading <small>story card words</small></label><div class="seg" data-key="reading"><button data-v="auto">Auto</button><button data-v="0">Pictures</button><button data-v="1">Short</button><button data-v="2">Story</button></div></div>
+    </div>
+  </section>
+
+  <section class="panel" data-collapsed="false">
+    <button class="pHead" type="button" aria-expanded="true"><span class="icon">🎨</span><span class="title">Art style</span><span class="mark">▾</span></button>
+    <div class="pBody">
+      <div class="setting"><label>Style <small>restyles the whole campaign</small></label>
+        <div class="seg wide" data-key="theme"><button data-v="manuscript">Manuscript</button><button data-v="tapestry">Tapestry</button><button data-v="woodblock">Woodblock</button><button data-v="nouveau">Nouveau</button><button data-v="stained">Glass</button></div></div>
+    </div>
+  </section>
+
+  <section class="panel" data-collapsed="true">
+    <button class="pHead" type="button" aria-expanded="false"><span class="icon">🗺️</span><span class="title">Levels</span><span class="mark">▸</span></button>
+    <div class="pBody">
+      <button id="btnMap" type="button" class="wideBtn">Chapter select</button>
+      <button id="btnFree" type="button" class="wideBtn">Free-for-all level <small>every fighter, harder foes</small></button>
+      <button id="btnReset" type="button" class="wideBtn danger">Reset progress</button>
+    </div>
+  </section>
+
+  <section class="panel" data-collapsed="true">
+    <button class="pHead" type="button" aria-expanded="false"><span class="icon">🧪</span><span class="title">Testing</span><span class="mark">▸</span></button>
+    <div class="pBody">
+      <button id="btnCheat" type="button" class="wideBtn">+25 coins</button>
+      <p class="hint">Each tap adds 25 coins in a level. Balance test without playing: <code>node tools/balance_sim.js</code></p>
+    </div>
+  </section>
+
+  <section class="panel" data-collapsed="true">
+    <button class="pHead" type="button" aria-expanded="false"><span class="icon">📝</span><span class="title">Notes for improvement</span><span class="mark">▸</span></button>
+    <div class="pBody">
+      <section id="notesBox" class="notesBox">
+        <textarea id="noteText" rows="3" placeholder="What would make this better?"></textarea>
+        <div class="row"><button id="noteSave" type="button" class="wideBtn">Save note</button><button id="noteCopy" type="button" class="wideBtn">Copy notes</button>
+          <select id="noteFilter" aria-label="Which notes"><option value="open">Open</option><option value="all">All</option></select></div>
+        <ul id="noteList"></ul>
+      </section>
+    </div>
+  </section>
+
+  <section class="panel" data-collapsed="true">
+    <button class="pHead" type="button" aria-expanded="false"><span class="icon">☁️</span><span class="title">Family sign-in</span><span class="mark">▸</span></button>
+    <div class="pBody">
+      <p id="familyStatus" class="hint"></p>
+      <form id="familyForm" autocomplete="on">
+        <input id="familyEmail" type="email" autocomplete="username" placeholder="Email" required>
+        <input id="familyPassword" type="password" autocomplete="current-password" placeholder="Password" required>
+        <button type="submit" class="wideBtn">Sign in</button>
+      </form>
+      <button id="familyOut" type="button" class="wideBtn" hidden>Sign out</button>
+      <button id="familyCheck" type="button" class="wideBtn">Check database</button>
+      <p id="dbCheck" class="hint">This device only.</p>
+    </div>
+  </section>
+
+  <label class="toggle"><input type="checkbox" id="showErrors"> Show errors</label>
+  <p id="verInfo" class="hint"></p>
+</aside>
+<pre id="errorsPanel" class="errorsPanel" hidden></pre>
+
+<script src="js/data.js"></script>
+<script src="js/sim.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/art.js"></script>
+<script src="js/notes.js"></script>
+<script src="js/family.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
