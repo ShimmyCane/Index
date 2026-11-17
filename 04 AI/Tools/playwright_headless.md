@@ -10,3 +10,5 @@
 5. **Save screenshots outside the repo** (the scratchpad), and look at them before calling a visual change done.
 6. **Orbit a Make 3D scene by dragging.** The viewer orbits on pointer drag (about 0.008 radians per pixel). Move the mouse in steps while the button is down to reach a fixed angle, then screenshot.
 7. **The library shows only the latest version of a project.** Older versions sit behind the `proj-more` toggle, which closes when clicked again. Open it only when `ul.versions` is hidden.
+8. **A blank strip in a WebGL page may be the page layers, not the scene.** Read a pixel with `gl.readPixels` in a `requestAnimationFrame` to tell them apart. A solid scrolling box over a see-through canvas blanked the canvas above it; a background of `rgba(..., .985)` stopped it. _(Mind Palace)_
+9. **Software GL is slow motion.** Wait on a state the page exposes (for example `traveling` is false), not on a number of seconds. _(Mind Palace)_

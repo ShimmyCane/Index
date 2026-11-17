@@ -2,7 +2,7 @@
 
 **Track: B. Studio design** (a 3-D sky study and backdrop maker for renderings). Palette: sky-blue ink on cloud-white paper, because the subject is the sky. Panels collapsible, open on a large screen, closed on a phone.
 
-Status: MVP 0.4.0 (2026-11-16). Headless-tested with made-up weather replies. Not yet run against the live weather service, and not yet on an iPad.
+Status: MVP 0.5.0 (2026-11-17). Headless-tested with made-up weather replies. Not yet run against the live weather service, and not yet on an iPad.
 
 ## Purpose
 
@@ -16,7 +16,7 @@ Pick any point on Earth and any moment. The page reads the weather for that poin
 | Panels | Map · Place and time · How to read this sky · Cloud atlas · Weather maker · Adjust · Save pictures. ☰ hides all of them |
 | Under the scene | Play, back to start, time slider; camera height slider; Ground, Inside, Above, Space, Orbit, Turn |
 | ⚙️ holds | Picture quality, time-lapse speed, autoplay, compass line, data check, notes, Show errors, version |
-| Database | None. Device storage only |
+| Database | Architecture project, owner only: notes (`gc_notes`) after sign-in. Everything else on the device |
 | Private data | None in the repo. A chosen location stays on the device |
 
 ## Files
@@ -34,7 +34,9 @@ Pick any point on Earth and any moment. The page reads the weather for that poin
 | `js/terrain.js` | The height map: loading, smoothing, what kind of spot it is, where the water is |
 | `js/map.js` | The map panel (tiles, pin, markers), no library |
 | `js/audio.js` | Thunder, made with Web Audio |
-| `js/notes.js` | Notes for improvement |
+| `js/config.js` | The database address and the publishable key (nothing else) |
+| `js/cloud.js` | Sign-in, notes sync, database check |
+| `js/notes.js` | Notes for improvement (device first, merged with the database) |
 | `js/app.js` | Panels, time lapse, camera, saving, ⚙️ |
 | `js/vendor/three.min.js` | three.js r128 (MIT), copied in so the page works from `file://` |
 | `research/` | Four notes: clouds, light and colour, data sources, 3-D methods |
@@ -128,6 +130,16 @@ Dates more than 85 days back use the archive service (no upper winds, CAPE or ai
 
 - **This view**: PNG at 1920 × 1080, 2560 × 1440, 3840 × 2160 or 2048 square.
 - **360° panorama**: equirectangular PNG at 2048, 4096 or 8192 wide, north in the middle. Drawn in 512-pixel tiles at a higher quality than the live view. 8192 needs a computer (iPad limits canvas size).
+
+## Database (0.5.0): notes go to the studio database
+
+- **Which database:** the Architecture project (studio, Track B; `xabgankckrcuhcgdolrg`), owner only, the same one Critique Detail uses. Table `gc_notes` (same columns as `dc_notes`: `id`, `text`, `page`, `item`, `label`, `version`, `status` open or done, `noted_at`). Registered in `table_index` under project "Generate Clouds".
+- **Security:** row-level security on, anon has no access, one policy that calls `public.platform_is_owner()`. No email or user id in the repo. Until the owner's row is in `platform_owners` (added by hand, never committed) no sign-in sees any rows; `platform_owners` had 0 rows when checked on 2026-11-17.
+- **In the app (⚙️ → Studio database):** email and password, Sign in, Sync notes now, Sign out, Check the database. The password is never stored; a renewal token is kept on the device so you stay signed in (Sign out removes it). Publishable key only (`js/config.js`).
+- **Flow:** a note is saved on the device first. Signed in, it is also sent with its own id and time; later notes are sent at once. Sync sends what the database has not seen, then takes back done marks and notes from other devices. A ☁️ on a note means the database has it. Signed out or offline: "This device only", no error on load.
+- **What is sent:** only the notes, each with the place and moment it was about (so a note can say which sky). Not the weather, not the pictures.
+- **Not synced yet:** kept map spots stay on the device (a `gc_spots` table is a small addition if wanted).
+- **SQL** in `supabase/`: `test_001_gc.sql` (rolled back; expect an error starting `RESULT:`), `001_gc_notes.sql`, `verify_001_gc.sql`. Pasted by hand.
 
 ## Feedback notes
 

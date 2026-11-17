@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Generate Clouds</title>
-<link rel="stylesheet" href="css/style.css?v=0.4.0">
+<link rel="stylesheet" href="css/style.css?v=0.5.0">
 </head>
 <body data-panels="on">
 
@@ -241,6 +241,20 @@
     <button class="btn wide" id="checkData" type="button">Check the data link</button>
     <ul class="checks" id="checkList"></ul></div>
 
+  <section class="setting" id="dbBox">
+    <label>Studio database</label>
+    <p class="hint" id="dbStatus">This device only.</p>
+    <div id="dbSignInBox">
+      <input type="text" id="dbEmail" inputmode="email" autocomplete="username" autocapitalize="off" placeholder="Email" aria-label="Email">
+      <input type="password" id="dbPassword" autocomplete="current-password" placeholder="Password" aria-label="Password" style="margin-top:6px;width:100%;min-height:48px;border:var(--line);border-radius:12px;padding:0 10px;font:16px system-ui,sans-serif">
+      <button class="btn wide" id="dbSignIn" type="button">Sign in</button>
+    </div>
+    <div class="row"><button class="btn" id="dbSync" type="button" hidden>Sync notes now</button><button class="btn" id="dbSignOut" type="button" hidden>Sign out</button></div>
+    <button class="btn wide" id="dbCheck" type="button">Check the database</button>
+    <ul class="checks" id="dbCheckOut"></ul>
+    <p class="hint">Only the notes go there, each with the place and moment it was about (so a note can say which sky you meant). The weather and the pictures stay here. The password is not saved. Signing in works for the owner account only.</p>
+  </section>
+
   <section id="notesBox" class="notesBox">
     <h3>Notes for improvement</h3>
     <p class="hint" id="noteWhere"></p>
@@ -257,17 +271,19 @@
 <div id="errorsPanel" class="errorsPanel" hidden></div>
 
 <script src="js/vendor/three.min.js"></script>
-<script src="js/core.js?v=0.4.0"></script>
-<script src="js/sun.js?v=0.4.0"></script>
-<script src="js/presets.js?v=0.4.0"></script>
-<script src="js/weather.js?v=0.4.0"></script>
-<script src="js/skymodel.js?v=0.4.0"></script>
-<script src="js/terrain.js?v=0.4.0"></script>
-<script src="js/map.js?v=0.4.0"></script>
-<script src="js/audio.js?v=0.4.0"></script>
-<script src="js/shader.js?v=0.4.0"></script>
-<script src="js/renderer.js?v=0.4.0"></script>
-<script src="js/notes.js?v=0.4.0"></script>
-<script src="js/app.js?v=0.4.0"></script>
+<script src="js/core.js?v=0.5.0"></script>
+<script src="js/sun.js?v=0.5.0"></script>
+<script src="js/presets.js?v=0.5.0"></script>
+<script src="js/weather.js?v=0.5.0"></script>
+<script src="js/skymodel.js?v=0.5.0"></script>
+<script src="js/terrain.js?v=0.5.0"></script>
+<script src="js/map.js?v=0.5.0"></script>
+<script src="js/audio.js?v=0.5.0"></script>
+<script src="js/shader.js?v=0.5.0"></script>
+<script src="js/renderer.js?v=0.5.0"></script>
+<script src="js/config.js?v=0.5.0"></script>
+<script src="js/notes.js?v=0.5.0"></script>
+<script src="js/cloud.js?v=0.5.0"></script>
+<script src="js/app.js?v=0.5.0"></script>
 </body>
 </html>

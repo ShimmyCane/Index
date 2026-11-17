@@ -1,0 +1,883 @@
+{
+ "project": "Mind Palace",
+ "schema": 1,
+ "updated_at": "2026-11-17T00:00:00.000Z",
+ "worlds": [
+  {
+   "id": "w_space",
+   "name": "Space",
+   "style": "moon",
+   "transform": {
+    "position": [
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  {
+   "id": "w_life",
+   "name": "Living Things",
+   "style": "grass",
+   "transform": {
+    "position": [
+     58,
+     3,
+     0
+    ]
+   }
+  },
+  {
+   "id": "w_make",
+   "name": "Making Things",
+   "style": "beach",
+   "transform": {
+    "position": [
+     29,
+     -2,
+     52
+    ]
+   }
+  }
+ ],
+ "places": [
+  {
+   "id": "p_planets",
+   "name": "Planet Room",
+   "type": "room",
+   "parent_id": "w_space",
+   "transform": {
+    "position": [
+     13,
+     0,
+     5
+    ],
+    "rotation": [
+     0,
+     0,
+     0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "style": "night"
+  },
+  {
+   "id": "p_rockets",
+   "name": "Rocket Workshop",
+   "type": "room",
+   "parent_id": "w_space",
+   "transform": {
+    "position": [
+     -12,
+     0,
+     7
+    ],
+    "rotation": [
+     0,
+     0,
+     0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "style": "peach"
+  },
+  {
+   "id": "p_ocean",
+   "name": "Ocean Room",
+   "type": "room",
+   "parent_id": "w_life",
+   "transform": {
+    "position": [
+     58,
+     3,
+     -14
+    ],
+    "rotation": [
+     0,
+     0,
+     0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "style": "sky"
+  },
+  {
+   "id": "p_forest",
+   "name": "Forest Den",
+   "type": "room",
+   "parent_id": "w_life",
+   "transform": {
+    "position": [
+     70,
+     3,
+     8
+    ],
+    "rotation": [
+     0,
+     0,
+     0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "style": "meadow"
+  },
+  {
+   "id": "p_studio",
+   "name": "Drawing Studio",
+   "type": "room",
+   "parent_id": "w_make",
+   "transform": {
+    "position": [
+     17,
+     -2,
+     58
+    ],
+    "rotation": [
+     0,
+     0,
+     0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "style": "lilac"
+  },
+  {
+   "id": "p_music",
+   "name": "Music Loft",
+   "type": "room",
+   "parent_id": "w_make",
+   "transform": {
+    "position": [
+     41,
+     1,
+     60
+    ],
+    "rotation": [
+     0,
+     0,
+     0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "style": "sand"
+  }
+ ],
+ "nodes": [
+  {
+   "id": "n_mars",
+   "type": "concept",
+   "title": "Mars is the red planet",
+   "description": "Mars looks red because its dust is full of rust.",
+   "tags": [
+    "planet",
+    "mars",
+    "red"
+   ],
+   "question": "Which planet is red, and why?",
+   "answer": "Mars. Its dust is rusty.",
+   "parent_id": "w_space",
+   "place_id": "p_planets",
+   "asset_id": "a_n_mars",
+   "transform": {
+    "position": [
+     -2,
+     0,
+     -2
+    ]
+   }
+  },
+  {
+   "id": "n_saturn",
+   "type": "concept",
+   "title": "Saturn has rings",
+   "description": "The rings are made of ice and rock, from dust size to house size.",
+   "tags": [
+    "planet",
+    "saturn",
+    "rings"
+   ],
+   "question": "What are Saturn's rings made of?",
+   "answer": "Ice and rock.",
+   "parent_id": "w_space",
+   "place_id": "p_planets",
+   "asset_id": "a_n_saturn",
+   "transform": {
+    "position": [
+     0,
+     0,
+     -2
+    ]
+   }
+  },
+  {
+   "id": "n_sun",
+   "type": "concept",
+   "title": "The Sun is a star",
+   "description": "It is the closest star. Its light takes about 8 minutes to reach us.",
+   "tags": [
+    "sun",
+    "star",
+    "light"
+   ],
+   "question": "How long does sunlight take to reach Earth?",
+   "answer": "About 8 minutes.",
+   "parent_id": "w_space",
+   "place_id": "p_planets",
+   "asset_id": "a_n_sun",
+   "transform": {
+    "position": [
+     2,
+     0,
+     -2
+    ]
+   }
+  },
+  {
+   "id": "n_earth",
+   "type": "concept",
+   "title": "Earth spins once a day",
+   "description": "One spin is a day. One trip around the Sun is a year.",
+   "tags": [
+    "earth",
+    "day",
+    "year",
+    "spin"
+   ],
+   "question": "What makes a day? What makes a year?",
+   "answer": "One spin is a day. One trip around the Sun is a year.",
+   "parent_id": "w_space",
+   "place_id": "p_planets",
+   "asset_id": "a_n_earth",
+   "transform": {
+    "position": [
+     -2,
+     0,
+     0
+    ]
+   }
+  },
+  {
+   "id": "n_rocket",
+   "type": "concept",
+   "title": "Rockets push down to go up",
+   "description": "Hot gas shoots down, so the rocket is pushed up. Every push has a push back.",
+   "tags": [
+    "rocket",
+    "force",
+    "push"
+   ],
+   "question": "Why does a rocket go up?",
+   "answer": "Gas pushes down, so the rocket is pushed up.",
+   "parent_id": "w_space",
+   "place_id": "p_rockets",
+   "asset_id": "a_n_rocket",
+   "transform": {
+    "position": [
+     -2,
+     0,
+     -2
+    ]
+   }
+  },
+  {
+   "id": "n_gears",
+   "type": "concept",
+   "title": "Gears trade speed for strength",
+   "description": "A small gear turning a big gear makes it slower and stronger.",
+   "tags": [
+    "gear",
+    "machine",
+    "force"
+   ],
+   "question": "A small gear turns a big gear. What changes?",
+   "answer": "The big gear turns slower, with more strength.",
+   "parent_id": "w_make",
+   "place_id": "p_rockets",
+   "asset_id": "a_n_gears",
+   "transform": {
+    "position": [
+     0,
+     0,
+     -2
+    ]
+   }
+  },
+  {
+   "id": "n_robot",
+   "type": "concept",
+   "title": "Robots explore first",
+   "description": "Rovers drive on Mars and send pictures home before any person goes.",
+   "tags": [
+    "robot",
+    "rover",
+    "mars"
+   ],
+   "question": "Who explores Mars today?",
+   "answer": "Robot rovers.",
+   "parent_id": "w_space",
+   "place_id": "p_rockets",
+   "asset_id": "a_n_robot",
+   "transform": {
+    "position": [
+     2,
+     0,
+     -2
+    ]
+   }
+  },
+  {
+   "id": "n_fish",
+   "type": "concept",
+   "title": "Fish breathe with gills",
+   "description": "Gills take the oxygen out of water.",
+   "tags": [
+    "fish",
+    "gills",
+    "water",
+    "breathe"
+   ],
+   "question": "How does a fish breathe?",
+   "answer": "With gills, which take oxygen out of the water.",
+   "parent_id": "w_life",
+   "place_id": "p_ocean",
+   "asset_id": "a_n_fish",
+   "transform": {
+    "position": [
+     -2,
+     0,
+     -2
+    ]
+   }
+  },
+  {
+   "id": "n_whale",
+   "type": "concept",
+   "title": "Whales breathe air",
+   "description": "A whale is a mammal. It comes up to breathe through its blowhole.",
+   "tags": [
+    "whale",
+    "mammal",
+    "air",
+    "breathe"
+   ],
+   "question": "Is a whale a fish?",
+   "answer": "No. It is a mammal and breathes air.",
+   "parent_id": "w_life",
+   "place_id": "p_ocean",
+   "asset_id": "a_n_whale",
+   "transform": {
+    "position": [
+     0,
+     0,
+     -2
+    ]
+   }
+  },
+  {
+   "id": "n_boat",
+   "type": "concept",
+   "title": "Boats float by pushing water away",
+   "description": "A boat floats when the water it pushes away weighs as much as the boat.",
+   "tags": [
+    "boat",
+    "float",
+    "water"
+   ],
+   "question": "Why does a heavy boat float?",
+   "answer": "It pushes away water that weighs as much as it does.",
+   "parent_id": "w_make",
+   "place_id": "p_ocean",
+   "asset_id": "a_n_boat",
+   "transform": {
+    "position": [
+     2,
+     0,
+     -2
+    ]
+   }
+  },
+  {
+   "id": "n_tree",
+   "type": "concept",
+   "title": "Trees drink through roots",
+   "description": "Roots pull water up. Leaves use sunlight to make food.",
+   "tags": [
+    "tree",
+    "roots",
+    "leaves",
+    "sunlight"
+   ],
+   "question": "What do the roots and the leaves do?",
+   "answer": "Roots drink water. Leaves make food from sunlight.",
+   "parent_id": "w_life",
+   "place_id": "p_forest",
+   "asset_id": "a_n_tree",
+   "transform": {
+    "position": [
+     -2,
+     0,
+     -2
+    ]
+   }
+  },
+  {
+   "id": "n_bees",
+   "type": "concept",
+   "title": "Bees help flowers make seeds",
+   "description": "Bees carry pollen from flower to flower.",
+   "tags": [
+    "bee",
+    "flower",
+    "pollen",
+    "seed"
+   ],
+   "question": "What do bees carry between flowers?",
+   "answer": "Pollen.",
+   "parent_id": "w_life",
+   "place_id": "p_forest",
+   "asset_id": "a_n_bees",
+   "transform": {
+    "position": [
+     0,
+     0,
+     -2
+    ]
+   }
+  },
+  {
+   "id": "n_apple",
+   "type": "concept",
+   "title": "A seed can become a tree",
+   "description": "An apple holds seeds. Each one can grow into a new apple tree.",
+   "tags": [
+    "apple",
+    "seed",
+    "grow"
+   ],
+   "question": "What is inside an apple that can grow?",
+   "answer": "Seeds.",
+   "parent_id": "w_life",
+   "place_id": "p_forest",
+   "asset_id": "a_n_apple",
+   "transform": {
+    "position": [
+     2,
+     0,
+     -2
+    ]
+   }
+  },
+  {
+   "id": "n_cat",
+   "type": "concept",
+   "title": "Cats see in dim light",
+   "description": "Their eyes open wide and bounce light back, so a little light goes a long way.",
+   "tags": [
+    "cat",
+    "eyes",
+    "night"
+   ],
+   "question": "Why do cats see well at night?",
+   "answer": "Their eyes open wide and reflect light.",
+   "parent_id": "w_life",
+   "place_id": "p_forest",
+   "asset_id": "a_n_cat",
+   "transform": {
+    "position": [
+     -2,
+     0,
+     0
+    ]
+   }
+  },
+  {
+   "id": "n_plan",
+   "type": "concept",
+   "title": "Plan before you build",
+   "description": "Draw it first. A mistake on paper is cheap to fix.",
+   "tags": [
+    "plan",
+    "draw",
+    "design"
+   ],
+   "question": "Why draw before building?",
+   "answer": "Mistakes on paper are cheap to fix.",
+   "parent_id": "w_make",
+   "place_id": "p_studio",
+   "asset_id": "a_n_plan",
+   "transform": {
+    "position": [
+     -2,
+     0,
+     -2
+    ]
+   }
+  },
+  {
+   "id": "n_triangle",
+   "type": "concept",
+   "title": "Triangles make things strong",
+   "description": "A triangle cannot be pushed out of shape, so roofs and bridges use them.",
+   "tags": [
+    "triangle",
+    "shape",
+    "strong",
+    "bridge"
+   ],
+   "question": "Which shape keeps a bridge stiff?",
+   "answer": "The triangle.",
+   "parent_id": "w_make",
+   "place_id": "p_studio",
+   "asset_id": "a_n_triangle",
+   "transform": {
+    "position": [
+     0,
+     0,
+     -2
+    ]
+   }
+  },
+  {
+   "id": "n_idea",
+   "type": "concept",
+   "title": "Test an idea early",
+   "description": "Build a small one, try it, and change it.",
+   "tags": [
+    "idea",
+    "test",
+    "try"
+   ],
+   "question": "What do you do with a new idea?",
+   "answer": "Build a small one and try it.",
+   "parent_id": "w_make",
+   "place_id": "p_studio",
+   "asset_id": "a_n_idea",
+   "transform": {
+    "position": [
+     2,
+     0,
+     -2
+    ]
+   }
+  },
+  {
+   "id": "n_beat",
+   "type": "concept",
+   "title": "A beat is a steady pulse",
+   "description": "Clap evenly, like a clock ticking. That is the beat.",
+   "tags": [
+    "beat",
+    "rhythm",
+    "music"
+   ],
+   "question": "What is a beat?",
+   "answer": "A steady pulse, like a ticking clock.",
+   "parent_id": "w_make",
+   "place_id": "p_music",
+   "asset_id": "a_n_beat",
+   "transform": {
+    "position": [
+     -2,
+     0,
+     -2
+    ]
+   }
+  },
+  {
+   "id": "n_pitch",
+   "type": "concept",
+   "title": "High notes shake fast",
+   "description": "A short string shakes faster and sounds higher.",
+   "tags": [
+    "note",
+    "pitch",
+    "sound",
+    "string"
+   ],
+   "question": "Which sounds higher: a short or a long string?",
+   "answer": "The short one. It shakes faster.",
+   "parent_id": "w_make",
+   "place_id": "p_music",
+   "asset_id": "a_n_pitch",
+   "transform": {
+    "position": [
+     0,
+     0,
+     -2
+    ]
+   }
+  }
+ ],
+ "relationships": [
+  {
+   "id": "r_0",
+   "source": "n_rocket",
+   "target": "n_mars",
+   "type": "leads_to",
+   "strength": 0.8
+  },
+  {
+   "id": "r_1",
+   "source": "n_robot",
+   "target": "n_mars",
+   "type": "related_to",
+   "strength": 0.9
+  },
+  {
+   "id": "r_2",
+   "source": "n_gears",
+   "target": "n_plan",
+   "type": "related_to",
+   "strength": 0.6
+  },
+  {
+   "id": "r_3",
+   "source": "n_bees",
+   "target": "n_apple",
+   "type": "leads_to",
+   "strength": 0.8
+  },
+  {
+   "id": "r_4",
+   "source": "n_apple",
+   "target": "n_tree",
+   "type": "part_of",
+   "strength": 0.7
+  },
+  {
+   "id": "r_5",
+   "source": "n_sun",
+   "target": "n_tree",
+   "type": "leads_to",
+   "strength": 0.7
+  },
+  {
+   "id": "r_6",
+   "source": "n_fish",
+   "target": "n_whale",
+   "type": "opposite_of",
+   "strength": 0.8
+  },
+  {
+   "id": "r_7",
+   "source": "n_beat",
+   "target": "n_earth",
+   "type": "reminds_me_of",
+   "strength": 0.4
+  },
+  {
+   "id": "r_8",
+   "source": "n_triangle",
+   "target": "n_boat",
+   "type": "related_to",
+   "strength": 0.4
+  },
+  {
+   "id": "r_9",
+   "source": "n_idea",
+   "target": "n_rocket",
+   "type": "related_to",
+   "strength": 0.5
+  }
+ ],
+ "assets": [
+  {
+   "id": "a_n_mars",
+   "type": "object",
+   "representation": "procedural",
+   "kind": "planet",
+   "glyph": "",
+   "color": "#f2a48c",
+   "description": ""
+  },
+  {
+   "id": "a_n_saturn",
+   "type": "object",
+   "representation": "procedural",
+   "kind": "planet",
+   "glyph": "",
+   "color": "#f3d9a0",
+   "description": ""
+  },
+  {
+   "id": "a_n_sun",
+   "type": "object",
+   "representation": "procedural",
+   "kind": "sun",
+   "glyph": "",
+   "color": "",
+   "description": ""
+  },
+  {
+   "id": "a_n_earth",
+   "type": "object",
+   "representation": "procedural",
+   "kind": "globe",
+   "glyph": "",
+   "color": "",
+   "description": ""
+  },
+  {
+   "id": "a_n_rocket",
+   "type": "object",
+   "representation": "procedural",
+   "kind": "rocket",
+   "glyph": "",
+   "color": "#ff9f8a",
+   "description": ""
+  },
+  {
+   "id": "a_n_gears",
+   "type": "object",
+   "representation": "procedural",
+   "kind": "gear",
+   "glyph": "",
+   "color": "#9fc5e8",
+   "description": ""
+  },
+  {
+   "id": "a_n_robot",
+   "type": "object",
+   "representation": "procedural",
+   "kind": "robot",
+   "glyph": "",
+   "color": "#bfe8d2",
+   "description": ""
+  },
+  {
+   "id": "a_n_fish",
+   "type": "object",
+   "representation": "procedural",
+   "kind": "fish",
+   "glyph": "",
+   "color": "#ffb37a",
+   "description": ""
+  },
+  {
+   "id": "a_n_whale",
+   "type": "object",
+   "representation": "emoji",
+   "kind": "star",
+   "glyph": "🐋",
+   "color": "",
+   "description": ""
+  },
+  {
+   "id": "a_n_boat",
+   "type": "object",
+   "representation": "procedural",
+   "kind": "boat",
+   "glyph": "",
+   "color": "#c4e3f7",
+   "description": ""
+  },
+  {
+   "id": "a_n_tree",
+   "type": "object",
+   "representation": "procedural",
+   "kind": "tree",
+   "glyph": "",
+   "color": "",
+   "description": ""
+  },
+  {
+   "id": "a_n_bees",
+   "type": "object",
+   "representation": "procedural",
+   "kind": "flower",
+   "glyph": "",
+   "color": "#f7b6d2",
+   "description": ""
+  },
+  {
+   "id": "a_n_apple",
+   "type": "object",
+   "representation": "procedural",
+   "kind": "apple",
+   "glyph": "",
+   "color": "",
+   "description": ""
+  },
+  {
+   "id": "a_n_cat",
+   "type": "object",
+   "representation": "procedural",
+   "kind": "cat",
+   "glyph": "",
+   "color": "#f3d9a0",
+   "description": ""
+  },
+  {
+   "id": "a_n_plan",
+   "type": "object",
+   "representation": "procedural",
+   "kind": "desk",
+   "glyph": "",
+   "color": "",
+   "description": ""
+  },
+  {
+   "id": "a_n_triangle",
+   "type": "object",
+   "representation": "procedural",
+   "kind": "house",
+   "glyph": "",
+   "color": "#ffd9a0",
+   "description": ""
+  },
+  {
+   "id": "a_n_idea",
+   "type": "object",
+   "representation": "procedural",
+   "kind": "lamp",
+   "glyph": "",
+   "color": "",
+   "description": ""
+  },
+  {
+   "id": "a_n_beat",
+   "type": "object",
+   "representation": "procedural",
+   "kind": "drum",
+   "glyph": "",
+   "color": "#ff9f8a",
+   "description": ""
+  },
+  {
+   "id": "a_n_pitch",
+   "type": "object",
+   "representation": "procedural",
+   "kind": "note",
+   "glyph": "",
+   "color": "#b9a6e8",
+   "description": ""
+  }
+ ],
+ "routes": [],
+ "recall": [],
+ "proposals": []
+}
