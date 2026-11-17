@@ -17,6 +17,14 @@
 ## Added in 0.3.0, to confirm on a real device
 - [ ] Orbit with real fingers: drag around, pinch closer; speed while turning.
 
+## Database link (0.5.0): Jimmy's steps, in order
+1. Architecture project → SQL Editor: paste `supabase/test_001_gc.sql` → Run. Expect an **error** starting `RESULT: tables=1 rls=1 policies=1 index=1 owner_sees=1 stranger_sees=0 stranger_insert=blocked anon=blocked done_check=blocked` (that error is the pass).
+2. Paste `supabase/001_gc_notes.sql` → Run. Expect "Success".
+3. Paste `supabase/verify_001_gc.sql` → Run; paste the result back. `owner_rows` of 0 means no sign-in sees data yet.
+4. If `owner_rows` is 0: sign in to the studio account once, copy your user id from Authentication → Users, and run `insert into public.platform_owners (user_id, note) values ('<your user id>', 'owner');` by hand. Never commit it.
+5. Open the page → ⚙️ → Studio database → Sign in. Your notes on the device are sent and the status line says how many are in the database.
+6. Then ask me to read the notes (`/read-notes-and-update`): archive them as V1, review, update.
+
 ## Added in 0.4.0, to confirm on a real device
 - [ ] The elevation service returns 576 heights (6 calls) and a real coast looks right at a known beach.
 - [ ] The 25-point regional call works; the view from Space shows different cover in different parts.

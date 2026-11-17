@@ -574,7 +574,7 @@
   };
 
   function start() {
-    initPanels(); GC.Notes.init(); initGear(); initPlace(); initMap(); initMaker(); initAdjust(); initBar(); initOrbit(); initExport();
+    initPanels(); GC.Notes.init(); initGear(); GC.Cloud.init(); initPlace(); initMap(); initMaker(); initAdjust(); initBar(); initOrbit(); initExport();
     if (!R.init($('sky'))) { $('noGl').hidden = false; setPill('sample', '⚠️ No 3-D'); return; }
     initLook();
     var lastUsed = GC.store.get('gc.last', null);

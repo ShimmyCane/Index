@@ -44,3 +44,11 @@
 30. **A funnel is darker than it first looks.** Lit like a cloud top it read as a white lens; ambient-from-below lighting made it read as a tornado.
 31. **Lightning must scale by exposure,** or a flash that reads at dusk whites out a day scene; keep the bolt's sideways wander well under its height.
 32. **Jimmy asks for whole worlds in one message.** Build every part to a working level, say which parts follow data and which are drawn from descriptions, and ask one question per part.
+
+## 2026-11-17 (0.5.0, database link)
+
+33. **"I added comments to the database" can mean there is no database yet.** The notes box was device-only, so nothing could have arrived. Search the live projects read-only first, say what was and was not found, and ask where the comments really are, instead of assuming.
+34. **"Splusystudio database" is not a project name.** Resolve it from the track (studio = Architecture), say that it is an assumption, and make the project address one line in `js/config.js` so a wrong guess costs nothing.
+35. **The database tool's confirmation can time out unanswered in a remote session.** Do not retry in the same turn. Write the SQL, run `sql_paste_check.py`, and hand over the paste order; build and test the app against a pretend database so it is ready the moment the table exists.
+36. **A privacy sentence must be checked against the payload.** The hint said the place never leaves the page, but each note carries the place and moment it was about. Check what is in the request body before writing what is sent.
+37. **A heavy still-picture pass blocks clicks in a headless test.** Turn the sharpening off (`GC.Renderer.fineStart = () => false`) in tests that are about the page, not the picture.
