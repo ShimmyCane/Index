@@ -26,6 +26,11 @@ When the user asks to initialize a project:
    - Add a 家庭登入 block to ⚙️ (email, password, signed-in status, sign out, 檢查資料庫). Reference: the block in `03 Projects/中文笔画/index.html` and `03 Projects/中文笔画/js/family.js`. Use the publishable key only. Never put an email or password in the repo.
    - Notes stay on the device first. When signed in they are also sent to the family table, with the note's own `id` and time unchanged. Signed out, the database check says "this device only". Notes are sent nowhere else.
    - Test with the rolled-back test, apply by hand or with the migration tool only when Jimmy asks, and record the result in `04 AI/Supabase/brief.md`. Lessons: `04 AI/Supabase/lessons.md`.
+9. Nursery link: when the project has a page that opens (an `index.html` or another entry page), always add its link to the Nursery list in the root `index.html`, in the same commit as the first build.
+   - Add one `<li>` at the end of the Nursery `<ul class="wall">`, copying the form of the tiles already there. The `href` is the project folder with spaces written as `%20` (and other characters percent-encoded), ending in `/`, or the entry page if it is not `index.html`.
+   - Pick a shape class and a `--c` colour that the neighbouring tiles do not use.
+   - Change nothing else in `index.html`. Note the link in `03 Projects/03 projects_schematic.md`.
+   - A project with no page yet (status: idea) gets its link when its first page is built.
 
 Rules:
 - Do not explain your reasoning.

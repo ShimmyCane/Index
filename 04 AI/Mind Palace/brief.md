@@ -17,3 +17,11 @@
 **Decisions made without asking:** in `03 Projects/Mind Palace/convo/convo v0.1.md`.
 
 **Next.** Answers to convo v0.1; candidates in `todo.md`.
+
+**Round 2 (2026-11-17), from Jimmy's answers to convo v0.1.** Direction changed: Godot is the main renderer, three.js a placeholder; splats started; one shared family palace; two looks (childish, grand); family sync planned; solid walls; tour mode; Jimmy's subject is childhood (personal: never in the repo).
+
+- **Done:** nursery tile; `/start-project` step 9 (always add the link); `tools/export_godot_data.js` (object library as 199 simple shapes, sample palace); Godot 4.3 project `godot/` (layout port, spec builder, solid renderer with colliders, splat cloud by surface sampling with a dithered shader and `.ply` export, main scene with search, guided walk, solid-wall walking); `godot/schematic.md`; sync plan in `schematic.md`; convo v0.2.
+- **Not verified, at all:** the Godot project. The engine was downloaded but the session's permission rules refused to run it. It has only been read through. The web page still passes its 54 checks.
+- **Not built:** SQL for sync, Godot editing and practice, looks, tour mode, growth, AI loop.
+- **Open:** convo v0.2 (how to read "different ones for family", the grand look, iPad route, permission to run Godot, a made-up childhood sample, scanned splats, sync conflicts, tour mode).
+

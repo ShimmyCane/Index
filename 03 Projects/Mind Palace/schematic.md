@@ -1,8 +1,8 @@
 # Mind Palace — schematic
 
-**Track: A. Family play** (a memory game for Felix and Jimmy), with studio-level depth kept in collapsed panels. The 3-D palace fills the screen. Family look: ink, paper and sun, over a pastel sky. This choice is question 1 in `convo/convo v0.1.md`.
+**Track: A. Family play** (one palace shared by the family), with studio-level depth kept in collapsed panels. Two looks are planned, childish and grand: memories are for the young and old.
 
-Status: MVP 0.1.0 (2026-11-17). Headless-tested at three screen sizes. Not yet tried on an iPad.
+Status (2026-11-17): the web page is MVP 0.1.0, headless-tested, not yet tried on an iPad. It is now the **placeholder**. The **Godot application** in `godot/` is the main renderer from here on: increment G1 is written and has never been run (`godot/schematic.md`).
 
 ## Purpose
 
@@ -16,12 +16,16 @@ The knowledge database is the substance. The palace is one drawing of it.
 
 ```
 knowledge database  →  scene description  →  renderer
-js/model.js            js/layout.js          js/view.js (three.js today; Godot, SDF or splats later)
+js/model.js            js/layout.js          js/view.js            (web placeholder, three.js)
+data/palace.json       palace_layout.gd      palace_renderer.gd    (Godot, solid look)
+                       + palace_builder.gd   splat_cloud.gd        (Godot, Gaussian splats)
 ```
+
+The two share the data schema and the object library: `tools/export_godot_data.js` writes `godot/data/objects.json` (the 29 objects as simple shapes) and `godot/data/palace.json` (the sample). Run it after changing `js/objects.js` or `js/sample.js`.
 
 - `model.js` and `layout.js` use no DOM and no 3-D library. They run in Node. Search, the map and practice work with no renderer.
 - `view.js` draws a scene description and never reads or changes the database. It reports taps and drops to the page.
-- A second renderer replaces `view.js` and `objects.js` only.
+- The layout rules exist twice for now (`js/layout.js` and `godot/scripts/palace_layout.gd`). Change both together until Godot owns editing (G3).
 
 ## Track defaults
 
@@ -31,7 +35,7 @@ js/model.js            js/layout.js          js/view.js (three.js today; Godot, 
 | Panels (☰) | Find · Map of my mind · Practise · Build · Save and open. Collapsible. Hidden behind ☰ on a phone |
 | Under the scene | All, Look, Walk, Move, Spin, Undo, Redo |
 | ⚙️ holds | Sound, name tags, connection lines, walking speed, shadows, storage check, notes, Show errors, version |
-| Database | None. Device storage only (question 3) |
+| Database | Family database, planned (see Family sync). Device storage only today |
 | Private data | None in the repo. The sample palace is made-up school facts. A real palace stays on the device |
 
 ## Data (schema 1)
@@ -75,15 +79,49 @@ Differences from the specification's example: a world does not store `places` an
 | `js/notes.js` | Notes for improvement |
 | `js/app.js` | Panels, search, card, practice, forms, saving, ⚙️ |
 | `js/vendor/three.min.js` | three.js r128 (MIT), copied in so the page opens from `file://` |
+| `tools/export_godot_data.js` | Node script: writes the object library and the sample palace for Godot |
+| `godot/` | The Godot 4.3 application. Its own schematic: `godot/schematic.md` |
 
 ## Feedback notes
 
 "Notes for improvement" in ⚙️. Each note is saved with the thing selected (a memory, a room, a world, or the whole palace), the time and the version. Open and All filter, Copy notes. Device storage only, key `mindpalace.notes`. Sent nowhere. A family table is question 3.
 
+## Family sync (planned, nothing applied)
+
+Jimmy's answer: yes, sync with the family database, plan ahead. One palace for the family.
+
+| Table | Holds | Rule |
+|---|---|---|
+| `mp_palace` | One row per palace: `id`, `data` (the JSON without practice), `version` (a counter), `updated_at`, `updated_by` | A save sends the version it started from. If the row has moved on, the newer save wins and the older one is kept in `mp_palace_copies` |
+| `mp_recall` | One row per practice answer: `id`, `palace_id`, `node_id`, `kind`, `result`, `at`, `member` | Added only, never overwritten, so two devices can practise at once |
+| `mp_notes` | Notes for improvement, in the shape `/start-project` step 8 gives | Same as the other family apps |
+
+- Family project, family sign-in, row-level security on, `anon` revoked, registered in `app_table_registry`. Publishable key only.
+- Device first: the palace always works signed out. Signed in, it pulls on open and pushes after a change.
+- `member` on a practice answer lets each person have their own "known" rings in the one palace.
+- Next step: write the paste files with `/supabase-link`, test in a rolled-back transaction, apply only when Jimmy says.
+- A real palace (childhood) is personal. It lives in the database and on devices, never in this repo.
+
+## Decisions from convo v0.1 (2026-11-17)
+
+| Topic | Decision |
+|---|---|
+| Renderer | Godot now; three.js is a placeholder |
+| Splats | Started in Godot (sampled from the palace) |
+| Palaces | One, shared |
+| Looks | Childish and grand |
+| Sync | Family database, planned above |
+| First content | Jimmy: childhood. Felix: to ask |
+| AI architect | Copy and paste loop |
+| Walking | Solid walls, ramps and stairs |
+| Growth | Worlds change with rooms, bridges appear with connections, a landmark for the best-known memory |
+| Practice | Rounds of five, plus a tour mode |
+| Devices | All |
+
 ## What this is not (0.1.0)
 
 - No AI collaborator yet. The data has a `proposals` list ready; the plan is the copy-and-paste loop (`02 Refs/Skills/ai_json_loop.md`) with preview, accept some, reject.
-- No Godot, no SDF, no Gaussian splats. The specification puts these in phase 5. The split above is what makes them possible later.
+- Godot and splats exist only as an unrun first increment (`godot/`). No SDF yet.
 - Not real architecture: rooms are open-topped boxes on floating islands. No stairs, hidden rooms, portals or changing scale yet.
 - No collisions. Little-me walks through walls and floats over gaps.
 - Device storage is `localStorage`, not IndexedDB. Enough for text; it changes when pictures or sounds are added.

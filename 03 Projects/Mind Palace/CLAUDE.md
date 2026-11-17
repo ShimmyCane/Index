@@ -9,12 +9,16 @@ Track: A. Family play (studio depth in collapsed panels)
 - AI notes: `04 AI/Mind Palace/brief.md` and `lessons.md`
 - Shared conventions: root `CLAUDE.md` (public repo, privacy)
 
-How to run: open `index.html` (no server or build). The first run loads the sample palace.
+Direction (Jimmy, 2026-11-17): Godot is the main renderer; the three.js page is a placeholder. One shared family palace, two looks (childish and grand), family sync planned.
+
+How to run: web placeholder: open `index.html` (no server or build). Godot: import `godot/` in Godot 4.3 and press ▶ (`godot/schematic.md`). **The Godot project has never been run**; the first job on it is to run it and fix what the Output panel reports.
 Code map: `js/model.js` (the database; no DOM), `js/layout.js` (database → scene description, routes; no DOM), `js/view.js` (three.js), `js/objects.js` (the object library), `js/app.js` (the page), `js/sample.js` (content).
 Check: `model.js`, `sample.js` and `layout.js` load in Node (`require` them after `core.js`). The page: headless Chromium with the WebGL flags (`/smoke-test`); read state with `MP.debug()`, find a thing on screen with `MP.View.screenOf(id)`. Wait for `MP.debug().view.traveling` to be false before a screenshot. Keep test scripts out of the repo.
 
+Godot data: `node tools/export_godot_data.js` rewrites `godot/data/objects.json` and `godot/data/palace.json` from `js/objects.js` and `js/sample.js`. Layout rules live in both `js/layout.js` and `godot/scripts/palace_layout.gd`; change both.
+
 Project rules:
-- Public repo. The sample palace holds made-up school facts only. Never commit a real exported palace.
+- Public repo. The sample palace holds made-up school facts only. Never commit a real exported palace, a scanned splat of a real place, or anything from Jimmy's childhood palace.
 - The database is the source of truth. `view.js` never reads or writes it. Keep `model.js` and `layout.js` free of DOM and three.js, so another renderer (Godot) can use them.
 - A memory's topic (`parent_id`) and its room (`place_id`) stay separate.
 - Room size means "how much is kept", never "how well known". Keep that sentence on the room card.
