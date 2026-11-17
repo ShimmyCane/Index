@@ -19,7 +19,7 @@ Its private counterpart is `ShimmyAI`, a private repo where family and personal 
 
 `readme.md` is human-only. Never edit it.
 
-`index.html` (the nursery home page) is human-only. Claude changes it only when Jimmy specifically asks for that change, and only the change he asked for. Adding a project link to its Nursery list is one such change, and Jimmy has asked for it as a standing step: `/start-project` adds the link when a project gets its first page.
+`index.html` (the nursery home page) is human-only. Claude changes it only when Jimmy specifically asks for that change, and only the change he asked for. The standing exception: `/start-project` adds a new project's tile to the Nursery list with its first build (Jimmy reviews from that link).
 
 ## Before starting work on a project
 

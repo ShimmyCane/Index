@@ -21,3 +21,4 @@ A website of scenarios for a parent to practise and learn from, for children fro
 6. Add the Better Parenting tile to the nursery home page?
 
 Answers:
+- Q6 (2026-11-17): yes. Tile added to the Nursery list; `/start-project` now adds it with the first build.
