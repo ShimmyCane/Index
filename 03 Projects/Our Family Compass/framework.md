@@ -1,6 +1,6 @@
 # Our Family Compass — the framework
 
-Version 0.1 (2026-11-17). A first proposal to react to. Nothing here is settled until Jimmy says so.
+Version 0.2 (2026-11-17). A proposal to react to. Round 1 answers are in `convo/convo v0.1.md`. The rooms are a starting set: they live as data, will grow, and can be drawn differently over time.
 
 ## 1. The one idea
 
@@ -8,9 +8,11 @@ Not a set of instructions for living. A way for the children to find their way b
 
 Guiding line: roots deep enough to know where they came from, wings strong enough to explore, and a compass they can trust when nobody is there to say which way to go.
 
+Who it is for: the children, the parents, one child, or the family. Each piece says which.
+
 Two tests follow from it, and every later decision is checked against them:
 - **Connected, not constrained.** A piece may offer heritage, family and values. It may not oblige the reader to repeat the parents' life.
-- **Written with them, not for them.** The record has several authors: both parents, grandparents, mentors and, from the first year, the children.
+- **Written with them, not for them.** The record has several authors: both parents, grandparents, mentors and, from the first year, the children. The start is mostly one voice (about 90% Jimmy, 10% Ying); the aim is an even share, or at least that everyone reads it and takes part. Nothing in the structure favours one author.
 
 ## 2. The palace
 
@@ -99,7 +101,7 @@ The end products are small. A child meets one piece at a time.
 | **Decision guide** | 3 to 5 questions | Is this person difficult, or dangerous? |
 | **Moral game** | a scenario with choices and consequences | The friend who cheated |
 | **Small reading** | one page | A paragraph from a book, with one question |
-| **Plain explanation** | one idea, said exactly | What a boundary is |
+| **The hammer** | one idea, said straight, no story | What a boundary is |
 | **Archive item** | one object | A letter, a photograph, a recording |
 
 ### Anatomy of a piece
@@ -115,9 +117,10 @@ Every piece has a front and a back.
 | Room | Principles, Library, Village, Workshop or Roots |
 | Level | 1, 2 or 3 |
 | Values | Which principles it touches |
-| Age band | Who it is written for now |
+| For | One child, the children, the parents or the whole family, and the age it suits now |
 | Kind | From the table above |
 | Author and date | Who wrote it, and when |
+| Voice | An optional recording linked to the piece |
 | Revises | The earlier piece it changes, if any |
 | Ending | The question or choice it leaves open |
 | What it is not | The limit of the lesson |
@@ -132,8 +135,11 @@ Worked example (a moral game):
 
 ## 5. Two layers
 
-- **The knowledge layer.** A structured record of people, stories, values, lessons and the links between them. Orderly, searchable, private.
-- **The experience layer.** A welcoming place where a child wanders into a room, hears a story, meets a trusted voice or plays a moral game. A child never needs to see the whole philosophy.
+Voices: writing is enough, and a voice note can be linked to any thought or piece (recorded on the page from ⚙️, or typed in from something a grandparent or mentor emailed or texted). Stored in a private bucket.
+
+
+- **The knowledge layer.** A structured record of people, stories, values, lessons and the links between them. Orderly, searchable, private. The palace itself (rooms, places on the map, connections) is data, kept as JSON in the family database, so it can grow and be redrawn without changing the page.
+- **The experience layer.** A palace the children walk through: they wander into a room, read, hear a story, meet a trusted voice, play a mini game and interact with an idea. A child never needs to see the whole philosophy.
 
 This round builds the first sketch of the knowledge layer's map. The experience layer comes after the framework holds.
 
@@ -147,7 +153,7 @@ This round builds the first sketch of the knowledge layer's map. The experience 
 | Frozen in time | Every piece has an author and a date. A change of mind is a new piece that points to the old one; the old one stays |
 | Private stories in a public place | The repo holds structure only. Content lives in the family database or a `private/` folder |
 | Too long to read | A size limit per kind (a story is 1 to 3 minutes) |
-| Two children, two ages | Each piece names an age band. One objective may have two fronts |
+| Different readers | Each piece says who it is for: one child, the children, the parents or the family |
 | Children as audience only | Their answers and disagreements are kept as pieces from the first year |
 | Heritage as obligation | Roots pieces offer and never test |
 | The framework never ends | Three test pieces are made early (round 4), so the framework is tested by use |
@@ -161,7 +167,11 @@ This round builds the first sketch of the knowledge layer's map. The experience 
 5. **Open the rooms.** Build the children's side, the database and the recordings.
 6. **Hand over the pen.** The children add pieces. Revisions are kept with their dates.
 
-## 8. What other nursery projects already give this one
+## 8. What research adds
+
+See `research/best_practices.md`. The main suggestions: put hard times and how they were met into the Library; let the children play moral games together before a parent is in the room; keep level 1 short, explain level 2, leave level 3 open; say what ranks above achievement; do not promise measurable results from the Workshop.
+
+## 9. What other nursery projects already give this one
 
 - **Adventure:** recorded narration kept in a private store, a family sign-in, and a story told in chapters. The same route serves a parent's narrated story.
 - **Better Parenting:** scenario cards with a situation, what is going on and what to say; answer first, then compare. The Workshop's moral games can take this shape, with the answer left open.

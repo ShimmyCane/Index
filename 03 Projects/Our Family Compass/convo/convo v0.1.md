@@ -31,3 +31,15 @@ The starting material was a long conversation that proposed: a Family Compass wi
 10. Which should round 2 be: the values sorting board, the village list, or three test pieces?
 
 Answers:
+
+Answers (2026-11-17, from Jimmy's comments on the questions; kept close to his words):
+1. Nine rooms are fine for now. They will grow. As long as the structure is tracked and kept as JSON in the database, it can be expanded, and the rooms and their connections can be drawn differently over time.
+2. "Plain explanation" is somewhat right, but "this is a brute force approach." (Claude's reading is in `convo v0.2.md`.)
+3. Family database with sign-in. Right now one main compass, but a database for many different voices is imaginable.
+4. The MVP is about 90% Jimmy's voice and 10% Ying's. Once it is open, the hope is for an even share, or at least that someone reads it and everyone participates. It should be collaborative.
+5. The output is aimed at the kids. It could be the children, the parents, one child, or the family.
+6. Written words are fine, but leave the option open: the SQL should allow a voice note to be linked. Maybe an option in the settings button to record directly on the page.
+7. A grandparent or mentor could also email or text it, and Jimmy uploads it.
+8. Did not understand what the guards are. Happy to review after merge. (Plain explanation in `convo v0.2.md`.)
+9. The palace is something the children walk through, play mini games in, read in, and interact with ideas in.
+10. Round 2: develop placeholder or sample scenarios and questions from the earlier conversation and the schematic. Also a research folder with best practices for today's world (articles, questions, Claude's thoughts, Claude's understanding of the family) so Jimmy can learn too.
