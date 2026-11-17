@@ -122,3 +122,11 @@ Patterns that repeat often enough to become a template in `02 Refs/Templates/` o
 - **Jointed figures from parts in code:** legs, torso, head, arms with two segments, weapon; poses from a walk phase and an attack progress; team look by palette, hat, scarf and boots. _(Felix Gear Wars)_
 - **Canvas HUD with hit-tested buttons** and pointer capture for drag; pan, buy and sell are one pointer path. _(Felix Gear Wars)_
 - **Template candidate:** a skill for "game with a balance bot" (sim file, matrix, campaign bot). Not written; needs Jimmy's go-ahead to edit `02 Refs/Skills/`.
+
+## Knowledge first, renderer last (Mind Palace)
+
+- **Three layers:** a database file with no DOM (schema, repair, editing, undo, search), a layout file with no DOM (plain positions, sizes and routes), and a renderer that only draws and reports taps. The first two run in Node. _(Mind Palace)_
+- **Repair on load, never refuse:** fill missing fields, drop broken links, give lost things a "Lost and found", and list what was fixed. _(Mind Palace)_
+- **Logical parent and physical place as two fields,** so a thing can belong to one topic and stand in the room of another. _(Mind Palace)_
+- **Practice counted in kinds** (what it is, where it is), each with its own spaced boxes. _(Mind Palace)_
+
