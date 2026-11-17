@@ -65,7 +65,13 @@
     <section class="panel" data-panel="save" data-open="false">
       <button class="panelHead" type="button" aria-controls="save-body"><span class="panelIcon">💾</span><span class="panelTitle">Save and open</span><span class="panelMark">▾</span></button>
       <div class="panelBody" id="save-body">
-        <p class="info">The palace saves itself on this device after every change.</p>
+        <label class="fieldLabel" for="palacePick">Whose palace?</label>
+        <div class="rowBtns"><select id="palacePick" aria-label="Whose palace"></select></div>
+        <div class="rowBtns">
+          <button class="btn" type="button" id="palaceNew">➕ New palace</button>
+          <button class="btn" type="button" id="palaceRename">✏️ Rename</button>
+        </div>
+        <p class="info">Each person has their own palace. It saves itself on this device after every change.</p>
         <div class="rowBtns">
           <button class="btn" type="button" id="exportBtn">⬇ Save a copy</button>
           <label class="btn fileBtn">⬆ Open a copy<input id="importFile" type="file" accept="application/json,.json"></label>
@@ -91,6 +97,7 @@
     <button type="button" data-act="spin" aria-pressed="false"><span>🔄</span>Spin</button>
     <button type="button" data-act="undo"><span>↩</span>Undo</button>
     <button type="button" data-act="redo"><span>↪</span>Redo</button>
+    <a class="barLink" href="splat.html"><span>✨</span>Splats</a>
   </nav>
 
   <div id="toast" class="toast" hidden role="status"></div>

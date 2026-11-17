@@ -130,3 +130,10 @@ Patterns that repeat often enough to become a template in `02 Refs/Templates/` o
 - **Logical parent and physical place as two fields,** so a thing can belong to one topic and stand in the room of another. _(Mind Palace)_
 - **Practice counted in kinds** (what it is, where it is), each with its own spaced boxes. _(Mind Palace)_
 
+## Gaussian splats from simple shapes, in the browser (Mind Palace)
+
+- **Pipeline:** layout → flat list of simple shapes → points scattered over each surface → one Gaussian per point (middle, spread from the normal, colour with light painted in, strength) → float texture → counting sort far to near → instanced rectangles, blended. Plain WebGL 2, no library. _(Mind Palace `js/scene.js`, `js/gauss.js`, `js/splatview.js`)_
+- **Detail weights and a budget,** so the things to recognise keep their splats. _(Mind Palace)_
+- **Fuzz as a meaning:** vague when not practised, sharp when known. _(Mind Palace)_
+- **One object library for two renderers:** build each object with the real library in Node, read back the meshes, write simple shapes as JSON. _(Mind Palace `tools/export_godot_data.js`)_
+

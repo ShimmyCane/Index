@@ -34,17 +34,27 @@ Jimmy answered `convo v0.1.md` (his words are recorded there, under each questio
 ## Questions
 
 1. **Did I read you right?** One shared palace, and each person picks a look (childish or grand). Or did you mean different palaces for different family members after all?
+   > **Jimmy, 2026-11-17:** No, I would like individual palaces for each family member. I am really teaching them about my world, so we build out mine and have them walk through mine and see if they can understand and learn from me first.
 
 2. **The grand look.** What is grand to you: a stone hall with columns and vaults, a library, a cathedral of light, a garden with pavilions? One or two words are enough. I will take it from historical architecture.
+   > **Jimmy, 2026-11-17:** I still think about the famous libraries, the famous science experiments, the arcane, so it brings you to medieval times; in other cultures there are large spaces, galleries and exhibition halls that work as well. But what I want to do right now is all residential. My focus is my childhood, so the first worlds of my palace will be the homes, the floor plans and the builds I had growing up, and I'll work on those with you over time. We'll start with a simple rectangle, but there should be options to add a door to another room and things like that.
 
 3. **iPad.** Godot reaches the iPad two ways: a web export hosted on GitHub Pages (no install, slower, needs a build step each time), or a real app through Xcode (fast, needs your Mac and an Apple developer account). Which one? Until then the three.js page is what runs on the iPad.
+   > **Jimmy, 2026-11-17:** Maybe this is a learning experiment: I would like a program I can access from the web. I'm really trying to figure out Gaussian splats here, and I do not want to stay with three.js. Let me know what other things I need and I'll get those registrations. I'm hoping a free version of those accounts will work.
 
 4. **Running Godot.** Do you want to allow me to run the Godot engine in these sessions (a permission rule for it), so I can test before you see it?
+   > **Jimmy, 2026-11-17:** I don't think so. It's OK for me to give you feedback after reviewing it myself. If it becomes two owners then yes, but for now no.
 
 5. **Childhood.** That is personal, and this repo is public. Your real palace will stay in the family database and on your devices, never in the repo. For the sample, may I add a made-up "Childhood" world (a street, a kitchen, a classroom) so the grand and childish looks have something to show?
+   > **Jimmy, 2026-11-17:** Yes, the information should be stored on the family database.
 
 6. **Splats from the real world.** Do you want to place a scanned splat (a real room or object, as a `.ply` or `.spz` file from a phone scan) as a memory object or a whole room? It is the natural next step for childhood places, and the files would stay private.
+   > **Jimmy, 2026-11-17:** Part of this is actually modelling, or working with AI to build the splats themselves, so there are no real-world scans. Maybe in the future, for places I've been to, I can take a video and import it as a scan. For now these are ideas for my memory, and that is why splats are really good: they approximate the fuzziness well.
 
 7. **Sync conflicts.** If two devices change the palace while one is offline, the simple rule is: the newer save wins and the older one is kept as a copy you can open. Practice answers are never lost, because they are added, not overwritten. Good enough?
+   > **Jimmy, 2026-11-17:** Proceed with what you recommend.
 
 8. **Tour mode.** Should a tour be a list you build by hand (tap memories in order), or the order little-me last walked? And should the tour test you (hide each name until you say it) or only show?
+   > **Jimmy, 2026-11-17:** It should be a free exploration of a little character walking through the space. As it approaches an object, a little pop-up shows with a couple of lines, and you can always read more.
+
+Also asked on 2026-11-17: continue, and merge so it can be tested. Follow-up in `convo v0.3.md`.

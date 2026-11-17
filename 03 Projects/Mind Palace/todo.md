@@ -1,5 +1,13 @@
 # Mind Palace — to do
 
+## Next (waiting on convo v0.3)
+- [ ] Floor plans: a room as a rectangle with its own width and depth; doors that join rooms; a home as a world. Jimmy's childhood homes.
+- [ ] Solid walls on the splat page, once rooms are plans.
+- [ ] Editing on the splat page, so the three.js page can retire.
+- [ ] AI-made objects: describe a thing, get simple shapes back, see them as splats, accept or reject.
+- [ ] Family sync: `mp_palace` (owner writes, family reads), `mp_recall`, `mp_notes` paste files; apply only on Jimmy's word.
+- [ ] Try `splat.html` on a real iPad: speed at each "Number of splats", pinch, the stick.
+
 ## First (blocked on running Godot)
 - [ ] Open `godot/` in Godot 4.3. Fix whatever the Output panel reports. It has never been run.
 - [ ] Look at the solid look and the splat look from several angles; check ring and object facing against the web page.

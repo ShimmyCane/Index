@@ -492,7 +492,7 @@
     $('checkStore').addEventListener('click', function () {
       var ok = MP.store.set('mindpalace.check', { at: Date.now() }) && MP.store.get('mindpalace.check', null), size = 0;
       try { size = Math.round(JSON.stringify(M.data).length / 1024); } catch (e) {}
-      var saved = MP.store.get(MP.KEYS.palace, null);
+      var saved = MP.palaces.load();
       $('dbLine').textContent = ok && saved ? '✅ Saving works on this device. The palace is ' + size + ' KB, with ' + (saved.nodes || []).length + ' memories saved. Nothing is sent anywhere.'
         : '❌ This browser is not keeping data (private mode, or storage is blocked). Use “Save a copy” to keep your palace.';
       $('pill').textContent = ok ? '💾 this device' : '⚠️ not saving';
@@ -523,6 +523,34 @@
     $('sampleBtn').addEventListener('click', function () { openData(MP.sample(), 'The sample palace is back. Undo returns to yours.'); });
     $('emptyBtn').addEventListener('click', function () { openData(M.empty(), 'An empty palace. Open Build to add a world. Undo returns to yours.'); });
   }
+  /* Whose palace: each person has their own, kept apart on this device. */
+  function renderPalaces() {
+    var cur = MP.palaces.current();
+    $('palacePick').innerHTML = MP.palaces.list().map(function (p) { return '<option value="' + esc(p.id) + '"' + (p.id === cur.id ? ' selected' : '') + '>' + esc(p.name) + '</option>'; }).join('');
+    document.title = cur.name + ' · Mind Palace';
+  }
+  function switchPalace(msg) {
+    if (practice) endPractice(true);
+    sel = null; results = []; $('q').value = '';
+    var saved = MP.palaces.load();
+    M.load(saved && saved.worlds ? saved : M.empty()).forEach(function (p) { MP.logError('repair: ' + p); });
+    renderPalaces(); homeAvatar(); view(function () { V.frame('all'); }); toast(msg, 3600);
+  }
+  function initPalaces() {
+    renderPalaces();
+    $('palacePick').addEventListener('change', function (e) { MP.palaces.choose(e.target.value); switchPalace('This is ' + MP.palaces.current().name + '.'); });
+    $('palaceNew').addEventListener('click', function () {
+      openSheet('New palace', '<label>Whose palace is it? <small>a first name is enough</small><input type="text" name="name" maxlength="30" required></label>' +
+        '<p class="how">It starts empty. Open Build to add the first world. The other palaces stay as they are.</p>', 'Make it', function (f) {
+        MP.palaces.add(f.name); switchPalace('A new, empty palace: ' + f.name + '. Open Build to add a world.');
+      });
+    });
+    $('palaceRename').addEventListener('click', function () {
+      openSheet('Rename this palace', '<label>Name<input type="text" name="name" maxlength="30" required value="' + esc(MP.palaces.current().name) + '"></label>', 'Save', function (f) {
+        MP.palaces.rename(f.name); renderPalaces();
+      });
+    });
+  }
   function openData(data, msg) {
     if (practice) endPractice(true);
     sel = null; results = []; $('q').value = '';
@@ -544,7 +572,8 @@
     V.on('spinEnd', function () { $('bar').querySelector('[data-act=spin]').setAttribute('aria-pressed', 'false'); });
     M.onChange(function (why) { rebuild(); if (why !== 'load' && why !== 'undo' && why !== 'recall') MP.sound('build'); });
 
-    var saved = MP.store.get(MP.KEYS.palace, null);
+    initPalaces();
+    var saved = MP.palaces.load();
     var problems = M.load(saved && saved.worlds ? saved : MP.sample());
     problems.forEach(function (p) { MP.logError('repair: ' + p); });
     homeAvatar(); view(function () { V.frame('all'); });

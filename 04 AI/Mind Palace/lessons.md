@@ -20,3 +20,14 @@
 13. **Say plainly when code has never been run.** The engine could not be started in the session. The project, its schematic, the to-do list and the PR all say so in the first lines.
 14. **Check that a tool can run before planning around it.** The download worked; running it was refused. Try the smallest run (`--version`) first.
 
+## 2026-11-17, round 3 (splats in the browser)
+
+15. **When the engine cannot be run, build where you can test.** Jimmy wanted splats, on the web, without three.js. A plain WebGL 2 splat renderer met all three and could be checked in headless Chromium the same hour; the unrun Godot project could not.
+16. **A splat renderer is small.** One float texture (three texels per splat: middle and packed colour, half the spread and strength, the other half), an instanced rectangle, a 16-bit counting sort on view depth, premultiplied back-to-front blending. About 150 lines.
+17. **Spend splats where recognition matters.** With one budget, the islands took most splats and objects became blobs. Give each shape a detail weight (objects 5, rooms 1, islands 0.3) and let the detailed ones keep their count when over budget.
+18. **A flat-surface Gaussian needs no tangent.** Spread = a² I + (t² − a²) n nᵀ, from the normal alone.
+19. **Fuzz is three moves together:** push the point off the surface, swell it, weaken it. Tie it to something meaningful (practice) and it stops being decoration.
+20. **`readPixels` reads nothing once the frame has been shown**, and a page that only draws when something moved may not draw in the frame you read. Check a splat page with screenshots and exposed state.
+21. **Software GL with 170,000 blended splats runs many times slower than a device.** Tests set the fewest splats and wait on state.
+22. **Carry every array through a join.** The `.ply` export failed because the join of palace and little-me dropped the normals and scales; only clicking the button showed it.
+

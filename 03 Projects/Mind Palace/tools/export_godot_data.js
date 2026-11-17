@@ -1,6 +1,7 @@
 /* Mind Palace: write the data the Godot project reads.
      node tools/export_godot_data.js
    - godot/data/objects.json : every object in js/objects.js as a list of simple shapes (so the two renderers share one object library)
+   - js/objects_data.js      : the same library as a script, for splat.html
    - godot/data/palace.json  : the sample palace, cleaned by the same repair step the page uses
    Run it again after changing js/objects.js or js/sample.js. */
 'use strict';
@@ -38,6 +39,8 @@ function shapesOf(kind) {
 const objects = { note: 'Made by tools/export_godot_data.js from js/objects.js. Do not edit by hand.', defaults: MP.Objects.DEFAULT, kinds: {} };
 MP.Objects.KINDS.forEach(k => { objects.kinds[k.id] = { label: k.label, emoji: k.emoji, parts: shapesOf(k.id) }; });
 fs.writeFileSync(path.join(root, 'godot/data/objects.json'), JSON.stringify(objects));
+// The same library for the splat page, as a script, so the page still opens from a double-click.
+fs.writeFileSync(path.join(root, 'js/objects_data.js'), '/* Made by tools/export_godot_data.js from js/objects.js. Do not edit by hand. */\n(function () { var r = typeof window !== "undefined" ? window : globalThis; (r.MP = r.MP || {}).objectShapes = ' + JSON.stringify(objects) + '; })();\n');
 MP.store = { set() {}, get(k, d) { return d; }, ok: true };
 MP.Model.load(MP.sample());
 const palace = MP.Model.clone(MP.Model.data); palace.updated_at = '2026-11-17T00:00:00.000Z';

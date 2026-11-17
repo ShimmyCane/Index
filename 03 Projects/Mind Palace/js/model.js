@@ -159,7 +159,7 @@
 
   /* ---------- change, undo, redo ---------- */
   function emit(why) { listeners.forEach(function (fn) { try { fn(why); } catch (e) { MP.logError && MP.logError('listener: ' + e.message); } }); }
-  function persist() { data.updated_at = now(); if (MP.store) MP.store.set(MP.KEYS.palace, data); }
+  function persist() { data.updated_at = now(); if (MP.store) MP.store.set(MP.palaces ? MP.palaces.key() : MP.KEYS.palace, data); }
   function commit(label, fn) {
     var before = JSON.stringify(data);
     var out = fn(data);

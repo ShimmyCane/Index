@@ -25,3 +25,10 @@
 - **Not built:** SQL for sync, Godot editing and practice, looks, tour mode, growth, AI loop.
 - **Open:** convo v0.2 (how to read "different ones for family", the grand look, iPad route, permission to run Godot, a made-up childhood sample, scanned splats, sync conflicts, tour mode).
 
+**Round 3 (2026-11-17), version 0.2.0, from Jimmy's answers to convo v0.2.** Direction refined: a palace per family member (his first, others walk through it); his first worlds are his childhood homes as floor plans; Gaussian splats on the web without three.js are the point; no scans; he tests Godot himself (engine not to be run in sessions); tour = free walking with pop-ups.
+
+- **Built and verified (30 headless checks, computer and phone):** `splat.html`, a Gaussian splat renderer in plain WebGL 2 (float data texture, counting sort per drawn frame, EWA projection in the vertex shader, back-to-front blending); shapes from `js/scene.js`; sampling, fuzz and `.ply` in `js/gauss.js`; fuzz slider and "sharper when practised"; walk-up pop-ups with Read more; Wander; individual palaces on the device (both pages). The Build page still passes its 54 checks.
+- **Not built:** floor plans and doors, solid walls on the splat page, editing on the splat page, AI-made objects, sync SQL.
+- **Unrun:** `godot/`.
+- **Open:** convo v0.3 (main renderer, homes, how to enter a plan, units, doors, visiting rights, AI objects, what drives fuzz).
+

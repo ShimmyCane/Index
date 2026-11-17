@@ -103,7 +103,10 @@ textarea { resize: vertical; min-height: 76px; }
 .bar { position: fixed; left: 12px; right: 100px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 18; display: flex; flex-wrap: wrap-reverse; gap: 8px; pointer-events: none; }
 .bar button { pointer-events: auto; min-width: 60px; min-height: 60px; padding: 4px 8px; border: 2.5px solid var(--ink); border-radius: 16px 11px 15px 10px; background: var(--card);
   font-weight: 700; font-size: .8rem; cursor: pointer; box-shadow: 3px 4px 0 var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.bar button span { font-size: 1.35rem; line-height: 1.1; }
+.bar button span, .bar .barLink span { font-size: 1.35rem; line-height: 1.1; }
+.bar .barLink { pointer-events: auto; min-width: 60px; min-height: 60px; padding: 4px 8px; border: 2.5px solid var(--ink); border-radius: 16px 11px 15px 10px; background: var(--lilac);
+  font-weight: 700; font-size: .8rem; box-shadow: 3px 4px 0 var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--ink); text-decoration: none; }
+.fieldLabel { display: block; font-weight: 700; margin: 2px 0 4px; }
 .bar button[aria-pressed="true"] { background: var(--sun); }
 .bar button:disabled { opacity: .45; cursor: default; }
 

@@ -1,8 +1,11 @@
 # Mind Palace — schematic
 
-**Track: A. Family play** (one palace shared by the family), with studio-level depth kept in collapsed panels. Two looks are planned, childish and grand: memories are for the young and old.
+**Track: A. Family play** (a palace for each family member; Jimmy's first, for the others to walk through), with studio-level depth kept in collapsed panels.
 
-Status (2026-11-17): the web page is MVP 0.1.0, headless-tested, not yet tried on an iPad. It is now the **placeholder**. The **Godot application** in `godot/` is the main renderer from here on: increment G1 is written and has never been run (`godot/schematic.md`).
+Status (2026-11-17), version 0.2.0, headless-tested, not yet tried on an iPad:
+- **`splat.html`**: the palace drawn with Gaussian splats in plain WebGL 2 (no three.js). Walk, search, walk-up pop-ups, Wander, a fuzziness slider. This is the view Jimmy asked for.
+- **`index.html`** (three.js): the Build page, where things are added, changed, connected and practised. A placeholder for its 3-D view.
+- **`godot/`**: a Godot 4.3 application, written and never run (`godot/schematic.md`). Jimmy tests it himself.
 
 ## Purpose
 
@@ -16,7 +19,8 @@ The knowledge database is the substance. The palace is one drawing of it.
 
 ```
 knowledge database  →  scene description  →  renderer
-js/model.js            js/layout.js          js/view.js            (web placeholder, three.js)
+js/model.js            js/layout.js          js/scene.js → js/gauss.js → js/splatview.js   (web, Gaussian splats)
+                                             js/view.js            (web Build page, three.js)
 data/palace.json       palace_layout.gd      palace_renderer.gd    (Godot, solid look)
                        + palace_builder.gd   splat_cloud.gd        (Godot, Gaussian splats)
 ```
@@ -75,6 +79,11 @@ Differences from the specification's example: a world does not store `places` an
 | `js/layout.js` | Database → scene description; routes; which room a point is in |
 | `js/objects.js` | 29 objects made from simple shapes, and emoji cards |
 | `js/view.js` | three.js: islands, rooms, bridges, little-me, camera, picking, dragging |
+| `js/scene.js` | Layout → a flat list of simple shapes (box, cylinder, sphere, ring, prism) and signs. No DOM |
+| `js/gauss.js` | Shapes → Gaussian splats (sampling, fuzz, `.ply`). No DOM |
+| `js/splatview.js` | The splat renderer: WebGL 2, sort far to near, blend |
+| `js/splatpage.js`, `splat.html`, `css/splat.css` | The splat page |
+| `js/objects_data.js` | The object library as simple shapes. Made by `tools/export_godot_data.js` |
 | `js/audio.js` | Sounds made with Web Audio |
 | `js/notes.js` | Notes for improvement |
 | `js/app.js` | Panels, search, card, practice, forms, saving, ⚙️ |
@@ -86,19 +95,35 @@ Differences from the specification's example: a world does not store `places` an
 
 "Notes for improvement" in ⚙️. Each note is saved with the thing selected (a memory, a room, a world, or the whole palace), the time and the version. Open and All filter, Copy notes. Device storage only, key `mindpalace.notes`. Sent nowhere. A family table is question 3.
 
+## Splats (how `splat.html` works)
+
+| Step | File | What happens |
+|---|---|---|
+| Shapes | `scene.js` | The layout becomes about 460 simple shapes for the sample palace |
+| Sample | `gauss.js` | Points are scattered over each surface. Memory objects get 5 times the density and keep it; islands get 0.3 times. Budget: 80,000, 170,000 or 300,000 |
+| Make a Gaussian | `gauss.js` | Each point gets a middle, a spread (wide along the surface, thin across it), a colour with the light painted in, and a strength |
+| Fuzz | `gauss.js` | Fuzz pushes points off the surface, swells them and weakens them. From the slider (0 to 100) times 0.1 to 1.0 by practice box for a memory, 0.3 for scenery |
+| Store | `splatview.js` | One float texture, three texels per splat |
+| Sort | `splatview.js` | Every drawn frame, a counting sort on distance from the eye |
+| Draw | `splatview.js` | One rectangle per splat. The vertex shader projects the 3-D spread to a 2-D ellipse; the fragment shader fades it as a bell curve; blending is back to front |
+
+Little-me is the last block of splats; the shader moves and turns that block. The page only redraws when something moved.
+
+Not this: not trained from photos, no view-dependent colour, no walls in the way, no editing (use Build).
+
 ## Family sync (planned, nothing applied)
 
-Jimmy's answer: yes, sync with the family database, plan ahead. One palace for the family.
+Jimmy's answers: sync with the family database; **a palace for each family member**; the others can walk through his.
 
 | Table | Holds | Rule |
 |---|---|---|
-| `mp_palace` | One row per palace: `id`, `data` (the JSON without practice), `version` (a counter), `updated_at`, `updated_by` | A save sends the version it started from. If the row has moved on, the newer save wins and the older one is kept in `mp_palace_copies` |
+| `mp_palace` | One row per palace: `id`, `owner` (a family member), `name`, `data` (the JSON without practice), `version` (a counter), `updated_at` | Only the owner writes. Every family member reads. A save sends the version it started from; if the row has moved on, the newer save wins and the older one is kept in `mp_palace_copies` |
 | `mp_recall` | One row per practice answer: `id`, `palace_id`, `node_id`, `kind`, `result`, `at`, `member` | Added only, never overwritten, so two devices can practise at once |
 | `mp_notes` | Notes for improvement, in the shape `/start-project` step 8 gives | Same as the other family apps |
 
 - Family project, family sign-in, row-level security on, `anon` revoked, registered in `app_table_registry`. Publishable key only.
 - Device first: the palace always works signed out. Signed in, it pulls on open and pushes after a change.
-- `member` on a practice answer lets each person have their own "known" rings in the one palace.
+- `member` on a practice answer lets each person have their own "known" rings (and their own fuzziness) in someone else's palace.
 - Next step: write the paste files with `/supabase-link`, test in a rolled-back transaction, apply only when Jimmy says.
 - A real palace (childhood) is personal. It lives in the database and on devices, never in this repo.
 
@@ -118,11 +143,23 @@ Jimmy's answer: yes, sync with the family database, plan ahead. One palace for t
 | Practice | Rounds of five, plus a tour mode |
 | Devices | All |
 
-## What this is not (0.1.0)
+## Decisions from convo v0.2 (2026-11-17)
+
+| Topic | Decision |
+|---|---|
+| Palaces | One per family member (replaces "one, shared"). Built on the device; sync planned |
+| First content | Jimmy's childhood homes as floor plans: a rectangle first, then doors between rooms. Not built; questions in convo v0.3 |
+| Splats | The point of the project. On the web, no three.js. Modelled or AI-made, no scans for now |
+| Godot | Jimmy tests it himself; the engine is not run in build sessions |
+| Tour | Free walking with walk-up pop-ups and "read more" (built), plus Wander |
+| Looks | Residential now; libraries, the arcane and great halls later |
+
+## What this is not (0.2.0)
 
 - No AI collaborator yet. The data has a `proposals` list ready; the plan is the copy-and-paste loop (`02 Refs/Skills/ai_json_loop.md`) with preview, accept some, reject.
 - Godot and splats exist only as an unrun first increment (`godot/`). No SDF yet.
 - Not real architecture: rooms are open-topped boxes on floating islands. No stairs, hidden rooms, portals or changing scale yet.
 - No collisions. Little-me walks through walls and floats over gaps.
 - Device storage is `localStorage`, not IndexedDB. Enough for text; it changes when pictures or sounds are added.
-- One palace per device. No sync between devices.
+- No sync between devices yet. Palaces are kept apart on one device.
+- No floor plans yet: rooms are still squares that grow by count.
