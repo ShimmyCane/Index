@@ -30,6 +30,7 @@ Shared list of open work across the nursery. Project to-do lists stay in each pr
 
 ## Project items
 
+- **Our Family Compass:** seed built 2026-11-17 (PR #185); round 2 added sample pieces, family sign-in, voice notes and research. Open: answers to `convo v0.2`, apply the `ofc_*` tables (the tool timed out), device test, review of the two guards after merge. See its `todo.md`.
 - **Better Parenting:** MVP 0.1.0 built 2026-11-16. Open: apply the `bp_*` tables, real sign-in, check video links, device test, answers to `convo v0.1`. See its `todo.md`.
 
 - **Athena's world, Bar Glide, Chinese Character Sudoku, Voice, What to Cook:** graduated to their own repos (`ShimmyCane/Athena-s-world`, `Bar-Glide`, `Chinese-Character-Sudoku`, `Voice`, `What-to-Cook`) and removed from the nursery on 2026-11-10. Their to-dos live there.

@@ -1,0 +1,185 @@
+/* Our Family Compass: the Family Habits look (ink, paper and sun; offset shadows; asymmetric corners; polka dots). */
+:root {
+  --ink: #2b2a33; --paper: #fff8ea; --card: #fffdf7; --sun: #ffcf4a; --sun2: #ffe9a8;
+  --coral: #ffb199; --mint: #bfe8d2; --sky: #c4e3f7; --lilac: #ddd0f7; --rose: #ffd9e0;
+  --soft: #6b6878; --r: 22px 14px 20px 12px; --shadow: 4px 5px 0 var(--ink);
+  --fs: 17px;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; color: var(--ink); font: 500 var(--fs)/1.5 Quicksand, "Avenir Next", system-ui, sans-serif;
+  background-color: var(--paper);
+  background-image: radial-gradient(rgba(255, 207, 74, .38) 2.5px, transparent 3px);
+  background-size: 26px 26px; touch-action: manipulation;
+}
+body.large { --fs: 20px; }
+body.sheetOpen { overflow: hidden; }
+button, input, select, textarea { font: inherit; color: inherit; }
+h1, h2, h3 { font-family: "Patrick Hand", Quicksand, system-ui, sans-serif; font-weight: 400; margin: 0; line-height: 1.15; }
+h3 { font-size: 1.3rem; margin: 18px 0 6px; }
+code { font-size: .9em; }
+
+.top { display: flex; align-items: center; gap: 12px; padding: 14px 16px 6px; max-width: 980px; margin: 0 auto; }
+.top h1 { flex: 1; font-size: 2rem; }
+.top h1 small { font: 600 .7rem Orbitron, monospace; letter-spacing: .08em; color: var(--soft); margin-left: 6px; white-space: nowrap; }
+.pill { min-height: 44px; padding: 0 14px; border: 2.5px solid var(--ink); border-radius: 999px; background: var(--card); font-weight: 700; font-size: .85rem; cursor: pointer; white-space: nowrap; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 6px 16px 130px; }
+.idea { font: 400 1.35rem/1.3 "Patrick Hand", Quicksand, sans-serif; margin: 4px 0 12px; }
+
+input[type=text], input[type=email], input[type=password], textarea, select {
+  width: 100%; min-height: 48px; padding: 10px 12px; border: 2.5px solid var(--ink); border-radius: 14px 10px 13px 9px; background: #fff;
+}
+select { width: auto; }
+textarea { resize: vertical; display: block; }
+.lab { display: block; font-weight: 700; font-size: .9rem; margin: 10px 0 4px; }
+
+.btn { min-height: 52px; padding: 0 18px; border: 2.5px solid var(--ink); border-radius: 16px 11px 15px 10px; background: var(--card); font-weight: 700; cursor: pointer; box-shadow: 3px 4px 0 var(--ink); }
+.btn:active { transform: translate(2px, 3px); box-shadow: 1px 1px 0 var(--ink); }
+.btn.go { background: var(--sun); }
+.btn.small { min-height: 48px; padding: 0 12px; font-size: .9rem; box-shadow: 2px 3px 0 var(--ink); }
+.mini { min-width: 48px; min-height: 48px; border: 2.5px solid var(--ink); border-radius: 14px; background: var(--card); font-weight: 700; cursor: pointer; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0; }
+.hint, .fine { color: var(--soft); font-size: .9rem; margin: 6px 0 10px; }
+.fine { margin-top: 22px; font-size: .8rem; }
+
+/* The palace map */
+.palace { border: 3px solid var(--ink); border-radius: var(--r); background: var(--card); box-shadow: var(--shadow); padding: 10px 12px 12px; }
+#map svg { display: block; width: 100%; height: auto; max-height: 78vh; margin: 0 auto; }
+.room { cursor: pointer; }
+.room .shape { stroke: var(--ink); stroke-width: 4; transition: filter .15s; }
+.room .drop { fill: var(--ink); }
+.room:hover .shape, .room:focus-visible .shape { filter: brightness(1.06) saturate(1.2); }
+.room:focus { outline: none; }
+.room:focus-visible .shape { stroke-width: 7; }
+.room .em { font-size: 40px; text-anchor: middle; }
+.room .nm { font: 400 30px "Patrick Hand", Quicksand, sans-serif; text-anchor: middle; fill: var(--ink); }
+.room .sb { font: 700 14px Quicksand, system-ui, sans-serif; text-anchor: middle; fill: #55525f; }
+.room .badge circle { fill: #fff; stroke: var(--ink); stroke-width: 3; }
+.room .badge text { font: 700 17px Quicksand, system-ui, sans-serif; text-anchor: middle; fill: var(--ink); }
+.deco { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linecap: round; }
+.band { font: 600 12px Orbitron, monospace; letter-spacing: .12em; fill: #6b6878; }
+.needle { transform-box: fill-box; transform-origin: center; animation: sway 6s ease-in-out infinite; }
+body.still .needle { animation: none; }
+@keyframes sway { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(11deg); } }
+@media (prefers-reduced-motion: reduce) { .needle { animation: none; } }
+
+.roomRow { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { min-height: 48px; padding: 0 12px; border: 2.5px solid var(--ink); border-radius: 16px 10px 14px 9px; background: var(--card); font-weight: 700; cursor: pointer; font-size: .9rem; }
+.chip b { display: inline-block; min-width: 22px; margin-left: 6px; padding: 0 5px; border-radius: 999px; background: var(--ink); color: #fff; font-size: .75rem; text-align: center; }
+
+/* Panels */
+.panel { border: 3px solid var(--ink); border-radius: var(--r); background: var(--card); margin: 14px 0; overflow: hidden; box-shadow: var(--shadow); }
+.panelHead { width: 100%; min-height: 56px; display: flex; align-items: center; gap: 10px; padding: 0 16px; border: 0; background: var(--sun2); cursor: pointer; text-align: left; font: 400 1.45rem "Patrick Hand", Quicksand, sans-serif; color: var(--ink); }
+.panelTitle { flex: 1; }
+.panelBody { padding: 12px 16px 16px; }
+.panel[data-collapsed=true] .panelBody { display: none; }
+.panel[data-collapsed=true] .panelMark { transform: rotate(-90deg); }
+.panel[data-panel=pieces] .panelHead { background: var(--sun); }
+.panel[data-panel=kinds] .panelHead { background: var(--mint); }
+.panel[data-panel=anatomy] .panelHead { background: var(--lilac); }
+.panel[data-panel=layers] .panelHead { background: var(--sky); }
+.panel[data-panel=risks] .panelHead { background: var(--coral); }
+.panel[data-panel=mine] .panelHead { background: var(--rose); }
+
+.path { margin: 0; padding: 0; list-style: none; counter-reset: step; }
+.path li { counter-increment: step; display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 2px dashed #d8d2c2; }
+.path li:first-child { border-top: 0; }
+.path li::before { content: counter(step); flex: none; width: 40px; height: 40px; display: grid; place-items: center; border: 2.5px solid var(--ink); border-radius: 50%; background: var(--sun); font: 400 1.3rem "Patrick Hand", sans-serif; }
+.path .txt { flex: 1; }
+.path .txt b { display: block; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.cards.two { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.card { border: 2.5px solid var(--ink); border-radius: 16px 10px 14px 9px; background: #fff; padding: 10px 12px; }
+.card .ci { font-size: 1.6rem; }
+.card b { display: block; }
+.card small { color: var(--soft); font-weight: 700; }
+.card em { display: block; margin-top: 4px; font: 400 1.05rem "Patrick Hand", sans-serif; }
+
+.sides { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.side { border: 2.5px solid var(--ink); border-radius: var(--r); padding: 10px 14px; }
+.side.front { background: var(--sun2); }
+.side.back { background: #f1ecfb; }
+.side h3 { margin-top: 0; }
+.side ul { margin: 0; padding-left: 20px; }
+.kv { margin: 0; }
+.kv dt { font-weight: 700; margin-top: 6px; }
+.kv dd { margin: 0; }
+.sampleTitle { font: 400 1.3rem "Patrick Hand", sans-serif; margin: 18px 0 8px; }
+
+.risks { margin: 0; }
+.risks dt { font-weight: 700; margin-top: 10px; }
+.risks dt::before { content: "⚠️ "; }
+.risks dd { margin: 0 0 0 4px; }
+.risks dd::before { content: "→ "; font-weight: 700; }
+
+/* Thoughts */
+.thoughts { list-style: none; margin: 12px 0 0; padding: 0; }
+.thoughts li { border: 2.5px solid var(--ink); border-radius: 14px 10px 13px 9px; background: #fff; padding: 10px 12px; margin-bottom: 10px; }
+.thoughts li.older { background: #f4f1ea; border-style: dashed; color: #5c5966; }
+.thoughts .meta { font-size: .8rem; font-weight: 700; color: var(--soft); }
+.thoughts .about { font: 400 1.05rem "Patrick Hand", sans-serif; }
+.thoughts .body { white-space: pre-wrap; margin: 4px 0; overflow-wrap: anywhere; }
+.thoughts .empty { border-style: dashed; color: var(--soft); }
+.link { min-height: 44px; border: 0; background: none; padding: 0 4px; font-weight: 700; text-decoration: underline; cursor: pointer; color: #1d5fa8; }
+
+/* Room sheet */
+.veil { position: fixed; inset: 0; z-index: 50; background: rgba(43, 42, 51, .45); display: flex; align-items: flex-end; justify-content: center; }
+.sheet { width: min(680px, 100%); max-height: 92vh; display: flex; flex-direction: column; background: var(--card); border: 3px solid var(--ink); border-bottom: 0; border-radius: 24px 16px 0 0; overflow: hidden; }
+@media (min-width: 720px) { .veil { align-items: center; } .sheet { border-bottom: 3px solid var(--ink); border-radius: var(--r); box-shadow: var(--shadow); max-height: 88vh; } }
+.sheetHead { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 3px solid var(--ink); }
+.sheetIcon { font-size: 2.2rem; }
+.sheetTitles { flex: 1; }
+.sheetTitles h2 { font-size: 1.8rem; }
+.sheetTitles p { margin: 0; font-weight: 700; font-size: .85rem; }
+.sheetBody { padding: 12px 16px calc(24px + env(safe-area-inset-bottom)); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.sheetBody > p:first-child { margin-top: 0; }
+.holds { margin: 0; padding-left: 20px; }
+.asks { display: grid; gap: 8px; }
+.ask { min-height: 48px; text-align: left; padding: 8px 12px; border: 2.5px solid var(--ink); border-radius: 14px 10px 13px 9px; background: #fff; cursor: pointer; font-weight: 500; }
+.ask.on { background: var(--sun2); box-shadow: 2px 3px 0 var(--ink); }
+
+/* Pieces */
+.veil.top2 { z-index: 60; }
+button.card { text-align: left; cursor: pointer; min-height: 48px; box-shadow: 2px 3px 0 var(--ink); font-weight: 500; }
+button.card:active { transform: translate(1px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+.front { white-space: pre-wrap; font-size: 1.1rem; }
+.bigAsk { font: 400 1.4rem/1.25 "Patrick Hand", Quicksand, sans-serif; margin: 12px 0 8px; }
+.then { min-height: 1.5em; margin: 10px 0; padding: 0 2px; font-weight: 700; }
+.steps { padding-left: 24px; }
+.steps li { margin: 6px 0; }
+#pieceAct textarea { margin-bottom: 10px; }
+#familyForm input { margin-bottom: 8px; }
+#dbCheck { white-space: pre-wrap; }
+
+#voiceRow audio, .voiceLine audio { width: 100%; margin: 8px 0; }
+.voiceLine { margin-top: 4px; }
+
+/* Settings */
+.gear { position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); width: 68px; height: 68px; border-radius: 50%; font-size: 32px; z-index: 30; background: var(--sun2); border: 3px solid var(--ink); box-shadow: 0 4px 0 var(--ink); cursor: pointer; }
+.drawer { position: fixed; right: 18px; bottom: calc(100px + env(safe-area-inset-bottom)); width: min(380px, calc(100vw - 36px)); max-height: 70vh; overflow-y: auto; z-index: 40; background: var(--card); border: 3px solid var(--ink); border-radius: var(--r); box-shadow: var(--shadow); padding: 14px; }
+.drawerHead { display: flex; align-items: center; justify-content: space-between; }
+.setting { padding: 8px 0; }
+.seg { display: flex; gap: 8px; }
+.seg button { flex: 1; min-height: 52px; border: 2.5px solid var(--ink); border-radius: 16px 10px 14px 9px; background: #fff; font-weight: 700; cursor: pointer; }
+.seg button.on { background: var(--mint); }
+.toggle { display: flex; align-items: center; gap: 10px; min-height: 48px; font-weight: 700; }
+.toggle input { width: 24px; height: 24px; }
+.notesBox { border-top: 2px dashed #d8d2c2; border-bottom: 2px dashed #d8d2c2; padding: 4px 0 10px; margin: 8px 0; }
+.noteList { list-style: none; margin: 0; padding: 0; }
+.noteList li { white-space: pre-wrap; overflow-wrap: anywhere; border: 2px solid var(--ink); border-radius: 12px; background: #fff; padding: 8px 10px; margin-top: 8px; font-size: .9rem; }
+.errorsPanel { position: fixed; left: 16px; right: 100px; bottom: calc(16px + env(safe-area-inset-bottom)); max-height: 30vh; overflow: auto; z-index: 25; background: #fff0ee; border: 3px solid var(--ink); border-radius: 16px; padding: 8px 12px; font: 14px ui-monospace, monospace; white-space: pre-wrap; }
+
+@media (max-width: 560px) {
+  .top h1 { font-size: 1.6rem; }
+  .room .sb { display: none; }
+  .room .nm { font-size: 36px; }
+  .room .em { font-size: 46px; }
+}
+@media print {
+  .gear, .drawer, .errorsPanel, .veil, .roomRow, .pill { display: none !important; }
+  .panel[data-collapsed=true] .panelBody { display: block; }
+  .panel, .palace { box-shadow: none; break-inside: avoid; }
+}
