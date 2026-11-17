@@ -18,12 +18,17 @@
 - [ ] Orbit with real fingers: drag around, pinch closer; speed while turning.
 
 ## Database link (0.5.0): Jimmy's steps, in order
+(Owner row first or last, either works, but the page shows no rows until it exists. `supabase/000_owner_row.sql` has the ready-to-paste steps; the id you copy is never committed.)
 1. Architecture project → SQL Editor: paste `supabase/test_001_gc.sql` → Run. Expect an **error** starting `RESULT: tables=1 rls=1 policies=1 index=1 owner_sees=1 stranger_sees=0 stranger_insert=blocked anon=blocked done_check=blocked` (that error is the pass).
 2. Paste `supabase/001_gc_notes.sql` → Run. Expect "Success".
 3. Paste `supabase/verify_001_gc.sql` → Run; paste the result back. `owner_rows` of 0 means no sign-in sees data yet.
-4. If `owner_rows` is 0: sign in to the studio account once, copy your user id from Authentication → Users, and run `insert into public.platform_owners (user_id, note) values ('<your user id>', 'owner');` by hand. Never commit it.
+4. If `owner_rows` is 0: paste `supabase/000_owner_row.sql`. Step A lists the newest accounts (copy yours), step B inserts it (uncomment the line and put the id in), step C should say `owner_rows = 1`. Never commit the id.
 5. Open the page → ⚙️ → Studio database → Sign in. Your notes on the device are sent and the status line says how many are in the database.
 6. Then ask me to read the notes (`/read-notes-and-update`): archive them as V1, review, update.
+
+## Next round (agreed 2026-11-17)
+- [ ] Read the saved notes (`/read-notes-and-update` style, table `gc_notes` in the Architecture project), copy them into `convo/notes v1.md` summarised as the V1 set, review them, and update. Mark notes done only after Jimmy confirms which.
+- [ ] `gc_spots`: kept map spots saved to the database (new SQL file `002_gc_spots.sql` with its test and verify; the page sends and merges them the way it does notes).
 
 ## Added in 0.4.0, to confirm on a real device
 - [ ] The elevation service returns 576 heights (6 calls) and a real coast looks right at a known beach.

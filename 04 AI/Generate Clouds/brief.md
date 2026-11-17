@@ -22,4 +22,15 @@
 
 **0.5.0 (2026-11-17):** notes linked to the studio database. The notes box saved to the device only, so there was no table: searched both Supabase projects read-only, found none and no cloud-related notes. Chose the Architecture project (Track B; neither project is named "splusystudio", so this is an assumption, asked in convo v0.5). Wrote `supabase/` (`test_001_gc`, `001_gc_notes`, `verify_001_gc`), `js/config.js` (publishable key), `js/cloud.js` (owner sign-in by plain fetch, device-first notes sync, done marks and other-device notes merged back, database check in plain words). **Not applied:** the rolled-back test went through `execute_sql` and timed out on an unanswered confirmation, so nothing is verified live; Jimmy pastes by hand. `platform_owners` had 0 rows, so no sign-in sees rows until his id is added by hand. 19 headless link checks pass against a pretend database (sign-in key use, columns, on_conflict, device-first, resume, sign out, missing table, not owner, offline).
 
+**Agreed 2026-11-17 (convo v0.6):** Architecture project confirmed; V1 means the comments written so far, to be copied (summarised) into `convo/notes v1.md` once they are in the database; `gc_spots` approved for a later round; `supabase/000_owner_row.sql` written (ids never committed). 0.5.0 merged so Jimmy can paste the SQL by hand.
+
+**How to read the notes (Architecture project, read-only):**
+```sql
+select id, page, item, label, version, status, noted_at, text
+from public.gc_notes
+where status = 'open' and text not like 'Done- %'
+order by noted_at;
+```
+If the table or rows are not there yet, ask Jimmy to run it in the SQL editor and paste the result. Mark done only after he confirms the ids: set `status = 'done'` and prefix `text` with `Done- `.
+
 **Next.** Answers to `03 Projects/Generate Clouds/convo/convo v0.1.md`; candidates in `todo.md`.
