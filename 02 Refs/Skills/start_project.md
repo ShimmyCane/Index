@@ -26,6 +26,7 @@ When the user asks to initialize a project:
    - Add a 家庭登入 block to ⚙️ (email, password, signed-in status, sign out, 檢查資料庫). Reference: the block in `03 Projects/中文笔画/index.html` and `03 Projects/中文笔画/js/family.js`. Use the publishable key only. Never put an email or password in the repo.
    - Notes stay on the device first. When signed in they are also sent to the family table, with the note's own `id` and time unchanged. Signed out, the database check says "this device only". Notes are sent nowhere else.
    - Test with the rolled-back test, apply by hand or with the migration tool only when Jimmy asks, and record the result in `04 AI/Supabase/brief.md`. Lessons: `04 AI/Supabase/lessons.md`.
+9. Home page link: as soon as the project has a page that opens, add a tile for it to the Nursery list in the root `index.html` (one `<li>` in the same form as the others, linking to `03%20Projects/<PROJECT NAME>/`). Jimmy reviews a project from that link, so do this in the same change as the first build, before asking for a merge. Change nothing else in `index.html`.
 
 Rules:
 - Do not explain your reasoning.
