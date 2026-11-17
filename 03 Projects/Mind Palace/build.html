@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <title>Mind Palace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Patrick+Hand&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <canvas id="scene" aria-label="Your mind palace in 3-D"></canvas>
+
+  <header class="top">
+    <button id="menuBtn" class="iconBtn" type="button" aria-label="Panels" aria-expanded="false" aria-controls="side">☰</button>
+    <h1>Mind Palace</h1>
+    <form id="searchForm" class="search" role="search">
+      <input id="q" type="search" placeholder="Find a memory…" autocomplete="off" aria-label="Find a memory">
+      <button class="btn sun" type="submit">🔎 Go</button>
+    </form>
+    <button id="pill" class="pill" type="button">💾 this device</button>
+  </header>
+
+  <div id="side" class="side">
+    <section class="panel" data-panel="find">
+      <button class="panelHead" type="button" aria-controls="find-body"><span class="panelIcon">🔎</span><span class="panelTitle">Find</span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="find-body"><ul id="results" class="list"><li class="hint">Type a word above. Little-me walks there.</li></ul></div>
+    </section>
+
+    <section class="panel" data-panel="outline">
+      <button class="panelHead" type="button" aria-controls="outline-body"><span class="panelIcon">🗺️</span><span class="panelTitle">Map of my mind</span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="outline-body">
+        <div class="seg small" id="outlineSeg"><button type="button" data-v="place">By place</button><button type="button" data-v="topic">By topic</button></div>
+        <div id="outline"></div>
+        <p class="how" id="outlineHow"></p>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="practice">
+      <button class="panelHead" type="button" aria-controls="practice-body"><span class="panelIcon">🧠</span><span class="panelTitle">Practise</span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="practice-body">
+        <p id="practiceInfo" class="info"></p>
+        <div class="seg small" id="practiceSeg">
+          <button type="button" data-v="what">What is here?</button><button type="button" data-v="where">Where is it?</button><button type="button" data-v="mix">Both</button>
+        </div>
+        <button id="practiceStart" class="btn sun wide" type="button">▶ Start a round of 5</button>
+        <p class="how"><b>How to read this.</b> <b>What</b> means: standing at the object, you can say what it holds. <b>Where</b> means: given the name, you can point to its room. They are counted apart, because knowing the way is not the same as knowing the thing. A right answer waits longer before it comes back (1, 2, 4, 8, then 16 days). A miss comes back today.</p>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="build" data-open="false">
+      <button class="panelHead" type="button" aria-controls="build-body"><span class="panelIcon">🧱</span><span class="panelTitle">Build</span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="build-body">
+        <div class="rowBtns">
+          <button class="btn" type="button" id="addNode">➕ Memory</button>
+          <button class="btn" type="button" id="addRoom">➕ Room</button>
+          <button class="btn" type="button" id="addWorld">➕ World</button>
+        </div>
+        <p class="how"><b>To move things:</b> turn on <b>Move</b> below. Drag an object to another spot or another room. Drag a floor to move the room. Drag the ball in the middle of a world to move the world. Connections stay. <b>Undo</b> takes back any change.</p>
+        <p class="how"><b>Rooms grow by themselves:</b> Nook, Room (3), Hall (6), Library (10), Tower (16). Size shows how much is kept there, not how well you know it. A gold ring on a stand shows what you have practised.</p>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="save" data-open="false">
+      <button class="panelHead" type="button" aria-controls="save-body"><span class="panelIcon">💾</span><span class="panelTitle">Save and open</span><span class="panelMark">▾</span></button>
+      <div class="panelBody" id="save-body">
+        <label class="fieldLabel" for="palacePick">Whose palace?</label>
+        <div class="rowBtns"><select id="palacePick" aria-label="Whose palace"></select></div>
+        <div class="rowBtns">
+          <button class="btn" type="button" id="palaceNew">➕ New palace</button>
+          <button class="btn" type="button" id="palaceRename">✏️ Rename</button>
+        </div>
+        <p class="info">Each person has their own palace. It saves itself on this device after every change.</p>
+        <div class="rowBtns">
+          <button class="btn" type="button" id="exportBtn">⬇ Save a copy</button>
+          <label class="btn fileBtn">⬆ Open a copy<input id="importFile" type="file" accept="application/json,.json"></label>
+        </div>
+        <div class="rowBtns">
+          <button class="btn" type="button" id="sampleBtn">🌱 Sample palace</button>
+          <button class="btn" type="button" id="emptyBtn">🧹 Empty palace</button>
+        </div>
+        <p class="how">A copy is one JSON file with everything in it: worlds, rooms, memories, connections and practice history. Opening a copy or the sample can be undone.</p>
+      </div>
+    </section>
+  </div>
+
+  <aside id="card" class="card" hidden aria-live="polite"></aside>
+
+  <div id="stick" class="stick" hidden aria-label="Walk"><div id="knob" class="knob"></div></div>
+
+  <nav class="bar" id="bar" aria-label="View and tools">
+    <button type="button" data-act="all"><span>🌍</span>All</button>
+    <button type="button" data-act="focus"><span>🎯</span>Look</button>
+    <button type="button" data-act="walk" aria-pressed="false"><span>🚶</span>Walk</button>
+    <button type="button" data-act="move" aria-pressed="false"><span>🖐</span>Move</button>
+    <button type="button" data-act="spin" aria-pressed="false"><span>🔄</span>Spin</button>
+    <button type="button" data-act="undo"><span>↩</span>Undo</button>
+    <button type="button" data-act="redo"><span>↪</span>Redo</button>
+    <a class="barLink" href="index.html"><span>✨</span>Splats</a>
+  </nav>
+
+  <div id="toast" class="toast" hidden role="status"></div>
+
+  <div id="sheetWrap" class="sheetWrap" hidden>
+    <form id="sheet" class="sheet" autocomplete="off"></form>
+  </div>
+
+  <button class="gear" id="gear" type="button" aria-label="Settings" aria-expanded="false" aria-controls="drawer">⚙️</button>
+  <aside class="drawer" id="drawer" hidden>
+    <div class="drawerHead"><h2>Settings</h2><button class="iconBtn" id="closeDrawer" type="button" aria-label="Close">✖</button></div>
+    <div class="setting"><label>Sound</label><div class="seg" data-key="sound"><button type="button" data-v="1">On</button><button type="button" data-v="0">Off</button></div></div>
+    <div class="setting"><label>Name tags on objects</label><div class="seg" data-key="labels"><button type="button" data-v="all">All</button><button type="button" data-v="selected">Chosen</button><button type="button" data-v="off">Off</button></div></div>
+    <div class="setting"><label>Connection lines</label><div class="seg" data-key="links"><button type="button" data-v="all">All</button><button type="button" data-v="selected">Chosen</button><button type="button" data-v="off">Off</button></div>
+      <small>Chosen: only the lines of the memory you tapped.</small></div>
+    <div class="setting"><label>Walking speed</label><div class="seg" data-key="speed"><button type="button" data-v="slow">Slow</button><button type="button" data-v="normal">Normal</button><button type="button" data-v="fast">Fast</button></div></div>
+    <div class="setting"><label>Shadows</label><div class="seg" data-key="shadows"><button type="button" data-v="1">On</button><button type="button" data-v="0">Off</button></div>
+      <small>Off is faster on an older iPad.</small></div>
+    <div class="setting"><label>Storage</label>
+      <p id="dbLine" class="info">💾 this device only</p>
+      <button class="btn wide" type="button" id="checkStore">Check saving</button></div>
+    <section id="notesBox" class="notesBox">
+      <h3>Notes for improvement</h3>
+      <p id="noteWhere" class="info"></p>
+      <textarea id="noteText" rows="3" placeholder="What would make this better?"></textarea>
+      <div class="rowBtns"><button class="btn" id="noteSave" type="button">Save note</button><button class="btn" id="noteCopy" type="button">Copy notes</button>
+        <select id="noteFilter" aria-label="Which notes"><option value="open">Open</option><option value="all">All</option></select></div>
+      <ul id="noteList" class="noteList"></ul>
+    </section>
+    <label class="toggle"><input type="checkbox" id="showErrors"> Show errors</label>
+    <p class="info" id="aboutLine"></p>
+  </aside>
+  <div id="errorsPanel" class="errorsPanel" hidden></div>
+
+  <script src="js/vendor/three.min.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/model.js"></script>
+  <script src="js/sample.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/objects.js"></script>
+  <script src="js/view.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/notes.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

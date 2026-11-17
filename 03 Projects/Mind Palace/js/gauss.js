@@ -98,7 +98,7 @@
     }
     // Over budget: the detailed shapes (the memory objects) keep their splats; floors, walls and islands give some up.
     if (total > budget) { var k = Math.max(0.05, (budget - kept) / Math.max(1, total - kept)); total = 0; for (i = 0; i < counts.length; i++) { if (counts[i] && !keep[i]) counts[i] = Math.max(8, Math.floor(counts[i] * k)); total += counts[i]; } }
-    var center = new Float32Array(total * 3), cov = new Float32Array(total * 6), rgba = new Uint8Array(total * 4), owner = new Int32Array(total), normal = new Float32Array(total * 3), scale = new Float32Array(total * 2);
+    var center = new Float32Array(total * 3), cov = new Float32Array(total * 6), rgba = new Uint8Array(total * 4), owner = new Int32Array(total), blk = new Uint8Array(total), normal = new Float32Array(total * 3), scale = new Float32Array(total * 2);
     var R = rng(opts.seed || 20261117), pt = [0, 0, 0, 0, 0, 0], at = 0;
     for (i = 0; i < shapes.length; i++) {
       var s = shapes[i], count = counts[i]; if (!count) continue;
@@ -120,10 +120,10 @@
         // Light is painted into the colour, with a little variation so a surface reads as dabs of paint.
         var shade = (s.glow ? 1.06 : 0.6 + 0.4 * Math.max(0, nx * SUN[0] + ny * SUN[1] + nz * SUN[2])) * (0.95 + R() * 0.1);
         rgba[at * 4] = Math.min(255, base[0] * shade); rgba[at * 4 + 1] = Math.min(255, base[1] * shade); rgba[at * 4 + 2] = Math.min(255, base[2] * shade); rgba[at * 4 + 3] = opacity;
-        owner[at] = i; normal[at * 3] = nx; normal[at * 3 + 1] = ny; normal[at * 3 + 2] = nz; scale[at * 2] = st; scale[at * 2 + 1] = thin * grow;
+        owner[at] = i; blk[at] = s.group || 0; normal[at * 3] = nx; normal[at * 3 + 1] = ny; normal[at * 3 + 2] = nz; scale[at * 2] = st; scale[at * 2 + 1] = thin * grow;
       }
     }
-    return { n: total, center: center, cov: cov, rgba: rgba, owner: owner, normal: normal, scale: scale };
+    return { n: total, center: center, cov: cov, rgba: rgba, owner: owner, block: blk, normal: normal, scale: scale };
   }
 
   /* Join two sets (the palace, then little-me). */
@@ -131,7 +131,8 @@
     var n = a.n + b.n, c = new Float32Array(n * 3), v = new Float32Array(n * 6), col = new Uint8Array(n * 4), nr = new Float32Array(n * 3), sc = new Float32Array(n * 2);
     c.set(a.center); c.set(b.center, a.n * 3); v.set(a.cov); v.set(b.cov, a.n * 6); col.set(a.rgba); col.set(b.rgba, a.n * 4);
     nr.set(a.normal); nr.set(b.normal, a.n * 3); sc.set(a.scale); sc.set(b.scale, a.n * 2);
-    return { n: n, center: c, cov: v, rgba: col, normal: nr, scale: sc, split: a.n };
+    var bl = new Uint8Array(n); bl.set(a.block); bl.set(b.block, a.n);
+    return { n: n, center: c, cov: v, rgba: col, block: bl, normal: nr, scale: sc, split: a.n };
   }
 
   /* The usual 3-D Gaussian splatting .ply (binary). Returns an ArrayBuffer. */

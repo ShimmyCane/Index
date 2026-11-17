@@ -32,3 +32,10 @@
 - **Unrun:** `godot/`.
 - **Open:** convo v0.3 (main renderer, homes, how to enter a plan, units, doors, visiting rights, AI objects, what drives fuzz).
 
+**Round 4 (2026-11-17), version 0.3.0, from Jimmy's request to make the splat view the default, add fog of war and more life.** The splat view is now `index.html` (the nursery tile opens it); the Build page is `build.html`.
+
+- **Done:** fog of war (radius around little-me, black beyond, names fade too, widens when zoomed out; settings: on/off, how far); moving things on loops (windmill, three birds, balloon, walker, gear) as rigid blocks in the splat shader, with the same motion on the CPU for the sort; trees (round, pine, blossom) on each island; settings for fog and moving things.
+- **Checked:** the default page opens with no errors; the clock runs and the 21 moving parts are present; screenshots show the fog, the trees, the birds and the balloon, and the boat close-up with its pop-up. The full suite is run again at the end (see the lessons).
+- **Not built:** an explored (dim) memory of where little-me has been; animals, boats, cars, stars, a lantern; moving things in Godot.
+- **Open:** convo v0.4 (explored memory, how far to see, more life, Godot).
+

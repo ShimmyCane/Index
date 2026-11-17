@@ -1,12 +1,20 @@
 # Mind Palace — to do
 
+## Done in 0.3.0 (2026-11-17)
+- [x] The splat view is the default page (`index.html`); the Build page is `build.html`.
+- [x] Fog of war: beyond little-me's sight the palace fades to black (setting: on/off and how far).
+- [x] More life: trees (round, pine, blossom), a windmill, three birds, a balloon, a walker and a gear, the moving ones on loops.
+
 ## Next (waiting on convo v0.3)
+- [ ] Explored memory: places little-me has seen stay dim after she moves on (a second, slower fog).
+- [ ] Richer look: more colour, a glow from little-me's lantern, the sky at night with stars.
+- [ ] Moving things in Godot too (the same motions, as rigid blocks).
 - [ ] Floor plans: a room as a rectangle with its own width and depth; doors that join rooms; a home as a world. Jimmy's childhood homes.
 - [ ] Solid walls on the splat page, once rooms are plans.
 - [ ] Editing on the splat page, so the three.js page can retire.
 - [ ] AI-made objects: describe a thing, get simple shapes back, see them as splats, accept or reject.
 - [ ] Family sync: `mp_palace` (owner writes, family reads), `mp_recall`, `mp_notes` paste files; apply only on Jimmy's word.
-- [ ] Try `splat.html` on a real iPad: speed at each "Number of splats", pinch, the stick.
+- [ ] Try `index.html` (the splat view) on a real iPad: speed at each "Number of splats", pinch, the stick.
 
 ## First (blocked on running Godot)
 - [ ] Open `godot/` in Godot 4.3. Fix whatever the Output panel reports. It has never been run.
