@@ -111,7 +111,7 @@ Question for Jimmy: is imported geometry enough for the first Revit use, or is a
 |---|---|---|
 | 0 | Research and schematic (this round) | Research 01 and 02, schematic, convo v0.1 |
 | 1 | DXF writer (AC1027 default, AC1009 alternate) for strokes, hatch, notes; DXF reader; linter (validity and confidence); one page | **Done (MVP 0.1).** Synthetic samples export; the reader reads them back; the linter scores; 12 Node tests and the ezdxf audit pass; page check clean |
-| 2 | Blocks (`BLOCK` + `INSERT`), line types (`.LIN` + `LTYPE`), hatch patterns (`.PAT` + `HATCH`); linter for dashes, hatch spacing, blocks | Round trip: write, read back, same primitives. Test files open in AutoCAD on Jimmy's machine |
+| 2 | Blocks (`BLOCK` + `INSERT`), line types (`.LIN` + `LTYPE`), hatch patterns (`.PAT` + `HATCH`); linter for dashes, hatch spacing, blocks | Separate viewers for line types and hatch patterns (convo v0.3) | Round trip: write, read back, same primitives. Test files open in AutoCAD on Jimmy's machine |
 | 3 | Library search: name and tag, owner sign-in, read only; map `sketch_details` items to the primitive list | A real detail (kept in `private/`) interprets and exports on Jimmy's device |
 | 4 | 3-D: Make-3D model to DXF mesh; 3-D linter checks; viewer rotates and pinches | A Make-3D model imports into Revit as a family geometry test, Jimmy reports the result |
 | 5 | Field tests in AutoCAD and Revit; DWG route decided | Results written in `04 AI/Drafting/brief.md` |
