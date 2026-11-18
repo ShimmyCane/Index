@@ -1,7 +1,7 @@
 {
-  "schema": "m3dxc.story/0.3",
+  "schema": "m3dxc.story/0.4",
   "title": "The camp moves toward the bluff (draft for consultation)",
-  "status": "draft. Not reviewed by the Cheyenne and Arapaho Tribes. Not for display until the consultation flags are closed.",
+  "status": "draft. Not reviewed by the Cheyenne and Arapaho Tribes. Consultation notes are on the flags.",
   "intro": "This diorama shows one camp move by Southern Cheyenne families in the 1870s, in Indian Territory. The herds that once fed the camp are gone. The travois cross the terrace toward the bluff of the land set aside in 1869. It shows no named person, no particular family or event, and no ceremony or sacred object.",
   "sources": [
     {
@@ -38,8 +38,9 @@
   "steps": [
     {
       "id": "step-1",
-      "text": "Morning. The herds that once fed the camp are gone.",
+      "text": "Morning. The herds that once fed the camp are gone. One bleached skull lies on the terrace.",
       "objects": [
+        "bones",
         "ground"
       ],
       "claims": [
@@ -55,7 +56,7 @@
           "text": "In the 1870s bones left on the plains were gathered and sold, and bone piles were a common sight.",
           "source": "S6",
           "certainty": 55,
-          "note": "Not drawn in this version. A later pass may add bones; the source describes the trade, not this camp."
+          "note": "The skull and vertebrae are a scene choice in the midground. The source describes the trade, not this camp."
         }
       ]
     },
@@ -79,8 +80,11 @@
       "text": "Women take down the lodges. The covers are folded and the poles are gathered.",
       "objects": [
         "lodges",
-        "struck-cover",
-        "struck-poles"
+        "struck-cover-top",
+        "struck-cover-fold",
+        "struck-pole-1",
+        "struck-pole-2",
+        "struck-pole-3"
       ],
       "claims": [
         {

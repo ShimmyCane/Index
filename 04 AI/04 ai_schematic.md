@@ -12,6 +12,7 @@ Layout:
 - Tools/artifacts.md — limits of the claude.ai Artifact host.
 - Tools/windows_local.md — tool quirks on a local Windows PC.
 - Tools/playwright_headless.md — headless Chromium checks: WebGL flags, two-finger touch, hidden controls.
+- Make-3D x Construct/scene_craft_lessons.md and model_iteration_lessons.md — lessons for building 3-D scenes (planes, depth cues, lighting, sources) and for iterating on a model (scale, parts, checks after each change). Also in the Make-3D repo under 04 AI/.
 - graduations.md — one checklist per project that left the nursery (`/graduate-project`), with what is still manual.
 - <Project>/brief.md — current state: goal, architecture, verified vs. unverified, next steps.
 - <Project>/lessons.md — project-specific lessons, appended over time.
