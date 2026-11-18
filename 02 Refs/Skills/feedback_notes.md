@@ -1,15 +1,15 @@
 # Feedback Notes (in-page notes for initial testing)
 
 Purpose
-Let the person testing a page leave a note on the exact thing on screen (a map, a level, a screen, a step) while they use it, so feedback is gathered during the first tests, not from memory afterwards. The notes are read back in the page, and later pulled into project work with `read-notes-and-update`.
+Let the person testing a page leave a note on the exact thing on screen (a map, a level, a screen, a step) while they use it, so feedback is gathered during the first tests, not from memory afterwards. The notes are read back in the page, and later pulled into project work with `review-notes-and-update`.
 
-This is the writing side. Reading and turning notes into todo items is `02 Refs/Skills/read_notes_and_update.md` (`/read-notes-and-update`).
+This is the writing side. Reading and turning notes into todo items is `02 Refs/Skills/read_notes_and_update.md` (`/review-notes-and-update`).
 
 Design
 - A **"Notes for improvement"** box in the ⚙️ panel (see `settings_gear.md`): a text box, a Save button, and a list of saved notes with a filter for open and done.
 - Each note is saved with the item it is about (a map name, a level, a screen), the page, the time, and the app version. The tester does not have to type that context.
 - **Device first.** Notes are saved in the browser's local storage under one key per app, inside a try/catch. The page works without it.
-- **Database only when it must persist.** If the app needs notes that survive a new device, write them to a table (follow `supabase_project`). Use the same shape as the existing tables (Expansion Wars' `xw_maps.notes`, Fishes' `fish_notes`), so `read-notes-and-update` reads them with the same query. The table is owner or family only, with row-level security on.
+- **Database only when it must persist.** If the app needs notes that survive a new device, write them to a table (follow `supabase_project`). Use the same shape as the existing tables (Expansion Wars' `xw_maps.notes`, Fishes' `fish_notes`), so `review-notes-and-update` reads them with the same query. The table is owner or family only, with row-level security on.
 - Notes are never sent anywhere else, and never auto-posted.
 
 Note shape (the same in local storage and in any table)
@@ -25,7 +25,7 @@ Steps
 3. **Read back.** The list shows open notes first, with the label and the time. Done notes stay visible under the filter.
 4. **Export** (optional): a "Copy notes" button puts the JSON on the clipboard, so the tester can paste it into a chat.
 5. **Test it** with `smoke_test` (save a note, reload, the note is still there; the label matches the item; zero console errors).
-6. **Hand over.** The tester uses the page; Jimmy or Claude later runs `/read-notes-and-update`.
+6. **Hand over.** The tester uses the page; Jimmy or Claude later runs `/review-notes-and-update`.
 
 Rules
 - Keep the tester's words as written. Do not edit a note's text, only mark it done.
@@ -84,7 +84,7 @@ Starter (copy into the app; classic script, no build)
 ```
 
 Lessons this comes from
-- Expansion Wars: notes are stored with the map and read by `read-notes-and-update`; the "Done- " prefix marks handled notes.
+- Expansion Wars: notes are stored with the map and read by `review-notes-and-update`; the "Done- " prefix marks handled notes.
 - Fishes and Felix Maze: feedback and flags were saved with the item they were about, device first, then to the family table once signed in.
 
 ## General notes table (update 2026-11-18)

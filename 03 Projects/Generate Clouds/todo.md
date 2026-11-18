@@ -25,7 +25,7 @@
 3. Paste `supabase/verify_001_gc.sql` → Run; paste the result back. `owner_rows` of 0 means no sign-in sees data yet.
 4. If `owner_rows` is 0: paste `supabase/000_owner_row.sql`. Step A lists the newest accounts (copy yours), step B inserts it (uncomment the line and put the id in), step C should say `owner_rows = 1`. Never commit the id.
 5. Open the page → ⚙️ → Studio database → Sign in. Your notes on the device are sent and the status line says how many are in the database.
-6. Then ask me to read the notes (`/read-notes-and-update`): archive them as V1, review, update.
+6. Then ask me to read the notes (`/review-notes-and-update`): archive them as V1, review, update.
 
 ## Notes status (2026-11-18)
 - Notes 1, 3, 5, 6, 7, 8, 9 of `convo/notes v1.md` are marked done in the database (with Jimmy's go-ahead: "if the items are built, mark done; I will flag it if it's problematic and reopen it via settings"). Notes 2 (stars) and 4 (real ground cover, partly built) stay open.
@@ -54,7 +54,7 @@
 - [ ] Real ground cover near the camera (note 4).
 
 ## Next round (agreed 2026-11-17)
-- [ ] Read the saved notes (`/read-notes-and-update` style, table `gc_notes` in the Architecture project), copy them into `convo/notes v1.md` summarised as the V1 set, review them, and update. Mark notes done only after Jimmy confirms which.
+- [ ] Read the saved notes (`/review-notes-and-update` style, table `gc_notes` in the Architecture project), copy them into `convo/notes v1.md` summarised as the V1 set, review them, and update. Mark notes done only after Jimmy confirms which.
 - [ ] `gc_spots`: kept map spots saved to the database (new SQL file `002_gc_spots.sql` with its test and verify; the page sends and merges them the way it does notes).
 
 ## Added in 0.4.0, to confirm on a real device
