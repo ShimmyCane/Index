@@ -41,3 +41,5 @@
 
 **0.3.1 (2026-11-18), from convo v0.4:** fog radius doubled (12 + sight × 0.9 + distance × 0.7); a lantern on little-me (a glowing splat block); fireflies on each island, spinning above the plaza. Checked: the default page loads with no errors and 24 moving parts. SDF is not used anywhere yet; the web view and the Godot port both use Gaussian splats only; Godot has never been run. Answered in convo v0.5.
 
+**Godot run (2026-11-18), on request.** The engine (4.3 stable) was run headless in the sandbox on the project. Import ran; the main scene ran 240 frames with no script or parse errors. The only output is 465 `mesh_get_surface_count` errors from the headless dummy renderer; they are not a script error. The picture itself still needs a screen to check. Not run: the splat look, the search and walk, the keys.
+

@@ -12,7 +12,7 @@
 - [ ] SDF shapes for rooms and objects in the web splat view (rounded rooms, a dome), if Jimmy agrees.
 - [ ] Animals, boats and cars on loops (Jimmy's choice, convo v0.5).
 - [ ] Glowing windows on rooms, if wanted (convo v0.5).
-- [ ] Godot: run it (Jimmy), fix what its Output reports.
+- [x] Godot 4.3 starts and loads the project; the main scene runs 240 frames with no script errors (2026-11-18). Its 465 mesh errors come from the headless dummy renderer. Still to do on a machine with a screen: look at the picture and check the splat look.
 
 ## Next (waiting on convo v0.3)
 - [ ] Explored memory: places little-me has seen stay dim after she moves on (a second, slower fog).
