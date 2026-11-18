@@ -2,7 +2,7 @@
 
 **Track: B. Studio design** (a 3-D sky study and backdrop maker for renderings). Palette: sky-blue ink on cloud-white paper, because the subject is the sky. Panels collapsible, open on a large screen, closed on a phone.
 
-Status: MVP 0.6.0 (2026-11-18). Headless-tested with made-up weather replies. Not yet run against the live weather service, and not yet on an iPad.
+Status: MVP 0.6.1 (2026-11-18). Headless-tested with made-up weather replies. Not yet run against the live weather service, and not yet on an iPad.
 
 ## Purpose
 
@@ -149,6 +149,7 @@ Dates more than 85 days back use the archive service (no upper winds, CAPE or ai
 - **Security:** row-level security on, anon has no access, one policy that calls `public.platform_is_owner()`: only accounts listed in `platform_owners` can read or write notes from the page. No email or user id in the repo. **Why not "any signed-in account":** sign-ups are open on this project (`disable_signup` is false, email provider on, confirmation required) and the publishable key is public, so anyone with an email address could create an account. Open sign-ups plus an any-account rule would let a stranger read the notes (each carries a place) and write to them. The project also holds a second, older account. Claude reads the notes through the database tool, which does not depend on this policy.
 - **Live state (read-only check 2026-11-18):** `gc_notes` exists (columns as designed, RLS on, one owner policy, anon has no grants, registered in `table_index`), 0 notes; `platform_owners` had 0 rows until the owner's account was added the same day (the sign-in account, matched by its address prefix and checked to be the only match).
 - **In the app (⚙️ → Studio database):** email and password, Sign in, Sync notes now, Sign out, Check the database. The password is never stored; a renewal token is kept on the device so you stay signed in (Sign out removes it). Publishable key only (`js/config.js`).
+- **Done and Reopen (0.6.1):** every note has a button, Done or Reopen, and the filter has Open, Done and All. Done sets the status to done and puts "Done- " in front of the text (the owner's convention); Reopen undoes both. Signed in, the change goes to the database at once (an update of that one note's status and text); signed out, it waits and goes at the next sync. On sync the database's version wins, except for a change this device has not sent yet, which is sent first. A note marked done by Claude in the database shows as done on the device after the next sync.
 - **Flow:** a note is saved on the device first. Signed in, it is also sent with its own id and time; later notes are sent at once. Sync sends what the database has not seen, then takes back done marks and notes from other devices. A ☁️ on a note means the database has it. Signed out or offline: "This device only", no error on load.
 - **What is sent:** only the notes, each with the place and moment it was about (so a note can say which sky). Not the weather, not the pictures.
 - **Not synced yet:** kept map spots stay on the device (a `gc_spots` table is a small addition if wanted).

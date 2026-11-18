@@ -72,6 +72,10 @@
     var send = todo.length ? api('POST', '/rest/v1/' + CFG.table + '?on_conflict=id', todo.map(row), { prefer: 'resolution=ignore-duplicates,return=minimal' }) : Promise.resolve();
     return send.then(function () {
       todo.forEach(function (n) { synced[n.id] = true; }); GC.store.set(SYNCED, synced);
+      // done / reopen changes made on this device that the database has not seen yet
+      var changes = GC.Notes.dirtyIds().map(function (id) { return local.filter(function (n) { return n.id === id; })[0] || GC.Notes.all().filter(function (n) { return n.id === id; })[0]; }).filter(Boolean);
+      return Promise.all(changes.map(function (n) { return patchNote(n); }));
+    }).then(function () {
       return api('GET', '/rest/v1/' + CFG.table + '?select=id,text,page,item,label,version,status,noted_at&order=noted_at.asc&limit=1000');
     }).then(function (rows) {
       var changed = GC.Notes.merge(rows || []);
@@ -80,6 +84,14 @@
         (changed ? ', ' + changed + ' updated from it' : '') + '. ' + ((rows || []).length ? '' : 'An empty list with no error can also mean this account is not allowed yet (row-level security).'));
     }).catch(function (e) { setStatus('Could not sync: ' + e.message + ' Notes are safe on this device.'); GC.logError('Notes sync: ' + e.message); })
       .finally(function () { busy = false; if (GC.Notes.render) GC.Notes.render(); });
+  };
+  function patchNote(n) {
+    return api('PATCH', '/rest/v1/' + CFG.table + '?id=eq.' + encodeURIComponent(n.id), { status: n.status, text: n.text }, { prefer: 'return=minimal' }).then(function () { GC.Notes.clearDirty(n.id); });
+  }
+  // A note marked done or reopened: sent straight away when signed in; otherwise it waits for the next sync.
+  C.noteChanged = function (n) {
+    if (!session) return;
+    patchNote(n).catch(function (e) { setStatus('Could not update that note in the database: ' + e.message + ' It is changed on this device and will be sent at the next sync.'); GC.logError('Note update: ' + e.message); });
   };
   // A new note: sent straight away when signed in.
   C.noteAdded = function () { if (session) C.sync(); };
