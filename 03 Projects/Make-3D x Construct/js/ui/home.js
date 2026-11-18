@@ -21,10 +21,12 @@
     return n;
   }
 
-  // The projects: the current sample (in the studio) and the archived V1 (its own folder, a self-contained copy).
+  // Every model in this project: the current sample (in the studio), the archived V1 (its own folder, a self-contained copy),
+  // and Salmon Leap (its own folder, five versions on its page).
   const PROJECTS = [
-    { title: 'Southern Cheyenne camp move (V2, draft)', text: 'The current diorama: three planes, lofted horses and people, a story. Not reviewed by the tribes.', href: 'studio.html?src=sample', open: 'Open in the studio' },
+    { title: 'Southern Cheyenne camp move (V2, draft)', text: 'The current diorama: three planes, lofted horses and people, a story. Draft.', href: 'studio.html?src=sample', open: 'Open in the studio' },
     { title: 'Oklahoma diorama V1 (archived)', text: 'The previous state, kept as it was (round 6). Read only.', href: 'archive/Oklahoma%20diorama%20V1/index.html', open: 'Open the archive' },
+    { title: 'Salmon Leap: bronze Atlantic salmon (V1 to V5)', text: 'A bronze statue of a salmon leaping up. Five versions on one page: narrative and massing, refined set-up, concept and details seen from every side, details, and the ground.', href: '../Salmon%20Leap/index.html', open: 'Open Salmon Leap' },
   ];
   function renderProjects() {
     const box = $('project-cards'); box.textContent = '';

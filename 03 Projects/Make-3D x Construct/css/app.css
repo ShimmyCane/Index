@@ -109,3 +109,11 @@ a { color: var(--sage); }
 .tag.consultation { background: #f6d2c2; }
 .tag.uncertain { background: var(--sun); }
 .reviewed { color: var(--sage); font-weight: 700; }
+
+/* Project home: the model cards and the review note. */
+.cards { display: grid; gap: 14px; }
+.card { border: 2.5px solid var(--ink); border-radius: 14px; background: var(--card); padding: 14px 16px; box-shadow: 0 4px 0 var(--ink); display: grid; gap: 8px; }
+.card h2 { margin: 0; font-size: 20px; }
+.card .help { margin: 0; }
+.card .btn { justify-self: start; }
+.note { margin-top: 14px; padding: 10px 12px; border: 2px dashed var(--ink); border-radius: 12px; color: var(--ink); font-size: 14px; }
