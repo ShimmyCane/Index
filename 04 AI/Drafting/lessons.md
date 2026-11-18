@@ -2,6 +2,15 @@
 
 Project-specific lessons, newest first. Generic ones go to `04 AI/lessons_pool.md`.
 
+## 2026-11-18 — increment 1 (MVP 0.1)
+
+1. **A test that checks the wrong place fails for the wrong reason.** The "reader names unknown entities" test put an entity after the section's ENDSEC, so the reader correctly ignored it. Fix the test's insertion point, not the reader. Check where the probe lands before reading a failure as a bug.
+2. **Read the file back, not the source.** The linter scores the DXF after it is parsed again, so a writer bug shows as a validity fail rather than a silent miss. The read-back count check (entities written = read) caught nothing here, but it is the cheap guard for the next writer change.
+3. **Use an external validator for files you hand-write.** ezdxf audit reports 0 errors. It is test-only and does not need AutoCAD. Install it in the test run, not in the page.
+4. **Know what a sample score proves.** Both samples scored 90%, so the 80% viewer rule was never tested live. A test builds a detail that scores 75% and checks the viewer flag. Say so when a number looks fine but the branch behind it did not run.
+5. **Quick Detail's `size` is paper inches.** Note text height is `size × scale factor`. A converter that uses size as real inches would be four times too small at 3"=1'-0". Read the layout code before mapping any size field.
+6. **Hand-written files need a quick browser check too.** The headless check found the download and the layout clean; it cannot prove AutoCAD opens the file. That gap is named in the brief and waits for Jimmy's test.
+
 ## 2026-11-18 — research and start
 
 1. **Read the request's words as the user's words first.** Several words came through as sound-alikes: "cat" (AutoCAD), "rabbit" (Revit), "litter" (linter), and a garbled sentence about where the project sits. Put each reading in the convo and ask one short question, instead of guessing silently.

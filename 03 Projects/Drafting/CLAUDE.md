@@ -11,6 +11,8 @@ Track: B. Studio design
 
 Rules for this project:
 - Read only from the Architecture project's `sketch_details`. Owner-only policies use `public.platform_is_owner()`, never an email.
-- Real drawings and their exports go in `private/` (ignored by git) or stay on the device. Synthetic samples only in the repo.
+- Exports are downloads only: they stay on the device and are never saved to the repo or a database (convo v0.2, Q14). Real details are read from the library; synthetic samples are the only files in `samples/`.
+- Run: open `index.html` (no server). Tests: `node tests/test_dxf.js`. Optional ezdxf audit (test-only) runs when ezdxf is installed.
+- Code: `js/` (`primitives.js`, `dxf_write.js`, `dxf_read.js`, `linter.js`, `pipeline.js`, `app.js`). Bundled samples in `js/samples.js` (generated from `samples/*.json`), so the page works from `file://`.
 - Units are real inches. Do not multiply by the scale factor on export.
-- Nothing is built yet (idea status). Build starts after `convo/convo v0.1.md` is answered, from increment 1 in `schematic.md` §7.
+- Status: MVP 0.1 (increment 1). Next: increment 2 (blocks, line types, hatch patterns), which needs Jimmy's AutoCAD test (convo v0.2).

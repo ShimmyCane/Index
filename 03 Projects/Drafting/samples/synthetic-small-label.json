@@ -1,0 +1,11 @@
+{
+  "name": "Synthetic small label (test)",
+  "scale": "1 1/2\"=1'-0\"",
+  "tags": ["export"],
+  "note": "Invented for tests. Deliberately small, so the linter has warnings to show.",
+  "items": [
+    { "id": "a1", "kind": "stroke", "pts": [[0,0,0.5,0],[0,12,0.5,0],[12,12,0.5,0]] },
+    { "id": "a2", "kind": "stroke", "pts": [[3,3,0.5,0]] },
+    { "id": "a3", "kind": "note", "text": "TINY", "at": [2, 6], "size": 0.0625, "width": 2 }
+  ]
+}

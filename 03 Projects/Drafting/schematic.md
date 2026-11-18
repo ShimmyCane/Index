@@ -1,6 +1,6 @@
 # Drafting — schematic
 
-Status: **idea** (research and schematic only, 2026-11-18). No code yet. Questions for Jimmy are in `convo/convo v0.1.md`.
+Status: **MVP 0.1** (increment 1, 2026-11-18): R2013 and R12 DXF writer, DXF reader, linter, one page. Node tests pass (12), ezdxf audit clean (0 errors), headless page check clean. Not device-tested and not opened in AutoCAD or Revit yet. Answers from Jimmy: `convo/convo v0.2.md`. Questions from v0.1 are answered there.
 Track: **B. Studio design** (dense, orderly panels, paper and ink palette). Architecture database, owner only. Private drawings in `private/`, never committed.
 
 ---
@@ -47,7 +47,8 @@ Find ──► Interpret ──► Export ──► Lint ──► View
 ## 3. Format rules (from research 01)
 
 - **Units.** Real inches. The scale (3"=1'-0", factor 4) only sets the paper size of notes and ticks; do not multiply by it on export. Set `$INSUNITS` to inches.
-- **DXF version.** Start with **R12 (AC1009)**: the oldest version most tools read, with blocks, linetypes and hatch. The old Quick Detail exporter already uses it. Test a newer version later.
+- **DXF version.** Default **AC1027 (AutoCAD 2013)**, with **R12 (AC1009)** as an alternate setting (convo v0.2, Q5). R12 has no hatch fill in our writer, and the linter says so.
+- **Line types and hatch patterns are plain text** (convo v0.2, Q4): `.LIN` and `.PAT` are text files, so they are written as text, not binary. The focus is on formats that open everywhere.
 - **Blocks.** Unique names, no self-insert, no empty block. Name = the detail's library id or a slug.
 - **Line types.** Dashes positive, gaps negative, dots zero. The `LTYPE` table carries them in the DXF; a `.LIN` file is also written for AutoCAD users.
 - **Hatch patterns.** `.PAT` text: header `*NAME, description`, one line per family `angle, x0, y0, dx, dy, dashes...`, a blank line at the end. Revit uses the same format with `;%UNITS=` and `;%TYPE=MODEL` comments (not yet checked against the 2026 help page).
@@ -58,7 +59,12 @@ Find ──► Interpret ──► Export ──► Lint ──► View
 
 ## 4. Linter: legibility confidence
 
-A score, not a judgement of the design. Each check is **pass**, **warn** or **fail**, with a weight. The score is the weighted share of passes (warn counts as half). Every fail shows a fix hint.
+Two results (convo v0.2, Q9):
+
+1. **Validity** (blocking): pass or fail per check. A failure says why, and the file cannot be downloaded.
+2. **Confidence** (0 to 100%): a score, not a judgement of the design. Each check is **pass**, **warn** or **fail**, with a weight. The score is the weighted share of passes (warn counts as half). Every fail shows a fix hint. **Below 80%, the viewer opens** and shows how the file renders.
+
+Both run on the file as read back, not on the source.
 
 | Check | What it looks for | Initial rule (to tune with Jimmy) |
 |---|---|---|
@@ -94,7 +100,7 @@ Question for Jimmy: is imported geometry enough for the first Revit use, or is a
 
 - **Read-only** from the Architecture project's `sketch_details` (name, tags, items, scale, parent). Needs an owner sign-in on the page. Use `public.platform_is_owner()` in any policy, not an email.
 - **No writes** to the library in v1. Exports are files, not rows. A later export log (`drafting_exports`, owner only) can come after Jimmy asks.
-- **Private data.** Exports from real drawings are not committed. `**/private/` is in `.gitignore`. Synthetic samples can be committed.
+- **Exports are downloads only** (convo v0.2, Q14). Export files stay on the device and are never saved to the repo or a database. Real drawings can be public in principle, but they are still not stored by the page. Synthetic samples are the only files in the repo.
 - **Supabase work** is not started. When it is, follow `02 Refs/Skills/supabase_link.md` (manual paste route) and `04 AI/Supabase/brief.md`.
 
 ---
@@ -104,7 +110,7 @@ Question for Jimmy: is imported geometry enough for the first Revit use, or is a
 | # | Scope | Done when |
 |---|---|---|
 | 0 | Research and schematic (this round) | Research 01 and 02, schematic, convo v0.1 |
-| 1 | R12 DXF writer for strokes, hatch boundaries, text; DXF reader; linter v0 (parse, units, extents, clean lines) | A synthetic detail exports; the reader draws it; linter scores it; Node tests pass |
+| 1 | DXF writer (AC1027 default, AC1009 alternate) for strokes, hatch, notes; DXF reader; linter (validity and confidence); one page | **Done (MVP 0.1).** Synthetic samples export; the reader reads them back; the linter scores; 12 Node tests and the ezdxf audit pass; page check clean |
 | 2 | Blocks (`BLOCK` + `INSERT`), line types (`.LIN` + `LTYPE`), hatch patterns (`.PAT` + `HATCH`); linter for dashes, hatch spacing, blocks | Round trip: write, read back, same primitives. Test files open in AutoCAD on Jimmy's machine |
 | 3 | Library search: name and tag, owner sign-in, read only; map `sketch_details` items to the primitive list | A real detail (kept in `private/`) interprets and exports on Jimmy's device |
 | 4 | 3-D: Make-3D model to DXF mesh; 3-D linter checks; viewer rotates and pinches | A Make-3D model imports into Revit as a family geometry test, Jimmy reports the result |
