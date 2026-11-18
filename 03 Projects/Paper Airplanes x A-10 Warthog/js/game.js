@@ -164,6 +164,95 @@ var PA;
             .p(3, 2, '#fffdfa');
     };
 })(PA || (PA = {}));
+// The A-10 Warthog, drawn at its own detail: seen from behind, on a 66-unit grid.
+// The drawing is painted at several crisp sizes (not stretched), and each size is
+// stacked: thin slices one above another, the lower ones shaded darker, so the body reads solid.
+var PA;
+(function (PA) {
+    const DESIGN_W = 66;
+    const DESIGN_H = 40;
+    const LAYERS = 4; // slices in the stack
+    const LIGHT = 1; // how far each slice steps down (design units, before scaling)
+    // Shade a hex colour toward dark (f = 1 is unchanged).
+    function shade(hex, f) {
+        const n = parseInt(hex.slice(1), 16);
+        const ch = (v) => Math.round(v * f);
+        const r = ch((n >> 16) & 255), g = ch((n >> 8) & 255), b = ch(n & 255);
+        return '#' + ((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1);
+    }
+    // The drawing itself, in design units: x across (0 … 66), y down (0 … 40).
+    // The A-10 from behind: a broad body, a thick high wing, two fins set wide apart, and
+    // the two engines under the wing, each with its exhaust.
+    function design(g, dy, f) {
+        const c = (hex) => shade(hex, f);
+        const body = c('#c8cfd6'), light = c('#eef3f6'), mid = c('#9aa4ae'), dark = c('#4d5560');
+        const glass = c('#9fdcf5'), hot = c('#ffb02e'), tail = c('#b8c1ca');
+        const R = (x, y, w, h, col) => g.r(x, y + dy, w, h, col);
+        // Fins: two tall, leaning out, with dark tips.
+        R(14, 7, 5, 13, tail);
+        R(13, 4, 4, 4, dark);
+        R(15, 6, 2, 1, light);
+        R(47, 7, 5, 13, tail);
+        R(49, 4, 4, 4, dark);
+        R(49, 6, 2, 1, light);
+        // Wing: a thick, straight, high wing with dark tips.
+        R(3, 18, 60, 6, body);
+        R(3, 18, 60, 1, light);
+        R(3, 22, 60, 2, mid);
+        R(2, 19, 2, 5, dark);
+        R(62, 19, 2, 5, dark);
+        // Fuselage: a broad body, lit on the left, shaded on the right, with a dark belly.
+        R(26, 6, 14, 24, body);
+        R(26, 6, 4, 24, light);
+        R(37, 6, 3, 24, mid);
+        R(27, 28, 12, 2, dark);
+        // Cockpit canopy.
+        R(28, 8, 10, 5, glass);
+        R(29, 9, 3, 2, light);
+        // Camouflage: a few darker patches on the body and the wing.
+        R(31, 15, 3, 2, mid);
+        R(34, 19, 2, 1, mid);
+        R(8, 20, 4, 1, mid);
+        R(55, 20, 4, 1, mid);
+        // Engine nacelles, each with a dark intake and a glowing exhaust.
+        R(20, 24, 7, 11, dark);
+        R(39, 24, 7, 11, dark);
+        R(21, 25, 5, 3, mid);
+        R(40, 25, 5, 3, mid);
+        R(22, 33, 5, 2, hot);
+        R(41, 33, 5, 2, hot);
+        // The nose underneath, a dark line.
+        R(29, 30, 8, 1, mid);
+    }
+    // The design at a whole-size scale k, stacked. Each layer is the same drawing; lower
+    // layers sit a little lower and are shaded darker.
+    function stackedAt(k) {
+        return (g) => {
+            for (let layer = 0; layer < LAYERS; layer++) {
+                const top = layer === LAYERS - 1;
+                const sub = new PA.Painter();
+                const f = top ? 1 : 0.55 + 0.4 * (layer / (LAYERS - 1));
+                design(sub, (LAYERS - 1 - layer) * LIGHT, f);
+                for (const o of sub.ops) {
+                    const x0 = Math.round(o.x * k), y0 = Math.round(o.y * k);
+                    const x1 = Math.round((o.x + o.w) * k), y1 = Math.round((o.y + o.h) * k);
+                    g.r(x0, y0, Math.max(1, x1 - x0), Math.max(1, y1 - y0), o.c);
+                }
+            }
+        };
+    }
+    // The four whole-step sizes: about 25% of the screen width (about 100 px) up to 33% (about 132 px).
+    PA.PLANE_SCALES = [1.6, 1.78, 1.94, 2.1];
+    const planeCache = [];
+    // The plane sprite for a turn tightness of 0 (straight) to 1 (hardest turn).
+    function planeSprite(tight) {
+        const i = Math.max(0, Math.min(PA.PLANE_SCALES.length - 1, Math.round(tight * (PA.PLANE_SCALES.length - 1))));
+        if (!planeCache[i])
+            planeCache[i] = PA.buildSprite(stackedAt(PA.PLANE_SCALES[i]));
+        return { img: planeCache[i], k: PA.PLANE_SCALES[i] };
+    }
+    PA.planeSprite = planeSprite;
+})(PA || (PA = {}));
 // Ground vehicles and guns: tanks, armoured carriers, trucks, a fuel tanker, a SAM launcher, flak.
 var PA;
 (function (PA) {
@@ -2264,38 +2353,6 @@ var PA;
             ctx.stroke();
         }
     }
-    // Sprite stacking: the plane is built from thin slices, one above another. The
-    // lower slices are darker, so the body reads as solid from every angle.
-    const stackCache = {};
-    const STACK_LAYERS = 4;
-    function stacked(img, name) {
-        if (stackCache[name])
-            return stackCache[name];
-        const out = document.createElement('canvas');
-        out.width = img.width;
-        out.height = img.height + STACK_LAYERS;
-        const ctx = out.getContext('2d');
-        if (!ctx)
-            return img;
-        for (let layer = STACK_LAYERS - 1; layer >= 0; layer--) {
-            const y = STACK_LAYERS - layer; // layer 0 is the top slice, drawn last
-            const tmp = document.createElement('canvas');
-            tmp.width = img.width;
-            tmp.height = img.height;
-            const t = tmp.getContext('2d');
-            if (!t)
-                continue;
-            t.drawImage(img, 0, 0);
-            if (layer > 0) {
-                t.globalCompositeOperation = 'source-atop';
-                t.fillStyle = 'rgba(47,45,61,' + (0.12 + 0.12 * layer).toFixed(2) + ')';
-                t.fillRect(0, 0, tmp.width, tmp.height);
-            }
-            ctx.drawImage(tmp, 0, y - (layer === 0 ? 0 : 0));
-        }
-        stackCache[name] = out;
-        return out;
-    }
     // Ring of the lock and the collapsing warning ring are drawn in screen space.
     function lockRing(ctx, g, c) {
         const t = g.lock.target;
@@ -2380,22 +2437,24 @@ var PA;
         }
         const blinkOff = g.phase === 'crashed' && Math.floor(g.blink * 8) % 2 === 0;
         const sx = PA.W / 2, sy = PA.H * PLANE_SCREEN_Y;
-        const name = g.settings.mode === 'glider' ? 'glider' : 'plane';
-        const base = PA.sprite(name);
-        const img = name === 'plane' ? stacked(base, name) : base;
+        const glider = g.settings.mode === 'glider';
         const tight = Math.min(1, Math.abs(p.bank) / PA.AIR.bankMax);
-        const targetW = PA.W * (0.25 + 0.08 * tight);
-        const scale = targetW / base.width;
+        // The jet is drawn at its own detail, at one of four crisp sizes (25% to 33% of the width).
+        // The paper glider is drawn at its own size.
+        const plane2 = glider ? null : PA.planeSprite(tight);
+        const img = plane2 ? plane2.img : PA.sprite('glider');
+        const scale = plane2 ? plane2.k : 1.5;
         ctx.save();
         ctx.translate(sx, sy);
         ctx.rotate(p.bank);
         if (!blinkOff) {
-            const dw = img.width * scale, dh = img.height * scale;
+            const dw = img.width, dh = img.height;
             // Flame from the engines when boosting: two flickering tongues.
-            if (g.held.boost && g.phase === 'flying' && name === 'plane') {
-                for (const ex of [-4, 4]) {
+            if (g.held.boost && g.phase === 'flying' && !glider) {
+                // The engine exhausts sit at design x 25 and 42, y 35 (centre 33, 20).
+                for (const ex of [24.5, 43.5]) {
                     const len = (8 + Math.random() * 6) * scale / 2;
-                    const x0 = (ex * scale) / 1, y0 = (6 * scale) / 1;
+                    const x0 = (ex - 33) * scale, y0 = 35 * scale - 20 * scale;
                     ctx.fillStyle = '#ffb02e';
                     ctx.beginPath();
                     ctx.moveTo(x0 - 2, y0);
@@ -2412,7 +2471,7 @@ var PA;
                     ctx.fill();
                 }
             }
-            ctx.drawImage(img, -Math.round(dw / 2), -Math.round(dh / 2), Math.round(dw), Math.round(dh));
+            ctx.drawImage(img, -Math.round(dw / 2), -Math.round(dh / 2));
         }
         // Damage: a cloud of smoke on each wing, slowly lifting.
         for (const m of g.marks) {

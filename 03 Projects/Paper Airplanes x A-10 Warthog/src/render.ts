@@ -295,37 +295,6 @@ namespace PA {
     }
   }
 
-  // Sprite stacking: the plane is built from thin slices, one above another. The
-  // lower slices are darker, so the body reads as solid from every angle.
-  const stackCache: { [name: string]: HTMLCanvasElement } = {};
-  const STACK_LAYERS = 4;
-
-  function stacked(img: HTMLCanvasElement, name: string): HTMLCanvasElement {
-    if (stackCache[name]) return stackCache[name];
-    const out = document.createElement('canvas');
-    out.width = img.width;
-    out.height = img.height + STACK_LAYERS;
-    const ctx = out.getContext('2d');
-    if (!ctx) return img;
-    for (let layer = STACK_LAYERS - 1; layer >= 0; layer--) {
-      const y = STACK_LAYERS - layer;   // layer 0 is the top slice, drawn last
-      const tmp = document.createElement('canvas');
-      tmp.width = img.width;
-      tmp.height = img.height;
-      const t = tmp.getContext('2d');
-      if (!t) continue;
-      t.drawImage(img, 0, 0);
-      if (layer > 0) {
-        t.globalCompositeOperation = 'source-atop';
-        t.fillStyle = 'rgba(47,45,61,' + (0.12 + 0.12 * layer).toFixed(2) + ')';
-        t.fillRect(0, 0, tmp.width, tmp.height);
-      }
-      ctx.drawImage(tmp, 0, y - (layer === 0 ? 0 : 0));
-    }
-    stackCache[name] = out;
-    return out;
-  }
-
   // Ring of the lock and the collapsing warning ring are drawn in screen space.
   function lockRing(ctx: CanvasRenderingContext2D, g: Game, c: Cam): void {
     const t = g.lock.target;
@@ -401,22 +370,24 @@ namespace PA {
     }
     const blinkOff = g.phase === 'crashed' && Math.floor(g.blink * 8) % 2 === 0;
     const sx = W / 2, sy = H * PLANE_SCREEN_Y;
-    const name = g.settings.mode === 'glider' ? 'glider' : 'plane';
-    const base = sprite(name);
-    const img = name === 'plane' ? stacked(base, name) : base;
+    const glider = g.settings.mode === 'glider';
     const tight = Math.min(1, Math.abs(p.bank) / AIR.bankMax);
-    const targetW = W * (0.25 + 0.08 * tight);
-    const scale = targetW / base.width;
+    // The jet is drawn at its own detail, at one of four crisp sizes (25% to 33% of the width).
+    // The paper glider is drawn at its own size.
+    const plane2 = glider ? null : planeSprite(tight);
+    const img = plane2 ? plane2.img : sprite('glider');
+    const scale = plane2 ? plane2.k : 1.5;
     ctx.save();
     ctx.translate(sx, sy);
     ctx.rotate(p.bank);
     if (!blinkOff) {
-      const dw = img.width * scale, dh = img.height * scale;
+      const dw = img.width, dh = img.height;
       // Flame from the engines when boosting: two flickering tongues.
-      if (g.held.boost && g.phase === 'flying' && name === 'plane') {
-        for (const ex of [-4, 4]) {
+      if (g.held.boost && g.phase === 'flying' && !glider) {
+        // The engine exhausts sit at design x 25 and 42, y 35 (centre 33, 20).
+        for (const ex of [24.5, 43.5]) {
           const len = (8 + Math.random() * 6) * scale / 2;
-          const x0 = (ex * scale) / 1, y0 = (6 * scale) / 1;
+          const x0 = (ex - 33) * scale, y0 = 35 * scale - 20 * scale;
           ctx.fillStyle = '#ffb02e';
           ctx.beginPath();
           ctx.moveTo(x0 - 2, y0); ctx.lineTo(x0 + 2, y0); ctx.lineTo(x0, y0 + len);
@@ -427,7 +398,7 @@ namespace PA {
           ctx.closePath(); ctx.fill();
         }
       }
-      ctx.drawImage(img, -Math.round(dw / 2), -Math.round(dh / 2), Math.round(dw), Math.round(dh));
+      ctx.drawImage(img, -Math.round(dw / 2), -Math.round(dh / 2));
     }
     // Damage: a cloud of smoke on each wing, slowly lifting.
     for (const m of g.marks) {
