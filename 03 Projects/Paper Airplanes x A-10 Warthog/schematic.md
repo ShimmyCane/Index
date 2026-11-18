@@ -1,6 +1,6 @@
 # Paper Airplanes × A-10 Warthog — Schematic
 
-**Status:** MVP 0.2 (chase view; headless-tested; not device-tested). Track A, family play. Questions and answers: `convo/convo v0.1.md` to `convo v0.3.md`.
+**Status:** MVP 0.3 (chase, top-down and cockpit views; missile; ejection; first-run tutorial; headless-tested; not device-tested). Track A, family play. Questions and answers: `convo/convo v0.1.md` to `convo v0.3.md`.
 **Platform:** TypeScript source (`src/`) compiled to `js/game.js`, which the page runs. Canvas 400 × 225 internal, scaled with no smoothing. No image files, no server, no database.
 **Remix:** taken from fighter-jet-eject (a standalone export of the UI8 Forge fighter; no licence file; not copied): the sprite-stacked look as a goal, and the chase camera. From the 1990s A-10 Tank Killer (Jimmy's reference): free play, shooting ground targets. From Paper Airplanes: the four forces, and a paper glider mode.
 
@@ -53,6 +53,14 @@ Learn how a sprite game is made by building a small one: a chase view, a flight 
 ## Settings (⚙️)
 
 Flight: plane (A-10 jet / paper glider), steering (drag / joystick), new flight. Show: force arrows. Sound. How it is built. Errors: opt-in, at the bottom.
+
+## Phases (0.3)
+
+- **Views (V key or ⚙️):** chase (behind, 26 m back, 8 m up), top-down (110 m up, looking down, stays level), cockpit (canopy struts and a dark instrument panel; a horizon gauge that tilts with the bank).
+- **Missile (M key or MISSILE button):** locks on to the nearest ground target within 900 m and 0.45 rad of the nose; turns toward it at up to 2.2 rad/s; 3 s reload; HUD pill shows ready or the count.
+- **Ejection:** a crash throws the pilot out under a parachute (sinks at 4 m/s) for 3.5 s before the flight restarts.
+- **Tutorial:** a card the first time on a device, tap to start (stored in localStorage; if storage fails it simply shows again).
+- **Not copied:** no code, sounds or art from fighter-jet-eject (UI8's, unlicensed). See `convo/convo v0.4.md`.
 
 ## Later (not in this version)
 

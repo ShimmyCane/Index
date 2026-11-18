@@ -14,6 +14,7 @@
       <span class="pill">★ <b id="score">0</b></span>
       <span class="pill">🎯 <b id="kills">0</b></span>
       <span class="pill">🪟 <b id="hoops">—</b></span>
+      <span class="pill">🚀 <b id="missile">ready</b></span>
       <span class="hullWrap" title="Hull"><i id="hull"></i></span>
     </header>
 
@@ -26,6 +27,14 @@
 
     <p class="msg" id="msg" aria-live="polite"></p>
 
+    <div class="tutorial" id="tutorial" hidden>
+      <h2>Fly the A-10</h2>
+      <p>Drag from the middle to climb, dive and turn.</p>
+      <p>FIRE shoots the gun. MISSILE locks on to a target ahead.</p>
+      <p>BOOST for speed. Press V (or the view in ⚙️) to change the camera.</p>
+      <p class="tap">Tap to start</p>
+    </div>
+
     <div class="overlay" id="overlay" hidden>
       <h2 id="ovTitle"></h2>
       <p id="ovText"></p>
@@ -33,6 +42,7 @@
     </div>
 
     <nav class="actions" aria-label="Actions">
+      <button type="button" data-k="missile" class="c-mint">MISSILE</button>
       <button type="button" data-k="fire" class="c-coral">FIRE</button>
       <button type="button" data-k="boost" class="c-sun">BOOST</button>
     </nav>
@@ -60,6 +70,15 @@
           <button type="button" data-v="glider">Paper glider</button>
         </div>
         <p class="hint">Changing this starts a new flight.</p>
+      </div>
+      <div class="setting">
+        <label>Camera view</label>
+        <div class="seg" data-key="view">
+          <button type="button" data-v="chase">Chase</button>
+          <button type="button" data-v="top">Top-down</button>
+          <button type="button" data-v="cockpit">Cockpit</button>
+        </div>
+        <p class="hint">Also V on a keyboard.</p>
       </div>
       <div class="setting">
         <label>Steering</label>

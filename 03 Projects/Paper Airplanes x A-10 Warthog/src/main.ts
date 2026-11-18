@@ -2,7 +2,9 @@
 // settings gear, the HUD, the settings drawer, opt-in errors, and the frame loop.
 namespace PA {
   const SETTINGS_KEY = 'pa_warthog.settings';
-  const DEFAULTS: Settings = { mode: 'jet', control: 'drag', sound: 1, forces: 0, showErrors: 0 };
+  const DEFAULTS: Settings = { mode: 'jet', control: 'drag', view: 'chase', sound: 1, forces: 0, showErrors: 0 };
+  const VIEW_ORDER: View[] = ['chase', 'top', 'cockpit'];
+  const TUTORIAL_KEY = 'pa_warthog.tutorialSeen';
   const DEAD = 0.06;          // a small dead zone around the centre
   const GEAR_SECONDS = 2000;  // the settings gear fades after this long untouched
 
@@ -71,7 +73,7 @@ namespace PA {
   }
 
   function onSeg(key: keyof Settings, value: string): void {
-    if (key === 'mode' || key === 'control') {
+    if (key === 'mode' || key === 'control' || key === 'view') {
       (settings as unknown as Record<string, unknown>)[key] = value;
     } else {
       settings[key] = +value;
@@ -112,6 +114,8 @@ namespace PA {
     ArrowRight: 'right', KeyD: 'right',
     Space: 'fire',
     ShiftLeft: 'boost', ShiftRight: 'boost',
+    KeyM: 'missile',
+    KeyV: 'view',
   };
 
   function bindKeys(): void {
@@ -119,7 +123,9 @@ namespace PA {
       const k = keyMap[e.code];
       if (!k) return;
       e.preventDefault();
-      if (k === 'fire' || k === 'boost') {
+      if (k === 'view') {
+        cycleView();
+      } else if (k === 'fire' || k === 'boost' || k === 'missile') {
         sound.unlock();
         game.held[k] = true;
       } else {
@@ -129,20 +135,28 @@ namespace PA {
     window.addEventListener('keyup', e => {
       const k = keyMap[e.code];
       if (!k) return;
-      if (k === 'fire' || k === 'boost') game.held[k] = false;
+      if (k === 'fire' || k === 'boost' || k === 'missile') game.held[k] = false;
       else keys[k as 'up' | 'down' | 'left' | 'right'] = false;
     });
     window.addEventListener('blur', () => {
       keys.up = keys.down = keys.left = keys.right = false;
-      game.held.fire = game.held.boost = false;
+      game.held.fire = game.held.boost = game.held.missile = false;
       dragAxes = null;
       stickAxes = null;
     });
   }
 
+  // The camera views in turn: chase, top-down, cockpit (also the V key).
+  function cycleView(): void {
+    const next = VIEW_ORDER[(VIEW_ORDER.indexOf(settings.view) + 1) % VIEW_ORDER.length];
+    settings.view = next;
+    saveSettings();
+    renderSettings();
+  }
+
   // ---- Drag relative to the centre of the screen ------------------------
 
-  const IGNORE = '.actions, .stick, #gear, .gearHot, .drawer, .errorsPanel, button, input, label';
+  const IGNORE = '.actions, .stick, #gear, .gearHot, .drawer, .errorsPanel, .tutorial, button, input, label';
 
   function dz(v: number): number {
     if (Math.abs(v) < DEAD) return 0;
@@ -216,7 +230,7 @@ namespace PA {
 
   function bindActions(): void {
     document.querySelectorAll<HTMLButtonElement>('.actions button').forEach(b => {
-      const k = b.dataset.k as 'fire' | 'boost';
+      const k = b.dataset.k as 'fire' | 'boost' | 'missile';
       b.addEventListener('pointerdown', e => {
         e.preventDefault();
         sound.unlock();
@@ -279,6 +293,7 @@ namespace PA {
     $('kills').textContent = String(g.kills);
     $('hoops').textContent = g.mission.hoops.length ? g.hoopsPassed + ' / ' + g.mission.hoops.length : '—';
     $('hull').style.width = Math.max(0, g.hull) + '%';
+    $('missile').textContent = g.missileCool > 0 ? Math.ceil(g.missileCool) + 's' : 'ready';
     $('speed').textContent = Math.round(p.speed * 1.94) + ' kt';
     $('alt').textContent = Math.round(p.h - groundAt(p.X, p.Z)) + ' m';
     $('aoa').textContent = (p.alpha * 180 / Math.PI).toFixed(0) + '°';
@@ -288,12 +303,12 @@ namespace PA {
   function message(): string {
     const g = game;
     const p = g.plane;
-    if (g.phase === 'crashed') return 'Back in the air in a moment…';
+    if (g.phase === 'crashed') return 'Ejected! The parachute is open. Back in the air soon.';
     if (g.phase !== 'flying') return '';
     if (p.stalled) return 'Too steep! Ease the nose down to get the air flowing.';
     if (g.settings.mode === 'glider') return 'Fly through the rings.';
     if (p.vy < -2 && p.h - groundAt(p.X, p.Z) < 25) return 'Losing height: nose up or hold BOOST.';
-    return 'Drag from the middle to steer. Hold FIRE over the targets.';
+    return 'Drag from the middle to steer. FIRE the gun, MISSILE for a target ahead.';
   }
 
   function overlay(): void {
@@ -306,6 +321,30 @@ namespace PA {
     box.hidden = false;
     $('ovTitle').textContent = 'Landed!';
     $('ovText').textContent = 'Rings flown: ' + g.hoopsPassed + ' of ' + g.mission.hoops.length + '.';
+  }
+
+  // ---- First-run tutorial (shown once per device) -----------------------
+
+  function tutorialSeen(): boolean {
+    try {
+      return localStorage.getItem(TUTORIAL_KEY) === '1';
+    } catch (e) {
+      return true;
+    }
+  }
+
+  function showTutorial(): void {
+    if (tutorialSeen()) return;
+    const card = $('tutorial');
+    card.hidden = false;
+    card.addEventListener('pointerdown', () => {
+      card.hidden = true;
+      try {
+        localStorage.setItem(TUTORIAL_KEY, '1');
+      } catch (e) {
+        // Not saved on this device: it may show again next time, which is fine.
+      }
+    }, { once: true });
   }
 
   // ---- Frame loop -------------------------------------------------------
@@ -364,6 +403,7 @@ namespace PA {
     $('version').textContent = 'Version ' + VERSION;
 
     bindKeys();
+    showTutorial();
     bindDrag();
     bindStick();
     bindActions();

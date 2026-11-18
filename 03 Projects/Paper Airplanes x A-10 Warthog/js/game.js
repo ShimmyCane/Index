@@ -114,6 +114,16 @@ var PA;
                     .r(0, 8, 20, 1, '#d6d0f0'); // shaded underside
             });
         }
+        else if (name === 'pilot') {
+            // A pilot under a parachute canopy.
+            s = buildSprite(g => {
+                g.r(1, 0, 9, 3, '#ffb3a7') // canopy
+                    .r(1, 0, 9, 1, '#ff9e8a')
+                    .p(2, 3, '#6b7480').p(8, 3, '#6b7480') // lines
+                    .r(4, 4, 3, 3, '#f5d7b0') // head and body
+                    .r(4, 7, 3, 2, '#3d8bff');
+            });
+        }
         else if (name === 'tank') {
             s = buildSprite(g => {
                 g.r(0, 5, 15, 2, '#6b7480') // tracks
@@ -428,7 +438,13 @@ var PA;
     const CRUISE_THROTTLE = 0.6;
     const BULLET_LIFE = 1.6;
     const SHELL_LIFE = 4;
-    const RESPAWN_SECONDS = 2.5;
+    const RESPAWN_SECONDS = 3.5;
+    const MISSILE_COOL = 3; // seconds between missiles
+    const MISSILE_SPEED = 180; // m/s
+    const MISSILE_TURN = 2.2; // radians per second at most
+    const MISSILE_RANGE = 900; // metres
+    const MISSILE_CONE = 0.45; // radians either side of the nose to lock on
+    const PARACHUTE_FALL = 4; // m/s, the pilot's sink rate under the parachute
     const KEEP_AHEAD = 6; // free play keeps this many targets in front of the plane
     class Game {
         constructor(settings) {
@@ -444,8 +460,11 @@ var PA;
             this.respawnIn = 0;
             this.shots = [];
             this.shells = [];
+            this.missiles = [];
+            this.jumpers = [];
+            this.missileCool = 0;
             this.puffs = [];
-            this.held = { fire: false, boost: false };
+            this.held = { fire: false, boost: false, missile: false };
             this.axes = { yaw: 0, pitch: 0 };
             this.onSound = () => { };
             this.rand = PA.random(1);
@@ -473,10 +492,14 @@ var PA;
             this.shots = [];
             this.shells = [];
             this.puffs = [];
+            this.missiles = [];
+            this.jumpers = [];
+            this.missileCool = 0;
         }
         update(dtIn) {
             const dt = Math.min(dtIn, 1 / 30);
             this.updatePuffs(dt);
+            this.updateJumpers(dt);
             if (this.phase === 'crashed') {
                 this.respawnIn -= dt;
                 if (this.respawnIn <= 0)
@@ -505,6 +528,7 @@ var PA;
             }
             if (jet) {
                 this.updateGuns(dt);
+                this.updateMissiles(dt);
                 this.updateShots(dt);
                 this.updateShells(dt);
                 this.updateFlak(dt);
@@ -516,12 +540,108 @@ var PA;
                 this.checkRings();
             }
         }
+        // Ejection: the explosion, then the pilot drifts down on a parachute.
         crash() {
             this.phase = 'crashed';
             this.hull = 0;
             this.respawnIn = RESPAWN_SECONDS;
             this.explode(this.plane.X, this.plane.h, this.plane.Z, 26);
+            this.jumpers.push({ X: this.plane.X, Z: this.plane.Z, h: Math.max(this.plane.h, 4), vY: 8, drift: this.plane.vx, life: RESPAWN_SECONDS });
             this.onSound('crash');
+        }
+        updateJumpers(dt) {
+            for (const j of this.jumpers) {
+                // Free fall for a moment, then the parachute slows the sink to a steady drift.
+                j.vY = j.vY > -PARACHUTE_FALL ? Math.max(-PARACHUTE_FALL, j.vY - PA.GRAVITY * dt) : -PARACHUTE_FALL;
+                j.h = Math.max(PA.groundAt(j.X, j.Z), j.h + j.vY * dt);
+                j.X += j.drift * dt * 0.2;
+                j.life -= dt;
+            }
+            this.jumpers = this.jumpers.filter(j => j.life > 0);
+        }
+        // The missile locks on to the nearest target in front, and turns to follow it.
+        updateMissiles(dt) {
+            this.missileCool -= dt;
+            const p = this.plane;
+            if (this.held.missile && this.missileCool <= 0) {
+                const target = this.findLock();
+                if (target) {
+                    this.missileCool = MISSILE_COOL;
+                    const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
+                    this.missiles.push({
+                        X: p.X + sinY * 3, Z: p.Z + cosY * 3, h: p.h,
+                        vX: p.vx * sinY + MISSILE_SPEED * sinY, vZ: p.vx * cosY + MISSILE_SPEED * cosY, vY: p.vy,
+                        life: 6, target,
+                    });
+                    this.onSound('gun');
+                }
+            }
+            const keep = [];
+            for (const m of this.missiles) {
+                m.life -= dt;
+                if (m.target && m.target.alive) {
+                    const tx = m.target.X, tz = m.target.Z, th = PA.groundAt(tx, tz) + 1;
+                    const dx = tx - m.X, dy = th - m.h, dz = tz - m.Z;
+                    const d = Math.hypot(dx, dy, dz) || 1;
+                    const sp = Math.hypot(m.vX, m.vY, m.vZ) || MISSILE_SPEED;
+                    const want = [dx / d * sp, dy / d * sp, dz / d * sp];
+                    const cur = [m.vX, m.vY, m.vZ];
+                    const step = MISSILE_TURN * dt * sp;
+                    // Turn the velocity toward the target, by at most the turn rate.
+                    const diff = [want[0] - cur[0], want[1] - cur[1], want[2] - cur[2]];
+                    const dl = Math.hypot(diff[0], diff[1], diff[2]) || 1;
+                    const k = Math.min(1, step / dl);
+                    m.vX = cur[0] + diff[0] * k;
+                    m.vY = cur[1] + diff[1] * k;
+                    m.vZ = cur[2] + diff[2] * k;
+                }
+                m.X += m.vX * dt;
+                m.Z += m.vZ * dt;
+                m.h += m.vY * dt;
+                const target = m.target;
+                if (target && target.alive) {
+                    const size = PA.SIZE[target.kind];
+                    const tg = PA.groundAt(target.X, target.Z);
+                    const dx = m.X - target.X, dz = m.Z - target.Z;
+                    if (dx * dx + dz * dz < size.r * size.r * 2.2 && m.h <= tg + size.height + 2 && m.h >= tg - 1) {
+                        target.alive = false;
+                        this.kills++;
+                        this.score += target.points;
+                        this.explode(target.X, tg + 1, target.Z, 22);
+                        this.onSound('boom');
+                        continue;
+                    }
+                }
+                if (m.life <= 0 || m.h <= PA.groundAt(m.X, m.Z)) {
+                    if (m.h <= PA.groundAt(m.X, m.Z))
+                        this.explode(m.X, m.h, m.Z, 8);
+                    continue;
+                }
+                keep.push(m);
+            }
+            this.missiles = keep;
+        }
+        // Nearest alive target within range and close to the nose.
+        findLock() {
+            const p = this.plane;
+            const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
+            let best = null;
+            let bestD = MISSILE_RANGE;
+            for (const t of this.mission.targets) {
+                if (!t.alive)
+                    continue;
+                const dx = t.X - p.X, dz = t.Z - p.Z;
+                const d = Math.hypot(dx, dz);
+                if (d > bestD || d < 1)
+                    continue;
+                const ahead = (dx * sinY + dz * cosY) / d;
+                const side = Math.acos(Math.max(-1, Math.min(1, ahead)));
+                if (ahead > 0 && side < MISSILE_CONE) {
+                    best = t;
+                    bestD = d;
+                }
+            }
+            return best;
         }
         // Free play: when the ground targets run low, more appear ahead of the plane.
         keepTargets() {
@@ -703,20 +823,29 @@ var PA;
     const PLANE_SCREEN_Y = 0.72;
     const PX_PER_M = 0.3; // sprite pixel size in metres (ground targets)
     const PLANE_SCALE = 2; // the plane sprite is drawn at a whole-number scale
+    // Camera placement for each view: where it sits behind the plane, how high, and how far it looks down.
+    const VIEWS = {
+        chase: { back: CAM_BACK, up: CAM_UP, tilt: TILT, range: RANGE },
+        top: { back: 4, up: 110, tilt: 1.35, range: 26 },
+        cockpit: { back: -1.5, up: 1.4, tilt: 0.02, range: RANGE },
+    };
     function makeCam(g) {
         const p = g.plane;
+        const v = VIEWS[g.settings.view];
         const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
         // Horizontal forward and right of the heading.
         const hx = sinY, hz = cosY;
         const rhx = cosY, rhz = -sinY;
-        const px = p.X - hx * CAM_BACK;
-        const py = p.h + CAM_UP;
-        const pz = p.Z - hz * CAM_BACK;
-        // Tilt the view down, then roll it with the bank.
-        const ct = Math.cos(TILT), st = Math.sin(TILT);
+        const px = p.X - hx * v.back;
+        const py = p.h + v.up;
+        const pz = p.Z - hz * v.back;
+        // Tilt the view down, then roll it with the bank (not in the top view, which stays level).
+        const tilt = v.tilt;
+        const bankUsed = g.settings.view === 'top' ? 0 : p.bank;
+        const ct = Math.cos(tilt), st = Math.sin(tilt);
         const fx = hx * ct, fy = -st, fz = hz * ct;
         const u0x = hx * st, u0y = ct, u0z = hz * st;
-        const cb = Math.cos(p.bank), sb = Math.sin(p.bank);
+        const cb = Math.cos(bankUsed), sb = Math.sin(bankUsed);
         const rx = rhx * cb + u0x * sb, ry = u0y * sb, rz = rhz * cb + u0z * sb;
         const ux = u0x * cb - rhx * sb, uy = u0y * cb, uz = u0z * cb - rhz * sb;
         return { px, py, pz, rx, ry, rz, ux, uy, uz, fx, fy, fz };
@@ -758,10 +887,11 @@ var PA;
     }
     // Ground: squares of the world, far ones first, each faded toward the sky.
     function ground(ctx, g, c) {
+        const range = VIEWS[g.settings.view].range;
         const ci = Math.round(c.px / CELL), cj = Math.round(c.pz / CELL);
         const cells = [];
-        for (let i = ci - RANGE; i < ci + RANGE; i++) {
-            for (let j = cj - RANGE; j < cj + RANGE; j++) {
+        for (let i = ci - range; i < ci + range; i++) {
+            for (let j = cj - range; j < cj + range; j++) {
                 const corners = [];
                 let ok = true;
                 for (const [a, b] of [[i, j], [i + 1, j], [i + 1, j + 1], [i, j + 1]]) {
@@ -813,6 +943,31 @@ var PA;
             .sort((a, b) => b.zc - a.zc);
         for (const { t } of list) {
             billboard(ctx, c, PA.sprite(t.kind), t.X, t.Z, PA.groundAt(t.X, t.Z));
+        }
+    }
+    function jumpers(ctx, g, c) {
+        const img = PA.sprite('pilot');
+        for (const j of g.jumpers) {
+            billboard(ctx, c, img, j.X, j.Z, j.h);
+        }
+    }
+    function missiles(ctx, g, c) {
+        for (const m of g.missiles) {
+            const p = project(c, m.X, m.h, m.Z);
+            if (!p)
+                continue;
+            // A short trail behind the missile, then the head.
+            const tail = project(c, m.X - m.vX * 0.05, m.h - m.vY * 0.05, m.Z - m.vZ * 0.05);
+            if (tail) {
+                ctx.strokeStyle = PA.COL.shell;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(tail[0], tail[1]);
+                ctx.lineTo(p[0], p[1]);
+                ctx.stroke();
+            }
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(Math.round(p[0]) - 1, Math.round(p[1]) - 1, 3, 3);
         }
     }
     function rings(ctx, g, c) {
@@ -926,24 +1081,65 @@ var PA;
         const c = makeCam(g);
         sky(ctx);
         ground(ctx, g, c);
-        if (g.mission.mode === 'glider')
+        if (g.settings.view !== 'cockpit' && g.mission.mode === 'glider')
             rings(ctx, g, c);
         targets(ctx, g, c);
         shots(ctx, c, g.shots, PA.COL.bullet, 2);
         shots(ctx, c, g.shells, PA.COL.shell, 2);
+        missiles(ctx, g, c);
+        jumpers(ctx, g, c);
         puffs(ctx, g, c);
-        plane(ctx, g, c);
+        if (g.settings.view !== 'cockpit')
+            plane(ctx, g, c);
+        if (g.settings.view === 'cockpit')
+            cockpit(ctx, g);
         if (g.settings.forces)
             forces(ctx, g);
     }
     PA.render = render;
+    // The cockpit: canopy struts and a dark instrument panel along the bottom.
+    function cockpit(ctx, g) {
+        const panelTop = PA.H * 0.84;
+        ctx.fillStyle = '#3b3950';
+        ctx.fillRect(0, panelTop, PA.W, PA.H - panelTop);
+        ctx.fillStyle = '#5b5876';
+        ctx.fillRect(0, panelTop, PA.W, 2);
+        // Gauges: a horizon bar that tilts with the bank, and a heading tick.
+        const gx = PA.W / 2, gy = panelTop + 14;
+        ctx.strokeStyle = '#fffdfa';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(gx, gy, 9, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.save();
+        ctx.translate(gx, gy);
+        ctx.rotate(-g.plane.bank);
+        ctx.beginPath();
+        ctx.moveTo(-9, 0);
+        ctx.lineTo(9, 0);
+        ctx.stroke();
+        ctx.restore();
+        // Canopy struts at the edges.
+        ctx.strokeStyle = '#2f2d3d';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(0, panelTop);
+        ctx.lineTo(PA.W * 0.22, 0);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(PA.W, panelTop);
+        ctx.lineTo(PA.W * 0.78, 0);
+        ctx.stroke();
+    }
 })(PA || (PA = {}));
 // Boot: the page, the controls (drag or joystick, action buttons), the fading
 // settings gear, the HUD, the settings drawer, opt-in errors, and the frame loop.
 var PA;
 (function (PA) {
     const SETTINGS_KEY = 'pa_warthog.settings';
-    const DEFAULTS = { mode: 'jet', control: 'drag', sound: 1, forces: 0, showErrors: 0 };
+    const DEFAULTS = { mode: 'jet', control: 'drag', view: 'chase', sound: 1, forces: 0, showErrors: 0 };
+    const VIEW_ORDER = ['chase', 'top', 'cockpit'];
+    const TUTORIAL_KEY = 'pa_warthog.tutorialSeen';
     const DEAD = 0.06; // a small dead zone around the centre
     const GEAR_SECONDS = 2000; // the settings gear fades after this long untouched
     const $ = (id) => {
@@ -1004,7 +1200,7 @@ var PA;
         renderErrors();
     }
     function onSeg(key, value) {
-        if (key === 'mode' || key === 'control') {
+        if (key === 'mode' || key === 'control' || key === 'view') {
             settings[key] = value;
         }
         else {
@@ -1045,6 +1241,8 @@ var PA;
         ArrowRight: 'right', KeyD: 'right',
         Space: 'fire',
         ShiftLeft: 'boost', ShiftRight: 'boost',
+        KeyM: 'missile',
+        KeyV: 'view',
     };
     function bindKeys() {
         window.addEventListener('keydown', e => {
@@ -1052,7 +1250,10 @@ var PA;
             if (!k)
                 return;
             e.preventDefault();
-            if (k === 'fire' || k === 'boost') {
+            if (k === 'view') {
+                cycleView();
+            }
+            else if (k === 'fire' || k === 'boost' || k === 'missile') {
                 sound.unlock();
                 game.held[k] = true;
             }
@@ -1064,20 +1265,27 @@ var PA;
             const k = keyMap[e.code];
             if (!k)
                 return;
-            if (k === 'fire' || k === 'boost')
+            if (k === 'fire' || k === 'boost' || k === 'missile')
                 game.held[k] = false;
             else
                 keys[k] = false;
         });
         window.addEventListener('blur', () => {
             keys.up = keys.down = keys.left = keys.right = false;
-            game.held.fire = game.held.boost = false;
+            game.held.fire = game.held.boost = game.held.missile = false;
             dragAxes = null;
             stickAxes = null;
         });
     }
+    // The camera views in turn: chase, top-down, cockpit (also the V key).
+    function cycleView() {
+        const next = VIEW_ORDER[(VIEW_ORDER.indexOf(settings.view) + 1) % VIEW_ORDER.length];
+        settings.view = next;
+        saveSettings();
+        renderSettings();
+    }
     // ---- Drag relative to the centre of the screen ------------------------
-    const IGNORE = '.actions, .stick, #gear, .gearHot, .drawer, .errorsPanel, button, input, label';
+    const IGNORE = '.actions, .stick, #gear, .gearHot, .drawer, .errorsPanel, .tutorial, button, input, label';
     function dz(v) {
         if (Math.abs(v) < DEAD)
             return 0;
@@ -1210,6 +1418,7 @@ var PA;
         $('kills').textContent = String(g.kills);
         $('hoops').textContent = g.mission.hoops.length ? g.hoopsPassed + ' / ' + g.mission.hoops.length : '—';
         $('hull').style.width = Math.max(0, g.hull) + '%';
+        $('missile').textContent = g.missileCool > 0 ? Math.ceil(g.missileCool) + 's' : 'ready';
         $('speed').textContent = Math.round(p.speed * 1.94) + ' kt';
         $('alt').textContent = Math.round(p.h - PA.groundAt(p.X, p.Z)) + ' m';
         $('aoa').textContent = (p.alpha * 180 / Math.PI).toFixed(0) + '°';
@@ -1219,7 +1428,7 @@ var PA;
         const g = game;
         const p = g.plane;
         if (g.phase === 'crashed')
-            return 'Back in the air in a moment…';
+            return 'Ejected! The parachute is open. Back in the air soon.';
         if (g.phase !== 'flying')
             return '';
         if (p.stalled)
@@ -1228,7 +1437,7 @@ var PA;
             return 'Fly through the rings.';
         if (p.vy < -2 && p.h - PA.groundAt(p.X, p.Z) < 25)
             return 'Losing height: nose up or hold BOOST.';
-        return 'Drag from the middle to steer. Hold FIRE over the targets.';
+        return 'Drag from the middle to steer. FIRE the gun, MISSILE for a target ahead.';
     }
     function overlay() {
         const g = game;
@@ -1240,6 +1449,30 @@ var PA;
         box.hidden = false;
         $('ovTitle').textContent = 'Landed!';
         $('ovText').textContent = 'Rings flown: ' + g.hoopsPassed + ' of ' + g.mission.hoops.length + '.';
+    }
+    // ---- First-run tutorial (shown once per device) -----------------------
+    function tutorialSeen() {
+        try {
+            return localStorage.getItem(TUTORIAL_KEY) === '1';
+        }
+        catch (e) {
+            return true;
+        }
+    }
+    function showTutorial() {
+        if (tutorialSeen())
+            return;
+        const card = $('tutorial');
+        card.hidden = false;
+        card.addEventListener('pointerdown', () => {
+            card.hidden = true;
+            try {
+                localStorage.setItem(TUTORIAL_KEY, '1');
+            }
+            catch (e) {
+                // Not saved on this device: it may show again next time, which is fine.
+            }
+        }, { once: true });
     }
     // ---- Frame loop -------------------------------------------------------
     function resolveAxes() {
@@ -1295,6 +1528,7 @@ var PA;
         $('again').addEventListener('click', () => restart());
         $('version').textContent = 'Version ' + PA.VERSION;
         bindKeys();
+        showTutorial();
         bindDrag();
         bindStick();
         bindActions();

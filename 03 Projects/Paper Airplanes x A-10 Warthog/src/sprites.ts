@@ -50,7 +50,7 @@ namespace PA {
   const cache: { [name: string]: HTMLCanvasElement } = {};
 
   // Built the first time it is needed (so the file also loads without a page).
-  export function sprite(name: 'plane' | 'glider' | 'tank' | 'truck' | 'flak'): HTMLCanvasElement {
+  export function sprite(name: 'plane' | 'glider' | 'tank' | 'truck' | 'flak' | 'pilot'): HTMLCanvasElement {
     if (cache[name]) return cache[name];
     let s: HTMLCanvasElement;
     if (name === 'plane') {
@@ -74,6 +74,15 @@ namespace PA {
          .r(9, 2, 2, 9, '#fffdfa')                               // fold line
          .p(10, 1, '#fffdfa')
          .r(0, 8, 20, 1, '#d6d0f0');                             // shaded underside
+      });
+    } else if (name === 'pilot') {
+      // A pilot under a parachute canopy.
+      s = buildSprite(g => {
+        g.r(1, 0, 9, 3, '#ffb3a7')                              // canopy
+         .r(1, 0, 9, 1, '#ff9e8a')
+         .p(2, 3, '#6b7480').p(8, 3, '#6b7480')                 // lines
+         .r(4, 4, 3, 3, '#f5d7b0')                              // head and body
+         .r(4, 7, 3, 2, '#3d8bff');
       });
     } else if (name === 'tank') {
       s = buildSprite(g => {

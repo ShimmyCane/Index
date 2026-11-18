@@ -20,20 +20,30 @@ namespace PA {
     fx: number; fy: number; fz: number;           // forward
   }
 
+  // Camera placement for each view: where it sits behind the plane, how high, and how far it looks down.
+  const VIEWS = {
+    chase: { back: CAM_BACK, up: CAM_UP, tilt: TILT, range: RANGE },
+    top: { back: 4, up: 110, tilt: 1.35, range: 26 },
+    cockpit: { back: -1.5, up: 1.4, tilt: 0.02, range: RANGE },
+  };
+
   function makeCam(g: Game): Cam {
     const p = g.plane;
+    const v = VIEWS[g.settings.view];
     const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
     // Horizontal forward and right of the heading.
     const hx = sinY, hz = cosY;
     const rhx = cosY, rhz = -sinY;
-    const px = p.X - hx * CAM_BACK;
-    const py = p.h + CAM_UP;
-    const pz = p.Z - hz * CAM_BACK;
-    // Tilt the view down, then roll it with the bank.
-    const ct = Math.cos(TILT), st = Math.sin(TILT);
+    const px = p.X - hx * v.back;
+    const py = p.h + v.up;
+    const pz = p.Z - hz * v.back;
+    // Tilt the view down, then roll it with the bank (not in the top view, which stays level).
+    const tilt = v.tilt;
+    const bankUsed = g.settings.view === 'top' ? 0 : p.bank;
+    const ct = Math.cos(tilt), st = Math.sin(tilt);
     const fx = hx * ct, fy = -st, fz = hz * ct;
     const u0x = hx * st, u0y = ct, u0z = hz * st;
-    const cb = Math.cos(p.bank), sb = Math.sin(p.bank);
+    const cb = Math.cos(bankUsed), sb = Math.sin(bankUsed);
     const rx = rhx * cb + u0x * sb, ry = u0y * sb, rz = rhz * cb + u0z * sb;
     const ux = u0x * cb - rhx * sb, uy = u0y * cb, uz = u0z * cb - rhz * sb;
     return { px, py, pz, rx, ry, rz, ux, uy, uz, fx, fy, fz };
@@ -78,11 +88,12 @@ namespace PA {
 
   // Ground: squares of the world, far ones first, each faded toward the sky.
   function ground(ctx: CanvasRenderingContext2D, g: Game, c: Cam): void {
+    const range = VIEWS[g.settings.view].range;
     const ci = Math.round(c.px / CELL), cj = Math.round(c.pz / CELL);
     type Cell = { pts: [number, number][]; depth: number; color: string };
     const cells: Cell[] = [];
-    for (let i = ci - RANGE; i < ci + RANGE; i++) {
-      for (let j = cj - RANGE; j < cj + RANGE; j++) {
+    for (let i = ci - range; i < ci + range; i++) {
+      for (let j = cj - range; j < cj + range; j++) {
         const corners: [number, number, number][] = [];
         let ok = true;
         for (const [a, b] of [[i, j], [i + 1, j], [i + 1, j + 1], [i, j + 1]] as [number, number][]) {
@@ -130,6 +141,29 @@ namespace PA {
       .sort((a, b) => b.zc - a.zc);
     for (const { t } of list) {
       billboard(ctx, c, sprite(t.kind), t.X, t.Z, groundAt(t.X, t.Z));
+    }
+  }
+
+  function jumpers(ctx: CanvasRenderingContext2D, g: Game, c: Cam): void {
+    const img = sprite('pilot');
+    for (const j of g.jumpers) {
+      billboard(ctx, c, img, j.X, j.Z, j.h);
+    }
+  }
+
+  function missiles(ctx: CanvasRenderingContext2D, g: Game, c: Cam): void {
+    for (const m of g.missiles) {
+      const p = project(c, m.X, m.h, m.Z);
+      if (!p) continue;
+      // A short trail behind the missile, then the head.
+      const tail = project(c, m.X - m.vX * 0.05, m.h - m.vY * 0.05, m.Z - m.vZ * 0.05);
+      if (tail) {
+        ctx.strokeStyle = COL.shell;
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(tail[0], tail[1]); ctx.lineTo(p[0], p[1]); ctx.stroke();
+      }
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(Math.round(p[0]) - 1, Math.round(p[1]) - 1, 3, 3);
     }
   }
 
@@ -244,12 +278,41 @@ namespace PA {
     const c = makeCam(g);
     sky(ctx);
     ground(ctx, g, c);
-    if (g.mission.mode === 'glider') rings(ctx, g, c);
+    if (g.settings.view !== 'cockpit' && g.mission.mode === 'glider') rings(ctx, g, c);
     targets(ctx, g, c);
     shots(ctx, c, g.shots, COL.bullet, 2);
     shots(ctx, c, g.shells, COL.shell, 2);
+    missiles(ctx, g, c);
+    jumpers(ctx, g, c);
     puffs(ctx, g, c);
-    plane(ctx, g, c);
+    if (g.settings.view !== 'cockpit') plane(ctx, g, c);
+    if (g.settings.view === 'cockpit') cockpit(ctx, g);
     if (g.settings.forces) forces(ctx, g);
+  }
+
+  // The cockpit: canopy struts and a dark instrument panel along the bottom.
+  function cockpit(ctx: CanvasRenderingContext2D, g: Game): void {
+    const panelTop = H * 0.84;
+    ctx.fillStyle = '#3b3950';
+    ctx.fillRect(0, panelTop, W, H - panelTop);
+    ctx.fillStyle = '#5b5876';
+    ctx.fillRect(0, panelTop, W, 2);
+    // Gauges: a horizon bar that tilts with the bank, and a heading tick.
+    const gx = W / 2, gy = panelTop + 14;
+    ctx.strokeStyle = '#fffdfa';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(gx, gy, 9, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.save();
+    ctx.translate(gx, gy);
+    ctx.rotate(-g.plane.bank);
+    ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(9, 0); ctx.stroke();
+    ctx.restore();
+    // Canopy struts at the edges.
+    ctx.strokeStyle = '#2f2d3d';
+    ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.moveTo(0, panelTop); ctx.lineTo(W * 0.22, 0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(W, panelTop); ctx.lineTo(W * 0.78, 0); ctx.stroke();
   }
 }

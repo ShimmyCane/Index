@@ -3,19 +3,44 @@ namespace PA {
   export type Phase = 'flying' | 'crashed' | 'landed';
   export type SoundName = 'gun' | 'boom' | 'thud' | 'chime' | 'land' | 'crash';
   export type Control = 'drag' | 'stick';
+  export type View = 'chase' | 'top' | 'cockpit';
 
   export interface Settings {
     mode: Mode;
     control: Control;
+    view: View;
     sound: number;
     forces: number;
     showErrors: number;
   }
 
-  // Held action buttons (fire, boost) and the steering axes from the drag, the joystick or the keys.
+  // Held action buttons (fire, boost, missile) and the steering axes from the drag, the joystick or the keys.
   export interface Held {
     fire: boolean;
     boost: boolean;
+    missile: boolean;
+  }
+
+  // A homing missile. It turns toward its target at a limited rate.
+  export interface Missile {
+    X: number;
+    Z: number;
+    h: number;
+    vX: number;
+    vY: number;
+    vZ: number;
+    life: number;
+    target: Target | null;
+  }
+
+  // The pilot after an ejection: a parachute drifts down, then the pilot lands.
+  export interface Jumper {
+    X: number;
+    Z: number;
+    h: number;
+    vY: number;
+    drift: number;
+    life: number;
   }
 
   export interface Axes {
@@ -51,7 +76,13 @@ namespace PA {
   const CRUISE_THROTTLE = 0.6;
   const BULLET_LIFE = 1.6;
   const SHELL_LIFE = 4;
-  const RESPAWN_SECONDS = 2.5;
+  const RESPAWN_SECONDS = 3.5;
+  const MISSILE_COOL = 3;      // seconds between missiles
+  const MISSILE_SPEED = 180;   // m/s
+  const MISSILE_TURN = 2.2;    // radians per second at most
+  const MISSILE_RANGE = 900;   // metres
+  const MISSILE_CONE = 0.45;   // radians either side of the nose to lock on
+  const PARACHUTE_FALL = 4;    // m/s, the pilot's sink rate under the parachute
   const KEEP_AHEAD = 6;       // free play keeps this many targets in front of the plane
 
   export class Game {
@@ -68,8 +99,11 @@ namespace PA {
     respawnIn = 0;
     shots: Shot[] = [];
     shells: Shot[] = [];
+    missiles: Missile[] = [];
+    jumpers: Jumper[] = [];
+    missileCool = 0;
     puffs: Puff[] = [];
-    held: Held = { fire: false, boost: false };
+    held: Held = { fire: false, boost: false, missile: false };
     axes: Axes = { yaw: 0, pitch: 0 };
     onSound: (name: SoundName) => void = () => {};
     private rand = random(1);
@@ -99,11 +133,15 @@ namespace PA {
       this.shots = [];
       this.shells = [];
       this.puffs = [];
+      this.missiles = [];
+      this.jumpers = [];
+      this.missileCool = 0;
     }
 
     update(dtIn: number): void {
       const dt = Math.min(dtIn, 1 / 30);
       this.updatePuffs(dt);
+      this.updateJumpers(dt);
 
       if (this.phase === 'crashed') {
         this.respawnIn -= dt;
@@ -132,6 +170,7 @@ namespace PA {
 
       if (jet) {
         this.updateGuns(dt);
+        this.updateMissiles(dt);
         this.updateShots(dt);
         this.updateShells(dt);
         this.updateFlak(dt);
@@ -142,12 +181,108 @@ namespace PA {
       }
     }
 
+    // Ejection: the explosion, then the pilot drifts down on a parachute.
     private crash(): void {
       this.phase = 'crashed';
       this.hull = 0;
       this.respawnIn = RESPAWN_SECONDS;
       this.explode(this.plane.X, this.plane.h, this.plane.Z, 26);
+      this.jumpers.push({ X: this.plane.X, Z: this.plane.Z, h: Math.max(this.plane.h, 4), vY: 8, drift: this.plane.vx, life: RESPAWN_SECONDS });
       this.onSound('crash');
+    }
+
+    private updateJumpers(dt: number): void {
+      for (const j of this.jumpers) {
+        // Free fall for a moment, then the parachute slows the sink to a steady drift.
+        j.vY = j.vY > -PARACHUTE_FALL ? Math.max(-PARACHUTE_FALL, j.vY - GRAVITY * dt) : -PARACHUTE_FALL;
+        j.h = Math.max(groundAt(j.X, j.Z), j.h + j.vY * dt);
+        j.X += j.drift * dt * 0.2;
+        j.life -= dt;
+      }
+      this.jumpers = this.jumpers.filter(j => j.life > 0);
+    }
+
+    // The missile locks on to the nearest target in front, and turns to follow it.
+    private updateMissiles(dt: number): void {
+      this.missileCool -= dt;
+      const p = this.plane;
+      if (this.held.missile && this.missileCool <= 0) {
+        const target = this.findLock();
+        if (target) {
+          this.missileCool = MISSILE_COOL;
+          const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
+          this.missiles.push({
+            X: p.X + sinY * 3, Z: p.Z + cosY * 3, h: p.h,
+            vX: p.vx * sinY + MISSILE_SPEED * sinY, vZ: p.vx * cosY + MISSILE_SPEED * cosY, vY: p.vy,
+            life: 6, target,
+          });
+          this.onSound('gun');
+        }
+      }
+      const keep: Missile[] = [];
+      for (const m of this.missiles) {
+        m.life -= dt;
+        if (m.target && m.target.alive) {
+          const tx = m.target.X, tz = m.target.Z, th = groundAt(tx, tz) + 1;
+          const dx = tx - m.X, dy = th - m.h, dz = tz - m.Z;
+          const d = Math.hypot(dx, dy, dz) || 1;
+          const sp = Math.hypot(m.vX, m.vY, m.vZ) || MISSILE_SPEED;
+          const want = [dx / d * sp, dy / d * sp, dz / d * sp];
+          const cur = [m.vX, m.vY, m.vZ];
+          const step = MISSILE_TURN * dt * sp;
+          // Turn the velocity toward the target, by at most the turn rate.
+          const diff = [want[0] - cur[0], want[1] - cur[1], want[2] - cur[2]];
+          const dl = Math.hypot(diff[0], diff[1], diff[2]) || 1;
+          const k = Math.min(1, step / dl);
+          m.vX = cur[0] + diff[0] * k;
+          m.vY = cur[1] + diff[1] * k;
+          m.vZ = cur[2] + diff[2] * k;
+        }
+        m.X += m.vX * dt;
+        m.Z += m.vZ * dt;
+        m.h += m.vY * dt;
+        const target = m.target;
+        if (target && target.alive) {
+          const size = SIZE[target.kind];
+          const tg = groundAt(target.X, target.Z);
+          const dx = m.X - target.X, dz = m.Z - target.Z;
+          if (dx * dx + dz * dz < size.r * size.r * 2.2 && m.h <= tg + size.height + 2 && m.h >= tg - 1) {
+            target.alive = false;
+            this.kills++;
+            this.score += target.points;
+            this.explode(target.X, tg + 1, target.Z, 22);
+            this.onSound('boom');
+            continue;
+          }
+        }
+        if (m.life <= 0 || m.h <= groundAt(m.X, m.Z)) {
+          if (m.h <= groundAt(m.X, m.Z)) this.explode(m.X, m.h, m.Z, 8);
+          continue;
+        }
+        keep.push(m);
+      }
+      this.missiles = keep;
+    }
+
+    // Nearest alive target within range and close to the nose.
+    private findLock(): Target | null {
+      const p = this.plane;
+      const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
+      let best: Target | null = null;
+      let bestD = MISSILE_RANGE;
+      for (const t of this.mission.targets) {
+        if (!t.alive) continue;
+        const dx = t.X - p.X, dz = t.Z - p.Z;
+        const d = Math.hypot(dx, dz);
+        if (d > bestD || d < 1) continue;
+        const ahead = (dx * sinY + dz * cosY) / d;
+        const side = Math.acos(Math.max(-1, Math.min(1, ahead)));
+        if (ahead > 0 && side < MISSILE_CONE) {
+          best = t;
+          bestD = d;
+        }
+      }
+      return best;
     }
 
     // Free play: when the ground targets run low, more appear ahead of the plane.

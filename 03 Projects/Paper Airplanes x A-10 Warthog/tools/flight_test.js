@@ -92,5 +92,31 @@ const still = { pitch: 0, yaw: 0, throttle: 0 };
   check('missions: glider has 24 rings and no guns', g.hoops.length === 24 && g.targets.length === 0);
 }
 
+// 8. Missile: locks on to a target ahead and destroys it.
+{
+  const settings = { mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0 };
+  const g = new PA.Game(settings);
+  g.onSound = () => {};
+  const ahead = { kind: 'tank', X: g.plane.X, Z: g.plane.Z + 200, alive: true, points: 100, cool: 0 };
+  g.mission.targets = [ahead];
+  g.held.missile = true;
+  g.update(1 / 30);
+  g.held.missile = false;
+  for (let i = 0; i < 12 * 30 && ahead.alive; i++) g.update(1 / 30);
+  check('missile: locks on and destroys the target ahead', !ahead.alive && g.kills >= 1, 'kills = ' + g.kills);
+}
+
+// 9. Ejection: a crash starts the eject sequence, then the flight restarts.
+{
+  const settings = { mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0 };
+  const g = new PA.Game(settings);
+  g.onSound = () => {};
+  g.hull = 0;
+  g.update(1 / 30);
+  check('eject: a crash starts the sequence with a pilot in the air', g.phase === 'crashed' && g.jumpers.length === 1);
+  for (let i = 0; i < 5 * 30; i++) g.update(1 / 30);
+  check('eject: the flight restarts after the parachute', g.phase === 'flying' && g.hull === 100);
+}
+
 console.log(failures === 0 ? '\nAll flight checks passed.' : '\n' + failures + ' check(s) failed.');
 process.exit(failures ? 1 : 0);

@@ -157,6 +157,27 @@ canvas {
 .c-coral { background: var(--coral); }
 .c-sun { background: var(--sun); }
 body.glider .actions { display: none; }
+.c-mint { background: var(--sage); }
+
+/* First-run tutorial: a card in the middle, tap to start. */
+.tutorial {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(440px, 90vw);
+  background: var(--card);
+  border: 3px solid var(--ink);
+  border-radius: 20px;
+  box-shadow: 0 6px 0 var(--ink);
+  padding: 16px 20px;
+  text-align: center;
+  z-index: 35;
+  cursor: pointer;
+}
+.tutorial h2 { margin: 0 0 8px; font-size: 22px; font-weight: 800; }
+.tutorial p { margin: 6px 0; font-weight: 700; font-size: 15px; }
+.tutorial .tap { color: #5d5a73; font-size: 13px; margin-top: 12px; }
 
 /* Lower left: the joystick, shown only with the joystick setting. */
 .stick {

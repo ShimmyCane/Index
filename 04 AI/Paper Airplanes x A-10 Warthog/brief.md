@@ -41,3 +41,9 @@ A browser 2.5D pixel-art flight game, built small enough to read, so Jimmy can s
 - Controls per `game-controls`: drag from the centre (default), joystick lower left (setting), FIRE and BOOST lower right, ⚙️ upper right and faded (jet view).
 - Checks: `npm test` (7 groups, incl. turning); Playwright at 1180×820 and 390×844: drag climbs (12 → 43 m), joystick shows, gear fades after 2 s and returns on an upper-right tap, glider view renders, no console errors, no horizontal scroll.
 - Not verified: a real iPad touch; difficulty; the flat plane sprite (stacking not built yet).
+
+## Round 3 (convo v0.4)
+
+- Added the phases shown by the reference as new code: camera views (chase, top-down, cockpit), a homing missile, ejection with a parachute, a first-run tutorial.
+- Declined: copying fighter-jet-eject's code or sounds, and broadening its licence. That repo is UI8's work with no licence; nothing from it is in the repo.
+- Checks: `npm test` (19 checks, incl. missile lock and eject); Playwright views, tutorial, missile label, no console errors.
