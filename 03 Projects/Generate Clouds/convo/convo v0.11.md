@@ -43,3 +43,11 @@ Jimmy asked for all of round 7 (`convo v0.10.md`) and the stars and ground from 
 1. The waves clip: is 15 seconds at 1× the right default, or should the default be 30?
 2. The space clouds drift with one wind for now. Should I build the worldwide wind grid next, or first check the satellite look on your device?
 3. Commercial use (still open from v0.8) decides whether the satellite and map pictures can be used for backdrops.
+
+## Answers (Jimmy, 2026-11-18)
+
+1. **Waves clip default:** 15 seconds at 1×. (Already the default in 0.7.0.)
+2. **Wind:** build the worldwide wind grid next. Expect winds to differ at each altitude, so the space clouds need a wind per height as well as per place (the low, mid and high layers already use three different winds at one place; the grid must give each layer its own wind at every point).
+3. **Commercial use:** yes, the satellite and map pictures can be used for backdrops. The Earth picture's CC BY-SA credit stays in ⚙️.
+
+**Merge:** Jimmy said "merge when done". The wind grid (answer 2) is not built yet, so PR #202 stays a draft until it is.
