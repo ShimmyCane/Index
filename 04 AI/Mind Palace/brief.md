@@ -39,3 +39,5 @@
 - **Not built:** an explored (dim) memory of where little-me has been; animals, boats, cars, stars, a lantern; moving things in Godot.
 - **Open:** convo v0.4 (explored memory, how far to see, more life, Godot).
 
+**0.3.1 (2026-11-18), from convo v0.4:** fog radius doubled (12 + sight × 0.9 + distance × 0.7); a lantern on little-me (a glowing splat block); fireflies on each island, spinning above the plaza. Checked: the default page loads with no errors and 24 moving parts. SDF is not used anywhere yet; the web view and the Godot port both use Gaussian splats only; Godot has never been run. Answered in convo v0.5.
+

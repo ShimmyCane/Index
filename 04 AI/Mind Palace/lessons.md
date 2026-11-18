@@ -40,3 +40,5 @@
 27. **Renaming a page is a link audit.** Moving the splat view to `index.html` meant rewriting every link and the notes' page names; the Node check and the headless run both confirmed the new paths.
 28. **Names belong to the fog too.** A label that stays on screen across the fog gives away what can't be seen; hide it by the same radius.
 
+29. **Say which technique is in use before saying what is missing.** Jimmy asked whether SDF and splats were in use. The web view uses splats only, and the Godot port also uses splats only, though it has never been run. Answer with a table of "used / not used / run" before proposing the next step.
+

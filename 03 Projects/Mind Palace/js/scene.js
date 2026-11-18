@@ -169,6 +169,7 @@
     sph(out, '#ffe0c2', 0.25, [0, 1.13, 0]); sph(out, '#6b4a3a', 0.27, [0, 1.2, -0.04], [1, 0.75, 1]);
     sph(out, '#2b2a33', 0.04, [-0.09, 1.14, 0.23]); sph(out, '#2b2a33', 0.04, [0.09, 1.14, 0.23]);
     box(out, '#8fd3b0', [0.3, 0.34, 0.14], [0, 0.7, -0.24]);
+    sph(out, '#ffd76a', 0.2, [0.32, 1.0, 0.22], null, true);          // a lantern that glows
     return out;
   }
 
@@ -251,6 +252,14 @@
       var wr = 5.5, Wr = [w.pos[0] + wr, w.pos[1], w.pos[2]], walker = avatar();
       walker.forEach(function (s) { s.xf.o = [s.xf.o[0] + Wr[0], s.xf.o[1] + Wr[1], s.xf.o[2] + Wr[2]]; });
       motion('orbit', { centre: [w.pos[0], w.pos[1], w.pos[2]], radius: wr, rest: Wr, period: 22, phase: rand() * 6.28 }, walker);
+
+      // Fireflies: a ring of glowing dots turning slowly above the plaza.
+      var ff = [], fc = [w.pos[0], w.pos[1] + 3.2, w.pos[2]];
+      for (k = 0; k < 6; k++) {
+        var fa = k * Math.PI / 3, fr = 3.5 + (k % 2) * 1.5;
+        sph(ff, '#fff3a0', 0.16, [fc[0] + Math.cos(fa) * fr, fc[1] + (k % 3) * 0.5, fc[2] + Math.sin(fa) * fr], null, true);
+      }
+      motion('spin', { axis: 'y', pivot: fc, period: 12 }, ff);
 
       // A gear on a post, turning.
       var gp = freeSpot(desc, w, rand, 0.45, 0.8, 2.5);

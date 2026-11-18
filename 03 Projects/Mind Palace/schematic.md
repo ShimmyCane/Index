@@ -2,7 +2,7 @@
 
 **Track: A. Family play** (a palace for each family member; Jimmy's first, for the others to walk through), with studio-level depth kept in collapsed panels.
 
-Status (2026-11-17), version 0.3.0 (in progress), headless-tested, not yet tried on an iPad:
+Status (2026-11-18), version 0.3.1 (fog radius doubled; lantern and fireflies added), headless-tested, not yet tried on an iPad:
 - **`index.html`** (the default page): the palace drawn with Gaussian splats in plain WebGL 2 (no three.js). Walk, search, walk-up pop-ups, Wander, a fuzziness slider, fog of war, moving things on loops.
 - **`build.html`** (three.js): the Build page, where things are added, changed, connected and practised.
 - **`godot/`**: a Godot 4.3 application, written and never run (`godot/schematic.md`). Jimmy tests it himself.
@@ -111,6 +111,16 @@ Each moving part is a block (1 is little-me; the rest from 2). A splat keeps its
 Fog of war: within a radius around little-me the palace is lit; beyond it the splats fade to black, and their names go too. The radius is 6 + the "How far you can see" setting (10 to 100, times 0.45) + 0.35 times the camera distance, so zooming out reveals more. Settings: Fog of war on/off, How far you can see, Moving things Move/Still.
 
 Not in Godot yet: the moving things and the fog exist only on the web splat view.
+
+## Technique in use (2026-11-18)
+
+| Part | Gaussian splats | SDF |
+|---|---|---|
+| Web splat view | yes | no |
+| Build page | no (three.js meshes) | no |
+| Godot project (never run) | yes (a port) | no |
+
+SDF is a proposed next step for shaping rooms and objects (convo v0.5).
 
 ## Splats (how the splat view works)
 

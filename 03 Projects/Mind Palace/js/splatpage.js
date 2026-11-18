@@ -307,7 +307,7 @@
   function rot(axis, a) { return axis === 'x' ? rx(a) : axis === 'y' ? ry(a) : rz(a); }
   function mv(R, v) { return [R[0] * v[0] + R[3] * v[1] + R[6] * v[2], R[1] * v[0] + R[4] * v[1] + R[7] * v[2], R[2] * v[0] + R[5] * v[1] + R[8] * v[2]]; }
   /* How far little-me can see. Zooming out widens the view, so the whole palace can still be looked over. */
-  function fogRadius() { return MP.settings.fog ? 6 + MP.settings.sight * 0.45 + cam.dist * 0.35 : 0; }
+  function fogRadius() { return MP.settings.fog ? 12 + MP.settings.sight * 0.9 + cam.dist * 0.7 : 0; }   // doubled in 0.3.1
   /* Where every block is this frame. Each motion is periodic, so it loops exactly. */
   function blockMats() {
     var out = [], t = clock, bob = Math.abs(Math.sin(av.bob)) * 0.07;

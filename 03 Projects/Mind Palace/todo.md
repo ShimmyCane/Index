@@ -5,6 +5,15 @@
 - [x] Fog of war: beyond little-me's sight the palace fades to black (setting: on/off and how far).
 - [x] More life: trees (round, pine, blossom), a windmill, three birds, a balloon, a walker and a gear, the moving ones on loops.
 
+## 0.3.1 (2026-11-18)
+- [x] Fog radius doubled. Lantern glow in little-me's hand. Fireflies circling each island.
+
+## Next (convo v0.5)
+- [ ] SDF shapes for rooms and objects in the web splat view (rounded rooms, a dome), if Jimmy agrees.
+- [ ] Animals, boats and cars on loops (Jimmy's choice, convo v0.5).
+- [ ] Glowing windows on rooms, if wanted (convo v0.5).
+- [ ] Godot: run it (Jimmy), fix what its Output reports.
+
 ## Next (waiting on convo v0.3)
 - [ ] Explored memory: places little-me has seen stay dim after she moves on (a second, slower fog).
 - [ ] Richer look: more colour, a glow from little-me's lantern, the sky at night with stars.

@@ -13,9 +13,13 @@ Jimmy asked for two things: start on the splat view by default, and add a fog of
 ## Questions
 
 1. **Fog as sight or memory?** Now the fog is only what little-me can see right now. Should a place she has been to stay dim (an "explored" memory), so you can see where you have already been?
+   > **Jimmy, 2026-11-18:** Good as you have it. (Explored places stay dim, as built later.)
 
 2. **How far should you see?** The default shows about the plaza and the nearest rooms. Is that the right default for Felix, or should he start with more in view?
+   > **Jimmy, 2026-11-18:** Can you double it. (Done: the view is twice as wide by default.)
 
 3. **More life.** What else would make it fun for you and Felix: animals on the islands, boats on water, cars on paths, fireworks, a night sky with stars, or a lantern glow around little-me?
+   > **Jimmy, 2026-11-18:** I like more lighting and more glowing, maybe some animals, maybe trees, some elements. (Done in 0.3.1: a lantern that glows in little-me's hand, fireflies circling each island, the trees and birds from 0.3.0. Animals, boats and cars are next.)
 
 4. **Moving things in Godot.** The moving things and the fog exist only on the web splat view. Should I add them to the Godot project too, or keep Godot for later?
+   > **Jimmy, 2026-11-18:** I would like to use SDF and splat. Are you saying the web splat view is not using those? Tell me more about Godot, am I not using that right now? (Answered in convo v0.5.)
