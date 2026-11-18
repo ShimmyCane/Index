@@ -156,7 +156,7 @@ const still = { pitch: 0, yaw: 0, throttle: 0 };
   const enemies0 = g.mission.targets.filter(t => t.faction === 'enemy').length;
   for (let i = 0; i < 10 * 30; i++) g.update(1 / 30);
   const enemies1 = g.mission.targets.filter(t => t.faction === 'enemy').length;
-  check('waves: the first wave arrives soon after take-off', enemies1 >= 2 && enemies0 === 0, 'enemies ' + enemies1);
+  check('waves: the first wave arrives soon after take-off (Felix: a quarter of the setting, at least one)', enemies1 >= 1 && enemies0 === 0, 'enemies ' + enemies1);
   const ally = g.mission.targets.find(t => t.faction === 'ally');
   const a0 = ally.X;
   for (let i = 0; i < 2 * 30; i++) g.update(1 / 30);

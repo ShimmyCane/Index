@@ -66,7 +66,8 @@ namespace PA {
   // The same sprite built as a stack: four slices, each one pixel lower than the one above,
   // the lower slices darker. The top slice is the full colour, so the edge of the stack shows.
   export function stackedSprite(name: string, layers = 4, step = 1): HTMLCanvasElement {
-    if (stackCache[name]) return stackCache[name];
+    const key = name + ':' + layers + ':' + step;
+    if (stackCache[key]) return stackCache[key];
     const paint = PAINT[name];
     if (!paint) throw new Error('no sprite named ' + name);
     const base = new Painter();
@@ -80,7 +81,7 @@ namespace PA {
       }
     };
     const s = buildSprite(stacked);
-    stackCache[name] = s;
+    stackCache[key] = s;
     return s;
   }
 

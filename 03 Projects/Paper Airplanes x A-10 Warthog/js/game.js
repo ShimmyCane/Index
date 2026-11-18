@@ -99,8 +99,9 @@ var PA;
     // The same sprite built as a stack: four slices, each one pixel lower than the one above,
     // the lower slices darker. The top slice is the full colour, so the edge of the stack shows.
     function stackedSprite(name, layers = 4, step = 1) {
-        if (stackCache[name])
-            return stackCache[name];
+        const key = name + ':' + layers + ':' + step;
+        if (stackCache[key])
+            return stackCache[key];
         const paint = PA.PAINT[name];
         if (!paint)
             throw new Error('no sprite named ' + name);
@@ -116,7 +117,7 @@ var PA;
             }
         };
         const s = buildSprite(stacked);
-        stackCache[name] = s;
+        stackCache[key] = s;
         return s;
     }
     PA.stackedSprite = stackedSprite;
@@ -1525,7 +1526,11 @@ var PA;
             this.waveTimer -= dt;
             if (this.waveTimer <= 0) {
                 this.waveTimer = WAVE_SECONDS;
-                for (let i = 0; i < this.settings.enemyWave; i++) {
+                // Felix (easy) has a quarter of the fighters; normal has half as many again.
+                const wave = this.settings.enemyWave === 0 ? 0
+                    : this.felix ? Math.max(1, Math.round(this.settings.enemyWave * 0.25))
+                        : Math.round(this.settings.enemyWave * 1.5);
+                for (let i = 0; i < wave; i++) {
                     this.mission.targets.push(PA.spawnAir(this.rand, this.plane.X, this.plane.Z, true));
                 }
             }
@@ -2388,12 +2393,20 @@ var PA;
             ctx.fill();
         }
     }
+    // Which way a thing faces, in the ground plane (0 = east, the way the sprites face).
+    function facingOf(t) {
+        if (t.faction === 'enemy' && t.vH !== undefined)
+            return Math.atan2(Math.cos(t.vH), Math.sin(t.vH));
+        if (t.vZ !== undefined && t.vZ !== 0)
+            return t.vZ > 0 ? Math.PI / 2 : -Math.PI / 2;
+        return 0;
+    }
     function collect(g, c) {
         const things = [];
         const range = VIEWS[g.settings.view].range;
         // Trees: a few in each forest square near the camera.
         const ci = Math.round(c.px / CELL), cj = Math.round(c.pz / CELL);
-        const tree = PA.sprite('tree');
+        const tree = PA.stackedSprite('tree', 4, 1);
         for (let i = ci - range; i < ci + range; i++) {
             for (let j = cj - range; j < cj + range; j++) {
                 const cx0 = i * CELL, cz0 = j * CELL;
@@ -2404,7 +2417,7 @@ var PA;
                     const Z = cz0 + PA.cellNoise(i, j, 47 + k) * CELL;
                     const p = project(c, X, PA.groundAt(X, Z), Z);
                     if (p)
-                        things.push({ zc: p[2], img: tree, X, base: PA.groundAt(X, Z), Z });
+                        things.push({ zc: p[2], img: tree, X, base: PA.groundAt(X, Z), Z, facing: 0, flip: false });
                 }
             }
         }
@@ -2418,17 +2431,22 @@ var PA;
                 continue;
             // Fighters and allies are stacked like the plane; ground things are single sprites for now.
             const air = t.h !== undefined;
-            things.push({ zc: p[2], img: air ? PA.stackedSprite(t.kind) : PA.sprite(t.kind), X: t.X, base: PA.altOf(t), Z: t.Z });
+            // Every object is stacked. Air things stack finely; ground things stack deeper.
+            const img = air ? PA.stackedSprite(t.kind, 4, 1) : PA.stackedSprite(t.kind, 4, 2);
+            things.push({ zc: p[2], img, X: t.X, base: PA.altOf(t), Z: t.Z, facing: facingOf(t), flip: false });
         }
         things.sort((a, b) => b.zc - a.zc);
         return things;
     }
     // Draws one sprite standing at (X, base, Z), larger the closer it is.
-    function billboard(ctx, c, img, X, Z, base) {
+    // The sprite is mirrored when the camera sees its front, so things change as you pass them.
+    function billboard(ctx, c, img, X, Z, base, facing = 0) {
         const p = project(c, X, base, Z);
         if (!p)
             return;
         const [sx, sy, zc] = p;
+        const toCam = Math.atan2(c.px - X, c.pz - Z);
+        const seesFront = Math.cos(toCam - facing) > 0;
         // Size by distance: true perspective, plus a boost when close (up to three times
         // larger inside 220 m), and a floor so anything far off still shows as a few pixels.
         const near = Math.max(0, Math.min(1, (NEAR_BOOST_M - zc) / NEAR_BOOST_M));
@@ -2437,7 +2455,16 @@ var PA;
         k = Math.min(k, MAX_PX / img.height);
         const w = Math.max(1, Math.round(img.width * k));
         const h = Math.max(1, Math.round(img.height * k));
-        ctx.drawImage(img, Math.round(sx - w / 2), Math.round(sy - h), w, h);
+        if (seesFront) {
+            ctx.save();
+            ctx.translate(Math.round(sx), 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(img, Math.round(-w / 2), Math.round(sy - h), w, h);
+            ctx.restore();
+        }
+        else {
+            ctx.drawImage(img, Math.round(sx - w / 2), Math.round(sy - h), w, h);
+        }
     }
     function shots(ctx, c, list, color, size) {
         ctx.fillStyle = color;
@@ -2721,7 +2748,7 @@ var PA;
         if (g.settings.view !== 'cockpit' && g.mission.mode === 'glider')
             rings(ctx, g, c);
         for (const th of collect(g, c))
-            billboard(ctx, c, th.img, th.X, th.Z, th.base);
+            billboard(ctx, c, th.img, th.X, th.Z, th.base, th.facing);
         shots(ctx, c, g.shots, PA.COL.bullet, 2);
         shots(ctx, c, g.shells, PA.COL.shell, 2);
         missiles(ctx, g, c);

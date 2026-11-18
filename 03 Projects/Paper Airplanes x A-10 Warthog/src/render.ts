@@ -187,14 +187,21 @@ namespace PA {
 
   // Things standing on the ground or flying: sprites placed by perspective.
   // Drawn as one list, far to near, so trees, vehicles and planes overlap correctly.
-  interface Thing { zc: number; img: HTMLCanvasElement; X: number; base: number; Z: number; }
+  interface Thing { zc: number; img: HTMLCanvasElement; X: number; base: number; Z: number; facing: number; flip: boolean; }
+
+  // Which way a thing faces, in the ground plane (0 = east, the way the sprites face).
+  function facingOf(t: Target): number {
+    if (t.faction === 'enemy' && t.vH !== undefined) return Math.atan2(Math.cos(t.vH), Math.sin(t.vH));
+    if (t.vZ !== undefined && t.vZ !== 0) return t.vZ > 0 ? Math.PI / 2 : -Math.PI / 2;
+    return 0;
+  }
 
   function collect(g: Game, c: Cam): Thing[] {
     const things: Thing[] = [];
     const range = VIEWS[g.settings.view].range;
     // Trees: a few in each forest square near the camera.
     const ci = Math.round(c.px / CELL), cj = Math.round(c.pz / CELL);
-    const tree = sprite('tree');
+    const tree = stackedSprite('tree', 4, 1);
     for (let i = ci - range; i < ci + range; i++) {
       for (let j = cj - range; j < cj + range; j++) {
         const cx0 = i * CELL, cz0 = j * CELL;
@@ -203,7 +210,7 @@ namespace PA {
           const X = cx0 + cellNoise(i, j, 41 + k) * CELL;
           const Z = cz0 + cellNoise(i, j, 47 + k) * CELL;
           const p = project(c, X, groundAt(X, Z), Z);
-          if (p) things.push({ zc: p[2], img: tree, X, base: groundAt(X, Z), Z });
+          if (p) things.push({ zc: p[2], img: tree, X, base: groundAt(X, Z), Z, facing: 0, flip: false });
         }
       }
     }
@@ -214,17 +221,22 @@ namespace PA {
       if (p[2] > FOG_FAR * 1.5) continue;
       // Fighters and allies are stacked like the plane; ground things are single sprites for now.
       const air = t.h !== undefined;
-      things.push({ zc: p[2], img: air ? stackedSprite(t.kind) : sprite(t.kind), X: t.X, base: altOf(t), Z: t.Z });
+      // Every object is stacked. Air things stack finely; ground things stack deeper.
+      const img = air ? stackedSprite(t.kind, 4, 1) : stackedSprite(t.kind, 4, 2);
+      things.push({ zc: p[2], img, X: t.X, base: altOf(t), Z: t.Z, facing: facingOf(t), flip: false });
     }
     things.sort((a, b) => b.zc - a.zc);
     return things;
   }
 
   // Draws one sprite standing at (X, base, Z), larger the closer it is.
-  function billboard(ctx: CanvasRenderingContext2D, c: Cam, img: HTMLCanvasElement, X: number, Z: number, base: number): void {
+  // The sprite is mirrored when the camera sees its front, so things change as you pass them.
+  function billboard(ctx: CanvasRenderingContext2D, c: Cam, img: HTMLCanvasElement, X: number, Z: number, base: number, facing = 0): void {
     const p = project(c, X, base, Z);
     if (!p) return;
     const [sx, sy, zc] = p;
+    const toCam = Math.atan2(c.px - X, c.pz - Z);
+    const seesFront = Math.cos(toCam - facing) > 0;
     // Size by distance: true perspective, plus a boost when close (up to three times
     // larger inside 220 m), and a floor so anything far off still shows as a few pixels.
     const near = Math.max(0, Math.min(1, (NEAR_BOOST_M - zc) / NEAR_BOOST_M));
@@ -233,7 +245,15 @@ namespace PA {
     k = Math.min(k, MAX_PX / img.height);
     const w = Math.max(1, Math.round(img.width * k));
     const h = Math.max(1, Math.round(img.height * k));
-    ctx.drawImage(img, Math.round(sx - w / 2), Math.round(sy - h), w, h);
+    if (seesFront) {
+      ctx.save();
+      ctx.translate(Math.round(sx), 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(img, Math.round(-w / 2), Math.round(sy - h), w, h);
+      ctx.restore();
+    } else {
+      ctx.drawImage(img, Math.round(sx - w / 2), Math.round(sy - h), w, h);
+    }
   }
 
   function shots(ctx: CanvasRenderingContext2D, c: Cam, list: Shot[], color: string, size: number): void {
@@ -484,7 +504,7 @@ namespace PA {
     ground(ctx, g, c);
     road(ctx, g, c);
     if (g.settings.view !== 'cockpit' && g.mission.mode === 'glider') rings(ctx, g, c);
-    for (const th of collect(g, c)) billboard(ctx, c, th.img, th.X, th.Z, th.base);
+    for (const th of collect(g, c)) billboard(ctx, c, th.img, th.X, th.Z, th.base, th.facing);
     shots(ctx, c, g.shots, COL.bullet, 2);
     shots(ctx, c, g.shells, COL.shell, 2);
     missiles(ctx, g, c);

@@ -473,7 +473,11 @@ namespace PA {
       this.waveTimer -= dt;
       if (this.waveTimer <= 0) {
         this.waveTimer = WAVE_SECONDS;
-        for (let i = 0; i < this.settings.enemyWave; i++) {
+        // Felix (easy) has a quarter of the fighters; normal has half as many again.
+        const wave = this.settings.enemyWave === 0 ? 0
+          : this.felix ? Math.max(1, Math.round(this.settings.enemyWave * 0.25))
+          : Math.round(this.settings.enemyWave * 1.5);
+        for (let i = 0; i < wave; i++) {
           this.mission.targets.push(spawnAir(this.rand, this.plane.X, this.plane.Z, true));
         }
       }
