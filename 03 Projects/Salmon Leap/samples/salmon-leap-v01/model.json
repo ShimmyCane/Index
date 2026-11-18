@@ -1,0 +1,568 @@
+{
+  "schema": "m3dxc.model/0.1",
+  "model_id": "salmon-leap-v01",
+  "name": "Leaping salmon statue V1",
+  "description": "Narrative and rough massing",
+  "scale": "statue, about 25 in from tail to nose",
+  "units": "in",
+  "up": "z",
+  "world": "salmon-world",
+  "version": 15,
+  "history_hash": "7c16bd64",
+  "objects": [
+    {
+      "uuid": "statue",
+      "name": "Leaping salmon (statue)",
+      "type": "group",
+      "description": "A bronze Atlantic salmon leaping up. Massing, then details."
+    },
+    {
+      "uuid": "fish",
+      "name": "Fish (bronze)",
+      "type": "group",
+      "description": "The body and its fins.",
+      "parent": "statue"
+    },
+    {
+      "uuid": "base",
+      "name": "Granite base (stepped)",
+      "type": "group",
+      "description": "Three steps of granite that the fish rises from.",
+      "parent": "statue"
+    },
+    {
+      "uuid": "supports",
+      "name": "Supports",
+      "type": "group",
+      "description": "A pillar under the belly and a prop under the tail.",
+      "parent": "statue"
+    },
+    {
+      "uuid": "body",
+      "name": "Body",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 26.3,
+        "y": 4.4,
+        "z": 11.2
+      },
+      "position": [
+        -0.05,
+        0,
+        11
+      ],
+      "material": "bronze",
+      "certainty": {
+        "percent": 70,
+        "basis": "inferred",
+        "note": "Spindle body: depth about a quarter of the length (Maine DMR, Fishbase)."
+      },
+      "joints": [
+        [
+          -11,
+          0,
+          7.6
+        ],
+        [
+          -7,
+          0,
+          10.6
+        ],
+        [
+          -3,
+          0,
+          13.2
+        ],
+        [
+          1,
+          0,
+          14.4
+        ],
+        [
+          5,
+          0,
+          14.1
+        ],
+        [
+          8.4,
+          0,
+          12.8
+        ],
+        [
+          10.9,
+          0,
+          10.8
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.3,
+          0.4
+        ],
+        [
+          0.08,
+          0.5,
+          0.7
+        ],
+        [
+          0.2,
+          1,
+          1.5
+        ],
+        [
+          0.38,
+          1.25,
+          2.2
+        ],
+        [
+          0.55,
+          1.2,
+          2.2
+        ],
+        [
+          0.7,
+          0.9,
+          1.5
+        ],
+        [
+          0.85,
+          0.6,
+          0.9
+        ],
+        [
+          0.95,
+          0.45,
+          0.6
+        ],
+        [
+          1,
+          0.5,
+          0.6
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "uuid": "tail-up",
+      "name": "Tail lobe (upper)",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 6.4,
+        "y": 2.2,
+        "z": 5.9
+      },
+      "position": [
+        -13.1,
+        0,
+        9.45
+      ],
+      "material": "bronze",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "Caudal fin, upper lobe. Forked tail."
+      },
+      "joints": [
+        [
+          -11,
+          0,
+          7.6
+        ],
+        [
+          -13.4,
+          0,
+          9.4
+        ],
+        [
+          -15.2,
+          0,
+          11.3
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.12,
+          0.6
+        ],
+        [
+          0.6,
+          0.14,
+          1.1
+        ],
+        [
+          1,
+          0.08,
+          0.45
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "uuid": "tail-down",
+      "name": "Tail lobe (lower)",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 6.4,
+        "y": 2.2,
+        "z": 5.6
+      },
+      "position": [
+        -13.1,
+        0,
+        5.9
+      ],
+      "material": "bronze",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "Caudal fin, lower lobe."
+      },
+      "joints": [
+        [
+          -11,
+          0,
+          7.6
+        ],
+        [
+          -13.4,
+          0,
+          6
+        ],
+        [
+          -15.2,
+          0,
+          4.2
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.12,
+          0.6
+        ],
+        [
+          0.6,
+          0.14,
+          1.1
+        ],
+        [
+          1,
+          0.08,
+          0.45
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "uuid": "dorsal",
+      "name": "Dorsal fin",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 6.9,
+        "y": 3.8,
+        "z": 6.1
+      },
+      "position": [
+        -2.45,
+        0,
+        16.45
+      ],
+      "material": "bronze",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "Dorsal fin: steering and balance."
+      },
+      "joints": [
+        [
+          -4,
+          0,
+          15.3
+        ],
+        [
+          -2.6,
+          0,
+          17.6
+        ],
+        [
+          -0.9,
+          0,
+          16.9
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.7
+        ],
+        [
+          0.45,
+          0.12,
+          1.9
+        ],
+        [
+          1,
+          0.1,
+          0.35
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "uuid": "pectoral-r",
+      "name": "Pectoral fin (right)",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 3.9,
+        "y": 5.8,
+        "z": 4.7
+      },
+      "position": [
+        2.85,
+        2.6,
+        11.35
+      ],
+      "material": "bronze",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "Pectoral fin: steering, spread out."
+      },
+      "joints": [
+        [
+          3.5,
+          1,
+          12.4
+        ],
+        [
+          2.8,
+          2.8,
+          11.2
+        ],
+        [
+          2.2,
+          4.2,
+          10.3
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.9
+        ],
+        [
+          0.6,
+          0.12,
+          1.3
+        ],
+        [
+          1,
+          0.08,
+          0.45
+        ]
+      ],
+      "facing": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "uuid": "pectoral-l",
+      "name": "Pectoral fin (left)",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 3.9,
+        "y": 5.8,
+        "z": 4.7
+      },
+      "position": [
+        2.85,
+        -2.6,
+        11.35
+      ],
+      "material": "bronze",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "Pectoral fin: steering, spread out."
+      },
+      "joints": [
+        [
+          3.5,
+          -1,
+          12.4
+        ],
+        [
+          2.8,
+          -2.8,
+          11.2
+        ],
+        [
+          2.2,
+          -4.2,
+          10.3
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.9
+        ],
+        [
+          0.6,
+          0.12,
+          1.3
+        ],
+        [
+          1,
+          0.08,
+          0.45
+        ]
+      ],
+      "facing": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "uuid": "step-1",
+      "name": "Step 1",
+      "type": "box",
+      "parent": "base",
+      "dimensions": {
+        "x": 16,
+        "y": 9,
+        "z": 3
+      },
+      "position": [
+        0,
+        0,
+        1.5
+      ],
+      "material": "granite",
+      "certainty": {
+        "percent": 80,
+        "basis": "user",
+        "note": "Designed step. Massing."
+      }
+    },
+    {
+      "uuid": "step-2",
+      "name": "Step 2",
+      "type": "box",
+      "parent": "base",
+      "dimensions": {
+        "x": 10,
+        "y": 7,
+        "z": 3
+      },
+      "position": [
+        0,
+        0,
+        4.5
+      ],
+      "material": "granite",
+      "certainty": {
+        "percent": 80,
+        "basis": "user",
+        "note": "Designed step. Massing."
+      }
+    },
+    {
+      "uuid": "step-3",
+      "name": "Step 3",
+      "type": "box",
+      "parent": "base",
+      "dimensions": {
+        "x": 5,
+        "y": 4.5,
+        "z": 2
+      },
+      "position": [
+        0,
+        0,
+        7
+      ],
+      "material": "granite",
+      "certainty": {
+        "percent": 80,
+        "basis": "user",
+        "note": "Designed step. Massing."
+      }
+    },
+    {
+      "uuid": "pillar",
+      "name": "Pillar under the belly",
+      "type": "cylinder",
+      "parent": "supports",
+      "dimensions": {
+        "x": 1,
+        "y": 1,
+        "z": 4
+      },
+      "position": [
+        0,
+        0,
+        9.9
+      ],
+      "material": "bronze",
+      "certainty": {
+        "percent": 80,
+        "basis": "user",
+        "note": "Support pillar, bronze. Its height meets the belly."
+      }
+    },
+    {
+      "uuid": "tail-prop",
+      "name": "Prop under the tail",
+      "type": "cylinder",
+      "parent": "supports",
+      "dimensions": {
+        "x": 0.8,
+        "y": 0.8,
+        "z": 7.4
+      },
+      "position": [
+        -11,
+        0,
+        3.7
+      ],
+      "material": "bronze",
+      "certainty": {
+        "percent": 80,
+        "basis": "user",
+        "note": "Tail prop from the ground."
+      }
+    }
+  ],
+  "flags": []
+}

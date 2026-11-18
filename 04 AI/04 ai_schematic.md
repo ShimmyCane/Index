@@ -31,6 +31,8 @@ Projects with notes:
 - Mind Palace/ — MVP 0.1.0 (2026-11-17): a memory palace in 3-D; database, scene description and renderer kept apart; search and walk, two kinds of practice, build and move, undo. Round 3 (0.2.0): Gaussian splat page in plain WebGL 2, palaces per person; Godot project written, not run. `brief.md`, `lessons.md`. Questions in `03 Projects/Mind Palace/convo/convo v0.3.md`.
 - Make-3D x Construct/ — MVP 0.1 (2026-11-18): new version of Make 3D with Construct's processes (checks with fix hints, certainty percent, flags, defect ledger and rounds); plains camp diorama sample; 33 Node tests and headless browser check; SQL not applied. `brief.md`, `lessons.md`. Questions in `03 Projects/Make-3D x Construct/convo/convo v0.2.md`.
 
+- Salmon Leap/ — V1 to V5 (2026-11-18): a bronze statue of a leaping Atlantic salmon, built in five versions with a test; references and lessons in `Salmon Leap/lessons.md` and `brief.md`. Questions in `03 Projects/Salmon Leap/convo/convo v0.1.md`.
+
 Notes:
 - Graduated to their own repos (removed from the nursery 2026-11-10; history stays in git): Athena's world → `ShimmyCane/Athena-s-world`, Bar Glide → `ShimmyCane/Bar-Glide`, Chinese Character Sudoku → `ShimmyCane/Chinese-Character-Sudoku`, Voice → `ShimmyCane/Voice`, What to Cook → `ShimmyCane/What-to-Cook`. Earlier: Expansion Wars → `ShimmyCane/Expansion-Wars`, Felix Maze → `ShimmyCane/Felix-Maze`, Fishes → `ShimmyCane/Fishes`, Make 3D → `ShimmyCane/Make-3D`, Growth (with Paper Again) → `ShimmyCane/Growth`, Increment Viewer → `ShimmyCane/Increment-Viewer`. Steps for the next one: `/graduate-project`.
 - Lessons in this folder come from the private ShimmyAI repo's `04 AI/`. Only generic lessons were carried over. Family and personal details were not.

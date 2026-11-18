@@ -1,0 +1,10 @@
+{
+  "schema": "m3dxc.world/0.1",
+  "name": "salmon-world",
+  "description": "Rules for the salmon statue. Units inches, Z up. Change a rule here, not in the model.",
+  "units": "in",
+  "up": "z",
+  "max_dimension_in": 240,
+  "min_dimension_in": 0.05,
+  "warn_below_percent": 50
+}
