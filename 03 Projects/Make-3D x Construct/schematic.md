@@ -1,6 +1,6 @@
 # Make-3D x Construct — Schematic
 
-**Status:** idea, round 1 questions open (`convo/convo v0.1.md`) · **Updated:** 2026-11-18
+**Status:** MVP 0.1 built (headless-tested; not device-tested) · round 2 questions open (`convo/convo v0.2.md`) · **Updated:** 2026-11-18
 **Track:** B. Studio design (`02 Refs/Skills/project_track.md`)
 **Based on:** a review of Construct (`rtmandreyev/construct`, commit `7ea702e`, toolkit version 1.3.2), the Make-3D schematic and to-do list (graduated to `ShimmyCane/Make-3D`), and the nursery's new-project workflow. Nothing is built yet. The first build waits for Jimmy's answers.
 
@@ -79,12 +79,39 @@ A new version of Make 3D, built with the working method Construct uses. Make 3D 
 - **Family database (step 8):** not applicable. This is track B, and the database is the Architecture project's owner-only one.
 - **Home page tile (step 9):** no page exists yet, so no tile is added now. The first build adds one in the same change, as the workflow requires.
 
-## 7. Open questions
+## 7. Decisions from round 1 (`convo/convo v0.1.md`, answered)
 
-All questions are in `convo/convo v0.1.md`. Jimmy answers inline there. This schematic is updated after each round.
+- **Scope:** implement as much of Construct's method as possible, in JavaScript (Q1: c).
+- **Judging:** a person and a model critic, both (Q2: c). The model critic is not built yet.
+- **Order:** all the pieces in one first increment (Q3: doesn't matter).
+- **Certainty:** a percentage per part, sortable and editable, saved to the Architecture database (Q4).
+- **Unknown values:** left out and flagged, never `null` (Q5).
+- **Look:** paper and ink, the user's materials (Q6).
+- **Round limits:** at most four per round; stop after two rounds without a win; no time cap; explained in ⚙️ (Q7).
+- **Units:** inches and Z up, as Make 3D (Q8).
+- **Credit:** an About panel in ⚙️, near the bottom (Q9).
+- **⚙️:** yes, with Notes for improvement (Q10).
+- **Database:** table prefix `m3dxc_`, owner only, local first (Q11).
+- **Start:** build fresh here, with a generic plains camp diorama as the sample (Q12).
 
-## 8. Next steps
+## 8. Built in round 2 (2026-11-18)
 
-1. Jimmy answers `convo/convo v0.1.md`.
-2. This schematic is updated with the answers, and a `todo.md` with the first increment and its ledger is written.
-3. A confirmed first increment is built, reviewed from four views, and then the project's first tile goes on the nursery home page.
+- **Engine** (`js/core/model.js`): history replay, each operation checked before it is applied, 30 diagnostic codes with path and fix hint, certainty percent 0–100 with a basis, flags that explain warnings, FNV-1a history hash, world rules in `worlds/`.
+- **Rounds** (`js/core/rounds.js`): ledger, four items per round, keep the best, stop rules, a packet with renders and open defects only (no history, no notes).
+- **Viewer** (`js/viewer/viewer.js`): three.js r160, Z up, certainty colour (provenance view), drag, pinch, wheel, tap to select, four fixed views for a packet.
+- **Page** (`index.html`, `js/app.js`, `css/app.css`): Model, Certainty, Flags, Ledger and rounds, Selected part; ⚙️ drawer with Show errors, How rounds work, Notes for improvement, Database check, About and credits (bottom). Errors shown at the bottom only when Show errors is on.
+- **Sample** (`tools/diorama_scene.js` → `samples/plains-diorama/`): 32 objects, 6 open flags, placeholders marked. Research in `research/plains-diorama.md`.
+- **Database** (`supabase/001_m3dxc_certainty.sql`): written and test SQL, **not applied**.
+- **Tests:** 18 model tests, 14 rounds tests, 1 sample test: all pass.
+
+Not built yet: the cloud save to `m3dxc_certainty`; the model critic; the Show errors and round scoring in the page beyond the rules; the summary page (`summarize_code`) for `index.html`; any device test.
+
+## 9. Open questions
+
+See `convo/convo v0.2.md`.
+
+## 10. Next steps
+
+1. Jimmy reviews the MVP from the nursery tile and answers `convo/convo v0.2.md`.
+2. Decide on the cloud save (apply the SQL) and on the model critic.
+3. Device test on an iPad before any family-facing use.

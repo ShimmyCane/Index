@@ -1,31 +1,37 @@
 # Make-3D x Construct — Brief
 
-**Status (2026-11-18):** seed created (`/start-project`). No code. Waiting for Jimmy's answers in `03 Projects/Make-3D x Construct/convo/convo v0.1.md`.
+**Status (2026-11-18):** MVP 0.1 built and checked headless (not device-tested). Round 2 questions open in `03 Projects/Make-3D x Construct/convo/convo v0.2.md`.
 
 ## Goal
 
-A new version of Make 3D (`ShimmyCane/Make-3D`) built with Construct's working method. Construct is by Artyom Andreyev (rtmandreyev), Apache-2.0, https://github.com/rtmandreyev/construct. Its method is credited in `03 Projects/Make-3D x Construct/schematic.md` §0.
+A new version of Make 3D (`ShimmyCane/Make-3D`), built with Construct's working method. Construct is by Artyom Andreyev (rtmandreyev), Apache-2.0, https://github.com/rtmandreyev/construct. Credits: `schematic.md` §0, and the page's About panel.
 
 ## What was read (verified)
 
-- Construct at commit `7ea702e754c70cbd22157378cbde95be112b32c8`, toolkit version 1.3.2 (`skills/construct/SKILL.md`). Cloned shallow to `/home/user/rtmandreyev/construct` (read-only; not attached to any repo here).
-- Licence: Apache-2.0 (`LICENSE`). Notice: `NOTICE` credits Anatomy (MIT) as the source of its working method.
-- Processes read: `CONTRACT.md` (contract, geometry, certainty and sources), `CONTRIBUTING.md` (determinism, audit to zero), `skills/construct/references/rounds.md` (ledger, packet, blind critic, pairwise gate, stop rules), `references/provenance.md` (certainty, two-axis size and shape, requirements, shades), `references/method.md`.
-- Make 3D: `schematic.md` and `todo.md` (graduated repo copy at `/home/user/Make-3D`).
+- Construct at commit `7ea702e754c70cbd22157378cbde95be112b32c8`, toolkit 1.3.2. Read: `CONTRACT.md`, `CONTRIBUTING.md`, `skills/construct/SKILL.md`, `references/rounds.md`, `references/provenance.md`, `references/method.md`. Clone is outside the repo: `/home/user/rtmandreyev/construct`.
+- Its tests and CLI were not run. Its method was re-implemented in plain JavaScript, with no code copied.
+
+## What exists now (verified by running)
+
+- `js/core/model.js`, `js/core/rounds.js`: 33 Node tests pass (`tests/`). Sample builds clean.
+- `index.html` in headless Chromium (desktop 1280 px, phone 390 px): no console or page errors, no horizontal scroll, the 3-D view renders, selection works, an edit saves and re-checks, the ⚙️ drawer opens and Show errors works.
+- The viewer had a bug (blank until the first interaction). Fixed by rendering after `setModel`. A second bug (number step blocking the inspector's save) fixed with `step="any"`.
 
 ## Not verified
 
-- Construct's own tests and CLI were **not run**. The review is from reading the docs and the skill only.
-- Whether the rounds process works with a human critic. It was written for a model critic.
+- A real iPad (touch, pinch, the bottom errors panel).
+- The database: `supabase/001_m3dxc_certainty.sql` is test SQL only, not run against the project.
+- The model critic: not built.
+- Research: 10 sources from search results; the Anadarko diorama date is unresolved (1949 vs 1950); the museum-studies claims need a book-length source before they are quoted publicly.
 
-## Decisions taken in the seed (proposed, Jimmy to confirm)
+## Decisions (see schematic §7–8)
 
-- Track B (studio design), paper and ink palette.
-- Ideas only, in JavaScript: no Python port, no build, no model needed to run.
-- No code copied from Construct. If any is, its LICENSE and NOTICE go into the project folder.
+- Track B, paper and ink. Inches, Z up. Certainty as a percent per part.
+- Round limits: 4 per round; stop after 2 rounds without a win; no time cap; round cap optional.
+- Terminology: "Native nations" or the nation's name, not "Indians", in new text.
 
-## Next steps
+## Next
 
-1. Jimmy answers `convo/convo v0.1.md`.
-2. Update `schematic.md` with the answers and write `todo.md` with the first increment and its ledger.
-3. Build the first increment, review from four views, add the nursery home page tile in the same change.
+1. Jimmy answers `convo v0.2.md`.
+2. Device test on an iPad.
+3. Decide on the database apply and the model critic.
