@@ -25,6 +25,8 @@ Skills:
 - update_story: Adventure only. Runs consider_actions first, plans the story line and its deviations, rewrites future chapter titles when needed, writes the next chapter (poem peek, minute, whole page, director's notes), and hands the next page to the family once Jimmy says go.
 - gather_story_lessons_learned: Adventure only, internal. After each run, records the family's pacing, plot adherence, role profiles and the storyteller's own right and wrong guesses, so planning gets faster. Family details stay in Supabase.
 
+- remix: Builds a nursery version of a linked website or GitHub repo, combines it with another repo or set of ideas, checks the licence, and records what was read and reused. Seed named "A x B".
+
 Claude Code:
 - These files are the source of truth. Each one has a thin wrapper in `.claude/skills/<name-with-hyphens>/SKILL.md`, so it can be run as `/start-project`, `/ai-consolidate`, etc.
 - When adding a skill here, also add its wrapper (or ask Claude to).
