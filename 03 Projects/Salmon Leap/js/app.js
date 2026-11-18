@@ -30,7 +30,9 @@
     const pill = $('pill-audit');
     pill.className = 'pill ' + (v.audit.ok ? 'ok' : 'bad');
     pill.textContent = v.label + ': ' + (v.audit.ok ? 'checks clean' : 'checks failing');
-    $('facts').textContent = v.model.objects.length + ' parts · history ' + v.model.history_hash + ' · ' + v.model.version + ' operations';
+    const st = v.stats;
+    const growth = v.growth ? ' · growth ×' + v.growth.triangles + ' triangles, ×' + v.growth.objects + ' objects' : '';
+    $('facts').textContent = st.objects + ' objects (' + st.parts + ' parts), about ' + st.triangles.toLocaleString() + ' triangles' + growth + ' · history ' + v.model.history_hash;
     const list = $('part-list'); list.textContent = '';
     v.model.objects.filter(o => o.type !== 'group').forEach(o => {
       const li = document.createElement('li');

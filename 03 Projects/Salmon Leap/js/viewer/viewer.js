@@ -74,7 +74,9 @@
 
   // A loft is built from its spine and rings (js/core/loft.js): smooth, with normals and UVs.
   function loftGeometry(obj) {
-    var m = LOFT.mesh(obj, { sides: 18, samples: 30 });
+    // each loft carries its own resolution (set per version by the build), so the viewer shows the counted faces
+    var det = obj.detail || { sides: 18, samples: 30 };
+    var m = LOFT.mesh(obj, { sides: det.sides, samples: det.samples });
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(m.positions, 3));
     g.setAttribute('normal', new THREE.Float32BufferAttribute(m.normals, 3));

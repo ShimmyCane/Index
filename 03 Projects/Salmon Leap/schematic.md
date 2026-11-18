@@ -29,6 +29,22 @@ Each version is cumulative and built from one generator (`tools/build_versions.j
 - Check the audit after each version; render from front, back and oblique; check the back view shows the statue (the backdrop is hidden from behind).
 - Refine the narrative in each version's convo and in the page's narrative panel.
 
+## Growth rule (Jimmy, 2026-11-18)
+
+V1 starts with 25 to 100 objects or meshes. Each later version may grow up to 4x in mesh faces or objects, and the growth decays over later versions. Refining or replacing a part may also shrink a count.
+
+Measured by `tools/build_versions.js` (triangles, approximate: lofts from their resolution, primitives at fixed counts):
+
+| Version | Objects | Triangles | Growth in triangles | Limit |
+|---|---|---|---|---|
+| V1 | 26 | 1,972 | (start) | 25 to 100 objects |
+| V2 | 33 | 7,456 | ×3.78 | ×4 |
+| V3 | 43 | 22,096 | ×2.96 | ×3 |
+| V4 | 49 | 43,536 | ×1.97 | ×2 |
+| V5 | 57 | 63,340 | ×1.45 | ×1.5 |
+
+Loft resolution (`sides` × `samples`) per version: V1 8×10, V2 12×20, V3 20×23, V4 25×31, V5 30×32. Objects grow 1.14× to 1.3× a step. `tests/test_versions.js` checks the rule.
+
 ## Open
 
 See `convo/convo v0.1.md`.
