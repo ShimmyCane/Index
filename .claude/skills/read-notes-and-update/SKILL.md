@@ -1,13 +1,11 @@
 ---
 name: read-notes-and-update
-description: "Read the feedback notes a nursery app saved to its Supabase table, turn them into project work (todo items, a new convo round), and mark handled notes as done after the owner confirms. Use when asked to read notes, review feedback, or update notes for a project."
+description: "Deprecated on 2026-11-18: renamed to review-notes-and-update. Use /review-notes-and-update. This stub only points to the new skill."
 argument-hint: "<project name>"
 ---
 
-The source of truth for this skill is `02 Refs/Skills/read_notes_and_update.md`, which Jimmy maintains by hand.
+This skill is deprecated. It was renamed on 2026-11-18 to `/review-notes-and-update`, because the skill reviews the saved notes, turns them into project work and marks them done.
 
-1. Read `02 Refs/Skills/read_notes_and_update.md` in full.
-2. Follow it exactly, applying the conventions in the root `CLAUDE.md` and `04 AI/<Project>/brief.md`.
-3. Arguments passed to this skill: $ARGUMENTS
+Run `/review-notes-and-update $ARGUMENTS` instead.
 
-Do not edit `02 Refs/Skills/read_notes_and_update.md` unless Jimmy asks.
+Why and history: `02 Refs/Skills/deprecated/read_notes_and_update.md`.

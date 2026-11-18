@@ -7,7 +7,7 @@
   var S = {
     place: GC.PLACES[0], when: { now: true }, data: null, preset: null, ov: {}, model: null, frame: null,
     simT: 0, playing: false, autoLeft: 0, loops: 0, dirty: true, flash: 0, loading: false, clock: 0, spot: null, pendingCam: null,
-    thunder: null, wideKey: '', clipStart: 0, regKey: '', starKey: '', satDone: false, satBusy: false, satRetry: 0, moveTimer: 0, pick: null
+    thunder: null, wideKey: '', nav: 'look', zone: '', regKey: '', starKey: '', satDone: false, satBusy: false, satRetry: 0, moveTimer: 0, pick: null
   };
   GC.state = S;
 
@@ -18,14 +18,19 @@
   function localAt(simT) { return S.data ? W.msToLocal(S.data.utcMs + S.data.offsetSec * 1000 + simT * 1000) : ''; }
   function fileStem() { return 'clouds_' + S.place.name.replace(/[^A-Za-z0-9]+/g, '-').toLowerCase() + '_' + localAt(S.simT).replace(/[:T]/g, '-'); }
 
-  // ---------- playback: the 24-hour time lapse, or a short clip of waves and clouds at a real speed ----------
-  function isClip() { return GC.settings.mode === 'clip'; }
-  function waveRate() { return +GC.settings.wave || 1; }                       // 0.5, 1 or 2 times real speed
-  function clipLen() { return +GC.settings.clip || 15; }                       // real seconds per clip
-  function lapseRate() { return DAY / (+GC.settings.lapse || 60); }            // sky seconds per real second
-  function barMax() { return isClip() ? clipLen() : DAY; }
-  function barToSim(v) { return isClip() ? S.clipStart + v * waveRate() : v; }
-  function simToBar(t) { return isClip() ? Math.max(0, (t - S.clipStart) / waveRate()) : t; }
+  // ---------- playback: how much sky the time lapse covers, and how long one run takes ----------
+  // The sky span is what the time lapse shows (15 s to 24 h); the playback is how long one run takes in real
+  // time (15 s to 5 min). Speed = sky span / playback: 1 is real time, 0.5 is half time.
+  var SPANS = [15, 60, 900, 3600, 7200, 28800, 86400], PLAYS = [15, 60, 120, 180, 240, 300];   // seconds
+  var SPAN_LABELS = ['15 s', '1 min', '15 min', '1 h', '2 h', '8 h', '24 h'], PLAY_LABELS = ['15 s', '1 min', '2 min', '3 min', '4 min', '5 min'];
+  function spanSec() { return +GC.settings.span || 60; }
+  function playSec() { return +GC.settings.play || 60; }
+  function rate() { return spanSec() / playSec(); }                         // sky seconds per real second
+  function rateText(r) {
+    if (Math.abs(r - 1) < 1e-6) return '1× · real time';
+    if (r < 1) return (Math.round(r * 100) / 100) + '× · ' + (Math.abs(r - 0.5) < 1e-6 ? 'half time' : (1 / r).toFixed(1) + ' times slower');
+    return Math.round(r) + '× · faster than real time';
+  }
 
   // ---------- panels (collapsible, remembered per device) ----------
   function initPanels() {
@@ -58,13 +63,13 @@
     S.regKey = ''; S.starKey = ''; S.dirty = true;
   }
   function restart(autoplay) {
-    S.simT = 0; S.loops = 0; S.clipStart = 0;
+    S.simT = 0; S.loops = 0;
     S.autoLeft = (autoplay && +GC.settings.autoplay) ? 2 : 0;
     setPlaying(S.autoLeft > 0);
     S.dirty = true;
   }
   function setPlaying(on) {
-    if (on) { GC.Audio.unlock(); if (isClip() && !S.playing) S.clipStart = S.simT; }
+    if (on) GC.Audio.unlock();
     S.playing = on; $('play').classList.toggle('playing', on); if (!on) S.autoLeft = 0; S.dirty = true;
   }
 
@@ -272,7 +277,26 @@
     return bands.some(function (b) { return a >= b[0] && a <= b[1]; });
   }
   // What one finger does here: orbit in the clouds, walk on the ground, pan across the Earth high up.
-  function gestureMode() { if (O.on || inCloudBand()) return 'orbit'; if (S.onGround) return 'walk'; return 'pan'; }
+  // The mode is chosen with the buttons in the bar: look (the default), walk (on the ground), orbit (a cloud) or pan (high up).
+  // Which buttons show depends on the height: ground, air (in the atmosphere) or space.
+  function zoneOf() { return S.onGround ? 'ground' : R.cam.alt >= 40 ? 'space' : 'air'; }
+  function gestureMode() { return S.nav; }
+  function setNav(m) {
+    if (m !== 'orbit' && O.on) orbitOff();
+    S.nav = m; syncNav(); S.dirty = true;
+  }
+  // The buttons for the current height: look everywhere; walk on the ground; orbit in the air; pan and clouds in space.
+  function syncNav() {
+    var z = zoneOf();
+    if (z !== S.zone) { S.zone = z; S.nav = z === 'space' ? 'pan' : 'look'; if (S.nav !== 'orbit' && O.on) orbitOff(); }
+    document.querySelectorAll('[data-zones]').forEach(function (b) {
+      b.hidden = b.dataset.zones.split(' ').indexOf(z) < 0;
+      if (b.dataset.nav) { b.classList.toggle('on', b.dataset.nav === S.nav); b.setAttribute('aria-pressed', String(b.dataset.nav === S.nav)); }
+    });
+    $('orbitBtn').classList.toggle('on', O.on || S.nav === 'orbit');
+    $('cloudChip').classList.toggle('on', !!+GC.settings.clouds);
+    $('cloudChip').textContent = +GC.settings.clouds ? '☁️ Clouds on' : '☁️ Clouds off';
+  }
 
   // Tap a cloud: the point where the tap's direction meets the cloud layer. Orbit around it and say what it is.
   var TYPE_NAMES = { altocumulus: 'Altocumulus', altostratus: 'Altostratus', cirrus: 'Cirrus', cirrostratus: 'Cirrostratus', cirrocumulus: 'Cirrocumulus' };
@@ -328,13 +352,22 @@
   function altFromSlider(s) { return Math.max(0.002, ALT_MAX * s * s * s); }
   function setAltSlider(a) { $('alt').value = Math.cbrt(Math.max(a, 0) / ALT_MAX); }
   function syncPlayback() {
-    var tm = $('time'); tm.max = barMax(); tm.step = isClip() ? 0.1 : 60;
-    $('barLabel').textContent = isClip() ? 'Waves' : '24 h';
+    var tm = $('time'); tm.max = spanSec(); tm.step = Math.max(0.1, spanSec() / 600);
+    if (S.simT > spanSec()) S.simT = 0;
+    $('speedLabel').textContent = rateText(rate());
   }
   function initBar() {
     $('play').addEventListener('click', function () { setPlaying(!S.playing); });
-    $('rewind').addEventListener('click', function () { S.simT = 0; S.clipStart = 0; S.dirty = true; });   // back to the start of the sky
-    $('time').addEventListener('input', function () { S.simT = barToSim(+$('time').value); if (S.playing) setPlaying(false); S.dirty = true; });
+    $('rewind').addEventListener('click', function () { S.simT = 0; S.loops = 0; S.dirty = true; });   // Restart: back to the start of the sky
+    $('time').addEventListener('input', function () { S.simT = +$('time').value; if (S.playing) setPlaying(false); S.dirty = true; });
+    document.querySelectorAll('[data-nav]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var m = b.dataset.nav;
+        if (m === 'orbit') { if (!O.on) orbitOn(null); setNav('orbit'); }
+        else setNav(m);
+        S.dirty = true;
+      });
+    });
     $('alt').addEventListener('input', function () {
       R.cam.alt = altFromSlider(+$('alt').value);
       if (O.on) { var r = O.D * Math.cos(GC.rad(O.phi)), up = Math.max(R.cam.alt - O.hF, r * 0.035); O.phi = GC.clamp(GC.deg(Math.atan2(up, r)), 2, 88); O.D = Math.hypot(r, up); R.cam.pitch = -O.phi + O.pitchOff; }
@@ -371,12 +404,11 @@
       var p = pts[e.pointerId]; if (!p) return;
       var dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY; moved += Math.abs(dx) + Math.abs(dy);
       var k = R.cam.fov / Math.max(cv.clientHeight, 1);
-      if (n() === 1 && !mouseLook) {
-        var mode = gestureMode();
-        if (mode === 'orbit') { if (!O.on) orbitOn(null); O.th = (O.th - dx * 0.3 + 360) % 360; O.phi = GC.clamp(O.phi + dy * 0.2, 2, 88); orbitApply(); }
-        else if (mode === 'walk') { walkBy(dx, dy); scheduleCommit(900); }
-        else { panBy(dx, dy); scheduleCommit(500); }
-      } else if (n() === 1 || n() === 2) {                      // look: turn the view
+      var mode = (n() === 2 || mouseLook) ? 'look' : gestureMode();
+      if (mode === 'orbit') { if (!O.on) orbitOn(null); O.th = (O.th - dx * 0.3 + 360) % 360; O.phi = GC.clamp(O.phi + dy * 0.2, 2, 88); orbitApply(); }
+      else if (mode === 'walk' && S.onGround) { walkBy(dx, dy); scheduleCommit(900); }
+      else if (mode === 'pan') { panBy(dx, dy); scheduleCommit(500); }
+      else {                                                    // look: turn the view
         if (O.on) { O.yawOff = (O.yawOff - dx * k + 360) % 360; O.pitchOff = GC.clamp(O.pitchOff + dy * k, -60, 60); orbitApply(); }
         else { R.cam.yaw = (R.cam.yaw - dx * k + 360) % 360; R.cam.pitch = GC.clamp(R.cam.pitch + dy * k, -89, 89); }
       }
@@ -393,7 +425,7 @@
     function up(e) {
       var was = n(), p = pts[e.pointerId]; delete pts[e.pointerId]; pinch = 0;
       if (was === 1 && e.type === 'pointerup' && moved < 8 && Date.now() - tapStart < 450 && p) {
-        var q = local(e); if (inCloudBand() || O.on) pickAt(q.x, q.y);
+        var q = local(e); if (S.nav === 'orbit') pickAt(q.x, q.y);
       }
       if (!n()) { cv.classList.remove('drag'); if (S.moveTimer) commitMove(); }
     }
@@ -406,7 +438,6 @@
     }, { passive: false });
     cv.addEventListener('gesturestart', function (e) { e.preventDefault(); });
     window.addEventListener('resize', function () { R.resize(); S.dirty = true; });
-    $('orbitBtn').addEventListener('click', function () { if (O.on) orbitOff(); else orbitOn(null); S.dirty = true; });
     $('turnBtn').addEventListener('click', function () { setTurning(!O.turning); });
     orbitButtons();
   }
@@ -653,11 +684,11 @@
       var v = String(GC.settings[seg.dataset.key]);
       seg.querySelectorAll('button').forEach(function (b) { b.classList.toggle('on', b.dataset.v === v); });
     });
-    var wi = [0.5, 1, 2].indexOf(+GC.settings.wave); $('waveSpeed').value = wi < 0 ? 1 : wi;
-    $('waveV').textContent = waveRate() + '× · ' + (waveRate() < 1 ? 'slow' : waveRate() > 1 ? 'fast' : 'real speed');
-    $('lapseBox').hidden = isClip(); $('clipBox').hidden = !isClip(); $('waveBox').hidden = !isClip();
-    $('cloudChip').classList.toggle('on', !!+GC.settings.clouds); $('cloudChip').setAttribute('aria-pressed', String(!!+GC.settings.clouds));
-    $('cloudChip').textContent = +GC.settings.clouds ? '☁️ Clouds on' : '☁️ Clouds off';
+    var si = SPANS.indexOf(spanSec()), pi = PLAYS.indexOf(playSec());
+    $('spanSlider').value = si < 0 ? 1 : si; $('playSlider').value = pi < 0 ? 1 : pi;
+    $('spanV').textContent = SPAN_LABELS[si < 0 ? 1 : si]; $('playV').textContent = PLAY_LABELS[pi < 0 ? 1 : pi];
+    $('timeLapseNote').textContent = 'Sky covered: ' + SPAN_LABELS[si < 0 ? 1 : si] + ', playback ' + PLAY_LABELS[pi < 0 ? 1 : pi] + ' → ' + rateText(rate()) + '.';
+    syncNav();
     $('showErrors').checked = !!GC.settings.showErrors;
     $('hud').hidden = !+GC.settings.compass;
     $('bar').hidden = !+GC.settings.bar; document.body.dataset.bar = +GC.settings.bar ? 'on' : 'off';
@@ -682,12 +713,14 @@
         if (k === 'quality') R.setQuality(v);
         if (k === 'relief') applyRelief();
         if (k === 'clouds') R.cloudsOn = +GC.settings.clouds;
-        if (k === 'mode') { S.clipStart = S.simT; }
         renderSettings(); S.dirty = true;
       });
     });
-    $('waveSpeed').addEventListener('input', function () {
-      GC.settings.wave = [0.5, 1, 2][+$('waveSpeed').value] || 1; GC.saveSettings(); renderSettings(); S.dirty = true;
+    $('spanSlider').addEventListener('input', function () {
+      GC.settings.span = SPANS[+$('spanSlider').value] || 60; GC.saveSettings(); syncPlayback(); renderSettings(); S.dirty = true;
+    });
+    $('playSlider').addEventListener('input', function () {
+      GC.settings.play = PLAYS[+$('playSlider').value] || 60; GC.saveSettings(); syncPlayback(); renderSettings(); S.dirty = true;
     });
     $('showErrors').addEventListener('change', function (e) { GC.settings.showErrors = e.target.checked; GC.saveSettings(); renderErrors(); });
     $('checkData').addEventListener('click', function () {
@@ -710,14 +743,9 @@
     var dt = Math.min((now - last) / 1000, 0.25); if (!last) dt = 0; last = now;
     if (!S.model || R.busy) return;
     if (S.playing) {
-      if (isClip()) {                                   // a short clip at a real speed: it repeats
-        var rate = waveRate();
-        S.simT += dt * rate; S.clock += dt * rate;      // waves, rain and funnels move at the clip's speed
-        if (S.simT - S.clipStart >= clipLen() * rate) { S.simT = S.clipStart; S.loops++; if (S.autoLeft > 0 && --S.autoLeft === 0) setPlaying(false); }
-      } else {                                          // 24 hours of sky in the chosen time
-        S.simT += dt * lapseRate(); S.clock += dt;
-        if (S.simT >= DAY) { S.simT -= DAY; S.loops++; if (S.autoLeft > 0 && --S.autoLeft === 0) setPlaying(false); }
-      }
+      var r = rate();                                   // the sky moves at the chosen rate: 1 is real time
+      S.simT += dt * r; S.clock += dt * Math.min(r, 2);  // waves, rain and funnels move at the rate, up to twice real speed
+      if (S.simT >= spanSec()) { S.simT -= spanSec(); if (S.simT >= spanSec()) S.simT = 0; S.loops++; if (S.autoLeft > 0 && --S.autoLeft === 0) setPlaying(false); }
       S.dirty = true;
       acc += dt * 1000; accN++;
       if (accN >= 20) { R.adapt(acc / accN); acc = 0; accN = 0; }
@@ -750,6 +778,7 @@
     var floor = GC.Terrain.ceilAt(R.cam.x, R.cam.z) + 0.002 + (onSea ? (S.frame.sea[4] || 0) + S.frame.sea[0] * 0.75 : 0);   // over water: 2 m above the highest crest, and above the tide
     S.onGround = R.cam.alt <= floor + 1e-6;
     if (R.cam.alt < floor) R.cam.alt = floor;
+    if (zoneOf() !== S.zone) syncNav();                 // the buttons follow the height
     R.clock = S.clock; R.city = S.place.city ? 1 : 0;
     maybeWide(); maybeSat(); R.satW = R.satOn ? GC.clamp((R.cam.alt - 20) / 40, 0, 1) : 0;
     applyRegional(); applyStars();
@@ -769,10 +798,9 @@
     GC.Stars.draw(figCtx, w, h, R.basis(), S.frame ? S.frame.night : 0);
   }
   function updateUi() {
-    if (document.activeElement !== $('time')) $('time').value = simToBar(S.simT);
-    $('clock').textContent = isClip()
-      ? 'Clip ' + fmtDur(simToBar(S.simT)) + ' of ' + fmtDur(clipLen()) + ' · ' + waveRate() + '×'
-      : localAt(S.simT).slice(11, 16) + ' · ' + (S.simT / 3600).toFixed(1) + ' h into 24';
+    if (document.activeElement !== $('time')) $('time').value = S.simT;
+    $('clock').textContent = fmtDur(S.simT) + ' of ' + fmtDur(spanSec()) + ' · ' + localAt(S.simT).slice(11, 16);
+    $('speedLabel').textContent = rateText(rate());
     $('altLabel').textContent = altText(R.cam.alt);
     var th = S.thunder && performance.now() < S.thunder.at + 1500 ? ' · ⚡ ' + S.thunder.km.toFixed(0) + ' km away, thunder ' + (performance.now() < S.thunder.at ? 'in ' + Math.ceil((S.thunder.at - performance.now()) / 1000) + ' s' : 'now') : '';
     var f = S.frame; if (!f) return;
@@ -786,7 +814,7 @@
 
   GC.debug = function () {
     var tl = S.data && S.data.tl;
-    return { version: GC.VERSION, simT: S.simT, playing: S.playing, mode: GC.settings.mode, lapse: +GC.settings.lapse, wave: waveRate(), clip: clipLen(), loops: S.loops, autoLeft: S.autoLeft,
+    return { version: GC.VERSION, simT: S.simT, playing: S.playing, span: spanSec(), play: playSec(), rate: rate(), nav: S.nav, zone: zoneOf(), loops: S.loops, autoLeft: S.autoLeft,
       source: tl && (S.preset ? 'atlas' : tl.source), hours: tl && tl.hours.length, hour: S.model && S.model.hourIndex(S.simT), place: S.place, local: S.data && S.data.localStr,
       types: S.model && S.model.types, summary: S.model && S.model.hourAt(S.simT).summary,
       cam: { yaw: R.cam.yaw, pitch: R.cam.pitch, fov: R.cam.fov, alt: R.cam.alt }, orbit: { on: O.on, turning: O.turning, turned: O.turned, D: O.D, phi: O.phi, th: O.th, fx: O.fx, fz: O.fz, hF: O.hF, yawOff: O.yawOff, pitchOff: O.pitchOff },

@@ -7,7 +7,7 @@
 - [ ] Answer `convo v0.4.md` (champion wait, castle strength, tower rebuild).
 - [ ] Push the late game harder (the bot still wins chapters 6 to 8 with no leaks).
 - [ ] Device test on iPad: touch drag, pinch, sound, battery, speed on long battles.
-- [ ] Read the first notes from ⚙️ (`/read-notes-and-update`).
+- [ ] Read the first notes from ⚙️ (`/review-notes-and-update`).
 - [ ] Apply `supabase/001_fgw_notes.sql` when Jimmy asks (test first), then record it in `04 AI/Supabase/brief.md`.
 - [ ] Tune from real play: heart period, tick counts, wave sizes (`research/balance.md` lists the knobs).
 
