@@ -86,3 +86,6 @@
 
 58. **Measure drift from the place, not from zero.** Adding the local wind to a layer that already moves with the place's wind changes the place itself; subtracting the place's wind keeps the place exact and only adds the difference.
 59. **A shader ternary cannot pick between two textures.** Choose with if/else and call the lookup in each branch.
+
+60. **A gesture the owner cannot see is not a control.** Pan worked, but nothing on screen said so; put each mode on a button that shows only where it applies.
+61. **Cutting a block by its neighbours can remove code between them.** When replacing a section, check the section that sits between the two markers before writing the replacement, or the next start-up fails with "not defined".
