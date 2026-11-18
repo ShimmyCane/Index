@@ -56,6 +56,12 @@ uniform vec4 uFine;              // half-width of the fine map km (0 = none), re
 uniform vec4 uReg2;              // weight, half-width km
 uniform vec4 uSea2;              // wave frequency rad/m (0 = from the wind), tide km
 uniform vec3 uWorldP;            // camera column: latitude, longitude (radians), world map ready 0 or 1
+uniform sampler2D uStars;        // the bright stars now: north at the left and right edges, zenith at the top, 2048 x 1024
+uniform float uStarsOn;          // 1 when the star picture is loaded
+uniform sampler2D uSat;          // cloud cover of the whole Earth from a satellite picture, 720 x 360, north at the top, red = cover
+uniform float uSatW;             // how much the satellite cover counts: 0 near the ground, 1 from space
+uniform sampler2D uOsm;          // ground colours from map tiles, on the fine map's grid (row 0 = north)
+uniform float uOsmOn;            // 1 when the map colours are loaded
 
 const float PI = 3.14159265;
 const float RE = 6371.0;
@@ -129,6 +135,8 @@ vec3 sky(vec3 ro, vec3 rd, out vec3 trans, float tHit) {
   return uSunI * (sumR * BR * pR + sumM * BM * uHaze * pM * uHazeTint + sumS * BR * vec3(0.55, 0.8, 1.0) * uMS / (4.0 * PI));
 }
 
+float satCover(vec2 xz);                       // defined with the world lookups below
+
 // ---------- cloud volumes ----------
 // A = base km, top km, cover 0..1, density per km
 // B = cell size km, soft bottom, top taper, anvil
@@ -158,6 +166,7 @@ float cloudD(vec3 p, vec4 A, vec4 B, vec4 W, int cheap) {
     az = mix(az, pow(gLay < 0.5 ? rg.r : rg.g, 0.85), uReg.x * (1.0 - smoothstep(uReg.y * 0.8, uReg.y * 1.7, max(abs(w.x), abs(w.y)))));
   }
   if (uReg.z > 0.0) az = clamp(az * mix(1.0, 0.15 + 1.9 * noise(vec3(w * 0.0023 + uSeed.xy, uSeed.z)), uReg.z * smoothstep(60.0, 420.0, length(w))), 0.0, 1.0);
+  if (uSatW > 0.0) az = mix(az, pow(satCover(p.xz), 0.85), uSatW);      // from space, the satellite picture sets the cover
   if (uFeat.z > 0.5 && gLay < 0.5) { vec2 fd = p.xz - uFeat.xy; az = max(az, 0.95 * smoothstep(64.0, 9.0, dot(fd, fd))); }   // a storm stands over a funnel
   float wxm = noise(vec3(q.x * 0.11, uEvolve * 0.25 + uSeed.z, q.z * 0.11));
   float cov = mix(az * mix(0.45, 1.55, wxm), 1.0, smoothstep(0.82, 1.0, az));
@@ -271,6 +280,7 @@ vec4 cirrus(vec3 ro, vec3 rd, float t, vec3 bg) {
   if (uReg2.x > 0.0) cover = mix(cover, texture2D(uRegion2, w / (2.0 * uReg2.y) + 0.5).b, uReg2.x * (1.0 - smoothstep(uReg2.y * 0.8, uReg2.y * 1.7, max(abs(w.x), abs(w.y)))));
   if (uReg.x > 0.0) cover = mix(cover, texture2D(uRegion, w / (2.0 * uReg.y) + 0.5).b, uReg.x * (1.0 - smoothstep(uReg.y * 0.8, uReg.y * 1.7, max(abs(w.x), abs(w.y)))));
   if (uReg.z > 0.0) cover = clamp(cover * mix(1.0, 0.15 + 1.9 * noise(vec3(w * 0.0019 + uSeed.yx, 4.0)), uReg.z * smoothstep(60.0, 420.0, length(w))), 0.0, 1.0);
+  if (uSatW > 0.0) cover = mix(cover, satCover(p.xz), uSatW);
   float thr = mix(0.78, 0.28, cover);
   float a = smoothstep(thr, thr + 0.32, n) * uC.w;
   float wf = 1.0 - smoothstep(0.02, 0.2, t * uPix / uCw.z);
@@ -283,6 +293,11 @@ vec4 cirrus(vec3 ro, vec3 rd, float t, vec3 bg) {
   return vec4(S * a, 1.0 - a);
 }
 
+// the bright stars from the star picture (see js/stars.js): the ray's azimuth across, its altitude up
+vec3 starMap(vec3 rd) {
+  float az = atan(rd.x, -rd.z); float alt = asin(clamp(rd.y, -1.0, 1.0));
+  return texture2D(uStars, vec2(fract(az / (2.0 * PI) + 1.0), alt / PI + 0.5)).rgb;
+}
 vec3 stars(vec3 rd) {
   vec3 d = rd * 190.0; vec3 c = floor(d); float h = hash13(c);
   if (h < 0.9975) return vec3(0.0);
@@ -304,6 +319,7 @@ vec2 worldLL(vec2 xz) {                                           // longitude, 
   return vec2(atan(wv.y, wv.x), asin(clamp(wv.z, -1.0, 1.0)));
 }
 vec3 worldTex(vec2 xz) { vec2 ll = worldLL(xz); return texture2D(uWorld, vec2(ll.x / (2.0 * PI) + 0.5, ll.y / PI + 0.5)).rgb; }
+float satCover(vec2 xz) { vec2 ll = worldLL(xz); return texture2D(uSat, vec2(ll.x / (2.0 * PI) + 0.5, ll.y / PI + 0.5)).r; }   // satellite cloud cover under a point
 float worldWater(vec2 xz) {                                       // 1 for ocean and lakes in the picture, 0 for land and ice
   vec3 c = worldTex(xz);
   return smoothstep(0.0, 0.07, c.b - max(c.r, c.g * 0.9)) * (1.0 - smoothstep(0.55, 0.8, min(c.r, min(c.g, c.b))));
@@ -404,6 +420,10 @@ vec3 landColor(vec3 pl, float t) {
   c = mix(c, mix(vec3(0.22, 0.21, 0.20), vec3(0.34, 0.31, 0.27), v2), smoothstep(0.16, 0.42, slope + (h - (uTerr.z - 1.5)) * 0.15));   // rock
   c = mix(c, vec3(0.82, 0.85, 0.90), smoothstep(-0.25, 0.25, h - uTerr.z + (v - 0.5) * 0.5) * (1.0 - smoothstep(0.45, 0.7, slope)));    // snow
   c = mix(c, vec3(0.62, 0.55, 0.38), (1.0 - smoothstep(0.008, 0.04, h)) * (1.0 - smoothstep(0.64, 0.86, mask)));                        // beach
+  if (uOsmOn > 0.5 && uFine.x > 0.0) {                              // the map's own colours near the place (woods, grass, water, streets)
+    float wf = 1.0 - smoothstep(0.7 * uFine.x, uFine.x, max(abs(w.x), abs(w.y)));
+    if (wf > 0.0) c = mix(c, pow(texture2D(uOsm, w / (2.0 * uFine.x) + 0.5).rgb, vec3(2.2)) * 0.5, wf);
+  }
   // a built-up patch around a city, with lights at night
   float urban = uCity.x * smoothstep(8.0, 2.5, length(w)) * smoothstep(0.6, 0.8, mask) * (1.0 - smoothstep(0.1, 0.3, slope));
   vec2 blk = floor(w * 9.0);
@@ -625,6 +645,7 @@ void main() {
   else {
     bg += trans * uSunI * 60.0 * smoothstep(0.99996, 0.99999, mu);
     bg += trans * stars(rd) * uNight * 0.012;
+    bg += trans * starMap(rd) * uNight * 0.9 * uStarsOn;
     bg += uNight * vec3(0.00016, 0.00026, 0.00060) * (0.6 + 0.4 * (1.0 - max(rd.y, 0.0)));
   }
   float tMax = tG > 0.0 ? tG : 1.0e9;

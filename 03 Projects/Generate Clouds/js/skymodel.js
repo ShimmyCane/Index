@@ -107,7 +107,7 @@
     var tint = [1, lerp(lerp(1, 0.92, dirty), 0.85, dusty), lerp(lerp(1, 0.80, dirty), 0.62, dusty)];
     var rain = (lowKey === 'nimbostratus' || lowKey === 'cumulonimbus') ? clamp(wx.precip / 4, 0.3, 1) : (wx.precip > 0.5 ? 0.25 : 0);
 
-    var seed = seedFrom(place, utcMs, ov.shuffle);
+    var seed = seedFrom(place, ov.seedMs != null ? ov.seedMs : utcMs, ov.shuffle);     // one cloud shape for the whole 24 hours (seedMs = the start)
     function rnd(k) { var a = Math.sin(seed[0] * 12.9898 + seed[1] * 78.233 + k * 37.719) * 43758.5453; return a - Math.floor(a); }   // repeatable dice
     // ----- a mixed sky: some low cells taller than the rest, ripples among the high streaks -----
     var vary = [0, 1], mixNote = '';
@@ -215,5 +215,38 @@
       };
     };
     return model;
+  };
+  // A 24-hour sky: one model for each hour, joined at the hour. The winds carry each layer on across the
+  // hours, the sea and the regional cover glide between hours, and the cloud shapes stay the same all day.
+  // tl = { hours: [{ utcMs, wx }], startMs }. Returns an object with at(simT, camAlt) like one model.
+  GC.Sky.timeline = function (tl, place, ov) {
+    ov = ov || {};
+    var o2 = {}; Object.keys(ov).forEach(function (k) { o2[k] = ov[k]; }); o2.seedMs = tl.startMs;
+    var models = tl.hours.map(function (h) { return GC.Sky.build(h.wx, place, h.utcMs, o2); });
+    var n = models.length, base = [], acc = [[0, 0], [0, 0], [0, 0]];
+    for (var k = 0; k < n; k++) {                              // where each layer has drifted before this hour
+      base.push(acc.map(function (a) { return a.slice(); }));
+      var e = models[k].at(3600, 0);
+      acc = [[acc[0][0] + e.L0w[0], acc[0][1] + e.L0w[1]], [acc[1][0] + e.L1w[0], acc[1][1] + e.L1w[1]], [acc[2][0] + e.Cw[0], acc[2][1] + e.Cw[1]]];
+    }
+    var first = models[0];
+    var tm = {
+      models: models, n: n, startMs: tl.startMs, place: place, utcMs: first.utcMs, reading: first.reading, types: first.types,
+      precipKind: first.precipKind, vary: first.vary, cmix: first.cmix, summary: first.summary, wx: first.wx,
+      hourAt: function (simT) { return models[Math.min(n - 1, Math.max(0, Math.floor(simT / 3600)))]; },
+      hourIndex: function (simT) { return Math.min(n - 1, Math.max(0, Math.floor(simT / 3600))); },
+      at: function (simT, camAlt) {
+        var h = Math.min(n - 1, Math.max(0, Math.floor(simT / 3600))), loc = simT - h * 3600;
+        var f = models[h].at(loc, camAlt), b = base[h];
+        f.L0w[0] += b[0][0]; f.L0w[1] += b[0][1]; f.L1w[0] += b[1][0]; f.L1w[1] += b[1][1]; f.Cw[0] += b[2][0]; f.Cw[1] += b[2][1];
+        f.evolve = simT / 900 * 0.55;
+        if (h + 1 < n && loc > 0) {                              // the sea glides between hours
+          var g = models[h + 1].at(0, camAlt), t = loc / 3600;
+          f.sea = f.sea.map(function (v, i) { return i === 1 ? v : GC.lerp(v, g.sea[i], t); });
+        }
+        return f;
+      }
+    };
+    return tm;
   };
 })();

@@ -37,14 +37,17 @@
 - [ ] The Earth picture looks right from space on the iPad, and the far ground is not too slow.
 - [ ] Mark notes done in the database after Jimmy confirms which (see `convo/notes v1.md`).
 
-## Round 7 (2026-11-18, convo v0.10): open, waiting on answers
-- [ ] Hide cloud cover button in Clouds settings (note: Moscow, geography view). Ready to build.
-- [ ] Speed slider snapping 0.5x / 1x / 2x, plus a "waves only" setting (note: coastal point). Ready to build.
-- [ ] Keep rain, snow, thunder and tornado above about 5x zoom (likely bug). Confirm in convo v0.10 Q6.
-- [ ] Time lapse over midnight to midnight with the tide line (convo v0.10 Q1).
-- [ ] Navigation by height: pan / look high up; walk / look on the ground; orbit / look in clouds, select a cloud (convo v0.10 Q3 to Q5).
-- [ ] Space view clouds: satellite picture plus worldwide wind grid (convo v0.10 Q7).
-- [ ] Archived as `convo/notes v2.md`. Mark done in the database only after Jimmy confirms which are built.
+## Round 7 (2026-11-18, convo v0.10 answers, built in 0.7.0, see convo v0.11)
+- [x] 24-hour time lapse from now, forecast-driven; tide along the bar.
+- [x] Waves clip with 15/30/60 s length and a 0.5× / 1× / 2× snapping speed slider.
+- [x] Hide-clouds chip in the bottom bar (the Clouds setting already existed).
+- [x] Pan, walk, look, orbit, tap a cloud to orbit it, with a label.
+- [x] Space clouds from the NASA GIBS picture of the day (cover only).
+- [ ] Worldwide wind grid so the space clouds drift with the real wind. NOT built.
+- [x] Stars and constellation figures (⚙️, off by default); constellations and ground from convo v0.8 defaults.
+- [x] Ground colours from OpenStreetMap tiles near the place.
+- [ ] Verify live: forecast, marine tide per hour, elevation, GIBS picture, OSM tiles on a phone (all tested with made-up replies only).
+- [ ] Mark notes 1–4 of `notes v2.md` done in the database only after Jimmy confirms.
 
 ## Next: stars and ground cover (waiting on `convo v0.8`)
 - [ ] Stars and constellations in the night sky (note 2).

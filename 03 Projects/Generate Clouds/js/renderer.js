@@ -50,8 +50,10 @@
       uTerrain: { value: null }, uRegion: { value: null }, uCamXZ: { value: new THREE.Vector2() }, uSkyZen: v3(), uSkyHor: v3(), uBoltSeed: { value: 1 },
       uTerr: v4(), uCity: { value: new THREE.Vector2() }, uTSteps: { value: 64 }, uTGrow: { value: 0.085 }, uSea: v4(), uReg: v4(), uVar: { value: new THREE.Vector2(0, 1) },
       uCmix: { value: 0 }, uPrecip: v4(), uFeat: v4(), uFeatB: v4(),
-      uTerrainF: { value: null }, uWorld: { value: null }, uRegion2: { value: null }, uFine: v4(), uReg2: v4(), uSea2: v4(), uWorldP: v3()
+      uTerrainF: { value: null }, uWorld: { value: null }, uRegion2: { value: null }, uFine: v4(), uReg2: v4(), uSea2: v4(), uWorldP: v3(),
+      uStars: { value: null }, uStarsOn: { value: 0 }, uSat: { value: null }, uSatW: { value: 0 }, uOsm: { value: null }, uOsmOn: { value: 0 }
     };
+    U.uStars.value = blank(); U.uSat.value = blank(); U.uOsm.value = blank();
     mat = new THREE.ShaderMaterial({ uniforms: U, vertexShader: GC.VERT, fragmentShader: GC.FRAG, depthTest: false, depthWrite: false });
     scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
     canvas.addEventListener('webglcontextlost', function (e) { e.preventDefault(); R.ok = false; GC.logError('The 3-D view was lost (graphics memory). Reload the page.'); });
@@ -117,6 +119,54 @@
     U.uRegion2.value = reg2Tex; R.region2On = cells ? 1 : 0;
   };
 
+  // The bright stars (js/stars.js): a 2048 x 1024 picture, north at the left and right edges, zenith at the top.
+  var starsTex = null;
+  R.setStars = function (cv) {
+    if (starsTex) starsTex.dispose();
+    starsTex = new THREE.Texture(cv);
+    starsTex.wrapS = THREE.RepeatWrapping; starsTex.wrapT = THREE.ClampToEdgeWrapping;
+    starsTex.minFilter = starsTex.magFilter = THREE.LinearFilter; starsTex.generateMipmaps = false; starsTex.needsUpdate = true;
+    U.uStars.value = starsTex; R.starsOn = 1;
+  };
+  // The satellite cloud cover of the whole Earth (js/weather.js): 720 x 360, north at the top, red = cover.
+  var satTex = null;
+  R.setSat = function (cv) {
+    if (satTex) satTex.dispose();
+    satTex = new THREE.Texture(cv);
+    satTex.wrapS = THREE.RepeatWrapping; satTex.wrapT = THREE.ClampToEdgeWrapping;
+    satTex.minFilter = satTex.magFilter = THREE.LinearFilter; satTex.generateMipmaps = false; satTex.needsUpdate = true;
+    U.uSat.value = satTex; R.satOn = 1;
+    if (R.onWorld) R.onWorld();
+  };
+  R.clearSat = function () { R.satOn = 0; if (satTex) { satTex.dispose(); satTex = null; } U.uSat.value = blank(); R.satW = 0; };
+  // Ground colours from map tiles on the fine map's grid (js/osm.js): 128 x 128 RGBA bytes, row 0 = north.
+  var osmTex = null;
+  R.setOsm = function (data, T) {
+    if (osmTex) osmTex.dispose();
+    osmTex = new THREE.DataTexture(data, T, T, THREE.RGBAFormat);
+    osmTex.wrapS = osmTex.wrapT = THREE.ClampToEdgeWrapping; osmTex.minFilter = osmTex.magFilter = THREE.LinearFilter; osmTex.generateMipmaps = false; osmTex.needsUpdate = true;
+    U.uOsm.value = osmTex; R.osmOn = 1;
+    if (R.onWorld) R.onWorld();
+  };
+  R.clearOsm = function () { R.osmOn = 0; if (osmTex) { osmTex.dispose(); osmTex = null; } U.uOsm.value = blank(); };
+  // The camera's frame, for drawing on top of the picture and for picking what is under a tap.
+  R.basis = function () {
+    var y = GC.rad(R.cam.yaw), p = GC.rad(R.cam.pitch);
+    var f = [Math.sin(y) * Math.cos(p), Math.sin(p), -Math.cos(y) * Math.cos(p)], r = [Math.cos(y), 0, Math.sin(y)];
+    var u = [r[1] * f[2] - r[2] * f[1], r[2] * f[0] - r[0] * f[2], r[0] * f[1] - r[1] * f[0]];
+    return { f: f, r: r, u: u, tan: Math.tan(GC.rad(R.cam.fov) / 2), aspect: canvas.clientWidth / Math.max(canvas.clientHeight, 1) };
+  };
+  // The direction (x east, y up, z south) through a point on the canvas, given in CSS pixels from its top left.
+  R.ray = function (px, py) {
+    var b = R.basis(), w = Math.max(canvas.clientWidth, 1), h = Math.max(canvas.clientHeight, 1);
+    var nx = px / w * 2 - 1, ny = 1 - py / h * 2, d = [0, 0, 0];
+    for (var i = 0; i < 3; i++) d[i] = b.f[i] + b.r[i] * nx * b.tan * b.aspect + b.u[i] * ny * b.tan;
+    var L = Math.hypot(d[0], d[1], d[2]) || 1;
+    return [d[0] / L, d[1] / L, d[2] / L];
+  };
+  R.canvasSize = function () { return { w: canvas.clientWidth, h: canvas.clientHeight }; };
+  R.satW = 0; R.satOn = 0; R.starsOn = 0; R.osmOn = 0;
+
   R.setQuality = function (q) {
     R.q = QUALITY[q] || QUALITY.med;
     R.scale = Math.min(R.scale, R.q.maxScale);
@@ -156,6 +206,7 @@
     U.uReg2.value.set(F.regionMix * R.region2On, 1125, 0, 0);
     var lat0 = GC.clamp(R.place.lat - R.cam.z / 111.19, -89.9, 89.9), lon0 = R.place.lon + R.cam.x / (111.19 * Math.max(Math.cos(GC.rad(R.place.lat)), 0.05));
     U.uWorldP.value.set(GC.rad(lat0), GC.rad(lon0), R.worldOn);
+    U.uSatW.value = R.satW || 0; U.uStarsOn.value = R.starsOn ? 1 : 0; U.uOsmOn.value = R.osmOn ? 1 : 0;
     U.uSea.value.set(F.sea[0], R.clock, F.sea[1], F.sea[2]);
     // regional data is used unless the cover was set by hand; far-away variety always
     U.uReg.value.set(F.regionMix * R.regionOn, 250, 1, 0);
