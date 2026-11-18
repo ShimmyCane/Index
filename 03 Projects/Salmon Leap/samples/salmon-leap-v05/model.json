@@ -1,0 +1,2341 @@
+{
+  "schema": "m3dxc.model/0.1",
+  "model_id": "salmon-leap-v05",
+  "name": "Leaping salmon statue V5",
+  "description": "The ground",
+  "scale": "statue, about 25 in from tail to nose",
+  "units": "in",
+  "up": "z",
+  "world": "salmon-world",
+  "version": 57,
+  "history_hash": "5ede8e14",
+  "objects": [
+    {
+      "uuid": "statue",
+      "name": "Leaping salmon (statue)",
+      "type": "group",
+      "description": "A bronze Atlantic salmon leaping up. Massing, then details."
+    },
+    {
+      "uuid": "fish",
+      "name": "Fish (bronze)",
+      "type": "group",
+      "description": "The body and its fins.",
+      "parent": "statue"
+    },
+    {
+      "uuid": "base",
+      "name": "Granite base (stepped)",
+      "type": "group",
+      "description": "Three steps of granite that the fish rises from.",
+      "parent": "statue"
+    },
+    {
+      "uuid": "supports",
+      "name": "Supports",
+      "type": "group",
+      "description": "A pillar under the belly and a prop under the tail.",
+      "parent": "statue"
+    },
+    {
+      "uuid": "body-tail",
+      "name": "Body (tail section)",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 12.04,
+        "y": 4.04,
+        "z": 9.64
+      },
+      "position": [
+        -7,
+        0,
+        10.4
+      ],
+      "material": "pattern:scales",
+      "certainty": {
+        "percent": 70,
+        "basis": "inferred",
+        "note": "Spindle body: depth about a quarter of the length (Maine DMR, Fishbase)."
+      },
+      "joints": [
+        [
+          -11,
+          0,
+          7.6
+        ],
+        [
+          -7,
+          0,
+          10.6
+        ],
+        [
+          -3,
+          0,
+          13.2
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.3,
+          0.4
+        ],
+        [
+          0.33,
+          0.63,
+          0.91
+        ],
+        [
+          0.67,
+          1.03,
+          1.59
+        ],
+        [
+          1,
+          1.19,
+          2.02
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "body-middle",
+      "name": "Body (middle)",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 12.4,
+        "y": 4.4,
+        "z": 5.6
+      },
+      "position": [
+        1,
+        0,
+        13.8
+      ],
+      "material": "pattern:scales",
+      "certainty": {
+        "percent": 70,
+        "basis": "inferred",
+        "note": "Spindle body: depth about a quarter of the length (Maine DMR, Fishbase)."
+      },
+      "joints": [
+        [
+          -3,
+          0,
+          13.2
+        ],
+        [
+          1,
+          0,
+          14.4
+        ],
+        [
+          5,
+          0,
+          14.1
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          1.19,
+          2.02
+        ],
+        [
+          0.33,
+          1.23,
+          2.2
+        ],
+        [
+          0.67,
+          1.19,
+          2.17
+        ],
+        [
+          1,
+          0.97,
+          1.66
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "body-front",
+      "name": "Body (front)",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 6.71,
+        "y": 3.31,
+        "z": 4.61
+      },
+      "position": [
+        6.7,
+        0,
+        13.45
+      ],
+      "material": "pattern:scales",
+      "certainty": {
+        "percent": 70,
+        "basis": "inferred",
+        "note": "Spindle body: depth about a quarter of the length (Maine DMR, Fishbase)."
+      },
+      "joints": [
+        [
+          5,
+          0,
+          14.1
+        ],
+        [
+          8.4,
+          0,
+          12.8
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.97,
+          1.66
+        ],
+        [
+          0.33,
+          0.86,
+          1.41
+        ],
+        [
+          0.67,
+          0.74,
+          1.19
+        ],
+        [
+          1,
+          0.63,
+          0.97
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "body-head",
+      "name": "Body (head)",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 4.43,
+        "y": 1.93,
+        "z": 3.93
+      },
+      "position": [
+        9.65,
+        0,
+        11.8
+      ],
+      "material": "pattern:scales",
+      "certainty": {
+        "percent": 70,
+        "basis": "inferred",
+        "note": "Spindle body: depth about a quarter of the length (Maine DMR, Fishbase)."
+      },
+      "joints": [
+        [
+          8.4,
+          0,
+          12.8
+        ],
+        [
+          10.9,
+          0,
+          10.8
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.63,
+          0.97
+        ],
+        [
+          0.33,
+          0.54,
+          0.78
+        ],
+        [
+          0.67,
+          0.46,
+          0.62
+        ],
+        [
+          1,
+          0.5,
+          0.6
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "tail-up-root",
+      "name": "tail-up (root)",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 4.4,
+        "y": 2,
+        "z": 3.8
+      },
+      "position": [
+        -12.2,
+        0,
+        8.5
+      ],
+      "material": "patina",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "Caudal fin root."
+      },
+      "joints": [
+        [
+          -11,
+          0,
+          7.6
+        ],
+        [
+          -13.4,
+          0,
+          9.4
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.12,
+          0.6
+        ],
+        [
+          1,
+          0.14,
+          1
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "tail-up-tip",
+      "name": "tail-up (tip)",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 3.8,
+        "y": 2,
+        "z": 3.9
+      },
+      "position": [
+        -14.3,
+        0,
+        10.35
+      ],
+      "material": "patina",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "Caudal fin tip."
+      },
+      "joints": [
+        [
+          -13.4,
+          0,
+          9.4
+        ],
+        [
+          -15.2,
+          0,
+          11.3
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.14,
+          1
+        ],
+        [
+          1,
+          0.08,
+          0.45
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "tail-down-root",
+      "name": "tail-down (root)",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 4.4,
+        "y": 2,
+        "z": 3.6
+      },
+      "position": [
+        -12.2,
+        0,
+        6.8
+      ],
+      "material": "patina",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "Caudal fin root."
+      },
+      "joints": [
+        [
+          -11,
+          0,
+          7.6
+        ],
+        [
+          -13.4,
+          0,
+          6
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.12,
+          0.6
+        ],
+        [
+          1,
+          0.14,
+          1
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "tail-down-tip",
+      "name": "tail-down (tip)",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 3.8,
+        "y": 2,
+        "z": 3.8
+      },
+      "position": [
+        -14.3,
+        0,
+        5.1
+      ],
+      "material": "patina",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "Caudal fin tip."
+      },
+      "joints": [
+        [
+          -13.4,
+          0,
+          6
+        ],
+        [
+          -15.2,
+          0,
+          4.2
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.14,
+          1
+        ],
+        [
+          1,
+          0.08,
+          0.45
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "dorsal-front",
+      "name": "Dorsal fin (front)",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 5.2,
+        "y": 3.8,
+        "z": 6.1
+      },
+      "position": [
+        -3.3,
+        0,
+        16.45
+      ],
+      "material": "patina",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "Dorsal fin, front."
+      },
+      "joints": [
+        [
+          -4,
+          0,
+          15.3
+        ],
+        [
+          -2.6,
+          0,
+          17.6
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.7
+        ],
+        [
+          1,
+          0.12,
+          1.9
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "dorsal-back",
+      "name": "Dorsal fin (back)",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 5.5,
+        "y": 3.8,
+        "z": 4.5
+      },
+      "position": [
+        -1.75,
+        0,
+        17.25
+      ],
+      "material": "patina",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "Dorsal fin, back."
+      },
+      "joints": [
+        [
+          -2.6,
+          0,
+          17.6
+        ],
+        [
+          -0.9,
+          0,
+          16.9
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.12,
+          1.9
+        ],
+        [
+          1,
+          0.1,
+          0.35
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "pectoral-r-root",
+      "name": "Pectoral fin right (root)",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 3.3,
+        "y": 4.4,
+        "z": 3.8
+      },
+      "position": [
+        3.15,
+        1.9,
+        11.8
+      ],
+      "material": "patina",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "Pectoral fin root."
+      },
+      "joints": [
+        [
+          3.5,
+          1,
+          12.4
+        ],
+        [
+          2.8,
+          2.8,
+          11.2
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.9
+        ],
+        [
+          1,
+          0.12,
+          1.3
+        ]
+      ],
+      "facing": [
+        0,
+        0,
+        1
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "pectoral-r-tip",
+      "name": "Pectoral fin right (tip)",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 3.2,
+        "y": 4,
+        "z": 3.5
+      },
+      "position": [
+        2.5,
+        3.5,
+        10.75
+      ],
+      "material": "patina",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "Pectoral fin tip."
+      },
+      "joints": [
+        [
+          2.8,
+          2.8,
+          11.2
+        ],
+        [
+          2.2,
+          4.2,
+          10.3
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.12,
+          1.3
+        ],
+        [
+          1,
+          0.08,
+          0.45
+        ]
+      ],
+      "facing": [
+        0,
+        0,
+        1
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "pectoral-l-root",
+      "name": "Pectoral fin left (root)",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 3.3,
+        "y": 4.4,
+        "z": 3.8
+      },
+      "position": [
+        3.15,
+        -1.9,
+        11.8
+      ],
+      "material": "patina",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "Pectoral fin root."
+      },
+      "joints": [
+        [
+          3.5,
+          -1,
+          12.4
+        ],
+        [
+          2.8,
+          -2.8,
+          11.2
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.9
+        ],
+        [
+          1,
+          0.12,
+          1.3
+        ]
+      ],
+      "facing": [
+        0,
+        0,
+        1
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "pectoral-l-tip",
+      "name": "Pectoral fin left (tip)",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 3.2,
+        "y": 4,
+        "z": 3.5
+      },
+      "position": [
+        2.5,
+        -3.5,
+        10.75
+      ],
+      "material": "patina",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "Pectoral fin tip."
+      },
+      "joints": [
+        [
+          2.8,
+          -2.8,
+          11.2
+        ],
+        [
+          2.2,
+          -4.2,
+          10.3
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.12,
+          1.3
+        ],
+        [
+          1,
+          0.08,
+          0.45
+        ]
+      ],
+      "facing": [
+        0,
+        0,
+        1
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "step-1-block-1",
+      "name": "Block 1 of step-1",
+      "type": "box",
+      "parent": "base",
+      "dimensions": {
+        "x": 5.23,
+        "y": 9,
+        "z": 3
+      },
+      "position": [
+        -5.33,
+        0,
+        1.5
+      ],
+      "material": "granite",
+      "certainty": {
+        "percent": 80,
+        "basis": "user",
+        "note": "Designed block. Massing."
+      }
+    },
+    {
+      "uuid": "step-1-block-2",
+      "name": "Block 2 of step-1",
+      "type": "box",
+      "parent": "base",
+      "dimensions": {
+        "x": 5.23,
+        "y": 9,
+        "z": 3
+      },
+      "position": [
+        0,
+        0,
+        1.5
+      ],
+      "material": "granite",
+      "certainty": {
+        "percent": 80,
+        "basis": "user",
+        "note": "Designed block. Massing."
+      }
+    },
+    {
+      "uuid": "step-1-block-3",
+      "name": "Block 3 of step-1",
+      "type": "box",
+      "parent": "base",
+      "dimensions": {
+        "x": 5.23,
+        "y": 9,
+        "z": 3
+      },
+      "position": [
+        5.33,
+        0,
+        1.5
+      ],
+      "material": "granite",
+      "certainty": {
+        "percent": 80,
+        "basis": "user",
+        "note": "Designed block. Massing."
+      }
+    },
+    {
+      "uuid": "step-2-block-1",
+      "name": "Block 1 of step-2",
+      "type": "box",
+      "parent": "base",
+      "dimensions": {
+        "x": 3.23,
+        "y": 7,
+        "z": 3
+      },
+      "position": [
+        -3.33,
+        0,
+        4.5
+      ],
+      "material": "granite",
+      "certainty": {
+        "percent": 80,
+        "basis": "user",
+        "note": "Designed block. Massing."
+      }
+    },
+    {
+      "uuid": "step-2-block-2",
+      "name": "Block 2 of step-2",
+      "type": "box",
+      "parent": "base",
+      "dimensions": {
+        "x": 3.23,
+        "y": 7,
+        "z": 3
+      },
+      "position": [
+        0,
+        0,
+        4.5
+      ],
+      "material": "granite",
+      "certainty": {
+        "percent": 80,
+        "basis": "user",
+        "note": "Designed block. Massing."
+      }
+    },
+    {
+      "uuid": "step-2-block-3",
+      "name": "Block 3 of step-2",
+      "type": "box",
+      "parent": "base",
+      "dimensions": {
+        "x": 3.23,
+        "y": 7,
+        "z": 3
+      },
+      "position": [
+        3.33,
+        0,
+        4.5
+      ],
+      "material": "granite",
+      "certainty": {
+        "percent": 80,
+        "basis": "user",
+        "note": "Designed block. Massing."
+      }
+    },
+    {
+      "uuid": "step-3-block-1",
+      "name": "Block 1 of step-3",
+      "type": "box",
+      "parent": "base",
+      "dimensions": {
+        "x": 1.57,
+        "y": 4.5,
+        "z": 2
+      },
+      "position": [
+        -1.67,
+        0,
+        7
+      ],
+      "material": "granite",
+      "certainty": {
+        "percent": 80,
+        "basis": "user",
+        "note": "Designed block. Massing."
+      }
+    },
+    {
+      "uuid": "step-3-block-2",
+      "name": "Block 2 of step-3",
+      "type": "box",
+      "parent": "base",
+      "dimensions": {
+        "x": 1.57,
+        "y": 4.5,
+        "z": 2
+      },
+      "position": [
+        0,
+        0,
+        7
+      ],
+      "material": "granite",
+      "certainty": {
+        "percent": 80,
+        "basis": "user",
+        "note": "Designed block. Massing."
+      }
+    },
+    {
+      "uuid": "step-3-block-3",
+      "name": "Block 3 of step-3",
+      "type": "box",
+      "parent": "base",
+      "dimensions": {
+        "x": 1.57,
+        "y": 4.5,
+        "z": 2
+      },
+      "position": [
+        1.67,
+        0,
+        7
+      ],
+      "material": "granite",
+      "certainty": {
+        "percent": 80,
+        "basis": "user",
+        "note": "Designed block. Massing."
+      }
+    },
+    {
+      "uuid": "pillar",
+      "name": "Pillar under the belly",
+      "type": "cylinder",
+      "parent": "supports",
+      "dimensions": {
+        "x": 1,
+        "y": 1,
+        "z": 4
+      },
+      "position": [
+        0,
+        0,
+        9.9
+      ],
+      "material": "bronze",
+      "certainty": {
+        "percent": 80,
+        "basis": "user",
+        "note": "Support pillar, bronze. Its height meets the belly."
+      }
+    },
+    {
+      "uuid": "pillar-foot",
+      "name": "Pillar foot",
+      "type": "box",
+      "parent": "supports",
+      "dimensions": {
+        "x": 1.8,
+        "y": 1.8,
+        "z": 0.5
+      },
+      "position": [
+        0,
+        0,
+        8.25
+      ],
+      "material": "granite",
+      "certainty": {
+        "percent": 80,
+        "basis": "user",
+        "note": "Foot where the pillar meets the step."
+      }
+    },
+    {
+      "uuid": "tail-prop",
+      "name": "Prop under the tail",
+      "type": "cylinder",
+      "parent": "supports",
+      "dimensions": {
+        "x": 0.8,
+        "y": 0.8,
+        "z": 7.4
+      },
+      "position": [
+        -11,
+        0,
+        3.7
+      ],
+      "material": "bronze",
+      "certainty": {
+        "percent": 80,
+        "basis": "user",
+        "note": "Tail prop from the ground."
+      }
+    },
+    {
+      "uuid": "tail-prop-foot",
+      "name": "Tail prop foot",
+      "type": "box",
+      "parent": "supports",
+      "dimensions": {
+        "x": 1.6,
+        "y": 1.6,
+        "z": 0.4
+      },
+      "position": [
+        -11,
+        0,
+        0.2
+      ],
+      "material": "granite",
+      "certainty": {
+        "percent": 80,
+        "basis": "user",
+        "note": "Foot of the tail prop."
+      }
+    },
+    {
+      "uuid": "background",
+      "name": "Background",
+      "type": "group",
+      "description": "A pale wall behind the arc, so the silhouette reads.",
+      "parent": "statue"
+    },
+    {
+      "uuid": "backdrop",
+      "name": "Backdrop wall",
+      "type": "box",
+      "parent": "background",
+      "dimensions": {
+        "x": 40,
+        "y": 0.5,
+        "z": 26
+      },
+      "position": [
+        0,
+        10,
+        13
+      ],
+      "material": "painted",
+      "certainty": {
+        "percent": 100,
+        "basis": "decorative",
+        "note": "Flat wall. Not a finished painting."
+      }
+    },
+    {
+      "uuid": "head",
+      "name": "Head details",
+      "type": "group",
+      "description": "The eye, the gill cover, the mouth, the adipose and anal fins, the pelvic fins.",
+      "parent": "fish"
+    },
+    {
+      "uuid": "eye-l",
+      "name": "Eye (left)",
+      "type": "sphere",
+      "parent": "head",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        9.6,
+        -1,
+        12.4
+      ],
+      "material": "dark",
+      "certainty": {
+        "percent": 50,
+        "basis": "inferred",
+        "note": "Eye, a small dark form."
+      }
+    },
+    {
+      "uuid": "eye-r",
+      "name": "Eye (right)",
+      "type": "sphere",
+      "parent": "head",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        9.6,
+        1,
+        12.4
+      ],
+      "material": "dark",
+      "certainty": {
+        "percent": 50,
+        "basis": "inferred",
+        "note": "Eye, a small dark form."
+      }
+    },
+    {
+      "uuid": "gill-l",
+      "name": "Gill cover (left)",
+      "type": "loft",
+      "parent": "head",
+      "dimensions": {
+        "x": 4.2,
+        "y": 3.9,
+        "z": 4.7
+      },
+      "position": [
+        7.8,
+        -0.75,
+        12.45
+      ],
+      "material": "bronze",
+      "certainty": {
+        "percent": 55,
+        "basis": "inferred",
+        "note": "Gill cover, an arc on the head."
+      },
+      "joints": [
+        [
+          7,
+          -0.1,
+          13.5
+        ],
+        [
+          8,
+          -1,
+          12.6
+        ],
+        [
+          8.6,
+          -1.4,
+          11.4
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.9
+        ],
+        [
+          0.5,
+          0.12,
+          1.3
+        ],
+        [
+          1,
+          0.1,
+          0.6
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "gill-r",
+      "name": "Gill cover (right)",
+      "type": "loft",
+      "parent": "head",
+      "dimensions": {
+        "x": 4.2,
+        "y": 3.9,
+        "z": 4.7
+      },
+      "position": [
+        7.8,
+        0.75,
+        12.45
+      ],
+      "material": "bronze",
+      "certainty": {
+        "percent": 55,
+        "basis": "inferred",
+        "note": "Gill cover, the other side."
+      },
+      "joints": [
+        [
+          7,
+          0.1,
+          13.5
+        ],
+        [
+          8,
+          1,
+          12.6
+        ],
+        [
+          8.6,
+          1.4,
+          11.4
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.9
+        ],
+        [
+          0.5,
+          0.12,
+          1.3
+        ],
+        [
+          1,
+          0.1,
+          0.6
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "mouth",
+      "name": "Mouth",
+      "type": "loft",
+      "parent": "head",
+      "dimensions": {
+        "x": 1.2,
+        "y": 0.6,
+        "z": 0.7
+      },
+      "position": [
+        10.55,
+        -0.25,
+        11.5
+      ],
+      "material": "dark",
+      "certainty": {
+        "percent": 50,
+        "basis": "inferred",
+        "note": "Mouth, the line of the jaw."
+      },
+      "joints": [
+        [
+          10.2,
+          -0.2,
+          11.6
+        ],
+        [
+          10.9,
+          -0.3,
+          11.4
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.25
+        ],
+        [
+          1,
+          0.08,
+          0.2
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "adipose",
+      "name": "Adipose fin",
+      "type": "loft",
+      "parent": "head",
+      "dimensions": {
+        "x": 1.4,
+        "y": 0.6,
+        "z": 1.4
+      },
+      "position": [
+        -7,
+        0,
+        12.5
+      ],
+      "material": "patina",
+      "certainty": {
+        "percent": 50,
+        "basis": "inferred",
+        "note": "Small fleshy fin between the dorsal and the tail."
+      },
+      "joints": [
+        [
+          -7.4,
+          0,
+          12.1
+        ],
+        [
+          -7,
+          0,
+          12.9
+        ],
+        [
+          -6.6,
+          0,
+          12.7
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.08,
+          0.3
+        ],
+        [
+          1,
+          0.08,
+          0.22
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "anal",
+      "name": "Anal fin",
+      "type": "loft",
+      "parent": "head",
+      "dimensions": {
+        "x": 4,
+        "y": 1.8,
+        "z": 2.4
+      },
+      "position": [
+        -5.1,
+        0,
+        8.5
+      ],
+      "material": "patina",
+      "certainty": {
+        "percent": 55,
+        "basis": "inferred",
+        "note": "Anal fin, under the body near the tail."
+      },
+      "joints": [
+        [
+          -6.2,
+          0,
+          8.8
+        ],
+        [
+          -5,
+          0,
+          8.2
+        ],
+        [
+          -4,
+          0,
+          8.4
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.08,
+          0.5
+        ],
+        [
+          0.5,
+          0.1,
+          0.9
+        ],
+        [
+          1,
+          0.08,
+          0.35
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "pelvic-r",
+      "name": "Pelvic fin (right)",
+      "type": "loft",
+      "parent": "head",
+      "dimensions": {
+        "x": 1.3,
+        "y": 2.2,
+        "z": 1.9
+      },
+      "position": [
+        1.65,
+        1.8,
+        11.25
+      ],
+      "material": "patina",
+      "certainty": {
+        "percent": 55,
+        "basis": "inferred",
+        "note": "Pelvic fin, small."
+      },
+      "joints": [
+        [
+          1.5,
+          1.2,
+          11.7
+        ],
+        [
+          1.8,
+          2.4,
+          10.8
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.08,
+          0.5
+        ],
+        [
+          1,
+          0.07,
+          0.35
+        ]
+      ],
+      "facing": [
+        0,
+        0,
+        1
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "pelvic-l",
+      "name": "Pelvic fin (left)",
+      "type": "loft",
+      "parent": "head",
+      "dimensions": {
+        "x": 1.3,
+        "y": 2.2,
+        "z": 1.9
+      },
+      "position": [
+        1.65,
+        -1.8,
+        11.25
+      ],
+      "material": "patina",
+      "certainty": {
+        "percent": 55,
+        "basis": "inferred",
+        "note": "Pelvic fin, small."
+      },
+      "joints": [
+        [
+          1.5,
+          -1.2,
+          11.7
+        ],
+        [
+          1.8,
+          -2.4,
+          10.8
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.08,
+          0.5
+        ],
+        [
+          1,
+          0.07,
+          0.35
+        ]
+      ],
+      "facing": [
+        0,
+        0,
+        1
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "rays",
+      "name": "Fin rays",
+      "type": "group",
+      "description": "Thin rays in the tail lobes: the structure of the fin.",
+      "parent": "fish"
+    },
+    {
+      "uuid": "ray-up-1",
+      "name": "Ray up 1",
+      "type": "loft",
+      "parent": "rays",
+      "dimensions": {
+        "x": 4.8,
+        "y": 0.6,
+        "z": 4.3
+      },
+      "position": [
+        -13.1,
+        -0.12,
+        9.45
+      ],
+      "material": "patina",
+      "certainty": {
+        "percent": 50,
+        "basis": "inferred",
+        "note": "A fin ray."
+      },
+      "joints": [
+        [
+          -11,
+          -0.12,
+          7.6
+        ],
+        [
+          -13.4,
+          -0.12,
+          9.4
+        ],
+        [
+          -15.2,
+          -0.12,
+          11.3
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.05,
+          0.3
+        ],
+        [
+          1,
+          0.05,
+          0.25
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "ray-up-2",
+      "name": "Ray up 2",
+      "type": "loft",
+      "parent": "rays",
+      "dimensions": {
+        "x": 4.8,
+        "y": 0.6,
+        "z": 4.3
+      },
+      "position": [
+        -13.1,
+        0.12,
+        9.45
+      ],
+      "material": "patina",
+      "certainty": {
+        "percent": 50,
+        "basis": "inferred",
+        "note": "A fin ray."
+      },
+      "joints": [
+        [
+          -11,
+          0.12,
+          7.6
+        ],
+        [
+          -13.4,
+          0.12,
+          9.4
+        ],
+        [
+          -15.2,
+          0.12,
+          11.3
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.05,
+          0.3
+        ],
+        [
+          1,
+          0.05,
+          0.25
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "ray-down-1",
+      "name": "Ray down 1",
+      "type": "loft",
+      "parent": "rays",
+      "dimensions": {
+        "x": 4.8,
+        "y": 0.6,
+        "z": 4
+      },
+      "position": [
+        -13.1,
+        -0.12,
+        5.9
+      ],
+      "material": "patina",
+      "certainty": {
+        "percent": 50,
+        "basis": "inferred",
+        "note": "A fin ray."
+      },
+      "joints": [
+        [
+          -11,
+          -0.12,
+          7.6
+        ],
+        [
+          -13.4,
+          -0.12,
+          6
+        ],
+        [
+          -15.2,
+          -0.12,
+          4.2
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.05,
+          0.3
+        ],
+        [
+          1,
+          0.05,
+          0.25
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "ray-down-2",
+      "name": "Ray down 2",
+      "type": "loft",
+      "parent": "rays",
+      "dimensions": {
+        "x": 4.8,
+        "y": 0.6,
+        "z": 4
+      },
+      "position": [
+        -13.1,
+        0.12,
+        5.9
+      ],
+      "material": "patina",
+      "certainty": {
+        "percent": 50,
+        "basis": "inferred",
+        "note": "A fin ray."
+      },
+      "joints": [
+        [
+          -11,
+          0.12,
+          7.6
+        ],
+        [
+          -13.4,
+          0.12,
+          6
+        ],
+        [
+          -15.2,
+          0.12,
+          4.2
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.05,
+          0.3
+        ],
+        [
+          1,
+          0.05,
+          0.25
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "lateral-line",
+      "name": "Lateral line",
+      "type": "loft",
+      "parent": "fish",
+      "dimensions": {
+        "x": 15.52,
+        "y": 0.12,
+        "z": 3.92
+      },
+      "position": [
+        0.7,
+        -1.27,
+        12.1
+      ],
+      "material": "dark",
+      "certainty": {
+        "percent": 50,
+        "basis": "inferred",
+        "note": "Lateral line, a thin mark along the flank."
+      },
+      "joints": [
+        [
+          -7,
+          -1.27,
+          10.2
+        ],
+        [
+          -3,
+          -1.27,
+          12.8
+        ],
+        [
+          1,
+          -1.27,
+          14
+        ],
+        [
+          5,
+          -1.27,
+          13.7
+        ],
+        [
+          8.4,
+          -1.27,
+          12.4
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.05,
+          0.06
+        ],
+        [
+          1,
+          0.05,
+          0.06
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "ground",
+      "name": "Ground and pool",
+      "type": "group",
+      "description": "A granite slab, a shallow pool, and rocks at the edge of the water.",
+      "parent": "statue"
+    },
+    {
+      "uuid": "slab",
+      "name": "Granite slab",
+      "type": "box",
+      "parent": "ground",
+      "dimensions": {
+        "x": 30,
+        "y": 22,
+        "z": 1
+      },
+      "position": [
+        0,
+        0,
+        0.5
+      ],
+      "material": "granite",
+      "certainty": {
+        "percent": 80,
+        "basis": "user",
+        "note": "Slab the statue stands on. Its top is the ground."
+      }
+    },
+    {
+      "uuid": "pool",
+      "name": "Pool surface",
+      "type": "box",
+      "parent": "ground",
+      "dimensions": {
+        "x": 22,
+        "y": 14,
+        "z": 0.3
+      },
+      "position": [
+        0,
+        0,
+        1.15
+      ],
+      "material": "water",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "Shallow pool. Its depth is not measured."
+      }
+    },
+    {
+      "uuid": "rock-1",
+      "name": "Rock 1",
+      "type": "loft",
+      "parent": "ground",
+      "dimensions": {
+        "x": 5.6,
+        "y": 4.7,
+        "z": 4.4
+      },
+      "position": [
+        -13,
+        -7.95,
+        3.2
+      ],
+      "material": "granite",
+      "certainty": {
+        "percent": 70,
+        "basis": "inferred",
+        "note": "Rock at the edge of the pool. Shape generic."
+      },
+      "joints": [
+        [
+          -13.6,
+          -8,
+          3.2
+        ],
+        [
+          -13,
+          -7.8,
+          3.2
+        ],
+        [
+          -12.4,
+          -8.1,
+          3.2
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          1.54,
+          1.32
+        ],
+        [
+          0.5,
+          2.2,
+          1.76
+        ],
+        [
+          1,
+          1.32,
+          1.1
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "rock-2",
+      "name": "Rock 2",
+      "type": "loft",
+      "parent": "ground",
+      "dimensions": {
+        "x": 4.8,
+        "y": 3.9,
+        "z": 3.6
+      },
+      "position": [
+        12,
+        -6.95,
+        2.8
+      ],
+      "material": "granite",
+      "certainty": {
+        "percent": 70,
+        "basis": "inferred",
+        "note": "Rock at the edge of the pool. Shape generic."
+      },
+      "joints": [
+        [
+          11.4,
+          -7,
+          2.8
+        ],
+        [
+          12,
+          -6.8,
+          2.8
+        ],
+        [
+          12.6,
+          -7.1,
+          2.8
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          1.26,
+          1.08
+        ],
+        [
+          0.5,
+          1.8,
+          1.44
+        ],
+        [
+          1,
+          1.08,
+          0.9
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "rock-3",
+      "name": "Rock 3",
+      "type": "loft",
+      "parent": "ground",
+      "dimensions": {
+        "x": 5.2,
+        "y": 4.3,
+        "z": 4
+      },
+      "position": [
+        -12,
+        7.05,
+        3
+      ],
+      "material": "granite",
+      "certainty": {
+        "percent": 70,
+        "basis": "inferred",
+        "note": "Rock at the edge of the pool. Shape generic."
+      },
+      "joints": [
+        [
+          -12.6,
+          7,
+          3
+        ],
+        [
+          -12,
+          7.2,
+          3
+        ],
+        [
+          -11.4,
+          6.9,
+          3
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          1.4,
+          1.2
+        ],
+        [
+          0.5,
+          2,
+          1.6
+        ],
+        [
+          1,
+          1.2,
+          1
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "rock-4",
+      "name": "Rock 4",
+      "type": "loft",
+      "parent": "ground",
+      "dimensions": {
+        "x": 6,
+        "y": 5.1,
+        "z": 4.8
+      },
+      "position": [
+        11,
+        8.05,
+        3.4
+      ],
+      "material": "granite",
+      "certainty": {
+        "percent": 70,
+        "basis": "inferred",
+        "note": "Rock at the edge of the pool. Shape generic."
+      },
+      "joints": [
+        [
+          10.4,
+          8,
+          3.4
+        ],
+        [
+          11,
+          8.2,
+          3.4
+        ],
+        [
+          11.6,
+          7.9,
+          3.4
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          1.68,
+          1.44
+        ],
+        [
+          0.5,
+          2.4,
+          1.92
+        ],
+        [
+          1,
+          1.44,
+          1.2
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    },
+    {
+      "uuid": "rock-5",
+      "name": "Rock 5",
+      "type": "loft",
+      "parent": "ground",
+      "dimensions": {
+        "x": 5.2,
+        "y": 4.3,
+        "z": 4
+      },
+      "position": [
+        0,
+        -9.95,
+        3
+      ],
+      "material": "granite",
+      "certainty": {
+        "percent": 70,
+        "basis": "inferred",
+        "note": "Rock at the edge of the pool. Shape generic."
+      },
+      "joints": [
+        [
+          -0.6,
+          -10,
+          3
+        ],
+        [
+          0,
+          -9.8,
+          3
+        ],
+        [
+          0.6,
+          -10.1,
+          3
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          1.4,
+          1.2
+        ],
+        [
+          0.5,
+          2,
+          1.6
+        ],
+        [
+          1,
+          1.2,
+          1
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
+      "detail": {
+        "sides": 30,
+        "samples": 32
+      }
+    }
+  ],
+  "flags": []
+}

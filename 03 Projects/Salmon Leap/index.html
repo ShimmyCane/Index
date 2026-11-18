@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Salmon Leap · statue</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1>Salmon Leap</h1>
+    <p id="subtitle">A bronze Atlantic salmon leaping up · five versions</p>
+  </div>
+  <div class="pills"><span id="pill-audit" class="pill">checking…</span></div>
+</header>
+
+<main class="grid">
+  <aside class="col">
+    <section class="panel" data-panel="versions" data-open="true">
+      <button class="panelHead" type="button" aria-expanded="true" aria-controls="versions-body">
+        <span class="panelIcon">🐟</span><span class="panelTitle">Versions</span><span class="panelMark">▾</span>
+      </button>
+      <div class="panelBody" id="versions-body">
+        <div class="row" id="version-tabs"></div>
+        <p class="help" id="version-title"></p>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="story" data-open="true">
+      <button class="panelHead" type="button" aria-expanded="true" aria-controls="story-body">
+        <span class="panelIcon">📜</span><span class="panelTitle">Narrative</span><span class="panelMark">▾</span>
+      </button>
+      <div class="panelBody" id="story-body"><p id="narrative" class="plain-text"></p></div>
+    </section>
+
+    <section class="panel" data-panel="facts" data-open="false">
+      <button class="panelHead" type="button" aria-expanded="false" aria-controls="facts-body">
+        <span class="panelIcon">🔎</span><span class="panelTitle">Parts</span><span class="panelMark">▾</span>
+      </button>
+      <div class="panelBody" id="facts-body">
+        <p id="facts" class="help"></p>
+        <ul id="part-list" class="list"></ul>
+      </div>
+    </section>
+  </aside>
+
+  <section class="col center" aria-label="3-D view">
+    <section class="panel" data-panel="view" data-open="true">
+      <button class="panelHead" type="button" aria-expanded="true" aria-controls="view-body">
+        <span class="panelIcon">🏛️</span><span class="panelTitle">3-D view</span><span class="panelMark">▾</span>
+      </button>
+      <div class="panelBody" id="view-body">
+        <div class="toolbar">
+          <button type="button" class="btn small" data-view="front">Front</button>
+          <button type="button" class="btn small" data-view="side">Side</button>
+          <button type="button" class="btn small" data-view="back">Back</button>
+          <button type="button" class="btn small" data-view="top">Top</button>
+          <button type="button" class="btn small" data-view="oblique">Oblique</button>
+          <button type="button" id="mode" class="btn small">Colour: material</button>
+        </div>
+        <canvas id="view" aria-label="3-D model; drag to turn, pinch or wheel to zoom, tap a part to see its name"></canvas>
+        <p class="help">Drag to turn. Pinch or scroll to zoom. Tap a part to see its name. Colour: material is the default look; certainty shows coral for low and sage for high.</p>
+      </div>
+    </section>
+  </section>
+</main>
+
+<script src="vendor/three/three.min.js"></script>
+<script src="js/versions_bundle.js"></script>
+<script src="js/core/model.js"></script>
+<script src="js/core/loft.js"></script>
+<script src="js/viewer/viewer.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

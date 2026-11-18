@@ -1,0 +1,1407 @@
+{
+  "schema": "m3dxc.history/0.1",
+  "header": {
+    "model_id": "salmon-leap-v02",
+    "name": "Leaping salmon statue V2",
+    "description": "Narrative refined; light, colour, texture, background set-up",
+    "scale": "statue, about 25 in from tail to nose",
+    "units": "in",
+    "up": "z",
+    "world": "salmon-world"
+  },
+  "operations": [
+    {
+      "seq": 1,
+      "op": "add",
+      "time": "2026-11-18T10:01:00Z",
+      "author": "jimmy",
+      "note": "add Leaping salmon (statue)",
+      "object": {
+        "uuid": "statue",
+        "name": "Leaping salmon (statue)",
+        "type": "group",
+        "description": "A bronze Atlantic salmon leaping up. Massing, then details."
+      }
+    },
+    {
+      "seq": 2,
+      "op": "add",
+      "time": "2026-11-18T10:02:00Z",
+      "author": "jimmy",
+      "note": "add Fish (bronze)",
+      "object": {
+        "uuid": "fish",
+        "name": "Fish (bronze)",
+        "type": "group",
+        "description": "The body and its fins.",
+        "parent": "statue"
+      }
+    },
+    {
+      "seq": 3,
+      "op": "add",
+      "time": "2026-11-18T10:03:00Z",
+      "author": "jimmy",
+      "note": "add Granite base (stepped)",
+      "object": {
+        "uuid": "base",
+        "name": "Granite base (stepped)",
+        "type": "group",
+        "description": "Three steps of granite that the fish rises from.",
+        "parent": "statue"
+      }
+    },
+    {
+      "seq": 4,
+      "op": "add",
+      "time": "2026-11-18T10:04:00Z",
+      "author": "jimmy",
+      "note": "add Supports",
+      "object": {
+        "uuid": "supports",
+        "name": "Supports",
+        "type": "group",
+        "description": "A pillar under the belly and a prop under the tail.",
+        "parent": "statue"
+      }
+    },
+    {
+      "seq": 5,
+      "op": "add",
+      "time": "2026-11-18T10:05:00Z",
+      "author": "jimmy",
+      "note": "add Body (tail section)",
+      "object": {
+        "uuid": "body-tail",
+        "name": "Body (tail section)",
+        "type": "loft",
+        "parent": "fish",
+        "dimensions": {
+          "x": 12.04,
+          "y": 4.04,
+          "z": 9.64
+        },
+        "position": [
+          -7,
+          0,
+          10.4
+        ],
+        "material": "bronze",
+        "certainty": {
+          "percent": 70,
+          "basis": "inferred",
+          "note": "Spindle body: depth about a quarter of the length (Maine DMR, Fishbase)."
+        },
+        "joints": [
+          [
+            -11,
+            0,
+            7.6
+          ],
+          [
+            -7,
+            0,
+            10.6
+          ],
+          [
+            -3,
+            0,
+            13.2
+          ]
+        ],
+        "rings": [
+          [
+            0,
+            0.3,
+            0.4
+          ],
+          [
+            0.33,
+            0.63,
+            0.91
+          ],
+          [
+            0.67,
+            1.03,
+            1.59
+          ],
+          [
+            1,
+            1.19,
+            2.02
+          ]
+        ],
+        "facing": [
+          0,
+          1,
+          0
+        ],
+        "detail": {
+          "sides": 12,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "seq": 6,
+      "op": "add",
+      "time": "2026-11-18T10:06:00Z",
+      "author": "jimmy",
+      "note": "add Body (middle)",
+      "object": {
+        "uuid": "body-middle",
+        "name": "Body (middle)",
+        "type": "loft",
+        "parent": "fish",
+        "dimensions": {
+          "x": 12.4,
+          "y": 4.4,
+          "z": 5.6
+        },
+        "position": [
+          1,
+          0,
+          13.8
+        ],
+        "material": "bronze",
+        "certainty": {
+          "percent": 70,
+          "basis": "inferred",
+          "note": "Spindle body: depth about a quarter of the length (Maine DMR, Fishbase)."
+        },
+        "joints": [
+          [
+            -3,
+            0,
+            13.2
+          ],
+          [
+            1,
+            0,
+            14.4
+          ],
+          [
+            5,
+            0,
+            14.1
+          ]
+        ],
+        "rings": [
+          [
+            0,
+            1.19,
+            2.02
+          ],
+          [
+            0.33,
+            1.23,
+            2.2
+          ],
+          [
+            0.67,
+            1.19,
+            2.17
+          ],
+          [
+            1,
+            0.97,
+            1.66
+          ]
+        ],
+        "facing": [
+          0,
+          1,
+          0
+        ],
+        "detail": {
+          "sides": 12,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "seq": 7,
+      "op": "add",
+      "time": "2026-11-18T10:07:00Z",
+      "author": "jimmy",
+      "note": "add Body (front)",
+      "object": {
+        "uuid": "body-front",
+        "name": "Body (front)",
+        "type": "loft",
+        "parent": "fish",
+        "dimensions": {
+          "x": 6.71,
+          "y": 3.31,
+          "z": 4.61
+        },
+        "position": [
+          6.7,
+          0,
+          13.45
+        ],
+        "material": "bronze",
+        "certainty": {
+          "percent": 70,
+          "basis": "inferred",
+          "note": "Spindle body: depth about a quarter of the length (Maine DMR, Fishbase)."
+        },
+        "joints": [
+          [
+            5,
+            0,
+            14.1
+          ],
+          [
+            8.4,
+            0,
+            12.8
+          ]
+        ],
+        "rings": [
+          [
+            0,
+            0.97,
+            1.66
+          ],
+          [
+            0.33,
+            0.86,
+            1.41
+          ],
+          [
+            0.67,
+            0.74,
+            1.19
+          ],
+          [
+            1,
+            0.63,
+            0.97
+          ]
+        ],
+        "facing": [
+          0,
+          1,
+          0
+        ],
+        "detail": {
+          "sides": 12,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "seq": 8,
+      "op": "add",
+      "time": "2026-11-18T10:08:00Z",
+      "author": "jimmy",
+      "note": "add Body (head)",
+      "object": {
+        "uuid": "body-head",
+        "name": "Body (head)",
+        "type": "loft",
+        "parent": "fish",
+        "dimensions": {
+          "x": 4.43,
+          "y": 1.93,
+          "z": 3.93
+        },
+        "position": [
+          9.65,
+          0,
+          11.8
+        ],
+        "material": "bronze",
+        "certainty": {
+          "percent": 70,
+          "basis": "inferred",
+          "note": "Spindle body: depth about a quarter of the length (Maine DMR, Fishbase)."
+        },
+        "joints": [
+          [
+            8.4,
+            0,
+            12.8
+          ],
+          [
+            10.9,
+            0,
+            10.8
+          ]
+        ],
+        "rings": [
+          [
+            0,
+            0.63,
+            0.97
+          ],
+          [
+            0.33,
+            0.54,
+            0.78
+          ],
+          [
+            0.67,
+            0.46,
+            0.62
+          ],
+          [
+            1,
+            0.5,
+            0.6
+          ]
+        ],
+        "facing": [
+          0,
+          1,
+          0
+        ],
+        "detail": {
+          "sides": 12,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "seq": 9,
+      "op": "add",
+      "time": "2026-11-18T10:09:00Z",
+      "author": "jimmy",
+      "note": "add tail-up (root)",
+      "object": {
+        "uuid": "tail-up-root",
+        "name": "tail-up (root)",
+        "type": "loft",
+        "parent": "fish",
+        "dimensions": {
+          "x": 4.4,
+          "y": 2,
+          "z": 3.8
+        },
+        "position": [
+          -12.2,
+          0,
+          8.5
+        ],
+        "material": "patina",
+        "certainty": {
+          "percent": 60,
+          "basis": "inferred",
+          "note": "Caudal fin root."
+        },
+        "joints": [
+          [
+            -11,
+            0,
+            7.6
+          ],
+          [
+            -13.4,
+            0,
+            9.4
+          ]
+        ],
+        "rings": [
+          [
+            0,
+            0.12,
+            0.6
+          ],
+          [
+            1,
+            0.14,
+            1
+          ]
+        ],
+        "facing": [
+          0,
+          1,
+          0
+        ],
+        "detail": {
+          "sides": 12,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "seq": 10,
+      "op": "add",
+      "time": "2026-11-18T10:10:00Z",
+      "author": "jimmy",
+      "note": "add tail-up (tip)",
+      "object": {
+        "uuid": "tail-up-tip",
+        "name": "tail-up (tip)",
+        "type": "loft",
+        "parent": "fish",
+        "dimensions": {
+          "x": 3.8,
+          "y": 2,
+          "z": 3.9
+        },
+        "position": [
+          -14.3,
+          0,
+          10.35
+        ],
+        "material": "patina",
+        "certainty": {
+          "percent": 60,
+          "basis": "inferred",
+          "note": "Caudal fin tip."
+        },
+        "joints": [
+          [
+            -13.4,
+            0,
+            9.4
+          ],
+          [
+            -15.2,
+            0,
+            11.3
+          ]
+        ],
+        "rings": [
+          [
+            0,
+            0.14,
+            1
+          ],
+          [
+            1,
+            0.08,
+            0.45
+          ]
+        ],
+        "facing": [
+          0,
+          1,
+          0
+        ],
+        "detail": {
+          "sides": 12,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "seq": 11,
+      "op": "add",
+      "time": "2026-11-18T10:11:00Z",
+      "author": "jimmy",
+      "note": "add tail-down (root)",
+      "object": {
+        "uuid": "tail-down-root",
+        "name": "tail-down (root)",
+        "type": "loft",
+        "parent": "fish",
+        "dimensions": {
+          "x": 4.4,
+          "y": 2,
+          "z": 3.6
+        },
+        "position": [
+          -12.2,
+          0,
+          6.8
+        ],
+        "material": "patina",
+        "certainty": {
+          "percent": 60,
+          "basis": "inferred",
+          "note": "Caudal fin root."
+        },
+        "joints": [
+          [
+            -11,
+            0,
+            7.6
+          ],
+          [
+            -13.4,
+            0,
+            6
+          ]
+        ],
+        "rings": [
+          [
+            0,
+            0.12,
+            0.6
+          ],
+          [
+            1,
+            0.14,
+            1
+          ]
+        ],
+        "facing": [
+          0,
+          1,
+          0
+        ],
+        "detail": {
+          "sides": 12,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "seq": 12,
+      "op": "add",
+      "time": "2026-11-18T10:12:00Z",
+      "author": "jimmy",
+      "note": "add tail-down (tip)",
+      "object": {
+        "uuid": "tail-down-tip",
+        "name": "tail-down (tip)",
+        "type": "loft",
+        "parent": "fish",
+        "dimensions": {
+          "x": 3.8,
+          "y": 2,
+          "z": 3.8
+        },
+        "position": [
+          -14.3,
+          0,
+          5.1
+        ],
+        "material": "patina",
+        "certainty": {
+          "percent": 60,
+          "basis": "inferred",
+          "note": "Caudal fin tip."
+        },
+        "joints": [
+          [
+            -13.4,
+            0,
+            6
+          ],
+          [
+            -15.2,
+            0,
+            4.2
+          ]
+        ],
+        "rings": [
+          [
+            0,
+            0.14,
+            1
+          ],
+          [
+            1,
+            0.08,
+            0.45
+          ]
+        ],
+        "facing": [
+          0,
+          1,
+          0
+        ],
+        "detail": {
+          "sides": 12,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "seq": 13,
+      "op": "add",
+      "time": "2026-11-18T10:13:00Z",
+      "author": "jimmy",
+      "note": "add Dorsal fin (front)",
+      "object": {
+        "uuid": "dorsal-front",
+        "name": "Dorsal fin (front)",
+        "type": "loft",
+        "parent": "fish",
+        "dimensions": {
+          "x": 5.2,
+          "y": 3.8,
+          "z": 6.1
+        },
+        "position": [
+          -3.3,
+          0,
+          16.45
+        ],
+        "material": "patina",
+        "certainty": {
+          "percent": 60,
+          "basis": "inferred",
+          "note": "Dorsal fin, front."
+        },
+        "joints": [
+          [
+            -4,
+            0,
+            15.3
+          ],
+          [
+            -2.6,
+            0,
+            17.6
+          ]
+        ],
+        "rings": [
+          [
+            0,
+            0.1,
+            0.7
+          ],
+          [
+            1,
+            0.12,
+            1.9
+          ]
+        ],
+        "facing": [
+          0,
+          1,
+          0
+        ],
+        "detail": {
+          "sides": 12,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "seq": 14,
+      "op": "add",
+      "time": "2026-11-18T10:14:00Z",
+      "author": "jimmy",
+      "note": "add Dorsal fin (back)",
+      "object": {
+        "uuid": "dorsal-back",
+        "name": "Dorsal fin (back)",
+        "type": "loft",
+        "parent": "fish",
+        "dimensions": {
+          "x": 5.5,
+          "y": 3.8,
+          "z": 4.5
+        },
+        "position": [
+          -1.75,
+          0,
+          17.25
+        ],
+        "material": "patina",
+        "certainty": {
+          "percent": 60,
+          "basis": "inferred",
+          "note": "Dorsal fin, back."
+        },
+        "joints": [
+          [
+            -2.6,
+            0,
+            17.6
+          ],
+          [
+            -0.9,
+            0,
+            16.9
+          ]
+        ],
+        "rings": [
+          [
+            0,
+            0.12,
+            1.9
+          ],
+          [
+            1,
+            0.1,
+            0.35
+          ]
+        ],
+        "facing": [
+          0,
+          1,
+          0
+        ],
+        "detail": {
+          "sides": 12,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "seq": 15,
+      "op": "add",
+      "time": "2026-11-18T10:15:00Z",
+      "author": "jimmy",
+      "note": "add Pectoral fin right (root)",
+      "object": {
+        "uuid": "pectoral-r-root",
+        "name": "Pectoral fin right (root)",
+        "type": "loft",
+        "parent": "fish",
+        "dimensions": {
+          "x": 3.3,
+          "y": 4.4,
+          "z": 3.8
+        },
+        "position": [
+          3.15,
+          1.9,
+          11.8
+        ],
+        "material": "patina",
+        "certainty": {
+          "percent": 60,
+          "basis": "inferred",
+          "note": "Pectoral fin root."
+        },
+        "joints": [
+          [
+            3.5,
+            1,
+            12.4
+          ],
+          [
+            2.8,
+            2.8,
+            11.2
+          ]
+        ],
+        "rings": [
+          [
+            0,
+            0.1,
+            0.9
+          ],
+          [
+            1,
+            0.12,
+            1.3
+          ]
+        ],
+        "facing": [
+          0,
+          0,
+          1
+        ],
+        "detail": {
+          "sides": 12,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "seq": 16,
+      "op": "add",
+      "time": "2026-11-18T10:16:00Z",
+      "author": "jimmy",
+      "note": "add Pectoral fin right (tip)",
+      "object": {
+        "uuid": "pectoral-r-tip",
+        "name": "Pectoral fin right (tip)",
+        "type": "loft",
+        "parent": "fish",
+        "dimensions": {
+          "x": 3.2,
+          "y": 4,
+          "z": 3.5
+        },
+        "position": [
+          2.5,
+          3.5,
+          10.75
+        ],
+        "material": "patina",
+        "certainty": {
+          "percent": 60,
+          "basis": "inferred",
+          "note": "Pectoral fin tip."
+        },
+        "joints": [
+          [
+            2.8,
+            2.8,
+            11.2
+          ],
+          [
+            2.2,
+            4.2,
+            10.3
+          ]
+        ],
+        "rings": [
+          [
+            0,
+            0.12,
+            1.3
+          ],
+          [
+            1,
+            0.08,
+            0.45
+          ]
+        ],
+        "facing": [
+          0,
+          0,
+          1
+        ],
+        "detail": {
+          "sides": 12,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "seq": 17,
+      "op": "add",
+      "time": "2026-11-18T10:17:00Z",
+      "author": "jimmy",
+      "note": "add Pectoral fin left (root)",
+      "object": {
+        "uuid": "pectoral-l-root",
+        "name": "Pectoral fin left (root)",
+        "type": "loft",
+        "parent": "fish",
+        "dimensions": {
+          "x": 3.3,
+          "y": 4.4,
+          "z": 3.8
+        },
+        "position": [
+          3.15,
+          -1.9,
+          11.8
+        ],
+        "material": "patina",
+        "certainty": {
+          "percent": 60,
+          "basis": "inferred",
+          "note": "Pectoral fin root."
+        },
+        "joints": [
+          [
+            3.5,
+            -1,
+            12.4
+          ],
+          [
+            2.8,
+            -2.8,
+            11.2
+          ]
+        ],
+        "rings": [
+          [
+            0,
+            0.1,
+            0.9
+          ],
+          [
+            1,
+            0.12,
+            1.3
+          ]
+        ],
+        "facing": [
+          0,
+          0,
+          1
+        ],
+        "detail": {
+          "sides": 12,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "seq": 18,
+      "op": "add",
+      "time": "2026-11-18T10:18:00Z",
+      "author": "jimmy",
+      "note": "add Pectoral fin left (tip)",
+      "object": {
+        "uuid": "pectoral-l-tip",
+        "name": "Pectoral fin left (tip)",
+        "type": "loft",
+        "parent": "fish",
+        "dimensions": {
+          "x": 3.2,
+          "y": 4,
+          "z": 3.5
+        },
+        "position": [
+          2.5,
+          -3.5,
+          10.75
+        ],
+        "material": "patina",
+        "certainty": {
+          "percent": 60,
+          "basis": "inferred",
+          "note": "Pectoral fin tip."
+        },
+        "joints": [
+          [
+            2.8,
+            -2.8,
+            11.2
+          ],
+          [
+            2.2,
+            -4.2,
+            10.3
+          ]
+        ],
+        "rings": [
+          [
+            0,
+            0.12,
+            1.3
+          ],
+          [
+            1,
+            0.08,
+            0.45
+          ]
+        ],
+        "facing": [
+          0,
+          0,
+          1
+        ],
+        "detail": {
+          "sides": 12,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "seq": 19,
+      "op": "add",
+      "time": "2026-11-18T10:19:00Z",
+      "author": "jimmy",
+      "note": "add Block 1 of step-1",
+      "object": {
+        "uuid": "step-1-block-1",
+        "name": "Block 1 of step-1",
+        "type": "box",
+        "parent": "base",
+        "dimensions": {
+          "x": 5.23,
+          "y": 9,
+          "z": 3
+        },
+        "position": [
+          -5.33,
+          0,
+          1.5
+        ],
+        "material": "granite",
+        "certainty": {
+          "percent": 80,
+          "basis": "user",
+          "note": "Designed block. Massing."
+        }
+      }
+    },
+    {
+      "seq": 20,
+      "op": "add",
+      "time": "2026-11-18T10:20:00Z",
+      "author": "jimmy",
+      "note": "add Block 2 of step-1",
+      "object": {
+        "uuid": "step-1-block-2",
+        "name": "Block 2 of step-1",
+        "type": "box",
+        "parent": "base",
+        "dimensions": {
+          "x": 5.23,
+          "y": 9,
+          "z": 3
+        },
+        "position": [
+          0,
+          0,
+          1.5
+        ],
+        "material": "granite",
+        "certainty": {
+          "percent": 80,
+          "basis": "user",
+          "note": "Designed block. Massing."
+        }
+      }
+    },
+    {
+      "seq": 21,
+      "op": "add",
+      "time": "2026-11-18T10:21:00Z",
+      "author": "jimmy",
+      "note": "add Block 3 of step-1",
+      "object": {
+        "uuid": "step-1-block-3",
+        "name": "Block 3 of step-1",
+        "type": "box",
+        "parent": "base",
+        "dimensions": {
+          "x": 5.23,
+          "y": 9,
+          "z": 3
+        },
+        "position": [
+          5.33,
+          0,
+          1.5
+        ],
+        "material": "granite",
+        "certainty": {
+          "percent": 80,
+          "basis": "user",
+          "note": "Designed block. Massing."
+        }
+      }
+    },
+    {
+      "seq": 22,
+      "op": "add",
+      "time": "2026-11-18T10:22:00Z",
+      "author": "jimmy",
+      "note": "add Block 1 of step-2",
+      "object": {
+        "uuid": "step-2-block-1",
+        "name": "Block 1 of step-2",
+        "type": "box",
+        "parent": "base",
+        "dimensions": {
+          "x": 3.23,
+          "y": 7,
+          "z": 3
+        },
+        "position": [
+          -3.33,
+          0,
+          4.5
+        ],
+        "material": "granite",
+        "certainty": {
+          "percent": 80,
+          "basis": "user",
+          "note": "Designed block. Massing."
+        }
+      }
+    },
+    {
+      "seq": 23,
+      "op": "add",
+      "time": "2026-11-18T10:23:00Z",
+      "author": "jimmy",
+      "note": "add Block 2 of step-2",
+      "object": {
+        "uuid": "step-2-block-2",
+        "name": "Block 2 of step-2",
+        "type": "box",
+        "parent": "base",
+        "dimensions": {
+          "x": 3.23,
+          "y": 7,
+          "z": 3
+        },
+        "position": [
+          0,
+          0,
+          4.5
+        ],
+        "material": "granite",
+        "certainty": {
+          "percent": 80,
+          "basis": "user",
+          "note": "Designed block. Massing."
+        }
+      }
+    },
+    {
+      "seq": 24,
+      "op": "add",
+      "time": "2026-11-18T10:24:00Z",
+      "author": "jimmy",
+      "note": "add Block 3 of step-2",
+      "object": {
+        "uuid": "step-2-block-3",
+        "name": "Block 3 of step-2",
+        "type": "box",
+        "parent": "base",
+        "dimensions": {
+          "x": 3.23,
+          "y": 7,
+          "z": 3
+        },
+        "position": [
+          3.33,
+          0,
+          4.5
+        ],
+        "material": "granite",
+        "certainty": {
+          "percent": 80,
+          "basis": "user",
+          "note": "Designed block. Massing."
+        }
+      }
+    },
+    {
+      "seq": 25,
+      "op": "add",
+      "time": "2026-11-18T10:25:00Z",
+      "author": "jimmy",
+      "note": "add Block 1 of step-3",
+      "object": {
+        "uuid": "step-3-block-1",
+        "name": "Block 1 of step-3",
+        "type": "box",
+        "parent": "base",
+        "dimensions": {
+          "x": 1.57,
+          "y": 4.5,
+          "z": 2
+        },
+        "position": [
+          -1.67,
+          0,
+          7
+        ],
+        "material": "granite",
+        "certainty": {
+          "percent": 80,
+          "basis": "user",
+          "note": "Designed block. Massing."
+        }
+      }
+    },
+    {
+      "seq": 26,
+      "op": "add",
+      "time": "2026-11-18T10:26:00Z",
+      "author": "jimmy",
+      "note": "add Block 2 of step-3",
+      "object": {
+        "uuid": "step-3-block-2",
+        "name": "Block 2 of step-3",
+        "type": "box",
+        "parent": "base",
+        "dimensions": {
+          "x": 1.57,
+          "y": 4.5,
+          "z": 2
+        },
+        "position": [
+          0,
+          0,
+          7
+        ],
+        "material": "granite",
+        "certainty": {
+          "percent": 80,
+          "basis": "user",
+          "note": "Designed block. Massing."
+        }
+      }
+    },
+    {
+      "seq": 27,
+      "op": "add",
+      "time": "2026-11-18T10:27:00Z",
+      "author": "jimmy",
+      "note": "add Block 3 of step-3",
+      "object": {
+        "uuid": "step-3-block-3",
+        "name": "Block 3 of step-3",
+        "type": "box",
+        "parent": "base",
+        "dimensions": {
+          "x": 1.57,
+          "y": 4.5,
+          "z": 2
+        },
+        "position": [
+          1.67,
+          0,
+          7
+        ],
+        "material": "granite",
+        "certainty": {
+          "percent": 80,
+          "basis": "user",
+          "note": "Designed block. Massing."
+        }
+      }
+    },
+    {
+      "seq": 28,
+      "op": "add",
+      "time": "2026-11-18T10:28:00Z",
+      "author": "jimmy",
+      "note": "add Pillar under the belly",
+      "object": {
+        "uuid": "pillar",
+        "name": "Pillar under the belly",
+        "type": "cylinder",
+        "parent": "supports",
+        "dimensions": {
+          "x": 1,
+          "y": 1,
+          "z": 4
+        },
+        "position": [
+          0,
+          0,
+          9.9
+        ],
+        "material": "bronze",
+        "certainty": {
+          "percent": 80,
+          "basis": "user",
+          "note": "Support pillar, bronze. Its height meets the belly."
+        }
+      }
+    },
+    {
+      "seq": 29,
+      "op": "add",
+      "time": "2026-11-18T10:29:00Z",
+      "author": "jimmy",
+      "note": "add Pillar foot",
+      "object": {
+        "uuid": "pillar-foot",
+        "name": "Pillar foot",
+        "type": "box",
+        "parent": "supports",
+        "dimensions": {
+          "x": 1.8,
+          "y": 1.8,
+          "z": 0.5
+        },
+        "position": [
+          0,
+          0,
+          8.25
+        ],
+        "material": "granite",
+        "certainty": {
+          "percent": 80,
+          "basis": "user",
+          "note": "Foot where the pillar meets the step."
+        }
+      }
+    },
+    {
+      "seq": 30,
+      "op": "add",
+      "time": "2026-11-18T10:30:00Z",
+      "author": "jimmy",
+      "note": "add Prop under the tail",
+      "object": {
+        "uuid": "tail-prop",
+        "name": "Prop under the tail",
+        "type": "cylinder",
+        "parent": "supports",
+        "dimensions": {
+          "x": 0.8,
+          "y": 0.8,
+          "z": 7.4
+        },
+        "position": [
+          -11,
+          0,
+          3.7
+        ],
+        "material": "bronze",
+        "certainty": {
+          "percent": 80,
+          "basis": "user",
+          "note": "Tail prop from the ground."
+        }
+      }
+    },
+    {
+      "seq": 31,
+      "op": "add",
+      "time": "2026-11-18T10:31:00Z",
+      "author": "jimmy",
+      "note": "add Tail prop foot",
+      "object": {
+        "uuid": "tail-prop-foot",
+        "name": "Tail prop foot",
+        "type": "box",
+        "parent": "supports",
+        "dimensions": {
+          "x": 1.6,
+          "y": 1.6,
+          "z": 0.4
+        },
+        "position": [
+          -11,
+          0,
+          0.2
+        ],
+        "material": "granite",
+        "certainty": {
+          "percent": 80,
+          "basis": "user",
+          "note": "Foot of the tail prop."
+        }
+      }
+    },
+    {
+      "seq": 32,
+      "op": "add",
+      "time": "2026-11-18T10:32:00Z",
+      "author": "jimmy",
+      "note": "add Background",
+      "object": {
+        "uuid": "background",
+        "name": "Background",
+        "type": "group",
+        "description": "A pale wall behind the arc, so the silhouette reads.",
+        "parent": "statue"
+      }
+    },
+    {
+      "seq": 33,
+      "op": "add",
+      "time": "2026-11-18T10:33:00Z",
+      "author": "jimmy",
+      "note": "add Backdrop wall",
+      "object": {
+        "uuid": "backdrop",
+        "name": "Backdrop wall",
+        "type": "box",
+        "parent": "background",
+        "dimensions": {
+          "x": 40,
+          "y": 0.5,
+          "z": 26
+        },
+        "position": [
+          0,
+          10,
+          13
+        ],
+        "material": "painted",
+        "certainty": {
+          "percent": 100,
+          "basis": "decorative",
+          "note": "Flat wall. Not a finished painting."
+        }
+      }
+    }
+  ]
+}
