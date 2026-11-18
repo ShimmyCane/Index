@@ -89,3 +89,7 @@
 
 60. **A gesture the owner cannot see is not a control.** Pan worked, but nothing on screen said so; put each mode on a button that shows only where it applies.
 61. **Cutting a block by its neighbours can remove code between them.** When replacing a section, check the section that sits between the two markers before writing the replacement, or the next start-up fails with "not defined".
+
+62. **Check what the owner sees before changing the data.** "The continents are missing" was the night side at the time of the test; a daylight, clouds-off view showed the real coastline. Reproduce the exact view the note describes before changing code.
+63. **A fallback must say which data is on screen.** The saved copy and the live model look alike; show the source and the date in the data line, or the owner cannot tell an old copy from live data.
+64. **A test that overrides one network route must hand the rest to the mock.** Use the fallback call, not continue, or the unmatched requests go to the real network and the page reports a fake outage.

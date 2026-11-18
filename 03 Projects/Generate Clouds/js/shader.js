@@ -58,8 +58,9 @@ uniform vec4 uSea2;              // wave frequency rad/m (0 = from the wind), ti
 uniform vec3 uWorldP;            // camera column: latitude, longitude (radians), world map ready 0 or 1
 uniform sampler2D uStars;        // the bright stars now: north at the left and right edges, zenith at the top, 2048 x 1024
 uniform float uStarsOn;          // 1 when the star picture is loaded
-uniform sampler2D uSat;          // cloud cover of the whole Earth from a satellite picture, 720 x 360, north at the top, red = cover
-uniform float uSatW;             // how much the satellite cover counts: 0 near the ground, 1 from space
+uniform sampler2D uCloudG;        // the live model's cloud cover over the whole Earth, 13 x 7 points: red low, green mid, blue high
+uniform float uCloudGOn;          // 1 when that grid is loaded
+uniform float uSatW;              // how far from the ground the view is: 0 near the ground, 1 from space (the world picture and the grid count)
 uniform sampler2D uOsm;          // ground colours from map tiles, on the fine map's grid (row 0 = north)
 uniform float uOsmOn;            // 1 when the map colours are loaded
 uniform sampler2D uWindL; uniform sampler2D uWindM; uniform sampler2D uWindH;   // wind over the Earth at 850, 500, 300 hPa: 9 x 7 points, (east, south) km a second
@@ -139,7 +140,7 @@ vec3 sky(vec3 ro, vec3 rd, out vec3 trans, float tHit) {
   return uSunI * (sumR * BR * pR + sumM * BM * uHaze * pM * uHazeTint + sumS * BR * vec3(0.55, 0.8, 1.0) * uMS / (4.0 * PI));
 }
 
-float satCover(vec2 xz);                       // defined with the world lookups below
+float gridCover(vec2 xz, float ch);             // defined with the world lookups below
 vec2 windAt(vec2 xz, sampler2D tex);           // defined with the world lookups below
 
 // ---------- cloud volumes ----------
@@ -178,7 +179,7 @@ float cloudD(vec3 p, vec4 A, vec4 B, vec4 W, int cheap) {
     az = mix(az, pow(gLay < 0.5 ? rg.r : rg.g, 0.85), uReg.x * (1.0 - smoothstep(uReg.y * 0.8, uReg.y * 1.7, max(abs(w.x), abs(w.y)))));
   }
   if (uReg.z > 0.0) az = clamp(az * mix(1.0, 0.15 + 1.9 * noise(vec3(w * 0.0023 + uSeed.xy, uSeed.z)), uReg.z * smoothstep(60.0, 420.0, length(w))), 0.0, 1.0);
-  if (uSatW > 0.0) az = mix(az, pow(satCover(p.xz), 0.85), uSatW);      // from space, the satellite picture sets the cover
+  if (uSatW > 0.0 && uCloudGOn > 0.5) az = mix(az, pow(gridCover(p.xz, gLay < 0.5 ? 0.0 : 1.0), 0.85), uSatW);      // from space, the model's cloud cover sets the cover
   if (uFeat.z > 0.5 && gLay < 0.5) { vec2 fd = p.xz - uFeat.xy; az = max(az, 0.95 * smoothstep(64.0, 9.0, dot(fd, fd))); }   // a storm stands over a funnel
   float wxm = noise(vec3(q.x * 0.11, uEvolve * 0.25 + uSeed.z, q.z * 0.11));
   float cov = mix(az * mix(0.45, 1.55, wxm), 1.0, smoothstep(0.82, 1.0, az));
@@ -293,7 +294,7 @@ vec4 cirrus(vec3 ro, vec3 rd, float t, vec3 bg) {
   if (uReg2.x > 0.0) cover = mix(cover, texture2D(uRegion2, w / (2.0 * uReg2.y) + 0.5).b, uReg2.x * (1.0 - smoothstep(uReg2.y * 0.8, uReg2.y * 1.7, max(abs(w.x), abs(w.y)))));
   if (uReg.x > 0.0) cover = mix(cover, texture2D(uRegion, w / (2.0 * uReg.y) + 0.5).b, uReg.x * (1.0 - smoothstep(uReg.y * 0.8, uReg.y * 1.7, max(abs(w.x), abs(w.y)))));
   if (uReg.z > 0.0) cover = clamp(cover * mix(1.0, 0.15 + 1.9 * noise(vec3(w * 0.0019 + uSeed.yx, 4.0)), uReg.z * smoothstep(60.0, 420.0, length(w))), 0.0, 1.0);
-  if (uSatW > 0.0) cover = mix(cover, satCover(p.xz), uSatW);
+  if (uSatW > 0.0 && uCloudGOn > 0.5) cover = mix(cover, gridCover(p.xz, 2.0), uSatW);
   float thr = mix(0.78, 0.28, cover);
   float a = smoothstep(thr, thr + 0.32, n) * uC.w;
   float wf = 1.0 - smoothstep(0.02, 0.2, t * uPix / uCw.z);
@@ -332,7 +333,12 @@ vec2 worldLL(vec2 xz) {                                           // longitude, 
   return vec2(atan(wv.y, wv.x), asin(clamp(wv.z, -1.0, 1.0)));
 }
 vec3 worldTex(vec2 xz) { vec2 ll = worldLL(xz); return texture2D(uWorld, vec2(ll.x / (2.0 * PI) + 0.5, ll.y / PI + 0.5)).rgb; }
-float satCover(vec2 xz) { vec2 ll = worldLL(xz); return texture2D(uSat, vec2(ll.x / (2.0 * PI) + 0.5, ll.y / PI + 0.5)).r; }   // satellite cloud cover under a point
+// the live model's cloud cover under a point: channel 0 low, 1 mid, 2 high. Grid nodes every 30 degrees (13 x 7).
+float gridCover(vec2 xz, float ch) {
+  vec2 ll = worldLL(xz) * (180.0 / PI);
+  vec3 c = texture2D(uCloudG, vec2((ll.x + 180.0) / 360.0 * (12.0 / 13.0) + 0.5 / 13.0, (clamp(ll.y, -90.0, 90.0) + 90.0) / 180.0 * (6.0 / 7.0) + 0.5 / 7.0)).rgb;
+  return ch < 0.5 ? c.r : (ch < 1.5 ? c.g : c.b);
+}
 // the wind at a ground point from the 9 x 7 grid (node centres at every 45 deg of longitude and 30 deg of latitude)
 vec2 windAt(vec2 xz, sampler2D tex) {
   vec2 ll = worldLL(xz) * (180.0 / PI);
@@ -354,6 +360,7 @@ vec2 groundTex(vec2 xz) {
     float far = smoothstep(0.85 * uTerr.x, uTerr.x * 1.02, edge);
     if (far > 0.0) { tx.g = mix(tx.g, 1.0 - worldWater(xz), far); tx.r *= 1.0 - far; }
   }
+  if (uSatW > 0.0 && uWorldP.z > 0.5) { tx.g = mix(tx.g, 1.0 - worldWater(xz), uSatW); tx.r *= 1.0 - uSatW; }   // from space, the real land and sea (no made-up patch)
   return tx.rg;
 }
 float terrainH(vec2 xz) {
@@ -450,11 +457,11 @@ vec3 landColor(vec3 pl, float t) {
   float sh = cloudShadow(pl);
   vec3 col = c * 1.2 * (uSun0 * max(dot(n, uSunDir), 0.0) * sh * 0.32 + uAmbTop * (0.55 + 0.45 * n.y));
   col += vec3(1.0, 0.72, 0.38) * 0.0035 * urban * uNight * step(0.82, hash12(floor(w * 46.0)));
-  float outside = smoothstep(0.7 * uTerr.x, uTerr.x, max(abs(w.x), abs(w.y)));
+  float outside = max(smoothstep(0.7 * uTerr.x, uTerr.x, max(abs(w.x), abs(w.y))), uSatW);   // from space, the real Earth everywhere
   if (outside > 0.0 && uWorldP.z > 0.5) {                          // far from the place: the real Earth, lit by the sun
     vec3 wc = pow(worldTex(pl.xz), vec3(2.2)) * (0.86 + 0.28 * noise(vec3(w * 0.45, 5.0)));
     float yy = sqrt(max(RE * RE - dot(pl.xz, pl.xz), 1.0)); vec3 uu = normalize(vec3(pl.x, yy, pl.z));
-    vec3 wl = wc * 1.2 * (uSun0 * max(dot(uu, uSunDir), 0.0) * sh * 0.32 + uAmbTop * 0.7);
+    vec3 wl = wc * 1.2 * (uSun0 * max(dot(uu, uSunDir), 0.0) * sh * 0.32 + uAmbTop * 0.7) + wc * 0.035;   // a faint floor on the night side, so the continents still read
     col = mix(col, wl, outside);
   }
   return col;

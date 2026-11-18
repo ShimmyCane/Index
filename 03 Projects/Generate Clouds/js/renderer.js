@@ -51,11 +51,11 @@
       uTerr: v4(), uCity: { value: new THREE.Vector2() }, uTSteps: { value: 64 }, uTGrow: { value: 0.085 }, uSea: v4(), uReg: v4(), uVar: { value: new THREE.Vector2(0, 1) },
       uCmix: { value: 0 }, uPrecip: v4(), uFeat: v4(), uFeatB: v4(),
       uTerrainF: { value: null }, uWorld: { value: null }, uRegion2: { value: null }, uFine: v4(), uReg2: v4(), uSea2: v4(), uWorldP: v3(),
-      uStars: { value: null }, uStarsOn: { value: 0 }, uSat: { value: null }, uSatW: { value: 0 }, uOsm: { value: null }, uOsmOn: { value: 0 },
+      uStars: { value: null }, uStarsOn: { value: 0 }, uCloudG: { value: null }, uCloudGOn: { value: 0 }, uSatW: { value: 0 }, uOsm: { value: null }, uOsmOn: { value: 0 },
       uWindL: { value: null }, uWindM: { value: null }, uWindH: { value: null }, uWindOn: { value: 0 }, uWindT: { value: 0 },
       uWindRefL: { value: new THREE.Vector2() }, uWindRefM: { value: new THREE.Vector2() }, uWindRefH: { value: new THREE.Vector2() }
     };
-    U.uStars.value = blank(); U.uSat.value = blank(); U.uOsm.value = blank(); U.uWindL.value = blank(); U.uWindM.value = blank(); U.uWindH.value = blank();
+    U.uStars.value = blank(); U.uCloudG.value = blank(); U.uOsm.value = blank(); U.uWindL.value = blank(); U.uWindM.value = blank(); U.uWindH.value = blank();
     mat = new THREE.ShaderMaterial({ uniforms: U, vertexShader: GC.VERT, fragmentShader: GC.FRAG, depthTest: false, depthWrite: false });
     scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
     canvas.addEventListener('webglcontextlost', function (e) { e.preventDefault(); R.ok = false; GC.logError('The 3-D view was lost (graphics memory). Reload the page.'); });
@@ -130,17 +130,17 @@
     starsTex.minFilter = starsTex.magFilter = THREE.LinearFilter; starsTex.generateMipmaps = false; starsTex.needsUpdate = true;
     U.uStars.value = starsTex; R.starsOn = 1;
   };
-  // The satellite cloud cover of the whole Earth (js/weather.js): 720 x 360, north at the top, red = cover.
-  var satTex = null;
-  R.setSat = function (cv) {
-    if (satTex) satTex.dispose();
-    satTex = new THREE.Texture(cv);
-    satTex.wrapS = THREE.RepeatWrapping; satTex.wrapT = THREE.ClampToEdgeWrapping;
-    satTex.minFilter = satTex.magFilter = THREE.LinearFilter; satTex.generateMipmaps = false; satTex.needsUpdate = true;
-    U.uSat.value = satTex; R.satOn = 1;
-    if (R.onWorld) R.onWorld();
+  // The live model's cloud cover over the whole Earth (js/weather.js, cloudGrid): 13 x 7 points, red low, green mid, blue high.
+  var gridTex = null;
+  R.setCloudGrid = function (cells) {
+    if (gridTex) { gridTex.dispose(); gridTex = null; }
+    if (!cells) { U.uCloudG.value = blank(); R.cloudGOn = 0; return; }
+    var NX = 13, NY = 7, data = new Uint8Array(NX * NY * 4);
+    for (var n = 0; n < NX * NY; n++) { var c = cells[n] || [0, 0, 0]; data[n * 4] = Math.round(c[0] * 255); data[n * 4 + 1] = Math.round(c[1] * 255); data[n * 4 + 2] = Math.round(c[2] * 255); data[n * 4 + 3] = 255; }
+    gridTex = new THREE.DataTexture(data, NX, NY, THREE.RGBAFormat);
+    gridTex.wrapS = gridTex.wrapT = THREE.ClampToEdgeWrapping; gridTex.minFilter = gridTex.magFilter = THREE.LinearFilter; gridTex.generateMipmaps = false; gridTex.needsUpdate = true;
+    U.uCloudG.value = gridTex; R.cloudGOn = 1;
   };
-  R.clearSat = function () { R.satOn = 0; if (satTex) { satTex.dispose(); satTex = null; } U.uSat.value = blank(); R.satW = 0; };
   // Ground colours from map tiles on the fine map's grid (js/osm.js): 128 x 128 RGBA bytes, row 0 = north.
   var osmTex = null;
   R.setOsm = function (data, T) {
@@ -167,7 +167,7 @@
     return [d[0] / L, d[1] / L, d[2] / L];
   };
   R.canvasSize = function () { return { w: canvas.clientWidth, h: canvas.clientHeight }; };
-  R.satW = 0; R.satOn = 0; R.starsOn = 0; R.osmOn = 0; R.windOn = 0; R.windW = 0; R.windT = 0;
+  R.satW = 0; R.cloudGOn = 0; R.starsOn = 0; R.osmOn = 0; R.windOn = 0; R.windW = 0; R.windT = 0;
   // The wind over the Earth (js/weather.js, windSeries) for one hour: three 9 x 7 pictures, one per layer.
   // The clouds are moved by how much the wind here differs from the wind at the place (so the place is unchanged).
   function toHalfWord(v) {
@@ -243,7 +243,7 @@
     U.uReg2.value.set(F.regionMix * R.region2On, 1125, 0, 0);
     var lat0 = GC.clamp(R.place.lat - R.cam.z / 111.19, -89.9, 89.9), lon0 = R.place.lon + R.cam.x / (111.19 * Math.max(Math.cos(GC.rad(R.place.lat)), 0.05));
     U.uWorldP.value.set(GC.rad(lat0), GC.rad(lon0), R.worldOn);
-    U.uSatW.value = R.satW || 0; U.uStarsOn.value = R.starsOn ? 1 : 0; U.uOsmOn.value = R.osmOn ? 1 : 0;
+    U.uSatW.value = R.satW || 0; U.uCloudGOn.value = R.cloudGOn ? 1 : 0; U.uStarsOn.value = R.starsOn ? 1 : 0; U.uOsmOn.value = R.osmOn ? 1 : 0;
     U.uWindOn.value = R.windOn ? (R.windW || 0) : 0; U.uWindT.value = R.windT || 0;
     U.uSea.value.set(F.sea[0], R.clock, F.sea[1], F.sea[2]);
     // regional data is used unless the cover was set by hand; far-away variety always
