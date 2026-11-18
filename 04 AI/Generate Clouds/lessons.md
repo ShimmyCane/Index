@@ -52,3 +52,7 @@
 35. **The database tool's confirmation can time out unanswered in a remote session.** Do not retry in the same turn. Write the SQL, run `sql_paste_check.py`, and hand over the paste order; build and test the app against a pretend database so it is ready the moment the table exists.
 36. **A privacy sentence must be checked against the payload.** The hint said the place never leaves the page, but each note carries the place and moment it was about. Check what is in the request body before writing what is sent.
 37. **A heavy still-picture pass blocks clicks in a headless test.** Turn the sharpening off (`GC.Renderer.fineStart = () => false`) in tests that are about the page, not the picture.
+
+38. **"Anyone who can log in" is only "only me" if sign-ups are closed.** Read `/auth/v1/settings` (public, read-only) and the account list (masked) before loosening a rule. Here sign-ups were open and a second account existed, so the owner-only rule stayed.
+39. **Do the owner step for the owner when they ask, behind a guard.** A single insert that matches exactly one account (and checks the match count), read back afterwards, is less error-prone than asking someone to copy a uuid. Never write the id or email to the repo.
+40. **Jargon in an error message caused real confusion.** "Owner list" meant nothing to the person it was shown to; say what the account may not do and what to run.

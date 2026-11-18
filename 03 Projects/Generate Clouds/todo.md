@@ -17,7 +17,8 @@
 ## Added in 0.3.0, to confirm on a real device
 - [ ] Orbit with real fingers: drag around, pinch closer; speed while turning.
 
-## Database link (0.5.0): Jimmy's steps, in order
+## Database link (0.5.0): DONE on 2026-11-18 (table pasted by Jimmy; owner row added by Claude after Jimmy's go-ahead). Kept for reference
+(Remaining: sign in on the page once so the notes on the device are sent; then read them.)
 (Owner row first or last, either works, but the page shows no rows until it exists. `supabase/000_owner_row.sql` has the ready-to-paste steps; the id you copy is never committed.)
 1. Architecture project → SQL Editor: paste `supabase/test_001_gc.sql` → Run. Expect an **error** starting `RESULT: tables=1 rls=1 policies=1 index=1 owner_sees=1 stranger_sees=0 stranger_insert=blocked anon=blocked done_check=blocked` (that error is the pass).
 2. Paste `supabase/001_gc_notes.sql` → Run. Expect "Success".

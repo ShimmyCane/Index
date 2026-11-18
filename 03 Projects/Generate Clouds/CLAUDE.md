@@ -16,7 +16,7 @@ Check: headless Chromium with the WebGL flags (`/smoke-test`). Route the `open-m
 
 Project rules:
 - Public repo. No home or family locations in code, notes or convo files; the place chips are well-known cities.
-- Database: Architecture project (studio), table `gc_notes`, owner only through `public.platform_is_owner()`. Publishable key only. SQL in `supabase/` (`test_001_gc`, `001_gc_notes`, `verify_001_gc`), pasted by hand; nothing is applied until Jimmy confirms. Never put an email, password or user id in a file.
+- Database: Architecture project (studio), table `gc_notes`, owner only through `public.platform_is_owner()`. Publishable key only. SQL in `supabase/` (`test_001_gc`, `001_gc_notes`, `verify_001_gc`), pasted by hand; nothing is applied until Jimmy confirms. Never put an email, password or user id in a file. Sign-ups are open on that project (checked 2026-11-18), so never relax the rule to "any signed-in user": keep it owner-only.
 - Only latitude, longitude and a date go to Open-Meteo. No keys. Credit Open-Meteo (CC BY 4.0) in ⚙️.
 - The look is physical (measured light and air), not a cartoon and not an imitation of any film's or living artist's style.
 - Tornadoes, waterspouts and microbursts are never in the data: keep them labelled "Made-up" in the reading panel.

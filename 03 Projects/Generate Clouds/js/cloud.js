@@ -27,7 +27,7 @@
   function plain(status, d) {
     var code = d && d.code, msg = d && (d.msg || d.message || d.error_description) || '';
     if (code === 'PGRST205' || code === '42P01' || /schema cache|does not exist/i.test(msg)) return 'The notes table is not in the database yet. Paste supabase/001_gc_notes.sql in the SQL editor first.';
-    if (status === 401 || status === 403 || code === '42501') return 'Not allowed. This account is not in the owner list yet, or the sign-in ran out. Sign in again; if it still fails, the owner row has to be added in the database.';
+    if (status === 401 || status === 403 || code === '42501') return 'This account is not allowed to keep notes yet, or the sign-in ran out. Sign in again. If it still fails, run supabase/000_owner_row.sql once in the database (it allows your account only).';
     if (status === 400 && /invalid login/i.test(msg)) return 'The email or password is not right.';
     return msg || ('HTTP ' + status);
   }
@@ -77,7 +77,7 @@
       var changed = GC.Notes.merge(rows || []);
       (rows || []).forEach(function (r) { synced[r.id] = true; }); GC.store.set(SYNCED, synced);
       setStatus('Signed in as ' + session.email + '. ' + (rows || []).length + ' note(s) in the studio database' + (todo.length ? ', ' + todo.length + ' just sent' : '') +
-        (changed ? ', ' + changed + ' updated from it' : '') + '. ' + ((rows || []).length ? '' : 'An empty list with no error can also mean this account is not the owner (row-level security).'));
+        (changed ? ', ' + changed + ' updated from it' : '') + '. ' + ((rows || []).length ? '' : 'An empty list with no error can also mean this account is not allowed yet (row-level security).'));
     }).catch(function (e) { setStatus('Could not sync: ' + e.message + ' Notes are safe on this device.'); GC.logError('Notes sync: ' + e.message); })
       .finally(function () { busy = false; if (GC.Notes.render) GC.Notes.render(); });
   };

@@ -33,4 +33,6 @@ order by noted_at;
 ```
 If the table or rows are not there yet, ask Jimmy to run it in the SQL editor and paste the result. Mark done only after he confirms the ids: set `status = 'done'` and prefix `text` with `Done- `.
 
+**2026-11-18 (0.5.1):** Jimmy confused by the owner step (expected "anyone who can log in"). Live check, read-only: `gc_notes` is live (columns as designed, RLS on, one `platform_is_owner()` policy, anon no grants, in `table_index`, 0 rows, no leftovers from the timed-out test). Auth: sign-ups OPEN (`disable_signup` false, email provider on) and a second account exists, so an any-account rule is unsafe; kept owner-only. After Jimmy's go-ahead I inserted the owner row for his sign-in account (guarded insert matching the address prefix, exactly one match; verified one owner). Page wording made plain; `000_owner_row.sql` now one edit (type the email). Open questions in convo v0.7: the second account, and switching sign-ups off.
+
 **Next.** Answers to `03 Projects/Generate Clouds/convo/convo v0.1.md`; candidates in `todo.md`.
