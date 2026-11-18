@@ -116,7 +116,7 @@ namespace PA {
   const AMMO_RECHARGE = 4;               // rounds per second, always coming back
   const RESUPPLY_COOL = 45;              // seconds between reloads from ⚙️
   const SHOT_SPEED = 260;
-  const CRUISE_THROTTLE = 0.6;
+  const CRUISE_THROTTLE = 0.36;   // about 100 knots on the display: a gentler cruise
   const BULLET_LIFE = 1.6;
   const SHELL_LIFE = 4;
   const BLINK_SECONDS = 1.2;
@@ -216,7 +216,7 @@ namespace PA {
       if (this.settings.mode === 'glider') {
         this.plane.start(0, 0, 90, 40, 0.08, 0, 0);
       } else {
-        this.plane.start(0, 0, groundAt(0, 0) + 10, 60, 0.05, 0, CRUISE_THROTTLE);
+        this.plane.start(0, 0, groundAt(0, 0) + 10, 50, 0.05, 0, CRUISE_THROTTLE);
       }
       this.phase = 'flying';
       this.score = keepScore ? score : 0;

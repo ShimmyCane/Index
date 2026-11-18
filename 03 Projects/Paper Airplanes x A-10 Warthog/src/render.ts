@@ -12,11 +12,11 @@ namespace PA {
   const RANGE = 16;           // squares drawn each way from the camera
   const FOG_FAR = 900;        // metres where the ground fades into the sky
   const PLANE_SCREEN_Y = 0.72;
-  const PX_PER_M = 0.3;       // sprite pixel size in metres (ground and air things)
+  const PX_PER_M = 0.6;       // sprite pixel size in metres (ground and air things), twice the first size
   const PLANE_SCALE = 2;      // the plane sprite is drawn at a whole-number scale
   const NEAR_BOOST_M = 220;   // closer than this, things grow up to three times
-  const MIN_PX = 7;           // the smallest a thing is drawn (tall)
-  const MAX_PX = 150;         // the largest, so nothing fills the whole screen
+  const MIN_PX = 10;          // the smallest a thing is drawn (tall)
+  const MAX_PX = 220;         // the largest, so nothing fills the whole screen
 
   // Camera placement for each view: where it sits behind the plane, how high, and how far it looks down.
   const VIEWS = {
