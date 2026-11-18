@@ -82,7 +82,7 @@
     var src = S.preset ? 'atlas' : tl.source;
     setPill(src, { live: '🛰️ Live data', cache: '💾 Saved copy', sample: '📦 Sample sky', atlas: '🗂️ Atlas sample' }[src] || src);
     $('loadNote').textContent = S.preset ? 'Made-up weather for "' + S.preset.name + '". Press Generate this sky for the real data.' : (tl.note || (tl.archive ? 'From the long-term archive: no pressure-level wind, storm energy or air quality that far back.' : ''));
-    $('dataLine').textContent = (S.preset ? 'Atlas sample (made-up weather). ' : { live: 'Live from Open-Meteo: 24 hours from the start time. ', cache: 'Saved copy on this device. ', sample: 'Bundled sample sky. ' }[tl.source]) + (tl.note || '');
+    $('dataLine').textContent = (S.preset ? 'Atlas sample (made-up weather). ' : { live: 'Live from Open-Meteo: 24 hours from the start time. ', cache: 'Saved copy on this device. ', sample: 'Bundled sample sky. ' }[tl.source]) + (tl.note || '') + (tl.cloudNote ? ' ' + tl.cloudNote : '');
     document.querySelectorAll('#atlas button').forEach(function (b) { b.classList.toggle('on', !!S.preset && b.dataset.id === S.preset.id); });
     R.feature = null;
     if (S.pendingCam && !S.preset) { var c = S.pendingCam; S.pendingCam = null; R.cam.yaw = c.yaw; R.cam.pitch = c.pitch; R.cam.fov = c.fov; R.cam.alt = c.alt; R.cam.x = c.x || 0; R.cam.z = c.z || 0; setAltSlider(R.cam.alt); }
@@ -108,11 +108,12 @@
   function applyRegional(force) {
     var tl = S.data && S.data.tl; if (!tl) return;
     var last = tl.hours.length - 1, h = GC.clamp(Math.floor(S.simT / 3600), 0, last), f = GC.clamp(S.simT / 3600 - h, 0, 1);
-    var key = h + ':' + Math.round(f * 20) + ':' + (tl.wide ? 1 : 0) + ':' + (tl.series && tl.series.wind ? 1 : 0);
+    var key = h + ':' + Math.round(f * 20) + ':' + (tl.wide ? 1 : 0) + ':' + (tl.series && tl.series.wind ? 1 : 0) + ':' + (tl.series && tl.series.cloud && tl.series.cloud.hours ? 1 : 0);
     if (key === S.regKey && !force) return;
     S.regKey = key;
     if (tl.series && tl.series.region) setGlide(R.setRegion, tl.series.region, h, f); else if (R.regionOn) R.setRegion(null);
     if (tl.wide) setGlide(R.setRegion2, tl.wide, h, f); else if (R.region2On) R.setRegion2(null);
+    if (tl.series && tl.series.cloud && tl.series.cloud.hours) setGlide(R.setCloudGrid, tl.series.cloud.hours, h, f); else if (R.cloudGOn) R.setCloudGrid(null);
     if (tl.series && tl.series.wind && tl.series.wind[h]) R.setWind(lerpWind(tl.series.wind[h], tl.series.wind[Math.min(h + 1, last)], f), S.place);
     else if (R.windOn) R.setWind(null, null);
   }
@@ -131,21 +132,6 @@
     if (key === S.starKey) return;
     S.starKey = key; R.setStars(GC.Stars.setSky(S.place, hour));
   }
-  // The satellite cloud picture, once the camera is high enough to see the whole Earth (yesterday's picture, then the day before).
-  function maybeSat() {
-    if (R.cam.alt < 20 || S.satDone || S.satBusy || Date.now() < S.satRetry) return;
-    S.satBusy = true;
-    var days = [1, 2], tries = [];
-    days.forEach(function (d) { tries.push(new Date(Date.now() - d * 86400000).toISOString().slice(0, 10)); });
-    (function next(i) {
-      if (i >= tries.length) { S.satBusy = false; S.satRetry = Date.now() + 10 * 60000; GC.logError('Satellite picture: no picture for the last two days'); return; }
-      W.satellite(tries[i]).then(function (cv) { R.setSat(cv); S.satDone = true; S.satBusy = false; S.dirty = true; }, function (e) {
-        if (i === tries.length - 1) { S.satBusy = false; S.satRetry = Date.now() + 10 * 60000; GC.logError('Satellite picture: ' + e.message + '. Using the model\'s own cover.'); }
-        else next(i + 1);
-      });
-    })(0);
-  }
-
   // ---------- the ground and the map colours around the place ----------
   function loadMapColours(place) {
     if (!GC.Terrain.fineSpan) { R.clearOsm(); return; }
@@ -731,7 +717,7 @@
         if (list.some(function (c) { return !c.ok; })) { var li = document.createElement('li'); li.textContent = 'Without the link the page shows the saved copy, or a sample sky.'; ul.appendChild(li); }
       });
     });
-    $('info').textContent = 'Generate Clouds ' + GC.VERSION + ' · Weather and air quality: Open-Meteo.com (CC BY 4.0), no key. Only a latitude, a longitude and a date are sent. · Earth picture: NASA Visible Earth (Blue Marble), via Wikimedia Commons, CC BY-SA 3.0 · Cloud picture from space: NASA GIBS (public domain), one a day · Map colours: © OpenStreetMap contributors (ODbL), a few tiles per place · Stars and figures: d3-celestial data (BSD) · Ground heights: Open-Meteo elevation (Copernicus DEM) · Sea: Open-Meteo marine · 3-D: three.js r128 (MIT).';
+    $('info').textContent = 'Generate Clouds ' + GC.VERSION + ' · Weather and air quality: Open-Meteo.com (CC BY 4.0), no key. Only a latitude, a longitude and a date are sent. · Earth picture: NASA Visible Earth (Blue Marble), via Wikimedia Commons, CC BY-SA 3.0 · Cloud cover from space: Open-Meteo (the live model), with the last saved copy if it cannot be reached · Map colours: © OpenStreetMap contributors (ODbL), a few tiles per place · Stars and figures: d3-celestial data (BSD) · Ground heights: Open-Meteo elevation (Copernicus DEM) · Sea: Open-Meteo marine · 3-D: three.js r128 (MIT).';
     GC.onError = renderErrors;
     renderSettings();
   }
@@ -780,7 +766,7 @@
     if (R.cam.alt < floor) R.cam.alt = floor;
     if (zoneOf() !== S.zone) syncNav();                 // the buttons follow the height
     R.clock = S.clock; R.city = S.place.city ? 1 : 0;
-    maybeWide(); maybeSat(); R.satW = R.satOn ? GC.clamp((R.cam.alt - 20) / 40, 0, 1) : 0;
+    maybeWide(); R.satW = GC.clamp((R.cam.alt - 8) / 22, 0, 1);      // from about 8 km up, the real Earth shows; from space, the model's cloud grid too
     applyRegional(); applyStars();
     R.windW = GC.clamp((R.cam.alt - 10) / 20, 0, 1); R.windT = S.simT;     // the wind grid counts from 10 km up, fully from 30 km
     var ftr = S.ov.feature; R.feature = ftr || null;
@@ -822,7 +808,7 @@
       relief: R.exag, bar: !+GC.settings.bar ? 'hidden' : 'shown', spot: S.spot, terrain: { source: GC.Terrain.source, max: GC.Terrain.max },
       precip: S.model && S.model.precipKind, vary: S.model && S.model.vary, feature: S.ov.feature || null, bolts: S.bolts || 0, favs: favs.length, mapPin: GC.Map.pin, mapTiles: GC.Map.tilesOk,
       onGround: !!S.onGround, gesture: S.model ? gestureMode() : null, inCloud: S.model ? inCloudBand() : null, pick: S.pick,
-      mapColours: !!R.osmOn, sat: !!R.satOn, satW: R.satW, wind: !!R.windOn, windW: R.windW, stars: !!R.starsOn, figures: +GC.settings.figures, clouds: R.cloudsOn, clock: S.clock, sound: GC.Audio.ready(),
+      mapColours: !!R.osmOn, cloudGrid: !!R.cloudGOn, satW: R.satW, wind: !!R.windOn, windW: R.windW, stars: !!R.starsOn, figures: +GC.settings.figures, clouds: R.cloudsOn, clock: S.clock, sound: GC.Audio.ready(),
       frames: R.frames, scale: R.scale, ok: R.ok, sharp: !!S.sharp, fine: R.fineProgress(), now: S.now && { source: S.now.source, groups: S.now.groups.map(function (g) { return [g.id, g.cities.length]; }) },
       sunEl: S.frame && S.frame.sunEl, exposure: S.frame && S.frame.exposure, ov: S.ov, notes: GC.Notes.all().length };
   };
