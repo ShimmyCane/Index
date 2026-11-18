@@ -1,6 +1,6 @@
 # Make-3D x Construct — Schematic
 
-**Status:** MVP 0.1 built (headless-tested; not device-tested) · round 2 questions open (`convo/convo v0.2.md`) · **Updated:** 2026-11-18
+**Status:** MVP 0.2 built: Southern Cheyenne camp move (draft, not for display until consultation) · round 3 answers in `convo/convo v0.3.md` · **Updated:** 2026-11-18
 **Track:** B. Studio design (`02 Refs/Skills/project_track.md`)
 **Based on:** a review of Construct (`rtmandreyev/construct`, commit `7ea702e`, toolkit version 1.3.2), the Make-3D schematic and to-do list (graduated to `ShimmyCane/Make-3D`), and the nursery's new-project workflow. Nothing is built yet. The first build waits for Jimmy's answers.
 
@@ -106,12 +106,22 @@ A new version of Make 3D, built with the working method Construct uses. Make 3D 
 
 Not built yet: the cloud save to `m3dxc_certainty`; the model critic; the Show errors and round scoring in the page beyond the rules; the summary page (`summarize_code`) for `index.html`; any device test.
 
-## 9. Open questions
+## 9. Round 3 (2026-11-18): specific draft, reviews, consultation
 
-See `convo/convo v0.2.md`.
+- **Sample:** a Southern Cheyenne camp move on the North Fork of the Canadian, Indian Territory, 1870s. A draft. No named person, family, event, ceremony or sacred object. Placeholders for people and horses. See `research/plains-diorama.md` §9.
+- **Story:** `exhibit/story.json`, six steps linked to objects; claims carry sources or are marked *scene choice*. The build checks every link and source.
+- **Consultation:** a flag kind of its own. Open consultation flags block display (header pill and ⚙️ → Display check). Closing one needs a note: role, date, outcome. Plan in `research/consultation-plan.md`.
+- **Reviews in ⚙️:** six switches, each with who does it: your verdict, your scores, an AI critic, an AI fact-check, the consultation gate, and the close note. AI reviews are copy and paste; replies are validated first.
+- **Summary page:** `index_summary.html`.
+- **Database:** `supabase/001_m3dxc_certainty.sql`, not applied. Jimmy copies it by hand after the merge.
 
-## 10. Next steps
+## 10. Open questions
 
-1. Jimmy reviews the MVP from the nursery tile and answers `convo/convo v0.2.md`.
-2. Decide on the cloud save (apply the SQL) and on the model critic.
-3. Device test on an iPad before any family-facing use.
+See `convo/convo v0.3.md`.
+
+## 11. Next steps
+
+1. Jimmy confirms the contact at the Cheyenne and Arapaho Tribes and sends the draft letter.
+2. The reviewers' answers go to `private/`; each consultation flag is closed with its note.
+3. Jimmy copies the database SQL by hand; then the cloud save can be wired.
+4. Device test on an iPad before any display.

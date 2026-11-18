@@ -80,6 +80,12 @@
     var changes = (round && round.changes) || [];
     var ids = [];
     changes.forEach(function (c) { if (ids.indexOf(c.ledger_id) < 0) ids.push(c.ledger_id); });
+    if (round && round.scores !== undefined && round.scores !== null) {
+      run.criteria.forEach(function (k) {
+        var v = round.scores[k];
+        if (!(Number.isInteger(v) && v >= 0 && v <= 3)) errors.push('score for ' + k + ' must be a whole number from 0 to 3');
+      });
+    }
     if (ids.length > run.settings.max_items_per_round) {
       errors.push('at most ' + run.settings.max_items_per_round + ' ledger items per round (this round has ' + ids.length +
         '); check the round in first, then work the rest');

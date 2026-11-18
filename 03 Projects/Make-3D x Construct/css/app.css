@@ -103,3 +103,6 @@ code { background: var(--paper); padding: 0 4px; border-radius: 4px; }
 .drawerHead { display: flex; justify-content: space-between; align-items: center; }
 .plain { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 15px; }
 a { color: var(--sage); }
+.tag.consultation { background: #f6d2c2; }
+.tag.uncertain { background: var(--sun); }
+.reviewed { color: var(--sage); font-weight: 700; }

@@ -71,3 +71,20 @@ Not shown: any real nation's dwelling, clothing, regalia, art, or any named pers
 - List of Native American tribes in Oklahoma (Wikipedia): https://www.Wikipedia.org/wiki/List_of_Native_American_Tribes_in_Oklahoma
 
 Caveat: the reviews and commentary above are secondary. The AMNH and Akeley items need a museum-studies source before they are quoted in public. The Anadarko date is unresolved.
+
+## 9. The specific version (round 3): Southern Cheyenne camp move
+
+The sample now depicts a **Southern Cheyenne camp move on the North Fork of the Canadian, Indian Territory, in the 1870s**. It is a draft for consultation. The Cheyenne and Arapaho Tribes have not reviewed it. See `research/consultation-plan.md` before any display.
+
+Facts the story rests on (claims in `exhibit/story.json`):
+
+- **Treaty, 1867.** The Medicine Lodge Treaty was signed on 28 October 1867. It set lands in Indian Territory for the Southern Cheyenne and Arapaho, and allowed hunting only while bison remained. Source: National Park Service, https://home.nps.gov/fols/learn/historyculture/medicine-lodge-treaty.htm (claim c6, certainty 70; sources differ on the exact hunting clause).
+- **Reservation, 1869.** An executive order of 10 August 1869 set aside land on the North Fork of the Canadian River, in western Indian Territory. The tribes had not lived on the land described in the 1867 treaty. Sources: 15 Stat. 593 (https://oms.library.okstate.edu/s/oklahoma-built/item/19033) and a Wikipedia summary to check (claim c5, certainty 75).
+- **Bison, late 1860s and 1870s.** Bison were nearly gone from the southern Plains by then. Sources describe the decline; the exact dates vary (claim c7, certainty 60).
+- **Horses and travois.** After horses came to the Plains, travois were drawn by horses and could be longer and carry more, which allowed larger lodges. Source: The Canadian Encyclopedia, https://thecanadianencyclopedia.ca/index.php/en/article/travois (claims c1 and c3, certainty 65).
+- **Women's work in moving camp.** Women took down lodges, packed the travois and led the horses. The source describes Ute camp moves in Colorado; it is applied to the Cheyenne camp by analogy, and must be checked (claim c2, certainty 60). Source: https://www.unco.edu/hewit/doing-history/colorado-indians/work-tools/womens-work.aspx
+- **The grouping of people walking beside the horses** is a scene choice, not a source (claim c4, certainty 30).
+
+Not shown: any named person; any particular family or event; faces, hair, clothing or regalia; ceremonial or sacred objects; any nation other than the Southern Cheyenne.
+
+Contact details for the Cheyenne and Arapaho Tribes conflict across sources (THPO name, email and phone). Confirm them by phone before writing. Sources: https://www.cheyenneandarapaho-nsn.gov (official site) and the state's tribal nations resource, https://oklahoma.gov/libraries/digital-resources/oklahoma-native-american-tribes.html.

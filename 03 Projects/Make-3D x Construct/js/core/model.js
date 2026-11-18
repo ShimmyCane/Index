@@ -18,6 +18,7 @@
   var SOLID_TYPES = ['box', 'cylinder', 'cone', 'sphere'];
   var TYPES = SOLID_TYPES.concat(['group']);
   var BASES = ['measured', 'cited', 'user', 'inferred', 'placeholder', 'decorative'];
+  var FLAG_KINDS = ['uncertain', 'consultation'];
   var SETTABLE = {
     name: 'string', description: 'string', material: 'string', rotation_z: 'number', position: 'vector',
     'dimensions.x': 'number', 'dimensions.y': 'number', 'dimensions.z': 'number',
@@ -208,6 +209,10 @@
     }
 
     if (op.op === 'flag') {
+      if (op.kind !== undefined && FLAG_KINDS.indexOf(op.kind) < 0) {
+        return [diag('E134', 'error', path + '.kind', 'flag kind must be uncertain or consultation',
+          'Use "uncertain" (a guess to check) or "consultation" (needs review by people outside the project before display).')];
+      }
       if (typeof op.id !== 'string' || findFlag(state.flags, op.id)) {
         return [diag('E131', 'error', path + '.id', 'flag id must be a new string', 'Use a new flag id, for example F1.')];
       }
@@ -249,7 +254,7 @@
     } else if (op.op === 'delete') {
       state.objects.splice(state.objects.indexOf(findObject(state.objects, op.uuid)), 1);
     } else if (op.op === 'flag') {
-      state.flags.push({ id: op.id, target: op.target, text: op.text, status: 'open', seq: op.seq });
+      state.flags.push({ id: op.id, target: op.target, text: op.text, kind: op.kind || 'uncertain', status: 'open', seq: op.seq });
     } else if (op.op === 'flag_close') {
       var f = findFlag(state.flags, op.id);
       f.status = 'closed';
@@ -340,6 +345,11 @@
     return { model: model, diagnostics: diagnostics, rejected: rejected, world: world };
   }
 
+  // Open consultation flags: each one must be closed by a person (with who and when in the note) before display.
+  function openConsultations(model) {
+    return model.flags.filter(function (f) { return f.status === 'open' && f.kind === 'consultation'; });
+  }
+
   // Summary for the page and the tests. ok means: no errors and no unexplained warnings.
   function audit(result) {
     var errors = result.diagnostics.filter(function (d) { return d.severity === 'error'; }).length;
@@ -385,7 +395,8 @@
     SCHEMA: SCHEMA, TYPES: TYPES, BASES: BASES, SETTABLE: SETTABLE, DEFAULT_WORLD: DEFAULT_WORLD,
     canon: canon, fnv1a: fnv1a, hashHistory: hashHistory,
     replay: replay, checkOperation: checkOperation, checkModel: checkModel, audit: audit,
-    bbox: bbox, band: band, sortSolids: sortSolids, childrenOf: childrenOf, findObject: findObject
+    bbox: bbox, band: band, sortSolids: sortSolids, childrenOf: childrenOf, findObject: findObject,
+    FLAG_KINDS: FLAG_KINDS, openConsultations: openConsultations
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

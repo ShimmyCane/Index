@@ -1,23 +1,38 @@
 /*
- * Make 3D x Construct: the page. Wires the engine (js/core), the viewer (js/viewer) and the panels.
+ * Make 3D x Construct: the page. Wires the engine (js/core), the AI review loop (js/core/review.js),
+ * the viewer (js/viewer) and the panels.
  * Every change is an operation appended to the history. It is replayed and checked BEFORE it is saved;
- * a change the checks refuse is not saved. Text from the page is written with textContent, never innerHTML.
+ * a change the checks refuse is not saved. AI replies are validated before anything is applied.
+ * Text from the page is written with textContent, never innerHTML.
  * Storage: this device only (localStorage, in try/catch). Nothing is sent anywhere.
  */
 (function () {
   'use strict';
 
-  var M = window.M3DXC.model, RD = window.M3DXC.rounds, VW = window.M3DXC.viewer;
+  var M = window.M3DXC.model, RD = window.M3DXC.rounds, RV = window.M3DXC.review, VW = window.M3DXC.viewer;
   var BASE = window.M3DXC_SAMPLE;
   var KEYS = { history: 'm3dxc.history.v1', rounds: 'm3dxc.rounds.v1', notes: 'm3dxc.notes.v1',
-    settings: 'm3dxc.settings.v1', panels: 'm3dxc.panels.v1' };
+    settings: 'm3dxc.settings.v1', panels: 'm3dxc.panels.v1', factcheck: 'm3dxc.factcheck.v1' };
   var CRITERIA_LABEL = { silhouette: 'silhouette', proportion: 'proportion', identity: 'identity', finish: 'finish' };
+
+  // Every item that needs a review by a person or an AI, with a switch in ⚙️.
+  var REVIEW_ITEMS = [
+    { key: 'person_verdict', who: 'You', def: true, label: 'I record each round\'s verdict (won, lost or tie)' },
+    { key: 'person_scores', who: 'You', def: true, label: 'I score the four criteria (0–3) for each round' },
+    { key: 'ai_critic', who: 'AI', def: false, label: 'An AI critic judges each round from the packet (paste reply)' },
+    { key: 'ai_factcheck', who: 'AI', def: false, label: 'An AI fact-checks the story claims (paste reply)' },
+    { key: 'consultation_gate', who: 'People outside the project', def: true, label: 'Block display until the consultation flags are closed' },
+    { key: 'consultation_close_note', who: 'You', def: true, label: 'Closing a consultation flag needs a note: who reviewed, role and date (no personal names)' }
+  ];
 
   var $ = function (id) { return document.getElementById(id); };
   var state = {
-    history: null, result: null, audit: null, run: null, notes: [],
-    settings: { showErrors: false, roundCap: null }, selected: null, mode: 'provenance', viewer: null
+    history: null, result: null, audit: null, run: null, notes: [], story: null,
+    settings: { showErrors: false, roundCap: null, reviews: {} }, selected: null, mode: 'provenance', viewer: null,
+    factcheck: {}
   };
+  REVIEW_ITEMS.forEach(function (r) { state.settings.reviews[r.key] = r.def; });
+  function on(key) { return !!state.settings.reviews[key]; }
 
   // ---------- storage (this device only; never throws) ----------
   var storageOk = true;
@@ -91,6 +106,7 @@
     var r = state.run;
     $('pill-rounds').textContent = 'rounds: ' + r.rounds.length + ' · best ' + (r.best_round || 'none') +
       (r.status === 'stopped' ? ' · stopped' : '');
+    renderDisplay();
   }
 
   function depthOf(objects, obj) {
@@ -103,19 +119,17 @@
     var list = $('tree'); list.textContent = '';
     state.result.model.objects.forEach(function (o) {
       var d = depthOf(state.result.model.objects, o);
-      var li = el('li', { class: d ? 'nested' : '', role: 'option', 'aria-selected': String(state.selected === o.uuid),
+      list.appendChild(el('li', { class: d ? 'nested' : '', role: 'option', 'aria-selected': String(state.selected === o.uuid),
         onclick: function () { select(o.uuid); } }, [
         el('span', { text: o.name }),
         el('span', { class: 'meta', text: o.type === 'group' ? 'group' : o.type + ' · ' + o.certainty.percent + '%' })
-      ]);
-      list.appendChild(li);
+      ]));
     });
   }
 
   function renderCert() {
     var list = $('cert-list'); list.textContent = '';
-    var by = $('sort-by').value, dir = $('sort-dir').value;
-    M.sortSolids(state.result.model.objects, by, dir).forEach(function (o) {
+    M.sortSolids(state.result.model.objects, $('sort-by').value, $('sort-dir').value).forEach(function (o) {
       var pct = o.certainty.percent;
       list.appendChild(el('li', { 'aria-selected': String(state.selected === o.uuid), onclick: function () { select(o.uuid); } }, [
         el('span', { text: o.name }),
@@ -129,16 +143,43 @@
     var list = $('flag-list'); list.textContent = '';
     state.result.model.flags.forEach(function (f) {
       var target = objectByUuid(f.target);
-      var li = el('li', {}, [
+      var kindTag = f.kind === 'consultation' ? 'consultation' : 'uncertain';
+      list.appendChild(el('li', {}, [
         el('span', { class: 'tag', text: f.id }),
+        el('span', { class: 'tag ' + kindTag, text: kindTag }),
         el('span', { text: f.text + ' (' + (target ? target.name : f.target) + ')' }),
         f.status === 'open'
-          ? el('button', { type: 'button', class: 'btn small ghost meta', text: 'Close flag', onclick: function () { closeFlag(f.id); } })
-          : el('span', { class: 'meta', text: 'closed' })
-      ]);
-      list.appendChild(li);
+          ? el('button', { type: 'button', class: 'btn small ghost meta', text: 'Close flag', onclick: function () { closeFlag(f); } })
+          : el('span', { class: 'meta', text: 'closed' + (f.close_note ? ': ' + f.close_note : '') })
+      ]));
     });
     if (!state.result.model.flags.length) list.appendChild(el('li', { text: 'No flags.' }));
+  }
+
+  function renderStory() {
+    var s = state.story;
+    $('story-status').textContent = s.status;
+    $('story-intro').textContent = s.intro;
+    var list = $('story-steps'); list.textContent = '';
+    s.steps.forEach(function (st, i) {
+      var objs = st.objects.map(function (u) {
+        var o = objectByUuid(u);
+        return el('button', { type: 'button', class: 'btn small ghost', text: o ? o.name : u, onclick: function () { select(u); } });
+      });
+      list.appendChild(el('li', { class: 'stack' }, [
+        el('span', { text: (i + 1) + '. ' + st.text }),
+        objs.length ? el('span', { class: 'row' }, objs) : null,
+        el('ul', { class: 'plain' }, st.claims.map(function (c) {
+          var src = c.source === 'scene' ? 'scene choice' : c.source;
+          var fc = state.factcheck[c.id];
+          var status = fc ? ' · AI: ' + fc.status : '';
+          return el('li', { text: c.text + ' [' + src + ', ' + c.certainty + '%' + status + ']' + (c.note ? ' ' + c.note : '') });
+        }))
+      ]));
+    });
+    var not = $('story-not'); not.textContent = '';
+    s.not_depicted.forEach(function (t) { not.appendChild(el('li', { text: t })); });
+    $('factcheck').hidden = !on('ai_factcheck');
   }
 
   function renderLedger() {
@@ -154,6 +195,7 @@
     var crit = $('defect-criterion');
     if (!crit.options.length) state.run.criteria.forEach(function (c) { crit.appendChild(el('option', { value: c, text: CRITERIA_LABEL[c] || c })); });
     renderRoundItems();
+    renderRoundControls();
   }
 
   // Checkboxes for the open defects; at most four may be ticked.
@@ -166,10 +208,7 @@
     open.forEach(function (i) {
       var cb = el('input', { type: 'checkbox', 'data-id': i.id, onchange: limitTicks });
       var txt = el('input', { type: 'text', 'data-id': i.id, placeholder: 'what changed for ' + i.id, value: prev[i.id] || '' });
-      box.appendChild(el('label', { class: 'row' }, [
-        el('span', {}, [cb, ' ' + i.id + ' ' + i.title]),
-        txt
-      ]));
+      box.appendChild(el('label', { class: 'row' }, [el('span', {}, [cb, ' ' + i.id + ' ' + i.title]), txt]));
     });
     limitTicks();
   }
@@ -182,11 +221,27 @@
     $('round-msg').textContent = ticked + ' of ' + max + ' ticked for this round.';
   }
 
+  // Score selects (only when the person scores) and the review controls that follow the switches in ⚙️.
+  function renderRoundControls() {
+    var sel = $('score-selects');
+    if (!sel.childNodes.length) {
+      state.run.criteria.forEach(function (c) {
+        var s = el('select', { 'data-criterion': c }, [el('option', { value: '', text: '–' })].concat([0, 1, 2, 3].map(function (v) {
+          return el('option', { value: String(v), text: v + ' ' + CRITERIA_LABEL[c] });
+        })));
+        sel.appendChild(el('label', {}, [CRITERIA_LABEL[c], s]));
+      });
+    }
+    $('scores').hidden = !on('person_scores');
+    $('verdicts').hidden = !on('person_verdict');
+    $('critic').hidden = !on('ai_critic');
+  }
+
   function renderErrors() {
-    var on = state.settings.showErrors;
-    $('errors').hidden = !on;
-    $('show-errors').checked = on;
-    if (!on) return;
+    var show = state.settings.showErrors;
+    $('errors').hidden = !show;
+    $('show-errors').checked = show;
+    if (!show) return;
     var list = $('error-list'); list.textContent = '';
     var items = state.result.diagnostics.filter(function (d) { return d.severity === 'error' || !d.explained; });
     items.forEach(function (d) {
@@ -199,10 +254,30 @@
     if (!items.length) list.appendChild(el('li', { text: 'No errors. ' + state.audit.explained + ' warnings are explained by open flags.' }));
   }
 
+  // The display gate: consultation flags that are still open block display while the gate is on.
+  function renderDisplay() {
+    var open = M.openConsultations(state.result.model);
+    var pill = $('pill-display'), status = $('display-status'), list = $('display-list');
+    list.textContent = '';
+    if (!on('consultation_gate')) {
+      pill.className = 'pill bad'; pill.textContent = 'display: gate off';
+      status.textContent = 'The gate is off. Do not show this to the public: the consultation review is not built into the page.';
+    } else if (open.length) {
+      pill.className = 'pill bad'; pill.textContent = 'display: blocked (' + open.length + ' to review)';
+      status.textContent = 'Not for display. Close each consultation flag once the people named have reviewed that part.';
+    } else {
+      pill.className = 'pill ok'; pill.textContent = 'display: no open flags';
+      status.textContent = 'No open consultation flags. The camp still needs the Cheyenne and Arapaho Tribes review recorded in the flag notes.';
+    }
+    open.forEach(function (f) {
+      var t = objectByUuid(f.target);
+      list.appendChild(el('li', {}, [el('span', { class: 'tag', text: f.id }), el('span', { text: (t ? t.name : f.target) + ': ' + f.text })]));
+    });
+  }
+
   function renderInspector() {
     var obj = state.selected ? objectByUuid(state.selected) : null;
-    var form = $('insp-form');
-    var empty = $('insp-empty');
+    var form = $('insp-form'), empty = $('insp-empty');
     empty.textContent = 'Tap a part in the view, or pick one from the Model list.';
     empty.hidden = !!obj && obj.type !== 'group';
     form.hidden = !obj || obj.type === 'group';
@@ -225,24 +300,39 @@
     $('note-about').textContent = 'About: ' + (about ? about.name : 'the whole model');
     var list = $('note-list'); list.textContent = '';
     state.notes.slice().reverse().forEach(function (n) {
-      var target = n.about === 'model' ? 'the whole model' : (objectByUuid(n.about) ? objectByUuid(n.about).name : n.about);
+      var t = n.about === 'model' ? 'the whole model' : (objectByUuid(n.about) ? objectByUuid(n.about).name : n.about);
       list.appendChild(el('li', { class: 'stack' }, [
         el('span', { text: n.text }),
-        el('span', { class: 'help', text: target + ' · ' + new Date(n.time).toLocaleString() })
+        el('span', { class: 'help', text: t + ' · ' + new Date(n.time).toLocaleString() })
       ]));
     });
     if (!state.notes.length) list.appendChild(el('li', { text: 'No notes yet.' }));
   }
 
-  function renderAll() {
-    renderHeader(); renderTree(); renderCert(); renderFlags(); renderLedger();
-    renderErrors(); renderInspector(); renderNotes();
+  function renderReviewToggles() {
+    var box = $('review-toggles'); box.textContent = '';
+    REVIEW_ITEMS.forEach(function (r) {
+      var cb = el('input', { type: 'checkbox', 'data-review': r.key, onchange: function () {
+        state.settings.reviews[r.key] = cb.checked;
+        saveSettings();
+        renderAll();
+      } });
+      cb.checked = on(r.key);
+      box.appendChild(el('label', { class: 'switch' }, [cb, el('span', { text: r.label + ' · ' + r.who })]));
+    });
   }
+
+  function renderAll() {
+    renderHeader(); renderTree(); renderCert(); renderFlags(); renderStory(); renderLedger();
+    renderErrors(); renderInspector(); renderNotes(); renderReviewToggles();
+  }
+
+  function saveSettings() { save(KEYS.settings, state.settings); }
 
   function select(uuid) {
     state.selected = uuid || null;
     if (state.viewer) state.viewer.select(state.selected);
-    renderTree(); renderCert(); renderInspector(); renderNotes();
+    renderTree(); renderCert(); renderInspector(); renderNotes(); renderStory();
     $('insp-msg').textContent = '';
   }
 
@@ -278,8 +368,14 @@
     $('insp-msg').textContent = r.ok ? 'Deleted (it stays in the history).' : 'Not deleted: ' + r.errors.join(' ');
   }
 
-  function closeFlag(id) {
-    var r = commitOp({ op: 'flag_close', id: id, note: 'closed in page' }, 'Closed.');
+  // Closing a consultation flag: with the note switch on, a note saying who reviewed, role and date, is required.
+  function closeFlag(f) {
+    var note = '';
+    if (f.kind === 'consultation' && on('consultation_close_note')) {
+      note = window.prompt('Who reviewed this part, their role, and the date (no personal names in the note):', '') || '';
+      if (!note.trim()) { $('round-msg').textContent = 'Not closed: a consultation flag needs a note.'; return; }
+    }
+    var r = commitOp({ op: 'flag_close', id: f.id, note: note.trim() || 'closed in page' }, 'Closed.');
     if (!r.ok) $('round-msg').textContent = 'Not closed: ' + r.errors.join(' ');
   }
 
@@ -290,7 +386,7 @@
     var target = state.selected || rootUuid();
     var n = state.result.model.flags.length + 1, id;
     do { id = 'F' + n++; } while (state.result.model.flags.some(function (f) { return f.id === id; }));
-    var r = commitOp({ op: 'flag', id: id, target: target, text: text, note: 'flag in page' }, 'Flag added.');
+    var r = commitOp({ op: 'flag', id: id, kind: $('flag-kind').value, target: target, text: text, note: 'flag in page' }, 'Flag added.');
     if (r.ok) $('flag-text').value = '';
     else $('round-msg').textContent = 'Flag not added: ' + r.errors.join(' ');
   }
@@ -298,15 +394,14 @@
   // ---------- rounds ----------
   function addDefect(e) {
     e.preventDefault();
-    var title = $('defect-title').value.trim();
-    var res = RD.addDefect(state.run, { title: title, criterion: $('defect-criterion').value, severity: $('defect-severity').value });
+    var res = RD.addDefect(state.run, { title: $('defect-title').value.trim(), criterion: $('defect-criterion').value, severity: $('defect-severity').value });
     if (!res.ok) { $('round-msg').textContent = res.errors.join('; '); return; }
     save(KEYS.rounds, state.run);
     $('defect-title').value = '';
     renderAll();
   }
 
-  function recordVerdict(verdict) {
+  function tickedChanges() {
     var boxes = $('round-items').querySelectorAll('input[type=checkbox]');
     var changes = [];
     Array.prototype.forEach.call(boxes, function (b) {
@@ -314,13 +409,61 @@
       var text = $('round-items').querySelector('input[type=text][data-id="' + b.dataset.id + '"]').value.trim();
       changes.push({ ledger_id: b.dataset.id, text: text || 'changed (no note)' });
     });
-    var res = RD.recordRound(state.run, { verdict: verdict, changes: changes });
-    if (!res.ok) { $('round-msg').textContent = 'Round not recorded: ' + res.errors.join(' '); return; }
+    return changes;
+  }
+
+  function readScores() {
+    var scores = {}, missing = [];
+    $('score-selects').querySelectorAll('select').forEach(function (s) {
+      if (s.value === '') missing.push(s.dataset.criterion); else scores[s.dataset.criterion] = Number(s.value);
+    });
+    return { scores: scores, missing: missing };
+  }
+
+  function finishRound(res, verdict, note) {
     save(KEYS.rounds, state.run);
-    var msg = 'Round ' + state.run.rounds.length + ' recorded: ' + verdict + (res.run.rounds[state.run.rounds.length - 1].kept ? ' (kept as the best).' : ' (reverted; the best stays).');
+    var last = state.run.rounds[state.run.rounds.length - 1];
+    var msg = 'Round ' + last.round + ' recorded: ' + verdict + (last.kept ? ' (kept as the best).' : ' (reverted; the best stays).');
+    if (note) msg += ' Reason: ' + note;
     if (res.stopped) msg += ' The run stopped: ' + res.reason + '.';
     renderAll();
     $('round-msg').textContent = msg;
+  }
+
+  function recordVerdict(verdict) {
+    var round = { verdict: verdict, changes: tickedChanges() };
+    if (on('person_scores')) {
+      var got = readScores();
+      if (got.missing.length) { $('round-msg').textContent = 'Score every criterion first (or turn round scores off in Reviews). Missing: ' + got.missing.join(', ') + '.'; return; }
+      round.scores = got.scores;
+    }
+    var res = RD.recordRound(state.run, round);
+    if (!res.ok) { $('round-msg').textContent = 'Round not recorded: ' + res.errors.join(' '); return; }
+    finishRound(res, verdict, '');
+  }
+
+  function currentPacket() {
+    return RD.buildPacket(state.run, { request: state.story.title });
+  }
+
+  function copyText(text, msgEl, box) {
+    var done = function () { msgEl.textContent = 'Prompt copied. Paste it into your AI chat.'; };
+    var fallback = function () { box.value = text; box.select && box.select(); msgEl.textContent = 'Copy is not allowed here. The prompt is in the box: select all and copy it.'; };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
+      else fallback();
+    } catch (e) { fallback(); }
+  }
+
+  function applyCriticReply() {
+    var packet = currentPacket();
+    var parsed = RV.parseCriticReply($('critic-reply').value, packet);
+    if (!parsed.ok) { $('round-msg').textContent = 'Reply not applied: ' + parsed.errors.join(' '); return; }
+    var round = { verdict: parsed.verdict, changes: tickedChanges(), scores: parsed.scores, note: parsed.reasons };
+    var res = RD.recordRound(state.run, round);
+    if (!res.ok) { $('round-msg').textContent = 'Round not recorded: ' + res.errors.join(' '); return; }
+    $('critic-reply').value = '';
+    finishRound(res, parsed.verdict + ' (AI critic)', parsed.reasons);
   }
 
   function downloadText(name, text, type) {
@@ -333,16 +476,28 @@
 
   function downloadPacket() {
     if (!state.viewer) { $('round-msg').textContent = 'The 3-D view did not load, so there are no renders to pack.'; return; }
-    var packet = RD.buildPacket(state.run, { request: 'A generic plains camp in a science-diorama box.' });
+    var packet = currentPacket();
     packet.model_hash = state.result.model.history_hash;
     packet.model_name = state.result.model.name;
-    var shots = state.viewer.snapshotViews(packet.views);
-    shots.forEach(function (s) {
+    state.viewer.snapshotViews(packet.views).forEach(function (s) {
       var a = el('a', { href: s.dataUrl, download: 'packet-round' + packet.round + '-' + s.view + '.png' });
       document.body.appendChild(a); a.click(); a.remove();
     });
     downloadText('packet-round' + packet.round + '.json', JSON.stringify(packet, null, 2) + '\n', 'application/json');
     $('round-msg').textContent = 'Packet for round ' + packet.round + ' downloaded: 4 views and a JSON file (no history, no notes).';
+  }
+
+  // ---------- AI fact-check of the story ----------
+  function applyFactcheck() {
+    var parsed = RV.parseFactcheckReply($('factcheck-reply').value, state.story);
+    if (!parsed.ok) { $('factcheck-msg').textContent = 'Reply not applied: ' + parsed.errors.join(' '); return; }
+    var map = {};
+    parsed.claims.forEach(function (c) { map[c.id] = { status: c.status, note: c.note, time: new Date().toISOString() }; });
+    state.factcheck = map;
+    save(KEYS.factcheck, map);
+    $('factcheck-reply').value = '';
+    $('factcheck-msg').textContent = 'Applied: ' + parsed.claims.length + ' claims checked. Unclear and unsupported claims need a person to decide.';
+    renderStory();
   }
 
   // ---------- settings, notes, database check ----------
@@ -369,7 +524,7 @@
     var n = parseInt(v, 10);
     if (v && n > 0) { state.settings.roundCap = n; state.run.settings.round_cap = n; }
     else { state.settings.roundCap = null; delete state.run.settings.round_cap; }
-    save(KEYS.settings, state.settings);
+    saveSettings();
     save(KEYS.rounds, state.run);
     renderHeader();
   }
@@ -415,12 +570,20 @@
 
   // ---------- boot ----------
   function boot() {
+    state.story = BASE.story;
     state.history = initHistory();
-    state.run = load(KEYS.rounds, null) || RD.createRun({ subject: 'plains-diorama' });
+    state.run = load(KEYS.rounds, null) || RD.createRun({ subject: 'plains-camp-move' });
     if (!state.run.settings) state.run.settings = RD.createRun({}).settings;
     state.notes = load(KEYS.notes, []) || [];
+    state.factcheck = load(KEYS.factcheck, {}) || {};
     var s = load(KEYS.settings, null);
-    if (s) state.settings = Object.assign(state.settings, s);
+    if (s) {
+      state.settings.showErrors = !!s.showErrors;
+      state.settings.roundCap = s.roundCap || null;
+      if (s.reviews) Object.keys(state.settings.reviews).forEach(function (k) {
+        if (typeof s.reviews[k] === 'boolean') state.settings.reviews[k] = s.reviews[k];
+      });
+    }
     recompute();
 
     $('subtitle').textContent = state.result.model.name + ' · ' + BASE.model.scale + ' · inches, Z up';
@@ -431,7 +594,7 @@
     $('show-errors').checked = state.settings.showErrors;
     $('show-errors').addEventListener('change', function () {
       state.settings.showErrors = $('show-errors').checked;
-      save(KEYS.settings, state.settings);
+      saveSettings();
       renderErrors();
     });
     $('round-cap').addEventListener('change', applyRoundCap);
@@ -445,6 +608,14 @@
       b.addEventListener('click', function () { recordVerdict(b.dataset.verdict); });
     });
     $('packet').addEventListener('click', downloadPacket);
+    $('critic-copy').addEventListener('click', function () {
+      copyText(RV.buildCriticPrompt(currentPacket()), $('round-msg'), $('critic-reply'));
+    });
+    $('critic-apply').addEventListener('click', applyCriticReply);
+    $('factcheck-copy').addEventListener('click', function () {
+      copyText(RV.buildFactcheckPrompt(state.story), $('factcheck-msg'), $('factcheck-reply'));
+    });
+    $('factcheck-apply').addEventListener('click', applyFactcheck);
     $('note-form').addEventListener('submit', saveNote);
     $('db-check').addEventListener('click', checkDevice);
     document.querySelectorAll('button[data-view]').forEach(function (b) {

@@ -1,24 +1,24 @@
 {
   "schema": "m3dxc.model/0.1",
-  "model_id": "plains-diorama-v01",
-  "name": "Plains camp diorama (generic)",
-  "description": "A generic plains camp in a science-diorama box. Placeholder figures and horse; no specific nation depicted.",
+  "model_id": "plains-diorama-v02",
+  "name": "Southern Cheyenne camp move, Indian Territory, 1870s (draft for consultation)",
+  "description": "A draft diorama of a camp move. Figures and horses are placeholders. Not reviewed by the Cheyenne and Arapaho Tribes; not for display.",
   "scale": "1:24 (1 in = 2 ft)",
   "units": "in",
   "up": "z",
   "world": "plains-diorama-world",
-  "version": 38,
-  "history_hash": "52d76103",
+  "version": 56,
+  "history_hash": "ee792ded",
   "objects": [
     {
       "uuid": "camp",
-      "name": "Plains camp (generic)",
+      "name": "Camp move (draft)",
       "type": "group",
-      "description": "Root group. Generic; no specific nation, family or place is depicted."
+      "description": "Root group. A Southern Cheyenne camp move on the North Fork of the Canadian. Not reviewed by the tribes."
     },
     {
       "uuid": "ground",
-      "name": "Prairie ground",
+      "name": "River terrace ground",
       "type": "box",
       "parent": "camp",
       "dimensions": {
@@ -35,12 +35,12 @@
       "certainty": {
         "percent": 70,
         "basis": "inferred",
-        "note": "Flat dry ground. No site survey; the shape is generic."
+        "note": "Flat river terrace. No site survey; the shape is generic."
       }
     },
     {
       "uuid": "ridge",
-      "name": "Low ridge",
+      "name": "Low bluff",
       "type": "box",
       "parent": "camp",
       "dimensions": {
@@ -79,47 +79,52 @@
       "certainty": {
         "percent": 100,
         "basis": "decorative",
-        "note": "Flat wall of the diorama box. The painting on it is not modelled."
+        "note": "Flat wall of the diorama box. The painting is not modelled."
       }
     },
     {
-      "uuid": "tipi-large",
-      "name": "Tipi (large)",
+      "uuid": "lodges",
+      "name": "Lodges (standing and struck)",
+      "type": "group",
+      "description": "Two standing lodges and one struck (taken down) lodge cover with its poles.",
+      "parent": "camp"
+    },
+    {
+      "uuid": "tipi-1",
+      "name": "Lodge (standing, large)",
       "type": "cone",
-      "description": "Conical hide dwelling. Generic form.",
-      "parent": "camp",
+      "parent": "lodges",
       "dimensions": {
         "x": 7,
         "y": 7,
         "z": 8
       },
       "position": [
-        -6,
-        2,
+        -7,
+        3,
         5
       ],
       "material": "hide",
       "certainty": {
         "percent": 60,
         "basis": "inferred",
-        "note": "General tipi form. Diameter and height are approximate, not from a source."
+        "note": "General tipi form. Diameter and height approximate, not from a source."
       }
     },
     {
-      "uuid": "tipi-small",
-      "name": "Tipi (small)",
+      "uuid": "tipi-2",
+      "name": "Lodge (standing, small)",
       "type": "cone",
-      "description": "Smaller conical dwelling, generic form.",
-      "parent": "camp",
+      "parent": "lodges",
       "dimensions": {
-        "x": 5,
-        "y": 5,
-        "z": 6
+        "x": 6,
+        "y": 6,
+        "z": 7
       },
       "position": [
-        -10,
-        -2,
-        4
+        -11,
+        -1,
+        4.5
       ],
       "material": "hide",
       "certainty": {
@@ -129,42 +134,98 @@
       }
     },
     {
-      "uuid": "travois-pole-left",
-      "name": "Travois pole (left)",
+      "uuid": "struck-cover",
+      "name": "Struck lodge cover (folded)",
       "type": "box",
-      "description": "Drag pole of a travois, a sledge-like carrier pulled by a horse or dog.",
-      "parent": "camp",
+      "parent": "lodges",
+      "dimensions": {
+        "x": 4.5,
+        "y": 3,
+        "z": 0.6
+      },
+      "position": [
+        -2,
+        -4,
+        1.3
+      ],
+      "material": "hide",
+      "certainty": {
+        "percent": 50,
+        "basis": "inferred",
+        "note": "The folded cover on the ground. Its size is approximate."
+      }
+    },
+    {
+      "uuid": "struck-poles",
+      "name": "Struck lodge poles",
+      "type": "box",
+      "parent": "lodges",
+      "dimensions": {
+        "x": 0.3,
+        "y": 8,
+        "z": 0.3
+      },
+      "position": [
+        -2.6,
+        -4,
+        1.15
+      ],
+      "material": "wood",
+      "certainty": {
+        "percent": 50,
+        "basis": "inferred",
+        "note": "Poles laid beside the cover. Length approximate."
+      }
+    },
+    {
+      "uuid": "travois",
+      "name": "Travois (two frames, loaded)",
+      "type": "group",
+      "description": "Two drag frames loaded for the move.",
+      "parent": "camp"
+    },
+    {
+      "uuid": "travois-a",
+      "name": "Travois A",
+      "type": "group",
+      "description": "A drag frame of two poles and a cross bar, with a load of bundles.",
+      "parent": "travois"
+    },
+    {
+      "uuid": "travois-a-pole-l",
+      "name": "Pole (left)",
+      "type": "box",
+      "parent": "travois-a",
       "dimensions": {
         "x": 0.4,
         "y": 9,
         "z": 0.4
       },
       "position": [
-        -2,
-        -1.5,
+        1.1,
+        -3,
         1.2
       ],
       "material": "wood",
       "certainty": {
         "percent": 55,
         "basis": "inferred",
-        "note": "Travois form from the research. Length approximate."
+        "note": "Travois form from the research; the length is approximate."
       }
     },
     {
-      "uuid": "travois-pole-right",
-      "name": "Travois pole (right)",
+      "uuid": "travois-a-pole-r",
+      "name": "Pole (right)",
       "type": "box",
-      "description": "Drag pole of a travois.",
-      "parent": "camp",
+      "parent": "travois-a",
       "dimensions": {
         "x": 0.4,
         "y": 9,
         "z": 0.4
       },
       "position": [
-        -2.8,
-        -1.5,
+        1.9,
+        -3,
         1.2
       ],
       "material": "wood",
@@ -175,32 +236,572 @@
       }
     },
     {
-      "uuid": "travois-bar",
-      "name": "Travois cross bar",
+      "uuid": "travois-a-bar",
+      "name": "Cross bar",
       "type": "box",
-      "parent": "camp",
+      "parent": "travois-a",
       "dimensions": {
         "x": 1.6,
         "y": 0.4,
         "z": 0.4
       },
       "position": [
-        -2.4,
-        -6,
+        1.5,
+        -7.5,
         1.2
       ],
       "material": "wood",
       "certainty": {
         "percent": 55,
         "basis": "inferred",
-        "note": "Joins the two poles at their ends."
+        "note": "Joins the poles at the front."
+      }
+    },
+    {
+      "uuid": "travois-a-load",
+      "name": "Load of bundles",
+      "type": "box",
+      "parent": "travois-a",
+      "dimensions": {
+        "x": 2.4,
+        "y": 2.6,
+        "z": 1.6
+      },
+      "position": [
+        1.5,
+        -2.5,
+        2.2
+      ],
+      "material": "hide and cloth",
+      "certainty": {
+        "percent": 30,
+        "basis": "placeholder",
+        "note": "A block for the load. What it holds is not yet confirmed."
+      }
+    },
+    {
+      "uuid": "travois-b",
+      "name": "Travois B",
+      "type": "group",
+      "description": "A drag frame of two poles and a cross bar, with a load of bundles.",
+      "parent": "travois"
+    },
+    {
+      "uuid": "travois-b-pole-l",
+      "name": "Pole (left)",
+      "type": "box",
+      "parent": "travois-b",
+      "dimensions": {
+        "x": 0.4,
+        "y": 9,
+        "z": 0.4
+      },
+      "position": [
+        5.1,
+        0,
+        1.2
+      ],
+      "material": "wood",
+      "certainty": {
+        "percent": 55,
+        "basis": "inferred",
+        "note": "Travois form from the research; the length is approximate."
+      }
+    },
+    {
+      "uuid": "travois-b-pole-r",
+      "name": "Pole (right)",
+      "type": "box",
+      "parent": "travois-b",
+      "dimensions": {
+        "x": 0.4,
+        "y": 9,
+        "z": 0.4
+      },
+      "position": [
+        5.9,
+        0,
+        1.2
+      ],
+      "material": "wood",
+      "certainty": {
+        "percent": 55,
+        "basis": "inferred",
+        "note": "As the left pole."
+      }
+    },
+    {
+      "uuid": "travois-b-bar",
+      "name": "Cross bar",
+      "type": "box",
+      "parent": "travois-b",
+      "dimensions": {
+        "x": 1.6,
+        "y": 0.4,
+        "z": 0.4
+      },
+      "position": [
+        5.5,
+        -4.5,
+        1.2
+      ],
+      "material": "wood",
+      "certainty": {
+        "percent": 55,
+        "basis": "inferred",
+        "note": "Joins the poles at the front."
+      }
+    },
+    {
+      "uuid": "travois-b-load",
+      "name": "Load of bundles",
+      "type": "box",
+      "parent": "travois-b",
+      "dimensions": {
+        "x": 2.4,
+        "y": 2.6,
+        "z": 1.6
+      },
+      "position": [
+        5.5,
+        0.5,
+        2.2
+      ],
+      "material": "hide and cloth",
+      "certainty": {
+        "percent": 30,
+        "basis": "placeholder",
+        "note": "A block for the load. What it holds is not yet confirmed."
+      }
+    },
+    {
+      "uuid": "horses",
+      "name": "Horses (placeholder)",
+      "type": "group",
+      "description": "Two placeholder horse silhouettes. No breed, tack or colour is claimed.",
+      "parent": "camp"
+    },
+    {
+      "uuid": "horse-1",
+      "name": "Horse 1 (front)",
+      "type": "group",
+      "description": "Placeholder silhouette. No breed, tack or colour is claimed.",
+      "parent": "horses"
+    },
+    {
+      "uuid": "horse-1-body",
+      "name": "Horse body",
+      "type": "box",
+      "parent": "horse-1",
+      "dimensions": {
+        "x": 6,
+        "y": 2,
+        "z": 2.6
+      },
+      "position": [
+        6,
+        -8.5,
+        4.8
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-1-neck",
+      "name": "Horse neck",
+      "type": "box",
+      "parent": "horse-1",
+      "dimensions": {
+        "x": 1,
+        "y": 1,
+        "z": 2
+      },
+      "position": [
+        8.5,
+        -8.5,
+        6.3
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-1-leg-fl",
+      "name": "Horse leg (front left)",
+      "type": "cylinder",
+      "parent": "horse-1",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 2.5
+      },
+      "position": [
+        8.2,
+        -9.2,
+        2.25
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-1-leg-fr",
+      "name": "Horse leg (front right)",
+      "type": "cylinder",
+      "parent": "horse-1",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 2.5
+      },
+      "position": [
+        8.2,
+        -7.8,
+        2.25
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-1-leg-bl",
+      "name": "Horse leg (back left)",
+      "type": "cylinder",
+      "parent": "horse-1",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 2.5
+      },
+      "position": [
+        3.8,
+        -9.2,
+        2.25
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-1-leg-br",
+      "name": "Horse leg (back right)",
+      "type": "cylinder",
+      "parent": "horse-1",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 2.5
+      },
+      "position": [
+        3.8,
+        -7.8,
+        2.25
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-2",
+      "name": "Horse 2 (by the cover)",
+      "type": "group",
+      "description": "Placeholder silhouette. No breed, tack or colour is claimed.",
+      "parent": "horses"
+    },
+    {
+      "uuid": "horse-2-body",
+      "name": "Horse body",
+      "type": "box",
+      "parent": "horse-2",
+      "dimensions": {
+        "x": 6,
+        "y": 2,
+        "z": 2.6
+      },
+      "position": [
+        -5,
+        -8.5,
+        4.8
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-2-neck",
+      "name": "Horse neck",
+      "type": "box",
+      "parent": "horse-2",
+      "dimensions": {
+        "x": 1,
+        "y": 1,
+        "z": 2
+      },
+      "position": [
+        -2.5,
+        -8.5,
+        6.3
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-2-leg-fl",
+      "name": "Horse leg (front left)",
+      "type": "cylinder",
+      "parent": "horse-2",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 2.5
+      },
+      "position": [
+        -2.8,
+        -9.2,
+        2.25
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-2-leg-fr",
+      "name": "Horse leg (front right)",
+      "type": "cylinder",
+      "parent": "horse-2",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 2.5
+      },
+      "position": [
+        -2.8,
+        -7.8,
+        2.25
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-2-leg-bl",
+      "name": "Horse leg (back left)",
+      "type": "cylinder",
+      "parent": "horse-2",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 2.5
+      },
+      "position": [
+        -7.2,
+        -9.2,
+        2.25
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-2-leg-br",
+      "name": "Horse leg (back right)",
+      "type": "cylinder",
+      "parent": "horse-2",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 2.5
+      },
+      "position": [
+        -7.2,
+        -7.8,
+        2.25
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "figures",
+      "name": "People (placeholder forms)",
+      "type": "group",
+      "description": "Three placeholder forms: an older woman, a child and a woman. No faces, hair, clothing or regalia.",
+      "parent": "camp"
+    },
+    {
+      "uuid": "figure-woman-a-body",
+      "name": "Woman A body",
+      "type": "cylinder",
+      "parent": "figures",
+      "dimensions": {
+        "x": 1.6,
+        "y": 1.6,
+        "z": 4.5
+      },
+      "position": [
+        -5,
+        -2,
+        3.25
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Form only."
+      }
+    },
+    {
+      "uuid": "figure-woman-a-head",
+      "name": "Woman A head",
+      "type": "sphere",
+      "parent": "figures",
+      "dimensions": {
+        "x": 1,
+        "y": 1,
+        "z": 1
+      },
+      "position": [
+        -5,
+        -2,
+        6
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Form only."
+      }
+    },
+    {
+      "uuid": "figure-child-body",
+      "name": "Child body",
+      "type": "cylinder",
+      "parent": "figures",
+      "dimensions": {
+        "x": 1,
+        "y": 1,
+        "z": 2.8
+      },
+      "position": [
+        -1,
+        1.5,
+        2.4
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Form only."
+      }
+    },
+    {
+      "uuid": "figure-child-head",
+      "name": "Child head",
+      "type": "sphere",
+      "parent": "figures",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.7,
+        "z": 0.7
+      },
+      "position": [
+        -1,
+        1.5,
+        4.25
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Form only."
+      }
+    },
+    {
+      "uuid": "figure-woman-b-body",
+      "name": "Woman B body",
+      "type": "cylinder",
+      "parent": "figures",
+      "dimensions": {
+        "x": 1.6,
+        "y": 1.6,
+        "z": 4.5
+      },
+      "position": [
+        9,
+        3,
+        3.25
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Form only."
+      }
+    },
+    {
+      "uuid": "figure-woman-b-head",
+      "name": "Woman B head",
+      "type": "sphere",
+      "parent": "figures",
+      "dimensions": {
+        "x": 1,
+        "y": 1,
+        "z": 1
+      },
+      "position": [
+        9,
+        3,
+        6
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Form only."
       }
     },
     {
       "uuid": "fire-ring",
-      "name": "Fire ring",
+      "name": "Cold fire ring",
       "type": "cylinder",
-      "description": "Ring of stones around a fire. Stones are not modelled one by one.",
       "parent": "camp",
       "dimensions": {
         "x": 2.4,
@@ -216,303 +817,7 @@
       "certainty": {
         "percent": 40,
         "basis": "inferred",
-        "note": "Typical size. Not from a source."
-      }
-    },
-    {
-      "uuid": "horse",
-      "name": "Horse (placeholder)",
-      "type": "group",
-      "description": "Placeholder silhouette. No breed, tack or colour is claimed.",
-      "parent": "camp"
-    },
-    {
-      "uuid": "horse-body",
-      "name": "Horse body",
-      "type": "box",
-      "parent": "horse",
-      "dimensions": {
-        "x": 6,
-        "y": 2,
-        "z": 2.6
-      },
-      "position": [
-        4,
-        -2,
-        4.8
-      ],
-      "material": "placeholder grey",
-      "certainty": {
-        "percent": 20,
-        "basis": "placeholder",
-        "note": "Silhouette only."
-      }
-    },
-    {
-      "uuid": "horse-neck",
-      "name": "Horse neck",
-      "type": "box",
-      "parent": "horse",
-      "dimensions": {
-        "x": 1,
-        "y": 1,
-        "z": 2
-      },
-      "position": [
-        6.5,
-        -2,
-        6.3
-      ],
-      "material": "placeholder grey",
-      "certainty": {
-        "percent": 20,
-        "basis": "placeholder",
-        "note": "Silhouette only."
-      }
-    },
-    {
-      "uuid": "horse-leg-fl",
-      "name": "Horse leg (front left)",
-      "type": "cylinder",
-      "parent": "horse",
-      "dimensions": {
-        "x": 0.4,
-        "y": 0.4,
-        "z": 2.5
-      },
-      "position": [
-        6.2,
-        -2.7,
-        2.25
-      ],
-      "material": "placeholder grey",
-      "certainty": {
-        "percent": 20,
-        "basis": "placeholder",
-        "note": "Silhouette only."
-      }
-    },
-    {
-      "uuid": "horse-leg-fr",
-      "name": "Horse leg (front right)",
-      "type": "cylinder",
-      "parent": "horse",
-      "dimensions": {
-        "x": 0.4,
-        "y": 0.4,
-        "z": 2.5
-      },
-      "position": [
-        6.2,
-        -1.3,
-        2.25
-      ],
-      "material": "placeholder grey",
-      "certainty": {
-        "percent": 20,
-        "basis": "placeholder",
-        "note": "Silhouette only."
-      }
-    },
-    {
-      "uuid": "horse-leg-bl",
-      "name": "Horse leg (back left)",
-      "type": "cylinder",
-      "parent": "horse",
-      "dimensions": {
-        "x": 0.4,
-        "y": 0.4,
-        "z": 2.5
-      },
-      "position": [
-        1.8,
-        -2.7,
-        2.25
-      ],
-      "material": "placeholder grey",
-      "certainty": {
-        "percent": 20,
-        "basis": "placeholder",
-        "note": "Silhouette only."
-      }
-    },
-    {
-      "uuid": "horse-leg-br",
-      "name": "Horse leg (back right)",
-      "type": "cylinder",
-      "parent": "horse",
-      "dimensions": {
-        "x": 0.4,
-        "y": 0.4,
-        "z": 2.5
-      },
-      "position": [
-        1.8,
-        -1.3,
-        2.25
-      ],
-      "material": "placeholder grey",
-      "certainty": {
-        "percent": 20,
-        "basis": "placeholder",
-        "note": "Silhouette only."
-      }
-    },
-    {
-      "uuid": "figures",
-      "name": "Figures (placeholder)",
-      "type": "group",
-      "description": "Three placeholder forms. No faces, hair, clothing or regalia.",
-      "parent": "camp"
-    },
-    {
-      "uuid": "figure-a",
-      "name": "Figure A (placeholder)",
-      "type": "group",
-      "parent": "figures"
-    },
-    {
-      "uuid": "figure-a-body",
-      "name": "Figure A body",
-      "type": "cylinder",
-      "parent": "figure-a",
-      "dimensions": {
-        "x": 1.6,
-        "y": 1.6,
-        "z": 4.5
-      },
-      "position": [
-        -5,
-        -7,
-        3.25
-      ],
-      "material": "placeholder grey",
-      "certainty": {
-        "percent": 15,
-        "basis": "placeholder",
-        "note": "Form only."
-      }
-    },
-    {
-      "uuid": "figure-a-head",
-      "name": "Figure A head",
-      "type": "sphere",
-      "parent": "figure-a",
-      "dimensions": {
-        "x": 1,
-        "y": 1,
-        "z": 1
-      },
-      "position": [
-        -5,
-        -7,
-        6
-      ],
-      "material": "placeholder grey",
-      "certainty": {
-        "percent": 15,
-        "basis": "placeholder",
-        "note": "Form only."
-      }
-    },
-    {
-      "uuid": "figure-b",
-      "name": "Figure B (placeholder)",
-      "type": "group",
-      "parent": "figures"
-    },
-    {
-      "uuid": "figure-b-body",
-      "name": "Figure B body",
-      "type": "cylinder",
-      "parent": "figure-b",
-      "dimensions": {
-        "x": 1.6,
-        "y": 1.6,
-        "z": 4.5
-      },
-      "position": [
-        -9.5,
-        -9,
-        3.25
-      ],
-      "material": "placeholder grey",
-      "certainty": {
-        "percent": 15,
-        "basis": "placeholder",
-        "note": "Form only."
-      }
-    },
-    {
-      "uuid": "figure-b-head",
-      "name": "Figure B head",
-      "type": "sphere",
-      "parent": "figure-b",
-      "dimensions": {
-        "x": 1,
-        "y": 1,
-        "z": 1
-      },
-      "position": [
-        -9.5,
-        -9,
-        6
-      ],
-      "material": "placeholder grey",
-      "certainty": {
-        "percent": 15,
-        "basis": "placeholder",
-        "note": "Form only."
-      }
-    },
-    {
-      "uuid": "figure-c",
-      "name": "Figure C (placeholder)",
-      "type": "group",
-      "parent": "figures"
-    },
-    {
-      "uuid": "figure-c-body",
-      "name": "Figure C body",
-      "type": "cylinder",
-      "parent": "figure-c",
-      "dimensions": {
-        "x": 1.6,
-        "y": 1.6,
-        "z": 4.5
-      },
-      "position": [
-        1.5,
-        2,
-        3.25
-      ],
-      "material": "placeholder grey",
-      "certainty": {
-        "percent": 15,
-        "basis": "placeholder",
-        "note": "Form only."
-      }
-    },
-    {
-      "uuid": "figure-c-head",
-      "name": "Figure C head",
-      "type": "sphere",
-      "parent": "figure-c",
-      "dimensions": {
-        "x": 1,
-        "y": 1,
-        "z": 1
-      },
-      "position": [
-        1.5,
-        2,
-        6
-      ],
-      "material": "placeholder grey",
-      "certainty": {
-        "percent": 15,
-        "basis": "placeholder",
-        "note": "Form only."
+        "note": "Typical size. Not from a source. The fire is out."
       }
     },
     {
@@ -555,7 +860,7 @@
       },
       "position": [
         11,
-        3,
+        -2,
         1.5
       ],
       "material": "grass",
@@ -591,7 +896,7 @@
       "uuid": "label-plate",
       "name": "Label plate",
       "type": "box",
-      "description": "Front label. Text: \"Generic plains camp. Placeholder figures. Not a portrait of any people.\"",
+      "description": "Label text: \"Southern Cheyenne camp move, 1870s. Draft. Not reviewed by the Cheyenne and Arapaho Tribes.\"",
       "parent": "camp",
       "dimensions": {
         "x": 6,
@@ -600,7 +905,7 @@
       },
       "position": [
         0,
-        -9.6,
+        -9.8,
         1.6
       ],
       "material": "brass",
@@ -615,44 +920,66 @@
     {
       "id": "F1",
       "target": "camp",
-      "text": "The camp is generic. It shows no specific Oklahoma nation, family or place. Check the research folder before any nation-specific version.",
+      "text": "Display needs review by the Cheyenne and Arapaho Tribes (see research/consultation-plan.md). The whole camp is a draft until then.",
+      "kind": "consultation",
       "status": "open",
-      "seq": 33
+      "seq": 49
     },
     {
       "id": "F2",
       "target": "ridge",
-      "text": "The ridge is invented to frame the camp. It has no source.",
+      "text": "The bluff is invented to frame the camp. It has no source.",
+      "kind": "uncertain",
       "status": "open",
-      "seq": 34
+      "seq": 50
     },
     {
       "id": "F3",
-      "target": "horse",
-      "text": "The horse is a placeholder. Breed, tack and colour are unknown and are not guessed. Check with consultants before any display.",
+      "target": "horses",
+      "text": "The horses are placeholders. Breed, tack and colour are not claimed. Check with consultants before any display.",
+      "kind": "consultation",
       "status": "open",
-      "seq": 35
+      "seq": 51
     },
     {
       "id": "F4",
       "target": "figures",
-      "text": "The figures are placeholder forms only. They must not stand in for real people or nations. Review with Oklahoma consultants before any public display.",
+      "text": "The people are placeholder forms only. They must not stand in for real people. Review before any display.",
+      "kind": "consultation",
       "status": "open",
-      "seq": 36
+      "seq": 52
     },
     {
       "id": "F5",
       "target": "fire-ring",
       "text": "The fire ring size is typical, not sourced.",
+      "kind": "uncertain",
       "status": "open",
-      "seq": 37
+      "seq": 53
     },
     {
       "id": "F6",
       "target": "tufts",
       "text": "The grass tufts are decoration; their size is not measured.",
+      "kind": "uncertain",
       "status": "open",
-      "seq": 38
+      "seq": 54
+    },
+    {
+      "id": "F7",
+      "target": "lodges",
+      "text": "The lodge shapes and the way the cover is folded need checking against Cheyenne practice.",
+      "kind": "consultation",
+      "status": "open",
+      "seq": 55
+    },
+    {
+      "id": "F8",
+      "target": "travois",
+      "text": "The travois sizes and the load are approximate. Check the load and how it was packed.",
+      "kind": "consultation",
+      "status": "open",
+      "seq": 56
     }
   ]
 }
