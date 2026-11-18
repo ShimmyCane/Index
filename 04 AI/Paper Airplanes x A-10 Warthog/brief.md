@@ -12,6 +12,10 @@ A browser 2.5D pixel-art flight game, built small enough to read, so Jimmy can s
 - **A-10 game:** search did not confirm a single title. Working reading: *A-10 Tank Killer* (Dynamix, 1990). Confirm (Q2).
 - **Paper Airplanes** `research/topics.md`: the four forces, lift from angle of attack, balance, trim. Used for the flight model and glider mode.
 
+## Reference found (2026-11-18, convo v0.2)
+
+- Repo: https://github.com/LeePillWoo/sprite-stack-fighter. A sprite-stacked jet dogfight, one HTML file, Canvas 2D, views top-down / chase / cockpit. README credits UI8 Forge (https://remix.ui8.ai/fly) as the reference for a new implementation. No licence found, so no code or art is copied. Not confirmed: the 32 KB figure, the 2.1 M views, the roguelite and flight-sim remixes (no sources found).
+
 ## Decisions (see schematic)
 
 - TypeScript source compiled to a committed `js/game.js`; the page needs no build. TypeScript pinned at 5.6.3 (`package.json`, dev only). Global `tsc` v6 rejects `outFile`, so use `npx tsc`.
