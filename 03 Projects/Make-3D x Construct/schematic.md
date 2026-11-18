@@ -1,6 +1,6 @@
 # Make-3D x Construct — Schematic
 
-**Status:** MVP 0.3 built: Southern Cheyenne camp move, 388 parts (draft, not for display until consultation) · round 4 answers in `convo/convo v0.4.md` · **Updated:** 2026-11-18
+**Status:** MVP 0.4 built: Southern Cheyenne camp move, 109 parts, real scale, objects built from real parts (draft, not for display until consultation) · round 5 answers in `convo/convo v0.5.md` · **Updated:** 2026-11-18
 **Track:** B. Studio design (`02 Refs/Skills/project_track.md`)
 **Based on:** a review of Construct (`rtmandreyev/construct`, commit `7ea702e`, toolkit version 1.3.2), the Make-3D schematic and to-do list (graduated to `ShimmyCane/Make-3D`), and the nursery's new-project workflow. Nothing is built yet. The first build waits for Jimmy's answers.
 
@@ -136,3 +136,10 @@ See `convo/convo v0.3.md`.
 2. The reviewers' answers go to `private/`; each consultation flag is closed with its note.
 3. Jimmy copies the database SQL by hand; then the cloud save can be wired.
 4. Device test on an iPad before any display.
+
+## 12. Round 5 (2026-11-18): rollback and density
+
+- The round 4 fillers are removed. No object is added for its own sake.
+- Density is detail in the existing objects. The scale is fixed to real sizes (1 in = 2 ft).
+- Objects are built from real parts: lodges (cover, four leaning poles, door), horses (barrel, neck, head, legs), people (torso, arms, head, hair).
+- Next density pass only when asked: bluff, struck cover, travois loads. See `convo/convo v0.5.md`.
