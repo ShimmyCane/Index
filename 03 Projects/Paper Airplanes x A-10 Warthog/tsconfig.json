@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2019",
+    "lib": ["ES2019", "DOM"],
+    "module": "none",
+    "strict": true,
+    "noImplicitAny": true,
+    "outFile": "js/game.js",
+    "sourceMap": false,
+    "removeComments": false,
+    "types": []
+  },
+  "files": [
+    "src/config.ts",
+    "src/sprites.ts",
+    "src/flight.ts",
+    "src/world.ts",
+    "src/audio.ts",
+    "src/game.ts",
+    "src/render.ts",
+    "src/main.ts"
+  ]
+}
