@@ -348,5 +348,45 @@ const still = { pitch: 0, yaw: 0, throttle: 0 };
   check('gun: leads a tank moving along the road', !t2.alive || t2.hp < 2, 'hp ' + t2.hp);
 }
 
+// 23. Fighters make attack runs and break off, instead of circling forever.
+{
+  const st = { mode: 'jet', control: 'drag', view: 'chase', difficulty: 'felix', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const g = new PA.Game(st);
+  g.onSound = () => {};
+  g.mission.targets = [];
+  g.mission.targets.push({ kind: 'fighter', X: g.plane.X + 900, Z: g.plane.Z + 400, h: 90, alive: true, points: 200, hp: 1, cool: 0, faction: 'enemy', age: 0, vH: 0 });
+  const f = g.mission.targets[0];
+  const seen = new Set();
+  for (let i = 0; i < 40 * 30 && f.alive; i++) { g.update(1 / 30); if (f.state) seen.add(f.state); }
+  check('fighters: they go through approach, attack and break', seen.has('approach') && seen.has('attack') && seen.has('break'), 'states ' + [...seen].join(','));
+}
+
+// 24. Allies shoot at an enemy fighter that comes close to them.
+{
+  const st = { mode: 'jet', control: 'drag', view: 'chase', difficulty: 'felix', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const g = new PA.Game(st);
+  g.onSound = () => {};
+  g.mission.targets = [];
+  const ally = { kind: 'ally', X: 0, Z: 1500, h: 90, alive: true, points: -300, hp: 1, cool: 0, faction: 'ally', orbit: { cx: 0, cz: 1500, r: 1, ang: 0, w: 0 }, age: 0 };
+  const foe = { kind: 'fighter', X: 150, Z: 1500, h: 90, alive: true, points: 200, hp: 1, cool: 99, faction: 'enemy', age: 0, vH: 0, state: 'break', stateT: 0 };
+  g.mission.targets.push(ally, foe);
+  let fired = false;
+  for (let i = 0; i < 3 * 30 && foe.alive; i++) { g.update(1 / 30); if (g.shots.some(s => s.friendly)) fired = true; }
+  check('allies: they shoot at a fighter that comes close', fired && !foe.alive);
+}
+
+// 25. Bases: a defended base comes up as the plane passes each stretch of the route.
+{
+  const st = { mode: 'jet', control: 'drag', view: 'chase', difficulty: 'felix', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const g = new PA.Game(st);
+  g.onSound = () => {};
+  const cities0 = g.mission.targets.filter(t => t.kind === 'city').length;
+  g.plane.Z = 900;
+  g.update(1 / 30);
+  const cities1 = g.mission.targets.filter(t => t.kind === 'city').length;
+  const allies = g.mission.targets.filter(t => t.faction === 'ally' && t.orbit && t.orbit.r === 450).length;
+  check('bases: a base comes up ahead with towns and defending allies', cities1 >= cities0 + 3 && allies === 2, 'cities ' + cities1 + ', base allies ' + allies);
+}
+
 console.log(failures === 0 ? '\nAll flight checks passed.' : '\n' + failures + ' check(s) failed.');
 process.exit(failures ? 1 : 0);

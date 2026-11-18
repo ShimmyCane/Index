@@ -5,15 +5,10 @@ namespace PA {
   const DESIGN_W = 66;
   const DESIGN_H = 40;
   const LAYERS = 4;           // slices in the stack
-  const LIGHT = 1;            // how far each slice steps down (design units, before scaling)
+  const LIGHT = 2;            // how far each slice steps down (design units, before scaling)
 
   // Shade a hex colour toward dark (f = 1 is unchanged).
-  function shade(hex: string, f: number): string {
-    const n = parseInt(hex.slice(1), 16);
-    const ch = (v: number) => Math.round(v * f);
-    const r = ch((n >> 16) & 255), g = ch((n >> 8) & 255), b = ch(n & 255);
-    return '#' + ((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1);
-  }
+  const shade = shadeHex;
 
   // The drawing itself, in design units: x across (0 … 66), y down (0 … 40).
   // The A-10 from behind: a broad body, a thick high wing, two fins set wide apart, and
@@ -51,7 +46,7 @@ namespace PA {
       for (let layer = 0; layer < LAYERS; layer++) {
         const top = layer === LAYERS - 1;
         const sub = new Painter();
-        const f = top ? 1 : 0.55 + 0.4 * (layer / (LAYERS - 1));
+        const f = top ? 1 : 0.42 + 0.5 * (layer / (LAYERS - 1));
         design(sub, (LAYERS - 1 - layer) * LIGHT, f);
         for (const o of sub.ops) {
           const x0 = Math.round(o.x * k), y0 = Math.round(o.y * k);

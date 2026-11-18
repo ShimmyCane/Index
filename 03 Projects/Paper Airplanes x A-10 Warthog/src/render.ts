@@ -212,7 +212,9 @@ namespace PA {
       const p = project(c, t.X, altOf(t), t.Z);
       if (!p) continue;
       if (p[2] > FOG_FAR * 1.5) continue;
-      things.push({ zc: p[2], img: sprite(t.kind), X: t.X, base: altOf(t), Z: t.Z });
+      // Fighters and allies are stacked like the plane; ground things are single sprites for now.
+      const air = t.h !== undefined;
+      things.push({ zc: p[2], img: air ? stackedSprite(t.kind) : sprite(t.kind), X: t.X, base: altOf(t), Z: t.Z });
     }
     things.sort((a, b) => b.zc - a.zc);
     return things;

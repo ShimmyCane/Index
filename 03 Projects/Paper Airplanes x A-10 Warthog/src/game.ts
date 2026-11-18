@@ -62,6 +62,7 @@ namespace PA {
     vZ: number;
     life: number;
     warn?: boolean;
+    friendly?: boolean;   // an ally's bullet: it only hits enemies
   }
 
   export interface Puff {
@@ -146,6 +147,13 @@ namespace PA {
   const SHELL_WARN_RANGE = 300;
   const FRIEND_RESPAWN = 40;
   const WISP_LIFE = 1.4;
+  const ATTACK_RANGE = 700;      // a fighter starts its attack run inside this distance
+  const BREAK_RANGE = 180;       // and breaks off this close, or after BREAK_AFTER seconds
+  const BREAK_AFTER = 3;
+  const BREAK_FOR = 3.5;         // it flies straight away this long, then comes back
+  const ALLY_GUN_RANGE = 700;    // allies shoot at enemy fighters inside this range
+  const ALLY_COOL = 0.35;
+  const BASE_SPACING = 1400;     // a defended base every this many metres along the route
   const KEEP_AHEAD = 6;
   const OBJECTIVE_GROUND = [4, 5, 6];    // ground targets to destroy for a mission (cycles)
 
@@ -170,6 +178,7 @@ namespace PA {
     chaff = CHAFF_MAX;
     resupplyCool = 0;
     waveTimer = 0;
+    nextBaseZ = BASE_SPACING;
     enemyMissileCool = 0;
     allyTimers: number[] = [];
     aim: Aim = { yaw: 0, pitch: 0, mode: 'straight', dir: [0, 0, 1] };
@@ -233,6 +242,7 @@ namespace PA {
       this.missileCool = 0;
       this.reloadTimer = 0;
       this.waveTimer = 8;
+      this.nextBaseZ = BASE_SPACING;
       this.enemyMissileCool = 6;
       this.allyTimers = [];
       this.lock = { target: null, progress: 0 };
@@ -484,24 +494,7 @@ namespace PA {
         if (!t.alive) continue;
         t.age = (t.age || 0) + dt;
         if (t.faction === 'enemy') {
-          const dx = p.X - t.X, dz = p.Z - t.Z;
-          const want = Math.atan2(dx, dz);
-          const cur = t.vH || 0;
-          let diff = want - cur;
-          while (diff > Math.PI) diff -= 2 * Math.PI;
-          while (diff < -Math.PI) diff += 2 * Math.PI;
-          const turn = Math.max(-FIGHTER_TURN * dt, Math.min(FIGHTER_TURN * dt, diff));
-          t.vH = cur + turn;
-          t.X += Math.sin(t.vH) * FIGHTER_SPEED * dt;
-          t.Z += Math.cos(t.vH) * FIGHTER_SPEED * dt;
-          t.h = (t.h ?? p.h) + (p.h + 10 - (t.h ?? p.h)) * Math.min(1, dt * 0.4);
-          const gun = KINDS.fighter.gun!;
-          t.cool -= dt;
-          const dist = Math.hypot(dx, dz);
-          if (t.cool <= 0 && dist < FIGHTER_FIRE_RANGE) {
-            t.cool = gun.cool * (0.8 + this.rand() * 0.4);
-            this.fireAt(t, gun.speed, true);
-          }
+          this.flyFighter(t, dt);
           if (t.age > 150 || Math.hypot(t.X - p.X, t.Z - p.Z) > 3000) t.alive = false;
         } else if (t.faction === 'ally' && t.orbit) {
           const o = t.orbit;
@@ -509,6 +502,15 @@ namespace PA {
           t.X = o.cx + Math.cos(o.ang) * o.r;
           t.Z = o.cz + Math.sin(o.ang) * o.r;
           t.h = 90;
+          // Allies defend: they shoot at an enemy fighter that is close to them.
+          t.cool -= dt;
+          if (t.cool <= 0) {
+            const foe = this.nearestEnemy(t, ALLY_GUN_RANGE);
+            if (foe) {
+              t.cool = ALLY_COOL * (0.8 + this.rand() * 0.4);
+              this.friendlyShot(t, foe);
+            }
+          }
         }
       }
       // Enemy fighters also fire a homing missile now and then, when the plane is in front and near.
@@ -523,6 +525,92 @@ namespace PA {
             break;
           }
         }
+      }
+    }
+
+    // An enemy fighter's flight: approach, make an attack run (firing), break off, come back.
+    private flyFighter(t: Target, dt: number): void {
+      const p = this.plane;
+      const dx = p.X - t.X, dz = p.Z - t.Z;
+      const dist = Math.hypot(dx, dz);
+      t.stateT = (t.stateT ?? 0) + dt;
+      if (!t.state) t.state = 'approach';
+      if (t.state === 'approach' && dist < ATTACK_RANGE) { t.state = 'attack'; t.stateT = 0; }
+      if (t.state === 'attack' && (dist < BREAK_RANGE || t.stateT > BREAK_AFTER)) {
+        // Break away: the nose goes the way it came, and the fighter keeps going for a while.
+        t.state = 'break'; t.stateT = 0;
+        t.vH = Math.atan2(-dx, -dz);
+      }
+      if (t.state === 'break' && t.stateT > BREAK_FOR) { t.state = 'approach'; t.stateT = 0; }
+
+      const cur = t.vH ?? Math.atan2(dx, dz);
+      let want = Math.atan2(dx, dz);
+      let rate = FIGHTER_TURN;
+      let speed = FIGHTER_SPEED * 0.85;
+      if (t.state === 'attack') { rate = 1.6; speed = FIGHTER_SPEED; }
+      if (t.state === 'break') { want = cur; rate = 0.4; speed = FIGHTER_SPEED; }
+      let diff = want - cur;
+      while (diff > Math.PI) diff -= 2 * Math.PI;
+      while (diff < -Math.PI) diff += 2 * Math.PI;
+      const turn = Math.max(-rate * dt, Math.min(rate * dt, diff));
+      t.vH = cur + turn;
+      t.X += Math.sin(t.vH) * speed * dt;
+      t.Z += Math.cos(t.vH) * speed * dt;
+      // Fighters settle toward the plane's height slowly, so a shot can be led.
+      t.h = (t.h ?? p.h) + (p.h + 10 - (t.h ?? p.h)) * Math.min(1, dt * 0.15);
+
+      const gun = KINDS.fighter.gun!;
+      t.cool -= dt;
+      if (t.state === 'attack' && t.cool <= 0 && dist < FIGHTER_FIRE_RANGE) {
+        t.cool = gun.cool * (0.8 + this.rand() * 0.4);
+        this.fireAt(t, gun.speed, true);
+      }
+    }
+
+    private nearestEnemy(from: Target, range: number): Target | null {
+      let best: Target | null = null;
+      let bestD = range;
+      for (const t of this.mission.targets) {
+        if (!t.alive || t.faction !== 'enemy') continue;
+        const d = Math.hypot(t.X - from.X, t.Z - from.Z, (t.h ?? 0) - (from.h ?? 0));
+        if (d < bestD) { best = t; bestD = d; }
+      }
+      return best;
+    }
+
+    // An ally's bullet toward an enemy fighter, led to where the fighter will be.
+    private friendlyShot(from: Target, foe: Target): void {
+      const sp = 260;
+      const vf = this.targetVelocity(foe);
+      const fromH = from.h ?? 90;
+      let tt = Math.hypot(foe.X - from.X, (foe.h ?? 0) - fromH, foe.Z - from.Z) / sp;
+      let dir: [number, number, number] = [0, 0, 1];
+      for (let it = 0; it < 4; it++) {
+        const rx = foe.X + vf[0] * tt - from.X;
+        const ry = (foe.h ?? 0) + vf[1] * tt - fromH + 0.5 * GRAVITY * tt * tt;
+        const rz = foe.Z + vf[2] * tt - from.Z;
+        const d = Math.hypot(rx, ry, rz) || 1;
+        dir = [rx / d, ry / d, rz / d];
+        tt = d / sp;
+      }
+      this.shots.push({
+        X: from.X, Z: from.Z, h: fromH,
+        vX: dir[0] * sp, vY: dir[1] * sp, vZ: dir[2] * sp,
+        life: 1.6, friendly: true,
+      });
+    }
+
+    // A defended base: towns, guns and a SAM site, with allies circling it.
+    private spawnBase(z: number): void {
+      const X = (this.rand() - 0.5) * 600;
+      const m = this.mission.targets;
+      m.push(target('city', X, z, this.rand), target('city', X + 10, z + 7, this.rand), target('city', X - 9, z + 10, this.rand));
+      m.push(target('sam', X + 14, z - 6, this.rand), target('flak', X - 14, z - 8, this.rand), target('flak', X + 6, z + 16, this.rand));
+      for (let i = 0; i < 2; i++) {
+        m.push({
+          kind: 'ally', X: X + 450, Z: z, h: 90, alive: true, points: KINDS.ally.points, hp: 1, cool: 0,
+          faction: 'ally', orbit: { cx: X, cz: z, r: 450, ang: i * Math.PI, w: 0.12 }, age: 0,
+        });
       }
     }
 
@@ -757,7 +845,9 @@ namespace PA {
     // Where a target is moving to, per second (vehicles on the road, fighters, allies on their orbit).
     private targetVelocity(t: Target): [number, number, number] {
       if (t.faction === 'enemy' && t.vH !== undefined) {
-        return [Math.sin(t.vH) * FIGHTER_SPEED, 0, Math.cos(t.vH) * FIGHTER_SPEED];
+        // A fighter also climbs or sinks toward the plane's height (see flyFighter).
+        const climb = (this.plane.h + 10 - (t.h ?? 0)) * 0.15;
+        return [Math.sin(t.vH) * FIGHTER_SPEED, climb, Math.cos(t.vH) * FIGHTER_SPEED];
       }
       if (t.faction === 'ally' && t.orbit) {
         const o = t.orbit;
@@ -884,11 +974,21 @@ namespace PA {
         let hit = false;
         for (const t of this.mission.targets) {
           if (!t.alive) continue;
+          // An ally's bullet only hits enemies; the player's never hit allies.
+          if (s.friendly ? t.faction !== 'enemy' : t.faction === 'ally') continue;
           const info = KINDS[t.kind];
           const dx = s.X - t.X, dz = s.Z - t.Z;
           const tg = altOf(t);
-          if (dx * dx + dz * dz < info.r * info.r && s.h >= tg && s.h <= tg + info.height) {
-            this.hitTarget(t, 1, tg);
+          // Flying things get a few metres of vertical room: a dogfight is hard to aim exactly.
+          const slack = t.h !== undefined ? 3 : 0;
+          if (dx * dx + dz * dz < info.r * info.r && s.h >= tg - slack && s.h <= tg + info.height + slack) {
+            if (s.friendly) {
+              t.alive = false;
+              this.explode(t.X, tg + 1, t.Z, 10);
+              this.onSound('boom');
+            } else {
+              this.hitTarget(t, 1, tg);
+            }
             hit = true;
             break;
           }
@@ -948,6 +1048,11 @@ namespace PA {
       const left = m.targets.filter(t => t.alive && t.faction === undefined).length;
       if (left < KEEP_AHEAD) {
         m.targets.push(...spawnTargets(this.rand, this.plane.Z + 240, 6));
+      }
+      // Bases come up ahead of the plane, one every BASE_SPACING metres of route.
+      while (this.plane.Z + 900 > this.nextBaseZ) {
+        this.spawnBase(this.nextBaseZ);
+        this.nextBaseZ += BASE_SPACING;
       }
     }
 

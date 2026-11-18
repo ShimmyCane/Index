@@ -61,8 +61,36 @@ namespace PA {
       ctx.restore();
     }
 
+    // A flying thing is a triangle with its sharp point on its heading, so you can read where it is going.
+    const tri = g.felix ? 9 : 6;
     for (const t of g.mission.targets) {
-      if (!t.alive) continue;
+      if (!t.alive || t.h === undefined) continue;
+      const q = place(t.X, t.Z);
+      if (!q) continue;
+      let heading: number;
+      if (t.faction === 'enemy') heading = t.vH ?? 0;
+      else if (t.orbit) heading = Math.atan2(-Math.sin(t.orbit.ang), Math.cos(t.orbit.ang));
+      else heading = 0;
+      // Turn the heading into a direction on the radar (up is the plane's nose).
+      const rel = heading - p.yaw;
+      const dx2 = Math.sin(rel), dy2 = -Math.cos(rel);
+      const px = q[0], py = q[1];
+      const tipX = px + dx2 * tri, tipY = py + dy2 * tri;
+      const bx = px - dx2 * tri * 0.6, by = py - dy2 * tri * 0.6;
+      const perpX = -dy2 * tri * 0.55, perpY = dx2 * tri * 0.55;
+      ctx.fillStyle = t.faction === 'enemy' ? '#ff3b3b' : '#3d8bff';
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(tipX, tipY);
+      ctx.lineTo(bx + perpX, by + perpY);
+      ctx.lineTo(bx - perpX, by - perpY);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+    for (const t of g.mission.targets) {
+      if (!t.alive || t.h !== undefined) continue;
       const q = place(t.X, t.Z);
       if (!q) continue;
       const info = KINDS[t.kind];

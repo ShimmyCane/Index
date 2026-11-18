@@ -90,7 +90,7 @@ namespace PA {
     jet:        { r: 3.0, height: 2.5, hp: 1, points: 150, group: 'airfield' },
     ship:       { r: 6.0, height: 3.0, hp: 4, points: 250, group: 'port' },
     rail:       { r: 2.5, height: 2.5, hp: 1, points: 40, group: 'rail' },
-    fighter:    { r: 3.0, height: 2.5, hp: 1, points: 200, group: 'air', gun: { range: 380, cool: 2.6, speed: 230 } },
+    fighter:    { r: 4.5, height: 3.0, hp: 1, points: 200, group: 'air', gun: { range: 380, cool: 2.6, speed: 230 } },
     ally:       { r: 3.0, height: 2.5, hp: 1, points: -300, group: 'air' },
   };
 
@@ -120,6 +120,8 @@ namespace PA {
     orbit?: { cx: number; cz: number; r: number; ang: number; w: number };
     faction?: 'enemy' | 'ally';
     age?: number;
+    state?: 'approach' | 'attack' | 'break';   // enemy fighters: the phase of their flight
+    stateT?: number;                           // seconds in that phase
   }
 
   export interface Hoop {
@@ -136,7 +138,7 @@ namespace PA {
     hoops: Hoop[];
   }
 
-  function target(kind: string, X: number, Z: number, rand: () => number): Target {
+  export function target(kind: string, X: number, Z: number, rand: () => number): Target {
     const info = KINDS[kind];
     return {
       kind, X, Z, alive: true, points: info.points, hp: info.hp,

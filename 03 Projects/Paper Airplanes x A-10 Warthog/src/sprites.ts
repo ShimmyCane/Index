@@ -53,6 +53,37 @@ namespace PA {
     return canvas;
   }
 
+  // Shade a hex colour toward dark (f = 1 is unchanged).
+  export function shadeHex(hex: string, f: number): string {
+    const n = parseInt(hex.slice(1), 16);
+    const ch = (v: number) => Math.round(v * f);
+    const r = ch((n >> 16) & 255), g = ch((n >> 8) & 255), b = ch(n & 255);
+    return '#' + ((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1);
+  }
+
+  const stackCache: { [name: string]: HTMLCanvasElement } = {};
+
+  // The same sprite built as a stack: four slices, each one pixel lower than the one above,
+  // the lower slices darker. The top slice is the full colour, so the edge of the stack shows.
+  export function stackedSprite(name: string, layers = 4, step = 1): HTMLCanvasElement {
+    if (stackCache[name]) return stackCache[name];
+    const paint = PAINT[name];
+    if (!paint) throw new Error('no sprite named ' + name);
+    const base = new Painter();
+    paint(base);
+    const stacked: Paint = g => {
+      for (let l = 0; l < layers; l++) {
+        const top = l === layers - 1;
+        const f = top ? 1 : 0.45 + 0.45 * (l / (layers - 1));
+        const dy = (layers - 1 - l) * step;
+        for (const o of base.ops) g.r(o.x, o.y + dy, o.w, o.h, shadeHex(o.c, f));
+      }
+    };
+    const s = buildSprite(stacked);
+    stackCache[name] = s;
+    return s;
+  }
+
   const cache: { [name: string]: HTMLCanvasElement } = {};
 
   // Built the first time it is needed (so the file also loads without a page).
