@@ -25,13 +25,14 @@ When to use
 - For many settings (about ten or more), use a full-height side sheet instead (Chinese Character Sudoku: `right:0; top:0; bottom:0; width:min(420px,100vw)`).
 - Include a close button (✖, 48 px or more) in the header.
 - Every control is 48 px high or more. Labels are plain words, with a short sub-hint where the choice needs one ("放对马上变绿", "关：看不到淡淡的字").
-- Order, top to bottom. Leave out any section the app doesn't need:
-  1. **Mode or game switch.** Links with hash routes (`#v1`, `#v2`, `#v3`) so a mode can be bookmarked. Remember the last choice.
-  2. **Options.** Segmented buttons (see §3). Rows that belong to one mode are hidden with `data-games="grid lines"`.
-  3. **Pages.** Links to the app's other pages, leaving out the current page (Adventure: Story / World / Under the hood / All projects).
-  4. **Database.** Status line, Sign in (only when signed out), Sync, Check database, Sign out.
-  5. **Show errors** checkbox (always last among the controls).
-  6. **Info.** Version, changelog, data counts. Keep it at the very bottom.
+- Order, top to bottom (the standard for every ⚙️ panel). Leave out any section the app doesn't need, but keep the order of the rest:
+  1. **Quick description.** One or two plain sentences: what the thing is and how to use the panel. No header box.
+  2. **Controls (toggles).** Everything that changes how the game is played or steered: the mode or game switch (hash routes such as `#v1`, `#v2`, remembered), the plane or character, difficulty, the camera view, the steering method, reload buttons with their hint, and "New …" to start again. Segmented buttons (see §3).
+  3. **Other toggles.** Everything else that is switched or tuned, each as a nested group in this order where it applies: safety, display, sound (with its sliders), opponents, pages (links to the app's other pages, leaving out the current one), the **family database** (sign-in, check, sign out), and last **Show errors** (a checkbox).
+  4. **Notes.** The notes-for-improvement box (see `feedback_notes.md`), with its identifier index nested inside.
+  5. **Version.** The app's version, and the changelog if there is one.
+  6. **Archived.** Links to earlier versions (for example V1), only when there are any.
+  7. **About.** How it is built, the credits and the licence notes, last.
 - Anything hidden from the screen must stay reachable here. Never remove a feature just to save space (`ipad_website.md`).
 - Say which settings restart the current item. Changing a setting that changes what is shown (for example, the tracing guide) starts that character again. Say so in the row's hint.
 
