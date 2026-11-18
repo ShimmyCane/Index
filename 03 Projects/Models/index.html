@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>3-D models · front page</title>
+<style>
+  :root { --paper: #fbf6ea; --card: #fffdf7; --ink: #2b2a33; --ink-soft: #5d5a68; --sun: #ffe9a8; --sage: #2f5d50; --line: 2px; --radius: 14px; --gutter: 16px; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --paper: #1e1d24; --card: #27262f; --ink: #f1ead8; --ink-soft: #bdb8c8; --sun: #4a4220; }
+  }
+  :root[data-theme="dark"] { --paper: #1e1d24; --card: #27262f; --ink: #f1ead8; --ink-soft: #bdb8c8; --sun: #4a4220; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  body { padding: var(--gutter); overflow-x: hidden; }
+  header { max-width: 980px; margin: 0 auto 16px; }
+  h1 { margin: 0; font-size: 24px; }
+  .lead { color: var(--ink-soft); margin: 4px 0 0; }
+  .grid { max-width: 980px; margin: 0 auto; display: grid; gap: 14px; grid-template-columns: 1fr; }
+  @media (min-width: 720px) { .grid { grid-template-columns: 1fr 1fr; } }
+  .card { background: var(--card); border: var(--line) solid var(--ink); border-radius: var(--radius); padding: 14px; box-shadow: 0 3px 0 var(--ink); display: grid; gap: 8px; align-content: start; }
+  .card h2 { margin: 0; font-size: 18px; }
+  .card p { margin: 0; color: var(--ink-soft); font-size: 15px; }
+  .tag { justify-self: start; font-size: 13px; border: var(--line) solid var(--ink); border-radius: 999px; padding: 2px 10px; background: var(--sun); }
+  a.btn { justify-self: start; min-height: 48px; display: inline-flex; align-items: center; padding: 8px 16px; border: var(--line) solid var(--ink); border-radius: 12px; background: var(--sun); color: var(--ink); font-weight: 700; text-decoration: none; box-shadow: 0 3px 0 var(--ink); }
+  a.btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+  .note { max-width: 980px; margin: 16px auto 0; font-size: 14px; color: var(--ink-soft); }
+  code { background: var(--paper); padding: 0 4px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>3-D models · front page</h1>
+  <p class="lead">Every 3-D model in the nursery that can be opened as a page. Each link opens the model in the same window.</p>
+</header>
+
+<main class="grid">
+  <article class="card">
+    <span class="tag">Studio design · 5 versions</span>
+    <h2>Salmon Leap</h2>
+    <p>A bronze statue of an Atlantic salmon leaping up. Five versions: narrative and massing, refined set-up, concept and details, details, the ground. Pick a version in the page.</p>
+    <a class="btn" href="../Salmon%20Leap/index.html">Open Salmon Leap</a>
+  </article>
+
+  <article class="card">
+    <span class="tag">Studio design · draft</span>
+    <h2>Make 3D x Construct · camp move</h2>
+    <p>A Southern Cheyenne camp move on a river terrace, in a diorama: lofted horses and people, a story with sources. A draft for consultation.</p>
+    <a class="btn" href="../Make-3D%20x%20Construct/studio.html?src=sample">Open the camp studio</a>
+  </article>
+
+  <article class="card">
+    <span class="tag">Archived</span>
+    <h2>Oklahoma diorama V1</h2>
+    <p>The earlier state of the camp move (round 6), kept as it was. Read only.</p>
+    <a class="btn" href="../Make-3D%20x%20Construct/archive/Oklahoma%20diorama%20V1/index.html">Open the archive</a>
+  </article>
+
+  <article class="card">
+    <span class="tag">Project home</span>
+    <h2>Make 3D x Construct · home</h2>
+    <p>The project's home page: its projects, the library saved on this device, and cloud sign-in.</p>
+    <a class="btn" href="../Make-3D%20x%20Construct/index.html">Open the project home</a>
+  </article>
+
+  <article class="card">
+    <span class="tag">Model</span>
+    <h2>Generate Clouds</h2>
+    <p>A volumetric sky from weather data for any place and time, with a time lapse and a 360° view.</p>
+    <a class="btn" href="../Generate%20Clouds/index.html">Open Generate Clouds</a>
+  </article>
+
+  <article class="card">
+    <span class="tag">Model</span>
+    <h2>Mind Palace · build</h2>
+    <p>A memory palace drawn with Gaussian splats: rooms, a search, and practice in two kinds of recall.</p>
+    <a class="btn" href="../Mind%20Palace/build.html">Open Mind Palace</a>
+  </article>
+</main>
+
+<p class="note">These links open the pages from this repository. If a page does not open, the repository must be opened locally, or GitHub Pages must be turned on for the nursery. The GitHub file view shows the source code, not the running page.</p>
+</body>
+</html>
