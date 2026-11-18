@@ -140,8 +140,16 @@
     if (pKind && covLow < 0.05) { covLow = 0.5; }                 // something has to carry the rain
     var snowLine = pKind === 2 ? -1 : (wx.frz != null ? wx.frz : Math.max(wx.t, 0) / 6.5) + 0.2;
     var arid = clamp((52 - wx.rh) / 40, 0, 1);
-    var waveM = clamp(0.022 * wx.wind.s * wx.wind.s, 0.15, 5);    // significant wave height, metres
-    var v10 = vel(wx.wind), windHeading = Math.atan2(v10[1], v10[0]);
+    // Sea state: the marine model when it has this spot (waves, period, direction, tide), otherwise the wind alone (0.022 x wind squared).
+    var mar = (wx.marine && wx.marine.wave != null && !ov.noMarine) ? wx.marine : null;
+    var waveM = mar ? clamp(mar.wave, 0.05, 14) : clamp(0.022 * wx.wind.s * wx.wind.s, 0.15, 5);    // significant wave height, metres
+    var seaFrom = wx.wind.d;
+    if (mar) { var sw = mar.swell && mar.swell.h != null ? mar.swell.h : 0, ww = mar.windwave && mar.windwave.h != null ? mar.windwave.h : 0;
+      seaFrom = (sw >= ww && mar.swell && mar.swell.dir != null) ? mar.swell.dir : (mar.dir != null ? mar.dir : wx.wind.d); }
+    var seaPeriod = mar && mar.period ? mar.period : (mar && mar.swell && mar.swell.period ? mar.swell.period : 0);
+    var seaFreq = seaPeriod > 1 ? 2 * Math.PI / (1.56 * seaPeriod * seaPeriod) : 0;          // radians per metre: deep-water wavelength = 1.56 T squared
+    var tideM = mar && mar.tide != null ? mar.tide : 0;
+    var v10 = vel({ s: 1, d: seaFrom }), windHeading = Math.atan2(v10[1], v10[0]);
 
     var flashy = lowKey === 'cumulonimbus' || !!ov.lightning;
 
@@ -159,7 +167,12 @@
     if (pKind) R.push({ icon: pKind === 2 ? '🌨️' : '🌧️', head: ['', 'Rain', 'Snow', 'Sleet'][pKind] + ' is drawn', text: 'Why this kind: ' + pWhy + '. It falls under ' + (pShare >= 1 ? 'the whole layer' : 'the thicker parts of the cloud') + ', slanted by the wind.' });
     if (cmix > 0) R.push({ icon: '🪶', head: 'High mix', text: 'Patches of small ripples (cirrocumulus) sit among the cirrus streaks.' });
     if (ov.feature) R.push({ icon: '🌪️', head: 'Made-up: ' + ({ tornado: 'tornado', waterspout: 'waterspout', microburst: 'microburst' })[ov.feature.kind], text: 'Placed by hand from the Weather maker. No weather feed reports these, so this one is drawn from how they are described, not from data.' });
-    R.push({ icon: '🌊', head: 'Sea', text: 'Wind ' + wx.wind.s.toFixed(0) + ' m/s at the ground gives waves about ' + waveM.toFixed(1) + ' m high (0.022 × wind²).' });
+    function f1(x) { return x == null ? '?' : x.toFixed(1); }
+    if (mar) R.push({ icon: '🌊', head: 'Sea (marine model)', text: 'Waves ' + f1(mar.wave) + ' m' + (mar.period ? ', one every ' + Math.round(mar.period) + ' s, about ' + Math.round(1.56 * mar.period * mar.period) + ' m apart' : '') +
+      (mar.dir != null ? ', coming from ' + GC.compass(mar.dir) : '') + '. Swell ' + f1(mar.swell && mar.swell.h) + ' m' + (mar.swell && mar.swell.dir != null ? ' from ' + GC.compass(mar.swell.dir) : '') + ', wind waves ' + f1(mar.windwave && mar.windwave.h) + ' m. ' +
+      (mar.tide != null ? 'Tide ' + (mar.tide >= 0 ? '+' : '') + mar.tide.toFixed(2) + ' m against mean sea level: the water is drawn that much higher or lower. ' : 'No tide value for this spot; the water stays at mean sea level. ') +
+      'One wave train is drawn (' + (seaFrom === wx.wind.d ? 'from the wind' : (GC.compass(seaFrom) + ', the stronger of swell and wind waves')) + '). Model cells are a few km wide, so a small bay is not told apart from open water.' });
+    else R.push({ icon: '🌊', head: 'Sea', text: 'Wind ' + wx.wind.s.toFixed(0) + ' m/s at the ground gives waves about ' + waveM.toFixed(1) + ' m high (0.022 × wind²). No marine-model data here (inland, or not loaded), so tide and swell are not drawn.' });
     R.push({ icon: '🌡️', head: 'Air', text: wx.t.toFixed(0) + '°C, humidity ' + Math.round(wx.rh) + '%' + (wx.frz != null ? ', freezing level ' + km(wx.frz) : '') + '.' });
 
     var model = {
@@ -196,7 +209,7 @@
         C: [highH, ch > 0.02 ? ch : 0, highT.stretch, highT.opacity], Cw: [vHigh[0] * simT, vHigh[1] * simT, highT.scale, Math.atan2(vHigh[1], vHigh[0])],
         regionMix: (ov.low == null && ov.mid == null && ov.high == null && !ov.noRegion) ? 1 : 0, midOn: midOn,
         vary: vary, cmix: cmix, precip: [pKind, pKind ? pStrength : 0, pShare, clamp(wx.wind.s / 12, 0, 1.2)],
-        terr: [snowLine, arid], sea: [waveM / 1000, windHeading, wx.wind.s],
+        terr: [snowLine, arid], sea: [waveM / 1000, windHeading, wx.wind.s, seaFreq, tideM / 1000],
         skyZen: GC.Atmo.sky(0.002, [0, 1, 0], s, hz, tint), skyHor: hor,
         seed: seed, evolve: simT / 900 * 0.55, exposure: clamp(0.26 / scene, 0.35, 110), night: night, rain: rain, flashy: flashy
       };

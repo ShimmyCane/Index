@@ -25,8 +25,9 @@
   function add() {
     var box = GC.$('noteText'), text = box.value.trim();
     if (!text) return;
+    var ctx = (GC.Notes && GC.Notes.contextNow && GC.Notes.contextNow()) || where;
     notes.push({ id: 'n-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7), at: new Date().toISOString(), status: 'open',
-      text: text, where: { page: where.page, item: where.item, label: where.label }, version: GC.VERSION });
+      text: text, where: { page: ctx.page || where.page, item: ctx.item, label: ctx.label }, version: GC.VERSION });
     box.value = ''; save(); render();
     if (GC.Cloud) GC.Cloud.noteAdded();
   }

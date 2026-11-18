@@ -49,12 +49,13 @@
       uSteps: { value: 44 }, uLSteps: { value: 4 }, uMS: { value: 0.28 }, uPix: { value: 0.002 }, uFar: { value: 260 }, uFineK: { value: 0.5 },
       uTerrain: { value: null }, uRegion: { value: null }, uCamXZ: { value: new THREE.Vector2() }, uSkyZen: v3(), uSkyHor: v3(), uBoltSeed: { value: 1 },
       uTerr: v4(), uCity: { value: new THREE.Vector2() }, uTSteps: { value: 64 }, uTGrow: { value: 0.085 }, uSea: v4(), uReg: v4(), uVar: { value: new THREE.Vector2(0, 1) },
-      uCmix: { value: 0 }, uPrecip: v4(), uFeat: v4(), uFeatB: v4()
+      uCmix: { value: 0 }, uPrecip: v4(), uFeat: v4(), uFeatB: v4(),
+      uTerrainF: { value: null }, uWorld: { value: null }, uRegion2: { value: null }, uFine: v4(), uReg2: v4(), uSea2: v4(), uWorldP: v3()
     };
     mat = new THREE.ShaderMaterial({ uniforms: U, vertexShader: GC.VERT, fragmentShader: GC.FRAG, depthTest: false, depthWrite: false });
     scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
     canvas.addEventListener('webglcontextlost', function (e) { e.preventDefault(); R.ok = false; GC.logError('The 3-D view was lost (graphics memory). Reload the page.'); });
-    R.setTerrain(GC.Terrain); R.setRegion(null);
+    R.setTerrain(GC.Terrain); R.setTerrainFine(null); R.setRegion(null); R.setRegion2(null); R.setWorld(window.GC_WORLD);
     R.ok = true;
     R.setQuality(GC.settings.quality);
     return true;
@@ -67,7 +68,33 @@
     if (terrTex) terrTex.dispose();
     terrTex = new THREE.DataTexture(Tn.tex, Tn.T, Tn.T, THREE.RGBAFormat, THREE.HalfFloatType);
     terrTex.wrapS = terrTex.wrapT = THREE.ClampToEdgeWrapping; terrTex.minFilter = terrTex.magFilter = THREE.LinearFilter; terrTex.generateMipmaps = false; terrTex.needsUpdate = true;
-    U.uTerrain.value = terrTex; R.terrMax = Tn.max; R.terrSpan = Tn.SPAN;
+    U.uTerrain.value = terrTex; R.terrMax = Tn.max * R.exag; R.terrSpan = Tn.SPAN;
+  };
+  // The fine ground map around the place (about 11 km across), or null for none.
+  R.cloudsOn = 1; R.fineSpan = 0; R.exag = 1; R.worldOn = 0; R.region2On = 0; R.place = { lat: 0, lon: 0 };
+  function blank() { var t = new THREE.DataTexture(new Uint8Array([0, 0, 0, 255]), 1, 1, THREE.RGBAFormat); t.needsUpdate = true; return t; }
+  var fineTex = null;
+  R.setTerrainFine = function (Tn) {
+    if (fineTex) { fineTex.dispose(); fineTex = null; }
+    if (!Tn || !Tn.fineTex) { U.uTerrainF.value = blank(); R.fineSpan = 0; return; }
+    fineTex = new THREE.DataTexture(Tn.fineTex, Tn.T, Tn.T, THREE.RGBAFormat, THREE.HalfFloatType);
+    fineTex.wrapS = fineTex.wrapT = THREE.ClampToEdgeWrapping; fineTex.minFilter = fineTex.magFilter = THREE.LinearFilter; fineTex.generateMipmaps = false; fineTex.needsUpdate = true;
+    U.uTerrainF.value = fineTex; R.fineSpan = Tn.fineSpan; R.terrMax = Math.max(R.terrMax, Tn.fineMax * R.exag);
+  };
+  // The whole Earth picture (a data address, so it also works from a file).
+  var worldTex = null;
+  R.setWorld = function (uri) {
+    U.uWorld.value = blank();
+    if (!uri) return;
+    var img = new Image();
+    img.onload = function () {
+      worldTex = new THREE.Texture(img);
+      worldTex.wrapS = THREE.RepeatWrapping; worldTex.wrapT = THREE.ClampToEdgeWrapping;
+      worldTex.minFilter = worldTex.magFilter = THREE.LinearFilter; worldTex.generateMipmaps = false; worldTex.needsUpdate = true;
+      U.uWorld.value = worldTex; R.worldOn = 1; if (R.onWorld) R.onWorld();
+    };
+    img.onerror = function () { GC.logError('The world map picture could not be decoded. The far ground is plain.'); };
+    img.src = uri;
   };
   // The region: 5 x 5 cloud cover (low, mid, high) around the place, or null for none.
   R.setRegion = function (cells) {
@@ -77,6 +104,17 @@
     regTex = new THREE.DataTexture(data, n, n, THREE.RGBAFormat);
     regTex.wrapS = regTex.wrapT = THREE.ClampToEdgeWrapping; regTex.minFilter = regTex.magFilter = THREE.LinearFilter; regTex.generateMipmaps = false; regTex.needsUpdate = true;
     U.uRegion.value = regTex; R.regionOn = cells ? 1 : 0;
+  };
+
+  // The wide region: 9 x 9 cloud cover, 250 km apart (2000 km across), or null.
+  var reg2Tex = null;
+  R.setRegion2 = function (cells) {
+    var n = 9, data = new Uint8Array(n * n * 4);
+    for (var i = 0; i < n * n; i++) { var c = cells ? cells[i] : [0, 0, 0]; data[i * 4] = Math.round(c[0] * 255); data[i * 4 + 1] = Math.round(c[1] * 255); data[i * 4 + 2] = Math.round(c[2] * 255); data[i * 4 + 3] = 255; }
+    if (reg2Tex) reg2Tex.dispose();
+    reg2Tex = new THREE.DataTexture(data, n, n, THREE.RGBAFormat);
+    reg2Tex.wrapS = reg2Tex.wrapT = THREE.ClampToEdgeWrapping; reg2Tex.minFilter = reg2Tex.magFilter = THREE.LinearFilter; reg2Tex.generateMipmaps = false; reg2Tex.needsUpdate = true;
+    U.uRegion2.value = reg2Tex; R.region2On = cells ? 1 : 0;
   };
 
   R.setQuality = function (q) {
@@ -114,10 +152,15 @@
     s3(U.uSeed, F.seed); U.uEvolve.value = F.evolve; U.uExposure.value = F.exposure; U.uNight.value = F.night; U.uRain.value = F.rain; U.uMS.value = F.ms;
     U.uCamXZ.value.set(R.cam.x, R.cam.z); s3(U.uSkyZen, F.skyZen); s3(U.uSkyHor, F.skyHor);
     U.uTerr.value.set(R.terrSpan, R.terrMax, F.terr[0], F.terr[1]); U.uCity.value.set(R.city, 0);
+    U.uFine.value.set(R.fineSpan, R.exag, 0, 0); U.uSea2.value.set(F.sea[3] || 0, F.sea[4] || 0, 0, 0);
+    U.uReg2.value.set(F.regionMix * R.region2On, 1125, 0, 0);
+    var lat0 = GC.clamp(R.place.lat - R.cam.z / 111.19, -89.9, 89.9), lon0 = R.place.lon + R.cam.x / (111.19 * Math.max(Math.cos(GC.rad(R.place.lat)), 0.05));
+    U.uWorldP.value.set(GC.rad(lat0), GC.rad(lon0), R.worldOn);
     U.uSea.value.set(F.sea[0], R.clock, F.sea[1], F.sea[2]);
     // regional data is used unless the cover was set by hand; far-away variety always
     U.uReg.value.set(F.regionMix * R.regionOn, 250, 1, 0);
     if (F.regionMix * R.regionOn > 0) { U.uL0a.value.z = Math.max(U.uL0a.value.z, 0.004); U.uL1a.value.z = Math.max(U.uL1a.value.z, F.L1a[2] > 0 || F.midOn ? 0.004 : 0); U.uC.value.y = Math.max(U.uC.value.y, 0.004); }
+    if (R.cloudsOn === 0) { U.uL0a.value.z = 0; U.uL1a.value.z = 0; U.uC.value.y = 0; U.uReg.value.x = 0; U.uReg2.value.x = 0; }      // clouds hidden by the setting (last, so nothing turns them back on)
     U.uVar.value.set(F.vary[0], F.vary[1]); U.uCmix.value = F.cmix;
     U.uPrecip.value.set(F.precip[0], F.precip[1], F.precip[2], F.precip[3]);
     var ft = R.feature;

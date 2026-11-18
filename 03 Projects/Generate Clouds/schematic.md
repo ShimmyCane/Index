@@ -2,7 +2,7 @@
 
 **Track: B. Studio design** (a 3-D sky study and backdrop maker for renderings). Palette: sky-blue ink on cloud-white paper, because the subject is the sky. Panels collapsible, open on a large screen, closed on a phone.
 
-Status: MVP 0.5.0 (2026-11-17). Headless-tested with made-up weather replies. Not yet run against the live weather service, and not yet on an iPad.
+Status: MVP 0.6.0 (2026-11-18). Headless-tested with made-up weather replies. Not yet run against the live weather service, and not yet on an iPad.
 
 ## Purpose
 
@@ -31,7 +31,8 @@ Pick any point on Earth and any moment. The page reads the weather for that poin
 | `js/skymodel.js` | Weather numbers → cloud types, heights, amounts, wind, haze, and the plain-words reading |
 | `js/shader.js` | The sky shader (air, two cloud volumes, cirrus, sun, stars) |
 | `js/renderer.js` | three.js set-up, camera, quality, tiled picture export |
-| `js/terrain.js` | The height map: loading, smoothing, what kind of spot it is, where the water is |
+| `js/terrain.js` | The height maps (coarse and fine): loading, smoothing, what kind of spot it is, where the water is |
+| `js/world.js` | The Earth picture (data address, about 360 KB). Generated: do not edit |
 | `js/map.js` | The map panel (tiles, pin, markers), no library |
 | `js/audio.js` | Thunder, made with Web Audio |
 | `js/config.js` | The database address and the publishable key (nothing else) |
@@ -105,6 +106,17 @@ The planet has always been a sphere of 6371 km in the model. From the ground the
 - A funnel hangs from a lowered wall cloud, leans and turns, with dust at the ground or spray over water (a tornado placed over water becomes a waterspout). A microburst is a rain shaft that flares at the ground with a curl at its edge. Placing one puts a storm cloud above it.
 - These three are **drawn from descriptions, not simulated**: no wind field, no damage, no size taken from data. The reading panel labels them "Made-up".
 
+## Round 6 (0.6.0): the real Earth, finer ground, the sea from data (from notes v1)
+
+- **The whole Earth** (`js/world.js`): NASA Blue Marble, 2048 × 1024, embedded as a data address (a plain picture file would be blocked from the 3-D view when the page is opened from a file). The ground beyond the 120 km local map is this picture, lit by the sun at its true angle, with land and water told apart by colour; the local map fades into it between 85% and 100% of its edge. From space and from high up the continents and oceans are where they really are. Credit: NASA Visible Earth, via Wikimedia Commons (**CC BY-SA 3.0**; the NASA original is public domain). The credit is in ⚙️.
+- **Finer ground:** a second height map, 20 × 20 points 0.6 km apart (about 11 km across, shown at about 90 m), on top of the coarse one near the place. 4 more elevation calls per place, saved on the device. **Land relief** in ⚙️ (True, 2×, 4×) multiplies land heights; the sea is not changed; the camera floor follows it.
+- **The sea from data:** for coast and open-water spots, a call to the Open-Meteo marine service gives wave height, period, direction, swell and wind-wave parts, and (in a separate call, so a refusal costs only the tide) sea level against the mean. Wave period sets the spacing of the waves (1.56 × T² metres, deep water); direction sets which way they run; the tide raises or lowers the water. One wave train is drawn: the stronger of swell and wind waves. Without data the wind-only rule is used and the reading says so. Not simulated: breaking waves shaped by the seabed, currents, a small bay told apart from open water (model cells are a few km wide).
+- **Camera:** over water it stays at least 2 m above the highest crest plus the tide.
+- **Wide weather:** above 15 km, one more call gives low, mid and high cover for 81 places 250 km apart (2000 km across). It joins the close 5 × 5 grid and fades back to the place's own value beyond 2000 km. Far clouds use bigger and bigger shapes (and finally the average transparency) so a pixel wider than a cloud cell does not show grain.
+- **⚙️:** Bottom bar (Show / Hide), Clouds (Show / Hide, to look at the land and sea underneath), Land relief.
+- **Notes:** each note carries the camera height above sea level, the ground height under the camera, and "over water" when it is.
+- **Not done (needs decisions, see `convo v0.8`):** stars and constellations; real ground cover near the camera (forest, water, sand, city).
+
 ## Orbit (0.3.0)
 
 - **Orbit** chip (beside the height chips): the camera circles a centre point in the clouds and always faces it. The centre is where the view was pointing, at the middle height of the low cloud. From the ground it first lifts the camera above the low cloud.
@@ -134,7 +146,8 @@ Dates more than 85 days back use the archive service (no upper winds, CAPE or ai
 ## Database (0.5.0): notes go to the studio database
 
 - **Which database:** the Architecture project (studio, Track B; `xabgankckrcuhcgdolrg`), owner only, the same one Critique Detail uses. Table `gc_notes` (same columns as `dc_notes`: `id`, `text`, `page`, `item`, `label`, `version`, `status` open or done, `noted_at`). Registered in `table_index` under project "Generate Clouds".
-- **Security:** row-level security on, anon has no access, one policy that calls `public.platform_is_owner()`. No email or user id in the repo. Until the owner's row is in `platform_owners` (added by hand, never committed) no sign-in sees any rows; `platform_owners` had 0 rows when checked on 2026-11-17.
+- **Security:** row-level security on, anon has no access, one policy that calls `public.platform_is_owner()`: only accounts listed in `platform_owners` can read or write notes from the page. No email or user id in the repo. **Why not "any signed-in account":** sign-ups are open on this project (`disable_signup` is false, email provider on, confirmation required) and the publishable key is public, so anyone with an email address could create an account. Open sign-ups plus an any-account rule would let a stranger read the notes (each carries a place) and write to them. The project also holds a second, older account. Claude reads the notes through the database tool, which does not depend on this policy.
+- **Live state (read-only check 2026-11-18):** `gc_notes` exists (columns as designed, RLS on, one owner policy, anon has no grants, registered in `table_index`), 0 notes; `platform_owners` had 0 rows until the owner's account was added the same day (the sign-in account, matched by its address prefix and checked to be the only match).
 - **In the app (⚙️ → Studio database):** email and password, Sign in, Sync notes now, Sign out, Check the database. The password is never stored; a renewal token is kept on the device so you stay signed in (Sign out removes it). Publishable key only (`js/config.js`).
 - **Flow:** a note is saved on the device first. Signed in, it is also sent with its own id and time; later notes are sent at once. Sync sends what the database has not seen, then takes back done marks and notes from other devices. A ☁️ on a note means the database has it. Signed out or offline: "This device only", no error on load.
 - **What is sent:** only the notes, each with the place and moment it was about (so a note can say which sky). Not the weather, not the pictures.
@@ -152,6 +165,7 @@ Dates more than 85 days back use the archive service (no upper winds, CAPE or ai
 ## What it is not (known limits)
 
 - Not a photo of the real sky: amounts, heights, wind, sun and haze follow the data; each cloud's shape is generated.
+- The far ground is a 20 km-per-pixel picture: from 400 km up the continents are right, a city or a lake is not. Heights beyond the local map are flat. At night the far ground shows no city lights.
 - Three layers only. No moon. The ground is a coarse height map: no buildings, trees, roads, rivers or lakes, and coasts are only right to a few kilometres. Below-sea-level land reads as sea.
 - Tornadoes, waterspouts and microbursts are drawn from descriptions and placed by hand.
 - Close-up detail is generated noise, not a simulation of real turbulence; at the deepest zoom, edges show some grain.

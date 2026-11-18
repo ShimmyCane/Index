@@ -17,7 +17,8 @@
 ## Added in 0.3.0, to confirm on a real device
 - [ ] Orbit with real fingers: drag around, pinch closer; speed while turning.
 
-## Database link (0.5.0): Jimmy's steps, in order
+## Database link (0.5.0): DONE on 2026-11-18 (table pasted by Jimmy; owner row added by Claude after Jimmy's go-ahead). Kept for reference
+(Remaining: sign in on the page once so the notes on the device are sent; then read them.)
 (Owner row first or last, either works, but the page shows no rows until it exists. `supabase/000_owner_row.sql` has the ready-to-paste steps; the id you copy is never committed.)
 1. Architecture project → SQL Editor: paste `supabase/test_001_gc.sql` → Run. Expect an **error** starting `RESULT: tables=1 rls=1 policies=1 index=1 owner_sees=1 stranger_sees=0 stranger_insert=blocked anon=blocked done_check=blocked` (that error is the pass).
 2. Paste `supabase/001_gc_notes.sql` → Run. Expect "Success".
@@ -25,6 +26,16 @@
 4. If `owner_rows` is 0: paste `supabase/000_owner_row.sql`. Step A lists the newest accounts (copy yours), step B inserts it (uncomment the line and put the id in), step C should say `owner_rows = 1`. Never commit the id.
 5. Open the page → ⚙️ → Studio database → Sign in. Your notes on the device are sent and the status line says how many are in the database.
 6. Then ask me to read the notes (`/read-notes-and-update`): archive them as V1, review, update.
+
+## Round 6 (0.6.0): to confirm on a real device
+- [ ] The marine call returns waves and tide (the variable names were confirmed from documentation for waves; the tide name `sea_level_height_msl` was not).
+- [ ] The elevation service returns the fine map (4 more calls per place); the 81-place wide weather call works; neither was reachable from the build sandbox, so only mocked replies were tested.
+- [ ] The Earth picture looks right from space on the iPad, and the far ground is not too slow.
+- [ ] Mark notes done in the database after Jimmy confirms which (see `convo/notes v1.md`).
+
+## Next: stars and ground cover (waiting on `convo v0.8`)
+- [ ] Stars and constellations in the night sky (note 2).
+- [ ] Real ground cover near the camera (note 4).
 
 ## Next round (agreed 2026-11-17)
 - [ ] Read the saved notes (`/read-notes-and-update` style, table `gc_notes` in the Architecture project), copy them into `convo/notes v1.md` summarised as the V1 set, review them, and update. Mark notes done only after Jimmy confirms which.
