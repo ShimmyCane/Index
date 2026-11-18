@@ -4,11 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Generate Clouds</title>
-<link rel="stylesheet" href="css/style.css?v=0.6.1">
+<link rel="stylesheet" href="css/style.css?v=0.7.0">
 </head>
 <body data-panels="on">
 
-<canvas id="sky" aria-label="The generated sky. Drag to look around, pinch to zoom."></canvas>
+<canvas id="sky" aria-label="The generated sky. One finger pans the Earth, walks on the ground or orbits in the clouds; two fingers look around; pinch to zoom."></canvas>
+<canvas id="figures" aria-hidden="true"></canvas>
+<div class="pick" id="pick" role="status" hidden></div>
 <div id="noGl" class="noGl" hidden>This device could not start the 3-D view (WebGL). Try another browser.</div>
 
 <header class="top">
@@ -198,8 +200,9 @@
       <svg class="icoPlay" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M7 4 L20 12 L7 20 Z"/></svg>
       <svg class="icoPause" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="5" y="4" width="5" height="16"/><rect x="14" y="4" width="5" height="16"/></svg>
     </button>
-    <input type="range" id="time" min="0" max="900" step="1" value="0" aria-label="Time in the 15 minute time lapse">
-    <span class="clock" id="clock">00:00 / 15:00</span>
+    <span class="barLabel" id="barLabel">24 h</span>
+    <input type="range" id="time" min="0" max="86400" step="60" value="0" aria-label="Time in the time lapse">
+    <span class="clock" id="clock">00:00 · 0.0 h into 24</span>
   </div>
   <div class="barRow">
     <span class="barLabel" id="altLabel">✈️ 0 m</span>
@@ -211,6 +214,7 @@
       <button class="chip" data-alt="space" type="button">Space</button>
       <button class="chip" id="orbitBtn" type="button" aria-pressed="false">Orbit</button>
       <button class="chip" id="turnBtn" type="button" aria-pressed="false" hidden>Turn</button>
+      <button class="chip on" id="cloudChip" type="button" aria-pressed="true">☁️ Clouds on</button>
     </div>
   </div>
 </footer>
@@ -222,9 +226,22 @@
   <div class="setting"><label>Picture quality</label>
     <div class="seg" data-key="quality"><button data-v="low" type="button">Light</button><button data-v="med" type="button">Medium</button><button data-v="high" type="button">Fine</button></div>
     <p class="hint">Fine is slower. The view lowers its sharpness by itself while the time lapse plays, to stay smooth. When the view is still, it is redrawn sharp with fine detail; zoom in to see the wisps.</p></div>
-  <div class="setting"><label>Time lapse speed</label>
-    <div class="seg" data-key="speed"><button data-v="30" type="button">30×</button><button data-v="60" type="button">60×</button><button data-v="120" type="button">120×</button><button data-v="300" type="button">300×</button></div>
-    <p class="hint">60× plays 15 minutes of sky in 15 seconds.</p></div>
+  <div class="setting"><label>What plays</label>
+    <div class="seg" data-key="mode"><button data-v="lapse" type="button">24 hours of sky</button><button data-v="clip" type="button">Waves clip</button></div>
+    <p class="hint">24 hours runs from now (or the start you chose) through the next 24 hours, using the forecast: the sun, the clouds, the wind and the tide. Waves clip is a short loop of the sea and the clouds at a real speed.</p></div>
+  <div class="setting" id="lapseBox"><label>24 hours takes</label>
+    <div class="seg" data-key="lapse"><button data-v="60" type="button">1 min</button><button data-v="120" type="button">2 min</button><button data-v="240" type="button">4 min</button></div>
+    <p class="hint">Whole days pass in a minute at the quickest setting. The tide rises and falls along the time bar.</p></div>
+  <div class="setting" id="clipBox"><label>Clip length</label>
+    <div class="seg" data-key="clip"><button data-v="15" type="button">15 s</button><button data-v="30" type="button">30 s</button><button data-v="60" type="button">60 s</button></div>
+    <p class="hint">The clip repeats. The clouds jump back at each repeat; the waves keep rolling in.</p></div>
+  <div class="setting" id="waveBox"><label class="slider"><span>Waves speed <b id="waveV"></b></span><input type="range" id="waveSpeed" min="0" max="2" step="1" value="1" aria-label="Waves speed"></label>
+    <p class="hint">Snaps to 0.5×, 1× or 2×. The clouds and the waves both move at this speed.</p></div>
+  <div class="setting"><label>Constellations</label>
+    <div class="seg" data-key="figures"><button data-v="0" type="button">Off</button><button data-v="1" type="button">Lines and names</button></div>
+    <p class="hint">Faint lines and names of fifteen constellations, where they are in the sky now. The bright stars are always drawn at night.</p></div>
+  <div class="setting"><label>How to move</label>
+    <p class="hint">One finger: pans the Earth when high up, walks on the ground (the view moves like a map), and orbits in the clouds. Tap a cloud to orbit around it. Two fingers, or Shift-drag: look around. Pinch or scroll: zoom. When a drag ends, the centre of the view becomes the new place.</p></div>
   <div class="setting"><label>Play when a sky loads</label>
     <div class="seg" data-key="autoplay"><button data-v="1" type="button">Twice, then pause</button><button data-v="0" type="button">Off</button></div></div>
   <div class="setting"><label>Orbit: one full turn takes</label>
@@ -280,20 +297,23 @@
 <div id="errorsPanel" class="errorsPanel" hidden></div>
 
 <script src="js/vendor/three.min.js"></script>
-<script src="js/core.js?v=0.6.1"></script>
-<script src="js/sun.js?v=0.6.1"></script>
-<script src="js/presets.js?v=0.6.1"></script>
-<script src="js/weather.js?v=0.6.1"></script>
-<script src="js/skymodel.js?v=0.6.1"></script>
-<script src="js/terrain.js?v=0.6.1"></script>
-<script src="js/map.js?v=0.6.1"></script>
-<script src="js/audio.js?v=0.6.1"></script>
-<script src="js/shader.js?v=0.6.1"></script>
-<script src="js/renderer.js?v=0.6.1"></script>
-<script src="js/config.js?v=0.6.1"></script>
-<script src="js/world.js?v=0.6.1"></script>
-<script src="js/notes.js?v=0.6.1"></script>
-<script src="js/cloud.js?v=0.6.1"></script>
-<script src="js/app.js?v=0.6.1"></script>
+<script src="js/core.js?v=0.7.0"></script>
+<script src="js/sun.js?v=0.7.0"></script>
+<script src="js/presets.js?v=0.7.0"></script>
+<script src="js/weather.js?v=0.7.0"></script>
+<script src="js/skymodel.js?v=0.7.0"></script>
+<script src="js/terrain.js?v=0.7.0"></script>
+<script src="js/map.js?v=0.7.0"></script>
+<script src="js/audio.js?v=0.7.0"></script>
+<script src="js/shader.js?v=0.7.0"></script>
+<script src="js/renderer.js?v=0.7.0"></script>
+<script src="js/config.js?v=0.7.0"></script>
+<script src="js/world.js?v=0.7.0"></script>
+<script src="js/notes.js?v=0.7.0"></script>
+<script src="js/cloud.js?v=0.7.0"></script>
+<script src="js/stars_data.js?v=0.7.0"></script>
+<script src="js/stars.js?v=0.7.0"></script>
+<script src="js/osm.js?v=0.7.0"></script>
+<script src="js/app.js?v=0.7.0"></script>
 </body>
 </html>

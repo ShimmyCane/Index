@@ -22,6 +22,8 @@
   var CACHE_KEY = 'gc.wx.cache', CACHE_MAX = 10;
 
   W.status = { source: 'none', note: '' };
+  W.REGION = { N: 5, STEP: 100 };          // cloud grid near the place: 5 x 5, 100 km apart (500 km across)
+  W.REGION_WIDE = { N: 9, STEP: 250 };     // wide grid: 9 x 9, 250 km apart (2000 km across)
 
   function fetchJson(url, ms) {
     var ctl = ('AbortController' in window) ? new AbortController() : null;
@@ -123,34 +125,114 @@
     };
   }
 
-  function result(rec, local, source, note) {
-    var wx = pick(rec, local);
-    if (!wx) return null;
-    W.status = { source: source, note: note || '' };
-    return { wx: wx, localStr: local, offsetSec: rec.offset, utcMs: W.localToMs(local) - rec.offset * 1000, source: source, note: note || '', archive: !!rec.archive };
+  // ---------- the 24-hour timeline: forecast hours, the sea, the cloud grids, from a start hour ----------
+  var HOURS = 24;
+  function hourKey(ms) { return new Date(ms).toISOString().slice(0, 13) + ':00'; }          // GMT, as the marine and grid calls return it
+  function utcDay(ms) { return dayStr(ms); }
+  function startLocalOf(when, off) {
+    if (when && when.local) return when.local.slice(0, 13) + ':00';
+    return W.msToLocal(Math.floor(Date.now() / 3600000) * 3600000 + off * 1000).slice(0, 13) + ':00';
   }
-
-  // place {lat, lon}; when {now:true} or {local:'YYYY-MM-DDTHH:MM'}
-  W.load = function (place, when) {
-    var local = when && when.local ? when.local.slice(0, 16) : null;
-    var hit = findCached(place, local);
-    if (hit) {
-      var age = Date.now() - hit.rec.fetchedAt;
-      var past = (Date.now() - (W.localToMs(hit.local) - hit.rec.offset * 1000)) > 2 * 86400000;
-      if (age < 30 * 60000 || past) { var r0 = result(hit.rec, hit.local, 'live', age < 60000 ? '' : 'loaded earlier on this device'); if (r0) return Promise.resolve(r0); }
+  // Build the hours from one forecast record. Returns null when the record does not hold the whole 24 hours.
+  function hoursFrom(rec, startLocal, source, note) {
+    var base = W.localToMs(startLocal), hours = [];
+    for (var k = 0; k < HOURS; k++) {
+      var L = W.msToLocal(base + k * 3600000), wx = pick(rec, L);
+      if (!wx) return null;
+      hours.push({ localStr: L, utcMs: base - rec.offset * 1000 + k * 3600000, wx: wx });
     }
-    return fetchRecord(place, local).then(function (rec) {
-      var loc = local || W.msToLocal(Date.now() + rec.offset * 1000);
-      var r = result(rec, loc, 'live', '');
-      if (!r) throw new Error('That hour is not in the weather reply');
-      return r;
+    return { source: source, note: note || '', archive: !!rec.archive, offsetSec: rec.offset, startLocal: startLocal, startMs: base - rec.offset * 1000, hours: hours };
+  }
+  // Sea (waves and tide) for every hour: two calls, so a refusal of tide never costs the waves.
+  W.marineSeries = function (place, startMs) {
+    var none = []; for (var k = 0; k < HOURS; k++) none.push(null);
+    var ageDays = (Date.now() - startMs) / 86400000;
+    if (ageDays < -7 || ageDays > 85) return Promise.resolve(none);
+    var q = '?latitude=' + place.lat.toFixed(3) + '&longitude=' + place.lon.toFixed(3) + '&timezone=GMT&start_date=' + utcDay(startMs) + '&end_date=' + utcDay(startMs + 25 * 3600000) + '&hourly=';
+    function idx(j, name, key) { var k = j && j.hourly && j.hourly.time ? j.hourly.time.indexOf(key) : -1; return (k < 0 || !j.hourly[name]) ? null : (j.hourly[name][k] == null ? null : j.hourly[name][k]); }
+    var waves = fetchJson(HOSTS.marine + q + 'wave_height,wave_direction,wave_period,swell_wave_height,swell_wave_direction,swell_wave_period,wind_wave_height,wind_wave_direction,wind_wave_period,ocean_current_velocity,ocean_current_direction', 12000).catch(function (e) {
+      GC.logError('Sea data: ' + ((e && e.name === 'AbortError') ? 'no answer in time' : (e && e.message) || 'no connection')); return null; });
+    var tide = fetchJson(HOSTS.marine + q + 'sea_level_height_msl', 12000).catch(function () { return null; });
+    return Promise.all([waves, tide]).then(function (r) {
+      var w = r[0], t = r[1], out = [];
+      for (var i = 0; i < HOURS; i++) {
+        var key = hourKey(startMs + i * 3600000);
+        if (!w || idx(w, 'wave_height', key) === null) { out.push(null); continue; }
+        out.push({ wave: idx(w, 'wave_height', key), dir: idx(w, 'wave_direction', key), period: idx(w, 'wave_period', key),
+          swell: { h: idx(w, 'swell_wave_height', key), dir: idx(w, 'swell_wave_direction', key), period: idx(w, 'swell_wave_period', key) },
+          windwave: { h: idx(w, 'wind_wave_height', key), dir: idx(w, 'wind_wave_direction', key), period: idx(w, 'wind_wave_period', key) },
+          current: { v: idx(w, 'ocean_current_velocity', key), dir: idx(w, 'ocean_current_direction', key) },
+          tide: t ? idx(t, 'sea_level_height_msl', key) : null });
+      }
+      return out;
+    });
+  };
+  // Cloud cover on a grid (5 x 5 near the place, 9 x 9 wide) for every hour: one call. Returns cells[hour][point] = [low, mid, high].
+  W.gridSeries = function (place, startMs, spec) {
+    spec = spec || W.REGION;
+    var n = spec.N, half = (n - 1) / 2, kx = Math.max(111.2 * Math.cos(GC.rad(place.lat)), 5), lats = [], lons = [];
+    var ageDays = (Date.now() - startMs) / 86400000;
+    if (ageDays < -15) return Promise.resolve(null);
+    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) {
+      lats.push(GC.clamp(place.lat - (r - half) * spec.STEP / 111.2, -89, 89).toFixed(3));
+      lons.push((((place.lon + (c - half) * spec.STEP / kx + 540) % 360) - 180).toFixed(3));
+    }
+    var url = (ageDays > 85 ? HOSTS.archive : HOSTS.forecast) + '?latitude=' + lats.join(',') + '&longitude=' + lons.join(',') +
+      '&hourly=cloud_cover_low,cloud_cover_mid,cloud_cover_high&timezone=GMT&start_date=' + utcDay(startMs) + '&end_date=' + utcDay(startMs + 25 * 3600000);
+    return fetchJson(url, 14000).then(function (j) {
+      var list = Array.isArray(j) ? j : [j];
+      if (list.length !== n * n) throw new Error('Expected ' + (n * n) + ' places, got ' + list.length);
+      var cells = [];
+      for (var h = 0; h < HOURS; h++) {
+        var key = hourKey(startMs + h * 3600000);
+        cells.push(list.map(function (x) {
+          var k = x.hourly && x.hourly.time ? x.hourly.time.indexOf(key) : -1;
+          function v(name) { var a = x.hourly[name]; return (k < 0 || !a || a[k] == null) ? 0 : a[k] / 100; }
+          return k < 0 ? [0, 0, 0] : [v('cloud_cover_low'), v('cloud_cover_mid'), v('cloud_cover_high')];
+        }));
+      }
+      return cells;
+    }).catch(function (e) { GC.logError('Regional cover: ' + ((e && e.name === 'AbortError') ? 'no answer in time' : (e && e.message) || 'no connection')); return null; });
+  };
+  // A sample sky for 24 hours, used when the service cannot be reached.
+  function sampleTimeline(place, startLocal, why) {
+    var off = W.guessOffset(place.lon), base = W.localToMs(startLocal) - off * 1000, hours = [];
+    for (var k = 0; k < HOURS; k++) hours.push({ localStr: W.msToLocal(base + off * 1000 + k * 3600000), utcMs: base + k * 3600000, wx: JSON.parse(JSON.stringify(GC.SAMPLE_WX)) });
+    W.status = { source: 'sample', note: why + '. Showing a sample sky, not this place.' };
+    return { source: 'sample', note: W.status.note, archive: false, offsetSec: off, startLocal: startLocal, startMs: base, hours: hours, series: null };
+  }
+  // Attach the sea and the cloud grids to a timeline (each one optional).
+  function attachSeries(tl, place) {
+    return Promise.all([W.marineSeries(place, tl.startMs), W.gridSeries(place, tl.startMs, W.REGION)]).then(function (r) {
+      tl.hours.forEach(function (h, k) { h.wx.marine = r[0][k]; });
+      tl.series = { region: r[1] };
+      return tl;
+    });
+  }
+  // place {lat, lon}; when {now:true} or {local:'YYYY-MM-DDTHH:MM'}. Resolves to a 24-hour timeline.
+  W.timeline = function (place, when) {
+    var local = when && when.local ? when.local.slice(0, 16) : null, off = local ? W.guessOffset(place.lon) : 0;
+    var startLocal = startLocalOf(when, off);
+    return fetchRecord(place, local ? startLocal : null).then(function (rec) {
+      var tl = hoursFrom(rec, startLocal, 'live', '');
+      if (!tl) throw new Error('The weather reply does not hold the next 24 hours');
+      return attachSeries(tl, place);
     }).catch(function (err) {
       var why = (err && err.name === 'AbortError') ? 'The weather service did not answer in time' : (err && err.message) || 'No connection';
-      if (hit) { var r1 = result(hit.rec, hit.local, 'cache', why + '. Showing the copy saved on this device.'); if (r1) return r1; }
-      var off = W.guessOffset(place.lon), loc2 = local || W.msToLocal(Date.now() + off * 1000);
-      W.status = { source: 'sample', note: why + '. Showing a sample sky, not this place.' };
-      return { wx: JSON.parse(JSON.stringify(GC.SAMPLE_WX)), localStr: loc2, offsetSec: off, utcMs: W.localToMs(loc2) - off * 1000, source: 'sample', note: W.status.note, archive: false };
+      var hit = findCached(place, local);
+      if (hit) {
+        var tl2 = hoursFrom(hit.rec, startLocal, 'cache', why + '. Showing the copy saved on this device.');
+        if (tl2) return attachSeries(tl2, place).then(function (t) { W.status = { source: 'cache', note: t.note }; return t; }, function () { return tl2; });
+      }
+      return sampleTimeline(place, startLocal, why);
     });
+  };
+
+  // Turn an atlas sample into a 24-hour timeline (the same weather, the sun moving).
+  W.sampleTimeline = function (wx, startMs, off) {
+    var hours = [];
+    for (var k = 0; k < HOURS; k++) hours.push({ localStr: W.msToLocal(startMs + off * 1000 + k * 3600000), utcMs: startMs + k * 3600000, wx: JSON.parse(JSON.stringify(wx)) });
+    return { source: 'sample', note: '', archive: false, offsetSec: off, startLocal: hours[0].localStr, startMs: startMs, hours: hours, series: null };
   };
 
   W.search = function (name) {
@@ -174,70 +256,6 @@
       res.forEach(function (j) { if (!j.elevation) throw new Error('Elevation reply had no heights'); out = out.concat(j.elevation); });
       if (out.length !== pts.length) throw new Error('Expected ' + pts.length + ' heights, got ' + out.length);
       return out.map(function (m) { return (m == null || isNaN(m)) ? 0 : Math.round(m); });
-    });
-  };
-
-  // ---------- the region: cloud cover on a 5 x 5 grid, 100 km apart, for the same hour ----------
-  // Returns 25 x [low, mid, high] as 0..1 (rows north to south), or null when it cannot be had.
-  var REG_KEY = 'gc.region';
-  W.REGION = { N: 5, STEP: 100 };
-  W.REGION_WIDE = { N: 9, STEP: 250 };
-  W.region = function (place, utcMs, spec) {
-    spec = spec || W.REGION;
-    var hour = new Date(utcMs).toISOString().slice(0, 13) + ':00', key = placeKey(place) + '@' + hour + '#' + spec.N, saved = GC.store.get(REG_KEY, []);
-    if (!Array.isArray(saved)) saved = [];
-    for (var i = 0; i < saved.length; i++) if (saved[i].key === key) return Promise.resolve(saved[i].cells);
-    var ageDays = (Date.now() - utcMs) / 86400000;
-    if (ageDays < -15) return Promise.resolve(null);
-    var lats = [], lons = [], kx = Math.max(111.2 * Math.cos(GC.rad(place.lat)), 5), n = spec.N, half = (n - 1) / 2;
-    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) {
-      lats.push(GC.clamp(place.lat - (r - half) * spec.STEP / 111.2, -89, 89).toFixed(3));
-      lons.push((((place.lon + (c - half) * spec.STEP / kx + 540) % 360) - 180).toFixed(3));
-    }
-    var day = hour.slice(0, 10);
-    var url = (ageDays > 85 ? HOSTS.archive : HOSTS.forecast) + '?latitude=' + lats.join(',') + '&longitude=' + lons.join(',') +
-      '&hourly=cloud_cover_low,cloud_cover_mid,cloud_cover_high&timezone=GMT&start_date=' + day + '&end_date=' + day;
-    return fetchJson(url, 12000).then(function (j) {
-      var list = Array.isArray(j) ? j : [j];
-      if (list.length !== n * n) throw new Error('Expected ' + (n * n) + ' places, got ' + list.length);
-      var cells = list.map(function (x) {
-        var k = x.hourly && x.hourly.time ? x.hourly.time.indexOf(hour) : -1;
-        function v(name) { var a = x.hourly[name]; return (k < 0 || !a || a[k] == null) ? 0 : a[k] / 100; }
-        return k < 0 ? [0, 0, 0] : [v('cloud_cover_low'), v('cloud_cover_mid'), v('cloud_cover_high')];
-      });
-      saved.unshift({ key: key, cells: cells }); while (saved.length > 8) saved.pop();
-      GC.store.set(REG_KEY, saved);
-      return cells;
-    }).catch(function (e) { GC.logError('Region: ' + ((e && e.name === 'AbortError') ? 'no answer in time' : (e && e.message) || 'no connection')); return null; });
-  };
-
-  W.regionWide = function (place, utcMs) { return W.region(place, utcMs, W.REGION_WIDE); };
-
-  // ---------- the sea: waves, swell, period, direction and tide (Open-Meteo marine model, cells of a few km) ----------
-  // Returns null when the point has no sea data (inland, or the service did not answer). Tide is asked for separately,
-  // so a refusal of that one value never costs the waves.
-  var MAR_KEY = 'gc.marine';
-  W.marine = function (place, utcMs) {
-    var hour = new Date(utcMs).toISOString().slice(0, 13) + ':00', key = placeKey(place) + '@' + hour, saved = GC.store.get(MAR_KEY, []);
-    if (!Array.isArray(saved)) saved = [];
-    for (var i = 0; i < saved.length; i++) if (saved[i].key === key) return Promise.resolve(saved[i].m);
-    var ageDays = (Date.now() - utcMs) / 86400000;
-    if (ageDays < -7 || ageDays > 85) return Promise.resolve(null);
-    var day = hour.slice(0, 10), base = HOSTS.marine + '?latitude=' + place.lat.toFixed(3) + '&longitude=' + place.lon.toFixed(3) + '&timezone=GMT&start_date=' + day + '&end_date=' + day + '&hourly=';
-    function at(j, name) { var k = j && j.hourly && j.hourly.time ? j.hourly.time.indexOf(hour) : -1, a = k < 0 || !j.hourly[name] ? null : j.hourly[name][k]; return a == null ? null : a; }
-    var waves = fetchJson(base + 'wave_height,wave_direction,wave_period,swell_wave_height,swell_wave_direction,swell_wave_period,wind_wave_height,wind_wave_direction,wind_wave_period,ocean_current_velocity,ocean_current_direction', 12000).catch(function (e) {
-      GC.logError('Sea data: ' + ((e && e.name === 'AbortError') ? 'no answer in time' : (e && e.message) || 'no connection')); return null; });
-    var tide = fetchJson(base + 'sea_level_height_msl', 12000).catch(function () { return null; });
-    return Promise.all([waves, tide]).then(function (r) {
-      var w = r[0], t = r[1];
-      if (w === null || at(w, 'wave_height') === null) return null;
-      var m = { wave: at(w, 'wave_height'), dir: at(w, 'wave_direction'), period: at(w, 'wave_period'),
-        swell: { h: at(w, 'swell_wave_height'), dir: at(w, 'swell_wave_direction'), period: at(w, 'swell_wave_period') },
-        windwave: { h: at(w, 'wind_wave_height'), dir: at(w, 'wind_wave_direction'), period: at(w, 'wind_wave_period') },
-        current: { v: at(w, 'ocean_current_velocity'), dir: at(w, 'ocean_current_direction') }, tide: t ? at(t, 'sea_level_height_msl') : null };
-      saved.unshift({ key: key, m: m }); while (saved.length > 6) saved.pop();
-      GC.store.set(MAR_KEY, saved);
-      return m;
     });
   };
 
@@ -308,5 +326,33 @@
       return list;
     });
   };
+  // ---------- the whole Earth's cloud cover from a satellite picture (NASA GIBS, public domain, one picture a day) ----------
+  // The picture is true colour from the Terra satellite (about 10:30 local time), 720 x 360, north at the top.
+  // Bright, colourless pixels count as cloud: the result is a grey picture, white = full cover.
+  W.SAT_URL = 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=MODIS_Terra_CorrectedReflectance_TrueColor&STYLES=&CRS=EPSG:4326&BBOX=-90,-180,90,180&WIDTH=720&HEIGHT=360&FORMAT=image/jpeg&TIME=';
+  W.satellite = function (day) {
+    return new Promise(function (resolve, reject) {
+      var im = new Image(); im.crossOrigin = 'anonymous';
+      var t = setTimeout(function () { im.src = ''; reject(new Error('the satellite picture did not answer in time')); }, 20000);
+      im.onload = function () { clearTimeout(t); try { resolve(cloudMask(im)); } catch (e) { reject(new Error('the satellite picture could not be read')); } };
+      im.onerror = function () { clearTimeout(t); reject(new Error('the satellite picture could not be loaded')); };
+      im.src = W.SAT_URL + day;
+    });
+  };
+  function cloudMask(im) {
+    var w = 720, h = 360, c = document.createElement('canvas'); c.width = w; c.height = h;
+    var g = c.getContext('2d'); g.drawImage(im, 0, 0, w, h);
+    var px = g.getImageData(0, 0, w, h).data, out = document.createElement('canvas'); out.width = w; out.height = h;
+    var o = out.getContext('2d'), od = o.createImageData(w, h);
+    for (var i = 0; i < w * h; i++) {
+      var r = px[i * 4], gg = px[i * 4 + 1], b = px[i * 4 + 2], mn = Math.min(r, gg, b), mx = Math.max(r, gg, b);
+      var bright = GC.clamp((mn - 150) / 80, 0, 1), plain = 1 - GC.clamp((mx - mn - 20) / 50, 0, 1);
+      var v = Math.round(255 * bright * bright * (3 - 2 * bright) * plain);
+      od.data[i * 4] = v; od.data[i * 4 + 1] = v; od.data[i * 4 + 2] = v; od.data[i * 4 + 3] = 255;
+    }
+    o.putImageData(od, 0, 0);
+    return out;
+  }
+
   W.cacheCount = function () { return readCache().length; };
 })();
