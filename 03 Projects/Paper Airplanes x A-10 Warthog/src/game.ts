@@ -99,6 +99,7 @@ namespace PA {
     yaw: number;
     pitch: number;
     mode: 'straight' | 'ground' | 'air';
+    dir: [number, number, number];   // the unit direction the gun fires in
   }
 
   // The player's lock: the target and how far the lock has got (0 to 1).
@@ -171,7 +172,7 @@ namespace PA {
     waveTimer = 0;
     enemyMissileCool = 0;
     allyTimers: number[] = [];
-    aim: Aim = { yaw: 0, pitch: 0, mode: 'straight' };
+    aim: Aim = { yaw: 0, pitch: 0, mode: 'straight', dir: [0, 0, 1] };
     lock: Lock = { target: null, progress: 0 };
     tagged = false;            // an enemy missile is after the plane
     tagDist = 0;              // its distance, metres
@@ -753,25 +754,43 @@ namespace PA {
       }
     }
 
-    private updateGuns(dt: number): void {
-      this.fireCool -= dt;
-      this.aim = this.computeAim();
-      if (!this.held.fire || this.fireCool > 0 || this.ammo < 1) return;
-      this.fireCool = 0.09;
-      this.ammo -= 1;
+    // Where a target is moving to, per second (vehicles on the road, fighters, allies on their orbit).
+    private targetVelocity(t: Target): [number, number, number] {
+      if (t.faction === 'enemy' && t.vH !== undefined) {
+        return [Math.sin(t.vH) * FIGHTER_SPEED, 0, Math.cos(t.vH) * FIGHTER_SPEED];
+      }
+      if (t.faction === 'ally' && t.orbit) {
+        const o = t.orbit;
+        return [-Math.sin(o.ang) * o.r * o.w, 0, Math.cos(o.ang) * o.r * o.w];
+      }
+      return [0, 0, t.vZ ?? 0];
+    }
+
+    // The direction to fire so the bullet reaches where the target WILL be. The bullet starts
+    // with the plane's own speed, and it falls under gravity, so both are allowed for.
+    private leadDir(t: Target): [number, number, number] {
       const p = this.plane;
-      const cosP = Math.cos(this.aim.pitch), sinP = Math.sin(this.aim.pitch);
-      const sinY = Math.sin(this.aim.yaw), cosY = Math.cos(this.aim.yaw);
-      this.shots.push({
-        X: p.X + sinY * cosP * 2,
-        Z: p.Z + cosY * cosP * 2,
-        h: p.h + sinP * 2,
-        vX: p.vx * sinY + SHOT_SPEED * cosP * sinY,
-        vZ: p.vx * cosY + SHOT_SPEED * cosP * cosY,
-        vY: p.vy + SHOT_SPEED * sinP,
-        life: BULLET_LIFE,
-      });
-      this.onSound('gun');
+      const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
+      const vp: [number, number, number] = [p.vx * sinY, p.vy, p.vx * cosY];
+      const vt = this.targetVelocity(t);
+      const aimH = altOf(t) + (t.h === undefined ? 1 : 0);
+      let tt = Math.hypot(t.X - p.X, aimH - p.h, t.Z - p.Z) / SHOT_SPEED;
+      let dir: [number, number, number] = [0, 0, 1];
+      for (let it = 0; it < 5; it++) {
+        // Where the target is at time tt, lifted by the drop the bullet will have fallen.
+        const tx = t.X + vt[0] * tt;
+        const ty = aimH + vt[1] * tt + 0.5 * GRAVITY * tt * tt;
+        const tz = t.Z + vt[2] * tt;
+        // The muzzle velocity is the plane's velocity plus SHOT_SPEED along the gun,
+        // so the gun must point at (target − plane − plane velocity × tt).
+        const rx = tx - p.X - vp[0] * tt;
+        const ry = ty - p.h - vp[1] * tt;
+        const rz = tz - p.Z - vp[2] * tt;
+        const d = Math.hypot(rx, ry, rz) || 1;
+        dir = [rx / d, ry / d, rz / d];
+        tt = d / SHOT_SPEED;
+      }
+      return dir;
     }
 
     private computeAim(): Aim {
@@ -786,20 +805,44 @@ namespace PA {
         const d = Math.hypot(dx, dz);
         if (d < 1 || (dx * sinY + dz * cosY) <= 0) continue;
         if (t.h !== undefined && d < AIR_RANGE) airborne = true;
-        if (t.kind === 'jet' && d < AIR_RANGE) airborne = true;
         if (t.h === undefined && t.kind !== 'jet' && d < bestD) {
           best = t;
           bestD = d;
         }
       }
-      if (airborne || !best) return { yaw: p.yaw, pitch: 0, mode: airborne ? 'air' : 'straight' };
-      const tg = altOf(best) + 1;
-      const dh = tg - p.h;
-      const dd = Math.hypot(best.X - p.X, best.Z - p.Z);
-      const flight = dd / SHOT_SPEED;
-      const drop = 0.5 * GRAVITY * flight * flight;
-      const pitch = Math.atan2(dh + drop, dd);
-      return { yaw: Math.atan2(best.X - p.X, best.Z - p.Z), pitch, mode: 'ground' };
+      if (airborne || !best) {
+        // Planes nearby: the gun points straight ahead, the way the plane is going.
+        return { yaw: p.yaw, pitch: 0, mode: airborne ? 'air' : 'straight', dir: [sinY, 0, cosY] };
+      }
+      const dir = this.leadDir(best);
+      return {
+        yaw: Math.atan2(dir[0], dir[2]),
+        pitch: Math.asin(Math.max(-1, Math.min(1, dir[1]))),
+        mode: 'ground',
+        dir,
+      };
+    }
+
+    private updateGuns(dt: number): void {
+      this.fireCool -= dt;
+      this.aim = this.computeAim();
+      if (!this.held.fire || this.fireCool > 0 || this.ammo < 1) return;
+      this.fireCool = 0.09;
+      this.ammo -= 1;
+      const p = this.plane;
+      const [dx, dy, dz] = this.aim.dir;
+      // The bullet keeps the plane's speed and adds the gun's speed along the aim.
+      const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
+      this.shots.push({
+        X: p.X + dx * 2,
+        Z: p.Z + dz * 2,
+        h: p.h + dy * 2,
+        vX: p.vx * sinY + SHOT_SPEED * dx,
+        vZ: p.vx * cosY + SHOT_SPEED * dz,
+        vY: p.vy + SHOT_SPEED * dy,
+        life: BULLET_LIFE,
+      });
+      this.onSound('gun');
     }
 
     private hitTarget(t: Target, damage: number, tg: number): void {

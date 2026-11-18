@@ -302,9 +302,11 @@ namespace PA {
     };
     gear.addEventListener('click', () => setOpen(drawer.hidden));
     $('closeDrawer').addEventListener('click', () => setOpen(false));
+    // A tap in the upper-right corner brings the gear back and opens the settings in one go.
     $('gearHot').addEventListener('pointerdown', e => {
       e.preventDefault();
       wakeGear();
+      if (drawer.hidden) setOpen(true);
     });
     wakeGear();
   }

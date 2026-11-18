@@ -177,7 +177,7 @@ const still = { pitch: 0, yaw: 0, throttle: 0 };
 
 // 10. Safe flight: a plane diving at the ground is pulled up and does not crash.
 {
-  const g = new PA.Game({ mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0, safeFlight: 1, invincible: 0, autoReload: 1 });
+  const g = new PA.Game({ mode: 'jet', control: 'drag', view: 'chase', difficulty: 'felix', sound: 0, forces: 0, showErrors: 0, safeFlight: 1, invincible: 0, autoReload: 1 });
   g.onSound = () => {};
   g.mission.targets = [];
   g.plane.start(0, 0, PA.groundAt(0, 0) + 5, 60, -0.5, 0, 0.6);
@@ -326,6 +326,26 @@ const still = { pitch: 0, yaw: 0, throttle: 0 };
   g.update(1 / 30);
   for (let i = 0; i < 2 * 30; i++) g.update(1 / 30);
   check('loss: a full reset restocks the gun, missiles and chaff', g.ammo === PA.AMMO_MAX && g.missileStock === PA.MISSILE_MAX && g.chaff === PA.CHAFF_MAX && g.phase === 'flying');
+}
+
+// 22. The gun leads: at flying speed it hits a still target ahead, and a target moving along the road.
+{
+  const st = { mode: 'jet', control: 'drag', view: 'chase', difficulty: 'felix', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const still = new PA.Game(st);
+  still.onSound = () => {};
+  still.mission.targets = [{ kind: 'tank_mbt', X: 0, Z: still.plane.Z + 200, alive: true, points: 100, hp: 2, cool: 0 }];
+  const t1 = still.mission.targets[0];
+  still.held.fire = true;
+  for (let i = 0; i < 3 * 30 && t1.alive; i++) still.update(1 / 30);
+  check('gun: hits a still tank 200 m ahead at flying speed', !t1.alive || t1.hp < 2, 'hp ' + t1.hp + ', aim ' + still.aim.mode);
+
+  const moving = new PA.Game(st);
+  moving.onSound = () => {};
+  moving.mission.targets = [{ kind: 'tank_mbt', X: 0, Z: moving.plane.Z + 250, alive: true, points: 100, hp: 2, cool: 0, vZ: 9 }];
+  const t2 = moving.mission.targets[0];
+  moving.held.fire = true;
+  for (let i = 0; i < 3 * 30 && t2.alive; i++) moving.update(1 / 30);
+  check('gun: leads a tank moving along the road', !t2.alive || t2.hp < 2, 'hp ' + t2.hp);
 }
 
 console.log(failures === 0 ? '\nAll flight checks passed.' : '\n' + failures + ' check(s) failed.');
