@@ -21,7 +21,7 @@ Browser check: headless Chromium via the pre-installed Playwright, from a script
 Layout: `js/core/model.js` (replay, checks, hash, certainty, flags; DOM-free) · `js/core/rounds.js` (ledger, rounds, packets; DOM-free) · `js/core/review.js` (AI prompts and reply checks; DOM-free) · `js/viewer/viewer.js` (three.js, reads only) · `js/app.js` (page) · `vendor/three/` (three.js r160, MIT) · `worlds/plains-diorama-world.json` (rules) · `tools/diorama_scene.js` (sample operations) · `exhibit/story.json` (story).
 
 Project rules:
-- Public repo. The sample is synthetic and generic in its figures. It depicts a specific nation, so it stays a draft until the Cheyenne and Arapaho Tribes have reviewed it. Real drawings, client work and the tribes' written answers go in `private/`.
+- Public repo. The sample is synthetic and generic in its figures. It depicts a specific nation. Jimmy is the only reviewer so far. No tribe has reviewed it, and no tribal review is set up. Concern: no one from the depicted nation has reviewed it, so it stays a draft until someone from that nation has. Real drawings, client work and any written answers from people of the nation go in `private/`.
 - Rendering never modifies the model. Rules live in the world file. Every change is an operation in the history.
 - Never write `null` into a model. Unknown values are left out and flagged.
 - No filler objects. "Density" means more real parts in the objects that already exist. New objects (foreground, background) are added only when Jimmy asks. Check each object against its real size at 1 in = 2 ft before anything else.
