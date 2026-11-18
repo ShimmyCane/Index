@@ -153,7 +153,7 @@ See `convo/convo v0.3.md`.
 
 ## 14. V2 (round 7, 2026-11-18): home, studio, library, cloud, lofted meshes
 
-- **Pages:** `index.html` (home: projects, library on this device, cloud sign-in) and `studio.html` (the 3-D app).
+- **Pages:** `index.html` (home: projects, library on this device, cloud sign-in), `models.html` (front page listing every model in the project: the studio sample, the archived V1, and Salmon Leap V1 to V5, each linked) and `studio.html` (the 3-D app).
 - **Cloud:** the Architecture project (same as Make 3D). One table, `m3dxc_scenes`, owner only. SQL in `supabase/002_m3dxc_scenes.sql`, not applied.
 - **Sign-in:** an email code to an existing account only. Publishable key in the browser; no secret in the repo.
 - **Library:** on this device, by model_id. The studio saves to the library or, when signed in, to the cloud.
