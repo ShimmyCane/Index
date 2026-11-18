@@ -41,3 +41,27 @@ namespace PA {
      .r(14, 3, 2, 1, '#6b7480');
   };
 }
+
+namespace PA {
+  // An enemy fighter, seen from the side: dark red, swept wings, a nose cone.
+  PAINT['fighter'] = g => {
+    g.r(0, 4, 16, 2, '#7a3b44')
+     .r(9, 2, 4, 3, '#a85560')
+     .r(4, 5, 6, 2, '#c97080')
+     .r(12, 3, 4, 1, '#7a3b44')
+     .p(15, 4, '#2f2d3d')
+     .r(2, 2, 2, 2, '#7a3b44')
+     .p(12, 2, '#8fd3f0');
+  };
+
+  // An allied fighter: blue with a white star on the tail.
+  PAINT['ally'] = g => {
+    g.r(0, 4, 16, 2, '#3d8bff')
+     .r(9, 2, 4, 3, '#8fb8f5')
+     .r(4, 5, 6, 2, '#5b9fff')
+     .r(12, 3, 4, 1, '#3d8bff')
+     .p(15, 4, '#2f2d3d')
+     .r(2, 2, 2, 2, '#3d8bff')
+     .p(3, 2, '#fffdfa');
+  };
+}

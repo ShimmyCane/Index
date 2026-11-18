@@ -1,6 +1,8 @@
-// Drawing the chase view. The camera sits behind and above the plane and turns
-// with its heading and bank. The ground is a checkerboard in world space, so it
-// stays put while the plane turns. Everything else is a sprite placed by perspective.
+// Drawing the chase view (and the top-down and cockpit views). The camera sits
+// behind the plane and turns with its heading and bank. The ground is a checkerboard
+// in world space, with lakes, forests, a road with stripes, and clouds high up.
+// Everything standing on the ground or flying is a sprite placed by perspective and
+// sorted from far to near.
 namespace PA {
   const FOCAL = 200;          // pixels: how big a metre looks at distance one
   const CAM_BACK = 26;        // metres behind the plane
@@ -10,18 +12,11 @@ namespace PA {
   const RANGE = 16;           // squares drawn each way from the camera
   const FOG_FAR = 900;        // metres where the ground fades into the sky
   const PLANE_SCREEN_Y = 0.72;
-  const PX_PER_M = 0.3;       // sprite pixel size in metres (ground targets)
-  const PLANE_SCALE = 2;
-  const NEAR_BOOST_M = 220;   // closer than this, ground things grow up to three times
+  const PX_PER_M = 0.3;       // sprite pixel size in metres (ground and air things)
+  const PLANE_SCALE = 2;      // the plane sprite is drawn at a whole-number scale
+  const NEAR_BOOST_M = 220;   // closer than this, things grow up to three times
   const MIN_PX = 7;           // the smallest a thing is drawn (tall)
-  const MAX_PX = 150;         // the largest, so nothing fills the whole screen      // the plane sprite is drawn at a whole-number scale
-
-  interface Cam {
-    px: number; py: number; pz: number;           // camera position
-    rx: number; ry: number; rz: number;           // right
-    ux: number; uy: number; uz: number;           // up
-    fx: number; fy: number; fz: number;           // forward
-  }
+  const MAX_PX = 150;         // the largest, so nothing fills the whole screen
 
   // Camera placement for each view: where it sits behind the plane, how high, and how far it looks down.
   const VIEWS = {
@@ -30,13 +25,19 @@ namespace PA {
     cockpit: { back: -1.5, up: 1.4, tilt: 0.02, range: RANGE },
   };
 
+  interface Cam {
+    px: number; py: number; pz: number;           // camera position
+    rx: number; ry: number; rz: number;           // right
+    ux: number; uy: number; uz: number;           // up
+    fx: number; fy: number; fz: number;           // forward
+  }
+
   function makeCam(g: Game): Cam {
     const p = g.plane;
     const v = VIEWS[g.settings.view];
     const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
-    // Horizontal forward and right of the heading.
-    const hx = sinY, hz = cosY;
-    const rhx = cosY, rhz = -sinY;
+    const hx = sinY, hz = cosY;             // horizontal forward
+    const rhx = cosY, rhz = -sinY;          // horizontal right
     const px = p.X - hx * v.back;
     const py = p.h + v.up;
     const pz = p.Z - hz * v.back;
@@ -52,9 +53,8 @@ namespace PA {
     return { px, py, pz, rx, ry, rz, ux, uy, uz, fx, fy, fz };
   }
 
-  // World point → screen point, or null if it is behind the camera.
-  // With clampDepth, points just behind the camera are pulled to the near plane,
-  // so the ground right under the camera still reaches the bottom of the screen.
+  // World point → screen point and depth, or null if it is behind the camera.
+  // With clampDepth, points just behind the camera are pulled to the near plane.
   function project(c: Cam, X: number, h: number, Z: number, clampDepth = false): [number, number, number] | null {
     const dx = X - c.px, dy = h - c.py, dz = Z - c.pz;
     let zc = dx * c.fx + dy * c.fy + dz * c.fz;
@@ -89,6 +89,29 @@ namespace PA {
     ctx.fill();
   }
 
+  // Clouds high in the air: soft puffs at fixed places in the world, drifting slowly.
+  function clouds(ctx: CanvasRenderingContext2D, g: Game, c: Cam): void {
+    const i0 = Math.floor(c.px / 300) - 4, i1 = i0 + 9;
+    const j0 = Math.floor(c.pz / 300) - 4, j1 = j0 + 9;
+    const drift = g.time * 4;
+    ctx.fillStyle = 'rgba(255,253,250,0.85)';
+    for (let i = i0; i <= i1; i++) {
+      for (let j = j0; j <= j1; j++) {
+        if (cellNoise(i, j, 23) < 0.45) continue;
+        const X = i * 300 + cellNoise(i, j, 29) * 240 + drift;
+        const Z = j * 300 + cellNoise(i, j, 31) * 240;
+        const h = 140 + cellNoise(i, j, 37) * 60;
+        const p = project(c, X, h, Z);
+        if (!p) continue;
+        const r = (46 * FOCAL) / p[2];
+        if (r < 2) continue;
+        ctx.beginPath();
+        ctx.ellipse(p[0], p[1], r * 1.6, r * 0.7, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
   // Ground: squares of the world, far ones first, each faded toward the sky.
   function ground(ctx: CanvasRenderingContext2D, g: Game, c: Cam): void {
     const range = VIEWS[g.settings.view].range;
@@ -98,19 +121,20 @@ namespace PA {
     for (let i = ci - range; i < ci + range; i++) {
       for (let j = cj - range; j < cj + range; j++) {
         const corners: [number, number, number][] = [];
-        let ok = true;
         for (const [a, b] of [[i, j], [i + 1, j], [i + 1, j + 1], [i, j + 1]] as [number, number][]) {
           const p = project(c, a * CELL, groundAt(a * CELL, b * CELL), b * CELL, true);
-          if (!p) { ok = false; break; }
-          corners.push(p);
+          if (p) corners.push(p);
         }
-        if (!ok) continue;
+        if (corners.length < 4) continue;
         const depth = (corners[0][2] + corners[2][2]) / 2;
-        const biome = biomeAt((i + 0.5) * CELL, (j + 0.5) * CELL);
+        const cx = (i + 0.5) * CELL, cz = (j + 0.5) * CELL;
+        const biome = biomeAt(cx, cz);
         const light = ((i + j) & 1) === 0;
         const base = biome === 'sea' ? (light ? '#9fd3ea' : '#8cc6e2')
+          : biome === 'lake' ? (light ? '#86c9e6' : '#74bddf')
           : biome === 'farm' ? (light ? '#cfe3a2' : '#e6d9a0')
           : biome === 'town' ? (light ? '#cfd3d8' : '#bcc2c9')
+          : biome === 'forest' ? (light ? '#a6d69a' : '#93c888')
           : (light ? COL.ground : COL.groundDark);
         cells.push({
           pts: corners.map(p => [p[0], p[1]] as [number, number]),
@@ -130,7 +154,71 @@ namespace PA {
     }
   }
 
-  // A sprite standing on the ground at (X, Z), drawn larger the closer it is.
+  // The main road: a grey band with a dashed white centre stripe, drawn in world space.
+  function road(ctx: CanvasRenderingContext2D, g: Game, c: Cam): void {
+    const z0 = Math.floor(c.pz / 25) * 25 - 50;
+    const z1 = c.pz + 900;
+    const edge = (X: number, z: number): [number, number] | null => {
+      const p = project(c, X, groundAt(ROAD_X, z) + 0.05, z, true);
+      return p ? [p[0], p[1]] : null;
+    };
+    ctx.fillStyle = '#8a8f99';
+    for (let z = z0; z < z1; z += 25) {
+      const a = edge(ROAD_X - ROAD_W, z), b = edge(ROAD_X + ROAD_W, z);
+      const c2 = edge(ROAD_X + ROAD_W, z + 25), d = edge(ROAD_X - ROAD_W, z + 25);
+      if (!a || !b || !c2 || !d) continue;
+      ctx.beginPath();
+      ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(c2[0], c2[1]); ctx.lineTo(d[0], d[1]);
+      ctx.closePath();
+      ctx.fill();
+    }
+    // Stripes: a white dash every 50 m along the centre.
+    ctx.fillStyle = '#fffdfa';
+    for (let z = z0; z < z1; z += 50) {
+      const a = edge(ROAD_X - 0.6, z + 6), b = edge(ROAD_X + 0.6, z + 6);
+      const c2 = edge(ROAD_X + 0.6, z + 26), d = edge(ROAD_X - 0.6, z + 26);
+      if (!a || !b || !c2 || !d) continue;
+      ctx.beginPath();
+      ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(c2[0], c2[1]); ctx.lineTo(d[0], d[1]);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  // Things standing on the ground or flying: sprites placed by perspective.
+  // Drawn as one list, far to near, so trees, vehicles and planes overlap correctly.
+  interface Thing { zc: number; img: HTMLCanvasElement; X: number; base: number; Z: number; }
+
+  function collect(g: Game, c: Cam): Thing[] {
+    const things: Thing[] = [];
+    const range = VIEWS[g.settings.view].range;
+    // Trees: a few in each forest square near the camera.
+    const ci = Math.round(c.px / CELL), cj = Math.round(c.pz / CELL);
+    const tree = sprite('tree');
+    for (let i = ci - range; i < ci + range; i++) {
+      for (let j = cj - range; j < cj + range; j++) {
+        const cx0 = i * CELL, cz0 = j * CELL;
+        if (biomeAt(cx0 + CELL / 2, cz0 + CELL / 2) !== 'forest') continue;
+        for (let k = 0; k < 4; k++) {
+          const X = cx0 + cellNoise(i, j, 41 + k) * CELL;
+          const Z = cz0 + cellNoise(i, j, 47 + k) * CELL;
+          const p = project(c, X, groundAt(X, Z), Z);
+          if (p) things.push({ zc: p[2], img: tree, X, base: groundAt(X, Z), Z });
+        }
+      }
+    }
+    for (const t of g.mission.targets) {
+      if (!t.alive) continue;
+      const p = project(c, t.X, altOf(t), t.Z);
+      if (!p) continue;
+      if (p[2] > FOG_FAR * 1.5) continue;
+      things.push({ zc: p[2], img: sprite(t.kind), X: t.X, base: altOf(t), Z: t.Z });
+    }
+    things.sort((a, b) => b.zc - a.zc);
+    return things;
+  }
+
+  // Draws one sprite standing at (X, base, Z), larger the closer it is.
   function billboard(ctx: CanvasRenderingContext2D, c: Cam, img: HTMLCanvasElement, X: number, Z: number, base: number): void {
     const p = project(c, X, base, Z);
     if (!p) return;
@@ -146,21 +234,11 @@ namespace PA {
     ctx.drawImage(img, Math.round(sx - w / 2), Math.round(sy - h), w, h);
   }
 
-  function targets(ctx: CanvasRenderingContext2D, g: Game, c: Cam): void {
-    const list = g.mission.targets
-      .filter(t => t.alive)
-      .map(t => ({ t, zc: (t.X - c.px) * c.fx + (groundAt(t.X, t.Z) - c.py) * c.fy + (t.Z - c.pz) * c.fz }))
-      .filter(o => o.zc > 1 && o.zc < FOG_FAR * 1.5)
-      .sort((a, b) => b.zc - a.zc);
-    for (const { t } of list) {
-      billboard(ctx, c, sprite(t.kind), t.X, t.Z, groundAt(t.X, t.Z));
-    }
-  }
-
-  function jumpers(ctx: CanvasRenderingContext2D, g: Game, c: Cam): void {
-    const img = sprite('pilot');
-    for (const j of g.jumpers) {
-      billboard(ctx, c, img, j.X, j.Z, j.h);
+  function shots(ctx: CanvasRenderingContext2D, c: Cam, list: Shot[], color: string, size: number): void {
+    ctx.fillStyle = color;
+    for (const s of list) {
+      const p = project(c, s.X, s.h, s.Z);
+      if (p) ctx.fillRect(Math.round(p[0]), Math.round(p[1]), size, size);
     }
   }
 
@@ -180,6 +258,19 @@ namespace PA {
     }
   }
 
+  function puffs(ctx: CanvasRenderingContext2D, g: Game, c: Cam): void {
+    for (const p of g.puffs) {
+      const k = Math.max(0, p.life / p.max);
+      const q = project(c, p.X, p.h, p.Z);
+      if (!q) continue;
+      ctx.globalAlpha = Math.min(1, k * 1.4);
+      ctx.fillStyle = p.color;
+      const s = Math.max(1, Math.round((p.size * (0.5 + k) * FOCAL) / (q[2] * 0.6)));
+      ctx.fillRect(Math.round(q[0]), Math.round(q[1]), s, s);
+    }
+    ctx.globalAlpha = 1;
+  }
+
   function rings(ctx: CanvasRenderingContext2D, g: Game, c: Cam): void {
     // A ring stands across the heading (level right, then up), so the plane flies through it.
     const rhx = Math.cos(g.plane.yaw), rhz = -Math.sin(g.plane.yaw);
@@ -187,12 +278,7 @@ namespace PA {
       const pts: [number, number][] = [];
       for (let a = 0; a < 24; a++) {
         const t = (a / 24) * Math.PI * 2;
-        const p = project(
-          c,
-          ring.X + rhx * Math.cos(t) * ring.r,
-          ring.h + Math.sin(t) * ring.r,
-          ring.Z + rhz * Math.cos(t) * ring.r,
-        );
+        const p = project(c, ring.X + rhx * Math.cos(t) * ring.r, ring.h + Math.sin(t) * ring.r, ring.Z + rhz * Math.cos(t) * ring.r);
         if (p) pts.push([p[0], p[1]]);
       }
       if (pts.length < 24) continue;
@@ -209,31 +295,10 @@ namespace PA {
     }
   }
 
-  function shots(ctx: CanvasRenderingContext2D, c: Cam, list: Shot[], color: string, size: number): void {
-    ctx.fillStyle = color;
-    for (const s of list) {
-      const p = project(c, s.X, s.h, s.Z);
-      if (p) ctx.fillRect(Math.round(p[0]), Math.round(p[1]), size, size);
-    }
-  }
-
-  function puffs(ctx: CanvasRenderingContext2D, g: Game, c: Cam): void {
-    for (const p of g.puffs) {
-      const k = Math.max(0, p.life / p.max);
-      const q = project(c, p.X, p.h, p.Z);
-      if (!q) continue;
-      ctx.globalAlpha = Math.min(1, k * 1.4);
-      ctx.fillStyle = p.color;
-      const s = Math.max(1, Math.round((p.size * (0.5 + k) * FOCAL) / (q[2] * 0.6)));
-      ctx.fillRect(Math.round(q[0]), Math.round(q[1]), s, s);
-    }
-    ctx.globalAlpha = 1;
-  }
-
   // The plane is always in the same place on the screen; the world moves past it.
+  // It blinks after a loss, and shows smoke on the wings where it has been hit.
   function plane(ctx: CanvasRenderingContext2D, g: Game, c: Cam): void {
     const p = g.plane;
-    const img = sprite(g.settings.mode === 'glider' ? 'glider' : 'plane');
     const shadow = project(c, p.X, groundAt(p.X, p.Z), p.Z);
     if (shadow) {
       const rx = Math.max(3, Math.min(14, 26 - p.h * 0.2));
@@ -242,12 +307,29 @@ namespace PA {
       ctx.ellipse(shadow[0], shadow[1], rx, 3, 0, 0, Math.PI * 2);
       ctx.fill();
     }
+    const blinkOff = g.phase === 'crashed' && Math.floor(g.blink * 8) % 2 === 0;
     const sx = W / 2, sy = H * PLANE_SCREEN_Y;
+    const img = sprite(g.settings.mode === 'glider' ? 'glider' : 'plane');
     ctx.save();
     ctx.translate(sx, sy);
     ctx.rotate(p.bank);
-    ctx.drawImage(img, -Math.round((img.width * PLANE_SCALE) / 2), -Math.round((img.height * PLANE_SCALE) / 2),
-      img.width * PLANE_SCALE, img.height * PLANE_SCALE);
+    if (!blinkOff) {
+      ctx.drawImage(img, -Math.round((img.width * PLANE_SCALE) / 2), -Math.round((img.height * PLANE_SCALE) / 2),
+        img.width * PLANE_SCALE, img.height * PLANE_SCALE);
+    }
+    // Damage: a cloud of smoke on each wing, slowly lifting.
+    for (const m of g.marks) {
+      const rise = Math.min(6, m.age * 2);
+      const r = 2.5 + Math.sin(m.age * 3) * 0.6;
+      ctx.fillStyle = 'rgba(255,253,250,0.85)';
+      ctx.beginPath();
+      ctx.arc(m.x * PLANE_SCALE, (m.y - rise * 0.2) * PLANE_SCALE, r * PLANE_SCALE, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(120,120,130,0.6)';
+      ctx.beginPath();
+      ctx.arc(m.x * PLANE_SCALE + 2, (m.y - rise * 0.2 - 1) * PLANE_SCALE, r * PLANE_SCALE * 0.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
     ctx.restore();
   }
 
@@ -279,28 +361,10 @@ namespace PA {
     const p = g.plane;
     const x = W / 2, y = H * PLANE_SCREEN_Y - 10;
     const k = 1.6;
-    // Forces in the vertical plane; the screen shows them as up and down, sideways is the nose.
     arrow(ctx, x, y, 0, p.lift[1] * k, COL.lift, 'lift');
     arrow(ctx, x, y, 0, p.weight[1] * k, COL.weight, 'weight');
     arrow(ctx, x, y, 0, p.thrust[1] * k, COL.thrust, 'thrust');
     arrow(ctx, x, y, p.drag[0] * k, 0, COL.drag, 'drag');
-  }
-
-  export function render(ctx: CanvasRenderingContext2D, g: Game): void {
-    ctx.imageSmoothingEnabled = false;
-    const c = makeCam(g);
-    sky(ctx);
-    ground(ctx, g, c);
-    if (g.settings.view !== 'cockpit' && g.mission.mode === 'glider') rings(ctx, g, c);
-    targets(ctx, g, c);
-    shots(ctx, c, g.shots, COL.bullet, 2);
-    shots(ctx, c, g.shells, COL.shell, 2);
-    missiles(ctx, g, c);
-    jumpers(ctx, g, c);
-    puffs(ctx, g, c);
-    if (g.settings.view !== 'cockpit') plane(ctx, g, c);
-    if (g.settings.view === 'cockpit') cockpit(ctx, g);
-    if (g.settings.forces) forces(ctx, g);
   }
 
   // The cockpit: canopy struts and a dark instrument panel along the bottom.
@@ -310,7 +374,6 @@ namespace PA {
     ctx.fillRect(0, panelTop, W, H - panelTop);
     ctx.fillStyle = '#5b5876';
     ctx.fillRect(0, panelTop, W, 2);
-    // Gauges: a horizon bar that tilts with the bank, and a heading tick.
     const gx = W / 2, gy = panelTop + 14;
     ctx.strokeStyle = '#fffdfa';
     ctx.lineWidth = 2;
@@ -322,10 +385,27 @@ namespace PA {
     ctx.rotate(-g.plane.bank);
     ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(9, 0); ctx.stroke();
     ctx.restore();
-    // Canopy struts at the edges.
     ctx.strokeStyle = '#2f2d3d';
     ctx.lineWidth = 6;
     ctx.beginPath(); ctx.moveTo(0, panelTop); ctx.lineTo(W * 0.22, 0); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(W, panelTop); ctx.lineTo(W * 0.78, 0); ctx.stroke();
+  }
+
+  export function render(ctx: CanvasRenderingContext2D, g: Game): void {
+    ctx.imageSmoothingEnabled = false;
+    const c = makeCam(g);
+    sky(ctx);
+    clouds(ctx, g, c);
+    ground(ctx, g, c);
+    road(ctx, g, c);
+    if (g.settings.view !== 'cockpit' && g.mission.mode === 'glider') rings(ctx, g, c);
+    for (const th of collect(g, c)) billboard(ctx, c, th.img, th.X, th.Z, th.base);
+    shots(ctx, c, g.shots, COL.bullet, 2);
+    shots(ctx, c, g.shells, COL.shell, 2);
+    missiles(ctx, g, c);
+    puffs(ctx, g, c);
+    if (g.settings.view !== 'cockpit') plane(ctx, g, c);
+    if (g.settings.view === 'cockpit') cockpit(ctx, g);
+    if (g.settings.forces) forces(ctx, g);
   }
 }

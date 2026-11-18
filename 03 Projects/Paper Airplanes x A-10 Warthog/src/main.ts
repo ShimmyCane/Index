@@ -3,8 +3,10 @@
 namespace PA {
   const SETTINGS_KEY = 'pa_warthog.settings';
   const DEFAULTS: Settings = {
-    mode: 'jet', control: 'drag', view: 'chase', sound: 1, forces: 0,
-    safeFlight: 1, invincible: 0, autoReload: 1, showErrors: 0,
+    mode: 'jet', control: 'drag', view: 'chase', sound: 1,
+    volMusic: 30, volGun: 35, volTurn: 30, volWarn: 70,
+    forces: 0, safeFlight: 1, invincible: 0, autoReload: 1,
+    enemyWave: 2, allies: 1, showErrors: 0,
   };
   const VIEW_ORDER: View[] = ['chase', 'top', 'cockpit'];
   const TUTORIAL_KEY = 'pa_warthog.tutorialSeen';
@@ -64,6 +66,17 @@ namespace PA {
     document.body.classList.toggle('joy', settings.control === 'stick');
   }
 
+  // The sound sliders, as 0-1 values for the audio channels.
+  function applySound(): void {
+    sound.enabled = settings.sound === 1;
+    sound.setVolumes({
+      music: settings.volMusic / 100,
+      gun: settings.volGun / 100,
+      turn: settings.volTurn / 100,
+      warn: settings.volWarn / 100,
+    });
+  }
+
   function renderSettings(): void {
     document.querySelectorAll<HTMLElement>('.seg').forEach(seg => {
       const key = seg.dataset.key as keyof Settings;
@@ -81,7 +94,7 @@ namespace PA {
     } else {
       settings[key] = +value;
     }
-    if (key === 'sound') sound.enabled = settings.sound === 1;
+    if (key === 'sound') applySound();
     saveSettings();
     renderSettings();
     if (key === 'mode') restart();
@@ -270,6 +283,8 @@ namespace PA {
     const drawer = $('drawer');
     const setOpen = (open: boolean) => {
       drawer.hidden = !open;
+      game.paused = open;
+      sound.setPaused(open);
       gear.setAttribute('aria-expanded', String(open));
       if (open) {
         window.clearTimeout(gearTimer);
@@ -297,6 +312,7 @@ namespace PA {
     $('hoops').textContent = g.mission.hoops.length ? g.hoopsPassed + ' / ' + g.mission.hoops.length : '—';
     $('hull').style.width = Math.max(0, g.hull) + '%';
     const stock = g.missileStock;
+    $('ammo').textContent = String(Math.floor(g.ammo));
     $('missile').textContent = stock + '/' + MISSILE_MAX + (stock === 0 ? (settings.autoReload === 1 ? ' reloading' : ' empty') : '');
     const a = g.aim;
     $('gun').textContent = a.mode === 'air' ? 'air: straight'
@@ -311,7 +327,7 @@ namespace PA {
   function message(): string {
     const g = game;
     const p = g.plane;
-    if (g.phase === 'crashed') return 'Ejected! The parachute is open. Back in the air soon.';
+    if (g.phase === 'crashed') return 'Hit! The plane blinks and carries on with a full repair.';
     if (g.phase !== 'flying') return '';
     if (g.floorActive) return 'Safe flight: pulling up off the ground.';
     if (settings.invincible === 1) return 'Invincible: nothing can hurt you.';
@@ -338,7 +354,7 @@ namespace PA {
   let noteSort: NoteSort = 'time';
 
   function noteItem(): string {
-    if (game.phase === 'crashed') return 'Ejected';
+    if (game.phase === 'crashed') return 'Hit and carried on';
     if (game.phase === 'landed') return 'Glider landed';
     if (game.plane.stalled) return 'Stalled';
     return game.settings.mode === 'glider' ? 'Gliding' : 'Flying';
@@ -422,6 +438,23 @@ namespace PA {
     }
   }
 
+  // Sliders: each one sets its setting at once and shows its value.
+  function bindSliders(): void {
+    document.querySelectorAll<HTMLInputElement>('input[type="range"][data-key]').forEach(input => {
+      const key = input.dataset.key as keyof Settings;
+      const label = document.getElementById(input.id + 'Value');
+      input.value = String(settings[key]);
+      const show = () => { if (label) label.textContent = input.value + (input.dataset.unit || ''); };
+      show();
+      input.addEventListener('input', () => {
+        (settings as unknown as Record<string, number>)[key] = +input.value;
+        saveSettings();
+        applySound();
+        show();
+      });
+    });
+  }
+
   function bindNotes(): void {
     $('noteSave').addEventListener('click', saveNoteFromScreen);
     $('noteCopy').addEventListener('click', () => void copyNotes());
@@ -439,6 +472,7 @@ namespace PA {
     });
     renderNoteIndex();
     renderNotes();
+    bindSliders();
   }
 
   // ---- Family database sign-in (drawer) ---------------------------------
@@ -526,7 +560,7 @@ namespace PA {
       if (ctx) render(ctx, game);
       const rc = $<HTMLCanvasElement>('radar').getContext('2d');
       if (rc) radar(rc, game, 150);
-      sound.setThrottle(game.plane.throttle, game.phase === 'flying' && game.settings.mode === 'jet');
+      sound.setFlight(game.plane.throttle, game.phase === 'flying' && game.settings.mode === 'jet', Math.abs(game.axes.yaw));
       hudTimer += dt;
       if (hudTimer > 0.1) {
         hudTimer = 0;
@@ -566,6 +600,7 @@ namespace PA {
     $('again').addEventListener('click', () => restart());
     $('version').textContent = 'Version ' + VERSION;
 
+    applySound();
     bindKeys();
     showTutorial();
     bindDrag();

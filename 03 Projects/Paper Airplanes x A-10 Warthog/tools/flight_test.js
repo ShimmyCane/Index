@@ -107,16 +107,72 @@ const still = { pitch: 0, yaw: 0, throttle: 0 };
   check('missile: locks on and destroys the target ahead', !ahead.alive && g.kills >= 1, 'kills = ' + g.kills);
 }
 
-// 9. Ejection: a crash starts the eject sequence, then the flight restarts.
+// 9. A loss: the plane blinks once, then carries on with full health and a new flight; the score stays.
 {
-  const settings = { mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0 };
+  const settings = { mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
   const g = new PA.Game(settings);
   g.onSound = () => {};
+  g.score = 500;
   g.hull = 0;
   g.update(1 / 30);
-  check('eject: a crash starts the sequence with a pilot in the air', g.phase === 'crashed' && g.jumpers.length === 1);
+  check('loss: the plane blinks instead of ending the flight', g.phase === 'crashed' && g.blink > 0);
+  for (let i = 0; i < 2 * 30; i++) g.update(1 / 30);
+  check('loss: the flight carries on at full health, score kept', g.phase === 'flying' && g.hull === 100 && g.score === 500, 'score ' + g.score);
+}
+
+// 9b. Pause: nothing moves while the game is paused.
+{
+  const settings = { mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const g = new PA.Game(settings);
+  g.onSound = () => {};
+  g.paused = true;
+  const x0 = g.plane.X, t0 = g.time;
+  for (let i = 0; i < 60; i++) g.update(1 / 30);
+  check('pause: the plane and the clock stand still', g.plane.X === x0 && g.time === t0);
+}
+
+// 9c. Ammo: limited, and it comes back over time.
+{
+  const settings = { mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const g = new PA.Game(settings);
+  g.onSound = () => {};
+  g.mission.targets = [];
+  g.ammo = 10;
+  g.held.fire = true;
+  for (let i = 0; i < 3 * 30; i++) g.update(1 / 30);
+  g.held.fire = false;
+  check('ammo: firing uses it up to zero and no further', g.ammo <= 1 && g.ammo >= 0, 'ammo ' + g.ammo.toFixed(1));
+  const before = g.ammo;
   for (let i = 0; i < 5 * 30; i++) g.update(1 / 30);
-  check('eject: the flight restarts after the parachute', g.phase === 'flying' && g.hull === 100);
+  check('ammo: it comes back over time', g.ammo > before + 5, 'ammo ' + g.ammo.toFixed(1));
+}
+
+// 9d. Enemy waves come about every minute; allies fly and do not shoot.
+{
+  const settings = { mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 2, allies: 1 };
+  const g = new PA.Game(settings);
+  g.onSound = () => {};
+  g.mission.targets = g.mission.targets.filter(t => t.faction === 'ally');
+  const enemies0 = g.mission.targets.filter(t => t.faction === 'enemy').length;
+  for (let i = 0; i < 10 * 30; i++) g.update(1 / 30);
+  const enemies1 = g.mission.targets.filter(t => t.faction === 'enemy').length;
+  check('waves: the first wave arrives soon after take-off', enemies1 >= 2 && enemies0 === 0, 'enemies ' + enemies1);
+  const ally = g.mission.targets.find(t => t.faction === 'ally');
+  const a0 = ally.X;
+  for (let i = 0; i < 2 * 30; i++) g.update(1 / 30);
+  check('allies: they fly around (they move)', ally.X !== a0);
+  check('allies: they do not shoot', !g.shells.some(s => s.warn === undefined && Math.hypot(s.X - ally.X, s.Z - ally.Z) < 2));
+}
+
+// 9e. Damage shows as a mark, even when invincible (and costs nothing then).
+{
+  const settings = { mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 1, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const g = new PA.Game(settings);
+  g.onSound = () => {};
+  g.mission.targets = [];
+  g.shells.push({ X: g.plane.X, Z: g.plane.Z, h: g.plane.h, vX: 0, vY: 0, vZ: 0, life: 2 });
+  g.update(1 / 30);
+  check('damage: a hit shows as a mark, invincible keeps the hull', g.marks.length === 1 && g.hull === 100, 'marks ' + g.marks.length);
 }
 
 // 10. Safe flight: a plane diving at the ground is pulled up and does not crash.

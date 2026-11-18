@@ -1,6 +1,6 @@
 # Paper Airplanes × A-10 Warthog — Schematic
 
-**Status:** MVP 0.5 (round 4: notes for improvement with identifiers and an index, closer and larger things; round 3: family sign-in, radar, missile stock and auto reload, gun modes, safe flight, invincibility, a first world of 15 kinds of target and sea; headless-tested; not device-tested). Questions: `convo/convo v0.5.md`. Track A, family play. Questions and answers: `convo/convo v0.1.md` to `convo v0.3.md`.
+**Status:** MVP 0.6 (round 5: moving vehicles, enemy fighters in waves, allied fighters, lakes, forests, road stripes, clouds, pause while settings are open, four sound sliders, limited recharging ammo, damage marks, blink and carry on. Earlier: round 4: notes for improvement with identifiers and an index, closer and larger things; round 3: family sign-in, radar, missile stock and auto reload, gun modes, safe flight, invincibility, a first world of 15 kinds of target and sea; headless-tested; not device-tested). Questions: `convo/convo v0.5.md`. Track A, family play. Questions and answers: `convo/convo v0.1.md` to `convo v0.3.md`.
 **Platform:** TypeScript source (`src/`) compiled to `js/game.js`, which the page runs. Canvas 400 × 225 internal, scaled with no smoothing. No image files, no server, no database.
 **Remix:** taken from fighter-jet-eject (a standalone export of the UI8 Forge fighter; no licence file; not copied): the sprite-stacked look as a goal, and the chase camera. From the 1990s A-10 Tank Killer (Jimmy's reference): free play, shooting ground targets. From Paper Airplanes: the four forces, and a paper glider mode.
 
@@ -85,3 +85,14 @@ Flight: plane (A-10 jet / paper glider), steering (drag / joystick), new flight.
 - **Identifiers:** HP, TIME, ALT, SPD, AOA, VIEW, PLANE, MISS, GUN, LEFT, SCORE, SAFE, INV (in `src/notes.ts`).
 - **Closer things:** near objects grow up to three times larger (inside 220 m); far ones keep at least 7 px; the largest is 150 px.
 - **General notes table:** `supabase/001_gen_notes.sql` (with a rollback test). Not applied. Sending to the table is not written yet.
+
+## Round 5 (0.6)
+
+- **World:** moving vehicles on the road; lakes (`isLake`), forests (`isForest`), a main road with stripes (`ROAD_X`), clouds high up. The sea is east of 1,300 m.
+- **Air:** enemy fighters come in a wave about every minute (setting 0–6, default 2): they turn toward the plane and fire warning shells. Allied fighters orbit (setting 0–4, default 1) and never fire; hitting one costs points; lost allies are replaced after 40 s.
+- **Pause:** opening ⚙️ pauses the game and the music.
+- **Sound:** four sliders (music and engine, guns, big turns, incoming warning). A soft looping melody; a rush of air on hard turns.
+- **Ammo:** 240 rounds, recharging at 4 per second.
+- **Damage:** a smoke mark on the wing for each hit, even when invincible.
+- **A loss:** a blink, then a new flight with full health and new targets; the score is kept.
+- **Assets:** `src/assets/aircraft.ts` gains the enemy fighter and the ally; `src/assets/decor.ts` holds the tree. Sizes grow when close (up to 3×).

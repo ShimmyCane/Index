@@ -10,6 +10,7 @@ namespace PA {
     airfield: '#b48cf0',
     port: '#3d8bff',
     rail: '#8a6a4a',
+    air: '#8fe0bd',
   };
 
   export function radar(ctx: CanvasRenderingContext2D, g: Game, size: number): void {
@@ -46,7 +47,7 @@ namespace PA {
       if (!q) continue;
       const info = KINDS[t.kind];
       const gunner = info && info.gun;
-      ctx.fillStyle = gunner ? '#ffb02e' : DOT[info ? info.group : 'army'];
+      ctx.fillStyle = t.faction === 'enemy' ? '#ff6b6b' : gunner ? '#ffb02e' : DOT[info ? info.group : 'army'];
       ctx.fillRect(Math.round(q[0]) - 2, Math.round(q[1]) - 2, 4, 4);
     }
     for (const h of g.mission.hoops) {

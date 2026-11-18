@@ -20,6 +20,7 @@
     "src/assets/vehicles.ts",
     "src/assets/buildings.ts",
     "src/assets/naval.ts",
+    "src/assets/decor.ts",
     "src/flight.ts",
     "src/world.ts",
     "src/audio.ts",

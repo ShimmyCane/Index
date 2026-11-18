@@ -60,3 +60,9 @@ A browser 2.5D pixel-art flight game, built small enough to read, so Jimmy can s
 - Added: notes for improvement (numbered, status, sort, identifier index, copy); closer and larger ground things; general notes SQL (not applied); feedback_notes and settings_gear skills updated.
 - Checks: 31 checks (`npm test`); browser: notes save, status change, sort; no page errors.
 - Next: sending notes to the general table when signed in (after the SQL is applied); close-up sprite drawings.
+
+## Round 5 (convo v0.7)
+
+- Added: moving vehicles on the road, enemy fighters in waves (about every minute), allied orbiting fighters, lakes, forests, a striped road, clouds, pause while settings are open, four sound sliders with a soft melody, limited and recharging gun ammo, damage marks, and a blink-and-carry-on after a loss (score kept).
+- Checks: `npm test` (all pass, incl. pause, ammo, waves, allies, damage marks, blink); browser: pause holds the clock, sliders update, no page errors.
+- Open: Q10–Q15 and Q18–Q19 in `convo/convo v0.7.md`.
