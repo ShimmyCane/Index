@@ -295,8 +295,100 @@ namespace PA {
     }
   }
 
+  // Sprite stacking: the plane is built from thin slices, one above another. The
+  // lower slices are darker, so the body reads as solid from every angle.
+  const stackCache: { [name: string]: HTMLCanvasElement } = {};
+  const STACK_LAYERS = 4;
+
+  function stacked(img: HTMLCanvasElement, name: string): HTMLCanvasElement {
+    if (stackCache[name]) return stackCache[name];
+    const out = document.createElement('canvas');
+    out.width = img.width;
+    out.height = img.height + STACK_LAYERS;
+    const ctx = out.getContext('2d');
+    if (!ctx) return img;
+    for (let layer = STACK_LAYERS - 1; layer >= 0; layer--) {
+      const y = STACK_LAYERS - layer;   // layer 0 is the top slice, drawn last
+      const tmp = document.createElement('canvas');
+      tmp.width = img.width;
+      tmp.height = img.height;
+      const t = tmp.getContext('2d');
+      if (!t) continue;
+      t.drawImage(img, 0, 0);
+      if (layer > 0) {
+        t.globalCompositeOperation = 'source-atop';
+        t.fillStyle = 'rgba(47,45,61,' + (0.12 + 0.12 * layer).toFixed(2) + ')';
+        t.fillRect(0, 0, tmp.width, tmp.height);
+      }
+      ctx.drawImage(tmp, 0, y - (layer === 0 ? 0 : 0));
+    }
+    stackCache[name] = out;
+    return out;
+  }
+
+  // Ring of the lock and the collapsing warning ring are drawn in screen space.
+  function lockRing(ctx: CanvasRenderingContext2D, g: Game, c: Cam): void {
+    const t = g.lock.target;
+    if (!t || g.lock.progress <= 0) return;
+    const q = project(c, t.X, altOf(t), t.Z);
+    if (!q) return;
+    const r = 26 - g.lock.progress * 14;
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(q[0], q[1], r, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = g.lock.progress >= 1 ? '#ff6b6b' : '#ffe08a';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(q[0], q[1], r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * g.lock.progress); ctx.stroke();
+  }
+
+  // The tag: a ring around the plane that collapses as the enemy missile closes in.
+  function warnRing(ctx: CanvasRenderingContext2D, g: Game): void {
+    if (!g.tagged) return;
+    const flash = Math.floor(g.time * 8) % 2 === 0;
+    const k = Math.max(0, Math.min(1, g.tagDist / 900));
+    const r = 18 + k * 70;
+    ctx.strokeStyle = flash ? '#ff3b3b' : INK;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(W / 2, H * PLANE_SCREEN_Y, r, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // Enemy missiles: a red streak with a bright head.
+  function enemyMissiles(ctx: CanvasRenderingContext2D, g: Game, c: Cam): void {
+    for (const m of g.missiles) {
+      if (!m.enemy) continue;
+      const p = project(c, m.X, m.h, m.Z);
+      if (!p) continue;
+      const tail = project(c, m.X - m.vX * 0.08, m.h - m.vY * 0.08, m.Z - m.vZ * 0.08);
+      if (tail) {
+        ctx.strokeStyle = '#ff6b6b';
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(tail[0], tail[1]); ctx.lineTo(p[0], p[1]); ctx.stroke();
+      }
+      ctx.fillStyle = '#fffdfa';
+      ctx.fillRect(Math.round(p[0]) - 2, Math.round(p[1]) - 2, 4, 4);
+    }
+  }
+
+  function wisps(ctx: CanvasRenderingContext2D, g: Game, c: Cam): void {
+    for (const w of g.wisps) {
+      const q = project(c, w.X, w.h, w.Z);
+      if (!q) continue;
+      const k = Math.max(0, w.life / w.max);
+      ctx.globalAlpha = Math.min(0.9, k * 1.2);
+      ctx.fillStyle = w.color;
+      const r = Math.max(1, (w.size * (1.2 - k) * FOCAL) / (q[2] * 0.9));
+      ctx.beginPath();
+      ctx.arc(q[0], q[1], r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
   // The plane is always in the same place on the screen; the world moves past it.
-  // It blinks after a loss, and shows smoke on the wings where it has been hit.
+  // It grows from a quarter to a third of the screen width as the turn tightens, blinks
+  // after a loss, shows smoke on the wings where it has been hit, and trails flame when boosting.
   function plane(ctx: CanvasRenderingContext2D, g: Game, c: Cam): void {
     const p = g.plane;
     const shadow = project(c, p.X, groundAt(p.X, p.Z), p.Z);
@@ -309,13 +401,33 @@ namespace PA {
     }
     const blinkOff = g.phase === 'crashed' && Math.floor(g.blink * 8) % 2 === 0;
     const sx = W / 2, sy = H * PLANE_SCREEN_Y;
-    const img = sprite(g.settings.mode === 'glider' ? 'glider' : 'plane');
+    const name = g.settings.mode === 'glider' ? 'glider' : 'plane';
+    const base = sprite(name);
+    const img = name === 'plane' ? stacked(base, name) : base;
+    const tight = Math.min(1, Math.abs(p.bank) / AIR.bankMax);
+    const targetW = W * (0.25 + 0.08 * tight);
+    const scale = targetW / base.width;
     ctx.save();
     ctx.translate(sx, sy);
     ctx.rotate(p.bank);
     if (!blinkOff) {
-      ctx.drawImage(img, -Math.round((img.width * PLANE_SCALE) / 2), -Math.round((img.height * PLANE_SCALE) / 2),
-        img.width * PLANE_SCALE, img.height * PLANE_SCALE);
+      const dw = img.width * scale, dh = img.height * scale;
+      // Flame from the engines when boosting: two flickering tongues.
+      if (g.held.boost && g.phase === 'flying' && name === 'plane') {
+        for (const ex of [-4, 4]) {
+          const len = (8 + Math.random() * 6) * scale / 2;
+          const x0 = (ex * scale) / 1, y0 = (6 * scale) / 1;
+          ctx.fillStyle = '#ffb02e';
+          ctx.beginPath();
+          ctx.moveTo(x0 - 2, y0); ctx.lineTo(x0 + 2, y0); ctx.lineTo(x0, y0 + len);
+          ctx.closePath(); ctx.fill();
+          ctx.fillStyle = '#fff1b8';
+          ctx.beginPath();
+          ctx.moveTo(x0 - 1, y0); ctx.lineTo(x0 + 1, y0); ctx.lineTo(x0, y0 + len * 0.5);
+          ctx.closePath(); ctx.fill();
+        }
+      }
+      ctx.drawImage(img, -Math.round(dw / 2), -Math.round(dh / 2), Math.round(dw), Math.round(dh));
     }
     // Damage: a cloud of smoke on each wing, slowly lifting.
     for (const m of g.marks) {
@@ -323,11 +435,11 @@ namespace PA {
       const r = 2.5 + Math.sin(m.age * 3) * 0.6;
       ctx.fillStyle = 'rgba(255,253,250,0.85)';
       ctx.beginPath();
-      ctx.arc(m.x * PLANE_SCALE, (m.y - rise * 0.2) * PLANE_SCALE, r * PLANE_SCALE, 0, Math.PI * 2);
+      ctx.arc(m.x * scale, (m.y - rise * 0.2) * scale, r * scale, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = 'rgba(120,120,130,0.6)';
       ctx.beginPath();
-      ctx.arc(m.x * PLANE_SCALE + 2, (m.y - rise * 0.2 - 1) * PLANE_SCALE, r * PLANE_SCALE * 0.6, 0, Math.PI * 2);
+      ctx.arc(m.x * scale + 2, (m.y - rise * 0.2 - 1) * scale, r * scale * 0.6, 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.restore();
@@ -403,8 +515,12 @@ namespace PA {
     shots(ctx, c, g.shots, COL.bullet, 2);
     shots(ctx, c, g.shells, COL.shell, 2);
     missiles(ctx, g, c);
+    enemyMissiles(ctx, g, c);
+    wisps(ctx, g, c);
     puffs(ctx, g, c);
+    lockRing(ctx, g, c);
     if (g.settings.view !== 'cockpit') plane(ctx, g, c);
+    warnRing(ctx, g);
     if (g.settings.view === 'cockpit') cockpit(ctx, g);
     if (g.settings.forces) forces(ctx, g);
   }

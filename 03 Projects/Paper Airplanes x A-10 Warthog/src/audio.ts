@@ -163,6 +163,16 @@ namespace PA {
           this.tone(880, 0.12, 0.25, t, 'sine', undefined, this.busWarn!);
           this.tone(880, 0.12, 0.25, t + 0.2, 'sine', undefined, this.busWarn!);
           break;
+        case 'beep':
+          // Beep, beep: the tag. Speed comes from the game, pitch rises a little.
+          this.tone(1100, 0.07, 0.3, t, 'square', undefined, this.busWarn!);
+          break;
+        case 'lock':
+          this.tone(1500, 0.04, 0.12, t, 'sine', undefined, this.busWarn!);
+          break;
+        case 'chaff':
+          this.burst(0.35, 0.4, 3500, t, this.busGun!);
+          break;
         case 'chime':
           this.tone(660, 0.25, 0.1, t, 'sine', undefined, this.busMusic!);
           this.tone(990, 0.35, 0.1, t + 0.12, 'sine', undefined, this.busMusic!);

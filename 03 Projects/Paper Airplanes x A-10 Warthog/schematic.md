@@ -1,6 +1,6 @@
 # Paper Airplanes × A-10 Warthog — Schematic
 
-**Status:** MVP 0.6 (round 5: moving vehicles, enemy fighters in waves, allied fighters, lakes, forests, road stripes, clouds, pause while settings are open, four sound sliders, limited recharging ammo, damage marks, blink and carry on. Earlier: round 4: notes for improvement with identifiers and an index, closer and larger things; round 3: family sign-in, radar, missile stock and auto reload, gun modes, safe flight, invincibility, a first world of 15 kinds of target and sea; headless-tested; not device-tested). Questions: `convo/convo v0.5.md`. Track A, family play. Questions and answers: `convo/convo v0.1.md` to `convo v0.3.md`.
+**Status:** MVP 0.7 (round 6: two modes, targeting with lock time, enemy missiles with a tag and collapsing ring, tight-turn break, chaff, mission objectives and resupply, wisps, dust, flame, stacked plane sized 25–33%. Earlier: round 5: moving vehicles, enemy fighters in waves, allied fighters, lakes, forests, road stripes, clouds, pause while settings are open, four sound sliders, limited recharging ammo, damage marks, blink and carry on. Earlier: round 4: notes for improvement with identifiers and an index, closer and larger things; round 3: family sign-in, radar, missile stock and auto reload, gun modes, safe flight, invincibility, a first world of 15 kinds of target and sea; headless-tested; not device-tested). Questions: `convo/convo v0.5.md`. Track A, family play. Questions and answers: `convo/convo v0.1.md` to `convo v0.3.md`.
 **Platform:** TypeScript source (`src/`) compiled to `js/game.js`, which the page runs. Canvas 400 × 225 internal, scaled with no smoothing. No image files, no server, no database.
 **Remix:** taken from fighter-jet-eject (a standalone export of the UI8 Forge fighter; no licence file; not copied): the sprite-stacked look as a goal, and the chase camera. From the 1990s A-10 Tank Killer (Jimmy's reference): free play, shooting ground targets. From Paper Airplanes: the four forces, and a paper glider mode.
 
@@ -96,3 +96,11 @@ Flight: plane (A-10 jet / paper glider), steering (drag / joystick), new flight.
 - **Damage:** a smoke mark on the wing for each hit, even when invincible.
 - **A loss:** a blink, then a new flight with full health and new targets; the score is kept.
 - **Assets:** `src/assets/aircraft.ts` gains the enemy fighter and the ally; `src/assets/decor.ts` holds the tree. Sizes grow when close (up to 3×).
+
+## Round 6 (0.7)
+
+- **Modes:** normal (limited; three hits to down; ⚙️ reload; objectives restock) and Felix (easy; never down; unlimited).
+- **Targeting:** hold MISSILE ~1.2 s on a target in front to lock. CHAFF (button or C) drops two decoys.
+- **Tag:** an enemy missile shows TAGGED, beeps faster as it closes, and a red ring collapses. A hard turn (held ~0.6 s) breaks its lock.
+- **Graphics:** stacked-slice plane (four slices), 25–33% of the screen by turn tightness, wisps at the wing tips, a boost flame, dust near the ground, a cloud trail.
+- **Not yet:** moving ships; better sprites; loop; second missile slot; a mission loading screen.

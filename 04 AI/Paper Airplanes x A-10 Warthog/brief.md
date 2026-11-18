@@ -66,3 +66,9 @@ A browser 2.5D pixel-art flight game, built small enough to read, so Jimmy can s
 - Added: moving vehicles on the road, enemy fighters in waves (about every minute), allied orbiting fighters, lakes, forests, a striped road, clouds, pause while settings are open, four sound sliders with a soft melody, limited and recharging gun ammo, damage marks, and a blink-and-carry-on after a loss (score kept).
 - Checks: `npm test` (all pass, incl. pause, ammo, waves, allies, damage marks, blink); browser: pause holds the clock, sliders update, no page errors.
 - Open: Q10–Q15 and Q18–Q19 in `convo/convo v0.7.md`.
+
+## Round 6 (convo v0.8)
+
+- Added: normal and Felix modes; a lock that takes ~1.2 s; enemy missiles with a tag, a collapsing ring and a break by hard turn; chaff (button and C); mission objectives with a full resupply; ⚙️ reload (45 s cooldown); the plane at 25–33% of the screen by turn; stacked-slice plane; wisps, dust, boost flame, cloud trail.
+- Checks: 49 in `tools/flight_test.js` (all pass); browser: a hard turn with boost, the Felix switch, the reload hint; no page errors.
+- Open: Q20–Q22 in `convo/convo v0.8.md`. Ships still static; sprites are first drafts.

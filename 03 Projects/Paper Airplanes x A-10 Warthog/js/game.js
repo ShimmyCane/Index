@@ -760,6 +760,16 @@ var PA;
                     this.tone(880, 0.12, 0.25, t, 'sine', undefined, this.busWarn);
                     this.tone(880, 0.12, 0.25, t + 0.2, 'sine', undefined, this.busWarn);
                     break;
+                case 'beep':
+                    // Beep, beep: the tag. Speed comes from the game, pitch rises a little.
+                    this.tone(1100, 0.07, 0.3, t, 'square', undefined, this.busWarn);
+                    break;
+                case 'lock':
+                    this.tone(1500, 0.04, 0.12, t, 'sine', undefined, this.busWarn);
+                    break;
+                case 'chaff':
+                    this.burst(0.35, 0.4, 3500, t, this.busGun);
+                    break;
                 case 'chime':
                     this.tone(660, 0.25, 0.1, t, 'sine', undefined, this.busMusic);
                     this.tone(990, 0.35, 0.1, t + 0.12, 'sine', undefined, this.busMusic);
@@ -1020,36 +1030,52 @@ var PA;
     }
     PA.statusCount = statusCount;
 })(PA || (PA = {}));
-// Game state and rules: guns and their aim, limited ammo that recharges, missiles, enemy
-// waves and allies, anti-aircraft fire, rings, the safe-flight floor, invincibility,
-// damage marks, the blink and carry-on after a loss, and free play.
+// Game state and rules. Two modes: "normal" (limited ammo and missiles, three hits and the
+// plane is down, mission objectives restock it) and "felix" (easy: never goes down, unlimited
+// supplies). Targeting takes a moment to lock. Enemy fighters fire homing missiles; a tag
+// warns of them, and a tight turn or chaff can break them off.
 var PA;
 (function (PA) {
     PA.MISSILE_MAX = 6;
     PA.AMMO_MAX = 240;
+    PA.CHAFF_MAX = 4;
+    PA.HITS_TO_DOWN = 3; // normal mode: three hits and the plane is down
+    const HIT_DAMAGE = 100 / PA.HITS_TO_DOWN; // each hit takes a third of the hull
     const AMMO_RECHARGE = 4; // rounds per second, always coming back
-    const SHOT_SPEED = 260; // m/s, the gun, relative to the plane
+    const RESUPPLY_COOL = 45; // seconds between reloads from ⚙️
+    const SHOT_SPEED = 260;
     const CRUISE_THROTTLE = 0.6;
     const BULLET_LIFE = 1.6;
     const SHELL_LIFE = 4;
-    const BLINK_SECONDS = 1.2; // the blink after a loss, then the flight carries on
-    const MISSILE_COOL = 1; // seconds between missiles
-    const MISSILE_RELOAD = 3; // seconds for one missile to come back (auto reload)
-    const MISSILE_SPEED = 180; // m/s
-    const MISSILE_TURN = 2.2; // radians per second at most
-    const MISSILE_RANGE = 900; // metres
-    const MISSILE_CONE = 0.45; // radians either side of the nose to lock on
-    const FLOOR = 30; // safe flight: below this height above ground the plane pulls up
-    const FLOOR_MIN = 8; // safe flight: below this it must not sink any further
-    const AIR_RANGE = 900; // the gun aims straight at aircraft within this range
-    const GROUND_RANGE = 700; // the gun depresses toward ground targets within this range
-    const WAVE_SECONDS = 60; // enemy waves come about every minute
-    const FIGHTER_SPEED = 120; // m/s
-    const FIGHTER_TURN = 0.7; // radians per second
+    const BLINK_SECONDS = 1.2;
+    const MISSILE_COOL = 1;
+    const MISSILE_RELOAD = 3;
+    const MISSILE_SPEED = 180;
+    const MISSILE_TURN = 2.2;
+    const MISSILE_RANGE = 900;
+    const MISSILE_CONE = 0.45;
+    const LOCK_TIME = 1.2; // seconds of steady aim before a missile locks
+    const ENEMY_MISSILE_SPEED = 170;
+    const ENEMY_MISSILE_TURN = 2.5;
+    const ENEMY_MISSILE_RANGE = 1000;
+    const ENEMY_MISSILE_COOL = 7;
+    const BREAK_TURN = 0.6; // a yaw this hard, held this long, breaks the enemy's lock
+    const BREAK_TIME = 0.6;
+    const CHAFF_LIFE = 4;
+    const CHAFF_DECOY_RANGE = 320;
+    const FLOOR = 30;
+    const FLOOR_MIN = 8;
+    const AIR_RANGE = 900;
+    const GROUND_RANGE = 700;
+    const WAVE_SECONDS = 60;
+    const FIGHTER_SPEED = 120;
+    const FIGHTER_TURN = 0.7;
     const FIGHTER_FIRE_RANGE = 380;
-    const SHELL_WARN_RANGE = 300; // a shell this close sounds the warning
-    const FRIEND_RESPAWN = 40; // seconds before a lost ally is replaced
-    const MARK_LIFE = 999; // damage marks stay until the flight is restarted
+    const SHELL_WARN_RANGE = 300;
+    const FRIEND_RESPAWN = 40;
+    const WISP_LIFE = 1.4;
+    const KEEP_AHEAD = 6;
+    const OBJECTIVE_GROUND = [4, 5, 6]; // ground targets to destroy for a mission (cycles)
     class Game {
         constructor(settings) {
             this.settings = settings;
@@ -1059,6 +1085,7 @@ var PA;
             this.score = 0;
             this.kills = 0;
             this.hull = 100;
+            this.hits = 0;
             this.hoopsPassed = 0;
             this.time = 0;
             this.fireCool = 0;
@@ -1067,15 +1094,29 @@ var PA;
             this.missileStock = PA.MISSILE_MAX;
             this.missileCool = 0;
             this.reloadTimer = 0;
+            this.chaff = PA.CHAFF_MAX;
+            this.resupplyCool = 0;
             this.waveTimer = 0;
+            this.enemyMissileCool = 0;
             this.allyTimers = [];
             this.aim = { yaw: 0, pitch: 0, mode: 'straight' };
+            this.lock = { target: null, progress: 0 };
+            this.tagged = false; // an enemy missile is after the plane
+            this.tagDist = 0; // its distance, metres
+            this.breakTimer = 0;
+            this.beepTimer = 0;
+            this.objectiveGoal = 0;
+            this.objectiveDone = 0;
+            this.missionNumber = 1;
+            this.resupplied = 0; // seconds left of the "resupplied" banner
             this.floorActive = false;
             this.shots = [];
             this.shells = [];
             this.missiles = [];
+            this.decoys = [];
             this.puffs = [];
             this.marks = [];
+            this.wisps = [];
             this.warned = false;
             this.held = { fire: false, boost: false, missile: false };
             this.axes = { yaw: 0, pitch: 0 };
@@ -1083,9 +1124,13 @@ var PA;
             this.rand = PA.random(1);
             this.newFlight(Math.floor(Math.random() * 100000));
         }
-        // A new flight: new targets, full health, full ammo and missiles. Score carries on when keepScore is set.
-        newFlight(seed, keepScore = false) {
+        get felix() {
+            return this.settings.difficulty === 'felix';
+        }
+        // A new flight or mission: new targets, full health; supplies are kept (or refilled).
+        newFlight(seed, keepScore = false, refill = true) {
             const score = this.score, kills = this.kills;
+            const ammo = this.ammo, missiles = this.missileStock, chaff = this.chaff;
             this.seed = seed;
             this.mission = PA.makeMission(this.settings.mode, seed);
             this.rand = PA.random(seed + 7);
@@ -1100,24 +1145,62 @@ var PA;
             this.score = keepScore ? score : 0;
             this.kills = keepScore ? kills : 0;
             this.hull = 100;
+            this.hits = 0;
             this.hoopsPassed = 0;
             this.time = 0;
             this.fireCool = 0;
             this.blink = 0;
-            this.ammo = PA.AMMO_MAX;
-            this.missileStock = PA.MISSILE_MAX;
+            this.ammo = refill || this.felix ? PA.AMMO_MAX : ammo;
+            this.missileStock = refill || this.felix ? PA.MISSILE_MAX : missiles;
+            this.chaff = refill || this.felix ? PA.CHAFF_MAX : chaff;
             this.missileCool = 0;
             this.reloadTimer = 0;
-            this.waveTimer = 8; // the first wave comes soon after take-off
+            this.waveTimer = 8;
+            this.enemyMissileCool = 6;
             this.allyTimers = [];
+            this.lock = { target: null, progress: 0 };
+            this.tagged = false;
+            this.breakTimer = 0;
+            this.objectiveGoal = OBJECTIVE_GROUND[(this.missionNumber - 1) % OBJECTIVE_GROUND.length];
+            this.objectiveDone = 0;
             for (let i = 0; i < this.settings.allies; i++) {
                 this.mission.targets.push(PA.spawnAir(this.rand, 0, 0, false));
             }
             this.shots = [];
             this.shells = [];
             this.missiles = [];
+            this.decoys = [];
             this.puffs = [];
             this.marks = [];
+            this.wisps = [];
+        }
+        // A reload from ⚙️ (normal mode only): the gun and missiles come back, with a cooldown.
+        reloadFromSettings() {
+            if (this.felix || this.resupplyCool > 0)
+                return false;
+            this.ammo = PA.AMMO_MAX;
+            this.missileStock = Math.min(PA.MISSILE_MAX, this.missileStock + 2);
+            this.resupplyCool = RESUPPLY_COOL;
+            this.onSound('chime');
+            return true;
+        }
+        fireChaff() {
+            if (this.phase !== 'flying' || this.settings.mode !== 'jet')
+                return;
+            if (!this.felix && this.chaff < 1)
+                return;
+            if (!this.felix)
+                this.chaff--;
+            const p = this.plane;
+            for (let i = 0; i < 2; i++) {
+                this.decoys.push({
+                    X: p.X - Math.sin(p.yaw) * 6 + (i ? 3 : -3), Z: p.Z - Math.cos(p.yaw) * 6, h: p.h,
+                    vX: p.vx * Math.sin(p.yaw) * 0.5, vY: -3, vZ: p.vx * Math.cos(p.yaw) * 0.5, life: CHAFF_LIFE,
+                });
+            }
+            for (let i = 0; i < 12; i++)
+                this.puffs.push(sparkle(this.rand, p.X, p.h, p.Z));
+            this.onSound('chaff');
         }
         update(dtIn) {
             if (this.paused)
@@ -1125,11 +1208,13 @@ var PA;
             const dt = Math.min(dtIn, 1 / 30);
             this.updatePuffs(dt);
             this.updateMarks(dt);
+            this.updateWisps(dt);
             this.blink = Math.max(0, this.blink - dt);
+            this.resupplied = Math.max(0, this.resupplied - dt);
+            this.resupplyCool = Math.max(0, this.resupplyCool - dt);
             if (this.phase === 'crashed') {
-                // Blink once, then carry on in a new flight with full health and new conditions.
                 if (this.blink <= 0)
-                    this.newFlight(this.seed + 1, true);
+                    this.newFlight(this.seed + 1, true, false);
                 return;
             }
             if (this.phase !== 'flying')
@@ -1151,8 +1236,7 @@ var PA;
                     this.onSound('land');
                     return;
                 }
-                if (this.settings.invincible === 1) {
-                    // Invincible: the ground only bounces the plane back up.
+                if (this.settings.invincible === 1 || this.felix) {
                     this.plane.h = PA.groundAt(this.plane.X, this.plane.Z) + 4;
                     this.plane.vy = Math.max(this.plane.vy, 6);
                 }
@@ -1166,20 +1250,25 @@ var PA;
                 this.updateWaves(dt);
                 this.updateAir(dt);
                 this.updateGuns(dt);
+                this.updateLock(dt);
                 this.updateMissiles(dt);
+                this.updateEnemyMissiles(dt);
+                this.updateDecoys(dt);
                 this.updateShots(dt);
                 this.updateShells(dt);
                 this.updateGunners(dt);
+                this.updateTag(dt);
+                this.updateObjective();
                 this.keepTargets();
-                if (this.hull <= 0 && this.settings.invincible !== 1)
+                this.emitWisps(dt);
+                this.emitDust();
+                if (this.hull <= 0 && !this.felix && this.settings.invincible !== 1)
                     this.crash();
             }
             else {
                 this.checkRings();
             }
         }
-        // Safe flight: a floor above the ground. Near it the plane levels out and pulls up;
-        // very close, it cannot sink any further.
         applyFloor(pilot) {
             const p = this.plane;
             const agl = p.h - PA.groundAt(p.X, p.Z);
@@ -1191,7 +1280,7 @@ var PA;
                     p.vy = Math.max(p.vy, 0);
             }
         }
-        // A loss: the plane blinks once, then the flight carries on (see update).
+        // Downed (normal mode): the plane blinks once, then carries on with full health.
         crash() {
             this.phase = 'crashed';
             this.hull = 0;
@@ -1199,23 +1288,72 @@ var PA;
             this.explode(this.plane.X, this.plane.h, this.plane.Z, 26);
             this.onSound('crash');
         }
-        // Damage shows as a mark on the wing (and a puff of smoke) whether or not the hit counts.
-        addMark() {
-            this.marks.push({
-                x: (this.rand() < 0.5 ? -1 : 1) * (5 + this.rand() * 6),
-                y: -1 + this.rand() * 2,
-                age: 0,
-            });
+        // A hit: the damage shows as a mark on the wing; in normal mode it takes a third of the hull.
+        takeHit() {
+            this.marks.push({ x: (this.rand() < 0.5 ? -1 : 1) * (5 + this.rand() * 6), y: -1 + this.rand() * 2, age: 0 });
             if (this.marks.length > 12)
                 this.marks.shift();
+            this.hits++;
+            if (this.settings.invincible !== 1 && !this.felix) {
+                this.hull = Math.max(0, this.hull - HIT_DAMAGE);
+            }
         }
         updateMarks(dt) {
             for (const m of this.marks)
                 m.age += dt;
-            this.marks = this.marks.filter(m => m.age < MARK_LIFE);
         }
-        // The ammo comes back all the time, slowly; firing uses it faster than that.
+        // Wisps stream from the wing tips in a tight turn; clouds come from the boost.
+        emitWisps(dt) {
+            const p = this.plane;
+            const tight = Math.abs(p.bank) / PA.AIR.bankMax;
+            if (tight < 0.5 || this.phase !== 'flying')
+                return;
+            const count = Math.floor(tight * 5 * dt * 30) + (this.rand() < tight * dt * 6 ? 1 : 0);
+            const cosY = Math.cos(p.yaw), sinY = Math.sin(p.yaw);
+            for (let i = 0; i < count; i++) {
+                const side = this.rand() < 0.5 ? -1 : 1;
+                const span = 8;
+                this.wisps.push({
+                    X: p.X + cosY * side * span, Z: p.Z - sinY * side * span, h: p.h,
+                    vX: 0, vY: 1, vZ: 0, life: WISP_LIFE, max: WISP_LIFE, color: '#ffffff', size: 2 + this.rand() * 2,
+                });
+            }
+            if (this.held.boost && this.rand() < 0.4) {
+                this.wisps.push({
+                    X: p.X - Math.sin(p.yaw) * 10, Z: p.Z - Math.cos(p.yaw) * 10, h: p.h - 1,
+                    vX: (this.rand() - 0.5) * 2, vY: 1.5, vZ: (this.rand() - 0.5) * 2,
+                    life: 1.2, max: 1.2, color: '#fffdfa', size: 4 + this.rand() * 3,
+                });
+            }
+        }
+        // Dust is kicked up when the plane is low and moving fast.
+        emitDust() {
+            const p = this.plane;
+            const agl = p.h - PA.groundAt(p.X, p.Z);
+            if (agl > 6 || p.speed < 40 || this.rand() > 0.35)
+                return;
+            this.puffs.push({
+                X: p.X + (this.rand() - 0.5) * 10, Z: p.Z + (this.rand() - 0.5) * 10, h: PA.groundAt(p.X, p.Z) + 0.5,
+                vX: (this.rand() - 0.5) * 6, vY: 2 + this.rand() * 3, vZ: (this.rand() - 0.5) * 6,
+                life: 0.6, max: 0.6, color: '#e6dcc0', size: 2 + this.rand() * 2,
+            });
+        }
+        updateWisps(dt) {
+            for (const w of this.wisps) {
+                w.life -= dt;
+                w.X += w.vX * dt;
+                w.Z += w.vZ * dt;
+                w.h += w.vY * dt;
+            }
+            this.wisps = this.wisps.filter(w => w.life > 0);
+        }
         updateReload(dt) {
+            if (this.felix) {
+                this.ammo = PA.AMMO_MAX;
+                this.missileStock = PA.MISSILE_MAX;
+                this.chaff = PA.CHAFF_MAX;
+                return;
+            }
             this.ammo = Math.min(PA.AMMO_MAX, this.ammo + AMMO_RECHARGE * dt);
             if (this.settings.autoReload !== 1 || this.missileStock >= PA.MISSILE_MAX) {
                 this.reloadTimer = 0;
@@ -1227,7 +1365,21 @@ var PA;
                 this.missileStock++;
             }
         }
-        // A wave of enemy fighters about every minute, and a replacement for each lost ally.
+        // Mission objective: destroy a number of ground targets. Finishing restocks everything.
+        updateObjective() {
+            if (this.objectiveDone < this.objectiveGoal)
+                return;
+            this.missionNumber++;
+            this.score += 500;
+            this.ammo = PA.AMMO_MAX;
+            this.missileStock = PA.MISSILE_MAX;
+            this.chaff = PA.CHAFF_MAX;
+            this.hull = 100;
+            this.hits = 0;
+            this.resupplied = 4;
+            this.onSound('chime');
+            this.newFlight(this.seed + 1, true, true);
+        }
         updateWaves(dt) {
             this.waveTimer -= dt;
             if (this.waveTimer <= 0) {
@@ -1236,7 +1388,6 @@ var PA;
                     this.mission.targets.push(PA.spawnAir(this.rand, this.plane.X, this.plane.Z, true));
                 }
             }
-            // One replacement timer per missing ally (never more timers than the setting asks for).
             const allies = this.mission.targets.filter(t => t.faction === 'ally' && t.alive).length;
             if (allies + this.allyTimers.length < this.settings.allies) {
                 this.allyTimers.push(FRIEND_RESPAWN);
@@ -1248,7 +1399,6 @@ var PA;
                 return false;
             });
         }
-        // Moves the flying things: enemy fighters turn toward the plane and fire; allies orbit.
         updateAir(dt) {
             var _a, _b;
             const p = this.plane;
@@ -1288,8 +1438,32 @@ var PA;
                     t.h = 90;
                 }
             }
+            // Enemy fighters also fire a homing missile now and then, when the plane is in front and near.
+            this.enemyMissileCool -= dt;
+            if (this.enemyMissileCool <= 0) {
+                for (const t of this.mission.targets) {
+                    if (t.faction !== 'enemy' || !t.alive || t.h === undefined)
+                        continue;
+                    const d = Math.hypot(p.X - t.X, p.Z - t.Z);
+                    if (d < ENEMY_MISSILE_RANGE && d > 250) {
+                        this.enemyMissileCool = ENEMY_MISSILE_COOL;
+                        this.launchEnemyMissile(t);
+                        break;
+                    }
+                }
+            }
         }
-        // One shell from a ground gun or a fighter, aimed where the plane will be.
+        launchEnemyMissile(t) {
+            var _a, _b;
+            const p = this.plane;
+            const dx = p.X - t.X, dz = p.Z - t.Z, dh = p.h - ((_a = t.h) !== null && _a !== void 0 ? _a : p.h);
+            const d = Math.hypot(dx, dz, dh) || 1;
+            this.missiles.push({
+                X: t.X, Z: t.Z, h: (_b = t.h) !== null && _b !== void 0 ? _b : p.h,
+                vX: dx / d * ENEMY_MISSILE_SPEED, vY: dh / d * ENEMY_MISSILE_SPEED, vZ: dz / d * ENEMY_MISSILE_SPEED,
+                life: 9, target: null, enemy: true,
+            });
+        }
         fireAt(t, speed, warn) {
             const p = this.plane;
             const gy = PA.altOf(t) + 2;
@@ -1309,8 +1483,8 @@ var PA;
             });
             this.onSound('thud');
         }
-        // Missiles lock on to any enemy or ground target in front. Allies are never locked.
-        findLock() {
+        // Targeting: hold MISSILE on a target in front for LOCK_TIME to lock; then a missile goes.
+        candidate() {
             const p = this.plane;
             const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
             let best = null;
@@ -1331,41 +1505,52 @@ var PA;
             }
             return best;
         }
-        updateMissiles(dt) {
+        updateLock(dt) {
             this.missileCool -= dt;
-            const p = this.plane;
-            if (this.held.missile && this.missileCool <= 0 && this.missileStock > 0) {
-                const target = this.findLock();
-                if (target) {
-                    this.missileCool = MISSILE_COOL;
-                    this.missileStock--;
-                    const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
-                    this.missiles.push({
-                        X: p.X + sinY * 3, Z: p.Z + cosY * 3, h: p.h,
-                        vX: p.vx * sinY + MISSILE_SPEED * sinY, vZ: p.vx * cosY + MISSILE_SPEED * cosY, vY: p.vy,
-                        life: 6, target,
-                    });
-                    this.onSound('gun');
-                }
+            if (!this.held.missile) {
+                this.lock = { target: null, progress: 0 };
+                return;
             }
+            const cand = this.missileStock > 0 && this.missileCool <= 0 ? this.candidate() : null;
+            if (!cand) {
+                this.lock = { target: null, progress: 0 };
+                return;
+            }
+            if (this.lock.target !== cand) {
+                this.lock = { target: cand, progress: 0 };
+                this.onSound('lock');
+            }
+            this.lock.progress = Math.min(1, this.lock.progress + dt / LOCK_TIME);
+            if (this.lock.progress >= 1) {
+                this.fireMissile(cand);
+                this.lock = { target: null, progress: 0 };
+            }
+        }
+        fireMissile(target) {
+            const p = this.plane;
+            this.missileCool = MISSILE_COOL;
+            this.missileStock--;
+            const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
+            this.missiles.push({
+                X: p.X + sinY * 3, Z: p.Z + cosY * 3, h: p.h,
+                vX: p.vx * sinY + MISSILE_SPEED * sinY, vZ: p.vx * cosY + MISSILE_SPEED * cosY, vY: p.vy,
+                life: 6, target,
+            });
+            this.onSound('gun');
+        }
+        updateMissiles(dt) {
             const keep = [];
             for (const m of this.missiles) {
+                if (m.enemy) {
+                    keep.push(m);
+                    continue;
+                }
                 m.life -= dt;
                 const target = m.target;
                 if (target && target.alive) {
                     const tg = PA.altOf(target) + 1;
                     const dx = target.X - m.X, dy = tg - m.h, dz = target.Z - m.Z;
-                    const d = Math.hypot(dx, dy, dz) || 1;
-                    const sp = Math.hypot(m.vX, m.vY, m.vZ) || MISSILE_SPEED;
-                    const want = [dx / d * sp, dy / d * sp, dz / d * sp];
-                    const cur = [m.vX, m.vY, m.vZ];
-                    const step = MISSILE_TURN * dt * sp;
-                    const diff = [want[0] - cur[0], want[1] - cur[1], want[2] - cur[2]];
-                    const dl = Math.hypot(diff[0], diff[1], diff[2]) || 1;
-                    const k = Math.min(1, step / dl);
-                    m.vX = cur[0] + diff[0] * k;
-                    m.vY = cur[1] + diff[1] * k;
-                    m.vZ = cur[2] + diff[2] * k;
+                    this.steer(m, dx, dy, dz, MISSILE_SPEED, MISSILE_TURN, dt);
                 }
                 m.X += m.vX * dt;
                 m.Z += m.vZ * dt;
@@ -1388,8 +1573,143 @@ var PA;
             }
             this.missiles = keep;
         }
-        // The gun aims straight when there are aircraft about, and points down toward a
-        // ground target (with a declination for the bullet's drop) when one is in front.
+        // Turns a missile's velocity toward (dx, dy, dz) at most at the turn rate.
+        steer(m, dx, dy, dz, speed, turn, dt) {
+            const d = Math.hypot(dx, dy, dz) || 1;
+            const sp = Math.hypot(m.vX, m.vY, m.vZ) || speed;
+            const want = [dx / d * sp, dy / d * sp, dz / d * sp];
+            const cur = [m.vX, m.vY, m.vZ];
+            const step = turn * dt * sp;
+            const diff = [want[0] - cur[0], want[1] - cur[1], want[2] - cur[2]];
+            const dl = Math.hypot(diff[0], diff[1], diff[2]) || 1;
+            const k = Math.min(1, step / dl);
+            m.vX = cur[0] + diff[0] * k;
+            m.vY = cur[1] + diff[1] * k;
+            m.vZ = cur[2] + diff[2] * k;
+        }
+        // Enemy missiles: home on the plane, or on a chaff decoy if one is nearer. A hard turn breaks the lock.
+        updateEnemyMissiles(dt) {
+            const p = this.plane;
+            const keep = [];
+            for (const m of this.missiles) {
+                if (!m.enemy) {
+                    keep.push(m);
+                    continue;
+                }
+                m.life -= dt;
+                let aimX = p.X, aimY = p.h, aimZ = p.Z;
+                if (!m.broken) {
+                    let best = null;
+                    let bestD = Math.hypot(m.X - p.X, m.h - p.h, m.Z - p.Z);
+                    for (const d of this.decoys) {
+                        const dd = Math.hypot(m.X - d.X, m.h - d.h, m.Z - d.Z);
+                        if (dd < bestD && dd < CHAFF_DECOY_RANGE * 2) {
+                            best = d;
+                            bestD = dd;
+                        }
+                    }
+                    if (best) {
+                        aimX = best.X;
+                        aimY = best.h;
+                        aimZ = best.Z;
+                    }
+                    this.steer(m, aimX - m.X, aimY - m.h, aimZ - m.Z, ENEMY_MISSILE_SPEED, ENEMY_MISSILE_TURN, dt);
+                }
+                m.X += m.vX * dt;
+                m.Z += m.vZ * dt;
+                m.h += m.vY * dt;
+                const dp = Math.hypot(m.X - p.X, m.h - p.h, m.Z - p.Z);
+                // A decoy caught it: it bursts there.
+                const hitDecoy = this.decoys.find(d => Math.hypot(m.X - d.X, m.h - d.h, m.Z - d.Z) < 8);
+                if (hitDecoy) {
+                    this.explode(m.X, m.h, m.Z, 14);
+                    this.onSound('boom');
+                    continue;
+                }
+                if (!m.broken && dp < 5) {
+                    this.takeHit();
+                    this.explode(m.X, m.h, m.Z, 14);
+                    this.onSound('boom');
+                    continue;
+                }
+                if (m.life <= 0 || m.h <= PA.groundAt(m.X, m.Z)) {
+                    if (m.h <= PA.groundAt(m.X, m.Z))
+                        this.explode(m.X, m.h, m.Z, 8);
+                    continue;
+                }
+                keep.push(m);
+            }
+            this.missiles = keep;
+        }
+        updateDecoys(dt) {
+            for (const d of this.decoys) {
+                d.life -= dt;
+                d.X += d.vX * dt;
+                d.Z += d.vZ * dt;
+                d.h += d.vY * dt;
+                if (this.rand() < 0.3)
+                    this.puffs.push(sparkle(this.rand, d.X, d.h, d.Z));
+            }
+            this.decoys = this.decoys.filter(d => d.life > 0 && d.h > PA.groundAt(d.X, d.Z));
+        }
+        // The tag: an enemy missile is after the plane. The beep speeds up as it closes; a hard turn breaks it.
+        updateTag(dt) {
+            const p = this.plane;
+            let nearest = Infinity;
+            let active = false;
+            for (const m of this.missiles) {
+                if (!m.enemy || m.broken)
+                    continue;
+                active = true;
+                nearest = Math.min(nearest, Math.hypot(m.X - p.X, m.h - p.h, m.Z - p.Z));
+            }
+            if (active && Math.abs(this.axes.yaw) > BREAK_TURN) {
+                this.breakTimer += dt;
+                if (this.breakTimer > BREAK_TIME) {
+                    for (const m of this.missiles)
+                        if (m.enemy)
+                            m.broken = true;
+                    this.breakTimer = 0;
+                    this.onSound('chime');
+                }
+            }
+            else {
+                this.breakTimer = Math.max(0, this.breakTimer - dt);
+            }
+            this.tagged = active;
+            this.tagDist = active ? nearest : 0;
+            if (active) {
+                this.beepTimer -= dt;
+                if (this.beepTimer <= 0) {
+                    this.beepTimer = 0.12 + Math.min(0.6, nearest / 1200);
+                    this.onSound('beep');
+                }
+            }
+            else {
+                this.beepTimer = 0;
+            }
+        }
+        updateGuns(dt) {
+            this.fireCool -= dt;
+            this.aim = this.computeAim();
+            if (!this.held.fire || this.fireCool > 0 || this.ammo < 1)
+                return;
+            this.fireCool = 0.09;
+            this.ammo -= 1;
+            const p = this.plane;
+            const cosP = Math.cos(this.aim.pitch), sinP = Math.sin(this.aim.pitch);
+            const sinY = Math.sin(this.aim.yaw), cosY = Math.cos(this.aim.yaw);
+            this.shots.push({
+                X: p.X + sinY * cosP * 2,
+                Z: p.Z + cosY * cosP * 2,
+                h: p.h + sinP * 2,
+                vX: p.vx * sinY + SHOT_SPEED * cosP * sinY,
+                vZ: p.vx * cosY + SHOT_SPEED * cosP * cosY,
+                vY: p.vy + SHOT_SPEED * sinP,
+                life: BULLET_LIFE,
+            });
+            this.onSound('gun');
+        }
         computeAim() {
             const p = this.plane;
             const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
@@ -1422,30 +1742,8 @@ var PA;
             const pitch = Math.atan2(dh + drop, dd);
             return { yaw: Math.atan2(best.X - p.X, best.Z - p.Z), pitch, mode: 'ground' };
         }
-        updateGuns(dt) {
-            this.fireCool -= dt;
-            this.aim = this.computeAim();
-            if (!this.held.fire || this.fireCool > 0 || this.ammo < 1)
-                return;
-            this.fireCool = 0.09;
-            this.ammo -= 1;
-            const p = this.plane;
-            const cosP = Math.cos(this.aim.pitch), sinP = Math.sin(this.aim.pitch);
-            const sinY = Math.sin(this.aim.yaw), cosY = Math.cos(this.aim.yaw);
-            this.shots.push({
-                X: p.X + sinY * cosP * 2,
-                Z: p.Z + cosY * cosP * 2,
-                h: p.h + sinP * 2,
-                vX: p.vx * sinY + SHOT_SPEED * cosP * sinY,
-                vZ: p.vx * cosY + SHOT_SPEED * cosP * cosY,
-                vY: p.vy + SHOT_SPEED * sinP,
-                life: BULLET_LIFE,
-            });
-            this.onSound('gun');
-        }
         hitTarget(t, damage, tg) {
             if (t.faction === 'ally') {
-                // Hitting an ally costs points; the ally is replaced later.
                 t.alive = false;
                 this.score += t.points;
                 this.explode(t.X, tg + 1, t.Z, 14);
@@ -1461,6 +1759,10 @@ var PA;
             t.alive = false;
             this.kills++;
             this.score += t.points;
+            // The mission objective counts ground places and vehicles (not ships, rail, or the air).
+            const group = PA.KINDS[t.kind].group;
+            if (!t.faction && (group === 'army' || group === 'farm' || group === 'town'))
+                this.objectiveDone++;
             this.explode(t.X, tg + 1, t.Z, PA.KINDS[t.kind].height > 5 ? 26 : 16);
             this.onSound('boom');
         }
@@ -1496,7 +1798,6 @@ var PA;
             }
             this.shots = keep;
         }
-        // Anti-aircraft guns and SAM sites: each one aims at where the plane will be.
         updateGunners(dt) {
             const p = this.plane;
             for (const t of this.mission.targets) {
@@ -1529,11 +1830,8 @@ var PA;
                     this.onSound('warn');
                 }
                 if (d * d < 9) {
-                    // A hit: the damage shows; it only costs hull when not invincible.
-                    this.addMark();
+                    this.takeHit();
                     this.explode(s.X, s.h, s.Z, 6);
-                    if (this.settings.invincible !== 1)
-                        this.hull = Math.max(0, this.hull - 12);
                     this.onSound('thud');
                     continue;
                 }
@@ -1543,11 +1841,9 @@ var PA;
             if (!this.shells.some(s => s.warn))
                 this.warned = false;
         }
-        // Free play: when the ground targets run low, more appear ahead of the plane.
         keepTargets() {
             const m = this.mission;
             m.targets = m.targets.filter(t => (t.alive || t.Z > this.plane.Z - 150) && !(t.faction === 'enemy' && !t.alive));
-            // Vehicles on the road drive; those that are left behind are removed.
             for (const t of m.targets) {
                 if (t.vZ !== undefined && t.alive)
                     t.Z += t.vZ * (1 / 30);
@@ -1604,7 +1900,13 @@ var PA;
         }
     }
     PA.Game = Game;
-    const KEEP_AHEAD = 6; // free play keeps this many ground targets in front of the plane
+    function sparkle(rand, X, h, Z) {
+        return {
+            X, h, Z,
+            vX: (rand() - 0.5) * 14, vY: 2 + rand() * 6, vZ: (rand() - 0.5) * 14,
+            life: 0.9, max: 0.9, color: '#fff1b8', size: 2,
+        };
+    }
     function clamp(v) {
         return Math.max(-1, Math.min(1, v));
     }
@@ -1910,8 +2212,110 @@ var PA;
             ctx.stroke();
         }
     }
+    // Sprite stacking: the plane is built from thin slices, one above another. The
+    // lower slices are darker, so the body reads as solid from every angle.
+    const stackCache = {};
+    const STACK_LAYERS = 4;
+    function stacked(img, name) {
+        if (stackCache[name])
+            return stackCache[name];
+        const out = document.createElement('canvas');
+        out.width = img.width;
+        out.height = img.height + STACK_LAYERS;
+        const ctx = out.getContext('2d');
+        if (!ctx)
+            return img;
+        for (let layer = STACK_LAYERS - 1; layer >= 0; layer--) {
+            const y = STACK_LAYERS - layer; // layer 0 is the top slice, drawn last
+            const tmp = document.createElement('canvas');
+            tmp.width = img.width;
+            tmp.height = img.height;
+            const t = tmp.getContext('2d');
+            if (!t)
+                continue;
+            t.drawImage(img, 0, 0);
+            if (layer > 0) {
+                t.globalCompositeOperation = 'source-atop';
+                t.fillStyle = 'rgba(47,45,61,' + (0.12 + 0.12 * layer).toFixed(2) + ')';
+                t.fillRect(0, 0, tmp.width, tmp.height);
+            }
+            ctx.drawImage(tmp, 0, y - (layer === 0 ? 0 : 0));
+        }
+        stackCache[name] = out;
+        return out;
+    }
+    // Ring of the lock and the collapsing warning ring are drawn in screen space.
+    function lockRing(ctx, g, c) {
+        const t = g.lock.target;
+        if (!t || g.lock.progress <= 0)
+            return;
+        const q = project(c, t.X, PA.altOf(t), t.Z);
+        if (!q)
+            return;
+        const r = 26 - g.lock.progress * 14;
+        ctx.strokeStyle = PA.INK;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(q[0], q[1], r, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.strokeStyle = g.lock.progress >= 1 ? '#ff6b6b' : '#ffe08a';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(q[0], q[1], r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * g.lock.progress);
+        ctx.stroke();
+    }
+    // The tag: a ring around the plane that collapses as the enemy missile closes in.
+    function warnRing(ctx, g) {
+        if (!g.tagged)
+            return;
+        const flash = Math.floor(g.time * 8) % 2 === 0;
+        const k = Math.max(0, Math.min(1, g.tagDist / 900));
+        const r = 18 + k * 70;
+        ctx.strokeStyle = flash ? '#ff3b3b' : PA.INK;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(PA.W / 2, PA.H * PLANE_SCREEN_Y, r, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+    // Enemy missiles: a red streak with a bright head.
+    function enemyMissiles(ctx, g, c) {
+        for (const m of g.missiles) {
+            if (!m.enemy)
+                continue;
+            const p = project(c, m.X, m.h, m.Z);
+            if (!p)
+                continue;
+            const tail = project(c, m.X - m.vX * 0.08, m.h - m.vY * 0.08, m.Z - m.vZ * 0.08);
+            if (tail) {
+                ctx.strokeStyle = '#ff6b6b';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(tail[0], tail[1]);
+                ctx.lineTo(p[0], p[1]);
+                ctx.stroke();
+            }
+            ctx.fillStyle = '#fffdfa';
+            ctx.fillRect(Math.round(p[0]) - 2, Math.round(p[1]) - 2, 4, 4);
+        }
+    }
+    function wisps(ctx, g, c) {
+        for (const w of g.wisps) {
+            const q = project(c, w.X, w.h, w.Z);
+            if (!q)
+                continue;
+            const k = Math.max(0, w.life / w.max);
+            ctx.globalAlpha = Math.min(0.9, k * 1.2);
+            ctx.fillStyle = w.color;
+            const r = Math.max(1, (w.size * (1.2 - k) * FOCAL) / (q[2] * 0.9));
+            ctx.beginPath();
+            ctx.arc(q[0], q[1], r, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+    }
     // The plane is always in the same place on the screen; the world moves past it.
-    // It blinks after a loss, and shows smoke on the wings where it has been hit.
+    // It grows from a quarter to a third of the screen width as the turn tightens, blinks
+    // after a loss, shows smoke on the wings where it has been hit, and trails flame when boosting.
     function plane(ctx, g, c) {
         const p = g.plane;
         const shadow = project(c, p.X, PA.groundAt(p.X, p.Z), p.Z);
@@ -1924,12 +2328,39 @@ var PA;
         }
         const blinkOff = g.phase === 'crashed' && Math.floor(g.blink * 8) % 2 === 0;
         const sx = PA.W / 2, sy = PA.H * PLANE_SCREEN_Y;
-        const img = PA.sprite(g.settings.mode === 'glider' ? 'glider' : 'plane');
+        const name = g.settings.mode === 'glider' ? 'glider' : 'plane';
+        const base = PA.sprite(name);
+        const img = name === 'plane' ? stacked(base, name) : base;
+        const tight = Math.min(1, Math.abs(p.bank) / PA.AIR.bankMax);
+        const targetW = PA.W * (0.25 + 0.08 * tight);
+        const scale = targetW / base.width;
         ctx.save();
         ctx.translate(sx, sy);
         ctx.rotate(p.bank);
         if (!blinkOff) {
-            ctx.drawImage(img, -Math.round((img.width * PLANE_SCALE) / 2), -Math.round((img.height * PLANE_SCALE) / 2), img.width * PLANE_SCALE, img.height * PLANE_SCALE);
+            const dw = img.width * scale, dh = img.height * scale;
+            // Flame from the engines when boosting: two flickering tongues.
+            if (g.held.boost && g.phase === 'flying' && name === 'plane') {
+                for (const ex of [-4, 4]) {
+                    const len = (8 + Math.random() * 6) * scale / 2;
+                    const x0 = (ex * scale) / 1, y0 = (6 * scale) / 1;
+                    ctx.fillStyle = '#ffb02e';
+                    ctx.beginPath();
+                    ctx.moveTo(x0 - 2, y0);
+                    ctx.lineTo(x0 + 2, y0);
+                    ctx.lineTo(x0, y0 + len);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.fillStyle = '#fff1b8';
+                    ctx.beginPath();
+                    ctx.moveTo(x0 - 1, y0);
+                    ctx.lineTo(x0 + 1, y0);
+                    ctx.lineTo(x0, y0 + len * 0.5);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            }
+            ctx.drawImage(img, -Math.round(dw / 2), -Math.round(dh / 2), Math.round(dw), Math.round(dh));
         }
         // Damage: a cloud of smoke on each wing, slowly lifting.
         for (const m of g.marks) {
@@ -1937,11 +2368,11 @@ var PA;
             const r = 2.5 + Math.sin(m.age * 3) * 0.6;
             ctx.fillStyle = 'rgba(255,253,250,0.85)';
             ctx.beginPath();
-            ctx.arc(m.x * PLANE_SCALE, (m.y - rise * 0.2) * PLANE_SCALE, r * PLANE_SCALE, 0, Math.PI * 2);
+            ctx.arc(m.x * scale, (m.y - rise * 0.2) * scale, r * scale, 0, Math.PI * 2);
             ctx.fill();
             ctx.fillStyle = 'rgba(120,120,130,0.6)';
             ctx.beginPath();
-            ctx.arc(m.x * PLANE_SCALE + 2, (m.y - rise * 0.2 - 1) * PLANE_SCALE, r * PLANE_SCALE * 0.6, 0, Math.PI * 2);
+            ctx.arc(m.x * scale + 2, (m.y - rise * 0.2 - 1) * scale, r * scale * 0.6, 0, Math.PI * 2);
             ctx.fill();
         }
         ctx.restore();
@@ -2031,9 +2462,13 @@ var PA;
         shots(ctx, c, g.shots, PA.COL.bullet, 2);
         shots(ctx, c, g.shells, PA.COL.shell, 2);
         missiles(ctx, g, c);
+        enemyMissiles(ctx, g, c);
+        wisps(ctx, g, c);
         puffs(ctx, g, c);
+        lockRing(ctx, g, c);
         if (g.settings.view !== 'cockpit')
             plane(ctx, g, c);
+        warnRing(ctx, g);
         if (g.settings.view === 'cockpit')
             cockpit(ctx, g);
         if (g.settings.forces)
@@ -2124,7 +2559,7 @@ var PA;
 (function (PA) {
     const SETTINGS_KEY = 'pa_warthog.settings';
     const DEFAULTS = {
-        mode: 'jet', control: 'drag', view: 'chase', sound: 1,
+        mode: 'jet', control: 'drag', view: 'chase', difficulty: 'normal', sound: 1,
         volMusic: 30, volGun: 35, volTurn: 30, volWarn: 70,
         forces: 0, safeFlight: 1, invincible: 0, autoReload: 1,
         enemyWave: 2, allies: 1, showErrors: 0,
@@ -2201,7 +2636,7 @@ var PA;
         renderErrors();
     }
     function onSeg(key, value) {
-        if (key === 'mode' || key === 'control' || key === 'view') {
+        if (key === 'mode' || key === 'control' || key === 'view' || key === 'difficulty') {
             settings[key] = value;
         }
         else {
@@ -2243,6 +2678,7 @@ var PA;
         Space: 'fire',
         ShiftLeft: 'boost', ShiftRight: 'boost',
         KeyM: 'missile',
+        KeyC: 'chaff',
         KeyV: 'view',
     };
     function bindKeys() {
@@ -2253,6 +2689,10 @@ var PA;
             e.preventDefault();
             if (k === 'view') {
                 cycleView();
+            }
+            else if (k === 'chaff') {
+                if (!e.repeat)
+                    game.fireChaff();
             }
             else if (k === 'fire' || k === 'boost' || k === 'missile') {
                 sound.unlock();
@@ -2367,10 +2807,15 @@ var PA;
                 e.preventDefault();
                 sound.unlock();
                 capture(b, e.pointerId);
-                game.held[k] = true;
                 wakeGear();
+                if (k === 'chaff') {
+                    game.fireChaff(); // one press, one burst of chaff
+                    return;
+                }
+                game.held[k] = true;
             });
-            const release = () => { game.held[k] = false; };
+            const release = () => { if (k !== 'chaff')
+                game.held[k] = false; };
             b.addEventListener('pointerup', release);
             b.addEventListener('pointercancel', release);
             b.addEventListener('lostpointercapture', release);
@@ -2422,7 +2867,20 @@ var PA;
         $('hoops').textContent = g.mission.hoops.length ? g.hoopsPassed + ' / ' + g.mission.hoops.length : '—';
         $('hull').style.width = Math.max(0, g.hull) + '%';
         const stock = g.missileStock;
-        $('ammo').textContent = String(Math.floor(g.ammo));
+        $('ammo').textContent = g.felix ? '∞' : String(Math.floor(g.ammo));
+        $('chaff').textContent = g.felix ? '∞' : String(g.chaff);
+        $('tag').hidden = !g.tagged;
+        $('tag').textContent = 'TAGGED ' + Math.round(g.tagDist) + ' m';
+        const left = Math.max(0, g.objectiveGoal - g.objectiveDone);
+        $('objective').textContent = g.resupplied > 0
+            ? 'Mission complete! Everything restocked.'
+            : g.settings.mode === 'glider' ? 'Fly through the rings.'
+                : 'Mission ' + g.missionNumber + ': destroy ' + left + ' more ground target' + (left === 1 ? '' : 's');
+        const cool = Math.ceil(g.resupplyCool);
+        $('reloadBtn').toggleAttribute('disabled', g.felix || cool > 0);
+        $('reloadHint').textContent = g.felix ? 'Felix mode never runs out, so no reload is needed.'
+            : cool > 0 ? 'The reload is ready again in ' + cool + ' s.'
+                : 'Gun back to full, and two missiles back.';
         $('missile').textContent = stock + '/' + PA.MISSILE_MAX + (stock === 0 ? (settings.autoReload === 1 ? ' reloading' : ' empty') : '');
         const a = g.aim;
         $('gun').textContent = a.mode === 'air' ? 'air: straight'
@@ -2440,6 +2898,8 @@ var PA;
             return 'Hit! The plane blinks and carries on with a full repair.';
         if (g.phase !== 'flying')
             return '';
+        if (g.tagged)
+            return 'Missile on you! Hard turn to break it, or drop CHAFF.';
         if (g.floorActive)
             return 'Safe flight: pulling up off the ground.';
         if (settings.invincible === 1)
@@ -2700,6 +3160,10 @@ var PA;
             renderErrors();
         });
         $('restart').addEventListener('click', () => { restart(); $('drawer').hidden = true; });
+        $('reloadBtn').addEventListener('click', () => {
+            game.reloadFromSettings();
+            hud();
+        });
         $('familySignIn').addEventListener('click', () => void familySignIn());
         $('familyCheck').addEventListener('click', () => void familyCheck());
         $('familySignOut').addEventListener('click', () => void PA.signOut().then(renderFamily));

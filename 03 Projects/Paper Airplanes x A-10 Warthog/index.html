@@ -16,6 +16,7 @@
       <span class="pill">🪟 <b id="hoops">—</b></span>
       <span class="pill">🔫 <b id="ammo">240</b></span>
       <span class="pill">🚀 <b id="missile">6/6</b></span>
+      <span class="pill">✨ <b id="chaff">4</b></span>
       <span class="pill">🎯 <b id="gun">straight</b></span>
       <span class="hullWrap" title="Hull"><i id="hull"></i></span>
     </header>
@@ -28,6 +29,8 @@
     </div>
 
     <p class="msg" id="msg" aria-live="polite"></p>
+    <p class="objective" id="objective" aria-live="polite"></p>
+    <p class="tag" id="tag" hidden>TAGGED</p>
 
     <canvas class="radar" id="radar" width="150" height="150" aria-label="Radar"></canvas>
 
@@ -46,6 +49,7 @@
     </div>
 
     <nav class="actions" aria-label="Actions">
+      <button type="button" data-k="chaff" class="c-sage">CHAFF</button>
       <button type="button" data-k="missile" class="c-mint">MISSILE</button>
       <button type="button" data-k="fire" class="c-coral">FIRE</button>
       <button type="button" data-k="boost" class="c-sun">BOOST</button>
@@ -67,6 +71,16 @@
 
     <details class="group" open>
       <summary>✈️ Flight</summary>
+      <div class="setting">
+        <label>Difficulty</label>
+        <div class="seg" data-key="difficulty">
+          <button type="button" data-v="normal">Normal</button>
+          <button type="button" data-v="felix">Felix (easy)</button>
+        </div>
+        <p class="hint">Normal: limited ammo and missiles, and three hits takes the plane down. Missions restock you when the objective is done. Felix: the plane never goes down and nothing runs out.</p>
+        <button class="wide" id="reloadBtn" type="button">Reload the gun and missiles</button>
+        <p class="hint" id="reloadHint" role="status"></p>
+      </div>
       <div class="setting">
         <label>Plane</label>
         <div class="seg" data-key="mode">

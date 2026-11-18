@@ -3,7 +3,7 @@
 namespace PA {
   const SETTINGS_KEY = 'pa_warthog.settings';
   const DEFAULTS: Settings = {
-    mode: 'jet', control: 'drag', view: 'chase', sound: 1,
+    mode: 'jet', control: 'drag', view: 'chase', difficulty: 'normal', sound: 1,
     volMusic: 30, volGun: 35, volTurn: 30, volWarn: 70,
     forces: 0, safeFlight: 1, invincible: 0, autoReload: 1,
     enemyWave: 2, allies: 1, showErrors: 0,
@@ -89,7 +89,7 @@ namespace PA {
   }
 
   function onSeg(key: keyof Settings, value: string): void {
-    if (key === 'mode' || key === 'control' || key === 'view') {
+    if (key === 'mode' || key === 'control' || key === 'view' || key === 'difficulty') {
       (settings as unknown as Record<string, unknown>)[key] = value;
     } else {
       settings[key] = +value;
@@ -131,6 +131,7 @@ namespace PA {
     Space: 'fire',
     ShiftLeft: 'boost', ShiftRight: 'boost',
     KeyM: 'missile',
+    KeyC: 'chaff',
     KeyV: 'view',
   };
 
@@ -141,6 +142,8 @@ namespace PA {
       e.preventDefault();
       if (k === 'view') {
         cycleView();
+      } else if (k === 'chaff') {
+        if (!e.repeat) game.fireChaff();
       } else if (k === 'fire' || k === 'boost' || k === 'missile') {
         sound.unlock();
         game.held[k] = true;
@@ -246,15 +249,19 @@ namespace PA {
 
   function bindActions(): void {
     document.querySelectorAll<HTMLButtonElement>('.actions button').forEach(b => {
-      const k = b.dataset.k as 'fire' | 'boost' | 'missile';
+      const k = b.dataset.k as 'fire' | 'boost' | 'missile' | 'chaff';
       b.addEventListener('pointerdown', e => {
         e.preventDefault();
         sound.unlock();
         capture(b, e.pointerId);
-        game.held[k] = true;
         wakeGear();
+        if (k === 'chaff') {
+          game.fireChaff();          // one press, one burst of chaff
+          return;
+        }
+        game.held[k] = true;
       });
-      const release = () => { game.held[k] = false; };
+      const release = () => { if (k !== 'chaff') game.held[k] = false; };
       b.addEventListener('pointerup', release);
       b.addEventListener('pointercancel', release);
       b.addEventListener('lostpointercapture', release);
@@ -312,7 +319,20 @@ namespace PA {
     $('hoops').textContent = g.mission.hoops.length ? g.hoopsPassed + ' / ' + g.mission.hoops.length : '—';
     $('hull').style.width = Math.max(0, g.hull) + '%';
     const stock = g.missileStock;
-    $('ammo').textContent = String(Math.floor(g.ammo));
+    $('ammo').textContent = g.felix ? '∞' : String(Math.floor(g.ammo));
+    $('chaff').textContent = g.felix ? '∞' : String(g.chaff);
+    $('tag').hidden = !g.tagged;
+    $('tag').textContent = 'TAGGED ' + Math.round(g.tagDist) + ' m';
+    const left = Math.max(0, g.objectiveGoal - g.objectiveDone);
+    $('objective').textContent = g.resupplied > 0
+      ? 'Mission complete! Everything restocked.'
+      : g.settings.mode === 'glider' ? 'Fly through the rings.'
+      : 'Mission ' + g.missionNumber + ': destroy ' + left + ' more ground target' + (left === 1 ? '' : 's');
+    const cool = Math.ceil(g.resupplyCool);
+    $('reloadBtn').toggleAttribute('disabled', g.felix || cool > 0);
+    $('reloadHint').textContent = g.felix ? 'Felix mode never runs out, so no reload is needed.'
+      : cool > 0 ? 'The reload is ready again in ' + cool + ' s.'
+      : 'Gun back to full, and two missiles back.';
     $('missile').textContent = stock + '/' + MISSILE_MAX + (stock === 0 ? (settings.autoReload === 1 ? ' reloading' : ' empty') : '');
     const a = g.aim;
     $('gun').textContent = a.mode === 'air' ? 'air: straight'
@@ -329,6 +349,7 @@ namespace PA {
     const p = g.plane;
     if (g.phase === 'crashed') return 'Hit! The plane blinks and carries on with a full repair.';
     if (g.phase !== 'flying') return '';
+    if (g.tagged) return 'Missile on you! Hard turn to break it, or drop CHAFF.';
     if (g.floorActive) return 'Safe flight: pulling up off the ground.';
     if (settings.invincible === 1) return 'Invincible: nothing can hurt you.';
     if (p.stalled) return 'Too steep! Ease the nose down to get the air flowing.';
@@ -592,6 +613,10 @@ namespace PA {
       renderErrors();
     });
     $('restart').addEventListener('click', () => { restart(); $('drawer').hidden = true; });
+    $('reloadBtn').addEventListener('click', () => {
+      game.reloadFromSettings();
+      hud();
+    });
     $('familySignIn').addEventListener('click', () => void familySignIn());
     $('familyCheck').addEventListener('click', () => void familyCheck());
     $('familySignOut').addEventListener('click', () => void signOut().then(renderFamily));
