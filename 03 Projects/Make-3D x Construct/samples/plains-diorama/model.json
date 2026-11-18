@@ -2,13 +2,13 @@
   "schema": "m3dxc.model/0.1",
   "model_id": "plains-diorama-v05",
   "name": "Southern Cheyenne camp move, Indian Territory, 1870s (draft)",
-  "description": "A draft diorama of a camp move in three planes: horses in front, lodges and travois and people in the middle, a layered bluff behind. Figures are placeholder forms. Not reviewed by the Cheyenne and Arapaho Tribes; not for display.",
+  "description": "A draft diorama of a camp move in three planes: horses in front, lodges and travois and people in the middle, a layered bluff behind. Figures are placeholder forms. Not reviewed by the Cheyenne and Arapaho Tribes.",
   "scale": "1:24 (1 in = 2 ft)",
   "units": "in",
   "up": "z",
   "world": "plains-diorama-world",
-  "version": 156,
-  "history_hash": "b9de2e15",
+  "version": 178,
+  "history_hash": "1ada4e2e",
   "objects": [
     {
       "uuid": "camp",
@@ -1104,26 +1104,64 @@
       "uuid": "woman-a",
       "name": "Woman A (placeholder)",
       "type": "group",
-      "description": "A placeholder form in a pose: no face, no hair, no clothing pattern, no regalia.",
+      "description": "A placeholder person in a pose. Approximate general features; a form, not a portrait of anyone. Clothing is generic.",
       "parent": "figures"
     },
     {
       "uuid": "woman-a-leg-1",
       "name": "Leg 1",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "woman-a",
       "dimensions": {
-        "x": 0.3,
-        "y": 0.3,
-        "z": 1.1
+        "x": 0.32,
+        "y": 0.47,
+        "z": 1.35
       },
       "position": [
         -5.2,
-        -2,
-        1.55
+        -1.77,
+        1.64
       ],
       "material": "hide and cloth",
-      "rotation_x": 12,
+      "joints": [
+        [
+          -5.2,
+          -1.85,
+          2.15
+        ],
+        [
+          -5.2,
+          -1.76,
+          1.55
+        ],
+        [
+          -5.2,
+          -1.7,
+          1.12
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.16,
+          0.16
+        ],
+        [
+          0.5,
+          0.12,
+          0.12
+        ],
+        [
+          1,
+          0.1,
+          0.1
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1133,19 +1171,48 @@
     {
       "uuid": "woman-a-foot-1",
       "name": "Foot 1",
-      "type": "box",
+      "type": "loft",
       "parent": "woman-a",
       "dimensions": {
-        "x": 0.36,
-        "y": 0.6,
-        "z": 0.2
+        "x": 0.26,
+        "y": 0.71,
+        "z": 0.26
       },
       "position": [
         -5.2,
-        -1.5,
-        1.1
+        -1.62,
+        1.08
       ],
       "material": "dark",
+      "joints": [
+        [
+          -5.2,
+          -1.85,
+          1.08
+        ],
+        [
+          -5.2,
+          -1.4,
+          1.08
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.09
+        ],
+        [
+          1,
+          0.13,
+          0.08
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1155,20 +1222,58 @@
     {
       "uuid": "woman-a-leg-2",
       "name": "Leg 2",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "woman-a",
       "dimensions": {
-        "x": 0.3,
-        "y": 0.3,
-        "z": 1.1
+        "x": 0.32,
+        "y": 0.42,
+        "z": 1.35
       },
       "position": [
         -4.8,
-        -2,
-        1.55
+        -2.15,
+        1.64
       ],
       "material": "hide and cloth",
-      "rotation_x": -12,
+      "joints": [
+        [
+          -4.8,
+          -2.1,
+          2.15
+        ],
+        [
+          -4.8,
+          -2.16,
+          1.55
+        ],
+        [
+          -4.8,
+          -2.2,
+          1.12
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.16,
+          0.16
+        ],
+        [
+          0.5,
+          0.12,
+          0.12
+        ],
+        [
+          1,
+          0.1,
+          0.1
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1178,19 +1283,48 @@
     {
       "uuid": "woman-a-foot-2",
       "name": "Foot 2",
-      "type": "box",
+      "type": "loft",
       "parent": "woman-a",
       "dimensions": {
-        "x": 0.36,
-        "y": 0.6,
-        "z": 0.2
+        "x": 0.26,
+        "y": 0.71,
+        "z": 0.26
       },
       "position": [
         -4.8,
-        -1.5,
-        1.1
+        -2.12,
+        1.08
       ],
       "material": "dark",
+      "joints": [
+        [
+          -4.8,
+          -2.35,
+          1.08
+        ],
+        [
+          -4.8,
+          -1.9,
+          1.08
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.09
+        ],
+        [
+          1,
+          0.13,
+          0.08
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1199,42 +1333,130 @@
     },
     {
       "uuid": "woman-a-skirt",
-      "name": "Skirt",
-      "type": "cone",
+      "name": "Skirt (banded)",
+      "type": "loft",
       "parent": "woman-a",
       "dimensions": {
-        "x": 1.1,
-        "y": 1.1,
-        "z": 1.4
+        "x": 0.84,
+        "y": 0.84,
+        "z": 1.84
       },
       "position": [
         -5,
         -2,
-        2.3
+        1.95
       ],
-      "material": "hide and cloth",
+      "material": "pattern:bands",
+      "joints": [
+        [
+          -5,
+          -2,
+          2.45
+        ],
+        [
+          -5,
+          -2,
+          2
+        ],
+        [
+          -5,
+          -2,
+          1.45
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.23,
+          0.2
+        ],
+        [
+          0.5,
+          0.32,
+          0.28
+        ],
+        [
+          1,
+          0.42,
+          0.36
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
-        "note": "Skirt shape. Form only."
+        "note": "Skirt with a band pattern. Generic."
       }
     },
     {
       "uuid": "woman-a-torso",
       "name": "Torso",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "woman-a",
       "dimensions": {
-        "x": 0.9,
-        "y": 0.9,
-        "z": 0.95
+        "x": 0.6,
+        "y": 0.6,
+        "z": 1.47
       },
       "position": [
         -5,
         -2,
-        2.58
+        2.59
       ],
       "material": "hide and cloth",
+      "joints": [
+        [
+          -5,
+          -2,
+          2.15
+        ],
+        [
+          -5,
+          -2,
+          2.5
+        ],
+        [
+          -5,
+          -2,
+          2.8
+        ],
+        [
+          -5,
+          -2,
+          3.02
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.22,
+          0.19
+        ],
+        [
+          0.35,
+          0.19,
+          0.16
+        ],
+        [
+          0.7,
+          0.26,
+          0.19
+        ],
+        [
+          1,
+          0.3,
+          0.16
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1244,21 +1466,58 @@
     {
       "uuid": "woman-a-arm-l",
       "name": "Arm (left)",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "woman-a",
       "dimensions": {
-        "x": 0.22,
-        "y": 0.22,
-        "z": 0.95
+        "x": 0.3,
+        "y": 0.55,
+        "z": 1.07
       },
       "position": [
-        -5.56,
-        -2,
-        2.45
+        -5.35,
+        -1.82,
+        2.52
       ],
-      "material": "clay",
-      "rotation_x": -18,
-      "rotation_y": -8,
+      "material": "hide and cloth",
+      "joints": [
+        [
+          -5.3,
+          -2,
+          2.95
+        ],
+        [
+          -5.36,
+          -1.8,
+          2.5
+        ],
+        [
+          -5.4,
+          -1.65,
+          2.08
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.1
+        ],
+        [
+          0.5,
+          0.09,
+          0.09
+        ],
+        [
+          1,
+          0.08,
+          0.08
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1271,16 +1530,16 @@
       "type": "sphere",
       "parent": "woman-a",
       "dimensions": {
-        "x": 0.24,
-        "y": 0.24,
-        "z": 0.24
+        "x": 0.14,
+        "y": 0.14,
+        "z": 0.14
       },
       "position": [
-        -5.6,
-        -2,
-        1.95
+        -5.4,
+        -1.65,
+        1.98
       ],
-      "material": "clay",
+      "material": "skin",
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1290,21 +1549,58 @@
     {
       "uuid": "woman-a-arm-r",
       "name": "Arm (right)",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "woman-a",
       "dimensions": {
-        "x": 0.22,
-        "y": 0.22,
-        "z": 0.95
+        "x": 0.3,
+        "y": 0.55,
+        "z": 1.07
       },
       "position": [
-        -4.44,
-        -2,
-        2.45
+        -4.65,
+        -2.17,
+        2.52
       ],
-      "material": "clay",
-      "rotation_x": 18,
-      "rotation_y": 8,
+      "material": "hide and cloth",
+      "joints": [
+        [
+          -4.7,
+          -2,
+          2.95
+        ],
+        [
+          -4.64,
+          -2.2,
+          2.5
+        ],
+        [
+          -4.6,
+          -2.35,
+          2.08
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.1
+        ],
+        [
+          0.5,
+          0.09,
+          0.09
+        ],
+        [
+          1,
+          0.08,
+          0.08
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1317,16 +1613,16 @@
       "type": "sphere",
       "parent": "woman-a",
       "dimensions": {
-        "x": 0.24,
-        "y": 0.24,
-        "z": 0.24
+        "x": 0.14,
+        "y": 0.14,
+        "z": 0.14
       },
       "position": [
-        -4.4,
-        -2,
-        1.95
+        -4.6,
+        -2.35,
+        1.98
       ],
-      "material": "clay",
+      "material": "skin",
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1336,19 +1632,48 @@
     {
       "uuid": "woman-a-neck",
       "name": "Neck",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "woman-a",
       "dimensions": {
-        "x": 0.28,
-        "y": 0.28,
-        "z": 0.2
+        "x": 0.2,
+        "y": 0.22,
+        "z": 0.4
       },
       "position": [
         -5,
-        -2,
-        3.15
+        -1.99,
+        3.1
       ],
-      "material": "clay",
+      "material": "skin",
+      "joints": [
+        [
+          -5,
+          -2,
+          3
+        ],
+        [
+          -5,
+          -1.98,
+          3.2
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.1
+        ],
+        [
+          1,
+          0.09,
+          0.09
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1358,49 +1683,308 @@
     {
       "uuid": "woman-a-head",
       "name": "Head",
-      "type": "sphere",
+      "type": "loft",
       "parent": "woman-a",
       "dimensions": {
-        "x": 0.55,
-        "y": 0.55,
-        "z": 0.55
+        "x": 0.48,
+        "y": 0.48,
+        "z": 1.08
       },
       "position": [
         -5,
         -2,
-        3.52
+        3.5
       ],
-      "material": "clay",
+      "material": "skin",
+      "joints": [
+        [
+          -5,
+          -2,
+          3.2
+        ],
+        [
+          -5,
+          -2,
+          3.5
+        ],
+        [
+          -5,
+          -2,
+          3.8
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.14,
+          0.16
+        ],
+        [
+          0.35,
+          0.22,
+          0.22
+        ],
+        [
+          0.75,
+          0.22,
+          0.24
+        ],
+        [
+          1,
+          0.13,
+          0.14
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
-        "note": "Head. Form only. No face."
+        "note": "Head with approximate general features. Not a portrait."
+      }
+    },
+    {
+      "uuid": "woman-a-eye-l",
+      "name": "Eye (left)",
+      "type": "sphere",
+      "parent": "woman-a",
+      "dimensions": {
+        "x": 0.06,
+        "y": 0.06,
+        "z": 0.06
+      },
+      "position": [
+        -5.09,
+        -2.23,
+        3.56
+      ],
+      "material": "dark",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Eye, a general form."
+      }
+    },
+    {
+      "uuid": "woman-a-brow-l",
+      "name": "Brow (left)",
+      "type": "box",
+      "parent": "woman-a",
+      "dimensions": {
+        "x": 0.13,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "position": [
+        -5.09,
+        -2.24,
+        3.67
+      ],
+      "material": "dark",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Brow, a general form."
+      }
+    },
+    {
+      "uuid": "woman-a-ear-l",
+      "name": "Ear (left)",
+      "type": "sphere",
+      "parent": "woman-a",
+      "dimensions": {
+        "x": 0.08,
+        "y": 0.08,
+        "z": 0.08
+      },
+      "position": [
+        -5.23,
+        -2,
+        3.5
+      ],
+      "material": "skin",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Ear, a general form."
+      }
+    },
+    {
+      "uuid": "woman-a-eye-r",
+      "name": "Eye (right)",
+      "type": "sphere",
+      "parent": "woman-a",
+      "dimensions": {
+        "x": 0.06,
+        "y": 0.06,
+        "z": 0.06
+      },
+      "position": [
+        -4.91,
+        -2.23,
+        3.56
+      ],
+      "material": "dark",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Eye, a general form."
+      }
+    },
+    {
+      "uuid": "woman-a-brow-r",
+      "name": "Brow (right)",
+      "type": "box",
+      "parent": "woman-a",
+      "dimensions": {
+        "x": 0.13,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "position": [
+        -4.91,
+        -2.24,
+        3.67
+      ],
+      "material": "dark",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Brow, a general form."
+      }
+    },
+    {
+      "uuid": "woman-a-ear-r",
+      "name": "Ear (right)",
+      "type": "sphere",
+      "parent": "woman-a",
+      "dimensions": {
+        "x": 0.08,
+        "y": 0.08,
+        "z": 0.08
+      },
+      "position": [
+        -4.77,
+        -2,
+        3.5
+      ],
+      "material": "skin",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Ear, a general form."
+      }
+    },
+    {
+      "uuid": "woman-a-nose",
+      "name": "Nose",
+      "type": "cone",
+      "parent": "woman-a",
+      "dimensions": {
+        "x": 0.1,
+        "y": 0.1,
+        "z": 0.18
+      },
+      "position": [
+        -5,
+        -2.25,
+        3.48
+      ],
+      "material": "skin",
+      "rotation_x": 90,
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Nose, a general form."
+      }
+    },
+    {
+      "uuid": "woman-a-mouth",
+      "name": "Mouth",
+      "type": "box",
+      "parent": "woman-a",
+      "dimensions": {
+        "x": 0.14,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "position": [
+        -5,
+        -2.23,
+        3.35
+      ],
+      "material": "dark",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Mouth, a general form."
       }
     },
     {
       "uuid": "child-a",
       "name": "Child (placeholder)",
       "type": "group",
-      "description": "A placeholder form in a pose: no face, no hair, no clothing pattern, no regalia.",
+      "description": "A placeholder person in a pose. Approximate general features; a form, not a portrait of anyone. Clothing is generic.",
       "parent": "figures"
     },
     {
       "uuid": "child-a-leg-1",
       "name": "Leg 1",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "child-a",
       "dimensions": {
-        "x": 0.21,
-        "y": 0.21,
-        "z": 0.77
+        "x": 0.22,
+        "y": 0.33,
+        "z": 0.94
       },
       "position": [
         -1.14,
-        1.5,
-        1.39
+        1.66,
+        1.44
       ],
       "material": "hide and cloth",
-      "rotation_x": 12,
+      "joints": [
+        [
+          -1.14,
+          1.61,
+          1.81
+        ],
+        [
+          -1.14,
+          1.67,
+          1.39
+        ],
+        [
+          -1.14,
+          1.71,
+          1.08
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.11,
+          0.11
+        ],
+        [
+          0.5,
+          0.08,
+          0.08
+        ],
+        [
+          1,
+          0.07,
+          0.07
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1410,19 +1994,48 @@
     {
       "uuid": "child-a-foot-1",
       "name": "Foot 1",
-      "type": "box",
+      "type": "loft",
       "parent": "child-a",
       "dimensions": {
-        "x": 0.252,
-        "y": 0.42,
-        "z": 0.13999999999999999
+        "x": 0.18,
+        "y": 0.5,
+        "z": 0.18
       },
       "position": [
         -1.14,
-        1.85,
-        1.07
+        1.76,
+        1.06
       ],
       "material": "dark",
+      "joints": [
+        [
+          -1.14,
+          1.61,
+          1.06
+        ],
+        [
+          -1.14,
+          1.92,
+          1.06
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.07,
+          0.06
+        ],
+        [
+          1,
+          0.09,
+          0.06
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1432,20 +2045,58 @@
     {
       "uuid": "child-a-leg-2",
       "name": "Leg 2",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "child-a",
       "dimensions": {
-        "x": 0.21,
-        "y": 0.21,
-        "z": 0.77
+        "x": 0.22,
+        "y": 0.29,
+        "z": 0.94
       },
       "position": [
         -0.86,
-        1.5,
-        1.39
+        1.4,
+        1.44
       ],
       "material": "hide and cloth",
-      "rotation_x": -12,
+      "joints": [
+        [
+          -0.86,
+          1.43,
+          1.81
+        ],
+        [
+          -0.86,
+          1.39,
+          1.39
+        ],
+        [
+          -0.86,
+          1.36,
+          1.08
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.11,
+          0.11
+        ],
+        [
+          0.5,
+          0.08,
+          0.08
+        ],
+        [
+          1,
+          0.07,
+          0.07
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1455,19 +2106,48 @@
     {
       "uuid": "child-a-foot-2",
       "name": "Foot 2",
-      "type": "box",
+      "type": "loft",
       "parent": "child-a",
       "dimensions": {
-        "x": 0.252,
-        "y": 0.42,
-        "z": 0.13999999999999999
+        "x": 0.18,
+        "y": 0.5,
+        "z": 0.18
       },
       "position": [
         -0.86,
-        1.85,
-        1.07
+        1.41,
+        1.06
       ],
       "material": "dark",
+      "joints": [
+        [
+          -0.86,
+          1.26,
+          1.06
+        ],
+        [
+          -0.86,
+          1.57,
+          1.06
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.07,
+          0.06
+        ],
+        [
+          1,
+          0.09,
+          0.06
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1477,19 +2157,68 @@
     {
       "uuid": "child-a-torso",
       "name": "Torso",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "child-a",
       "dimensions": {
-        "x": 0.63,
-        "y": 0.63,
-        "z": 0.6649999999999999
+        "x": 0.42,
+        "y": 0.42,
+        "z": 1.03
       },
       "position": [
         -1,
         1.5,
-        2.1
+        2.11
       ],
       "material": "red cloth",
+      "joints": [
+        [
+          -1,
+          1.5,
+          1.81
+        ],
+        [
+          -1,
+          1.5,
+          2.05
+        ],
+        [
+          -1,
+          1.5,
+          2.26
+        ],
+        [
+          -1,
+          1.5,
+          2.41
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.15,
+          0.13
+        ],
+        [
+          0.35,
+          0.13,
+          0.11
+        ],
+        [
+          0.7,
+          0.18,
+          0.13
+        ],
+        [
+          1,
+          0.21,
+          0.11
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1499,21 +2228,58 @@
     {
       "uuid": "child-a-arm-l",
       "name": "Arm (left)",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "child-a",
       "dimensions": {
-        "x": 0.154,
-        "y": 0.154,
-        "z": 0.6649999999999999
+        "x": 0.21,
+        "y": 0.39,
+        "z": 0.75
       },
       "position": [
-        -1.39,
-        1.5,
-        2.01
+        -1.25,
+        1.62,
+        2.06
       ],
-      "material": "clay",
-      "rotation_x": -18,
-      "rotation_y": -8,
+      "material": "red cloth",
+      "joints": [
+        [
+          -1.21,
+          1.5,
+          2.37
+        ],
+        [
+          -1.25,
+          1.64,
+          2.05
+        ],
+        [
+          -1.28,
+          1.75,
+          1.76
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.07,
+          0.07
+        ],
+        [
+          0.5,
+          0.06,
+          0.06
+        ],
+        [
+          1,
+          0.05,
+          0.05
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1526,16 +2292,16 @@
       "type": "sphere",
       "parent": "child-a",
       "dimensions": {
-        "x": 0.16799999999999998,
-        "y": 0.16799999999999998,
-        "z": 0.16799999999999998
+        "x": 0.098,
+        "y": 0.098,
+        "z": 0.098
       },
       "position": [
-        -1.42,
-        1.5,
-        1.67
+        -1.28,
+        1.75,
+        1.69
       ],
-      "material": "clay",
+      "material": "skin",
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1545,21 +2311,58 @@
     {
       "uuid": "child-a-arm-r",
       "name": "Arm (right)",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "child-a",
       "dimensions": {
-        "x": 0.154,
-        "y": 0.154,
-        "z": 0.6649999999999999
+        "x": 0.21,
+        "y": 0.39,
+        "z": 0.75
       },
       "position": [
-        -0.61,
-        1.5,
-        2.01
+        -0.75,
+        1.38,
+        2.06
       ],
-      "material": "clay",
-      "rotation_x": 18,
-      "rotation_y": 8,
+      "material": "red cloth",
+      "joints": [
+        [
+          -0.79,
+          1.5,
+          2.37
+        ],
+        [
+          -0.75,
+          1.36,
+          2.05
+        ],
+        [
+          -0.72,
+          1.26,
+          1.76
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.07,
+          0.07
+        ],
+        [
+          0.5,
+          0.06,
+          0.06
+        ],
+        [
+          1,
+          0.05,
+          0.05
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1572,16 +2375,16 @@
       "type": "sphere",
       "parent": "child-a",
       "dimensions": {
-        "x": 0.16799999999999998,
-        "y": 0.16799999999999998,
-        "z": 0.16799999999999998
+        "x": 0.098,
+        "y": 0.098,
+        "z": 0.098
       },
       "position": [
-        -0.58,
-        1.5,
-        1.67
+        -0.72,
+        1.26,
+        1.69
       ],
-      "material": "clay",
+      "material": "skin",
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1591,19 +2394,48 @@
     {
       "uuid": "child-a-neck",
       "name": "Neck",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "child-a",
       "dimensions": {
-        "x": 0.196,
-        "y": 0.196,
-        "z": 0.13999999999999999
+        "x": 0.14,
+        "y": 0.15,
+        "z": 0.28
       },
       "position": [
         -1,
-        1.5,
-        2.51
+        1.51,
+        2.47
       ],
-      "material": "clay",
+      "material": "skin",
+      "joints": [
+        [
+          -1,
+          1.5,
+          2.4
+        ],
+        [
+          -1,
+          1.51,
+          2.54
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.07,
+          0.07
+        ],
+        [
+          1,
+          0.06,
+          0.06
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1613,48 +2445,308 @@
     {
       "uuid": "child-a-head",
       "name": "Head",
-      "type": "sphere",
+      "type": "loft",
       "parent": "child-a",
       "dimensions": {
-        "x": 0.385,
-        "y": 0.385,
-        "z": 0.385
+        "x": 0.34,
+        "y": 0.34,
+        "z": 0.76
       },
       "position": [
         -1,
         1.5,
-        2.76
+        2.75
       ],
-      "material": "clay",
+      "material": "skin",
+      "joints": [
+        [
+          -1,
+          1.5,
+          2.54
+        ],
+        [
+          -1,
+          1.5,
+          2.75
+        ],
+        [
+          -1,
+          1.5,
+          2.96
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.11
+        ],
+        [
+          0.35,
+          0.15,
+          0.15
+        ],
+        [
+          0.75,
+          0.15,
+          0.17
+        ],
+        [
+          1,
+          0.09,
+          0.1
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
-        "note": "Head. Form only. No face."
+        "note": "Head with approximate general features. Not a portrait."
+      }
+    },
+    {
+      "uuid": "child-a-eye-l",
+      "name": "Eye (left)",
+      "type": "sphere",
+      "parent": "child-a",
+      "dimensions": {
+        "x": 0.06,
+        "y": 0.06,
+        "z": 0.06
+      },
+      "position": [
+        -1.06,
+        1.34,
+        2.79
+      ],
+      "material": "dark",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Eye, a general form."
+      }
+    },
+    {
+      "uuid": "child-a-brow-l",
+      "name": "Brow (left)",
+      "type": "box",
+      "parent": "child-a",
+      "dimensions": {
+        "x": 0.091,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "position": [
+        -1.06,
+        1.33,
+        2.87
+      ],
+      "material": "dark",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Brow, a general form."
+      }
+    },
+    {
+      "uuid": "child-a-ear-l",
+      "name": "Ear (left)",
+      "type": "sphere",
+      "parent": "child-a",
+      "dimensions": {
+        "x": 0.055999999999999994,
+        "y": 0.055999999999999994,
+        "z": 0.055999999999999994
+      },
+      "position": [
+        -1.16,
+        1.5,
+        2.75
+      ],
+      "material": "skin",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Ear, a general form."
+      }
+    },
+    {
+      "uuid": "child-a-eye-r",
+      "name": "Eye (right)",
+      "type": "sphere",
+      "parent": "child-a",
+      "dimensions": {
+        "x": 0.06,
+        "y": 0.06,
+        "z": 0.06
+      },
+      "position": [
+        -0.94,
+        1.34,
+        2.79
+      ],
+      "material": "dark",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Eye, a general form."
+      }
+    },
+    {
+      "uuid": "child-a-brow-r",
+      "name": "Brow (right)",
+      "type": "box",
+      "parent": "child-a",
+      "dimensions": {
+        "x": 0.091,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "position": [
+        -0.94,
+        1.33,
+        2.87
+      ],
+      "material": "dark",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Brow, a general form."
+      }
+    },
+    {
+      "uuid": "child-a-ear-r",
+      "name": "Ear (right)",
+      "type": "sphere",
+      "parent": "child-a",
+      "dimensions": {
+        "x": 0.055999999999999994,
+        "y": 0.055999999999999994,
+        "z": 0.055999999999999994
+      },
+      "position": [
+        -0.84,
+        1.5,
+        2.75
+      ],
+      "material": "skin",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Ear, a general form."
+      }
+    },
+    {
+      "uuid": "child-a-nose",
+      "name": "Nose",
+      "type": "cone",
+      "parent": "child-a",
+      "dimensions": {
+        "x": 0.06999999999999999,
+        "y": 0.06999999999999999,
+        "z": 0.126
+      },
+      "position": [
+        -1,
+        1.33,
+        2.74
+      ],
+      "material": "skin",
+      "rotation_x": 90,
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Nose, a general form."
+      }
+    },
+    {
+      "uuid": "child-a-mouth",
+      "name": "Mouth",
+      "type": "box",
+      "parent": "child-a",
+      "dimensions": {
+        "x": 0.098,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "position": [
+        -1,
+        1.34,
+        2.65
+      ],
+      "material": "dark",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Mouth, a general form."
       }
     },
     {
       "uuid": "woman-b",
       "name": "Woman B (placeholder)",
       "type": "group",
-      "description": "A placeholder form in a pose: no face, no hair, no clothing pattern, no regalia.",
+      "description": "A placeholder person in a pose. Approximate general features; a form, not a portrait of anyone. Clothing is generic.",
       "parent": "figures"
     },
     {
       "uuid": "woman-b-leg-1",
       "name": "Leg 1",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "woman-b",
       "dimensions": {
-        "x": 0.3,
-        "y": 0.3,
-        "z": 1.1
+        "x": 0.32,
+        "y": 0.32,
+        "z": 1.35
       },
       "position": [
         8.8,
         3,
-        1.55
+        1.64
       ],
       "material": "hide and cloth",
+      "joints": [
+        [
+          8.8,
+          3,
+          2.15
+        ],
+        [
+          8.8,
+          3,
+          1.55
+        ],
+        [
+          8.8,
+          3,
+          1.12
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.16,
+          0.16
+        ],
+        [
+          0.5,
+          0.12,
+          0.12
+        ],
+        [
+          1,
+          0.1,
+          0.1
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1664,19 +2756,48 @@
     {
       "uuid": "woman-b-foot-1",
       "name": "Foot 1",
-      "type": "box",
+      "type": "loft",
       "parent": "woman-b",
       "dimensions": {
-        "x": 0.36,
-        "y": 0.6,
-        "z": 0.2
+        "x": 0.26,
+        "y": 0.71,
+        "z": 0.26
       },
       "position": [
         8.8,
-        3.5,
-        1.1
+        3.08,
+        1.08
       ],
       "material": "dark",
+      "joints": [
+        [
+          8.8,
+          2.85,
+          1.08
+        ],
+        [
+          8.8,
+          3.3,
+          1.08
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.09
+        ],
+        [
+          1,
+          0.13,
+          0.08
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1686,19 +2807,58 @@
     {
       "uuid": "woman-b-leg-2",
       "name": "Leg 2",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "woman-b",
       "dimensions": {
-        "x": 0.3,
-        "y": 0.3,
-        "z": 1.1
+        "x": 0.32,
+        "y": 0.32,
+        "z": 1.35
       },
       "position": [
         9.2,
         3,
-        1.55
+        1.64
       ],
       "material": "hide and cloth",
+      "joints": [
+        [
+          9.2,
+          3,
+          2.15
+        ],
+        [
+          9.2,
+          3,
+          1.55
+        ],
+        [
+          9.2,
+          3,
+          1.12
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.16,
+          0.16
+        ],
+        [
+          0.5,
+          0.12,
+          0.12
+        ],
+        [
+          1,
+          0.1,
+          0.1
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1708,19 +2868,48 @@
     {
       "uuid": "woman-b-foot-2",
       "name": "Foot 2",
-      "type": "box",
+      "type": "loft",
       "parent": "woman-b",
       "dimensions": {
-        "x": 0.36,
-        "y": 0.6,
-        "z": 0.2
+        "x": 0.26,
+        "y": 0.71,
+        "z": 0.26
       },
       "position": [
         9.2,
-        3.5,
-        1.1
+        3.08,
+        1.08
       ],
       "material": "dark",
+      "joints": [
+        [
+          9.2,
+          2.85,
+          1.08
+        ],
+        [
+          9.2,
+          3.3,
+          1.08
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.09
+        ],
+        [
+          1,
+          0.13,
+          0.08
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1729,42 +2918,130 @@
     },
     {
       "uuid": "woman-b-skirt",
-      "name": "Skirt",
-      "type": "cone",
+      "name": "Skirt (banded)",
+      "type": "loft",
       "parent": "woman-b",
       "dimensions": {
-        "x": 1.1,
-        "y": 1.1,
-        "z": 1.4
+        "x": 0.84,
+        "y": 0.84,
+        "z": 1.84
       },
       "position": [
         9,
         3,
-        2.3
+        1.95
       ],
-      "material": "hide and cloth",
+      "material": "pattern:bands",
+      "joints": [
+        [
+          9,
+          3,
+          2.45
+        ],
+        [
+          9,
+          3,
+          2
+        ],
+        [
+          9,
+          3,
+          1.45
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.23,
+          0.2
+        ],
+        [
+          0.5,
+          0.32,
+          0.28
+        ],
+        [
+          1,
+          0.42,
+          0.36
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
-        "note": "Skirt shape. Form only."
+        "note": "Skirt with a band pattern. Generic."
       }
     },
     {
       "uuid": "woman-b-torso",
       "name": "Torso",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "woman-b",
       "dimensions": {
-        "x": 0.9,
-        "y": 0.9,
-        "z": 0.95
+        "x": 0.6,
+        "y": 0.6,
+        "z": 1.47
       },
       "position": [
         9,
         3,
-        2.58
+        2.59
       ],
       "material": "hide and cloth",
+      "joints": [
+        [
+          9,
+          3,
+          2.15
+        ],
+        [
+          9,
+          3,
+          2.5
+        ],
+        [
+          9,
+          3,
+          2.8
+        ],
+        [
+          9,
+          3,
+          3.02
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.22,
+          0.19
+        ],
+        [
+          0.35,
+          0.19,
+          0.16
+        ],
+        [
+          0.7,
+          0.26,
+          0.19
+        ],
+        [
+          1,
+          0.3,
+          0.16
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1774,21 +3051,58 @@
     {
       "uuid": "woman-b-arm-l",
       "name": "Arm (left)",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "woman-b",
       "dimensions": {
-        "x": 0.22,
-        "y": 0.22,
-        "z": 0.95
+        "x": 0.3,
+        "y": 0.2,
+        "z": 1.07
       },
       "position": [
-        8.44,
+        8.65,
         3,
-        2.45
+        2.52
       ],
-      "material": "clay",
-      "rotation_x": 0,
-      "rotation_y": -8,
+      "material": "hide and cloth",
+      "joints": [
+        [
+          8.7,
+          3,
+          2.95
+        ],
+        [
+          8.64,
+          3,
+          2.5
+        ],
+        [
+          8.6,
+          3,
+          2.08
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.1
+        ],
+        [
+          0.5,
+          0.09,
+          0.09
+        ],
+        [
+          1,
+          0.08,
+          0.08
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1801,16 +3115,16 @@
       "type": "sphere",
       "parent": "woman-b",
       "dimensions": {
-        "x": 0.24,
-        "y": 0.24,
-        "z": 0.24
+        "x": 0.14,
+        "y": 0.14,
+        "z": 0.14
       },
       "position": [
-        8.4,
+        8.6,
         3,
-        1.95
+        1.98
       ],
-      "material": "clay",
+      "material": "skin",
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1820,21 +3134,58 @@
     {
       "uuid": "woman-b-arm-r",
       "name": "Arm (right)",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "woman-b",
       "dimensions": {
-        "x": 0.22,
-        "y": 0.22,
-        "z": 0.95
+        "x": 0.3,
+        "y": 0.2,
+        "z": 1.07
       },
       "position": [
-        9.56,
+        9.35,
         3,
-        2.45
+        2.52
       ],
-      "material": "clay",
-      "rotation_x": 0,
-      "rotation_y": 8,
+      "material": "hide and cloth",
+      "joints": [
+        [
+          9.3,
+          3,
+          2.95
+        ],
+        [
+          9.36,
+          3,
+          2.5
+        ],
+        [
+          9.4,
+          3,
+          2.08
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.1
+        ],
+        [
+          0.5,
+          0.09,
+          0.09
+        ],
+        [
+          1,
+          0.08,
+          0.08
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1847,16 +3198,16 @@
       "type": "sphere",
       "parent": "woman-b",
       "dimensions": {
-        "x": 0.24,
-        "y": 0.24,
-        "z": 0.24
+        "x": 0.14,
+        "y": 0.14,
+        "z": 0.14
       },
       "position": [
-        9.6,
+        9.4,
         3,
-        1.95
+        1.98
       ],
-      "material": "clay",
+      "material": "skin",
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1866,19 +3217,48 @@
     {
       "uuid": "woman-b-neck",
       "name": "Neck",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "woman-b",
       "dimensions": {
-        "x": 0.28,
-        "y": 0.28,
-        "z": 0.2
+        "x": 0.2,
+        "y": 0.22,
+        "z": 0.4
       },
       "position": [
         9,
-        3,
-        3.15
+        3.01,
+        3.1
       ],
-      "material": "clay",
+      "material": "skin",
+      "joints": [
+        [
+          9,
+          3,
+          3
+        ],
+        [
+          9,
+          3.02,
+          3.2
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.1
+        ],
+        [
+          1,
+          0.09,
+          0.09
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
@@ -1888,23 +3268,244 @@
     {
       "uuid": "woman-b-head",
       "name": "Head",
-      "type": "sphere",
+      "type": "loft",
       "parent": "woman-b",
       "dimensions": {
-        "x": 0.55,
-        "y": 0.55,
-        "z": 0.55
+        "x": 0.48,
+        "y": 0.48,
+        "z": 1.08
       },
       "position": [
         9,
         3,
-        3.52
+        3.5
       ],
-      "material": "clay",
+      "material": "skin",
+      "joints": [
+        [
+          9,
+          3,
+          3.2
+        ],
+        [
+          9,
+          3,
+          3.5
+        ],
+        [
+          9,
+          3,
+          3.8
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.14,
+          0.16
+        ],
+        [
+          0.35,
+          0.22,
+          0.22
+        ],
+        [
+          0.75,
+          0.22,
+          0.24
+        ],
+        [
+          1,
+          0.13,
+          0.14
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 15,
         "basis": "placeholder",
-        "note": "Head. Form only. No face."
+        "note": "Head with approximate general features. Not a portrait."
+      }
+    },
+    {
+      "uuid": "woman-b-eye-l",
+      "name": "Eye (left)",
+      "type": "sphere",
+      "parent": "woman-b",
+      "dimensions": {
+        "x": 0.06,
+        "y": 0.06,
+        "z": 0.06
+      },
+      "position": [
+        8.91,
+        2.77,
+        3.56
+      ],
+      "material": "dark",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Eye, a general form."
+      }
+    },
+    {
+      "uuid": "woman-b-brow-l",
+      "name": "Brow (left)",
+      "type": "box",
+      "parent": "woman-b",
+      "dimensions": {
+        "x": 0.13,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "position": [
+        8.91,
+        2.76,
+        3.67
+      ],
+      "material": "dark",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Brow, a general form."
+      }
+    },
+    {
+      "uuid": "woman-b-ear-l",
+      "name": "Ear (left)",
+      "type": "sphere",
+      "parent": "woman-b",
+      "dimensions": {
+        "x": 0.08,
+        "y": 0.08,
+        "z": 0.08
+      },
+      "position": [
+        8.77,
+        3,
+        3.5
+      ],
+      "material": "skin",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Ear, a general form."
+      }
+    },
+    {
+      "uuid": "woman-b-eye-r",
+      "name": "Eye (right)",
+      "type": "sphere",
+      "parent": "woman-b",
+      "dimensions": {
+        "x": 0.06,
+        "y": 0.06,
+        "z": 0.06
+      },
+      "position": [
+        9.09,
+        2.77,
+        3.56
+      ],
+      "material": "dark",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Eye, a general form."
+      }
+    },
+    {
+      "uuid": "woman-b-brow-r",
+      "name": "Brow (right)",
+      "type": "box",
+      "parent": "woman-b",
+      "dimensions": {
+        "x": 0.13,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "position": [
+        9.09,
+        2.76,
+        3.67
+      ],
+      "material": "dark",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Brow, a general form."
+      }
+    },
+    {
+      "uuid": "woman-b-ear-r",
+      "name": "Ear (right)",
+      "type": "sphere",
+      "parent": "woman-b",
+      "dimensions": {
+        "x": 0.08,
+        "y": 0.08,
+        "z": 0.08
+      },
+      "position": [
+        9.23,
+        3,
+        3.5
+      ],
+      "material": "skin",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Ear, a general form."
+      }
+    },
+    {
+      "uuid": "woman-b-nose",
+      "name": "Nose",
+      "type": "cone",
+      "parent": "woman-b",
+      "dimensions": {
+        "x": 0.1,
+        "y": 0.1,
+        "z": 0.18
+      },
+      "position": [
+        9,
+        2.75,
+        3.48
+      ],
+      "material": "skin",
+      "rotation_x": 90,
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Nose, a general form."
+      }
+    },
+    {
+      "uuid": "woman-b-mouth",
+      "name": "Mouth",
+      "type": "box",
+      "parent": "woman-b",
+      "dimensions": {
+        "x": 0.14,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "position": [
+        9,
+        2.77,
+        3.35
+      ],
+      "material": "dark",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Mouth, a general form."
       }
     },
     {
@@ -2286,49 +3887,135 @@
       "uuid": "horse-1",
       "name": "Horse 1 (front)",
       "type": "group",
-      "description": "A horse standing, facing right. A placeholder silhouette in real proportions; no breed, tack or colour is claimed.",
+      "description": "A horse standing, facing right. A placeholder in real proportions; no breed, tack or colour is claimed.",
       "parent": "horses"
     },
     {
       "uuid": "horse-1-barrel",
       "name": "Barrel (body)",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "horse-1",
       "dimensions": {
-        "x": 1.1,
+        "x": 4.4,
         "y": 1.1,
-        "z": 3.2
+        "z": 1.4
       },
       "position": [
-        6,
+        5.95,
         -8.5,
-        3.3
+        3.05
       ],
       "material": "horse bay",
-      "rotation_y": 90,
+      "joints": [
+        [
+          4.3,
+          -8.5,
+          3
+        ],
+        [
+          5.4,
+          -8.5,
+          3.2
+        ],
+        [
+          6.8,
+          -8.5,
+          3.1
+        ],
+        [
+          7.6,
+          -8.5,
+          2.9
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.32,
+          0.4
+        ],
+        [
+          0.3,
+          0.55,
+          0.5
+        ],
+        [
+          0.6,
+          0.55,
+          0.52
+        ],
+        [
+          1,
+          0.42,
+          0.42
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
       "certainty": {
         "percent": 20,
         "basis": "placeholder",
-        "note": "Body shape from a horse body plan."
+        "note": "Barrel from a horse body plan."
       }
     },
     {
       "uuid": "horse-1-neck",
       "name": "Neck",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "horse-1",
       "dimensions": {
-        "x": 0.6,
-        "y": 0.6,
-        "z": 1.9
+        "x": 1.78,
+        "y": 0.68,
+        "z": 1.98
       },
       "position": [
-        7.9,
+        7.85,
         -8.5,
-        4.2
+        3.75
       ],
       "material": "horse bay",
-      "rotation_y": 30,
+      "joints": [
+        [
+          7.3,
+          -8.5,
+          3.1
+        ],
+        [
+          7.9,
+          -8.5,
+          3.7
+        ],
+        [
+          8.4,
+          -8.5,
+          4.4
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.32,
+          0.34
+        ],
+        [
+          0.5,
+          0.24,
+          0.26
+        ],
+        [
+          1,
+          0.2,
+          0.22
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
       "certainty": {
         "percent": 20,
         "basis": "placeholder",
@@ -2338,70 +4025,118 @@
     {
       "uuid": "horse-1-mane",
       "name": "Mane",
-      "type": "box",
+      "type": "loft",
       "parent": "horse-1",
       "dimensions": {
-        "x": 0.18,
-        "y": 0.18,
-        "z": 1.6
+        "x": 1.2,
+        "y": 0.2,
+        "z": 1.5
       },
       "position": [
-        7.95,
+        7.7,
         -8.5,
-        4.55
+        4.35
       ],
       "material": "horse dark",
-      "rotation_y": 30,
+      "joints": [
+        [
+          7.2,
+          -8.5,
+          3.7
+        ],
+        [
+          7.75,
+          -8.5,
+          4.3
+        ],
+        [
+          8.2,
+          -8.5,
+          5
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.06,
+          0.1
+        ],
+        [
+          1,
+          0.05,
+          0.08
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
       "certainty": {
         "percent": 20,
         "basis": "placeholder",
-        "note": "Mane along the neck."
+        "note": "Mane along the crest of the neck."
       }
     },
     {
       "uuid": "horse-1-head",
       "name": "Head",
-      "type": "box",
+      "type": "loft",
       "parent": "horse-1",
       "dimensions": {
-        "x": 0.95,
-        "y": 0.5,
-        "z": 0.55
+        "x": 1.64,
+        "y": 0.54,
+        "z": 1.24
       },
       "position": [
-        8.85,
+        8.95,
         -8.5,
-        5
+        3.95
       ],
       "material": "horse dark",
-      "rotation_y": 40,
+      "joints": [
+        [
+          8.4,
+          -8.5,
+          4.3
+        ],
+        [
+          8.9,
+          -8.5,
+          4.2
+        ],
+        [
+          9.5,
+          -8.5,
+          3.6
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.22,
+          0.27
+        ],
+        [
+          0.5,
+          0.2,
+          0.22
+        ],
+        [
+          1,
+          0.13,
+          0.14
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
       "certainty": {
         "percent": 20,
         "basis": "placeholder",
-        "note": "Head, lowered."
-      }
-    },
-    {
-      "uuid": "horse-1-muzzle",
-      "name": "Muzzle",
-      "type": "box",
-      "parent": "horse-1",
-      "dimensions": {
-        "x": 0.7,
-        "y": 0.38,
-        "z": 0.4
-      },
-      "position": [
-        9.45,
-        -8.5,
-        4.6
-      ],
-      "material": "horse dark",
-      "rotation_y": 40,
-      "certainty": {
-        "percent": 20,
-        "basis": "placeholder",
-        "note": "Muzzle."
+        "note": "Head, lowered, tapering to the muzzle."
       }
     },
     {
@@ -2410,14 +4145,14 @@
       "type": "cone",
       "parent": "horse-1",
       "dimensions": {
-        "x": 0.14,
-        "y": 0.14,
-        "z": 0.3
+        "x": 0.12,
+        "y": 0.12,
+        "z": 0.28
       },
       "position": [
         8.75,
-        -8.64,
-        5.6
+        -8.62,
+        4.75
       ],
       "material": "horse dark",
       "certainty": {
@@ -2432,14 +4167,14 @@
       "type": "cone",
       "parent": "horse-1",
       "dimensions": {
-        "x": 0.14,
-        "y": 0.14,
-        "z": 0.3
+        "x": 0.12,
+        "y": 0.12,
+        "z": 0.28
       },
       "position": [
         8.75,
-        -8.36,
-        5.6
+        -8.38,
+        4.75
       ],
       "material": "horse dark",
       "certainty": {
@@ -2451,20 +4186,58 @@
     {
       "uuid": "horse-1-tail",
       "name": "Tail",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "horse-1",
       "dimensions": {
-        "x": 0.28,
+        "x": 0.88,
         "y": 0.28,
-        "z": 1.6
+        "z": 1.98
       },
       "position": [
-        3.8,
+        4.1,
         -8.5,
-        2.8
+        2.25
       ],
       "material": "horse dark",
-      "rotation_y": 24,
+      "joints": [
+        [
+          4.4,
+          -8.5,
+          3.1
+        ],
+        [
+          4,
+          -8.5,
+          2.4
+        ],
+        [
+          3.8,
+          -8.5,
+          1.4
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.12
+        ],
+        [
+          0.6,
+          0.14,
+          0.14
+        ],
+        [
+          1,
+          0.07,
+          0.08
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
       "certainty": {
         "percent": 20,
         "basis": "placeholder",
@@ -2474,138 +4247,400 @@
     {
       "uuid": "horse-1-leg-1",
       "name": "Leg 1",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "horse-1",
       "dimensions": {
-        "x": 0.26,
-        "y": 0.26,
-        "z": 1.75
+        "x": 0.54,
+        "y": 0.44,
+        "z": 2.12
       },
       "position": [
-        7.2,
+        7.25,
         -8.86,
-        1.88
+        2.06
       ],
       "material": "horse dark",
+      "joints": [
+        [
+          7.2,
+          -8.86,
+          2.9
+        ],
+        [
+          7.2,
+          -8.86,
+          2.05
+        ],
+        [
+          7.3,
+          -8.86,
+          1.22
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.22,
+          0.22
+        ],
+        [
+          0.5,
+          0.13,
+          0.13
+        ],
+        [
+          0.85,
+          0.12,
+          0.12
+        ],
+        [
+          1,
+          0.17,
+          0.13
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 20,
         "basis": "placeholder",
-        "note": "Leg."
+        "note": "Leg with a hoof."
       }
     },
     {
       "uuid": "horse-1-leg-2",
       "name": "Leg 2",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "horse-1",
       "dimensions": {
-        "x": 0.26,
-        "y": 0.26,
-        "z": 1.75
+        "x": 0.54,
+        "y": 0.44,
+        "z": 2.12
       },
       "position": [
-        7.2,
+        7.25,
         -8.14,
-        1.88
+        2.06
       ],
       "material": "horse dark",
+      "joints": [
+        [
+          7.2,
+          -8.14,
+          2.9
+        ],
+        [
+          7.2,
+          -8.14,
+          2.05
+        ],
+        [
+          7.3,
+          -8.14,
+          1.22
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.22,
+          0.22
+        ],
+        [
+          0.5,
+          0.13,
+          0.13
+        ],
+        [
+          0.85,
+          0.12,
+          0.12
+        ],
+        [
+          1,
+          0.17,
+          0.13
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 20,
         "basis": "placeholder",
-        "note": "Leg."
+        "note": "Leg with a hoof."
       }
     },
     {
       "uuid": "horse-1-leg-3",
       "name": "Leg 3",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "horse-1",
       "dimensions": {
-        "x": 0.26,
-        "y": 0.26,
-        "z": 1.75
+        "x": 0.54,
+        "y": 0.44,
+        "z": 2.12
       },
       "position": [
-        4.8,
+        4.85,
         -8.86,
-        1.88
+        2.06
       ],
       "material": "horse dark",
+      "joints": [
+        [
+          4.8,
+          -8.86,
+          2.9
+        ],
+        [
+          4.8,
+          -8.86,
+          2.05
+        ],
+        [
+          4.9,
+          -8.86,
+          1.22
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.22,
+          0.22
+        ],
+        [
+          0.5,
+          0.13,
+          0.13
+        ],
+        [
+          0.85,
+          0.12,
+          0.12
+        ],
+        [
+          1,
+          0.17,
+          0.13
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 20,
         "basis": "placeholder",
-        "note": "Leg."
+        "note": "Leg with a hoof."
       }
     },
     {
       "uuid": "horse-1-leg-4",
       "name": "Leg 4",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "horse-1",
       "dimensions": {
-        "x": 0.26,
-        "y": 0.26,
-        "z": 1.75
+        "x": 0.54,
+        "y": 0.44,
+        "z": 2.12
       },
       "position": [
-        4.8,
+        4.85,
         -8.14,
-        1.88
+        2.06
       ],
       "material": "horse dark",
+      "joints": [
+        [
+          4.8,
+          -8.14,
+          2.9
+        ],
+        [
+          4.8,
+          -8.14,
+          2.05
+        ],
+        [
+          4.9,
+          -8.14,
+          1.22
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.22,
+          0.22
+        ],
+        [
+          0.5,
+          0.13,
+          0.13
+        ],
+        [
+          0.85,
+          0.12,
+          0.12
+        ],
+        [
+          1,
+          0.17,
+          0.13
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 20,
         "basis": "placeholder",
-        "note": "Leg."
+        "note": "Leg with a hoof."
       }
     },
     {
       "uuid": "horse-2",
       "name": "Horse 2 (by the cover)",
       "type": "group",
-      "description": "A horse standing, facing right. A placeholder silhouette in real proportions; no breed, tack or colour is claimed.",
+      "description": "A horse standing, facing right. A placeholder in real proportions; no breed, tack or colour is claimed.",
       "parent": "horses"
     },
     {
       "uuid": "horse-2-barrel",
       "name": "Barrel (body)",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "horse-2",
       "dimensions": {
-        "x": 1.1,
+        "x": 4.4,
         "y": 1.1,
-        "z": 3.2
+        "z": 1.4
       },
       "position": [
-        -5,
+        -5.05,
         -8.5,
-        3.3
+        3.05
       ],
       "material": "horse bay",
-      "rotation_y": 90,
+      "joints": [
+        [
+          -6.7,
+          -8.5,
+          3
+        ],
+        [
+          -5.6,
+          -8.5,
+          3.2
+        ],
+        [
+          -4.2,
+          -8.5,
+          3.1
+        ],
+        [
+          -3.4,
+          -8.5,
+          2.9
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.32,
+          0.4
+        ],
+        [
+          0.3,
+          0.55,
+          0.5
+        ],
+        [
+          0.6,
+          0.55,
+          0.52
+        ],
+        [
+          1,
+          0.42,
+          0.42
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
       "certainty": {
         "percent": 20,
         "basis": "placeholder",
-        "note": "Body shape from a horse body plan."
+        "note": "Barrel from a horse body plan."
       }
     },
     {
       "uuid": "horse-2-neck",
       "name": "Neck",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "horse-2",
       "dimensions": {
-        "x": 0.6,
-        "y": 0.6,
-        "z": 1.9
+        "x": 1.78,
+        "y": 0.68,
+        "z": 1.98
       },
       "position": [
-        -3.1,
+        -3.15,
         -8.5,
-        4.2
+        3.75
       ],
       "material": "horse bay",
-      "rotation_y": 30,
+      "joints": [
+        [
+          -3.7,
+          -8.5,
+          3.1
+        ],
+        [
+          -3.1,
+          -8.5,
+          3.7
+        ],
+        [
+          -2.6,
+          -8.5,
+          4.4
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.32,
+          0.34
+        ],
+        [
+          0.5,
+          0.24,
+          0.26
+        ],
+        [
+          1,
+          0.2,
+          0.22
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
       "certainty": {
         "percent": 20,
         "basis": "placeholder",
@@ -2615,70 +4650,118 @@
     {
       "uuid": "horse-2-mane",
       "name": "Mane",
-      "type": "box",
+      "type": "loft",
       "parent": "horse-2",
       "dimensions": {
-        "x": 0.18,
-        "y": 0.18,
-        "z": 1.6
+        "x": 1.2,
+        "y": 0.2,
+        "z": 1.5
       },
       "position": [
-        -3.05,
+        -3.3,
         -8.5,
-        4.55
+        4.35
       ],
       "material": "horse dark",
-      "rotation_y": 30,
+      "joints": [
+        [
+          -3.8,
+          -8.5,
+          3.7
+        ],
+        [
+          -3.25,
+          -8.5,
+          4.3
+        ],
+        [
+          -2.8,
+          -8.5,
+          5
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.06,
+          0.1
+        ],
+        [
+          1,
+          0.05,
+          0.08
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
       "certainty": {
         "percent": 20,
         "basis": "placeholder",
-        "note": "Mane along the neck."
+        "note": "Mane along the crest of the neck."
       }
     },
     {
       "uuid": "horse-2-head",
       "name": "Head",
-      "type": "box",
+      "type": "loft",
       "parent": "horse-2",
       "dimensions": {
-        "x": 0.95,
-        "y": 0.5,
-        "z": 0.55
+        "x": 1.64,
+        "y": 0.54,
+        "z": 1.24
       },
       "position": [
-        -2.15,
+        -2.05,
         -8.5,
-        5
+        3.95
       ],
       "material": "horse dark",
-      "rotation_y": 40,
+      "joints": [
+        [
+          -2.6,
+          -8.5,
+          4.3
+        ],
+        [
+          -2.1,
+          -8.5,
+          4.2
+        ],
+        [
+          -1.5,
+          -8.5,
+          3.6
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.22,
+          0.27
+        ],
+        [
+          0.5,
+          0.2,
+          0.22
+        ],
+        [
+          1,
+          0.13,
+          0.14
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
       "certainty": {
         "percent": 20,
         "basis": "placeholder",
-        "note": "Head, lowered."
-      }
-    },
-    {
-      "uuid": "horse-2-muzzle",
-      "name": "Muzzle",
-      "type": "box",
-      "parent": "horse-2",
-      "dimensions": {
-        "x": 0.7,
-        "y": 0.38,
-        "z": 0.4
-      },
-      "position": [
-        -1.55,
-        -8.5,
-        4.6
-      ],
-      "material": "horse dark",
-      "rotation_y": 40,
-      "certainty": {
-        "percent": 20,
-        "basis": "placeholder",
-        "note": "Muzzle."
+        "note": "Head, lowered, tapering to the muzzle."
       }
     },
     {
@@ -2687,14 +4770,14 @@
       "type": "cone",
       "parent": "horse-2",
       "dimensions": {
-        "x": 0.14,
-        "y": 0.14,
-        "z": 0.3
+        "x": 0.12,
+        "y": 0.12,
+        "z": 0.28
       },
       "position": [
         -2.25,
-        -8.64,
-        5.6
+        -8.62,
+        4.75
       ],
       "material": "horse dark",
       "certainty": {
@@ -2709,14 +4792,14 @@
       "type": "cone",
       "parent": "horse-2",
       "dimensions": {
-        "x": 0.14,
-        "y": 0.14,
-        "z": 0.3
+        "x": 0.12,
+        "y": 0.12,
+        "z": 0.28
       },
       "position": [
         -2.25,
-        -8.36,
-        5.6
+        -8.38,
+        4.75
       ],
       "material": "horse dark",
       "certainty": {
@@ -2728,20 +4811,58 @@
     {
       "uuid": "horse-2-tail",
       "name": "Tail",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "horse-2",
       "dimensions": {
-        "x": 0.28,
+        "x": 0.88,
         "y": 0.28,
-        "z": 1.6
+        "z": 1.98
       },
       "position": [
-        -7.2,
+        -6.9,
         -8.5,
-        2.8
+        2.25
       ],
       "material": "horse dark",
-      "rotation_y": 24,
+      "joints": [
+        [
+          -6.6,
+          -8.5,
+          3.1
+        ],
+        [
+          -7,
+          -8.5,
+          2.4
+        ],
+        [
+          -7.2,
+          -8.5,
+          1.4
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.1,
+          0.12
+        ],
+        [
+          0.6,
+          0.14,
+          0.14
+        ],
+        [
+          1,
+          0.07,
+          0.08
+        ]
+      ],
+      "facing": [
+        0,
+        1,
+        0
+      ],
       "certainty": {
         "percent": 20,
         "basis": "placeholder",
@@ -2751,89 +4872,265 @@
     {
       "uuid": "horse-2-leg-1",
       "name": "Leg 1",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "horse-2",
       "dimensions": {
-        "x": 0.26,
-        "y": 0.26,
-        "z": 1.75
+        "x": 0.54,
+        "y": 0.44,
+        "z": 2.12
       },
       "position": [
-        -3.8,
+        -3.75,
         -8.86,
-        1.88
+        2.06
       ],
       "material": "horse dark",
+      "joints": [
+        [
+          -3.8,
+          -8.86,
+          2.9
+        ],
+        [
+          -3.8,
+          -8.86,
+          2.05
+        ],
+        [
+          -3.7,
+          -8.86,
+          1.22
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.22,
+          0.22
+        ],
+        [
+          0.5,
+          0.13,
+          0.13
+        ],
+        [
+          0.85,
+          0.12,
+          0.12
+        ],
+        [
+          1,
+          0.17,
+          0.13
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 20,
         "basis": "placeholder",
-        "note": "Leg."
+        "note": "Leg with a hoof."
       }
     },
     {
       "uuid": "horse-2-leg-2",
       "name": "Leg 2",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "horse-2",
       "dimensions": {
-        "x": 0.26,
-        "y": 0.26,
-        "z": 1.75
+        "x": 0.54,
+        "y": 0.44,
+        "z": 2.12
       },
       "position": [
-        -3.8,
+        -3.75,
         -8.14,
-        1.88
+        2.06
       ],
       "material": "horse dark",
+      "joints": [
+        [
+          -3.8,
+          -8.14,
+          2.9
+        ],
+        [
+          -3.8,
+          -8.14,
+          2.05
+        ],
+        [
+          -3.7,
+          -8.14,
+          1.22
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.22,
+          0.22
+        ],
+        [
+          0.5,
+          0.13,
+          0.13
+        ],
+        [
+          0.85,
+          0.12,
+          0.12
+        ],
+        [
+          1,
+          0.17,
+          0.13
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 20,
         "basis": "placeholder",
-        "note": "Leg."
+        "note": "Leg with a hoof."
       }
     },
     {
       "uuid": "horse-2-leg-3",
       "name": "Leg 3",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "horse-2",
       "dimensions": {
-        "x": 0.26,
-        "y": 0.26,
-        "z": 1.75
+        "x": 0.54,
+        "y": 0.44,
+        "z": 2.12
       },
       "position": [
-        -6.2,
+        -6.15,
         -8.86,
-        1.88
+        2.06
       ],
       "material": "horse dark",
+      "joints": [
+        [
+          -6.2,
+          -8.86,
+          2.9
+        ],
+        [
+          -6.2,
+          -8.86,
+          2.05
+        ],
+        [
+          -6.1,
+          -8.86,
+          1.22
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.22,
+          0.22
+        ],
+        [
+          0.5,
+          0.13,
+          0.13
+        ],
+        [
+          0.85,
+          0.12,
+          0.12
+        ],
+        [
+          1,
+          0.17,
+          0.13
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 20,
         "basis": "placeholder",
-        "note": "Leg."
+        "note": "Leg with a hoof."
       }
     },
     {
       "uuid": "horse-2-leg-4",
       "name": "Leg 4",
-      "type": "cylinder",
+      "type": "loft",
       "parent": "horse-2",
       "dimensions": {
-        "x": 0.26,
-        "y": 0.26,
-        "z": 1.75
+        "x": 0.54,
+        "y": 0.44,
+        "z": 2.12
       },
       "position": [
-        -6.2,
+        -6.15,
         -8.14,
-        1.88
+        2.06
       ],
       "material": "horse dark",
+      "joints": [
+        [
+          -6.2,
+          -8.14,
+          2.9
+        ],
+        [
+          -6.2,
+          -8.14,
+          2.05
+        ],
+        [
+          -6.1,
+          -8.14,
+          1.22
+        ]
+      ],
+      "rings": [
+        [
+          0,
+          0.22,
+          0.22
+        ],
+        [
+          0.5,
+          0.13,
+          0.13
+        ],
+        [
+          0.85,
+          0.12,
+          0.12
+        ],
+        [
+          1,
+          0.17,
+          0.13
+        ]
+      ],
+      "facing": [
+        1,
+        0,
+        0
+      ],
       "certainty": {
         "percent": 20,
         "basis": "placeholder",
-        "note": "Leg."
+        "note": "Leg with a hoof."
       }
     },
     {
@@ -2936,10 +5233,10 @@
     {
       "id": "F1",
       "target": "camp",
-      "text": "Display needs review by the Cheyenne and Arapaho Tribes (see research/consultation-plan.md). The whole camp is a draft until then. Not for display.",
+      "text": "Consultation note: the Cheyenne and Arapaho Tribes have not reviewed this camp (see research/consultation-plan.md).",
       "kind": "consultation",
       "status": "open",
-      "seq": 147
+      "seq": 169
     },
     {
       "id": "F2",
@@ -2947,7 +5244,7 @@
       "text": "The lodge shapes, the pole angles, the door and the struck cover need checking against Cheyenne practice.",
       "kind": "consultation",
       "status": "open",
-      "seq": 148
+      "seq": 170
     },
     {
       "id": "F3",
@@ -2955,7 +5252,7 @@
       "text": "The travois sizes and the loads are approximate. Check the load and how it was packed.",
       "kind": "consultation",
       "status": "open",
-      "seq": 149
+      "seq": 171
     },
     {
       "id": "F4",
@@ -2963,7 +5260,7 @@
       "text": "The horses are placeholder silhouettes in real proportions. Breed, tack and colour are not claimed.",
       "kind": "consultation",
       "status": "open",
-      "seq": 150
+      "seq": 172
     },
     {
       "id": "F5",
@@ -2971,7 +5268,7 @@
       "text": "The people are placeholder forms in poses, with no faces, no hair and no clothing pattern. They must not stand in for real people.",
       "kind": "consultation",
       "status": "open",
-      "seq": 151
+      "seq": 173
     },
     {
       "id": "F6",
@@ -2979,7 +5276,7 @@
       "text": "The skull and vertebrae are a scene choice. They are not a particular skull.",
       "kind": "uncertain",
       "status": "open",
-      "seq": 152
+      "seq": 174
     },
     {
       "id": "F7",
@@ -2987,7 +5284,7 @@
       "text": "The bluff is invented to frame the camp. It has no source.",
       "kind": "uncertain",
       "status": "open",
-      "seq": 153
+      "seq": 175
     },
     {
       "id": "F8",
@@ -2995,7 +5292,7 @@
       "text": "The fire ring size is typical, and the cold ash is an assumption.",
       "kind": "uncertain",
       "status": "open",
-      "seq": 154
+      "seq": 176
     },
     {
       "id": "F9",
@@ -3003,7 +5300,7 @@
       "text": "The grass tufts are decoration; their size is not measured.",
       "kind": "uncertain",
       "status": "open",
-      "seq": 155
+      "seq": 177
     },
     {
       "id": "F10",
@@ -3011,7 +5308,7 @@
       "text": "The grass tuft is decoration; its size is not measured.",
       "kind": "uncertain",
       "status": "open",
-      "seq": 156
+      "seq": 178
     }
   ]
 }

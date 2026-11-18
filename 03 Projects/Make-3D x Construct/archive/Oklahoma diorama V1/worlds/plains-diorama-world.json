@@ -1,0 +1,10 @@
+{
+  "schema": "m3dxc.world/0.1",
+  "name": "plains-diorama-world",
+  "description": "Rules for the plains diorama sample. Change a rule here, not in the model. Units inches, Z up.",
+  "units": "in",
+  "up": "z",
+  "max_dimension_in": 240,
+  "min_dimension_in": 0.05,
+  "warn_below_percent": 50
+}

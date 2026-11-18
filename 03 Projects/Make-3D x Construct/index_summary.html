@@ -31,8 +31,8 @@
 <body>
 <main>
   <header class="card">
-    <h1>index.html: summary</h1>
-    <p class="lead">What the page does, where each part lives, and which values you can tweak. Line numbers are for the files as they are now: <code>index.html</code> 295 lines, <code>css/app.css</code> 111, <code>js/app.js</code> 662, <code>js/viewer/viewer.js</code> 291.</p>
+    <h1>studio.html: summary (version V2)</h1>
+    <p class="lead">The studio (<code>studio.html</code>) is the 3-D app; <code>index.html</code> is the home page (projects, the library on this device, cloud sign-in). What the studio does, where each part lives, and which values you can tweak. Line numbers are for the files as they are now: <code>studio.html</code> 303 lines, <code>index.html</code> 71 lines, <code>index.html</code> 295 lines, <code>css/app.css</code> 111, <code>js/app.js</code> 662, <code>js/viewer/viewer.js</code> 291.</p>
   </header>
 
   <section class="card">
@@ -90,13 +90,13 @@
       <thead><tr><th>Lines</th><th>Section</th><th>What it does</th></tr></thead>
       <tbody>
         <tr><td class="n">1–9</td><td>Head</td><td>Charset, viewport, title, <code>css/app.css</code></td></tr>
-        <tr><td class="n">10–21</td><td>Header</td><td>Title, subtitle, three pills: display, checks, rounds</td></tr>
-        <tr><td class="n">22–163</td><td>Left column</td><td>Selected part (from line 23, with Close up), Model, Certainty, Flags (with kind), Story (draft), Ledger and rounds (score selects, AI critic, packet)</td></tr>
-        <tr><td class="n">164–183</td><td>Right column: 3-D view</td><td>View buttons, the colour toggle (material, certainty, paper), the canvas</td></tr>
-        <tr><td class="n">185–188</td><td>Errors (bottom)</td><td>Hidden until Show errors is on in ⚙️</td></tr>
-        <tr><td class="n">190</td><td>Gear button</td><td>Opens the ⚙️ drawer, lower right</td></tr>
-        <tr><td class="n">192–284</td><td>⚙️ drawer</td><td>Errors switch (198); Reviews (208); Display check (218); How rounds work (228); Notes (248); Database check (263); About (274, last)</td></tr>
-        <tr><td class="n">286–292</td><td>Scripts</td><td>three.js, sample bundle, engine, rounds, review, viewer, page (in this order)</td></tr>
+        <tr><td class="n">10–20</td><td>Header</td><td>Title (links home), subtitle, pills: checks, rounds</td></tr>
+        <tr><td class="n">21–162</td><td>Left column</td><td>Selected part (with Close up), Model, Certainty, Flags, Story (draft), Ledger and rounds</td></tr>
+        <tr><td class="n">163–182</td><td>Right column: 3-D view</td><td>View buttons, the colour toggle (material, certainty, paper), the canvas</td></tr>
+        <tr><td class="n">184–187</td><td>Errors (bottom)</td><td>Hidden until Show errors is on in ⚙️</td></tr>
+        <tr><td class="n">189</td><td>Gear button</td><td>Opens the ⚙️ drawer, lower right</td></tr>
+        <tr><td class="n">191–288</td><td>⚙️ drawer</td><td>Errors; Reviews; How rounds work; Library (save to library or cloud); Notes; Database check; About (last)</td></tr>
+        <tr><td class="n">290–300</td><td>Scripts</td><td>three.js, Supabase library, sample bundle, engine, rounds, review, cloud, library, loft, viewer, page</td></tr>
       </tbody>
     </table>
     </div>
@@ -108,29 +108,26 @@
     <table>
       <thead><tr><th>Line</th><th>Function</th><th>What it does</th></tr></thead>
       <tbody>
-        <tr><td class="n">14–18</td><td><code>KEYS, CRITERIA_LABEL</code></td><td>localStorage keys; criterion names</td></tr>
-        <tr><td class="n">19–26</td><td><code>REVIEW_ITEMS</code></td><td>The six review switches: who does each, the default, the label</td></tr>
-        <tr><td class="n">39–47</td><td><code>load, save</code></td><td>localStorage in try/catch; never throws</td></tr>
-        <tr><td class="n">48–58</td><td><code>el</code></td><td>Builds elements; text is set with textContent only</td></tr>
-        <tr><td class="n">61–72</td><td><code>initHistory, recompute</code></td><td>Loads the saved history (or the sample) and replays it</td></tr>
-        <tr><td class="n">73–93</td><td><code>commitOp</code></td><td>Appends one operation; refuses it if the replay rejects it</td></tr>
-        <tr><td class="n">102–110</td><td><code>renderHeader</code></td><td>Checks pill, rounds pill, display pill</td></tr>
-        <tr><td class="n">118–141</td><td><code>renderTree, renderCert</code></td><td>Model list and the sorted certainty list</td></tr>
-        <tr><td class="n">142–158</td><td><code>renderFlags</code></td><td>Flags with kind; Close flag button</td></tr>
-        <tr><td class="n">159–184</td><td><code>renderStory</code></td><td>Story steps with object buttons, claims with source and AI status</td></tr>
-        <tr><td class="n">185–239</td><td><code>renderLedger, renderRoundItems, limitTicks, renderRoundControls</code></td><td>Defect list, at most four ticks, score selects and the review switches</td></tr>
-        <tr><td class="n">258–277</td><td><code>renderDisplay</code></td><td>The display gate: blocked, gate off, or no open flags</td></tr>
-        <tr><td class="n">278–298</td><td><code>renderInspector</code></td><td>Fills the form from the selected part; shows Close up for any part</td></tr>
-        <tr><td class="n">313–325</td><td><code>renderReviewToggles</code></td><td>The ⚙️ switches; changing one re-renders everything</td></tr>
-        <tr><td class="n">343–363</td><td><code>saveInspector</code></td><td>Builds a modify operation; only changed fields are sent</td></tr>
-        <tr><td class="n">373–382</td><td><code>closeFlag</code></td><td>Closes a flag; a consultation flag needs a note when the switch is on</td></tr>
-        <tr><td class="n">424–445</td><td><code>finishRound, recordVerdict</code></td><td>Records a person's verdict, with scores when they are on</td></tr>
-        <tr><td class="n">446–469</td><td><code>currentPacket, copyText, applyCriticReply</code></td><td>Builds the packet; copies a prompt; applies a validated AI critic reply</td></tr>
-        <tr><td class="n">478–491</td><td><code>downloadPacket</code></td><td>Four PNG views and a JSON packet (no history, no notes)</td></tr>
-        <tr><td class="n">492–504</td><td><code>applyFactcheck</code></td><td>Applies a validated fact-check reply to the claims</td></tr>
-        <tr><td class="n">505–541</td><td><code>setDbMessage, saveNote, applyRoundCap, checkDevice</code></td><td>Database line, notes, the round cap, the device check</td></tr>
-        <tr><td class="n">542–572</td><td><code>setupPanels, setupDrawer</code></td><td>Collapsible panels (state saved); the ⚙️ drawer open and close</td></tr>
-        <tr><td class="n">573–661</td><td><code>boot</code></td><td>Loads everything, wires events (mode cycle, Close up included), starts the viewer, renders</td></tr>
+        <tr><td class="n">66–78</td><td><code>el</code></td><td>Builds elements; text is set with textContent only</td></tr>
+        <tr><td class="n">79–90</td><td><code>initHistory</code></td><td>Loads the saved history (or the sample) and replays it</td></tr>
+        <tr><td class="n">91–119</td><td><code>commitOp</code></td><td>Appends one operation; refuses it if the replay rejects it</td></tr>
+        <tr><td class="n">120–134</td><td><code>renderHeader</code></td><td>Checks pill and rounds pill</td></tr>
+        <tr><td class="n">135–158</td><td><code>renderTree</code></td><td>Model list and the sorted certainty list</td></tr>
+        <tr><td class="n">159–175</td><td><code>renderFlags</code></td><td>Flags with kind; Close flag button</td></tr>
+        <tr><td class="n">176–201</td><td><code>renderStory</code></td><td>Story steps with object buttons, claims with source and AI status</td></tr>
+        <tr><td class="n">202–256</td><td><code>renderLedger</code></td><td>Defect list, at most four ticks, score selects and the review switches</td></tr>
+        <tr><td class="n">257–273</td><td><code>renderErrors</code></td><td>The bottom error panel (behind Show errors)</td></tr>
+        <tr><td class="n">274–338</td><td><code>renderInspector</code></td><td>Fills the form from the selected part; Close up for any part</td></tr>
+        <tr><td class="n">339–368</td><td><code>saveInspector</code></td><td>Builds a modify operation; only changed fields are sent</td></tr>
+        <tr><td class="n">369–418</td><td><code>closeFlag</code></td><td>Closes a flag; an optional note on a consultation flag</td></tr>
+        <tr><td class="n">419–453</td><td><code>finishRound</code></td><td>Records a verdict; shows the reason from the AI critic</td></tr>
+        <tr><td class="n">454–472</td><td><code>applyCriticReply</code></td><td>Applies a validated AI critic reply</td></tr>
+        <tr><td class="n">473–486</td><td><code>downloadPacket</code></td><td>Four PNG views and a JSON packet (no history, no notes)</td></tr>
+        <tr><td class="n">487–499</td><td><code>applyFactcheck</code></td><td>Applies a validated fact-check reply to the claims</td></tr>
+        <tr><td class="n">500–540</td><td><code>setDbMessage</code></td><td>Database line; the cloud check when signed in</td></tr>
+        <tr><td class="n">541–571</td><td><code>setupPanels</code></td><td>Collapsible panels (state saved); the ⚙️ drawer open and close</td></tr>
+        <tr><td class="n">572–662</td><td><code>start</code></td><td>Starts the studio with the history it is given</td></tr>
+        <tr><td class="n">663–685</td><td><code>bootstrap</code></td><td>Reads ?src=local or ?src=cloud and opens that scene, or the sample</td></tr>
       </tbody>
     </table>
     </div>

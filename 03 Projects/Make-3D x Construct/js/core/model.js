@@ -15,10 +15,11 @@
   'use strict';
 
   var SCHEMA = { history: 'm3dxc.history/0.1', model: 'm3dxc.model/0.1', world: 'm3dxc.world/0.1' };
-  var SOLID_TYPES = ['box', 'cylinder', 'cone', 'sphere'];
+  var SOLID_TYPES = ['box', 'cylinder', 'cone', 'sphere', 'loft'];
   var TYPES = SOLID_TYPES.concat(['group']);
   var BASES = ['measured', 'cited', 'user', 'inferred', 'placeholder', 'decorative'];
   var FLAG_KINDS = ['uncertain', 'consultation'];
+  var LOFT_FIELDS = ['joints', 'rings', 'facing'];
   var SETTABLE = {
     name: 'string', description: 'string', material: 'string', rotation_x: 'number', rotation_y: 'number', rotation_z: 'number', position: 'vector',
     'dimensions.x': 'number', 'dimensions.y': 'number', 'dimensions.z': 'number',
@@ -144,6 +145,16 @@
           'Set ' + k + ' to a number of degrees, or delete the key.'));
       }
     });
+
+    if (obj.type === 'loft') {
+      var jn = obj.joints, rn = obj.rings;
+      var shapeOk = Array.isArray(jn) && jn.length >= 2 && jn.every(function (q) { return Array.isArray(q) && q.length === 3 && q.every(isNum); }) &&
+        Array.isArray(rn) && rn.length >= 2 && rn.every(function (q) { return Array.isArray(q) && q.length === 3 && q.every(isNum); });
+      if (!shapeOk) {
+        out.push(diag('E136', 'error', path + '.joints', 'a loft needs joints (two or more [x, y, z]) and rings (two or more [t, w, h])',
+          'Give the spine as joints and the cross-sections as rings. See js/core/loft.js.'));
+      }
+    }
 
     var p = obj.position;
     if (!Array.isArray(p) || p.length !== 3 || !p.every(isNum)) {

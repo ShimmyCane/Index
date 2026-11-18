@@ -21,7 +21,7 @@ const byName = (g) => model.objects.filter(o => o.parent === g).map(o => o.uuid)
 // Each existing object is built from its real parts (no filler):
 assert.strictEqual(byName('lodge-1').length, 6, 'lodge 1 has a cover, four poles and a door');
 assert.strictEqual(byName('lodge-2').length, 6, 'lodge 2 has a cover, four poles and a door');
-['horse-1', 'horse-2'].forEach(h => assert.strictEqual(model.objects.filter(o => o.parent === h).length, 12, h + ' has barrel, neck, mane, head, muzzle, two ears, tail and four legs'));
+['horse-1', 'horse-2'].forEach(h => assert.strictEqual(model.objects.filter(o => o.parent === h).length, 11, h + ' has barrel, neck, mane, head, two ears, tail and four legs'));
 ['woman-a', 'woman-b', 'child-a'].forEach(p => assert(model.objects.filter(o => o.parent === p).some(o => o.name === 'Head'), p + ' has a head'));
 assert.strictEqual(model.objects.filter(o => o.parent === 'fire-ring').length, 9, 'fire ring: ash and eight stones');
 assert.strictEqual(model.objects.filter(o => o.parent === 'tufts').length, 6, 'two back tufts of three blades each');

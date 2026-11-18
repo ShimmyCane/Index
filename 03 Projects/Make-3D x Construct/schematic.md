@@ -1,6 +1,6 @@
 # Make-3D x Construct — Schematic
 
-**Status:** MVP 0.5 built: Southern Cheyenne camp move, 146 parts in three planes, real scale, bones and posed figures (draft, not for display until consultation) · round 6 answers in `convo/convo v0.6.md` · **Updated:** 2026-11-18
+**Status:** V2 built (see `convo/convo v0.7.md`): home page, studio, library, cloud client, lofted horses and people. Earlier: MVP 0.5 built: Southern Cheyenne camp move, 146 parts in three planes, real scale, bones and posed figures (draft, not for display until consultation) · round 6 answers in `convo/convo v0.6.md` · **Updated:** 2026-11-18
 **Track:** B. Studio design (`02 Refs/Skills/project_track.md`)
 **Based on:** a review of Construct (`rtmandreyev/construct`, commit `7ea702e`, toolkit version 1.3.2), the Make-3D schematic and to-do list (graduated to `ShimmyCane/Make-3D`), and the nursery's new-project workflow. Nothing is built yet. The first build waits for Jimmy's answers.
 
@@ -150,3 +150,14 @@ See `convo/convo v0.3.md`.
 - Detail by plane. The lessons for any scene are in `04 AI/3d_scene_craft_lessons.md`.
 - Figures: body, feet and poses. No faces (a decision for Jimmy: see `convo/convo v0.6.md`).
 - Display gate stays on until Jimmy decides.
+
+## 14. V2 (round 7, 2026-11-18): home, studio, library, cloud, lofted meshes
+
+- **Pages:** `index.html` (home: projects, library on this device, cloud sign-in) and `studio.html` (the 3-D app).
+- **Cloud:** the Architecture project (same as Make 3D). One table, `m3dxc_scenes`, owner only. SQL in `supabase/002_m3dxc_scenes.sql`, not applied.
+- **Sign-in:** an email code to an existing account only. Publishable key in the browser; no secret in the repo.
+- **Library:** on this device, by model_id. The studio saves to the library or, when signed in, to the cloud.
+- **Meshes:** loft parts (smooth surfaces through joints) for the horses and the people. Faces: approximate general features, no portraits.
+- **Lighting:** image-based room light, key and fill, soft shadows.
+- **Gate:** removed (Jimmy's decision). Consultation flags remain as notes.
+- **Archive:** V1 in `archive/Oklahoma diorama V1/`.

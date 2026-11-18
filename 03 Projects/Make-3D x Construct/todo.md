@@ -2,6 +2,20 @@
 
 Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Jimmy
 
+## V2 (round 7, 2026-11-18)
+
+- [x] V1 archived: `archive/Oklahoma diorama V1/` (a copy of the round 6 state), commit `f8d87b8` kept in history; PR #195 closed unmerged. A git tag could not be pushed (the proxy refuses tags), so no tag.
+- [x] Display gate removed (header pill, Display check panel, settings).
+- [x] Loft geometry (`js/core/loft.js`), engine check, build fields, viewer, 7 tests.
+- [x] Horses: lofted barrel, neck, mane, head, legs, tail.
+- [x] People: lofted torso, head, neck, limbs, feet, skirts with a banded pattern; approximate general facial features (eyes, brows, nose, mouth, ears); no hair detail, no portraits.
+- [x] Lighting: image-based room light, key, fill, soft shadows.
+- [x] Homepage (`index.html`), studio (`studio.html`), library on this device, cloud client (`m3dxc_scenes`), sign-in with an existing account only, Supabase library vendored with its licence.
+- [x] `supabase/002_m3dxc_scenes.sql` written with its rolled-back test; NOT applied (Jimmy copies it).
+- [ ] Sign-in and cloud save tested live (needs a code from email).
+- [ ] Device test on an iPad.
+- [ ] Jimmy: skin tone (convo v0.7 Q1), lighting references (Q2), next density step (Q3).
+
 ## Round 6: planes, bones, posed figures (2026-11-18)
 
 - [x] Three planes as groups: foreground, midground, background; detail by plane.
