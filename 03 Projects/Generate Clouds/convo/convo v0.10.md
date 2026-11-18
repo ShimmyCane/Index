@@ -37,3 +37,16 @@ Jimmy's new notes (`notes v2.md`) are archived and reviewed. Nothing is built or
 ## Not yet asked (waiting from earlier)
 
 - Constellations and the real ground (`convo v0.8.md`, questions 1–6). Please answer those when you can; they are still the two open notes from v1.
+
+## Answers (Jimmy, 2026-11-18)
+
+1. **Time lapse:** not midnight to midnight. Run from now through 24 hours ahead, using the weather report's forecast.
+2. **Watch the waves:** no. The clouds shift too. The processing cost is unknown, so start at 15 seconds for one loop, with a setting that goes up to 60 seconds.
+3. **Ground navigation:** like Google Maps or Apple Maps. Drag moves the world, and the centre point becomes the new location to start from. (Option A.)
+4. **Pan high up:** yes. The new point is also the focus of the look feature. Hiding clouds is wanted so the globe can be seen.
+5. **Cloud label:** OK, a small label with type and height.
+6. **"5X" weather features:** withdrawn. Jimmy will address this in the future. Not part of this round.
+7. **Space clouds:** option A, a real satellite cloud picture (NASA GIBS).
+8. **Licence:** yes. Commercial use and the Earth picture credit are still open from v0.8.
+
+**Constellations and real ground (convo v0.8):** "Proceed". Build with the recommended defaults in v0.8, and ask again only where a default is not safe.
