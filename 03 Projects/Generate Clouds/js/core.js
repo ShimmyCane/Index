@@ -2,10 +2,10 @@
 (function () {
   'use strict';
   var GC = window.GC = window.GC || {};
-  GC.VERSION = '0.5.1';
+  GC.VERSION = '0.6.0';
 
   var KEY = 'gc.settings';
-  GC.DEFAULTS = { quality: 'med', speed: 60, autoplay: 1, compass: 1, turn: 60, sound: 1, showErrors: false };
+  GC.DEFAULTS = { quality: 'med', speed: 60, autoplay: 1, compass: 1, turn: 60, sound: 1, bar: 1, relief: 1, clouds: 1, showErrors: false };
   GC.settings = {};
   (function load() {
     var saved = {};
@@ -14,6 +14,9 @@
     if (!{ low: 1, med: 1, high: 1 }[GC.settings.quality]) GC.settings.quality = 'med';
     if ([30, 60, 120, 300].indexOf(+GC.settings.speed) < 0) GC.settings.speed = 60;
     if ([30, 60, 120].indexOf(+GC.settings.turn) < 0) GC.settings.turn = 60;
+    if ([1, 2, 4].indexOf(+GC.settings.relief) < 0) GC.settings.relief = 1;
+    if (+GC.settings.bar !== 0) GC.settings.bar = 1;
+    if (+GC.settings.clouds !== 0) GC.settings.clouds = 1;
   })();
   GC.saveSettings = function () { try { localStorage.setItem(KEY, JSON.stringify(GC.settings)); } catch (e) { /* storage blocked */ } };
 

@@ -27,6 +27,16 @@
 5. Open the page → ⚙️ → Studio database → Sign in. Your notes on the device are sent and the status line says how many are in the database.
 6. Then ask me to read the notes (`/read-notes-and-update`): archive them as V1, review, update.
 
+## Round 6 (0.6.0): to confirm on a real device
+- [ ] The marine call returns waves and tide (the variable names were confirmed from documentation for waves; the tide name `sea_level_height_msl` was not).
+- [ ] The elevation service returns the fine map (4 more calls per place); the 81-place wide weather call works; neither was reachable from the build sandbox, so only mocked replies were tested.
+- [ ] The Earth picture looks right from space on the iPad, and the far ground is not too slow.
+- [ ] Mark notes done in the database after Jimmy confirms which (see `convo/notes v1.md`).
+
+## Next: stars and ground cover (waiting on `convo v0.8`)
+- [ ] Stars and constellations in the night sky (note 2).
+- [ ] Real ground cover near the camera (note 4).
+
 ## Next round (agreed 2026-11-17)
 - [ ] Read the saved notes (`/read-notes-and-update` style, table `gc_notes` in the Architecture project), copy them into `convo/notes v1.md` summarised as the V1 set, review them, and update. Mark notes done only after Jimmy confirms which.
 - [ ] `gc_spots`: kept map spots saved to the database (new SQL file `002_gc_spots.sql` with its test and verify; the page sends and merges them the way it does notes).

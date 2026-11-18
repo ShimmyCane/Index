@@ -56,3 +56,14 @@
 38. **"Anyone who can log in" is only "only me" if sign-ups are closed.** Read `/auth/v1/settings` (public, read-only) and the account list (masked) before loosening a rule. Here sign-ups were open and a second account existed, so the owner-only rule stayed.
 39. **Do the owner step for the owner when they ask, behind a guard.** A single insert that matches exactly one account (and checks the match count), read back afterwards, is less error-prone than asking someone to copy a uuid. Never write the id or email to the repo.
 40. **Jargon in an error message caused real confusion.** "Owner list" meant nothing to the person it was shown to; say what the account may not do and what to run.
+
+## 2026-11-18 (0.6.0, notes v1)
+
+41. **Read the notes before the plan.** Nine short notes became seven builds and two decisions; two of the builds were the same fix (camera above water) written twice.
+42. **A world picture embedded as a data address works from a file.** A texture loaded from a plain file path is blocked for the 3-D view on a double-click open. A 266 KB JPEG is about 360 KB as text.
+43. **Work out the view direction on the globe from the camera's own frame.** Local east, up and south turned into longitude and latitude with the place's latitude and longitude as the only input; checked by looking straight down over two known cities.
+44. **Do not average density to smooth far clouds.** Average the transparency (tau = -ln(1 - 0.85 cover), spread through the layer), or step to larger cloud shapes first. Averaging density made an opaque white sheet.
+45. **Hide-a-layer overrides must run last.** Another step re-raised the cover and the layer came back.
+46. **Ask for the tide separately.** One unknown variable name in a combined request fails the whole request.
+47. **Two debug fields with one name hide each other.** The later key wins; check the name before reading a value you added.
+48. **Decide the picture source with the licence in view.** Photographic satellite tiles are usually non-commercial only; ask whether backdrops are used commercially before choosing.

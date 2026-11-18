@@ -5,7 +5,7 @@
   var LOOP = 900;                                   // seconds of sky in one time lapse (15 minutes)
   var S = {
     place: GC.PLACES[0], when: { now: true }, data: null, preset: null, ov: {}, model: null, frame: null,
-    simT: 0, playing: false, autoLeft: 0, loops: 0, dirty: true, flash: 0, loading: false, clock: 0, spot: null, pendingCam: null, thunder: null
+    simT: 0, playing: false, autoLeft: 0, loops: 0, dirty: true, flash: 0, loading: false, clock: 0, spot: null, pendingCam: null, thunder: null, wideKey: ''
   };
   GC.state = S;
 
@@ -80,17 +80,42 @@
   }
   function loadGround() {
     var place = S.place, key = place.lat.toFixed(2) + ',' + place.lon.toFixed(2);
-    if (GC.Terrain.key === key && GC.Terrain.source === 'data') { S.spot = GC.Terrain.classify(); showSpot(); return Promise.resolve(); }
+    if (GC.Terrain.key === key && GC.Terrain.source === 'data') { S.spot = GC.Terrain.classify(); showSpot(); return GC.Terrain.fineTex ? Promise.resolve() : GC.Terrain.loadFine(place).then(function (f) { if (f && S.place === place) { R.setTerrainFine(f); S.spot = f.classify(); showSpot(); S.dirty = true; } }); }
     var stand = S.onGround;                              // a camera standing on the ground follows the ground when it changes
+    GC.Terrain.clearFine(); R.setTerrainFine(null);
     GC.Terrain.flat(place); R.setTerrain(GC.Terrain); S.spot = null; showSpot(); if (stand) R.cam.alt = 0;
     return GC.Terrain.load(place).then(function (T) {
       if (S.place !== place) return;
       if (S.onGround) R.cam.alt = 0;
       R.setTerrain(T); S.spot = T.classify(); showSpot(); S.dirty = true;
+      return GC.Terrain.loadFine(place);
+    }).then(function (f) {
+      if (!f || S.place !== place) return;
+      R.setTerrainFine(f); S.spot = f.classify(); showSpot(); S.dirty = true;
     });
   }
+  // The sea: waves, period, direction and tide from the marine model, only where there is sea.
+  function loadMarine(res) {
+    var place = S.place;
+    if (res.source === 'sample' || S.preset) return Promise.resolve();
+    return Promise.resolve(S.groundJob).then(function () {
+      if (S.place !== place || !S.spot || (S.spot.kind !== 'Coast' && S.spot.kind !== 'Open water')) return;
+      return W.marine(place, res.utcMs).then(function (m) {
+        if (S.place !== place || S.preset || S.data !== res) return;
+        res.wx.marine = m; S.marineOn = !!m; rebuild();
+      });
+    });
+  }
+  // The wide region (2000 km) is fetched only when the camera is high enough to see that far.
+  function maybeWide() {
+    if (!S.data || S.preset || S.data.source === 'sample' || R.cam.alt < 15) return;
+    var key = S.place.lat.toFixed(2) + ',' + S.place.lon.toFixed(2) + '@' + S.data.utcMs;
+    if (S.wideKey === key) return;
+    S.wideKey = key; var place = S.place;
+    W.regionWide(place, S.data.utcMs).then(function (cells) { if (S.place === place && S.wideKey === key && !S.preset) { R.setRegion2(cells); S.dirty = true; } });
+  }
   function loadRegion(res) {
-    R.setRegion(null);
+    R.setRegion(null); R.setRegion2(null); S.wideKey = '';
     var place = S.place;
     if (res.source === 'sample') return Promise.resolve();
     return W.region(place, res.utcMs).then(function (cells) { if (S.place === place && !S.preset) { R.setRegion(cells); S.region = !!cells; S.dirty = true; } });
@@ -105,7 +130,8 @@
       S.loading = false;
       if (res.source !== 'live' && res.note) GC.logError('Weather: ' + res.note);
       showData(res); restart(true);
-      S.groundJob = loadGround(); S.regionJob = loadRegion(res);
+      R.place = S.place; S.marineOn = false;
+      S.groundJob = loadGround(); S.regionJob = loadRegion(res); S.marineJob = loadMarine(res);
     }, function (e) { S.loading = false; GC.logError('Weather: ' + e.message); setPill('sample', '⚠️ Check'); });
   }
   GC.loadSky = loadSky;
@@ -246,6 +272,17 @@
     $('fov').addEventListener('input', function () { R.cam.fov = +$('fov').value; $('fovV').textContent = (70 / R.cam.fov).toFixed(1) + '× · ' + Math.round(R.cam.fov) + '°'; S.dirty = true; });
     $('ovReset').addEventListener('click', function () { S.ov = {}; rebuild(); syncMaker(); });
   }
+
+  // What a note is about, taken at the moment it is saved: place, time, and the elevation marker.
+  GC.Notes.contextNow = function () {
+    if (!S.data) return null;
+    var T = GC.Terrain, over = T.isSea(R.cam.x, R.cam.z), gm = T.source === 'data' ? T.heightAt(R.cam.x, R.cam.z) * 1000 : null;
+    var altM = Math.round(R.cam.alt * 1000), up = gm == null ? null : altM - Math.round(gm);
+    var elev = 'camera ' + (altM < 1000 ? altM + ' m' : (altM / 1000).toFixed(1) + ' km') + ' above sea level' +
+      (over ? ', over water' : gm != null ? ', ground ' + Math.round(gm) + ' m' + (up != null && up > 3 ? ' (' + (up < 1000 ? up + ' m' : (up / 1000).toFixed(1) + ' km') + ' above it)' : '') : '');
+    return { page: 'index.html', item: S.place.lat.toFixed(2) + ',' + S.place.lon.toFixed(2) + '@' + S.data.localStr + ';alt_m=' + altM + (gm != null ? ';ground_m=' + Math.round(gm) : ''),
+      label: (S.preset ? 'Atlas: ' + S.preset.name + ' · ' : '') + placeLabel() + ' · ' + S.data.localStr.replace('T', ' ') + ' · ' + elev };
+  };
 
   // ---------- the map: pick the exact spot, keep the ones you like ----------
   var favs = GC.store.get('gc.favs', []); if (!Array.isArray(favs)) favs = [];
@@ -472,7 +509,13 @@
     });
     $('showErrors').checked = !!GC.settings.showErrors;
     $('hud').hidden = !+GC.settings.compass;
+    $('bar').hidden = !+GC.settings.bar; document.body.dataset.bar = +GC.settings.bar ? 'on' : 'off';
     renderErrors();
+  }
+  // Relief exaggeration: heights of the ground (not of the sea) times 1, 2 or 4.
+  function applyRelief() {
+    GC.Terrain.exag = R.exag = +GC.settings.relief || 1;
+    R.setTerrain(GC.Terrain); if (GC.Terrain.fineTex) R.setTerrainFine(GC.Terrain); S.dirty = true;
   }
   function initGear() {
     var gear = $('gear'), drawer = $('drawer');
@@ -485,6 +528,8 @@
         var k = b.parentElement.dataset.key, v = b.dataset.v;
         GC.settings[k] = /^\d+$/.test(v) ? +v : v; GC.saveSettings();
         if (k === 'quality') R.setQuality(v);
+        if (k === 'relief') applyRelief();
+        if (k === 'clouds') R.cloudsOn = +GC.settings.clouds;
         renderSettings(); S.dirty = true;
       });
     });
@@ -497,7 +542,7 @@
         if (list.some(function (c) { return !c.ok; })) { var li = document.createElement('li'); li.textContent = 'Without the link the page shows the saved copy, or a sample sky.'; ul.appendChild(li); }
       });
     });
-    $('info').textContent = 'Generate Clouds ' + GC.VERSION + ' · Weather and air quality: Open-Meteo.com (CC BY 4.0), no key. Only a latitude, a longitude and a date are sent. · 3-D: three.js r128 (MIT).';
+    $('info').textContent = 'Generate Clouds ' + GC.VERSION + ' · Weather and air quality: Open-Meteo.com (CC BY 4.0), no key. Only a latitude, a longitude and a date are sent. · Earth map: NASA Visible Earth (Blue Marble), via Wikimedia Commons, CC BY-SA 3.0 · Ground heights: Open-Meteo elevation (Copernicus DEM) · Sea: Open-Meteo marine · 3-D: three.js r128 (MIT).';
     GC.onError = renderErrors;
     renderSettings();
   }
@@ -543,10 +588,11 @@
     S.dirty = false; S.still = now; S.sharp = false;
     R.fineStop();
     // never under the ground or the waves
-    var floor = GC.Terrain.ceilAt(R.cam.x, R.cam.z) + 0.002 + (GC.Terrain.isSea(R.cam.x, R.cam.z) && S.frame ? S.frame.sea[0] * 0.9 : 0);
+    var onSea = GC.Terrain.isSea(R.cam.x, R.cam.z) && S.frame;
+    var floor = GC.Terrain.ceilAt(R.cam.x, R.cam.z) + 0.002 + (onSea ? (S.frame.sea[4] || 0) + S.frame.sea[0] * 0.75 : 0);   // over water: 2 m above the highest crest, and above the tide
     S.onGround = R.cam.alt <= floor + 1e-6;
     if (R.cam.alt < floor) R.cam.alt = floor;
-    R.clock = S.clock; R.city = S.place.city ? 1 : 0;
+    R.clock = S.clock; R.city = S.place.city ? 1 : 0; maybeWide();
     var ftr = S.ov.feature; R.feature = ftr || null;
     S.frame = S.model.at(S.simT, R.cam.alt);
     R.apply(S.frame); R.render();
@@ -568,7 +614,7 @@
   GC.debug = function () {
     return { version: GC.VERSION, simT: S.simT, playing: S.playing, loops: S.loops, autoLeft: S.autoLeft, source: S.data && (S.preset ? 'atlas' : S.data.source),
       place: S.place, local: S.data && S.data.localStr, types: S.model && S.model.types, summary: S.model && S.model.summary,
-      cam: { yaw: R.cam.yaw, pitch: R.cam.pitch, fov: R.cam.fov, alt: R.cam.alt }, orbit: { on: O.on, turning: O.turning, turned: O.turned, D: O.D, phi: O.phi, th: O.th, fx: O.fx, fz: O.fz, hF: O.hF }, camXZ: [R.cam.x, R.cam.z], spot: S.spot, terrain: { source: GC.Terrain.source, max: GC.Terrain.max }, region: !!R.regionOn, precip: S.model && S.model.precipKind, vary: S.model && S.model.vary,
+      cam: { yaw: R.cam.yaw, pitch: R.cam.pitch, fov: R.cam.fov, alt: R.cam.alt }, orbit: { on: O.on, turning: O.turning, turned: O.turned, D: O.D, phi: O.phi, th: O.th, fx: O.fx, fz: O.fz, hF: O.hF }, camXZ: [R.cam.x, R.cam.z], world: R.worldOn, fineMap: R.fineSpan, region2: R.region2On, marine: !!S.marineOn, sea: S.frame && S.frame.sea, relief: R.exag, bar: !+GC.settings.bar ? 'hidden' : 'shown', spot: S.spot, terrain: { source: GC.Terrain.source, max: GC.Terrain.max }, region: !!R.regionOn, precip: S.model && S.model.precipKind, vary: S.model && S.model.vary,
       feature: S.ov.feature || null, bolts: S.bolts || 0, favs: favs.length, mapPin: GC.Map.pin, mapTiles: GC.Map.tilesOk, onGround: !!S.onGround, clock: S.clock, sound: GC.Audio.ready(), frames: R.frames, scale: R.scale, ok: R.ok, sharp: !!S.sharp, fine: R.fineProgress(), now: S.now && { source: S.now.source, groups: S.now.groups.map(function (g) { return [g.id, g.cities.length]; }) },
       sunEl: S.frame && S.frame.sunEl, exposure: S.frame && S.frame.exposure, ov: S.ov, notes: GC.Notes.all().length };
   };
@@ -576,7 +622,7 @@
   function start() {
     initPanels(); GC.Notes.init(); initGear(); GC.Cloud.init(); initPlace(); initMap(); initMaker(); initAdjust(); initBar(); initOrbit(); initExport();
     if (!R.init($('sky'))) { $('noGl').hidden = false; setPill('sample', '⚠️ No 3-D'); return; }
-    initLook();
+    initLook(); applyRelief(); R.cloudsOn = +GC.settings.clouds; R.onWorld = function () { S.dirty = true; };
     var lastUsed = GC.store.get('gc.last', null);
     if (lastUsed && lastUsed.place && typeof lastUsed.place.lat === 'number') { S.place = lastUsed.place; if (lastUsed.when && (lastUsed.when.now || lastUsed.when.local)) S.when = lastUsed.when; }
     var m = /[#&]atlas=([a-z]+)/.exec(location.hash);
