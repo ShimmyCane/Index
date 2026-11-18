@@ -32,7 +32,7 @@
 <main>
   <header class="card">
     <h1>index.html: summary</h1>
-    <p class="lead">What the page does, where each part lives, and which values you can tweak. Line numbers are for the files as they are now: <code>index.html</code> 293 lines, <code>css/app.css</code> 111, <code>js/app.js</code> 648, <code>js/viewer/viewer.js</code> 274.</p>
+    <p class="lead">What the page does, where each part lives, and which values you can tweak. Line numbers are for the files as they are now: <code>index.html</code> 295 lines, <code>css/app.css</code> 111, <code>js/app.js</code> 662, <code>js/viewer/viewer.js</code> 291.</p>
   </header>
 
   <section class="card">
@@ -42,7 +42,7 @@
       <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#2b2a33"/></marker></defs>
       <rect x="10" y="20" width="210" height="120" rx="12" fill="#fffdf7" stroke="#2b2a33" stroke-width="2"/>
       <text x="22" y="46" font-weight="700">Sample (generated)</text>
-      <text x="22" y="66">tools/diorama_scene.js (388 parts)</text>
+      <text x="22" y="66">tools/diorama_scene.js (109 parts)</text>
       <text x="22" y="84">exhibit/story.json</text>
       <text x="22" y="102">worlds/plains-diorama-world.json</text>
       <text x="22" y="122" fill="#5d5a68">→ js/sample_bundle.js</text>
@@ -91,12 +91,12 @@
       <tbody>
         <tr><td class="n">1–9</td><td>Head</td><td>Charset, viewport, title, <code>css/app.css</code></td></tr>
         <tr><td class="n">10–21</td><td>Header</td><td>Title, subtitle, three pills: display, checks, rounds</td></tr>
-        <tr><td class="n">22–162</td><td>Left column</td><td>Selected part (23–55), Model (56), Certainty (63), Flags with kind (81), Story (draft) (100), Ledger and rounds with score selects, AI critic and packet (121)</td></tr>
-        <tr><td class="n">163–182</td><td>Right column: 3-D view</td><td>View buttons, the colour toggle (material, certainty, paper), the canvas</td></tr>
-        <tr><td class="n">184–187</td><td>Errors (bottom)</td><td>Hidden until Show errors is on in ⚙️</td></tr>
-        <tr><td class="n">189</td><td>Gear button</td><td>Opens the ⚙️ drawer, lower right</td></tr>
-        <tr><td class="n">191–283</td><td>⚙️ drawer</td><td>Errors switch (197); Reviews (207); Display check (217); How rounds work (227); Notes (247); Database check (262); About (273, last)</td></tr>
-        <tr><td class="n">285–291</td><td>Scripts</td><td>three.js, sample bundle, engine, rounds, review, viewer, page (in this order)</td></tr>
+        <tr><td class="n">22–163</td><td>Left column</td><td>Selected part (from line 23, with Close up), Model, Certainty, Flags (with kind), Story (draft), Ledger and rounds (score selects, AI critic, packet)</td></tr>
+        <tr><td class="n">164–183</td><td>Right column: 3-D view</td><td>View buttons, the colour toggle (material, certainty, paper), the canvas</td></tr>
+        <tr><td class="n">185–188</td><td>Errors (bottom)</td><td>Hidden until Show errors is on in ⚙️</td></tr>
+        <tr><td class="n">190</td><td>Gear button</td><td>Opens the ⚙️ drawer, lower right</td></tr>
+        <tr><td class="n">192–284</td><td>⚙️ drawer</td><td>Errors switch (198); Reviews (208); Display check (218); How rounds work (228); Notes (248); Database check (263); About (274, last)</td></tr>
+        <tr><td class="n">286–292</td><td>Scripts</td><td>three.js, sample bundle, engine, rounds, review, viewer, page (in this order)</td></tr>
       </tbody>
     </table>
     </div>
@@ -108,29 +108,29 @@
     <table>
       <thead><tr><th>Line</th><th>Function</th><th>What it does</th></tr></thead>
       <tbody>
-        <tr><td class="n">14–18</td><td><code>KEYS</code>, <code>CRITERIA_LABEL</code></td><td>localStorage keys; criterion names</td></tr>
+        <tr><td class="n">14–18</td><td><code>KEYS, CRITERIA_LABEL</code></td><td>localStorage keys; criterion names</td></tr>
         <tr><td class="n">19–26</td><td><code>REVIEW_ITEMS</code></td><td>The six review switches: who does each, the default, the label</td></tr>
-        <tr><td class="n">39–47</td><td><code>load</code>, <code>save</code></td><td>localStorage in try/catch; never throws</td></tr>
+        <tr><td class="n">39–47</td><td><code>load, save</code></td><td>localStorage in try/catch; never throws</td></tr>
         <tr><td class="n">48–58</td><td><code>el</code></td><td>Builds elements; text is set with textContent only</td></tr>
-        <tr><td class="n">61–72</td><td><code>initHistory</code>, <code>recompute</code></td><td>Loads the saved history (or the sample) and replays it</td></tr>
+        <tr><td class="n">61–72</td><td><code>initHistory, recompute</code></td><td>Loads the saved history (or the sample) and replays it</td></tr>
         <tr><td class="n">73–93</td><td><code>commitOp</code></td><td>Appends one operation; refuses it if the replay rejects it</td></tr>
-        <tr><td class="n">102–111</td><td><code>renderHeader</code></td><td>Checks pill, rounds pill, display pill</td></tr>
-        <tr><td class="n">118–141</td><td><code>renderTree</code>, <code>renderCert</code></td><td>Model list and the sorted certainty list</td></tr>
+        <tr><td class="n">102–110</td><td><code>renderHeader</code></td><td>Checks pill, rounds pill, display pill</td></tr>
+        <tr><td class="n">118–141</td><td><code>renderTree, renderCert</code></td><td>Model list and the sorted certainty list</td></tr>
         <tr><td class="n">142–158</td><td><code>renderFlags</code></td><td>Flags with kind; Close flag button</td></tr>
         <tr><td class="n">159–184</td><td><code>renderStory</code></td><td>Story steps with object buttons, claims with source and AI status</td></tr>
-        <tr><td class="n">185–239</td><td><code>renderLedger</code>, <code>renderRoundItems</code>, <code>limitTicks</code>, <code>renderRoundControls</code></td><td>Defect list, at most four ticks, score selects and the review switches</td></tr>
+        <tr><td class="n">185–239</td><td><code>renderLedger, renderRoundItems, limitTicks, renderRoundControls</code></td><td>Defect list, at most four ticks, score selects and the review switches</td></tr>
         <tr><td class="n">258–277</td><td><code>renderDisplay</code></td><td>The display gate: blocked, gate off, or no open flags</td></tr>
-        <tr><td class="n">278–297</td><td><code>renderInspector</code></td><td>Fills the form from the selected part</td></tr>
-        <tr><td class="n">312–324</td><td><code>renderReviewToggles</code></td><td>The ⚙️ switches; changing one re-renders everything</td></tr>
-        <tr><td class="n">342–362</td><td><code>saveInspector</code></td><td>Builds a modify operation; only changed fields are sent</td></tr>
-        <tr><td class="n">372–381</td><td><code>closeFlag</code></td><td>Closes a flag; a consultation flag needs a note when the switch is on</td></tr>
-        <tr><td class="n">423–444</td><td><code>finishRound</code>, <code>recordVerdict</code></td><td>Records a person's verdict, with scores when they are on</td></tr>
-        <tr><td class="n">445–468</td><td><code>currentPacket</code>, <code>copyText</code>, <code>applyCriticReply</code></td><td>Builds the packet; copies a prompt; applies a validated AI critic reply</td></tr>
-        <tr><td class="n">477–489</td><td><code>downloadPacket</code></td><td>Four PNG views and a JSON packet (no history, no notes)</td></tr>
-        <tr><td class="n">491–502</td><td><code>applyFactcheck</code></td><td>Applies a validated fact-check reply to the claims</td></tr>
-        <tr><td class="n">504–539</td><td><code>setDbMessage</code>, <code>saveNote</code>, <code>applyRoundCap</code>, <code>checkDevice</code></td><td>Database line, notes, the round cap, the device check</td></tr>
-        <tr><td class="n">541–570</td><td><code>setupPanels</code>, <code>setupDrawer</code></td><td>Collapsible panels (state saved); the ⚙️ drawer open and close</td></tr>
-        <tr><td class="n">572–646</td><td><code>boot</code></td><td>Loads everything, wires events (mode cycle included), starts the viewer, renders</td></tr>
+        <tr><td class="n">278–298</td><td><code>renderInspector</code></td><td>Fills the form from the selected part; shows Close up for any part</td></tr>
+        <tr><td class="n">313–325</td><td><code>renderReviewToggles</code></td><td>The ⚙️ switches; changing one re-renders everything</td></tr>
+        <tr><td class="n">343–363</td><td><code>saveInspector</code></td><td>Builds a modify operation; only changed fields are sent</td></tr>
+        <tr><td class="n">373–382</td><td><code>closeFlag</code></td><td>Closes a flag; a consultation flag needs a note when the switch is on</td></tr>
+        <tr><td class="n">424–445</td><td><code>finishRound, recordVerdict</code></td><td>Records a person's verdict, with scores when they are on</td></tr>
+        <tr><td class="n">446–469</td><td><code>currentPacket, copyText, applyCriticReply</code></td><td>Builds the packet; copies a prompt; applies a validated AI critic reply</td></tr>
+        <tr><td class="n">478–491</td><td><code>downloadPacket</code></td><td>Four PNG views and a JSON packet (no history, no notes)</td></tr>
+        <tr><td class="n">492–504</td><td><code>applyFactcheck</code></td><td>Applies a validated fact-check reply to the claims</td></tr>
+        <tr><td class="n">505–541</td><td><code>setDbMessage, saveNote, applyRoundCap, checkDevice</code></td><td>Database line, notes, the round cap, the device check</td></tr>
+        <tr><td class="n">542–572</td><td><code>setupPanels, setupDrawer</code></td><td>Collapsible panels (state saved); the ⚙️ drawer open and close</td></tr>
+        <tr><td class="n">573–661</td><td><code>boot</code></td><td>Loads everything, wires events (mode cycle, Close up included), starts the viewer, renders</td></tr>
       </tbody>
     </table>
     </div>
@@ -152,13 +152,13 @@
         <tr><td class="n">viewer.js:10–11</td><td><code>PAPER</code>, <code>INK</code>, <code>LOW</code>, <code>HIGH</code></td><td>0xfbf6ea, 0x2b2a33, coral → sage</td><td>Edge and background colours; the certainty range (certainty mode).</td></tr>
         <tr><td class="n">viewer.js:12–19</td><td><code>VIEWS</code></td><td>front, side, top, oblique</td><td>Camera angles for the buttons and the packet.</td></tr>
         <tr><td class="n">viewer.js:20–29</td><td><code>PALETTE</code></td><td>material name → colour and roughness</td><td>The material look. Change a colour here; each part varies a little by its id. The painted backdrop is drawn unlit.</td></tr>
-        <tr><td class="n">viewer.js:85</td><td><code>mode</code></td><td>'material'</td><td>Default look. The button cycles material, certainty, paper and ink.</td></tr>
+        <tr><td class="n">viewer.js:86</td><td><code>mode</code></td><td>'material'</td><td>Default look. The button cycles material, certainty, paper and ink.</td></tr>
         <tr><td class="n">viewer.js (create)</td><td>sun, hemisphere light, tone mapping, sky gradient</td><td>sun 2.1 warm from the west; sky 0.85; exposure 1.05</td><td>Lighting. Raise the sun for a brighter scene; lower it for dusk.</td></tr>
         <tr><td class="n">app.js:14–17</td><td><code>KEYS</code></td><td>m3dxc.*.v1</td><td>localStorage keys. Changing one starts that store empty for this device.</td></tr>
         <tr><td class="n">app.js:19–26</td><td><code>REVIEW_ITEMS</code></td><td>six switches</td><td>Each review item: key, who does it, default on or off, label. Add an item here and the code that reads it.</td></tr>
         <tr><td class="n">worlds/plains-diorama-world.json</td><td><code>warn_below_percent</code></td><td>50</td><td>Certainty below this is a warning until a flag explains it.</td></tr>
         <tr><td class="n">rounds.js (engine)</td><td><code>MAX_ITEMS_DEFAULT</code>, <code>STOP_NO_WIN_DEFAULT</code>, <code>NO_PROGRESS_FOR_LIMIT</code></td><td>4, 2, 3</td><td>Items per round; rounds without a win before the run stops; tries before a defect is a known limit. The same numbers are in ⚙️; change both.</td></tr>
-        <tr><td class="n">tools/diorama_scene.js</td><td><code>rng(20261118)</code>, the counts in each loop</td><td>seed; 300 grass, 120 scrub, 90 shrubs, 70 stones</td><td>The layout. Change the seed for another arrangement; change a count to add or remove parts (keep the total between 300 and 500).</td></tr>
+        <tr><td class="n">tools/diorama_scene.js</td><td><code>part(…)</code>, <code>lodge(…)</code>, <code>horse(…)</code>, <code>person(…)</code>, <code>travois(…)</code></td><td>109 parts in 8 flags</td><td>The layout and each composite. Change a dimension, a position or a material here, then run <code>node tools/build_sample.js</code>. Sizes are real sizes at 1 in = 2 ft.</td></tr>
       </tbody>
     </table>
     </div>
