@@ -130,6 +130,7 @@ input[type="range"] { width: 100%; height: 36px; accent-color: var(--deep); marg
 .checks li, #noteList li { padding: 6px 0; border-bottom: 1.5px dashed #b8cfe4; white-space: pre-wrap; overflow-wrap: anywhere; }
 .notesBox h3 { margin: 12px 0 0; font-size: 17px; }
 .notesBox select { flex: 1; min-width: 90px; }
+.noteBtn { margin-top: 6px; min-height: 48px; }
 .info { margin-top: 12px; }
 .errorsPanel { position: fixed; left: 16px; right: 100px; bottom: calc(16px + env(safe-area-inset-bottom)); max-height: 30vh; overflow: auto; z-index: 45;
   background: #fff0ee; border: var(--line); border-radius: 14px; padding: 8px 12px; font: 13px ui-monospace, Menlo, monospace; white-space: pre-wrap; }
