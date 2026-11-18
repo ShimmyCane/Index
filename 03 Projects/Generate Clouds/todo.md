@@ -37,6 +37,15 @@
 - [ ] The Earth picture looks right from space on the iPad, and the far ground is not too slow.
 - [ ] Mark notes done in the database after Jimmy confirms which (see `convo/notes v1.md`).
 
+## Round 7 (2026-11-18, convo v0.10): open, waiting on answers
+- [ ] Hide cloud cover button in Clouds settings (note: Moscow, geography view). Ready to build.
+- [ ] Speed slider snapping 0.5x / 1x / 2x, plus a "waves only" setting (note: coastal point). Ready to build.
+- [ ] Keep rain, snow, thunder and tornado above about 5x zoom (likely bug). Confirm in convo v0.10 Q6.
+- [ ] Time lapse over midnight to midnight with the tide line (convo v0.10 Q1).
+- [ ] Navigation by height: pan / look high up; walk / look on the ground; orbit / look in clouds, select a cloud (convo v0.10 Q3 to Q5).
+- [ ] Space view clouds: satellite picture plus worldwide wind grid (convo v0.10 Q7).
+- [ ] Archived as `convo/notes v2.md`. Mark done in the database only after Jimmy confirms which are built.
+
 ## Next: stars and ground cover (waiting on `convo v0.8`)
 - [ ] Stars and constellations in the night sky (note 2).
 - [ ] Real ground cover near the camera (note 4).

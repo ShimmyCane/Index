@@ -70,3 +70,8 @@
 
 49. **When the owner says "I will reopen it from settings", check the control exists.** It did not; the notes box only listed notes. Say so and build it in the same turn.
 50. **A change made while signed out must survive the next sync.** Keep a list of unsent changes (note ids) and let the database win only for notes not on it.
+
+## 2026-11-18 (round 7, notes v2)
+
+51. **Archive notes without private coordinates.** A note's label carries the point's latitude and longitude; when one point is a home or private place, write the city or "a coastal point" in the convo and keep the raw pair out of the repo.
+52. **A "bug" note can hide inside a request.** "Above 5x the rain and tornado features get removed" reads as a data limit but is a visibility rule that should not exist; confirm the reading in the convo before building the fix.
