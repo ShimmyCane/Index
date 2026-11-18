@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Generate Clouds</title>
-<link rel="stylesheet" href="css/style.css?v=0.5.0">
+<link rel="stylesheet" href="css/style.css?v=0.6.1">
 </head>
 <body data-panels="on">
 
@@ -233,6 +233,15 @@
   <div class="setting"><label>Thunder sound</label>
     <div class="seg" data-key="sound"><button data-v="1" type="button">On</button><button data-v="0" type="button">Off</button></div>
     <p class="hint">Starts after you press play once. The rumble arrives late, as in life: 3 seconds for each kilometre.</p></div>
+  <div class="setting"><label>Bottom bar (time and height)</label>
+    <div class="seg" data-key="bar"><button data-v="1" type="button">Show</button><button data-v="0" type="button">Hide</button></div>
+    <p class="hint">Hides the play, time and height controls so the picture has the whole screen. The ⚙️ stays. Show brings them back.</p></div>
+  <div class="setting"><label>Clouds</label>
+    <div class="seg" data-key="clouds"><button data-v="1" type="button">Show</button><button data-v="0" type="button">Hide</button></div>
+    <p class="hint">Hide the clouds to look at the land and sea underneath, from the ground or from space.</p></div>
+  <div class="setting"><label>Land relief</label>
+    <div class="seg" data-key="relief"><button data-v="1" type="button">True</button><button data-v="2" type="button">2×</button><button data-v="4" type="button">4×</button></div>
+    <p class="hint">Makes hills and valleys taller than they are, so gentle land is easier to read. The sea is not changed.</p></div>
   <div class="setting"><label>Compass line at the top</label>
     <div class="seg" data-key="compass"><button data-v="1" type="button">Show</button><button data-v="0" type="button">Hide</button></div></div>
 
@@ -261,7 +270,7 @@
     <textarea id="noteText" rows="3" placeholder="What would make this better?"></textarea>
     <div class="row"><button class="btn" id="noteSave" type="button">Save note</button>
       <button class="btn" id="noteCopy" type="button">Copy notes</button>
-      <select id="noteFilter" aria-label="Which notes to show"><option value="open">Open</option><option value="all">All</option></select></div>
+      <select id="noteFilter" aria-label="Which notes to show"><option value="open">Open</option><option value="done">Done</option><option value="all">All</option></select></div>
     <ul id="noteList"></ul>
   </section>
 
@@ -271,19 +280,20 @@
 <div id="errorsPanel" class="errorsPanel" hidden></div>
 
 <script src="js/vendor/three.min.js"></script>
-<script src="js/core.js?v=0.5.0"></script>
-<script src="js/sun.js?v=0.5.0"></script>
-<script src="js/presets.js?v=0.5.0"></script>
-<script src="js/weather.js?v=0.5.0"></script>
-<script src="js/skymodel.js?v=0.5.0"></script>
-<script src="js/terrain.js?v=0.5.0"></script>
-<script src="js/map.js?v=0.5.0"></script>
-<script src="js/audio.js?v=0.5.0"></script>
-<script src="js/shader.js?v=0.5.0"></script>
-<script src="js/renderer.js?v=0.5.0"></script>
-<script src="js/config.js?v=0.5.0"></script>
-<script src="js/notes.js?v=0.5.0"></script>
-<script src="js/cloud.js?v=0.5.0"></script>
-<script src="js/app.js?v=0.5.0"></script>
+<script src="js/core.js?v=0.6.1"></script>
+<script src="js/sun.js?v=0.6.1"></script>
+<script src="js/presets.js?v=0.6.1"></script>
+<script src="js/weather.js?v=0.6.1"></script>
+<script src="js/skymodel.js?v=0.6.1"></script>
+<script src="js/terrain.js?v=0.6.1"></script>
+<script src="js/map.js?v=0.6.1"></script>
+<script src="js/audio.js?v=0.6.1"></script>
+<script src="js/shader.js?v=0.6.1"></script>
+<script src="js/renderer.js?v=0.6.1"></script>
+<script src="js/config.js?v=0.6.1"></script>
+<script src="js/world.js?v=0.6.1"></script>
+<script src="js/notes.js?v=0.6.1"></script>
+<script src="js/cloud.js?v=0.6.1"></script>
+<script src="js/app.js?v=0.6.1"></script>
 </body>
 </html>

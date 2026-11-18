@@ -49,6 +49,13 @@ uniform float uCmix;             // high layer: share of rippled patches
 uniform vec4 uPrecip;            // 0 none 1 rain 2 snow 3 sleet, strength 0..1, share of sky raining, slant
 uniform vec4 uFeat;              // x, z km from the camera, 0 none 1 funnel 2 microburst, strength
 uniform vec4 uFeatB;             // cloud base km, seed, ground km, over water 0/1
+uniform sampler2D uTerrainF;     // the same kind of map, finer, around the place (about 11 km across)
+uniform sampler2D uWorld;        // the whole Earth, 2048 x 1024 (NASA Blue Marble)
+uniform sampler2D uRegion2;      // 9 x 9 cloud cover, 250 km apart
+uniform vec4 uFine;              // half-width of the fine map km (0 = none), relief exaggeration
+uniform vec4 uReg2;              // weight, half-width km
+uniform vec4 uSea2;              // wave frequency rad/m (0 = from the wind), tide km
+uniform vec3 uWorldP;            // camera column: latitude, longitude (radians), world map ready 0 or 1
 
 const float PI = 3.14159265;
 const float RE = 6371.0;
@@ -142,7 +149,11 @@ float cloudD(vec3 p, vec4 A, vec4 B, vec4 W, int cheap) {
   }
   // Cover changes across the region (weather data around the place), and with distance beyond it.
   float az = A.z;
-  if (uReg.x > 0.0) {                          // the data covers 500 km; beyond it, fade back to the place's own cover
+  if (uReg2.x > 0.0) {                         // the wide data (2000 km, 250 km apart); beyond it, back to the place's own cover
+    vec4 rg2 = texture2D(uRegion2, w / (2.0 * uReg2.y) + 0.5);
+    az = mix(az, pow(gLay < 0.5 ? rg2.r : rg2.g, 0.85), uReg2.x * (1.0 - smoothstep(uReg2.y * 0.8, uReg2.y * 1.7, max(abs(w.x), abs(w.y)))));
+  }
+  if (uReg.x > 0.0) {                          // the close data covers 500 km; beyond it, fade back
     vec4 rg = texture2D(uRegion, w / (2.0 * uReg.y) + 0.5);
     az = mix(az, pow(gLay < 0.5 ? rg.r : rg.g, 0.85), uReg.x * (1.0 - smoothstep(uReg.y * 0.8, uReg.y * 1.7, max(abs(w.x), abs(w.y)))));
   }
@@ -171,6 +182,19 @@ float cloudD(vec3 p, vec4 A, vec4 B, vec4 W, int cheap) {
         if (w3 > 0.0) d -= W.w * w3 * 0.28 * smoothstep(0.32, 0.68, noise(qw * 127.0)) * (1.0 - d * 0.7);
       }
       d = clamp(d, 0.0, 1.0);
+    }
+  }
+  if (cheap == 0) {                              // far away a pixel is wider than a cell: use bigger and bigger cloud shapes, then the average
+    float fp = gT * uPix / B.x;
+    if (fp > 0.35) {
+      float l1 = smoothstep(0.35, 1.5, fp); float l2 = smoothstep(2.5, 9.0, fp); float l3 = smoothstep(14.0, 40.0, fp);
+      float nA = fbm2(q * 0.2 + 40.0);                                   // cells five times wider
+      float nB = 0.6 * noise(q * 0.04 + 80.0) + 0.4 * noise(q * 0.08 + 12.0);   // systems tens of km wide
+      float dA = clamp((nA - thr) * 5.0, 0.0, 1.0) * prof * (0.45 + 1.1 * nA);
+      float dB = clamp((nB - thr) * 5.0, 0.0, 1.0) * prof * (0.45 + 1.1 * nB);
+      float tau = -log(max(1.0 - 0.85 * cov, 0.05));                      // the average transparency of this cover, spread evenly through the layer
+      float dC = tau / (A.w * (A.y - A.x) * 0.6) * prof;
+      d = mix(d, dA, l1); d = mix(d, dB, l2); d = mix(d, dC, l3);
     }
   }
   return d * mix(1.0, 1.0 / lt, 0.6);            // short cells are denser, so they stay solid
@@ -244,6 +268,7 @@ vec4 cirrus(vec3 ro, vec3 rd, float t, vec3 bg) {
     if (pm > 0.0) n = mix(n, 0.35 + 0.5 * fbm2(vec3(u0 * 0.9, uEvolve) + uSeed), pm);
   }
   float cover = uC.y;
+  if (uReg2.x > 0.0) cover = mix(cover, texture2D(uRegion2, w / (2.0 * uReg2.y) + 0.5).b, uReg2.x * (1.0 - smoothstep(uReg2.y * 0.8, uReg2.y * 1.7, max(abs(w.x), abs(w.y)))));
   if (uReg.x > 0.0) cover = mix(cover, texture2D(uRegion, w / (2.0 * uReg.y) + 0.5).b, uReg.x * (1.0 - smoothstep(uReg.y * 0.8, uReg.y * 1.7, max(abs(w.x), abs(w.y)))));
   if (uReg.z > 0.0) cover = clamp(cover * mix(1.0, 0.15 + 1.9 * noise(vec3(w * 0.0019 + uSeed.yx, 4.0)), uReg.z * smoothstep(60.0, 420.0, length(w))), 0.0, 1.0);
   float thr = mix(0.78, 0.28, cover);
@@ -270,14 +295,41 @@ vec3 stars(vec3 rd) {
 // Positions here are km from the camera's own column: x east, y up from sea level, z south.
 float hsOf(vec3 pl) { return pl.y + (pl.x * pl.x + pl.z * pl.z) / (2.0 * RE); }       // height above the round sea
 vec3 toPlanet(vec2 xz, float hs) { return vec3(xz.x, sqrt(max((RE + hs) * (RE + hs) - dot(xz, xz), 0.0)), xz.y); }
-float terrainH(vec2 xz) {
+// ---- the whole Earth, for the ground far from the place and for the view from space ----
+vec2 worldLL(vec2 xz) {                                           // longitude, latitude of a ground point (km from the camera's column)
+  float y = sqrt(max(RE * RE - dot(xz, xz), 1.0)); vec3 u = normalize(vec3(xz.x, y, xz.y));
+  float sp = sin(uWorldP.x); float cp = cos(uWorldP.x); float sl = sin(uWorldP.y); float cl = cos(uWorldP.y);
+  vec3 east = vec3(-sl, cl, 0.0); vec3 north = vec3(-sp * cl, -sp * sl, cp); vec3 up = vec3(cp * cl, cp * sl, sp);
+  vec3 wv = u.x * east + u.y * up - u.z * north;                  // local z points south
+  return vec2(atan(wv.y, wv.x), asin(clamp(wv.z, -1.0, 1.0)));
+}
+vec3 worldTex(vec2 xz) { vec2 ll = worldLL(xz); return texture2D(uWorld, vec2(ll.x / (2.0 * PI) + 0.5, ll.y / PI + 0.5)).rgb; }
+float worldWater(vec2 xz) {                                       // 1 for ocean and lakes in the picture, 0 for land and ice
+  vec3 c = worldTex(xz);
+  return smoothstep(0.0, 0.07, c.b - max(c.r, c.g * 0.9)) * (1.0 - smoothstep(0.55, 0.8, min(c.r, min(c.g, c.b))));
+}
+// Ground texture at a point: x = height km above the sea, y = land (1) or water (0). Coarse map, fine map near the place, the world beyond.
+vec2 groundTex(vec2 xz) {
   vec2 w = xz + uCamXZ; vec4 tx = texture2D(uTerrain, w / (2.0 * uTerr.x) + 0.5);
-  gMask = tx.g; gRaw = tx.r;
-  float m = smoothstep(0.5, 0.64, tx.g);
+  float edge = max(abs(w.x), abs(w.y));
+  if (uFine.x > 0.0) {
+    float wf = 1.0 - smoothstep(0.7 * uFine.x, uFine.x, edge);
+    if (wf > 0.0) { vec4 tf = texture2D(uTerrainF, w / (2.0 * uFine.x) + 0.5); tx.r = mix(tx.r, tf.r, wf); tx.g = mix(tx.g, tf.g, wf); }
+  }
+  if (uWorldP.z > 0.5) {
+    float far = smoothstep(0.85 * uTerr.x, uTerr.x * 1.02, edge);
+    if (far > 0.0) { tx.g = mix(tx.g, 1.0 - worldWater(xz), far); tx.r *= 1.0 - far; }
+  }
+  return tx.rg;
+}
+float terrainH(vec2 xz) {
+  vec2 w = xz + uCamXZ; vec2 g = groundTex(xz);
+  gMask = g.y; gRaw = g.x;
+  float m = smoothstep(0.5, 0.64, g.y);
   if (m <= 0.0) return 0.0;
-  float A = 0.02 + 0.2 * tx.r;                                    // rougher where it is higher
+  float A = 0.02 + 0.2 * g.x;                                     // rougher where it is higher
   float dn = fbm2(vec3(w * 0.33, 3.7)) - 0.5 + 0.3 * (noise(vec3(w * 1.7, 9.1)) - 0.5);
-  return max(tx.r + A * dn, 0.004) * m;
+  return (max(g.x * uFine.y + A * dn, 0.004) - uSea2.y) * m;
 }
 float seaOct(vec2 uv, float ch) {
   uv += noise(vec3(uv, 0.0)) * 2.0 - 1.0;
@@ -288,7 +340,7 @@ float seaOct(vec2 uv, float ch) {
 float waveH(vec2 m, int it) {
   float c = cos(uSea.z); float s = sin(uSea.z);
   vec2 uv = vec2(c * m.x + s * m.y, -s * m.x + c * m.y); uv.x *= 0.75;
-  float freq = 0.05 / (1.0 + uSea.w * 0.1); float amp = 0.6; float ch = 4.0; float T = uSea.y * 5.0; float h = 0.0;
+  float freq = uSea2.x > 0.0 ? uSea2.x : 0.05 / (1.0 + uSea.w * 0.1); float amp = 0.6; float ch = 4.0; float T = uSea.y * 5.0; float h = 0.0;
   for (int i = 0; i < 5; i++) {
     if (i >= it) break;
     float d = seaOct((uv + T) * freq, ch) + seaOct((uv - T) * freq, ch);
@@ -298,29 +350,30 @@ float waveH(vec2 m, int it) {
   return h;
 }
 float seaH(vec2 xz, int it) {                                     // km; waves flatten toward the shore
-  float m = texture2D(uTerrain, (xz + uCamXZ) / (2.0 * uTerr.x) + 0.5).g;
+  float m = groundTex(xz).y;
   return (waveH((xz + uCamXZ) * 1000.0, it) - 0.55) * uSea.x * clamp(1.0 - m * 1.5, 0.35, 1.0);
 }
 // Where the ray meets the ground. Returns the distance (or -1) and whether it is water.
 float groundTrace(vec3 rd, float jit, out float isSea) {
   isSea = 0.0;
-  float Hm = uTerr.y + 0.02;
-  float dH = rd.y * rd.y + 2.0 * (Hm - uAlt) / RE;
+  float ga = uAlt - uSea2.y;                                     // the sea sits at the tide; the ground works in a frame where it is at 0
+  float Hm = uTerr.y + 0.02 - uSea2.y;
+  float dH = rd.y * rd.y + 2.0 * (Hm - ga) / RE;
   float tS = 0.0;
-  if (uAlt > Hm) { if (rd.y >= 0.0 || dH < 0.0) return -1.0; tS = 2.0 * (uAlt - Hm) / (-rd.y + sqrt(dH)); }
-  float d0 = rd.y * rd.y - 2.0 * uAlt / RE;
-  float tSea = (rd.y < 0.0 && d0 >= 0.0) ? 2.0 * uAlt / (-rd.y + sqrt(d0)) : -1.0;
+  if (ga > Hm) { if (rd.y >= 0.0 || dH < 0.0) return -1.0; tS = 2.0 * (ga - Hm) / (-rd.y + sqrt(dH)); }
+  float d0 = rd.y * rd.y - 2.0 * ga / RE;
+  float tSea = (rd.y < 0.0 && d0 >= 0.0) ? 2.0 * ga / (-rd.y + sqrt(d0)) : -1.0;
   float tEnd = tSea > 0.0 ? tSea : RE * (-rd.y + sqrt(max(dH, 0.0)));
   tEnd = min(tEnd, tS + 420.0);
-  if (uTerr.y > 0.006) {
+  if (uTerr.y > 0.006 && uAlt < 40.0) {                           // from very high up the relief is flat to the eye: go straight to the sea level hit
     float t = tS + 0.03 * jit; float prev = tS;
     for (int i = 0; i < 200; i++) {
       if (i >= uTSteps || t > tEnd) break;
-      vec3 pl = vec3(rd.x * t, uAlt + rd.y * t, rd.z * t);
+      vec3 pl = vec3(rd.x * t, ga + rd.y * t, rd.z * t);
       float f = hsOf(pl) - terrainH(pl.xz);
       if (f < 0.0) {
         float a = prev; float b = t;
-        for (int k = 0; k < 6; k++) { float m = 0.5 * (a + b); vec3 pm = vec3(rd.x * m, uAlt + rd.y * m, rd.z * m); if (hsOf(pm) - terrainH(pm.xz) < 0.0) b = m; else a = m; }
+        for (int k = 0; k < 6; k++) { float m = 0.5 * (a + b); vec3 pm = vec3(rd.x * m, ga + rd.y * m, rd.z * m); if (hsOf(pm) - terrainH(pm.xz) < 0.0) b = m; else a = m; }
         return 0.5 * (a + b);
       }
       prev = t; t += max(max(0.03, 0.45 * f), uTGrow * t);
@@ -359,10 +412,17 @@ vec3 landColor(vec3 pl, float t) {
   float sh = cloudShadow(pl);
   vec3 col = c * 1.2 * (uSun0 * max(dot(n, uSunDir), 0.0) * sh * 0.32 + uAmbTop * (0.55 + 0.45 * n.y));
   col += vec3(1.0, 0.72, 0.38) * 0.0035 * urban * uNight * step(0.82, hash12(floor(w * 46.0)));
+  float outside = smoothstep(0.7 * uTerr.x, uTerr.x, max(abs(w.x), abs(w.y)));
+  if (outside > 0.0 && uWorldP.z > 0.5) {                          // far from the place: the real Earth, lit by the sun
+    vec3 wc = pow(worldTex(pl.xz), vec3(2.2)) * (0.86 + 0.28 * noise(vec3(w * 0.45, 5.0)));
+    float yy = sqrt(max(RE * RE - dot(pl.xz, pl.xz), 1.0)); vec3 uu = normalize(vec3(pl.x, yy, pl.z));
+    vec3 wl = wc * 1.2 * (uSun0 * max(dot(uu, uSunDir), 0.0) * sh * 0.32 + uAmbTop * 0.7);
+    col = mix(col, wl, outside);
+  }
   return col;
 }
 vec3 seaColor(vec3 pl, vec3 rd, float t) {
-  float m = texture2D(uTerrain, (pl.xz + uCamXZ) / (2.0 * uTerr.x) + 0.5).g;
+  float m = groundTex(pl.xz).y;
   vec3 n = vec3(0.0, 1.0, 0.0);
   float near = 1.0 - smoothstep(3.0, 40.0, t);
   if (near > 0.0 && uSea.x > 0.0) {
@@ -537,16 +597,16 @@ void main() {
     if (isSea > 0.5) {
       // close water: find the wave surface itself
       if (tG < 6.0 && uSea.x > 0.0) {
-        float amp = uSea.x * 1.3;
-        float ta = uAlt > amp ? 2.0 * (uAlt - amp) / (-rd.y + sqrt(max(rd.y * rd.y - 2.0 * (uAlt - amp) / RE, 0.0))) : 0.0;
+        float amp = uSea.x * 1.3; float gA = uAlt - uSea2.y;
+        float ta = gA > amp ? 2.0 * (gA - amp) / (-rd.y + sqrt(max(rd.y * rd.y - 2.0 * (gA - amp) / RE, 0.0))) : 0.0;
         float tb = tG * 1.6 + 0.02;
-        vec3 pa = vec3(rd.x * ta, uAlt + rd.y * ta, rd.z * ta); float hm = hsOf(pa) - seaH(pa.xz, 4);
-        vec3 pb = vec3(rd.x * tb, uAlt + rd.y * tb, rd.z * tb); float hx = hsOf(pb) - seaH(pb.xz, 4);
+        vec3 pa = vec3(rd.x * ta, gA + rd.y * ta, rd.z * ta); float hm = hsOf(pa) - seaH(pa.xz, 4);
+        vec3 pb = vec3(rd.x * tb, gA + rd.y * tb, rd.z * tb); float hx = hsOf(pb) - seaH(pb.xz, 4);
         if (hm > 0.0 && hx < 0.0) {
           float tm = ta;
           for (int i = 0; i < 8; i++) {
             tm = mix(ta, tb, hm / (hm - hx));
-            vec3 pm = vec3(rd.x * tm, uAlt + rd.y * tm, rd.z * tm); float hmid = hsOf(pm) - seaH(pm.xz, 4);
+            vec3 pm = vec3(rd.x * tm, gA + rd.y * tm, rd.z * tm); float hmid = hsOf(pm) - seaH(pm.xz, 4);
             if (hmid < 0.0) { tb = tm; hx = hmid; } else { ta = tm; hm = hmid; }
           }
           tG = tm;

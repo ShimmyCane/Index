@@ -1,14 +1,17 @@
--- Generate Clouds: add yourself as the owner (once). Paste in the Architecture project's SQL editor.
--- The owner row is what lets your sign-in see and write gc_notes. Until it exists, every query returns nothing.
--- Nothing personal is kept in this file: the id comes from your own dashboard and is never committed.
+-- Generate Clouds: allow YOUR account to keep notes (once per database). Paste in the Architecture project's SQL editor.
+-- Only accounts in public.platform_owners can read or write gc_notes from the page. Everyone else, including anyone
+-- who signs up (sign-ups are open on this project), gets nothing. You never copy an id: you type the email you sign in with.
 --
--- STEP A. Run this file as it is. It only lists the newest accounts. Copy the id of YOUR account.
--- (The account must exist: Authentication > Users. Sign in on the page once if it is not there.)
-select id, email, last_sign_in_at from auth.users order by last_sign_in_at desc nulls last limit 5;
+-- 1. Replace PASTE-YOUR-SIGN-IN-EMAIL-HERE (keep the quotes) with the email you sign in to the page with.
+-- 2. Run. Expect one row with added = 1 (or 0 if you were already added). added = 0 and owner_rows = 0 means the email did not match an account.
+-- Nothing personal is kept in this file; the email is typed in your dashboard and never committed.
+with ins as (
+  insert into public.platform_owners (user_id, note)
+  select id, 'owner' from auth.users where email = 'PASTE-YOUR-SIGN-IN-EMAIL-HERE'
+  on conflict (user_id) do nothing
+  returning 1
+)
+select (select count(*) from ins) as added;
 
--- STEP B. Delete the two dashes at the start of the next line, replace the words in capitals
--- with the id you copied (keep the quotes), and run it. Re-runnable: a second run does nothing.
--- insert into public.platform_owners (user_id, note) values ('PASTE-YOUR-USER-ID-HERE', 'owner') on conflict (user_id) do nothing;
-
--- STEP C. Check. Expect owner_rows = 1.
+-- 3. Check. Expect owner_rows = 1.
 select count(*) as owner_rows from public.platform_owners;

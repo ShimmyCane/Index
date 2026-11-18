@@ -36,6 +36,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #8fc3ea; col
 .panels { position: fixed; left: 12px; top: calc(68px + env(safe-area-inset-top)); bottom: 136px; width: min(340px, calc(100vw - 24px));
   overflow-y: auto; z-index: 18; padding: 0 4px 6px 0; -webkit-overflow-scrolling: touch; }
 body[data-panels="off"] .panels { display: none; }
+body[data-bar="off"] .panels { bottom: 100px; }
 .panel { border: var(--line); border-radius: 16px 16px 16px 6px; background: rgba(248, 251, 255, 0.95); margin: 0 0 10px; overflow: hidden; box-shadow: 0 3px 0 var(--ink); }
 .panelHead { width: 100%; min-height: 50px; display: flex; align-items: center; gap: 10px; padding: 0 14px; border: 0;
   background: var(--sky2); font: 800 16px system-ui, sans-serif; color: var(--ink); cursor: pointer; text-align: left; }
@@ -129,6 +130,7 @@ input[type="range"] { width: 100%; height: 36px; accent-color: var(--deep); marg
 .checks li, #noteList li { padding: 6px 0; border-bottom: 1.5px dashed #b8cfe4; white-space: pre-wrap; overflow-wrap: anywhere; }
 .notesBox h3 { margin: 12px 0 0; font-size: 17px; }
 .notesBox select { flex: 1; min-width: 90px; }
+.noteBtn { margin-top: 6px; min-height: 48px; }
 .info { margin-top: 12px; }
 .errorsPanel { position: fixed; left: 16px; right: 100px; bottom: calc(16px + env(safe-area-inset-bottom)); max-height: 30vh; overflow: auto; z-index: 45;
   background: #fff0ee; border: var(--line); border-radius: 14px; padding: 8px 12px; font: 13px ui-monospace, Menlo, monospace; white-space: pre-wrap; }

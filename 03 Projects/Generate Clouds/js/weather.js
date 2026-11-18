@@ -10,7 +10,8 @@
     forecast: 'https://api.open-meteo.com/v1/forecast',
     archive: 'https://archive-api.open-meteo.com/v1/archive',
     air: 'https://air-quality-api.open-meteo.com/v1/air-quality',
-    geo: 'https://geocoding-api.open-meteo.com/v1/search'
+    geo: 'https://geocoding-api.open-meteo.com/v1/search',
+    marine: 'https://marine-api.open-meteo.com/v1/marine'
   };
   var CORE = ['temperature_2m', 'relative_humidity_2m', 'dew_point_2m', 'precipitation', 'weather_code', 'cloud_cover',
     'cloud_cover_low', 'cloud_cover_mid', 'cloud_cover_high', 'wind_speed_10m', 'wind_direction_10m', 'wind_gusts_10m'];
@@ -180,16 +181,18 @@
   // Returns 25 x [low, mid, high] as 0..1 (rows north to south), or null when it cannot be had.
   var REG_KEY = 'gc.region';
   W.REGION = { N: 5, STEP: 100 };
-  W.region = function (place, utcMs) {
-    var hour = new Date(utcMs).toISOString().slice(0, 13) + ':00', key = placeKey(place) + '@' + hour, saved = GC.store.get(REG_KEY, []);
+  W.REGION_WIDE = { N: 9, STEP: 250 };
+  W.region = function (place, utcMs, spec) {
+    spec = spec || W.REGION;
+    var hour = new Date(utcMs).toISOString().slice(0, 13) + ':00', key = placeKey(place) + '@' + hour + '#' + spec.N, saved = GC.store.get(REG_KEY, []);
     if (!Array.isArray(saved)) saved = [];
     for (var i = 0; i < saved.length; i++) if (saved[i].key === key) return Promise.resolve(saved[i].cells);
     var ageDays = (Date.now() - utcMs) / 86400000;
     if (ageDays < -15) return Promise.resolve(null);
-    var lats = [], lons = [], kx = Math.max(111.2 * Math.cos(GC.rad(place.lat)), 5), n = W.REGION.N, half = (n - 1) / 2;
+    var lats = [], lons = [], kx = Math.max(111.2 * Math.cos(GC.rad(place.lat)), 5), n = spec.N, half = (n - 1) / 2;
     for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) {
-      lats.push(GC.clamp(place.lat - (r - half) * W.REGION.STEP / 111.2, -89, 89).toFixed(3));
-      lons.push((((place.lon + (c - half) * W.REGION.STEP / kx + 540) % 360) - 180).toFixed(3));
+      lats.push(GC.clamp(place.lat - (r - half) * spec.STEP / 111.2, -89, 89).toFixed(3));
+      lons.push((((place.lon + (c - half) * spec.STEP / kx + 540) % 360) - 180).toFixed(3));
     }
     var day = hour.slice(0, 10);
     var url = (ageDays > 85 ? HOSTS.archive : HOSTS.forecast) + '?latitude=' + lats.join(',') + '&longitude=' + lons.join(',') +
@@ -202,10 +205,40 @@
         function v(name) { var a = x.hourly[name]; return (k < 0 || !a || a[k] == null) ? 0 : a[k] / 100; }
         return k < 0 ? [0, 0, 0] : [v('cloud_cover_low'), v('cloud_cover_mid'), v('cloud_cover_high')];
       });
-      saved.unshift({ key: key, cells: cells }); while (saved.length > 6) saved.pop();
+      saved.unshift({ key: key, cells: cells }); while (saved.length > 8) saved.pop();
       GC.store.set(REG_KEY, saved);
       return cells;
     }).catch(function (e) { GC.logError('Region: ' + ((e && e.name === 'AbortError') ? 'no answer in time' : (e && e.message) || 'no connection')); return null; });
+  };
+
+  W.regionWide = function (place, utcMs) { return W.region(place, utcMs, W.REGION_WIDE); };
+
+  // ---------- the sea: waves, swell, period, direction and tide (Open-Meteo marine model, cells of a few km) ----------
+  // Returns null when the point has no sea data (inland, or the service did not answer). Tide is asked for separately,
+  // so a refusal of that one value never costs the waves.
+  var MAR_KEY = 'gc.marine';
+  W.marine = function (place, utcMs) {
+    var hour = new Date(utcMs).toISOString().slice(0, 13) + ':00', key = placeKey(place) + '@' + hour, saved = GC.store.get(MAR_KEY, []);
+    if (!Array.isArray(saved)) saved = [];
+    for (var i = 0; i < saved.length; i++) if (saved[i].key === key) return Promise.resolve(saved[i].m);
+    var ageDays = (Date.now() - utcMs) / 86400000;
+    if (ageDays < -7 || ageDays > 85) return Promise.resolve(null);
+    var day = hour.slice(0, 10), base = HOSTS.marine + '?latitude=' + place.lat.toFixed(3) + '&longitude=' + place.lon.toFixed(3) + '&timezone=GMT&start_date=' + day + '&end_date=' + day + '&hourly=';
+    function at(j, name) { var k = j && j.hourly && j.hourly.time ? j.hourly.time.indexOf(hour) : -1, a = k < 0 || !j.hourly[name] ? null : j.hourly[name][k]; return a == null ? null : a; }
+    var waves = fetchJson(base + 'wave_height,wave_direction,wave_period,swell_wave_height,swell_wave_direction,swell_wave_period,wind_wave_height,wind_wave_direction,wind_wave_period,ocean_current_velocity,ocean_current_direction', 12000).catch(function (e) {
+      GC.logError('Sea data: ' + ((e && e.name === 'AbortError') ? 'no answer in time' : (e && e.message) || 'no connection')); return null; });
+    var tide = fetchJson(base + 'sea_level_height_msl', 12000).catch(function () { return null; });
+    return Promise.all([waves, tide]).then(function (r) {
+      var w = r[0], t = r[1];
+      if (w === null || at(w, 'wave_height') === null) return null;
+      var m = { wave: at(w, 'wave_height'), dir: at(w, 'wave_direction'), period: at(w, 'wave_period'),
+        swell: { h: at(w, 'swell_wave_height'), dir: at(w, 'swell_wave_direction'), period: at(w, 'swell_wave_period') },
+        windwave: { h: at(w, 'wind_wave_height'), dir: at(w, 'wind_wave_direction'), period: at(w, 'wind_wave_period') },
+        current: { v: at(w, 'ocean_current_velocity'), dir: at(w, 'ocean_current_direction') }, tide: t ? at(t, 'sea_level_height_msl') : null };
+      saved.unshift({ key: key, m: m }); while (saved.length > 6) saved.pop();
+      GC.store.set(MAR_KEY, saved);
+      return m;
+    });
   };
 
   // ---------- skies right now: one call for the current weather of many cities ----------
@@ -264,7 +297,8 @@
       ['Weather forecast', HOSTS.forecast + q + '&hourly=cloud_cover&forecast_days=1'],
       ['Air quality', HOSTS.air + q + '&hourly=pm2_5&forecast_days=1'],
       ['Place search', HOSTS.geo + '?name=Paris&count=1'],
-      ['Ground heights', 'https://api.open-meteo.com/v1/elevation?latitude=0&longitude=0']
+      ['Ground heights', 'https://api.open-meteo.com/v1/elevation?latitude=0&longitude=0'],
+      ['Sea waves and tide', HOSTS.marine + '?latitude=0&longitude=-30&hourly=wave_height&forecast_days=1']
     ];
     return Promise.all(tests.map(function (t) {
       return fetchJson(t[1], 7000).then(function () { return { name: t[0], ok: true, msg: 'reachable' }; },
