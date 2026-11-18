@@ -86,3 +86,17 @@ Starter (copy into the app; classic script, no build)
 Lessons this comes from
 - Expansion Wars: notes are stored with the map and read by `read-notes-and-update`; the "Done- " prefix marks handled notes.
 - Fishes and Felix Maze: feedback and flags were saved with the item they were about, device first, then to the family table once signed in.
+
+## General notes table (update 2026-11-18)
+
+Notes from every project now go to one general table in the **Family** project, so they can be sorted by project and sub-project in one place. The architecture project can use the same shape later.
+
+- **Table `gen_notes`:** `identifier` (N-0001, never changed), `project`, `sub_project`, `status` (`open`, `done` or `closed`), `description`, `item` (what was on screen), `identifiers` (JSON, one value per code), `version`, `noted_at` (never changed).
+- **Index table `gen_notes_index`:** one row per identifier code (`code`, `project` or `all`, `name`, `meaning`, `unit`, `sort_order`). A project may add its own codes; old notes keep the values they were written with.
+- **Identifiers are per note.** Each project picks its own codes (for a game: health `HP`, time played `TIME`, height `ALT`). The note stores the values at the moment it was written.
+- **Sorting:** by project, sub-project, status or time. Status order: open, then done, then closed.
+- **Device first.** A note is saved on the device at once. Sending to the table happens only when the family is signed in. Nothing is sent otherwise.
+- **SQL:** `supabase/001_gen_notes.sql` with `test_001_gen_notes_rollback.sql`. Not applied until Jimmy pastes it.
+- **Status:** new notes use `open`, `done` or `closed`. The earlier `Done-` prefix convention stays on the old notes only.
+
+The settings panel shows the notes with the sort buttons, the status buttons, and an identifier index (📝 Notes for improvement). The settings skill (`settings_gear.md`) gives the same panel to every page.

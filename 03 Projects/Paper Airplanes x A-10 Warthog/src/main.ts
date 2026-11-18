@@ -333,6 +333,114 @@ namespace PA {
     $('ovText').textContent = 'Rings flown: ' + g.hoopsPassed + ' of ' + g.mission.hoops.length + '.';
   }
 
+  // ---- Notes for improvement (drawer) -----------------------------------
+
+  let noteSort: NoteSort = 'time';
+
+  function noteItem(): string {
+    if (game.phase === 'crashed') return 'Ejected';
+    if (game.phase === 'landed') return 'Glider landed';
+    if (game.plane.stalled) return 'Stalled';
+    return game.settings.mode === 'glider' ? 'Gliding' : 'Flying';
+  }
+
+  function renderNotes(): void {
+    const all = loadNotes();
+    const list = sortNotes(all, noteSort);
+    const c = statusCount(all);
+    $('noteCounts').textContent = 'Open ' + c.open + ' · done ' + c.done + ' · closed ' + c.closed + ' (' + all.length + ' in all)';
+    document.querySelectorAll<HTMLButtonElement>('#noteSort button').forEach(b => b.classList.toggle('on', b.dataset.sort === noteSort));
+    const box = $('noteList');
+    box.textContent = '';
+    if (!list.length) {
+      const empty = document.createElement('p');
+      empty.className = 'hint';
+      empty.textContent = 'No notes yet. Write one above while you play.';
+      box.appendChild(empty);
+      return;
+    }
+    for (const n of list) {
+      const row = document.createElement('div');
+      row.className = 'noteRow ' + n.status;
+      const head = document.createElement('div');
+      head.className = 'noteHead';
+      head.textContent = n.identifier + ' · ' + n.sub + ' · ' + n.item;
+      const body = document.createElement('p');
+      body.className = 'noteBody';
+      body.textContent = n.description;
+      const ids = document.createElement('p');
+      ids.className = 'noteIds';
+      ids.textContent = Object.keys(n.ids).map(k => k + ' ' + n.ids[k]).join(' · ');
+      const seg = document.createElement('div');
+      seg.className = 'seg noteStatus';
+      for (const st of ['open', 'done', 'closed'] as NoteStatus[]) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = st;
+        b.dataset.id = n.identifier;
+        b.dataset.status = st;
+        b.classList.toggle('on', n.status === st);
+        seg.appendChild(b);
+      }
+      row.append(head, body, ids, seg);
+      box.appendChild(row);
+    }
+  }
+
+  function renderNoteIndex(): void {
+    const box = $('noteIndex');
+    box.textContent = '';
+    for (const e of INDEX) {
+      const p = document.createElement('p');
+      p.textContent = e.code + ' · ' + e.name + ': ' + e.meaning + (e.unit ? ' (' + e.unit + ')' : '');
+      box.appendChild(p);
+    }
+  }
+
+  function saveNoteFromScreen(): void {
+    const text = $<HTMLTextAreaElement>('noteText');
+    if (!text.value.trim()) {
+      $('noteHint').textContent = 'Type what should change first.';
+      return;
+    }
+    const note = addNote(text.value, noteItem(), subProject(settings), snapshot(game, settings));
+    text.value = '';
+    $('noteHint').textContent = 'Saved as ' + note.identifier + ' on this device.';
+    renderNotes();
+  }
+
+  async function copyNotes(): Promise<void> {
+    const lines = loadNotes().map(n =>
+      [n.identifier, n.status, n.project, n.sub, n.item, n.time, n.description,
+        Object.keys(n.ids).map(k => k + '=' + n.ids[k]).join(' ')].join(' | '));
+    const text = lines.join('\n') || 'No notes yet.';
+    try {
+      await navigator.clipboard.writeText(text);
+      $('noteHint').textContent = 'Copied ' + lines.length + ' note(s).';
+    } catch (e) {
+      $('noteHint').textContent = 'Could not copy here. Select the list and copy it by hand.';
+    }
+  }
+
+  function bindNotes(): void {
+    $('noteSave').addEventListener('click', saveNoteFromScreen);
+    $('noteCopy').addEventListener('click', () => void copyNotes());
+    document.querySelectorAll<HTMLButtonElement>('#noteSort button').forEach(b => {
+      b.addEventListener('click', () => {
+        noteSort = b.dataset.sort as NoteSort;
+        renderNotes();
+      });
+    });
+    $('noteList').addEventListener('click', e => {
+      const t = e.target as HTMLElement;
+      if (t.tagName !== 'BUTTON' || !t.dataset.id) return;
+      setStatus(t.dataset.id, t.dataset.status as NoteStatus);
+      renderNotes();
+    });
+    renderNoteIndex();
+    renderNotes();
+  }
+
   // ---- Family database sign-in (drawer) ---------------------------------
 
   function setFamilyStatus(text: string, ok: boolean): void {
@@ -464,6 +572,7 @@ namespace PA {
     bindStick();
     bindActions();
     bindGear();
+    bindNotes();
     renderErrors();
     requestAnimationFrame(frame);
   }

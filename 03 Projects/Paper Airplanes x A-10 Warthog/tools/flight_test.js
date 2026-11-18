@@ -173,5 +173,21 @@ const still = { pitch: 0, yaw: 0, throttle: 0 };
   check('world: the sea is at the east', PA.biomeAt(PA.SEA_X + 200, 0) === 'sea' && PA.groundAt(PA.SEA_X + 200, 0) === 0);
 }
 
+// 15. Notes: numbered, with a status, sorted, and each snapshot has every code in the index.
+{
+  const settings = { mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0, safeFlight: 1, invincible: 0, autoReload: 1 };
+  const g = new PA.Game(settings);
+  const ids = PA.snapshot(g, settings);
+  check('notes: snapshot has every code in the index', PA.INDEX.every(e => e.code in ids), 'codes ' + PA.INDEX.length);
+  const a = PA.addNote('Health bar is hard to read', 'Flying', PA.subProject(settings), ids);
+  const b = PA.addNote('Tanks too far away', 'Flying', 'A-10 jet / top', ids);
+  check('notes: numbered N-0001 and N-0002', a.identifier === 'N-0001' && b.identifier === 'N-0002', a.identifier + ', ' + b.identifier);
+  PA.setStatus(a.identifier, 'done');
+  const all = PA.loadNotes();
+  check('notes: status changes and is kept', all.find(n => n.identifier === 'N-0001').status === 'done');
+  check('notes: sorted by status puts open first', PA.sortNotes(all, 'status')[0].identifier === 'N-0002');
+  check('notes: the project name is on every note', all.every(n => n.project === PA.NOTES_PROJECT));
+}
+
 console.log(failures === 0 ? '\nAll flight checks passed.' : '\n' + failures + ' check(s) failed.');
 process.exit(failures ? 1 : 0);

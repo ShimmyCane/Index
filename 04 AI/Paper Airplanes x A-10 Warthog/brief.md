@@ -54,3 +54,9 @@ A browser 2.5D pixel-art flight game, built small enough to read, so Jimmy can s
 - Checks: 26 flight and rule checks (`npm test`); browser: no page errors; sign-in with a wrong password gives a plain 401 message.
 - Known: the HUD is limited to half the screen width so it wraps before the speed readout.
 - Next: art iterations 2–3, moving aircraft and ships, railway and roads, saving flights (needs a table SQL and Jimmy's paste).
+
+## Round 5 (convo v0.6)
+
+- Added: notes for improvement (numbered, status, sort, identifier index, copy); closer and larger ground things; general notes SQL (not applied); feedback_notes and settings_gear skills updated.
+- Checks: 31 checks (`npm test`); browser: notes save, status change, sort; no page errors.
+- Next: sending notes to the general table when signed in (after the SQL is applied); close-up sprite drawings.

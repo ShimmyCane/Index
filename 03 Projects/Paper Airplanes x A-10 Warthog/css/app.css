@@ -401,3 +401,20 @@ body.glider .drawer { top: auto; bottom: 100px; max-height: 70vh; }
 #familyIn label { display: block; font-weight: 800; font-size: 14px; }
 #familyStatus { font-weight: 700; }
 #familyStatus.bad { color: #a33; }
+
+/* Notes: a list of rows, each with its identifier, status buttons and identifiers. */
+textarea.field { resize: vertical; font-size: 15px; }
+.noteList { display: grid; gap: 8px; margin: 8px 0; }
+.noteRow {
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  padding: 8px 10px;
+  background: #fff;
+}
+.noteRow.done { background: #eef9f1; }
+.noteRow.closed { background: #f1f1f4; color: #6b6880; }
+.noteHead { font-weight: 800; font-size: 13px; }
+.noteBody { margin: 4px 0; font-size: 15px; }
+.noteIds { margin: 2px 0 6px; font-size: 12px; color: #5d5a73; font-variant-numeric: tabular-nums; }
+.noteStatus button { min-height: 40px; font-size: 14px; }
+#noteSort button { min-height: 44px; font-size: 14px; }

@@ -703,6 +703,136 @@ var PA;
     }
     PA.checkSession = checkSession;
 })(PA || (PA = {}));
+// Notes for improvement. Saved on this device first (never sent anywhere by itself).
+// Each note has a project and sub-project, a status (open, done or closed), a
+// description, an identifier (N-0001 …), and a snapshot of identifiers taken when
+// it was written. The identifier index says what each code means.
+var PA;
+(function (PA) {
+    PA.NOTES_PROJECT = 'Paper Airplanes x A-10 Warthog';
+    const NOTES_KEY = 'pa_warthog.notes';
+    // The identifier index: what each code in a note means. Values are stored with each note,
+    // so this list can grow without changing old notes.
+    PA.INDEX = [
+        { code: 'HP', name: 'Health', meaning: 'Hull left, as a share of full', unit: '%' },
+        { code: 'TIME', name: 'Time played', meaning: 'How long this flight has been going', unit: 'm:ss' },
+        { code: 'ALT', name: 'Height', meaning: 'Height above the ground under the plane', unit: 'm' },
+        { code: 'SPD', name: 'Speed', meaning: 'Airspeed in knots', unit: 'kt' },
+        { code: 'AOA', name: 'Angle of attack', meaning: 'Nose angle against the flight path (over 15° stalls)', unit: '°' },
+        { code: 'VIEW', name: 'Camera view', meaning: 'Chase, top-down or cockpit', unit: '' },
+        { code: 'PLANE', name: 'Plane', meaning: 'A-10 jet or paper glider', unit: '' },
+        { code: 'MISS', name: 'Missiles', meaning: 'Missiles in stock (of six)', unit: 'count' },
+        { code: 'GUN', name: 'Gun aim', meaning: 'Straight, or how far down it points at a ground target', unit: '°' },
+        { code: 'LEFT', name: 'Targets left', meaning: 'Ground targets still standing', unit: 'count' },
+        { code: 'SCORE', name: 'Score', meaning: 'Points this flight', unit: 'pts' },
+        { code: 'SAFE', name: 'Safe flight', meaning: 'Floor above the ground is on (1) or off (0)', unit: '' },
+        { code: 'INV', name: 'Invincible', meaning: 'Hits do no harm (1) or they do (0)', unit: '' },
+    ];
+    // Memory copy, used when the device will not keep notes (and in the tests).
+    let memory = null;
+    function loadNotes() {
+        if (memory)
+            return memoryCopy();
+        try {
+            const raw = localStorage.getItem(NOTES_KEY);
+            return raw ? JSON.parse(raw) : [];
+        }
+        catch (e) {
+            return memoryCopy();
+        }
+    }
+    PA.loadNotes = loadNotes;
+    function memoryCopy() {
+        return memory ? memory.slice() : [];
+    }
+    function saveNotes(list) {
+        memory = list.slice();
+        try {
+            localStorage.setItem(NOTES_KEY, JSON.stringify(list));
+        }
+        catch (e) {
+            // Kept in memory for this visit only.
+        }
+    }
+    function nextIdentifier(list) {
+        let top = 0;
+        for (const n of list) {
+            const m = /^N-(\d+)$/.exec(n.identifier);
+            if (m)
+                top = Math.max(top, +m[1]);
+        }
+        return 'N-' + String(top + 1).padStart(4, '0');
+    }
+    PA.nextIdentifier = nextIdentifier;
+    function addNote(description, item, sub, ids, when = new Date()) {
+        const list = loadNotes();
+        const note = {
+            identifier: nextIdentifier(list),
+            time: when.toISOString(),
+            project: PA.NOTES_PROJECT,
+            sub,
+            item,
+            status: 'open',
+            description: description.trim(),
+            ids,
+        };
+        list.push(note);
+        saveNotes(list);
+        return note;
+    }
+    PA.addNote = addNote;
+    function setStatus(identifier, status) {
+        const list = loadNotes();
+        for (const n of list)
+            if (n.identifier === identifier)
+                n.status = status;
+        saveNotes(list);
+    }
+    PA.setStatus = setStatus;
+    function sortNotes(list, by) {
+        const order = { open: 0, done: 1, closed: 2 };
+        return list.slice().sort((a, b) => {
+            if (by === 'status')
+                return order[a.status] - order[b.status] || a.identifier.localeCompare(b.identifier);
+            if (by === 'sub')
+                return a.sub.localeCompare(b.sub) || a.identifier.localeCompare(b.identifier);
+            return a.identifier.localeCompare(b.identifier);
+        });
+    }
+    PA.sortNotes = sortNotes;
+    // The identifiers at this moment in the game. Each code is written with its value.
+    function snapshot(g, settings) {
+        const p = g.plane;
+        const secs = Math.floor(g.time);
+        return {
+            HP: Math.round(Math.max(0, g.hull)),
+            TIME: Math.floor(secs / 60) + ':' + String(secs % 60).padStart(2, '0'),
+            ALT: Math.round(p.h - PA.groundAt(p.X, p.Z)),
+            SPD: Math.round(p.speed * 1.94),
+            AOA: Math.round((p.alpha * 180) / Math.PI),
+            VIEW: settings.view,
+            PLANE: settings.mode === 'glider' ? 'paper glider' : 'A-10 jet',
+            MISS: g.missileStock,
+            GUN: g.aim.mode === 'ground' ? Number(((Math.abs(g.aim.pitch) * 180) / Math.PI).toFixed(1)) : 0,
+            LEFT: g.mission.targets.filter(t => t.alive).length,
+            SCORE: g.score,
+            SAFE: settings.safeFlight,
+            INV: settings.invincible,
+        };
+    }
+    PA.snapshot = snapshot;
+    function subProject(settings) {
+        return (settings.mode === 'glider' ? 'paper glider' : 'A-10 jet') + ' / ' + settings.view;
+    }
+    PA.subProject = subProject;
+    function statusCount(list) {
+        const c = { open: 0, done: 0, closed: 0 };
+        for (const n of list)
+            c[n.status]++;
+        return c;
+    }
+    PA.statusCount = statusCount;
+})(PA || (PA = {}));
 // Game state and rules: guns and their aim, missiles and their stock, anti-aircraft
 // fire, rings, the safe-flight floor, invincibility, ejection and free play.
 var PA;
@@ -1181,7 +1311,10 @@ var PA;
     const FOG_FAR = 900; // metres where the ground fades into the sky
     const PLANE_SCREEN_Y = 0.72;
     const PX_PER_M = 0.3; // sprite pixel size in metres (ground targets)
-    const PLANE_SCALE = 2; // the plane sprite is drawn at a whole-number scale
+    const PLANE_SCALE = 2;
+    const NEAR_BOOST_M = 220; // closer than this, ground things grow up to three times
+    const MIN_PX = 7; // the smallest a thing is drawn (tall)
+    const MAX_PX = 150; // the largest, so nothing fills the whole screen      // the plane sprite is drawn at a whole-number scale
     // Camera placement for each view: where it sits behind the plane, how high, and how far it looks down.
     const VIEWS = {
         chase: { back: CAM_BACK, up: CAM_UP, tilt: TILT, range: RANGE },
@@ -1294,7 +1427,12 @@ var PA;
         if (!p)
             return;
         const [sx, sy, zc] = p;
-        const k = (FOCAL * PX_PER_M) / zc;
+        // Size by distance: true perspective, plus a boost when close (up to three times
+        // larger inside 220 m), and a floor so anything far off still shows as a few pixels.
+        const near = Math.max(0, Math.min(1, (NEAR_BOOST_M - zc) / NEAR_BOOST_M));
+        let k = ((FOCAL * PX_PER_M) / zc) * (1 + 2 * near);
+        k = Math.max(k, MIN_PX / img.height);
+        k = Math.min(k, MAX_PX / img.height);
         const w = Math.max(1, Math.round(img.width * k));
         const h = Math.max(1, Math.round(img.height * k));
         ctx.drawImage(img, Math.round(sx - w / 2), Math.round(sy - h), w, h);
@@ -1902,6 +2040,110 @@ var PA;
         $('ovTitle').textContent = 'Landed!';
         $('ovText').textContent = 'Rings flown: ' + g.hoopsPassed + ' of ' + g.mission.hoops.length + '.';
     }
+    // ---- Notes for improvement (drawer) -----------------------------------
+    let noteSort = 'time';
+    function noteItem() {
+        if (game.phase === 'crashed')
+            return 'Ejected';
+        if (game.phase === 'landed')
+            return 'Glider landed';
+        if (game.plane.stalled)
+            return 'Stalled';
+        return game.settings.mode === 'glider' ? 'Gliding' : 'Flying';
+    }
+    function renderNotes() {
+        const all = PA.loadNotes();
+        const list = PA.sortNotes(all, noteSort);
+        const c = PA.statusCount(all);
+        $('noteCounts').textContent = 'Open ' + c.open + ' · done ' + c.done + ' · closed ' + c.closed + ' (' + all.length + ' in all)';
+        document.querySelectorAll('#noteSort button').forEach(b => b.classList.toggle('on', b.dataset.sort === noteSort));
+        const box = $('noteList');
+        box.textContent = '';
+        if (!list.length) {
+            const empty = document.createElement('p');
+            empty.className = 'hint';
+            empty.textContent = 'No notes yet. Write one above while you play.';
+            box.appendChild(empty);
+            return;
+        }
+        for (const n of list) {
+            const row = document.createElement('div');
+            row.className = 'noteRow ' + n.status;
+            const head = document.createElement('div');
+            head.className = 'noteHead';
+            head.textContent = n.identifier + ' · ' + n.sub + ' · ' + n.item;
+            const body = document.createElement('p');
+            body.className = 'noteBody';
+            body.textContent = n.description;
+            const ids = document.createElement('p');
+            ids.className = 'noteIds';
+            ids.textContent = Object.keys(n.ids).map(k => k + ' ' + n.ids[k]).join(' · ');
+            const seg = document.createElement('div');
+            seg.className = 'seg noteStatus';
+            for (const st of ['open', 'done', 'closed']) {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.textContent = st;
+                b.dataset.id = n.identifier;
+                b.dataset.status = st;
+                b.classList.toggle('on', n.status === st);
+                seg.appendChild(b);
+            }
+            row.append(head, body, ids, seg);
+            box.appendChild(row);
+        }
+    }
+    function renderNoteIndex() {
+        const box = $('noteIndex');
+        box.textContent = '';
+        for (const e of PA.INDEX) {
+            const p = document.createElement('p');
+            p.textContent = e.code + ' · ' + e.name + ': ' + e.meaning + (e.unit ? ' (' + e.unit + ')' : '');
+            box.appendChild(p);
+        }
+    }
+    function saveNoteFromScreen() {
+        const text = $('noteText');
+        if (!text.value.trim()) {
+            $('noteHint').textContent = 'Type what should change first.';
+            return;
+        }
+        const note = PA.addNote(text.value, noteItem(), PA.subProject(settings), PA.snapshot(game, settings));
+        text.value = '';
+        $('noteHint').textContent = 'Saved as ' + note.identifier + ' on this device.';
+        renderNotes();
+    }
+    async function copyNotes() {
+        const lines = PA.loadNotes().map(n => [n.identifier, n.status, n.project, n.sub, n.item, n.time, n.description,
+            Object.keys(n.ids).map(k => k + '=' + n.ids[k]).join(' ')].join(' | '));
+        const text = lines.join('\n') || 'No notes yet.';
+        try {
+            await navigator.clipboard.writeText(text);
+            $('noteHint').textContent = 'Copied ' + lines.length + ' note(s).';
+        }
+        catch (e) {
+            $('noteHint').textContent = 'Could not copy here. Select the list and copy it by hand.';
+        }
+    }
+    function bindNotes() {
+        $('noteSave').addEventListener('click', saveNoteFromScreen);
+        $('noteCopy').addEventListener('click', () => void copyNotes());
+        document.querySelectorAll('#noteSort button').forEach(b => {
+            b.addEventListener('click', () => {
+                noteSort = b.dataset.sort;
+                renderNotes();
+            });
+        });
+        $('noteList').addEventListener('click', e => {
+            const t = e.target;
+            if (t.tagName !== 'BUTTON' || !t.dataset.id)
+                return;
+            PA.setStatus(t.dataset.id, t.dataset.status);
+            renderNotes();
+        });
+        renderNoteIndex();
+        renderNotes();
+    }
     // ---- Family database sign-in (drawer) ---------------------------------
     function setFamilyStatus(text, ok) {
         const el = $('familyStatus');
@@ -2031,6 +2273,7 @@ var PA;
         bindStick();
         bindActions();
         bindGear();
+        bindNotes();
         renderErrors();
         requestAnimationFrame(frame);
     }

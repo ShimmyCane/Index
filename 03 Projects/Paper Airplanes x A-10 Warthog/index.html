@@ -122,6 +122,31 @@
       </div>
     </details>
 
+    <details class="group" id="notesGroup">
+      <summary>📝 Notes for improvement</summary>
+      <div class="setting">
+        <label for="noteText">What should change?</label>
+        <textarea class="field" id="noteText" rows="3" placeholder="Describe what is confusing or wrong"></textarea>
+        <button class="wide" id="noteSave" type="button">Save note with this screen</button>
+        <p class="hint" id="noteHint" role="status">Each note keeps its project, sub-project, time and the identifiers from this moment.</p>
+      </div>
+      <div class="setting">
+        <label>Show</label>
+        <div class="seg" id="noteSort">
+          <button type="button" data-sort="time">By time</button>
+          <button type="button" data-sort="status">By status</button>
+          <button type="button" data-sort="sub">By sub-project</button>
+        </div>
+        <p class="hint" id="noteCounts"></p>
+        <div id="noteList" class="noteList"></div>
+        <button class="wide" id="noteCopy" type="button">Copy all notes</button>
+      </div>
+      <details class="group">
+        <summary>🔎 Identifier index</summary>
+        <div class="under" id="noteIndex"></div>
+      </details>
+    </details>
+
     <details class="group">
       <summary>☁️ Family database</summary>
       <div class="setting">

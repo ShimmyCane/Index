@@ -11,7 +11,10 @@ namespace PA {
   const FOG_FAR = 900;        // metres where the ground fades into the sky
   const PLANE_SCREEN_Y = 0.72;
   const PX_PER_M = 0.3;       // sprite pixel size in metres (ground targets)
-  const PLANE_SCALE = 2;      // the plane sprite is drawn at a whole-number scale
+  const PLANE_SCALE = 2;
+  const NEAR_BOOST_M = 220;   // closer than this, ground things grow up to three times
+  const MIN_PX = 7;           // the smallest a thing is drawn (tall)
+  const MAX_PX = 150;         // the largest, so nothing fills the whole screen      // the plane sprite is drawn at a whole-number scale
 
   interface Cam {
     px: number; py: number; pz: number;           // camera position
@@ -132,7 +135,12 @@ namespace PA {
     const p = project(c, X, base, Z);
     if (!p) return;
     const [sx, sy, zc] = p;
-    const k = (FOCAL * PX_PER_M) / zc;
+    // Size by distance: true perspective, plus a boost when close (up to three times
+    // larger inside 220 m), and a floor so anything far off still shows as a few pixels.
+    const near = Math.max(0, Math.min(1, (NEAR_BOOST_M - zc) / NEAR_BOOST_M));
+    let k = ((FOCAL * PX_PER_M) / zc) * (1 + 2 * near);
+    k = Math.max(k, MIN_PX / img.height);
+    k = Math.min(k, MAX_PX / img.height);
     const w = Math.max(1, Math.round(img.width * k));
     const h = Math.max(1, Math.round(img.height * k));
     ctx.drawImage(img, Math.round(sx - w / 2), Math.round(sy - h), w, h);

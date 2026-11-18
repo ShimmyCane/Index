@@ -24,6 +24,7 @@
     "src/world.ts",
     "src/audio.ts",
     "src/family.ts",
+    "src/notes.ts",
     "src/game.ts",
     "src/render.ts",
     "src/radar.ts",

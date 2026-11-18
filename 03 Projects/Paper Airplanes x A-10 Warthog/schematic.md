@@ -1,6 +1,6 @@
 # Paper Airplanes × A-10 Warthog — Schematic
 
-**Status:** MVP 0.4 (round 3: family sign-in, radar, missile stock and auto reload, gun modes, safe flight, invincibility, a first world of 15 kinds of target and sea; headless-tested; not device-tested). Questions: `convo/convo v0.5.md`. Track A, family play. Questions and answers: `convo/convo v0.1.md` to `convo v0.3.md`.
+**Status:** MVP 0.5 (round 4: notes for improvement with identifiers and an index, closer and larger things; round 3: family sign-in, radar, missile stock and auto reload, gun modes, safe flight, invincibility, a first world of 15 kinds of target and sea; headless-tested; not device-tested). Questions: `convo/convo v0.5.md`. Track A, family play. Questions and answers: `convo/convo v0.1.md` to `convo v0.3.md`.
 **Platform:** TypeScript source (`src/`) compiled to `js/game.js`, which the page runs. Canvas 400 × 225 internal, scaled with no smoothing. No image files, no server, no database.
 **Remix:** taken from fighter-jet-eject (a standalone export of the UI8 Forge fighter; no licence file; not copied): the sprite-stacked look as a goal, and the chase camera. From the 1990s A-10 Tank Killer (Jimmy's reference): free play, shooting ground targets. From Paper Airplanes: the four forces, and a paper glider mode.
 
@@ -78,3 +78,10 @@ Flight: plane (A-10 jet / paper glider), steering (drag / joystick), new flight.
 - **Safe flight** (default on): floor at 30 m; cannot sink below 8 m.
 - **Invincible:** no hull loss from shells or missiles; a crash only bounces.
 - **World:** `src/assets/` holds the painters (aircraft, vehicles, buildings, naval). Biomes: sea east of 1,300 m, farm, town and army land. Targets come in clusters (army, farm, town, airfield, port, railway). Kinds and hit boxes are in `src/world.ts`.
+
+## Round 4 (0.5)
+
+- **Notes for improvement** (📝 in ⚙️): saved on the device, numbered N-0001…, with project, sub-project, time, item, identifiers and a status (open, done, closed). Sort by time, status or sub-project. The identifier index explains each code. Copy all notes.
+- **Identifiers:** HP, TIME, ALT, SPD, AOA, VIEW, PLANE, MISS, GUN, LEFT, SCORE, SAFE, INV (in `src/notes.ts`).
+- **Closer things:** near objects grow up to three times larger (inside 220 m); far ones keep at least 7 px; the largest is 150 px.
+- **General notes table:** `supabase/001_gen_notes.sql` (with a rollback test). Not applied. Sending to the table is not written yet.
