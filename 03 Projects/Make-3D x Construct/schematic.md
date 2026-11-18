@@ -1,6 +1,6 @@
 # Make-3D x Construct — Schematic
 
-**Status:** MVP 0.2 built: Southern Cheyenne camp move (draft, not for display until consultation) · round 3 answers in `convo/convo v0.3.md` · **Updated:** 2026-11-18
+**Status:** MVP 0.3 built: Southern Cheyenne camp move, 388 parts (draft, not for display until consultation) · round 4 answers in `convo/convo v0.4.md` · **Updated:** 2026-11-18
 **Track:** B. Studio design (`02 Refs/Skills/project_track.md`)
 **Based on:** a review of Construct (`rtmandreyev/construct`, commit `7ea702e`, toolkit version 1.3.2), the Make-3D schematic and to-do list (graduated to `ShimmyCane/Make-3D`), and the nursery's new-project workflow. Nothing is built yet. The first build waits for Jimmy's answers.
 
@@ -115,11 +115,22 @@ Not built yet: the cloud save to `m3dxc_certainty`; the model critic; the Show e
 - **Summary page:** `index_summary.html`.
 - **Database:** `supabase/001_m3dxc_certainty.sql`, not applied. Jimmy copies it by hand after the merge.
 
+## 10. Round 4 (2026-11-18): drawer, panels, scene, story
+
+- **Drawer:** the items keep their height and the drawer scrolls. The earlier overlap made the taps land on the wrong item.
+- **Panels:** two, the controls (Selected part first) and the 3-D view.
+- **Scene:** 388 parts, seeded layout (`tools/diorama_scene.js`), warm late sun, shadows, sky, material colours. Colour modes: material, certainty, paper and ink.
+- **Story:** `exhibit/story.json` v0.2, six steps, seven sources, two scene choices.
+
+## 10b. Open questions
+
+See `convo/convo v0.4.md`.
+
 ## 10. Open questions
 
 See `convo/convo v0.3.md`.
 
-## 11. Next steps
+## 11. Next steps (round 4)
 
 1. Jimmy confirms the contact at the Cheyenne and Arapaho Tribes and sends the draft letter.
 2. The reviewers' answers go to `private/`; each consultation flag is closed with its note.
