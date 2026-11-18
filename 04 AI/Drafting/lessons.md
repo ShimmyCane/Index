@@ -2,6 +2,13 @@
 
 Project-specific lessons, newest first. Generic ones go to `04 AI/lessons_pool.md`.
 
+## 2026-11-18 — increment 2 (MVP 0.2)
+
+1. **Group 100 subclass markers are not allowed in R12.** The first writer added them to every text and insert entity, which only matters for AC1009. The fix is a guard on the version, and the test for R12 would not have caught it. Check each version's group codes when a branch is shared by both.
+2. **A rule that is never triggered is not a test.** The first version of the 80% test passed without any warning reaching it. A constructed case with four known deductions gives exactly 75%, and that is the only proof the rule works.
+3. **Keep the fix close to the cause.** A line type stored as its key (`dashed`) instead of its DXF name (`DASHED`) would have written a table that did not match the entities. Storing the real name in the primitive kept the writer simple.
+4. **Read what the viewer shows, not what the source says.** The block sample's note text overlaps in the drawing viewer at this size. That is the file as read back, so it is the right place to see it, and it is a size problem, not a parsing one.
+
 ## 2026-11-18 — increment 1 (MVP 0.1)
 
 1. **A test that checks the wrong place fails for the wrong reason.** The "reader names unknown entities" test put an entity after the section's ENDSEC, so the reader correctly ignored it. Fix the test's insertion point, not the reader. Check where the probe lands before reading a failure as a bug.

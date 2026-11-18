@@ -40,7 +40,7 @@
 <body>
 <header>
   <h1>Drafting</h1>
-  <p>Make a 2-D drawing from a detail, and export it for AutoCAD. Increment 1: DXF out, checked and viewed in the page. Blocks, line types and hatch patterns come next.</p>
+  <p>Make a 2-D drawing from a detail, and export it for AutoCAD: DXF with blocks and dimensions, plus the line types (.lin) and hatch patterns (.pat) as text. MVP 0.2 (increment 2).</p>
 </header>
 <main>
 
@@ -49,7 +49,7 @@
     <div class="panelBody" id="find-body">
       <div class="row"><input id="q" type="search" placeholder="name or tag" aria-label="search details" style="flex:1;min-width:200px"></div>
       <div id="list"></div>
-      <p class="muted">Two synthetic samples, both tagged <b>export</b>. Searching the architecture library (read only, owner sign-in) comes in increment 3.</p>
+      <p class="muted">Three synthetic samples, all tagged <b>export</b>. Searching the architecture library (read only, owner sign-in) comes in increment 3.</p>
     </div>
   </section>
 
@@ -64,7 +64,10 @@
           <option value="AC1009">R12 (older, no hatch fill)</option>
         </select>
         <button id="download" type="button" disabled>Download .dxf</button>
+        <button id="dlLin" type="button" hidden>Download .lin</button>
+        <button id="dlPat" type="button" hidden>Download .pat</button>
       </div>
+      <p class="muted">The .lin and .pat buttons appear only when a drawing uses a line type or a hatch pattern.</p>
       <p class="readme">The file is saved to your device only. It is not sent or stored anywhere.</p>
     </div>
   </section>
@@ -85,12 +88,30 @@
     <button class="panelHead" type="button" aria-expanded="false" aria-controls="view-body"><span>👁️</span><span class="panelTitle">Viewer (what the file reads back as)</span><span class="panelMark">▾</span></button>
     <div class="panelBody" id="view-body">
       <canvas id="view" width="880" height="360" aria-label="drawing as read back from the file"></canvas>
-      <p class="readme">How to read this: each line is a line in the file, each shaded area is a solid hatch, and each piece of text is a note. The drawing is shown as it is read back from the DXF, so a problem in the file shows here. The 3-D view comes in increment 4.</p>
+      <p class="readme">How to read this: each line is a line in the file, each shaded area is a solid hatch, and each piece of text is a note. Block uses are expanded at their scale. The drawing is shown as it is read back from the DXF, so a problem in the file shows here. The 3-D view comes in increment 4.</p>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="linetypes" data-collapsed="true">
+    <button class="panelHead" type="button" aria-expanded="false" aria-controls="lt-body"><span>┅</span><span class="panelTitle">Line types</span><span class="panelMark">▾</span></button>
+    <div class="panelBody" id="lt-body">
+      <div id="ltList"></div>
+      <p class="readme">How to read this: each row is one line type in the file, drawn as its dash pattern. A positive number is a dash (pen down), a negative number is a gap (pen up), and 0 is a dot. Numbers are real inches at this scale.</p>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="hatches" data-collapsed="true">
+    <button class="panelHead" type="button" aria-expanded="false" aria-controls="ht-body"><span>▨</span><span class="panelTitle">Hatch patterns</span><span class="panelMark">▾</span></button>
+    <div class="panelBody" id="ht-body">
+      <div id="patList"></div>
+      <p class="readme">How to read this: each square shows one hatch pattern at real size (2 real inches square), so the spacing you see is the spacing the file will print. Patterns come from the lines stored in the file.</p>
     </div>
   </section>
 
 </main>
 <script src="js/samples.js"></script>
+<script src="js/libraries.js"></script>
+<script src="js/text_files.js"></script>
 <script src="js/primitives.js"></script>
 <script src="js/dxf_write.js"></script>
 <script src="js/dxf_read.js"></script>
