@@ -374,14 +374,14 @@ body.glider .drawer { top: auto; bottom: 100px; max-height: 70vh; }
 .radar {
   position: absolute;
   left: 14px;
-  top: 58px;
+  top: 104px;
   width: 150px;
   height: 150px;
   border-radius: 50%;
   pointer-events: none;
 }
 @media (max-width: 600px) {
-  .radar { width: 110px; height: 110px; top: 48px; }
+  .radar { width: 110px; height: 110px; top: 92px; }
 }
 
 /* Family sign-in fields and status. */
@@ -401,3 +401,76 @@ body.glider .drawer { top: auto; bottom: 100px; max-height: 70vh; }
 #familyIn label { display: block; font-weight: 800; font-size: 14px; }
 #familyStatus { font-weight: 700; }
 #familyStatus.bad { color: #a33; }
+
+/* Notes: a list of rows, each with its identifier, status buttons and identifiers. */
+textarea.field { resize: vertical; font-size: 15px; }
+.noteList { display: grid; gap: 8px; margin: 8px 0; }
+.noteRow {
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  padding: 8px 10px;
+  background: #fff;
+}
+.noteRow.done { background: #eef9f1; }
+.noteRow.closed { background: #f1f1f4; color: #6b6880; }
+.noteHead { font-weight: 800; font-size: 13px; }
+.noteBody { margin: 4px 0; font-size: 15px; }
+.noteIds { margin: 2px 0 6px; font-size: 12px; color: #5d5a73; font-variant-numeric: tabular-nums; }
+.noteStatus button { min-height: 40px; font-size: 14px; }
+#noteSort button { min-height: 44px; font-size: 14px; }
+
+/* Sliders for sound and the air: a big touch thumb, the value on the right. */
+.slider { width: 100%; height: 36px; accent-color: #3d8bff; }
+.val { float: right; font-weight: 700; color: #5d5a73; font-variant-numeric: tabular-nums; }
+
+/* Mission objective and the tag. */
+.objective {
+  position: absolute;
+  left: 50%;
+  top: 88px;
+  transform: translateX(-50%);
+  margin: 0;
+  background: rgba(255, 253, 247, 0.85);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  padding: 2px 12px;
+  font-weight: 800;
+  font-size: 13px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.tag {
+  position: absolute;
+  left: 50%;
+  bottom: 130px;
+  transform: translateX(-50%);
+  margin: 0;
+  background: #ff6b6b;
+  color: #fffdfa;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  padding: 4px 16px;
+  font-weight: 900;
+  box-shadow: 0 3px 0 var(--ink);
+  animation: blink 0.25s steps(2) infinite;
+  pointer-events: none;
+}
+
+/* The mission pop-up card (GTA style): shown for a few seconds at the start of each mission. */
+.missionCard {
+  position: absolute;
+  left: 50%;
+  top: 22%;
+  transform: translateX(-50%);
+  width: min(380px, 86vw);
+  background: var(--card);
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  box-shadow: 0 6px 0 var(--ink);
+  padding: 12px 16px;
+  text-align: center;
+  pointer-events: none;
+  z-index: 20;
+}
+.missionCard h2 { margin: 0 0 4px; font-size: 20px; font-weight: 900; }
+.missionCard p { margin: 0; font-weight: 700; font-size: 14px; }

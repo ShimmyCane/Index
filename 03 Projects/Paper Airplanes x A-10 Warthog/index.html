@@ -14,7 +14,9 @@
       <span class="pill">★ <b id="score">0</b></span>
       <span class="pill">🎯 <b id="kills">0</b></span>
       <span class="pill">🪟 <b id="hoops">—</b></span>
+      <span class="pill">🔫 <b id="ammo">240</b></span>
       <span class="pill">🚀 <b id="missile">6/6</b></span>
+      <span class="pill">✨ <b id="chaff">4</b></span>
       <span class="pill">🎯 <b id="gun">straight</b></span>
       <span class="hullWrap" title="Hull"><i id="hull"></i></span>
     </header>
@@ -27,6 +29,12 @@
     </div>
 
     <p class="msg" id="msg" aria-live="polite"></p>
+    <p class="objective" id="objective" aria-live="polite"></p>
+    <div class="missionCard" id="missionCard" hidden>
+      <h2 id="missionTitle"></h2>
+      <p id="missionBody"></p>
+    </div>
+    <p class="tag" id="tag" hidden>TAGGED</p>
 
     <canvas class="radar" id="radar" width="150" height="150" aria-label="Radar"></canvas>
 
@@ -45,6 +53,7 @@
     </div>
 
     <nav class="actions" aria-label="Actions">
+      <button type="button" data-k="chaff" class="c-sage">CHAFF</button>
       <button type="button" data-k="missile" class="c-mint">MISSILE</button>
       <button type="button" data-k="fire" class="c-coral">FIRE</button>
       <button type="button" data-k="boost" class="c-sun">BOOST</button>
@@ -66,6 +75,16 @@
 
     <details class="group" open>
       <summary>✈️ Flight</summary>
+      <div class="setting">
+        <label>Difficulty</label>
+        <div class="seg" data-key="difficulty">
+          <button type="button" data-v="normal">Normal</button>
+          <button type="button" data-v="felix">Felix (easy)</button>
+        </div>
+        <p class="hint">Normal: limited ammo and missiles, and three hits takes the plane down. Missions restock you when the objective is done. Felix: the plane never goes down and nothing runs out.</p>
+        <button class="wide" id="reloadBtn" type="button">Reload the gun and missiles</button>
+        <p class="hint" id="reloadHint" role="status"></p>
+      </div>
       <div class="setting">
         <label>Plane</label>
         <div class="seg" data-key="mode">
@@ -122,6 +141,31 @@
       </div>
     </details>
 
+    <details class="group" id="notesGroup">
+      <summary>📝 Notes for improvement</summary>
+      <div class="setting">
+        <label for="noteText">What should change?</label>
+        <textarea class="field" id="noteText" rows="3" placeholder="Describe what is confusing or wrong"></textarea>
+        <button class="wide" id="noteSave" type="button">Save note with this screen</button>
+        <p class="hint" id="noteHint" role="status">Each note keeps its project, sub-project, time and the identifiers from this moment.</p>
+      </div>
+      <div class="setting">
+        <label>Show</label>
+        <div class="seg" id="noteSort">
+          <button type="button" data-sort="time">By time</button>
+          <button type="button" data-sort="status">By status</button>
+          <button type="button" data-sort="sub">By sub-project</button>
+        </div>
+        <p class="hint" id="noteCounts"></p>
+        <div id="noteList" class="noteList"></div>
+        <button class="wide" id="noteCopy" type="button">Copy all notes</button>
+      </div>
+      <details class="group">
+        <summary>🔎 Identifier index</summary>
+        <div class="under" id="noteIndex"></div>
+      </details>
+    </details>
+
     <details class="group">
       <summary>☁️ Family database</summary>
       <div class="setting">
@@ -161,6 +205,38 @@
           <button type="button" data-v="0">Off</button>
         </div>
       </div>
+      <div class="setting">
+        <label for="volMusic">Music and engine <span class="val" id="volMusicValue"></span></label>
+        <input class="slider" id="volMusic" type="range" min="0" max="100" step="1" data-key="volMusic" data-unit="%">
+      </div>
+      <div class="setting">
+        <label for="volGun">Guns <span class="val" id="volGunValue"></span></label>
+        <input class="slider" id="volGun" type="range" min="0" max="100" step="1" data-key="volGun" data-unit="%">
+      </div>
+      <div class="setting">
+        <label for="volTurn">Big turns <span class="val" id="volTurnValue"></span></label>
+        <input class="slider" id="volTurn" type="range" min="0" max="100" step="1" data-key="volTurn" data-unit="%">
+      </div>
+      <div class="setting">
+        <label for="volWarn">Incoming missiles <span class="val" id="volWarnValue"></span></label>
+        <input class="slider" id="volWarn" type="range" min="0" max="100" step="1" data-key="volWarn" data-unit="%">
+        <p class="hint">The warning beeps when an enemy shell comes close.</p>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>🛩️ Enemies and allies</summary>
+      <div class="setting">
+        <label for="enemyWave">Enemy fighters per wave <span class="val" id="enemyWaveValue"></span></label>
+        <input class="slider" id="enemyWave" type="range" min="0" max="6" step="1" data-key="enemyWave">
+        <p class="hint">A wave comes into your airspace about every minute. Set 0 for none.</p>
+      </div>
+      <div class="setting">
+        <label for="allies">Allied fighters <span class="val" id="alliesValue"></span></label>
+        <input class="slider" id="allies" type="range" min="0" max="4" step="1" data-key="allies">
+        <p class="hint">Allies fly around their own patch and do not shoot. Hitting one costs points. Lost allies are replaced.</p>
+      </div>
+      <p class="hint">The game pauses while this panel is open.</p>
     </details>
 
     <details class="group">

@@ -10,6 +10,7 @@ namespace PA {
     airfield: '#b48cf0',
     port: '#3d8bff',
     rail: '#8a6a4a',
+    air: '#8fe0bd',
   };
 
   export function radar(ctx: CanvasRenderingContext2D, g: Game, size: number): void {
@@ -40,13 +41,33 @@ namespace PA {
       return [c + (r / RANGE) * R, c - (f / RANGE) * R];
     };
 
+    // Mission targets beyond the rim: an arrow on the rim pointing toward each one.
+    for (const t of g.mission.targets) {
+      if (!t.alive || !isObjective(t) || place(t.X, t.Z)) continue;
+      const dx = t.X - p.X, dz = t.Z - p.Z;
+      const f = dx * sinY + dz * cosY;
+      const r = dx * cosY - dz * sinY;
+      const ang = Math.atan2(r, f);            // from straight ahead, clockwise
+      const ex = c + Math.sin(ang) * (R - 8), ey = c - Math.cos(ang) * (R - 8);
+      ctx.save();
+      ctx.translate(ex, ey);
+      ctx.rotate(ang);
+      ctx.fillStyle = '#ffe08a';
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(7, 0); ctx.lineTo(-5, -5); ctx.lineTo(-5, 5); ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      ctx.restore();
+    }
+
     for (const t of g.mission.targets) {
       if (!t.alive) continue;
       const q = place(t.X, t.Z);
       if (!q) continue;
       const info = KINDS[t.kind];
       const gunner = info && info.gun;
-      ctx.fillStyle = gunner ? '#ffb02e' : DOT[info ? info.group : 'army'];
+      ctx.fillStyle = t.faction === 'enemy' ? '#ff6b6b' : gunner ? '#ffb02e' : DOT[info ? info.group : 'army'];
       ctx.fillRect(Math.round(q[0]) - 2, Math.round(q[1]) - 2, 4, 4);
     }
     for (const h of g.mission.hoops) {

@@ -101,22 +101,78 @@ const still = { pitch: 0, yaw: 0, throttle: 0 };
   const ahead = { kind: 'tank_mbt', X: g.plane.X, Z: g.plane.Z + 200, alive: true, points: 100, hp: 2, cool: 0 };
   g.mission.targets = [ahead];
   g.held.missile = true;
-  g.update(1 / 30);
+  for (let i = 0; i < 2 * 30; i++) g.update(1 / 30);   // hold: the lock takes about a second and a bit
   g.held.missile = false;
   for (let i = 0; i < 12 * 30 && ahead.alive; i++) g.update(1 / 30);
-  check('missile: locks on and destroys the target ahead', !ahead.alive && g.kills >= 1, 'kills = ' + g.kills);
+  check('missile: a steady hold locks on and destroys the target ahead', !ahead.alive && g.kills >= 1, 'kills = ' + g.kills);
 }
 
-// 9. Ejection: a crash starts the eject sequence, then the flight restarts.
+// 9. A loss: the plane blinks once, then carries on with full health and a new flight; the score stays.
 {
-  const settings = { mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0 };
+  const settings = { mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
   const g = new PA.Game(settings);
   g.onSound = () => {};
+  g.score = 500;
   g.hull = 0;
   g.update(1 / 30);
-  check('eject: a crash starts the sequence with a pilot in the air', g.phase === 'crashed' && g.jumpers.length === 1);
+  check('loss: the plane blinks instead of ending the flight', g.phase === 'crashed' && g.blink > 0);
+  for (let i = 0; i < 2 * 30; i++) g.update(1 / 30);
+  check('loss: the flight carries on at full health, score kept', g.phase === 'flying' && g.hull === 100 && g.score === 500, 'score ' + g.score);
+}
+
+// 9b. Pause: nothing moves while the game is paused.
+{
+  const settings = { mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const g = new PA.Game(settings);
+  g.onSound = () => {};
+  g.paused = true;
+  const x0 = g.plane.X, t0 = g.time;
+  for (let i = 0; i < 60; i++) g.update(1 / 30);
+  check('pause: the plane and the clock stand still', g.plane.X === x0 && g.time === t0);
+}
+
+// 9c. Ammo: limited, and it comes back over time.
+{
+  const settings = { mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const g = new PA.Game(settings);
+  g.onSound = () => {};
+  g.mission.targets = [];
+  g.ammo = 10;
+  g.held.fire = true;
+  for (let i = 0; i < 3 * 30; i++) g.update(1 / 30);
+  g.held.fire = false;
+  check('ammo: firing uses it up to zero and no further', g.ammo <= 1 && g.ammo >= 0, 'ammo ' + g.ammo.toFixed(1));
+  const before = g.ammo;
   for (let i = 0; i < 5 * 30; i++) g.update(1 / 30);
-  check('eject: the flight restarts after the parachute', g.phase === 'flying' && g.hull === 100);
+  check('ammo: it comes back over time', g.ammo > before + 5, 'ammo ' + g.ammo.toFixed(1));
+}
+
+// 9d. Enemy waves come about every minute; allies fly and do not shoot.
+{
+  const settings = { mode: 'jet', control: 'drag', view: 'chase', difficulty: 'felix', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 2, allies: 1 };
+  const g = new PA.Game(settings);
+  g.onSound = () => {};
+  g.mission.targets = g.mission.targets.filter(t => t.faction === 'ally');
+  const enemies0 = g.mission.targets.filter(t => t.faction === 'enemy').length;
+  for (let i = 0; i < 10 * 30; i++) g.update(1 / 30);
+  const enemies1 = g.mission.targets.filter(t => t.faction === 'enemy').length;
+  check('waves: the first wave arrives soon after take-off', enemies1 >= 2 && enemies0 === 0, 'enemies ' + enemies1);
+  const ally = g.mission.targets.find(t => t.faction === 'ally');
+  const a0 = ally.X;
+  for (let i = 0; i < 2 * 30; i++) g.update(1 / 30);
+  check('allies: they fly around (they move)', ally.X !== a0);
+  check('allies: they do not shoot', !g.shells.some(s => s.warn === undefined && Math.hypot(s.X - ally.X, s.Z - ally.Z) < 2));
+}
+
+// 9e. Damage shows as a mark, even when invincible (and costs nothing then).
+{
+  const settings = { mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 1, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const g = new PA.Game(settings);
+  g.onSound = () => {};
+  g.mission.targets = [];
+  g.shells.push({ X: g.plane.X, Z: g.plane.Z, h: g.plane.h, vX: 0, vY: 0, vZ: 0, life: 2 });
+  g.update(1 / 30);
+  check('damage: a hit shows as a mark, invincible keeps the hull', g.marks.length === 1 && g.hull === 100, 'marks ' + g.marks.length);
 }
 
 // 10. Safe flight: a plane diving at the ground is pulled up and does not crash.
@@ -171,6 +227,105 @@ const still = { pitch: 0, yaw: 0, throttle: 0 };
   const names = Object.keys(PA.KINDS);
   check('assets: every kind has a painter', names.every(k => PA.PAINT[k]), 'kinds: ' + names.length);
   check('world: the sea is at the east', PA.biomeAt(PA.SEA_X + 200, 0) === 'sea' && PA.groundAt(PA.SEA_X + 200, 0) === 0);
+}
+
+// 15. Notes: numbered, with a status, sorted, and each snapshot has every code in the index.
+{
+  const settings = { mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0, safeFlight: 1, invincible: 0, autoReload: 1 };
+  const g = new PA.Game(settings);
+  const ids = PA.snapshot(g, settings);
+  check('notes: snapshot has every code in the index', PA.INDEX.every(e => e.code in ids), 'codes ' + PA.INDEX.length);
+  const a = PA.addNote('Health bar is hard to read', 'Flying', PA.subProject(settings), ids);
+  const b = PA.addNote('Tanks too far away', 'Flying', 'A-10 jet / top', ids);
+  check('notes: numbered N-0001 and N-0002', a.identifier === 'N-0001' && b.identifier === 'N-0002', a.identifier + ', ' + b.identifier);
+  PA.setStatus(a.identifier, 'done');
+  const all = PA.loadNotes();
+  check('notes: status changes and is kept', all.find(n => n.identifier === 'N-0001').status === 'done');
+  check('notes: sorted by status puts open first', PA.sortNotes(all, 'status')[0].identifier === 'N-0002');
+  check('notes: the project name is on every note', all.every(n => n.project === PA.NOTES_PROJECT));
+}
+
+// 16. Lock-on takes time: a quick tap fires nothing; a steady hold fires.
+{
+  const st = { mode: 'jet', control: 'drag', view: 'chase', difficulty: 'normal', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const g = new PA.Game(st);
+  g.onSound = () => {};
+  g.mission.targets = [{ kind: 'tank_mbt', X: g.plane.X, Z: g.plane.Z + 300, alive: true, points: 100, hp: 2, cool: 0 }];
+  g.held.missile = true;
+  for (let i = 0; i < 15; i++) g.update(1 / 30);
+  g.held.missile = false;
+  check('lock: a quick tap fires nothing', g.missiles.length === 0 && g.missileStock === 6);
+}
+
+// 17. Normal mode: three hits and the plane is down (blinks, carries on). Felix never goes down.
+{
+  const st = { mode: 'jet', control: 'drag', view: 'chase', difficulty: 'normal', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const g = new PA.Game(st);
+  g.onSound = () => {};
+  g.mission.targets = [];
+  for (let i = 0; i < 3; i++) g.shells.push({ X: g.plane.X, Z: g.plane.Z, h: g.plane.h, vX: 0, vY: 0, vZ: 0, life: 2 }), g.update(1 / 30);
+  check('normal: three hits take the plane down', g.phase === 'crashed' && g.hits >= 3, 'phase ' + g.phase + ', hits ' + g.hits);
+  const f = new PA.Game(Object.assign({}, st, { difficulty: 'felix' }));
+  f.onSound = () => {};
+  f.mission.targets = [];
+  for (let i = 0; i < 6; i++) f.shells.push({ X: f.plane.X, Z: f.plane.Z, h: f.plane.h, vX: 0, vY: 0, vZ: 0, life: 2 }), f.update(1 / 30);
+  check('felix: hits never take the plane down', f.phase === 'flying' && f.hull === 100 && f.hits === 6);
+}
+
+// 18. Supplies: normal mode runs out; Felix never does; a reload from the settings refills, with a cooldown.
+{
+  const st = { mode: 'jet', control: 'drag', view: 'chase', difficulty: 'normal', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 0, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const g = new PA.Game(st);
+  g.onSound = () => {};
+  g.mission.targets = [];
+  g.ammo = 0;
+  g.update(1 / 30);
+  check('normal: the gun runs out when the ammo is gone', g.ammo < 1);
+  check('reload: refills the gun from the settings', g.reloadFromSettings() === true && g.ammo === PA.AMMO_MAX);
+  check('reload: a second one waits (cooldown)', g.reloadFromSettings() === false);
+  const f = new PA.Game(Object.assign({}, st, { difficulty: 'felix' }));
+  f.onSound = () => {};
+  f.ammo = 0; f.chaff = 0; f.update(1 / 30);
+  check('felix: nothing runs out', f.ammo === PA.AMMO_MAX && f.chaff === PA.CHAFF_MAX);
+}
+
+// 19. The tag: an enemy missile after the plane is tagged; a hard turn breaks it; chaff makes decoys.
+{
+  const st = { mode: 'jet', control: 'drag', view: 'chase', difficulty: 'normal', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const g = new PA.Game(st);
+  g.onSound = () => {};
+  g.mission.targets = [];
+  g.missiles.push({ X: g.plane.X + 50, Z: g.plane.Z + 200, h: g.plane.h, vX: 0, vY: 0, vZ: -100, life: 5, target: null, enemy: true });
+  g.update(1 / 30);
+  check('tag: an enemy missile tags the plane', g.tagged === true && g.tagDist > 0, 'distance ' + Math.round(g.tagDist));
+  g.axes = { yaw: 1, pitch: 0 };
+  for (let i = 0; i < 2 * 30; i++) g.update(1 / 30);
+  check('tag: a hard turn breaks the lock', g.missiles.every(m => !m.enemy || m.broken));
+  g.fireChaff();
+  check('chaff: two decoys come out and one is used', g.decoys.length === 2 && g.chaff === PA.CHAFF_MAX - 1);
+}
+
+// 20. Objective: finishing it restocks everything (normal mode).
+{
+  const st = { mode: 'jet', control: 'drag', view: 'chase', difficulty: 'normal', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const g = new PA.Game(st);
+  g.onSound = () => {};
+  g.ammo = 5; g.missileStock = 1; g.chaff = 0;
+  g.objectiveDone = g.objectiveGoal;
+  g.update(1 / 30);
+  check('objective: finishing it restocks gun, missiles and chaff', g.ammo === PA.AMMO_MAX && g.missileStock === PA.MISSILE_MAX && g.chaff === PA.CHAFF_MAX && g.missionNumber === 2);
+}
+
+// 21. A loss in normal mode is a full reset: restocked, and the mission starts again.
+{
+  const st = { mode: 'jet', control: 'drag', view: 'chase', difficulty: 'normal', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 0, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const g = new PA.Game(st);
+  g.onSound = () => {};
+  g.ammo = 3; g.missileStock = 0; g.chaff = 0;
+  g.hull = 0;
+  g.update(1 / 30);
+  for (let i = 0; i < 2 * 30; i++) g.update(1 / 30);
+  check('loss: a full reset restocks the gun, missiles and chaff', g.ammo === PA.AMMO_MAX && g.missileStock === PA.MISSILE_MAX && g.chaff === PA.CHAFF_MAX && g.phase === 'flying');
 }
 
 console.log(failures === 0 ? '\nAll flight checks passed.' : '\n' + failures + ' check(s) failed.');

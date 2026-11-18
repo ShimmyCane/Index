@@ -128,6 +128,12 @@ renderSettings();
 @media print { .gear, .drawer, .errorsPanel { display: none !important; } }
 ```
 
+## 7b. Notes for improvement (every page with a ⚙️)
+
+- A 📝 Notes for improvement group in the drawer: a text box, a Save button that attaches the current screen's identifiers, sort buttons (time, status, sub-project), status buttons (open, done, closed), an identifier index, and Copy all notes.
+- Notes are saved on the device first. They go to the family table `gen_notes` only when signed in (see `feedback_notes.md`, the general notes table).
+- Identifiers are a short code per value (HP, TIME, ALT). Each project keeps its own list and writes the values at the time of the note.
+
 ## 8. Checks before calling it done
 
 Run in a headless browser (Chromium at `/opt/pw-browsers/chromium` with `--no-sandbox`), then say what was not tested on a real iPad.
