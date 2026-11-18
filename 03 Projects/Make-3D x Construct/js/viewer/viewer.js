@@ -23,7 +23,7 @@
     'wood': [0x8a6a45, 0.8], 'stone': [0x8f8a80, 0.9], 'bone': [0xe6dcc6, 0.7], 'iron': [0x5e5a57, 0.5],
     'brass': [0xb5893f, 0.4], 'water': [0x6f97a8, 0.2], 'placeholder grey': [0x9b9ba3, 0.9],
     'red cloth': [0xa5473a, 0.9], 'horse bay': [0x6e4a33, 0.8], 'horse dark': [0x2e241d, 0.85],
-    'clay': [0xb9a58a, 0.9], 'dark': [0x2f2a26, 0.8], 'ash': [0x9a948c, 0.95], 'default': [0xb8a88a, 0.9]
+    'clay': [0xb9a58a, 0.9], 'haze': [0xd6c3a0, 0.9], 'dark': [0x2f2a26, 0.8], 'ash': [0x9a948c, 0.95], 'default': [0xb8a88a, 0.9]
   };
 
   // A stable 0..1 number from a string (the uuid), so each part varies a little, the same way every time.
@@ -168,6 +168,8 @@
       var size = box.getSize(new THREE.Vector3()).length();
       target.copy(box.getCenter(new THREE.Vector3()));
       orbit.radius = Math.max(2, size * 1.6);
+      // start from the oblique angle, so the part is seen from the front, not from behind the scene
+      orbit.theta = VIEWS.oblique.theta; orbit.phi = VIEWS.oblique.phi;
       render();
     }
 

@@ -28,3 +28,5 @@ Project rules:
 - The page never calls an AI service. AI reviews are copy and paste, and each reply is checked first.
 - Construct's code is not copied in. If any is, its LICENSE and NOTICE go into this folder.
 - Do not apply the SQL without Jimmy's go-ahead.
+
+Scene rules (Jimmy, round 6): three planes (foreground, midground, background) with detail by plane; the lessons are in `04 AI/3d_scene_craft_lessons.md`. Figures: body, pose and feet are in; faces are not (see convo v0.6, decision pending).

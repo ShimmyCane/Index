@@ -24,7 +24,17 @@ assert.strictEqual(byName('lodge-2').length, 6, 'lodge 2 has a cover, four poles
 ['horse-1', 'horse-2'].forEach(h => assert.strictEqual(model.objects.filter(o => o.parent === h).length, 12, h + ' has barrel, neck, mane, head, muzzle, two ears, tail and four legs'));
 ['woman-a', 'woman-b', 'child-a'].forEach(p => assert(model.objects.filter(o => o.parent === p).some(o => o.name === 'Head'), p + ' has a head'));
 assert.strictEqual(model.objects.filter(o => o.parent === 'fire-ring').length, 9, 'fire ring: ash and eight stones');
-assert.strictEqual(model.objects.filter(o => o.parent === 'tufts').length, 9, 'three tufts of three blades each');
+assert.strictEqual(model.objects.filter(o => o.parent === 'tufts').length, 6, 'two back tufts of three blades each');
+assert.strictEqual(model.objects.filter(o => o.parent === 'tuft-front').length, 3, 'one front tuft of three blades');
+// Three planes, each a group under the root, and the bones in the midground:
+['back', 'mid', 'fore'].forEach(g => assert(model.objects.some(o => o.uuid === g && o.type === 'group'), 'plane ' + g + ' exists'));
+assert(model.objects.some(o => o.uuid === 'bones' && o.parent === 'mid'), 'bones sit in the midground');
+// Figures have a torso, arms, hands, legs and feet, and no face or hair parts:
+['woman-a', 'woman-b', 'child-a'].forEach(p => {
+  const names = model.objects.filter(o => o.parent === p).map(o => o.name.toLowerCase());
+  ['torso', 'arm', 'hand', 'leg', 'foot', 'head'].forEach(k => assert(names.some(n => n.includes(k)), p + ' has a ' + k));
+  assert(!names.some(n => n.includes('hair') || n.includes('face')), p + ' has no hair or face parts');
+});
 const story2 = JSON.parse(fs.readFileSync(path.join(root, 'exhibit/story.json'), 'utf8'));
 assert.strictEqual(story2.steps.length, 6, 'the story has six steps');
 console.log('ok  each object is built from its real parts; the story has six steps (' + model.objects.length + ' parts)');

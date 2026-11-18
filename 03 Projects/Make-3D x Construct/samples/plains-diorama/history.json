@@ -1,9 +1,9 @@
 {
   "schema": "m3dxc.history/0.1",
   "header": {
-    "name": "Southern Cheyenne camp move, Indian Territory, 1870s (draft for consultation)",
-    "model_id": "plains-diorama-v04",
-    "description": "A draft diorama of a camp move: lodges with poles and doors, a travois loaded for the move, two horses, three people as placeholder forms. Not reviewed by the Cheyenne and Arapaho Tribes; not for display.",
+    "name": "Southern Cheyenne camp move, Indian Territory, 1870s (draft)",
+    "model_id": "plains-diorama-v05",
+    "description": "A draft diorama of a camp move in three planes: horses in front, lodges and travois and people in the middle, a layered bluff behind. Figures are placeholder forms. Not reviewed by the Cheyenne and Arapaho Tribes; not for display.",
     "scale": "1:24 (1 in = 2 ft)",
     "units": "in",
     "up": "z",
@@ -28,12 +28,54 @@
       "op": "add",
       "time": "2026-11-18T10:02:00Z",
       "author": "jimmy",
+      "note": "add Background: far ground, bluff, backdrop, back tufts",
+      "object": {
+        "uuid": "back",
+        "name": "Background: far ground, bluff, backdrop, back tufts",
+        "type": "group",
+        "description": "The far plane: lower contrast, less detail, place and scale.",
+        "parent": "camp"
+      }
+    },
+    {
+      "seq": 3,
+      "op": "add",
+      "time": "2026-11-18T10:03:00Z",
+      "author": "jimmy",
+      "note": "add Midground: lodges, travois, people, fire, bones",
+      "object": {
+        "uuid": "mid",
+        "name": "Midground: lodges, travois, people, fire, bones",
+        "type": "group",
+        "description": "The middle plane: where the story happens. The most useful detail.",
+        "parent": "camp"
+      }
+    },
+    {
+      "seq": 4,
+      "op": "add",
+      "time": "2026-11-18T10:04:00Z",
+      "author": "jimmy",
+      "note": "add Foreground: horses, label, front tuft",
+      "object": {
+        "uuid": "fore",
+        "name": "Foreground: horses, label, front tuft",
+        "type": "group",
+        "description": "The near plane: sharpest, most detailed, strongest contrast.",
+        "parent": "camp"
+      }
+    },
+    {
+      "seq": 5,
+      "op": "add",
+      "time": "2026-11-18T10:05:00Z",
+      "author": "jimmy",
       "note": "add River terrace ground",
       "object": {
         "uuid": "ground",
         "name": "River terrace ground",
         "type": "box",
-        "parent": "camp",
+        "parent": "back",
         "dimensions": {
           "x": 30,
           "y": 20,
@@ -53,68 +95,68 @@
       }
     },
     {
-      "seq": 3,
+      "seq": 6,
       "op": "add",
-      "time": "2026-11-18T10:03:00Z",
+      "time": "2026-11-18T10:06:00Z",
       "author": "jimmy",
-      "note": "add Low bluff (two layers)",
+      "note": "add Bluff (layers, background)",
       "object": {
         "uuid": "ridge",
-        "name": "Low bluff (two layers)",
+        "name": "Bluff (layers, background)",
         "type": "group",
-        "description": "Two layers at the back of the camp, invented to frame it. Heights approximate.",
-        "parent": "camp"
+        "description": "Layers at the back of the camp, invented to frame it. Heights approximate.",
+        "parent": "back"
       }
     },
     {
-      "seq": 4,
+      "seq": 7,
       "op": "add",
-      "time": "2026-11-18T10:04:00Z",
+      "time": "2026-11-18T10:07:00Z",
       "author": "jimmy",
-      "note": "add Bluff, lower layer",
+      "note": "add Bluff base",
       "object": {
-        "uuid": "ridge-low",
-        "name": "Bluff, lower layer",
+        "uuid": "ridge-base",
+        "name": "Bluff base",
         "type": "box",
         "parent": "ridge",
         "dimensions": {
           "x": 22,
-          "y": 5,
+          "y": 3.5,
           "z": 2
         },
         "position": [
           0,
-          6,
+          8.25,
           2
         ],
-        "material": "prairie earth",
+        "material": "haze",
         "certainty": {
           "percent": 35,
           "basis": "inferred",
-          "note": "Invented to frame the camp."
+          "note": "Invented to frame the camp. Set behind the lodges."
         }
       }
     },
     {
-      "seq": 5,
+      "seq": 8,
       "op": "add",
-      "time": "2026-11-18T10:05:00Z",
+      "time": "2026-11-18T10:08:00Z",
       "author": "jimmy",
-      "note": "add Bluff, stone cap",
+      "note": "add Stone band",
       "object": {
-        "uuid": "ridge-cap",
-        "name": "Bluff, stone cap",
+        "uuid": "ridge-band",
+        "name": "Stone band",
         "type": "box",
         "parent": "ridge",
         "dimensions": {
-          "x": 18,
-          "y": 3.5,
-          "z": 1.5
+          "x": 21,
+          "y": 3.2,
+          "z": 0.7
         },
         "position": [
           0,
-          6.6,
-          3.75
+          8.25,
+          3.35
         ],
         "material": "stone",
         "certainty": {
@@ -125,16 +167,74 @@
       }
     },
     {
-      "seq": 6,
+      "seq": 9,
       "op": "add",
-      "time": "2026-11-18T10:06:00Z",
+      "time": "2026-11-18T10:09:00Z",
+      "author": "jimmy",
+      "note": "add Ledge",
+      "object": {
+        "uuid": "ridge-ledge",
+        "name": "Ledge",
+        "type": "box",
+        "parent": "ridge",
+        "dimensions": {
+          "x": 19,
+          "y": 2.6,
+          "z": 0.5
+        },
+        "position": [
+          0,
+          8.25,
+          4
+        ],
+        "material": "haze",
+        "certainty": {
+          "percent": 35,
+          "basis": "inferred",
+          "note": "Invented to frame the camp."
+        }
+      }
+    },
+    {
+      "seq": 10,
+      "op": "add",
+      "time": "2026-11-18T10:10:00Z",
+      "author": "jimmy",
+      "note": "add Bluff cap",
+      "object": {
+        "uuid": "ridge-cap",
+        "name": "Bluff cap",
+        "type": "box",
+        "parent": "ridge",
+        "dimensions": {
+          "x": 17,
+          "y": 2.2,
+          "z": 1
+        },
+        "position": [
+          0,
+          8.3,
+          4.75
+        ],
+        "material": "haze",
+        "certainty": {
+          "percent": 35,
+          "basis": "inferred",
+          "note": "Invented to frame the camp."
+        }
+      }
+    },
+    {
+      "seq": 11,
+      "op": "add",
+      "time": "2026-11-18T10:11:00Z",
       "author": "jimmy",
       "note": "add Painted backdrop wall",
       "object": {
         "uuid": "backdrop",
         "name": "Painted backdrop wall",
         "type": "box",
-        "parent": "camp",
+        "parent": "back",
         "dimensions": {
           "x": 30,
           "y": 0.5,
@@ -154,9 +254,197 @@
       }
     },
     {
-      "seq": 7,
+      "seq": 12,
       "op": "add",
-      "time": "2026-11-18T10:07:00Z",
+      "time": "2026-11-18T10:12:00Z",
+      "author": "jimmy",
+      "note": "add Grass tufts (back)",
+      "object": {
+        "uuid": "tufts",
+        "name": "Grass tufts (back)",
+        "type": "group",
+        "description": "Clumps of grass at the back. Decoration; sizes are not measured.",
+        "parent": "back"
+      }
+    },
+    {
+      "seq": 13,
+      "op": "add",
+      "time": "2026-11-18T10:13:00Z",
+      "author": "jimmy",
+      "note": "add Tuft 1 blade 1",
+      "object": {
+        "uuid": "tuft-1-1",
+        "name": "Tuft 1 blade 1",
+        "type": "cone",
+        "parent": "tufts",
+        "dimensions": {
+          "x": 0.5,
+          "y": 0.5,
+          "z": 0.8
+        },
+        "position": [
+          9,
+          6,
+          1.4
+        ],
+        "material": "grass",
+        "certainty": {
+          "percent": 30,
+          "basis": "decorative",
+          "note": "Decoration. Size not measured."
+        }
+      }
+    },
+    {
+      "seq": 14,
+      "op": "add",
+      "time": "2026-11-18T10:14:00Z",
+      "author": "jimmy",
+      "note": "add Tuft 1 blade 2",
+      "object": {
+        "uuid": "tuft-1-2",
+        "name": "Tuft 1 blade 2",
+        "type": "cone",
+        "parent": "tufts",
+        "dimensions": {
+          "x": 0.35,
+          "y": 0.35,
+          "z": 0.6
+        },
+        "position": [
+          9.25,
+          5.85,
+          1.3
+        ],
+        "material": "grass",
+        "certainty": {
+          "percent": 30,
+          "basis": "decorative",
+          "note": "Decoration. Size not measured."
+        }
+      }
+    },
+    {
+      "seq": 15,
+      "op": "add",
+      "time": "2026-11-18T10:15:00Z",
+      "author": "jimmy",
+      "note": "add Tuft 1 blade 3",
+      "object": {
+        "uuid": "tuft-1-3",
+        "name": "Tuft 1 blade 3",
+        "type": "cone",
+        "parent": "tufts",
+        "dimensions": {
+          "x": 0.4,
+          "y": 0.4,
+          "z": 0.7
+        },
+        "position": [
+          8.8,
+          6.2,
+          1.35
+        ],
+        "material": "grass",
+        "certainty": {
+          "percent": 30,
+          "basis": "decorative",
+          "note": "Decoration. Size not measured."
+        }
+      }
+    },
+    {
+      "seq": 16,
+      "op": "add",
+      "time": "2026-11-18T10:16:00Z",
+      "author": "jimmy",
+      "note": "add Tuft 2 blade 1",
+      "object": {
+        "uuid": "tuft-2-1",
+        "name": "Tuft 2 blade 1",
+        "type": "cone",
+        "parent": "tufts",
+        "dimensions": {
+          "x": 0.5,
+          "y": 0.5,
+          "z": 0.8
+        },
+        "position": [
+          11,
+          3,
+          1.4
+        ],
+        "material": "grass",
+        "certainty": {
+          "percent": 30,
+          "basis": "decorative",
+          "note": "Decoration. Size not measured."
+        }
+      }
+    },
+    {
+      "seq": 17,
+      "op": "add",
+      "time": "2026-11-18T10:17:00Z",
+      "author": "jimmy",
+      "note": "add Tuft 2 blade 2",
+      "object": {
+        "uuid": "tuft-2-2",
+        "name": "Tuft 2 blade 2",
+        "type": "cone",
+        "parent": "tufts",
+        "dimensions": {
+          "x": 0.35,
+          "y": 0.35,
+          "z": 0.6
+        },
+        "position": [
+          11.25,
+          2.85,
+          1.3
+        ],
+        "material": "grass",
+        "certainty": {
+          "percent": 30,
+          "basis": "decorative",
+          "note": "Decoration. Size not measured."
+        }
+      }
+    },
+    {
+      "seq": 18,
+      "op": "add",
+      "time": "2026-11-18T10:18:00Z",
+      "author": "jimmy",
+      "note": "add Tuft 2 blade 3",
+      "object": {
+        "uuid": "tuft-2-3",
+        "name": "Tuft 2 blade 3",
+        "type": "cone",
+        "parent": "tufts",
+        "dimensions": {
+          "x": 0.4,
+          "y": 0.4,
+          "z": 0.7
+        },
+        "position": [
+          10.8,
+          3.2,
+          1.35
+        ],
+        "material": "grass",
+        "certainty": {
+          "percent": 30,
+          "basis": "decorative",
+          "note": "Decoration. Size not measured."
+        }
+      }
+    },
+    {
+      "seq": 19,
+      "op": "add",
+      "time": "2026-11-18T10:19:00Z",
       "author": "jimmy",
       "note": "add Lodges (standing and struck)",
       "object": {
@@ -164,13 +452,13 @@
         "name": "Lodges (standing and struck)",
         "type": "group",
         "description": "Two standing lodges and one struck lodge cover with its poles.",
-        "parent": "camp"
+        "parent": "mid"
       }
     },
     {
-      "seq": 8,
+      "seq": 20,
       "op": "add",
-      "time": "2026-11-18T10:08:00Z",
+      "time": "2026-11-18T10:20:00Z",
       "author": "jimmy",
       "note": "add Lodge 1 (standing, large)",
       "object": {
@@ -182,9 +470,9 @@
       }
     },
     {
-      "seq": 9,
+      "seq": 21,
       "op": "add",
-      "time": "2026-11-18T10:09:00Z",
+      "time": "2026-11-18T10:21:00Z",
       "author": "jimmy",
       "note": "add Hide cover",
       "object": {
@@ -211,9 +499,9 @@
       }
     },
     {
-      "seq": 10,
+      "seq": 22,
       "op": "add",
-      "time": "2026-11-18T10:10:00Z",
+      "time": "2026-11-18T10:22:00Z",
       "author": "jimmy",
       "note": "add Pole (north)",
       "object": {
@@ -241,9 +529,9 @@
       }
     },
     {
-      "seq": 11,
+      "seq": 23,
       "op": "add",
-      "time": "2026-11-18T10:11:00Z",
+      "time": "2026-11-18T10:23:00Z",
       "author": "jimmy",
       "note": "add Pole (south)",
       "object": {
@@ -271,9 +559,9 @@
       }
     },
     {
-      "seq": 12,
+      "seq": 24,
       "op": "add",
-      "time": "2026-11-18T10:12:00Z",
+      "time": "2026-11-18T10:24:00Z",
       "author": "jimmy",
       "note": "add Pole (east)",
       "object": {
@@ -301,9 +589,9 @@
       }
     },
     {
-      "seq": 13,
+      "seq": 25,
       "op": "add",
-      "time": "2026-11-18T10:13:00Z",
+      "time": "2026-11-18T10:25:00Z",
       "author": "jimmy",
       "note": "add Pole (west)",
       "object": {
@@ -331,9 +619,9 @@
       }
     },
     {
-      "seq": 14,
+      "seq": 26,
       "op": "add",
-      "time": "2026-11-18T10:14:00Z",
+      "time": "2026-11-18T10:26:00Z",
       "author": "jimmy",
       "note": "add Door opening",
       "object": {
@@ -360,9 +648,9 @@
       }
     },
     {
-      "seq": 15,
+      "seq": 27,
       "op": "add",
-      "time": "2026-11-18T10:15:00Z",
+      "time": "2026-11-18T10:27:00Z",
       "author": "jimmy",
       "note": "add Lodge 2 (standing, small)",
       "object": {
@@ -374,9 +662,9 @@
       }
     },
     {
-      "seq": 16,
+      "seq": 28,
       "op": "add",
-      "time": "2026-11-18T10:16:00Z",
+      "time": "2026-11-18T10:28:00Z",
       "author": "jimmy",
       "note": "add Hide cover",
       "object": {
@@ -403,9 +691,9 @@
       }
     },
     {
-      "seq": 17,
+      "seq": 29,
       "op": "add",
-      "time": "2026-11-18T10:17:00Z",
+      "time": "2026-11-18T10:29:00Z",
       "author": "jimmy",
       "note": "add Pole (north)",
       "object": {
@@ -433,9 +721,9 @@
       }
     },
     {
-      "seq": 18,
+      "seq": 30,
       "op": "add",
-      "time": "2026-11-18T10:18:00Z",
+      "time": "2026-11-18T10:30:00Z",
       "author": "jimmy",
       "note": "add Pole (south)",
       "object": {
@@ -463,9 +751,9 @@
       }
     },
     {
-      "seq": 19,
+      "seq": 31,
       "op": "add",
-      "time": "2026-11-18T10:19:00Z",
+      "time": "2026-11-18T10:31:00Z",
       "author": "jimmy",
       "note": "add Pole (east)",
       "object": {
@@ -493,9 +781,9 @@
       }
     },
     {
-      "seq": 20,
+      "seq": 32,
       "op": "add",
-      "time": "2026-11-18T10:20:00Z",
+      "time": "2026-11-18T10:32:00Z",
       "author": "jimmy",
       "note": "add Pole (west)",
       "object": {
@@ -523,9 +811,9 @@
       }
     },
     {
-      "seq": 21,
+      "seq": 33,
       "op": "add",
-      "time": "2026-11-18T10:21:00Z",
+      "time": "2026-11-18T10:33:00Z",
       "author": "jimmy",
       "note": "add Door opening",
       "object": {
@@ -552,20 +840,49 @@
       }
     },
     {
-      "seq": 22,
+      "seq": 34,
       "op": "add",
-      "time": "2026-11-18T10:22:00Z",
+      "time": "2026-11-18T10:34:00Z",
       "author": "jimmy",
-      "note": "add Struck lodge cover (folded)",
+      "note": "add Folded cover (top panel)",
       "object": {
-        "uuid": "struck-cover",
-        "name": "Struck lodge cover (folded)",
+        "uuid": "struck-cover-top",
+        "name": "Folded cover (top panel)",
         "type": "box",
         "parent": "lodges",
         "dimensions": {
           "x": 4.5,
           "y": 3,
-          "z": 0.6
+          "z": 0.25
+        },
+        "position": [
+          -2,
+          -4,
+          1.6
+        ],
+        "material": "hide",
+        "certainty": {
+          "percent": 50,
+          "basis": "inferred",
+          "note": "The folded cover. Size approximate."
+        }
+      }
+    },
+    {
+      "seq": 35,
+      "op": "add",
+      "time": "2026-11-18T10:35:00Z",
+      "author": "jimmy",
+      "note": "add Folded cover (under panel)",
+      "object": {
+        "uuid": "struck-cover-bottom",
+        "name": "Folded cover (under panel)",
+        "type": "box",
+        "parent": "lodges",
+        "dimensions": {
+          "x": 4.5,
+          "y": 3,
+          "z": 0.25
         },
         "position": [
           -2,
@@ -576,43 +893,159 @@
         "certainty": {
           "percent": 50,
           "basis": "inferred",
-          "note": "The folded cover on the ground. Size approximate."
+          "note": "The folded cover, under panel. Size approximate."
         }
       }
     },
     {
-      "seq": 23,
+      "seq": 36,
       "op": "add",
-      "time": "2026-11-18T10:23:00Z",
+      "time": "2026-11-18T10:36:00Z",
       "author": "jimmy",
-      "note": "add Struck lodge poles",
+      "note": "add Fold strip",
       "object": {
-        "uuid": "struck-poles",
-        "name": "Struck lodge poles",
+        "uuid": "struck-cover-fold",
+        "name": "Fold strip",
         "type": "box",
         "parent": "lodges",
         "dimensions": {
-          "x": 0.3,
-          "y": 8,
-          "z": 0.3
+          "x": 4.5,
+          "y": 0.2,
+          "z": 0.6
         },
         "position": [
-          -2.6,
+          -2,
           -4,
-          1.15
+          1.45
+        ],
+        "material": "dark",
+        "certainty": {
+          "percent": 40,
+          "basis": "inferred",
+          "note": "The fold along the middle of the cover."
+        }
+      }
+    },
+    {
+      "seq": 37,
+      "op": "add",
+      "time": "2026-11-18T10:37:00Z",
+      "author": "jimmy",
+      "note": "add Struck pole 1",
+      "object": {
+        "uuid": "struck-pole-1",
+        "name": "Struck pole 1",
+        "type": "box",
+        "parent": "lodges",
+        "dimensions": {
+          "x": 0.28,
+          "y": 8,
+          "z": 0.28
+        },
+        "position": [
+          -4.85,
+          -4,
+          1.14
         ],
         "material": "wood",
         "certainty": {
           "percent": 50,
           "basis": "inferred",
-          "note": "Poles laid beside the cover. Length approximate."
+          "note": "Pole laid beside the cover. Length approximate."
         }
       }
     },
     {
-      "seq": 24,
+      "seq": 38,
       "op": "add",
-      "time": "2026-11-18T10:24:00Z",
+      "time": "2026-11-18T10:38:00Z",
+      "author": "jimmy",
+      "note": "add Struck pole 2",
+      "object": {
+        "uuid": "struck-pole-2",
+        "name": "Struck pole 2",
+        "type": "box",
+        "parent": "lodges",
+        "dimensions": {
+          "x": 0.28,
+          "y": 8,
+          "z": 0.28
+        },
+        "position": [
+          -4.4,
+          -4,
+          1.14
+        ],
+        "material": "wood",
+        "certainty": {
+          "percent": 50,
+          "basis": "inferred",
+          "note": "Pole laid beside the cover. Length approximate."
+        }
+      }
+    },
+    {
+      "seq": 39,
+      "op": "add",
+      "time": "2026-11-18T10:39:00Z",
+      "author": "jimmy",
+      "note": "add Struck pole 3",
+      "object": {
+        "uuid": "struck-pole-3",
+        "name": "Struck pole 3",
+        "type": "box",
+        "parent": "lodges",
+        "dimensions": {
+          "x": 0.28,
+          "y": 8,
+          "z": 0.28
+        },
+        "position": [
+          -3.95,
+          -4,
+          1.14
+        ],
+        "material": "wood",
+        "certainty": {
+          "percent": 50,
+          "basis": "inferred",
+          "note": "Pole laid beside the cover. Length approximate."
+        }
+      }
+    },
+    {
+      "seq": 40,
+      "op": "add",
+      "time": "2026-11-18T10:40:00Z",
+      "author": "jimmy",
+      "note": "add Tie strap",
+      "object": {
+        "uuid": "struck-strap",
+        "name": "Tie strap",
+        "type": "box",
+        "parent": "lodges",
+        "dimensions": {
+          "x": 1.6,
+          "y": 0.1,
+          "z": 0.1
+        },
+        "position": [
+          -4.4,
+          -4,
+          1.45
+        ],
+        "material": "dark",
+        "certainty": {
+          "percent": 40,
+          "basis": "inferred",
+          "note": "The strap that ties the poles."
+        }
+      }
+    },
+    {
+      "seq": 41,
+      "op": "add",
+      "time": "2026-11-18T10:41:00Z",
       "author": "jimmy",
       "note": "add Travois (two frames, loaded)",
       "object": {
@@ -620,13 +1053,13 @@
         "name": "Travois (two frames, loaded)",
         "type": "group",
         "description": "Two drag frames loaded for the move.",
-        "parent": "camp"
+        "parent": "mid"
       }
     },
     {
-      "seq": 25,
+      "seq": 42,
       "op": "add",
-      "time": "2026-11-18T10:25:00Z",
+      "time": "2026-11-18T10:42:00Z",
       "author": "jimmy",
       "note": "add Travois A",
       "object": {
@@ -638,9 +1071,9 @@
       }
     },
     {
-      "seq": 26,
+      "seq": 43,
       "op": "add",
-      "time": "2026-11-18T10:26:00Z",
+      "time": "2026-11-18T10:43:00Z",
       "author": "jimmy",
       "note": "add Pole (left)",
       "object": {
@@ -667,9 +1100,9 @@
       }
     },
     {
-      "seq": 27,
+      "seq": 44,
       "op": "add",
-      "time": "2026-11-18T10:27:00Z",
+      "time": "2026-11-18T10:44:00Z",
       "author": "jimmy",
       "note": "add Pole (right)",
       "object": {
@@ -696,9 +1129,9 @@
       }
     },
     {
-      "seq": 28,
+      "seq": 45,
       "op": "add",
-      "time": "2026-11-18T10:28:00Z",
+      "time": "2026-11-18T10:45:00Z",
       "author": "jimmy",
       "note": "add Cross bar",
       "object": {
@@ -725,38 +1158,126 @@
       }
     },
     {
-      "seq": 29,
+      "seq": 46,
       "op": "add",
-      "time": "2026-11-18T10:29:00Z",
+      "time": "2026-11-18T10:46:00Z",
       "author": "jimmy",
-      "note": "add Load of bundles",
+      "note": "add Bundle",
       "object": {
         "uuid": "travois-a-load",
-        "name": "Load of bundles",
+        "name": "Bundle",
         "type": "box",
         "parent": "travois-a",
         "dimensions": {
           "x": 2,
           "y": 2.2,
-          "z": 1.3
+          "z": 1.2
         },
         "position": [
           1.5,
           -2.5,
-          1.95
+          1.8
         ],
         "material": "hide and cloth",
         "certainty": {
           "percent": 30,
           "basis": "placeholder",
-          "note": "A block for the load. What it holds is not confirmed."
+          "note": "A block for the bundle. What it holds is not confirmed."
         }
       }
     },
     {
-      "seq": 30,
+      "seq": 47,
       "op": "add",
-      "time": "2026-11-18T10:30:00Z",
+      "time": "2026-11-18T10:47:00Z",
+      "author": "jimmy",
+      "note": "add Rolled hide",
+      "object": {
+        "uuid": "travois-a-roll",
+        "name": "Rolled hide",
+        "type": "cylinder",
+        "parent": "travois-a",
+        "dimensions": {
+          "x": 0.7,
+          "y": 0.7,
+          "z": 2
+        },
+        "position": [
+          1.5,
+          -2.5,
+          2.7
+        ],
+        "material": "hide",
+        "rotation_y": 90,
+        "certainty": {
+          "percent": 30,
+          "basis": "placeholder",
+          "note": "A rolled hide on top of the bundle."
+        }
+      }
+    },
+    {
+      "seq": 48,
+      "op": "add",
+      "time": "2026-11-18T10:48:00Z",
+      "author": "jimmy",
+      "note": "add Strap 1",
+      "object": {
+        "uuid": "travois-a-strap-1",
+        "name": "Strap 1",
+        "type": "box",
+        "parent": "travois-a",
+        "dimensions": {
+          "x": 2.1,
+          "y": 0.1,
+          "z": 0.1
+        },
+        "position": [
+          1.5,
+          -3.5,
+          2.1
+        ],
+        "material": "dark",
+        "certainty": {
+          "percent": 40,
+          "basis": "inferred",
+          "note": "A strap over the load."
+        }
+      }
+    },
+    {
+      "seq": 49,
+      "op": "add",
+      "time": "2026-11-18T10:49:00Z",
+      "author": "jimmy",
+      "note": "add Strap 2",
+      "object": {
+        "uuid": "travois-a-strap-2",
+        "name": "Strap 2",
+        "type": "box",
+        "parent": "travois-a",
+        "dimensions": {
+          "x": 2.1,
+          "y": 0.1,
+          "z": 0.1
+        },
+        "position": [
+          1.5,
+          -1.5,
+          2.1
+        ],
+        "material": "dark",
+        "certainty": {
+          "percent": 40,
+          "basis": "inferred",
+          "note": "A strap over the load."
+        }
+      }
+    },
+    {
+      "seq": 50,
+      "op": "add",
+      "time": "2026-11-18T10:50:00Z",
       "author": "jimmy",
       "note": "add Travois B",
       "object": {
@@ -768,9 +1289,9 @@
       }
     },
     {
-      "seq": 31,
+      "seq": 51,
       "op": "add",
-      "time": "2026-11-18T10:31:00Z",
+      "time": "2026-11-18T10:51:00Z",
       "author": "jimmy",
       "note": "add Pole (left)",
       "object": {
@@ -797,9 +1318,9 @@
       }
     },
     {
-      "seq": 32,
+      "seq": 52,
       "op": "add",
-      "time": "2026-11-18T10:32:00Z",
+      "time": "2026-11-18T10:52:00Z",
       "author": "jimmy",
       "note": "add Pole (right)",
       "object": {
@@ -826,9 +1347,9 @@
       }
     },
     {
-      "seq": 33,
+      "seq": 53,
       "op": "add",
-      "time": "2026-11-18T10:33:00Z",
+      "time": "2026-11-18T10:53:00Z",
       "author": "jimmy",
       "note": "add Cross bar",
       "object": {
@@ -855,577 +1376,31 @@
       }
     },
     {
-      "seq": 34,
+      "seq": 54,
       "op": "add",
-      "time": "2026-11-18T10:34:00Z",
+      "time": "2026-11-18T10:54:00Z",
       "author": "jimmy",
-      "note": "add Load of bundles",
+      "note": "add Bundle",
       "object": {
         "uuid": "travois-b-load",
-        "name": "Load of bundles",
+        "name": "Bundle",
         "type": "box",
         "parent": "travois-b",
         "dimensions": {
           "x": 2,
           "y": 2.2,
-          "z": 1.3
+          "z": 1.2
         },
         "position": [
           5.5,
           0.5,
-          1.95
+          1.8
         ],
         "material": "hide and cloth",
         "certainty": {
           "percent": 30,
           "basis": "placeholder",
-          "note": "A block for the load. What it holds is not confirmed."
-        }
-      }
-    },
-    {
-      "seq": 35,
-      "op": "add",
-      "time": "2026-11-18T10:35:00Z",
-      "author": "jimmy",
-      "note": "add Horses (placeholder)",
-      "object": {
-        "uuid": "horses",
-        "name": "Horses (placeholder)",
-        "type": "group",
-        "description": "Two horses, placeholder silhouettes in real proportions. No breed, tack or colour is claimed.",
-        "parent": "camp"
-      }
-    },
-    {
-      "seq": 36,
-      "op": "add",
-      "time": "2026-11-18T10:36:00Z",
-      "author": "jimmy",
-      "note": "add Horse 1 (front)",
-      "object": {
-        "uuid": "horse-1",
-        "name": "Horse 1 (front)",
-        "type": "group",
-        "description": "A horse standing, facing right. A placeholder silhouette in real proportions; no breed, tack or colour is claimed.",
-        "parent": "horses"
-      }
-    },
-    {
-      "seq": 37,
-      "op": "add",
-      "time": "2026-11-18T10:37:00Z",
-      "author": "jimmy",
-      "note": "add Barrel (body)",
-      "object": {
-        "uuid": "horse-1-barrel",
-        "name": "Barrel (body)",
-        "type": "cylinder",
-        "parent": "horse-1",
-        "dimensions": {
-          "x": 1.1,
-          "y": 1.1,
-          "z": 3.2
-        },
-        "position": [
-          6,
-          -8.5,
-          3.3
-        ],
-        "material": "horse bay",
-        "rotation_y": 90,
-        "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Body shape from a horse body plan."
-        }
-      }
-    },
-    {
-      "seq": 38,
-      "op": "add",
-      "time": "2026-11-18T10:38:00Z",
-      "author": "jimmy",
-      "note": "add Neck",
-      "object": {
-        "uuid": "horse-1-neck",
-        "name": "Neck",
-        "type": "cylinder",
-        "parent": "horse-1",
-        "dimensions": {
-          "x": 0.6,
-          "y": 0.6,
-          "z": 1.9
-        },
-        "position": [
-          7.9,
-          -8.5,
-          4.2
-        ],
-        "material": "horse bay",
-        "rotation_y": 30,
-        "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Neck, raised."
-        }
-      }
-    },
-    {
-      "seq": 39,
-      "op": "add",
-      "time": "2026-11-18T10:39:00Z",
-      "author": "jimmy",
-      "note": "add Mane",
-      "object": {
-        "uuid": "horse-1-mane",
-        "name": "Mane",
-        "type": "box",
-        "parent": "horse-1",
-        "dimensions": {
-          "x": 0.18,
-          "y": 0.18,
-          "z": 1.6
-        },
-        "position": [
-          7.95,
-          -8.5,
-          4.55
-        ],
-        "material": "horse dark",
-        "rotation_y": 30,
-        "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Mane along the neck."
-        }
-      }
-    },
-    {
-      "seq": 40,
-      "op": "add",
-      "time": "2026-11-18T10:40:00Z",
-      "author": "jimmy",
-      "note": "add Head",
-      "object": {
-        "uuid": "horse-1-head",
-        "name": "Head",
-        "type": "box",
-        "parent": "horse-1",
-        "dimensions": {
-          "x": 0.95,
-          "y": 0.5,
-          "z": 0.55
-        },
-        "position": [
-          8.85,
-          -8.5,
-          5
-        ],
-        "material": "horse dark",
-        "rotation_y": 40,
-        "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Head, lowered."
-        }
-      }
-    },
-    {
-      "seq": 41,
-      "op": "add",
-      "time": "2026-11-18T10:41:00Z",
-      "author": "jimmy",
-      "note": "add Muzzle",
-      "object": {
-        "uuid": "horse-1-muzzle",
-        "name": "Muzzle",
-        "type": "box",
-        "parent": "horse-1",
-        "dimensions": {
-          "x": 0.7,
-          "y": 0.38,
-          "z": 0.4
-        },
-        "position": [
-          9.45,
-          -8.5,
-          4.6
-        ],
-        "material": "horse dark",
-        "rotation_y": 40,
-        "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Muzzle, narrower than the head."
-        }
-      }
-    },
-    {
-      "seq": 42,
-      "op": "add",
-      "time": "2026-11-18T10:42:00Z",
-      "author": "jimmy",
-      "note": "add Ear (left)",
-      "object": {
-        "uuid": "horse-1-ear-l",
-        "name": "Ear (left)",
-        "type": "cone",
-        "parent": "horse-1",
-        "dimensions": {
-          "x": 0.14,
-          "y": 0.14,
-          "z": 0.3
-        },
-        "position": [
-          8.75,
-          -8.64,
-          5.6
-        ],
-        "material": "horse dark",
-        "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Ear."
-        }
-      }
-    },
-    {
-      "seq": 43,
-      "op": "add",
-      "time": "2026-11-18T10:43:00Z",
-      "author": "jimmy",
-      "note": "add Ear (right)",
-      "object": {
-        "uuid": "horse-1-ear-r",
-        "name": "Ear (right)",
-        "type": "cone",
-        "parent": "horse-1",
-        "dimensions": {
-          "x": 0.14,
-          "y": 0.14,
-          "z": 0.3
-        },
-        "position": [
-          8.75,
-          -8.36,
-          5.6
-        ],
-        "material": "horse dark",
-        "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Ear."
-        }
-      }
-    },
-    {
-      "seq": 44,
-      "op": "add",
-      "time": "2026-11-18T10:44:00Z",
-      "author": "jimmy",
-      "note": "add Tail",
-      "object": {
-        "uuid": "horse-1-tail",
-        "name": "Tail",
-        "type": "cylinder",
-        "parent": "horse-1",
-        "dimensions": {
-          "x": 0.28,
-          "y": 0.28,
-          "z": 1.6
-        },
-        "position": [
-          3.8,
-          -8.5,
-          2.8
-        ],
-        "material": "horse dark",
-        "rotation_y": 24,
-        "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Tail, hanging from the rump."
-        }
-      }
-    },
-    {
-      "seq": 45,
-      "op": "add",
-      "time": "2026-11-18T10:45:00Z",
-      "author": "jimmy",
-      "note": "add Leg 1",
-      "object": {
-        "uuid": "horse-1-leg-1",
-        "name": "Leg 1",
-        "type": "cylinder",
-        "parent": "horse-1",
-        "dimensions": {
-          "x": 0.26,
-          "y": 0.26,
-          "z": 1.75
-        },
-        "position": [
-          7.2,
-          -8.86,
-          1.88
-        ],
-        "material": "horse dark",
-        "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Leg."
-        }
-      }
-    },
-    {
-      "seq": 46,
-      "op": "add",
-      "time": "2026-11-18T10:46:00Z",
-      "author": "jimmy",
-      "note": "add Leg 2",
-      "object": {
-        "uuid": "horse-1-leg-2",
-        "name": "Leg 2",
-        "type": "cylinder",
-        "parent": "horse-1",
-        "dimensions": {
-          "x": 0.26,
-          "y": 0.26,
-          "z": 1.75
-        },
-        "position": [
-          7.2,
-          -8.14,
-          1.88
-        ],
-        "material": "horse dark",
-        "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Leg."
-        }
-      }
-    },
-    {
-      "seq": 47,
-      "op": "add",
-      "time": "2026-11-18T10:47:00Z",
-      "author": "jimmy",
-      "note": "add Leg 3",
-      "object": {
-        "uuid": "horse-1-leg-3",
-        "name": "Leg 3",
-        "type": "cylinder",
-        "parent": "horse-1",
-        "dimensions": {
-          "x": 0.26,
-          "y": 0.26,
-          "z": 1.75
-        },
-        "position": [
-          4.8,
-          -8.86,
-          1.88
-        ],
-        "material": "horse dark",
-        "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Leg."
-        }
-      }
-    },
-    {
-      "seq": 48,
-      "op": "add",
-      "time": "2026-11-18T10:48:00Z",
-      "author": "jimmy",
-      "note": "add Leg 4",
-      "object": {
-        "uuid": "horse-1-leg-4",
-        "name": "Leg 4",
-        "type": "cylinder",
-        "parent": "horse-1",
-        "dimensions": {
-          "x": 0.26,
-          "y": 0.26,
-          "z": 1.75
-        },
-        "position": [
-          4.8,
-          -8.14,
-          1.88
-        ],
-        "material": "horse dark",
-        "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Leg."
-        }
-      }
-    },
-    {
-      "seq": 49,
-      "op": "add",
-      "time": "2026-11-18T10:49:00Z",
-      "author": "jimmy",
-      "note": "add Horse 2 (by the cover)",
-      "object": {
-        "uuid": "horse-2",
-        "name": "Horse 2 (by the cover)",
-        "type": "group",
-        "description": "A horse standing, facing right. A placeholder silhouette in real proportions; no breed, tack or colour is claimed.",
-        "parent": "horses"
-      }
-    },
-    {
-      "seq": 50,
-      "op": "add",
-      "time": "2026-11-18T10:50:00Z",
-      "author": "jimmy",
-      "note": "add Barrel (body)",
-      "object": {
-        "uuid": "horse-2-barrel",
-        "name": "Barrel (body)",
-        "type": "cylinder",
-        "parent": "horse-2",
-        "dimensions": {
-          "x": 1.1,
-          "y": 1.1,
-          "z": 3.2
-        },
-        "position": [
-          -5,
-          -8.5,
-          3.3
-        ],
-        "material": "horse bay",
-        "rotation_y": 90,
-        "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Body shape from a horse body plan."
-        }
-      }
-    },
-    {
-      "seq": 51,
-      "op": "add",
-      "time": "2026-11-18T10:51:00Z",
-      "author": "jimmy",
-      "note": "add Neck",
-      "object": {
-        "uuid": "horse-2-neck",
-        "name": "Neck",
-        "type": "cylinder",
-        "parent": "horse-2",
-        "dimensions": {
-          "x": 0.6,
-          "y": 0.6,
-          "z": 1.9
-        },
-        "position": [
-          -3.1,
-          -8.5,
-          4.2
-        ],
-        "material": "horse bay",
-        "rotation_y": 30,
-        "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Neck, raised."
-        }
-      }
-    },
-    {
-      "seq": 52,
-      "op": "add",
-      "time": "2026-11-18T10:52:00Z",
-      "author": "jimmy",
-      "note": "add Mane",
-      "object": {
-        "uuid": "horse-2-mane",
-        "name": "Mane",
-        "type": "box",
-        "parent": "horse-2",
-        "dimensions": {
-          "x": 0.18,
-          "y": 0.18,
-          "z": 1.6
-        },
-        "position": [
-          -3.05,
-          -8.5,
-          4.55
-        ],
-        "material": "horse dark",
-        "rotation_y": 30,
-        "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Mane along the neck."
-        }
-      }
-    },
-    {
-      "seq": 53,
-      "op": "add",
-      "time": "2026-11-18T10:53:00Z",
-      "author": "jimmy",
-      "note": "add Head",
-      "object": {
-        "uuid": "horse-2-head",
-        "name": "Head",
-        "type": "box",
-        "parent": "horse-2",
-        "dimensions": {
-          "x": 0.95,
-          "y": 0.5,
-          "z": 0.55
-        },
-        "position": [
-          -2.15,
-          -8.5,
-          5
-        ],
-        "material": "horse dark",
-        "rotation_y": 40,
-        "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Head, lowered."
-        }
-      }
-    },
-    {
-      "seq": 54,
-      "op": "add",
-      "time": "2026-11-18T10:54:00Z",
-      "author": "jimmy",
-      "note": "add Muzzle",
-      "object": {
-        "uuid": "horse-2-muzzle",
-        "name": "Muzzle",
-        "type": "box",
-        "parent": "horse-2",
-        "dimensions": {
-          "x": 0.7,
-          "y": 0.38,
-          "z": 0.4
-        },
-        "position": [
-          -1.55,
-          -8.5,
-          4.6
-        ],
-        "material": "horse dark",
-        "rotation_y": 40,
-        "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Muzzle, narrower than the head."
+          "note": "A block for the bundle. What it holds is not confirmed."
         }
       }
     },
@@ -1434,27 +1409,28 @@
       "op": "add",
       "time": "2026-11-18T10:55:00Z",
       "author": "jimmy",
-      "note": "add Ear (left)",
+      "note": "add Rolled hide",
       "object": {
-        "uuid": "horse-2-ear-l",
-        "name": "Ear (left)",
-        "type": "cone",
-        "parent": "horse-2",
+        "uuid": "travois-b-roll",
+        "name": "Rolled hide",
+        "type": "cylinder",
+        "parent": "travois-b",
         "dimensions": {
-          "x": 0.14,
-          "y": 0.14,
-          "z": 0.3
+          "x": 0.7,
+          "y": 0.7,
+          "z": 2
         },
         "position": [
-          -2.25,
-          -8.64,
-          5.6
+          5.5,
+          0.5,
+          2.7
         ],
-        "material": "horse dark",
+        "material": "hide",
+        "rotation_y": 90,
         "certainty": {
-          "percent": 20,
+          "percent": 30,
           "basis": "placeholder",
-          "note": "Ear."
+          "note": "A rolled hide on top of the bundle."
         }
       }
     },
@@ -1463,27 +1439,27 @@
       "op": "add",
       "time": "2026-11-18T10:56:00Z",
       "author": "jimmy",
-      "note": "add Ear (right)",
+      "note": "add Strap 1",
       "object": {
-        "uuid": "horse-2-ear-r",
-        "name": "Ear (right)",
-        "type": "cone",
-        "parent": "horse-2",
+        "uuid": "travois-b-strap-1",
+        "name": "Strap 1",
+        "type": "box",
+        "parent": "travois-b",
         "dimensions": {
-          "x": 0.14,
-          "y": 0.14,
-          "z": 0.3
+          "x": 2.1,
+          "y": 0.1,
+          "z": 0.1
         },
         "position": [
-          -2.25,
-          -8.36,
-          5.6
+          5.5,
+          -0.5,
+          2.1
         ],
-        "material": "horse dark",
+        "material": "dark",
         "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Ear."
+          "percent": 40,
+          "basis": "inferred",
+          "note": "A strap over the load."
         }
       }
     },
@@ -1492,28 +1468,27 @@
       "op": "add",
       "time": "2026-11-18T10:57:00Z",
       "author": "jimmy",
-      "note": "add Tail",
+      "note": "add Strap 2",
       "object": {
-        "uuid": "horse-2-tail",
-        "name": "Tail",
-        "type": "cylinder",
-        "parent": "horse-2",
+        "uuid": "travois-b-strap-2",
+        "name": "Strap 2",
+        "type": "box",
+        "parent": "travois-b",
         "dimensions": {
-          "x": 0.28,
-          "y": 0.28,
-          "z": 1.6
+          "x": 2.1,
+          "y": 0.1,
+          "z": 0.1
         },
         "position": [
-          -7.2,
-          -8.5,
-          2.8
+          5.5,
+          1.5,
+          2.1
         ],
-        "material": "horse dark",
-        "rotation_y": 24,
+        "material": "dark",
         "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Tail, hanging from the rump."
+          "percent": 40,
+          "basis": "inferred",
+          "note": "A strap over the load."
         }
       }
     },
@@ -1522,28 +1497,13 @@
       "op": "add",
       "time": "2026-11-18T10:58:00Z",
       "author": "jimmy",
-      "note": "add Leg 1",
+      "note": "add People (placeholder forms)",
       "object": {
-        "uuid": "horse-2-leg-1",
-        "name": "Leg 1",
-        "type": "cylinder",
-        "parent": "horse-2",
-        "dimensions": {
-          "x": 0.26,
-          "y": 0.26,
-          "z": 1.75
-        },
-        "position": [
-          -3.8,
-          -8.86,
-          1.88
-        ],
-        "material": "horse dark",
-        "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Leg."
-        }
+        "uuid": "figures",
+        "name": "People (placeholder forms)",
+        "type": "group",
+        "description": "Three placeholder forms in poses: two women and a child. No faces, no hair, no clothing pattern, no regalia.",
+        "parent": "mid"
       }
     },
     {
@@ -1551,28 +1511,13 @@
       "op": "add",
       "time": "2026-11-18T10:59:00Z",
       "author": "jimmy",
-      "note": "add Leg 2",
+      "note": "add Woman A (placeholder)",
       "object": {
-        "uuid": "horse-2-leg-2",
-        "name": "Leg 2",
-        "type": "cylinder",
-        "parent": "horse-2",
-        "dimensions": {
-          "x": 0.26,
-          "y": 0.26,
-          "z": 1.75
-        },
-        "position": [
-          -3.8,
-          -8.14,
-          1.88
-        ],
-        "material": "horse dark",
-        "certainty": {
-          "percent": 20,
-          "basis": "placeholder",
-          "note": "Leg."
-        }
+        "uuid": "woman-a",
+        "name": "Woman A (placeholder)",
+        "type": "group",
+        "description": "A placeholder form in a pose: no face, no hair, no clothing pattern, no regalia.",
+        "parent": "figures"
       }
     },
     {
@@ -1580,27 +1525,28 @@
       "op": "add",
       "time": "2026-11-18T11:00:00Z",
       "author": "jimmy",
-      "note": "add Leg 3",
+      "note": "add Leg 1",
       "object": {
-        "uuid": "horse-2-leg-3",
-        "name": "Leg 3",
+        "uuid": "woman-a-leg-1",
+        "name": "Leg 1",
         "type": "cylinder",
-        "parent": "horse-2",
+        "parent": "woman-a",
         "dimensions": {
-          "x": 0.26,
-          "y": 0.26,
-          "z": 1.75
+          "x": 0.3,
+          "y": 0.3,
+          "z": 1.1
         },
         "position": [
-          -6.2,
-          -8.86,
-          1.88
+          -5.2,
+          -2,
+          1.55
         ],
-        "material": "horse dark",
+        "material": "hide and cloth",
+        "rotation_x": 12,
         "certainty": {
-          "percent": 20,
+          "percent": 15,
           "basis": "placeholder",
-          "note": "Leg."
+          "note": "Leg. Form only."
         }
       }
     },
@@ -1609,27 +1555,27 @@
       "op": "add",
       "time": "2026-11-18T11:01:00Z",
       "author": "jimmy",
-      "note": "add Leg 4",
+      "note": "add Foot 1",
       "object": {
-        "uuid": "horse-2-leg-4",
-        "name": "Leg 4",
-        "type": "cylinder",
-        "parent": "horse-2",
+        "uuid": "woman-a-foot-1",
+        "name": "Foot 1",
+        "type": "box",
+        "parent": "woman-a",
         "dimensions": {
-          "x": 0.26,
-          "y": 0.26,
-          "z": 1.75
+          "x": 0.36,
+          "y": 0.6,
+          "z": 0.2
         },
         "position": [
-          -6.2,
-          -8.14,
-          1.88
+          -5.2,
+          -1.5,
+          1.1
         ],
-        "material": "horse dark",
+        "material": "dark",
         "certainty": {
-          "percent": 20,
+          "percent": 15,
           "basis": "placeholder",
-          "note": "Leg."
+          "note": "Foot. Form only."
         }
       }
     },
@@ -1638,13 +1584,29 @@
       "op": "add",
       "time": "2026-11-18T11:02:00Z",
       "author": "jimmy",
-      "note": "add People (placeholder forms)",
+      "note": "add Leg 2",
       "object": {
-        "uuid": "figures",
-        "name": "People (placeholder forms)",
-        "type": "group",
-        "description": "Three placeholder forms: two women and a child. No faces, hair detail, clothing pattern or regalia.",
-        "parent": "camp"
+        "uuid": "woman-a-leg-2",
+        "name": "Leg 2",
+        "type": "cylinder",
+        "parent": "woman-a",
+        "dimensions": {
+          "x": 0.3,
+          "y": 0.3,
+          "z": 1.1
+        },
+        "position": [
+          -4.8,
+          -2,
+          1.55
+        ],
+        "material": "hide and cloth",
+        "rotation_x": -12,
+        "certainty": {
+          "percent": 15,
+          "basis": "placeholder",
+          "note": "Leg. Form only."
+        }
       }
     },
     {
@@ -1652,13 +1614,28 @@
       "op": "add",
       "time": "2026-11-18T11:03:00Z",
       "author": "jimmy",
-      "note": "add Woman A (placeholder)",
+      "note": "add Foot 2",
       "object": {
-        "uuid": "woman-a",
-        "name": "Woman A (placeholder)",
-        "type": "group",
-        "description": "A placeholder form in standing pose: no face, no hair detail, no clothing pattern, no regalia.",
-        "parent": "figures"
+        "uuid": "woman-a-foot-2",
+        "name": "Foot 2",
+        "type": "box",
+        "parent": "woman-a",
+        "dimensions": {
+          "x": 0.36,
+          "y": 0.6,
+          "z": 0.2
+        },
+        "position": [
+          -4.8,
+          -1.5,
+          1.1
+        ],
+        "material": "dark",
+        "certainty": {
+          "percent": 15,
+          "basis": "placeholder",
+          "note": "Foot. Form only."
+        }
       }
     },
     {
@@ -1673,14 +1650,14 @@
         "type": "cone",
         "parent": "woman-a",
         "dimensions": {
-          "x": 1.6,
-          "y": 1.6,
-          "z": 1.7
+          "x": 1.1,
+          "y": 1.1,
+          "z": 1.4
         },
         "position": [
           -5,
           -2,
-          1.85
+          2.3
         ],
         "material": "hide and cloth",
         "certainty": {
@@ -1702,14 +1679,14 @@
         "type": "cylinder",
         "parent": "woman-a",
         "dimensions": {
-          "x": 0.85,
-          "y": 0.85,
-          "z": 0.9
+          "x": 0.9,
+          "y": 0.9,
+          "z": 0.95
         },
         "position": [
           -5,
           -2,
-          2.45
+          2.58
         ],
         "material": "hide and cloth",
         "certainty": {
@@ -1738,9 +1715,10 @@
         "position": [
           -5.56,
           -2,
-          2.4
+          2.45
         ],
         "material": "clay",
+        "rotation_x": -18,
         "rotation_y": -8,
         "certainty": {
           "percent": 15,
@@ -1753,6 +1731,35 @@
       "seq": 67,
       "op": "add",
       "time": "2026-11-18T11:07:00Z",
+      "author": "jimmy",
+      "note": "add Hand (left)",
+      "object": {
+        "uuid": "woman-a-hand-l",
+        "name": "Hand (left)",
+        "type": "sphere",
+        "parent": "woman-a",
+        "dimensions": {
+          "x": 0.24,
+          "y": 0.24,
+          "z": 0.24
+        },
+        "position": [
+          -5.6,
+          -2,
+          1.95
+        ],
+        "material": "clay",
+        "certainty": {
+          "percent": 15,
+          "basis": "placeholder",
+          "note": "Hand. Form only."
+        }
+      }
+    },
+    {
+      "seq": 68,
+      "op": "add",
+      "time": "2026-11-18T11:08:00Z",
       "author": "jimmy",
       "note": "add Arm (right)",
       "object": {
@@ -1768,9 +1775,10 @@
         "position": [
           -4.44,
           -2,
-          2.4
+          2.45
         ],
         "material": "clay",
+        "rotation_x": 18,
         "rotation_y": 8,
         "certainty": {
           "percent": 15,
@@ -1780,9 +1788,38 @@
       }
     },
     {
-      "seq": 68,
+      "seq": 69,
       "op": "add",
-      "time": "2026-11-18T11:08:00Z",
+      "time": "2026-11-18T11:09:00Z",
+      "author": "jimmy",
+      "note": "add Hand (right)",
+      "object": {
+        "uuid": "woman-a-hand-r",
+        "name": "Hand (right)",
+        "type": "sphere",
+        "parent": "woman-a",
+        "dimensions": {
+          "x": 0.24,
+          "y": 0.24,
+          "z": 0.24
+        },
+        "position": [
+          -4.4,
+          -2,
+          1.95
+        ],
+        "material": "clay",
+        "certainty": {
+          "percent": 15,
+          "basis": "placeholder",
+          "note": "Hand. Form only."
+        }
+      }
+    },
+    {
+      "seq": 70,
+      "op": "add",
+      "time": "2026-11-18T11:10:00Z",
       "author": "jimmy",
       "note": "add Neck",
       "object": {
@@ -1798,7 +1835,7 @@
         "position": [
           -5,
           -2,
-          3
+          3.15
         ],
         "material": "clay",
         "certainty": {
@@ -1809,9 +1846,9 @@
       }
     },
     {
-      "seq": 69,
+      "seq": 71,
       "op": "add",
-      "time": "2026-11-18T11:09:00Z",
+      "time": "2026-11-18T11:11:00Z",
       "author": "jimmy",
       "note": "add Head",
       "object": {
@@ -1820,78 +1857,20 @@
         "type": "sphere",
         "parent": "woman-a",
         "dimensions": {
-          "x": 0.5,
-          "y": 0.5,
-          "z": 0.5
+          "x": 0.55,
+          "y": 0.55,
+          "z": 0.55
         },
         "position": [
           -5,
           -2,
-          3.25
+          3.52
         ],
         "material": "clay",
         "certainty": {
           "percent": 15,
           "basis": "placeholder",
           "note": "Head. Form only. No face."
-        }
-      }
-    },
-    {
-      "seq": 70,
-      "op": "add",
-      "time": "2026-11-18T11:10:00Z",
-      "author": "jimmy",
-      "note": "add Hair",
-      "object": {
-        "uuid": "woman-a-hair",
-        "name": "Hair",
-        "type": "cylinder",
-        "parent": "woman-a",
-        "dimensions": {
-          "x": 0.5,
-          "y": 0.5,
-          "z": 0.12
-        },
-        "position": [
-          -5,
-          -1.98,
-          3.5
-        ],
-        "material": "dark",
-        "certainty": {
-          "percent": 15,
-          "basis": "placeholder",
-          "note": "Hair. Form only."
-        }
-      }
-    },
-    {
-      "seq": 71,
-      "op": "add",
-      "time": "2026-11-18T11:11:00Z",
-      "author": "jimmy",
-      "note": "add Hair (back)",
-      "object": {
-        "uuid": "woman-a-hair-back",
-        "name": "Hair (back)",
-        "type": "cylinder",
-        "parent": "woman-a",
-        "dimensions": {
-          "x": 0.5,
-          "y": 0.5,
-          "z": 0.6
-        },
-        "position": [
-          -5,
-          -1.82,
-          3.1
-        ],
-        "material": "dark",
-        "certainty": {
-          "percent": 15,
-          "basis": "placeholder",
-          "note": "Long hair at the back. Form only."
         }
       }
     },
@@ -1905,7 +1884,7 @@
         "uuid": "child-a",
         "name": "Child (placeholder)",
         "type": "group",
-        "description": "A placeholder form in standing pose: no face, no hair detail, no clothing pattern, no regalia.",
+        "description": "A placeholder form in a pose: no face, no hair, no clothing pattern, no regalia.",
         "parent": "figures"
       }
     },
@@ -1923,14 +1902,15 @@
         "dimensions": {
           "x": 0.21,
           "y": 0.21,
-          "z": 0.7
+          "z": 0.77
         },
         "position": [
           -1.14,
           1.5,
-          1.35
+          1.39
         ],
         "material": "hide and cloth",
+        "rotation_x": 12,
         "certainty": {
           "percent": 15,
           "basis": "placeholder",
@@ -1943,6 +1923,35 @@
       "op": "add",
       "time": "2026-11-18T11:14:00Z",
       "author": "jimmy",
+      "note": "add Foot 1",
+      "object": {
+        "uuid": "child-a-foot-1",
+        "name": "Foot 1",
+        "type": "box",
+        "parent": "child-a",
+        "dimensions": {
+          "x": 0.252,
+          "y": 0.42,
+          "z": 0.13999999999999999
+        },
+        "position": [
+          -1.14,
+          1.85,
+          1.07
+        ],
+        "material": "dark",
+        "certainty": {
+          "percent": 15,
+          "basis": "placeholder",
+          "note": "Foot. Form only."
+        }
+      }
+    },
+    {
+      "seq": 75,
+      "op": "add",
+      "time": "2026-11-18T11:15:00Z",
+      "author": "jimmy",
       "note": "add Leg 2",
       "object": {
         "uuid": "child-a-leg-2",
@@ -1952,14 +1961,15 @@
         "dimensions": {
           "x": 0.21,
           "y": 0.21,
-          "z": 0.7
+          "z": 0.77
         },
         "position": [
           -0.86,
           1.5,
-          1.35
+          1.39
         ],
         "material": "hide and cloth",
+        "rotation_x": -12,
         "certainty": {
           "percent": 15,
           "basis": "placeholder",
@@ -1968,9 +1978,38 @@
       }
     },
     {
-      "seq": 75,
+      "seq": 76,
       "op": "add",
-      "time": "2026-11-18T11:15:00Z",
+      "time": "2026-11-18T11:16:00Z",
+      "author": "jimmy",
+      "note": "add Foot 2",
+      "object": {
+        "uuid": "child-a-foot-2",
+        "name": "Foot 2",
+        "type": "box",
+        "parent": "child-a",
+        "dimensions": {
+          "x": 0.252,
+          "y": 0.42,
+          "z": 0.13999999999999999
+        },
+        "position": [
+          -0.86,
+          1.85,
+          1.07
+        ],
+        "material": "dark",
+        "certainty": {
+          "percent": 15,
+          "basis": "placeholder",
+          "note": "Foot. Form only."
+        }
+      }
+    },
+    {
+      "seq": 77,
+      "op": "add",
+      "time": "2026-11-18T11:17:00Z",
       "author": "jimmy",
       "note": "add Torso",
       "object": {
@@ -1979,14 +2018,14 @@
         "type": "cylinder",
         "parent": "child-a",
         "dimensions": {
-          "x": 0.595,
-          "y": 0.595,
-          "z": 0.63
+          "x": 0.63,
+          "y": 0.63,
+          "z": 0.6649999999999999
         },
         "position": [
           -1,
           1.5,
-          2.01
+          2.1
         ],
         "material": "red cloth",
         "certainty": {
@@ -1997,9 +2036,9 @@
       }
     },
     {
-      "seq": 76,
+      "seq": 78,
       "op": "add",
-      "time": "2026-11-18T11:16:00Z",
+      "time": "2026-11-18T11:18:00Z",
       "author": "jimmy",
       "note": "add Arm (left)",
       "object": {
@@ -2015,9 +2054,10 @@
         "position": [
           -1.39,
           1.5,
-          1.98
+          2.01
         ],
         "material": "clay",
+        "rotation_x": -18,
         "rotation_y": -8,
         "certainty": {
           "percent": 15,
@@ -2027,9 +2067,38 @@
       }
     },
     {
-      "seq": 77,
+      "seq": 79,
       "op": "add",
-      "time": "2026-11-18T11:17:00Z",
+      "time": "2026-11-18T11:19:00Z",
+      "author": "jimmy",
+      "note": "add Hand (left)",
+      "object": {
+        "uuid": "child-a-hand-l",
+        "name": "Hand (left)",
+        "type": "sphere",
+        "parent": "child-a",
+        "dimensions": {
+          "x": 0.16799999999999998,
+          "y": 0.16799999999999998,
+          "z": 0.16799999999999998
+        },
+        "position": [
+          -1.42,
+          1.5,
+          1.67
+        ],
+        "material": "clay",
+        "certainty": {
+          "percent": 15,
+          "basis": "placeholder",
+          "note": "Hand. Form only."
+        }
+      }
+    },
+    {
+      "seq": 80,
+      "op": "add",
+      "time": "2026-11-18T11:20:00Z",
       "author": "jimmy",
       "note": "add Arm (right)",
       "object": {
@@ -2045,9 +2114,10 @@
         "position": [
           -0.61,
           1.5,
-          1.98
+          2.01
         ],
         "material": "clay",
+        "rotation_x": 18,
         "rotation_y": 8,
         "certainty": {
           "percent": 15,
@@ -2057,9 +2127,38 @@
       }
     },
     {
-      "seq": 78,
+      "seq": 81,
       "op": "add",
-      "time": "2026-11-18T11:18:00Z",
+      "time": "2026-11-18T11:21:00Z",
+      "author": "jimmy",
+      "note": "add Hand (right)",
+      "object": {
+        "uuid": "child-a-hand-r",
+        "name": "Hand (right)",
+        "type": "sphere",
+        "parent": "child-a",
+        "dimensions": {
+          "x": 0.16799999999999998,
+          "y": 0.16799999999999998,
+          "z": 0.16799999999999998
+        },
+        "position": [
+          -0.58,
+          1.5,
+          1.67
+        ],
+        "material": "clay",
+        "certainty": {
+          "percent": 15,
+          "basis": "placeholder",
+          "note": "Hand. Form only."
+        }
+      }
+    },
+    {
+      "seq": 82,
+      "op": "add",
+      "time": "2026-11-18T11:22:00Z",
       "author": "jimmy",
       "note": "add Neck",
       "object": {
@@ -2075,7 +2174,7 @@
         "position": [
           -1,
           1.5,
-          2.4
+          2.51
         ],
         "material": "clay",
         "certainty": {
@@ -2086,9 +2185,9 @@
       }
     },
     {
-      "seq": 79,
+      "seq": 83,
       "op": "add",
-      "time": "2026-11-18T11:19:00Z",
+      "time": "2026-11-18T11:23:00Z",
       "author": "jimmy",
       "note": "add Head",
       "object": {
@@ -2097,14 +2196,14 @@
         "type": "sphere",
         "parent": "child-a",
         "dimensions": {
-          "x": 0.35,
-          "y": 0.35,
-          "z": 0.35
+          "x": 0.385,
+          "y": 0.385,
+          "z": 0.385
         },
         "position": [
           -1,
           1.5,
-          2.58
+          2.76
         ],
         "material": "clay",
         "certainty": {
@@ -2115,52 +2214,139 @@
       }
     },
     {
-      "seq": 80,
+      "seq": 84,
       "op": "add",
-      "time": "2026-11-18T11:20:00Z",
-      "author": "jimmy",
-      "note": "add Hair",
-      "object": {
-        "uuid": "child-a-hair",
-        "name": "Hair",
-        "type": "cylinder",
-        "parent": "child-a",
-        "dimensions": {
-          "x": 0.35,
-          "y": 0.35,
-          "z": 0.08399999999999999
-        },
-        "position": [
-          -1,
-          1.52,
-          2.75
-        ],
-        "material": "dark",
-        "certainty": {
-          "percent": 15,
-          "basis": "placeholder",
-          "note": "Hair. Form only."
-        }
-      }
-    },
-    {
-      "seq": 81,
-      "op": "add",
-      "time": "2026-11-18T11:21:00Z",
+      "time": "2026-11-18T11:24:00Z",
       "author": "jimmy",
       "note": "add Woman B (placeholder)",
       "object": {
         "uuid": "woman-b",
         "name": "Woman B (placeholder)",
         "type": "group",
-        "description": "A placeholder form in standing pose: no face, no hair detail, no clothing pattern, no regalia.",
+        "description": "A placeholder form in a pose: no face, no hair, no clothing pattern, no regalia.",
         "parent": "figures"
       }
     },
     {
-      "seq": 82,
+      "seq": 85,
       "op": "add",
-      "time": "2026-11-18T11:22:00Z",
+      "time": "2026-11-18T11:25:00Z",
+      "author": "jimmy",
+      "note": "add Leg 1",
+      "object": {
+        "uuid": "woman-b-leg-1",
+        "name": "Leg 1",
+        "type": "cylinder",
+        "parent": "woman-b",
+        "dimensions": {
+          "x": 0.3,
+          "y": 0.3,
+          "z": 1.1
+        },
+        "position": [
+          8.8,
+          3,
+          1.55
+        ],
+        "material": "hide and cloth",
+        "certainty": {
+          "percent": 15,
+          "basis": "placeholder",
+          "note": "Leg. Form only."
+        }
+      }
+    },
+    {
+      "seq": 86,
+      "op": "add",
+      "time": "2026-11-18T11:26:00Z",
+      "author": "jimmy",
+      "note": "add Foot 1",
+      "object": {
+        "uuid": "woman-b-foot-1",
+        "name": "Foot 1",
+        "type": "box",
+        "parent": "woman-b",
+        "dimensions": {
+          "x": 0.36,
+          "y": 0.6,
+          "z": 0.2
+        },
+        "position": [
+          8.8,
+          3.5,
+          1.1
+        ],
+        "material": "dark",
+        "certainty": {
+          "percent": 15,
+          "basis": "placeholder",
+          "note": "Foot. Form only."
+        }
+      }
+    },
+    {
+      "seq": 87,
+      "op": "add",
+      "time": "2026-11-18T11:27:00Z",
+      "author": "jimmy",
+      "note": "add Leg 2",
+      "object": {
+        "uuid": "woman-b-leg-2",
+        "name": "Leg 2",
+        "type": "cylinder",
+        "parent": "woman-b",
+        "dimensions": {
+          "x": 0.3,
+          "y": 0.3,
+          "z": 1.1
+        },
+        "position": [
+          9.2,
+          3,
+          1.55
+        ],
+        "material": "hide and cloth",
+        "certainty": {
+          "percent": 15,
+          "basis": "placeholder",
+          "note": "Leg. Form only."
+        }
+      }
+    },
+    {
+      "seq": 88,
+      "op": "add",
+      "time": "2026-11-18T11:28:00Z",
+      "author": "jimmy",
+      "note": "add Foot 2",
+      "object": {
+        "uuid": "woman-b-foot-2",
+        "name": "Foot 2",
+        "type": "box",
+        "parent": "woman-b",
+        "dimensions": {
+          "x": 0.36,
+          "y": 0.6,
+          "z": 0.2
+        },
+        "position": [
+          9.2,
+          3.5,
+          1.1
+        ],
+        "material": "dark",
+        "certainty": {
+          "percent": 15,
+          "basis": "placeholder",
+          "note": "Foot. Form only."
+        }
+      }
+    },
+    {
+      "seq": 89,
+      "op": "add",
+      "time": "2026-11-18T11:29:00Z",
       "author": "jimmy",
       "note": "add Skirt",
       "object": {
@@ -2169,14 +2355,14 @@
         "type": "cone",
         "parent": "woman-b",
         "dimensions": {
-          "x": 1.6,
-          "y": 1.6,
-          "z": 1.7
+          "x": 1.1,
+          "y": 1.1,
+          "z": 1.4
         },
         "position": [
           9,
           3,
-          1.85
+          2.3
         ],
         "material": "hide and cloth",
         "certainty": {
@@ -2187,9 +2373,9 @@
       }
     },
     {
-      "seq": 83,
+      "seq": 90,
       "op": "add",
-      "time": "2026-11-18T11:23:00Z",
+      "time": "2026-11-18T11:30:00Z",
       "author": "jimmy",
       "note": "add Torso",
       "object": {
@@ -2198,14 +2384,14 @@
         "type": "cylinder",
         "parent": "woman-b",
         "dimensions": {
-          "x": 0.85,
-          "y": 0.85,
-          "z": 0.9
+          "x": 0.9,
+          "y": 0.9,
+          "z": 0.95
         },
         "position": [
           9,
           3,
-          2.45
+          2.58
         ],
         "material": "hide and cloth",
         "certainty": {
@@ -2216,9 +2402,9 @@
       }
     },
     {
-      "seq": 84,
+      "seq": 91,
       "op": "add",
-      "time": "2026-11-18T11:24:00Z",
+      "time": "2026-11-18T11:31:00Z",
       "author": "jimmy",
       "note": "add Arm (left)",
       "object": {
@@ -2234,9 +2420,10 @@
         "position": [
           8.44,
           3,
-          2.4
+          2.45
         ],
         "material": "clay",
+        "rotation_x": 0,
         "rotation_y": -8,
         "certainty": {
           "percent": 15,
@@ -2246,9 +2433,38 @@
       }
     },
     {
-      "seq": 85,
+      "seq": 92,
       "op": "add",
-      "time": "2026-11-18T11:25:00Z",
+      "time": "2026-11-18T11:32:00Z",
+      "author": "jimmy",
+      "note": "add Hand (left)",
+      "object": {
+        "uuid": "woman-b-hand-l",
+        "name": "Hand (left)",
+        "type": "sphere",
+        "parent": "woman-b",
+        "dimensions": {
+          "x": 0.24,
+          "y": 0.24,
+          "z": 0.24
+        },
+        "position": [
+          8.4,
+          3,
+          1.95
+        ],
+        "material": "clay",
+        "certainty": {
+          "percent": 15,
+          "basis": "placeholder",
+          "note": "Hand. Form only."
+        }
+      }
+    },
+    {
+      "seq": 93,
+      "op": "add",
+      "time": "2026-11-18T11:33:00Z",
       "author": "jimmy",
       "note": "add Arm (right)",
       "object": {
@@ -2264,9 +2480,10 @@
         "position": [
           9.56,
           3,
-          2.4
+          2.45
         ],
         "material": "clay",
+        "rotation_x": 0,
         "rotation_y": 8,
         "certainty": {
           "percent": 15,
@@ -2276,9 +2493,38 @@
       }
     },
     {
-      "seq": 86,
+      "seq": 94,
       "op": "add",
-      "time": "2026-11-18T11:26:00Z",
+      "time": "2026-11-18T11:34:00Z",
+      "author": "jimmy",
+      "note": "add Hand (right)",
+      "object": {
+        "uuid": "woman-b-hand-r",
+        "name": "Hand (right)",
+        "type": "sphere",
+        "parent": "woman-b",
+        "dimensions": {
+          "x": 0.24,
+          "y": 0.24,
+          "z": 0.24
+        },
+        "position": [
+          9.6,
+          3,
+          1.95
+        ],
+        "material": "clay",
+        "certainty": {
+          "percent": 15,
+          "basis": "placeholder",
+          "note": "Hand. Form only."
+        }
+      }
+    },
+    {
+      "seq": 95,
+      "op": "add",
+      "time": "2026-11-18T11:35:00Z",
       "author": "jimmy",
       "note": "add Neck",
       "object": {
@@ -2294,7 +2540,7 @@
         "position": [
           9,
           3,
-          3
+          3.15
         ],
         "material": "clay",
         "certainty": {
@@ -2305,9 +2551,9 @@
       }
     },
     {
-      "seq": 87,
+      "seq": 96,
       "op": "add",
-      "time": "2026-11-18T11:27:00Z",
+      "time": "2026-11-18T11:36:00Z",
       "author": "jimmy",
       "note": "add Head",
       "object": {
@@ -2316,14 +2562,14 @@
         "type": "sphere",
         "parent": "woman-b",
         "dimensions": {
-          "x": 0.5,
-          "y": 0.5,
-          "z": 0.5
+          "x": 0.55,
+          "y": 0.55,
+          "z": 0.55
         },
         "position": [
           9,
           3,
-          3.25
+          3.52
         ],
         "material": "clay",
         "certainty": {
@@ -2334,38 +2580,9 @@
       }
     },
     {
-      "seq": 88,
+      "seq": 97,
       "op": "add",
-      "time": "2026-11-18T11:28:00Z",
-      "author": "jimmy",
-      "note": "add Hair",
-      "object": {
-        "uuid": "woman-b-hair",
-        "name": "Hair",
-        "type": "cylinder",
-        "parent": "woman-b",
-        "dimensions": {
-          "x": 0.5,
-          "y": 0.5,
-          "z": 0.12
-        },
-        "position": [
-          9,
-          3.02,
-          3.5
-        ],
-        "material": "dark",
-        "certainty": {
-          "percent": 15,
-          "basis": "placeholder",
-          "note": "Hair. Form only."
-        }
-      }
-    },
-    {
-      "seq": 89,
-      "op": "add",
-      "time": "2026-11-18T11:29:00Z",
+      "time": "2026-11-18T11:37:00Z",
       "author": "jimmy",
       "note": "add Fire ring (cold)",
       "object": {
@@ -2373,13 +2590,13 @@
         "name": "Fire ring (cold)",
         "type": "group",
         "description": "A ring of stones around cold ash.",
-        "parent": "camp"
+        "parent": "mid"
       }
     },
     {
-      "seq": 90,
+      "seq": 98,
       "op": "add",
-      "time": "2026-11-18T11:30:00Z",
+      "time": "2026-11-18T11:38:00Z",
       "author": "jimmy",
       "note": "add Cold ash",
       "object": {
@@ -2406,9 +2623,9 @@
       }
     },
     {
-      "seq": 91,
+      "seq": 99,
       "op": "add",
-      "time": "2026-11-18T11:31:00Z",
+      "time": "2026-11-18T11:39:00Z",
       "author": "jimmy",
       "note": "add Fire stone 1",
       "object": {
@@ -2435,9 +2652,9 @@
       }
     },
     {
-      "seq": 92,
+      "seq": 100,
       "op": "add",
-      "time": "2026-11-18T11:32:00Z",
+      "time": "2026-11-18T11:40:00Z",
       "author": "jimmy",
       "note": "add Fire stone 2",
       "object": {
@@ -2464,9 +2681,9 @@
       }
     },
     {
-      "seq": 93,
+      "seq": 101,
       "op": "add",
-      "time": "2026-11-18T11:33:00Z",
+      "time": "2026-11-18T11:41:00Z",
       "author": "jimmy",
       "note": "add Fire stone 3",
       "object": {
@@ -2493,9 +2710,9 @@
       }
     },
     {
-      "seq": 94,
+      "seq": 102,
       "op": "add",
-      "time": "2026-11-18T11:34:00Z",
+      "time": "2026-11-18T11:42:00Z",
       "author": "jimmy",
       "note": "add Fire stone 4",
       "object": {
@@ -2522,9 +2739,9 @@
       }
     },
     {
-      "seq": 95,
+      "seq": 103,
       "op": "add",
-      "time": "2026-11-18T11:35:00Z",
+      "time": "2026-11-18T11:43:00Z",
       "author": "jimmy",
       "note": "add Fire stone 5",
       "object": {
@@ -2551,9 +2768,9 @@
       }
     },
     {
-      "seq": 96,
+      "seq": 104,
       "op": "add",
-      "time": "2026-11-18T11:36:00Z",
+      "time": "2026-11-18T11:44:00Z",
       "author": "jimmy",
       "note": "add Fire stone 6",
       "object": {
@@ -2580,9 +2797,9 @@
       }
     },
     {
-      "seq": 97,
+      "seq": 105,
       "op": "add",
-      "time": "2026-11-18T11:37:00Z",
+      "time": "2026-11-18T11:45:00Z",
       "author": "jimmy",
       "note": "add Fire stone 7",
       "object": {
@@ -2609,9 +2826,9 @@
       }
     },
     {
-      "seq": 98,
+      "seq": 106,
       "op": "add",
-      "time": "2026-11-18T11:38:00Z",
+      "time": "2026-11-18T11:46:00Z",
       "author": "jimmy",
       "note": "add Fire stone 8",
       "object": {
@@ -2638,204 +2855,999 @@
       }
     },
     {
-      "seq": 99,
+      "seq": 107,
       "op": "add",
-      "time": "2026-11-18T11:39:00Z",
+      "time": "2026-11-18T11:47:00Z",
       "author": "jimmy",
-      "note": "add Grass tufts (decorative)",
+      "note": "add Bison skull and vertebrae",
       "object": {
-        "uuid": "tufts",
-        "name": "Grass tufts (decorative)",
+        "uuid": "bones",
+        "name": "Bison skull and vertebrae",
         "type": "group",
-        "description": "Clumps of grass. Decoration; sizes are not measured.",
-        "parent": "camp"
+        "description": "One bleached skull with horns and three vertebrae. A scene choice that carries the story: the herds are gone.",
+        "parent": "mid"
       }
     },
     {
-      "seq": 100,
+      "seq": 108,
       "op": "add",
-      "time": "2026-11-18T11:40:00Z",
+      "time": "2026-11-18T11:48:00Z",
       "author": "jimmy",
-      "note": "add Tuft 1 blade 1",
+      "note": "add Skull (cranium)",
       "object": {
-        "uuid": "tuft-1-1",
-        "name": "Tuft 1 blade 1",
-        "type": "cone",
-        "parent": "tufts",
+        "uuid": "skull-cranium",
+        "name": "Skull (cranium)",
+        "type": "box",
+        "parent": "bones",
         "dimensions": {
-          "x": 0.5,
-          "y": 0.5,
+          "x": 1.1,
+          "y": 0.9,
           "z": 0.8
         },
         "position": [
-          9,
-          6,
-          1.4
-        ],
-        "material": "grass",
-        "certainty": {
-          "percent": 30,
-          "basis": "decorative",
-          "note": "Decoration. Size not measured."
-        }
-      }
-    },
-    {
-      "seq": 101,
-      "op": "add",
-      "time": "2026-11-18T11:41:00Z",
-      "author": "jimmy",
-      "note": "add Tuft 1 blade 2",
-      "object": {
-        "uuid": "tuft-1-2",
-        "name": "Tuft 1 blade 2",
-        "type": "cone",
-        "parent": "tufts",
-        "dimensions": {
-          "x": 0.35,
-          "y": 0.35,
-          "z": 0.6
-        },
-        "position": [
-          9.25,
-          5.85,
-          1.3
-        ],
-        "material": "grass",
-        "certainty": {
-          "percent": 30,
-          "basis": "decorative",
-          "note": "Decoration. Size not measured."
-        }
-      }
-    },
-    {
-      "seq": 102,
-      "op": "add",
-      "time": "2026-11-18T11:42:00Z",
-      "author": "jimmy",
-      "note": "add Tuft 1 blade 3",
-      "object": {
-        "uuid": "tuft-1-3",
-        "name": "Tuft 1 blade 3",
-        "type": "cone",
-        "parent": "tufts",
-        "dimensions": {
-          "x": 0.4,
-          "y": 0.4,
-          "z": 0.7
-        },
-        "position": [
-          8.8,
-          6.2,
-          1.35
-        ],
-        "material": "grass",
-        "certainty": {
-          "percent": 30,
-          "basis": "decorative",
-          "note": "Decoration. Size not measured."
-        }
-      }
-    },
-    {
-      "seq": 103,
-      "op": "add",
-      "time": "2026-11-18T11:43:00Z",
-      "author": "jimmy",
-      "note": "add Tuft 2 blade 1",
-      "object": {
-        "uuid": "tuft-2-1",
-        "name": "Tuft 2 blade 1",
-        "type": "cone",
-        "parent": "tufts",
-        "dimensions": {
-          "x": 0.5,
-          "y": 0.5,
-          "z": 0.8
-        },
-        "position": [
-          11,
           3,
+          0.5,
           1.4
         ],
-        "material": "grass",
+        "material": "bone",
         "certainty": {
-          "percent": 30,
-          "basis": "decorative",
-          "note": "Decoration. Size not measured."
+          "percent": 40,
+          "basis": "inferred",
+          "note": "Scene choice. Shape generic, not a particular skull."
         }
       }
     },
     {
-      "seq": 104,
+      "seq": 109,
       "op": "add",
-      "time": "2026-11-18T11:44:00Z",
+      "time": "2026-11-18T11:49:00Z",
       "author": "jimmy",
-      "note": "add Tuft 2 blade 2",
+      "note": "add Skull (snout)",
       "object": {
-        "uuid": "tuft-2-2",
-        "name": "Tuft 2 blade 2",
+        "uuid": "skull-snout",
+        "name": "Skull (snout)",
+        "type": "box",
+        "parent": "bones",
+        "dimensions": {
+          "x": 0.6,
+          "y": 0.6,
+          "z": 0.5
+        },
+        "position": [
+          3.8,
+          0.5,
+          1.3
+        ],
+        "material": "bone",
+        "certainty": {
+          "percent": 40,
+          "basis": "inferred",
+          "note": "Scene choice."
+        }
+      }
+    },
+    {
+      "seq": 110,
+      "op": "add",
+      "time": "2026-11-18T11:50:00Z",
+      "author": "jimmy",
+      "note": "add Horn (left)",
+      "object": {
+        "uuid": "skull-horn-l",
+        "name": "Horn (left)",
         "type": "cone",
-        "parent": "tufts",
+        "parent": "bones",
+        "dimensions": {
+          "x": 0.22,
+          "y": 0.22,
+          "z": 0.8
+        },
+        "position": [
+          2.9,
+          -0.1,
+          1.9
+        ],
+        "material": "bone",
+        "rotation_x": -60,
+        "certainty": {
+          "percent": 40,
+          "basis": "inferred",
+          "note": "Horn, generic."
+        }
+      }
+    },
+    {
+      "seq": 111,
+      "op": "add",
+      "time": "2026-11-18T11:51:00Z",
+      "author": "jimmy",
+      "note": "add Horn (right)",
+      "object": {
+        "uuid": "skull-horn-r",
+        "name": "Horn (right)",
+        "type": "cone",
+        "parent": "bones",
+        "dimensions": {
+          "x": 0.22,
+          "y": 0.22,
+          "z": 0.8
+        },
+        "position": [
+          2.9,
+          1.1,
+          1.9
+        ],
+        "material": "bone",
+        "rotation_x": 60,
+        "certainty": {
+          "percent": 40,
+          "basis": "inferred",
+          "note": "Horn, generic."
+        }
+      }
+    },
+    {
+      "seq": 112,
+      "op": "add",
+      "time": "2026-11-18T11:52:00Z",
+      "author": "jimmy",
+      "note": "add Vertebra 1",
+      "object": {
+        "uuid": "vertebra-1",
+        "name": "Vertebra 1",
+        "type": "cylinder",
+        "parent": "bones",
         "dimensions": {
           "x": 0.35,
           "y": 0.35,
-          "z": 0.6
+          "z": 0.25
         },
         "position": [
-          11.25,
-          2.85,
-          1.3
+          3,
+          -0.8,
+          1.12
         ],
-        "material": "grass",
+        "material": "bone",
         "certainty": {
-          "percent": 30,
-          "basis": "decorative",
-          "note": "Decoration. Size not measured."
+          "percent": 40,
+          "basis": "inferred",
+          "note": "Scene choice."
         }
       }
     },
     {
-      "seq": 105,
+      "seq": 113,
       "op": "add",
-      "time": "2026-11-18T11:45:00Z",
+      "time": "2026-11-18T11:53:00Z",
       "author": "jimmy",
-      "note": "add Tuft 2 blade 3",
+      "note": "add Vertebra 2",
       "object": {
-        "uuid": "tuft-2-3",
-        "name": "Tuft 2 blade 3",
-        "type": "cone",
-        "parent": "tufts",
+        "uuid": "vertebra-2",
+        "name": "Vertebra 2",
+        "type": "cylinder",
+        "parent": "bones",
         "dimensions": {
-          "x": 0.4,
-          "y": 0.4,
-          "z": 0.7
+          "x": 0.35,
+          "y": 0.35,
+          "z": 0.25
         },
         "position": [
-          10.8,
-          3.2,
-          1.35
+          3,
+          -1.3,
+          1.12
         ],
-        "material": "grass",
+        "material": "bone",
         "certainty": {
-          "percent": 30,
-          "basis": "decorative",
-          "note": "Decoration. Size not measured."
+          "percent": 40,
+          "basis": "inferred",
+          "note": "Scene choice."
         }
       }
     },
     {
-      "seq": 106,
+      "seq": 114,
       "op": "add",
-      "time": "2026-11-18T11:46:00Z",
+      "time": "2026-11-18T11:54:00Z",
+      "author": "jimmy",
+      "note": "add Vertebra 3",
+      "object": {
+        "uuid": "vertebra-3",
+        "name": "Vertebra 3",
+        "type": "cylinder",
+        "parent": "bones",
+        "dimensions": {
+          "x": 0.35,
+          "y": 0.35,
+          "z": 0.25
+        },
+        "position": [
+          3,
+          -1.8,
+          1.12
+        ],
+        "material": "bone",
+        "certainty": {
+          "percent": 40,
+          "basis": "inferred",
+          "note": "Scene choice."
+        }
+      }
+    },
+    {
+      "seq": 115,
+      "op": "add",
+      "time": "2026-11-18T11:55:00Z",
+      "author": "jimmy",
+      "note": "add Horses (placeholder)",
+      "object": {
+        "uuid": "horses",
+        "name": "Horses (placeholder)",
+        "type": "group",
+        "description": "Two horses, placeholder silhouettes in real proportions. No breed, tack or colour is claimed.",
+        "parent": "fore"
+      }
+    },
+    {
+      "seq": 116,
+      "op": "add",
+      "time": "2026-11-18T11:56:00Z",
+      "author": "jimmy",
+      "note": "add Horse 1 (front)",
+      "object": {
+        "uuid": "horse-1",
+        "name": "Horse 1 (front)",
+        "type": "group",
+        "description": "A horse standing, facing right. A placeholder silhouette in real proportions; no breed, tack or colour is claimed.",
+        "parent": "horses"
+      }
+    },
+    {
+      "seq": 117,
+      "op": "add",
+      "time": "2026-11-18T11:57:00Z",
+      "author": "jimmy",
+      "note": "add Barrel (body)",
+      "object": {
+        "uuid": "horse-1-barrel",
+        "name": "Barrel (body)",
+        "type": "cylinder",
+        "parent": "horse-1",
+        "dimensions": {
+          "x": 1.1,
+          "y": 1.1,
+          "z": 3.2
+        },
+        "position": [
+          6,
+          -8.5,
+          3.3
+        ],
+        "material": "horse bay",
+        "rotation_y": 90,
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Body shape from a horse body plan."
+        }
+      }
+    },
+    {
+      "seq": 118,
+      "op": "add",
+      "time": "2026-11-18T11:58:00Z",
+      "author": "jimmy",
+      "note": "add Neck",
+      "object": {
+        "uuid": "horse-1-neck",
+        "name": "Neck",
+        "type": "cylinder",
+        "parent": "horse-1",
+        "dimensions": {
+          "x": 0.6,
+          "y": 0.6,
+          "z": 1.9
+        },
+        "position": [
+          7.9,
+          -8.5,
+          4.2
+        ],
+        "material": "horse bay",
+        "rotation_y": 30,
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Neck, raised."
+        }
+      }
+    },
+    {
+      "seq": 119,
+      "op": "add",
+      "time": "2026-11-18T11:59:00Z",
+      "author": "jimmy",
+      "note": "add Mane",
+      "object": {
+        "uuid": "horse-1-mane",
+        "name": "Mane",
+        "type": "box",
+        "parent": "horse-1",
+        "dimensions": {
+          "x": 0.18,
+          "y": 0.18,
+          "z": 1.6
+        },
+        "position": [
+          7.95,
+          -8.5,
+          4.55
+        ],
+        "material": "horse dark",
+        "rotation_y": 30,
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Mane along the neck."
+        }
+      }
+    },
+    {
+      "seq": 120,
+      "op": "add",
+      "time": "2026-11-18T12:00:00Z",
+      "author": "jimmy",
+      "note": "add Head",
+      "object": {
+        "uuid": "horse-1-head",
+        "name": "Head",
+        "type": "box",
+        "parent": "horse-1",
+        "dimensions": {
+          "x": 0.95,
+          "y": 0.5,
+          "z": 0.55
+        },
+        "position": [
+          8.85,
+          -8.5,
+          5
+        ],
+        "material": "horse dark",
+        "rotation_y": 40,
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Head, lowered."
+        }
+      }
+    },
+    {
+      "seq": 121,
+      "op": "add",
+      "time": "2026-11-18T12:01:00Z",
+      "author": "jimmy",
+      "note": "add Muzzle",
+      "object": {
+        "uuid": "horse-1-muzzle",
+        "name": "Muzzle",
+        "type": "box",
+        "parent": "horse-1",
+        "dimensions": {
+          "x": 0.7,
+          "y": 0.38,
+          "z": 0.4
+        },
+        "position": [
+          9.45,
+          -8.5,
+          4.6
+        ],
+        "material": "horse dark",
+        "rotation_y": 40,
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Muzzle."
+        }
+      }
+    },
+    {
+      "seq": 122,
+      "op": "add",
+      "time": "2026-11-18T12:02:00Z",
+      "author": "jimmy",
+      "note": "add Ear (left)",
+      "object": {
+        "uuid": "horse-1-ear-l",
+        "name": "Ear (left)",
+        "type": "cone",
+        "parent": "horse-1",
+        "dimensions": {
+          "x": 0.14,
+          "y": 0.14,
+          "z": 0.3
+        },
+        "position": [
+          8.75,
+          -8.64,
+          5.6
+        ],
+        "material": "horse dark",
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Ear."
+        }
+      }
+    },
+    {
+      "seq": 123,
+      "op": "add",
+      "time": "2026-11-18T12:03:00Z",
+      "author": "jimmy",
+      "note": "add Ear (right)",
+      "object": {
+        "uuid": "horse-1-ear-r",
+        "name": "Ear (right)",
+        "type": "cone",
+        "parent": "horse-1",
+        "dimensions": {
+          "x": 0.14,
+          "y": 0.14,
+          "z": 0.3
+        },
+        "position": [
+          8.75,
+          -8.36,
+          5.6
+        ],
+        "material": "horse dark",
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Ear."
+        }
+      }
+    },
+    {
+      "seq": 124,
+      "op": "add",
+      "time": "2026-11-18T12:04:00Z",
+      "author": "jimmy",
+      "note": "add Tail",
+      "object": {
+        "uuid": "horse-1-tail",
+        "name": "Tail",
+        "type": "cylinder",
+        "parent": "horse-1",
+        "dimensions": {
+          "x": 0.28,
+          "y": 0.28,
+          "z": 1.6
+        },
+        "position": [
+          3.8,
+          -8.5,
+          2.8
+        ],
+        "material": "horse dark",
+        "rotation_y": 24,
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Tail, hanging from the rump."
+        }
+      }
+    },
+    {
+      "seq": 125,
+      "op": "add",
+      "time": "2026-11-18T12:05:00Z",
+      "author": "jimmy",
+      "note": "add Leg 1",
+      "object": {
+        "uuid": "horse-1-leg-1",
+        "name": "Leg 1",
+        "type": "cylinder",
+        "parent": "horse-1",
+        "dimensions": {
+          "x": 0.26,
+          "y": 0.26,
+          "z": 1.75
+        },
+        "position": [
+          7.2,
+          -8.86,
+          1.88
+        ],
+        "material": "horse dark",
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Leg."
+        }
+      }
+    },
+    {
+      "seq": 126,
+      "op": "add",
+      "time": "2026-11-18T12:06:00Z",
+      "author": "jimmy",
+      "note": "add Leg 2",
+      "object": {
+        "uuid": "horse-1-leg-2",
+        "name": "Leg 2",
+        "type": "cylinder",
+        "parent": "horse-1",
+        "dimensions": {
+          "x": 0.26,
+          "y": 0.26,
+          "z": 1.75
+        },
+        "position": [
+          7.2,
+          -8.14,
+          1.88
+        ],
+        "material": "horse dark",
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Leg."
+        }
+      }
+    },
+    {
+      "seq": 127,
+      "op": "add",
+      "time": "2026-11-18T12:07:00Z",
+      "author": "jimmy",
+      "note": "add Leg 3",
+      "object": {
+        "uuid": "horse-1-leg-3",
+        "name": "Leg 3",
+        "type": "cylinder",
+        "parent": "horse-1",
+        "dimensions": {
+          "x": 0.26,
+          "y": 0.26,
+          "z": 1.75
+        },
+        "position": [
+          4.8,
+          -8.86,
+          1.88
+        ],
+        "material": "horse dark",
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Leg."
+        }
+      }
+    },
+    {
+      "seq": 128,
+      "op": "add",
+      "time": "2026-11-18T12:08:00Z",
+      "author": "jimmy",
+      "note": "add Leg 4",
+      "object": {
+        "uuid": "horse-1-leg-4",
+        "name": "Leg 4",
+        "type": "cylinder",
+        "parent": "horse-1",
+        "dimensions": {
+          "x": 0.26,
+          "y": 0.26,
+          "z": 1.75
+        },
+        "position": [
+          4.8,
+          -8.14,
+          1.88
+        ],
+        "material": "horse dark",
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Leg."
+        }
+      }
+    },
+    {
+      "seq": 129,
+      "op": "add",
+      "time": "2026-11-18T12:09:00Z",
+      "author": "jimmy",
+      "note": "add Horse 2 (by the cover)",
+      "object": {
+        "uuid": "horse-2",
+        "name": "Horse 2 (by the cover)",
+        "type": "group",
+        "description": "A horse standing, facing right. A placeholder silhouette in real proportions; no breed, tack or colour is claimed.",
+        "parent": "horses"
+      }
+    },
+    {
+      "seq": 130,
+      "op": "add",
+      "time": "2026-11-18T12:10:00Z",
+      "author": "jimmy",
+      "note": "add Barrel (body)",
+      "object": {
+        "uuid": "horse-2-barrel",
+        "name": "Barrel (body)",
+        "type": "cylinder",
+        "parent": "horse-2",
+        "dimensions": {
+          "x": 1.1,
+          "y": 1.1,
+          "z": 3.2
+        },
+        "position": [
+          -5,
+          -8.5,
+          3.3
+        ],
+        "material": "horse bay",
+        "rotation_y": 90,
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Body shape from a horse body plan."
+        }
+      }
+    },
+    {
+      "seq": 131,
+      "op": "add",
+      "time": "2026-11-18T12:11:00Z",
+      "author": "jimmy",
+      "note": "add Neck",
+      "object": {
+        "uuid": "horse-2-neck",
+        "name": "Neck",
+        "type": "cylinder",
+        "parent": "horse-2",
+        "dimensions": {
+          "x": 0.6,
+          "y": 0.6,
+          "z": 1.9
+        },
+        "position": [
+          -3.1,
+          -8.5,
+          4.2
+        ],
+        "material": "horse bay",
+        "rotation_y": 30,
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Neck, raised."
+        }
+      }
+    },
+    {
+      "seq": 132,
+      "op": "add",
+      "time": "2026-11-18T12:12:00Z",
+      "author": "jimmy",
+      "note": "add Mane",
+      "object": {
+        "uuid": "horse-2-mane",
+        "name": "Mane",
+        "type": "box",
+        "parent": "horse-2",
+        "dimensions": {
+          "x": 0.18,
+          "y": 0.18,
+          "z": 1.6
+        },
+        "position": [
+          -3.05,
+          -8.5,
+          4.55
+        ],
+        "material": "horse dark",
+        "rotation_y": 30,
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Mane along the neck."
+        }
+      }
+    },
+    {
+      "seq": 133,
+      "op": "add",
+      "time": "2026-11-18T12:13:00Z",
+      "author": "jimmy",
+      "note": "add Head",
+      "object": {
+        "uuid": "horse-2-head",
+        "name": "Head",
+        "type": "box",
+        "parent": "horse-2",
+        "dimensions": {
+          "x": 0.95,
+          "y": 0.5,
+          "z": 0.55
+        },
+        "position": [
+          -2.15,
+          -8.5,
+          5
+        ],
+        "material": "horse dark",
+        "rotation_y": 40,
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Head, lowered."
+        }
+      }
+    },
+    {
+      "seq": 134,
+      "op": "add",
+      "time": "2026-11-18T12:14:00Z",
+      "author": "jimmy",
+      "note": "add Muzzle",
+      "object": {
+        "uuid": "horse-2-muzzle",
+        "name": "Muzzle",
+        "type": "box",
+        "parent": "horse-2",
+        "dimensions": {
+          "x": 0.7,
+          "y": 0.38,
+          "z": 0.4
+        },
+        "position": [
+          -1.55,
+          -8.5,
+          4.6
+        ],
+        "material": "horse dark",
+        "rotation_y": 40,
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Muzzle."
+        }
+      }
+    },
+    {
+      "seq": 135,
+      "op": "add",
+      "time": "2026-11-18T12:15:00Z",
+      "author": "jimmy",
+      "note": "add Ear (left)",
+      "object": {
+        "uuid": "horse-2-ear-l",
+        "name": "Ear (left)",
+        "type": "cone",
+        "parent": "horse-2",
+        "dimensions": {
+          "x": 0.14,
+          "y": 0.14,
+          "z": 0.3
+        },
+        "position": [
+          -2.25,
+          -8.64,
+          5.6
+        ],
+        "material": "horse dark",
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Ear."
+        }
+      }
+    },
+    {
+      "seq": 136,
+      "op": "add",
+      "time": "2026-11-18T12:16:00Z",
+      "author": "jimmy",
+      "note": "add Ear (right)",
+      "object": {
+        "uuid": "horse-2-ear-r",
+        "name": "Ear (right)",
+        "type": "cone",
+        "parent": "horse-2",
+        "dimensions": {
+          "x": 0.14,
+          "y": 0.14,
+          "z": 0.3
+        },
+        "position": [
+          -2.25,
+          -8.36,
+          5.6
+        ],
+        "material": "horse dark",
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Ear."
+        }
+      }
+    },
+    {
+      "seq": 137,
+      "op": "add",
+      "time": "2026-11-18T12:17:00Z",
+      "author": "jimmy",
+      "note": "add Tail",
+      "object": {
+        "uuid": "horse-2-tail",
+        "name": "Tail",
+        "type": "cylinder",
+        "parent": "horse-2",
+        "dimensions": {
+          "x": 0.28,
+          "y": 0.28,
+          "z": 1.6
+        },
+        "position": [
+          -7.2,
+          -8.5,
+          2.8
+        ],
+        "material": "horse dark",
+        "rotation_y": 24,
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Tail, hanging from the rump."
+        }
+      }
+    },
+    {
+      "seq": 138,
+      "op": "add",
+      "time": "2026-11-18T12:18:00Z",
+      "author": "jimmy",
+      "note": "add Leg 1",
+      "object": {
+        "uuid": "horse-2-leg-1",
+        "name": "Leg 1",
+        "type": "cylinder",
+        "parent": "horse-2",
+        "dimensions": {
+          "x": 0.26,
+          "y": 0.26,
+          "z": 1.75
+        },
+        "position": [
+          -3.8,
+          -8.86,
+          1.88
+        ],
+        "material": "horse dark",
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Leg."
+        }
+      }
+    },
+    {
+      "seq": 139,
+      "op": "add",
+      "time": "2026-11-18T12:19:00Z",
+      "author": "jimmy",
+      "note": "add Leg 2",
+      "object": {
+        "uuid": "horse-2-leg-2",
+        "name": "Leg 2",
+        "type": "cylinder",
+        "parent": "horse-2",
+        "dimensions": {
+          "x": 0.26,
+          "y": 0.26,
+          "z": 1.75
+        },
+        "position": [
+          -3.8,
+          -8.14,
+          1.88
+        ],
+        "material": "horse dark",
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Leg."
+        }
+      }
+    },
+    {
+      "seq": 140,
+      "op": "add",
+      "time": "2026-11-18T12:20:00Z",
+      "author": "jimmy",
+      "note": "add Leg 3",
+      "object": {
+        "uuid": "horse-2-leg-3",
+        "name": "Leg 3",
+        "type": "cylinder",
+        "parent": "horse-2",
+        "dimensions": {
+          "x": 0.26,
+          "y": 0.26,
+          "z": 1.75
+        },
+        "position": [
+          -6.2,
+          -8.86,
+          1.88
+        ],
+        "material": "horse dark",
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Leg."
+        }
+      }
+    },
+    {
+      "seq": 141,
+      "op": "add",
+      "time": "2026-11-18T12:21:00Z",
+      "author": "jimmy",
+      "note": "add Leg 4",
+      "object": {
+        "uuid": "horse-2-leg-4",
+        "name": "Leg 4",
+        "type": "cylinder",
+        "parent": "horse-2",
+        "dimensions": {
+          "x": 0.26,
+          "y": 0.26,
+          "z": 1.75
+        },
+        "position": [
+          -6.2,
+          -8.14,
+          1.88
+        ],
+        "material": "horse dark",
+        "certainty": {
+          "percent": 20,
+          "basis": "placeholder",
+          "note": "Leg."
+        }
+      }
+    },
+    {
+      "seq": 142,
+      "op": "add",
+      "time": "2026-11-18T12:22:00Z",
+      "author": "jimmy",
+      "note": "add Grass tuft (front)",
+      "object": {
+        "uuid": "tuft-front",
+        "name": "Grass tuft (front)",
+        "type": "group",
+        "description": "A clump of grass at the front. Decoration; size not measured.",
+        "parent": "fore"
+      }
+    },
+    {
+      "seq": 143,
+      "op": "add",
+      "time": "2026-11-18T12:23:00Z",
       "author": "jimmy",
       "note": "add Tuft 3 blade 1",
       "object": {
         "uuid": "tuft-3-1",
         "name": "Tuft 3 blade 1",
         "type": "cone",
-        "parent": "tufts",
+        "parent": "tuft-front",
         "dimensions": {
           "x": 0.5,
           "y": 0.5,
@@ -2855,16 +3867,16 @@
       }
     },
     {
-      "seq": 107,
+      "seq": 144,
       "op": "add",
-      "time": "2026-11-18T11:47:00Z",
+      "time": "2026-11-18T12:24:00Z",
       "author": "jimmy",
       "note": "add Tuft 3 blade 2",
       "object": {
         "uuid": "tuft-3-2",
         "name": "Tuft 3 blade 2",
         "type": "cone",
-        "parent": "tufts",
+        "parent": "tuft-front",
         "dimensions": {
           "x": 0.35,
           "y": 0.35,
@@ -2884,16 +3896,16 @@
       }
     },
     {
-      "seq": 108,
+      "seq": 145,
       "op": "add",
-      "time": "2026-11-18T11:48:00Z",
+      "time": "2026-11-18T12:25:00Z",
       "author": "jimmy",
       "note": "add Tuft 3 blade 3",
       "object": {
         "uuid": "tuft-3-3",
         "name": "Tuft 3 blade 3",
         "type": "cone",
-        "parent": "tufts",
+        "parent": "tuft-front",
         "dimensions": {
           "x": 0.4,
           "y": 0.4,
@@ -2913,16 +3925,16 @@
       }
     },
     {
-      "seq": 109,
+      "seq": 146,
       "op": "add",
-      "time": "2026-11-18T11:49:00Z",
+      "time": "2026-11-18T12:26:00Z",
       "author": "jimmy",
       "note": "add Label plate",
       "object": {
         "uuid": "label-plate",
         "name": "Label plate",
         "type": "box",
-        "parent": "camp",
+        "parent": "fore",
         "dimensions": {
           "x": 6,
           "y": 0.3,
@@ -2942,92 +3954,114 @@
       }
     },
     {
-      "seq": 110,
+      "seq": 147,
       "op": "flag",
-      "time": "2026-11-18T11:50:00Z",
+      "time": "2026-11-18T12:27:00Z",
       "author": "jimmy",
       "note": "flag F1",
       "id": "F1",
       "kind": "consultation",
       "target": "camp",
-      "text": "Display needs review by the Cheyenne and Arapaho Tribes (see research/consultation-plan.md). The whole camp is a draft until then."
+      "text": "Display needs review by the Cheyenne and Arapaho Tribes (see research/consultation-plan.md). The whole camp is a draft until then. Not for display."
     },
     {
-      "seq": 111,
+      "seq": 148,
       "op": "flag",
-      "time": "2026-11-18T11:51:00Z",
+      "time": "2026-11-18T12:28:00Z",
       "author": "jimmy",
       "note": "flag F2",
       "id": "F2",
       "kind": "consultation",
       "target": "lodges",
-      "text": "The lodge shapes, the pole angles, the door and how the cover is folded need checking against Cheyenne practice."
+      "text": "The lodge shapes, the pole angles, the door and the struck cover need checking against Cheyenne practice."
     },
     {
-      "seq": 112,
+      "seq": 149,
       "op": "flag",
-      "time": "2026-11-18T11:52:00Z",
+      "time": "2026-11-18T12:29:00Z",
       "author": "jimmy",
       "note": "flag F3",
       "id": "F3",
       "kind": "consultation",
       "target": "travois",
-      "text": "The travois sizes and the load are approximate. Check the load and how it was packed."
+      "text": "The travois sizes and the loads are approximate. Check the load and how it was packed."
     },
     {
-      "seq": 113,
+      "seq": 150,
       "op": "flag",
-      "time": "2026-11-18T11:53:00Z",
+      "time": "2026-11-18T12:30:00Z",
       "author": "jimmy",
       "note": "flag F4",
       "id": "F4",
       "kind": "consultation",
       "target": "horses",
-      "text": "The horses are placeholder silhouettes in real proportions. Breed, tack and colour are not claimed. Check with consultants before any display."
+      "text": "The horses are placeholder silhouettes in real proportions. Breed, tack and colour are not claimed."
     },
     {
-      "seq": 114,
+      "seq": 151,
       "op": "flag",
-      "time": "2026-11-18T11:54:00Z",
+      "time": "2026-11-18T12:31:00Z",
       "author": "jimmy",
       "note": "flag F5",
       "id": "F5",
       "kind": "consultation",
       "target": "figures",
-      "text": "The people are placeholder forms only: no faces, hair detail, clothing or regalia. They must not stand in for real people. Review before any display."
+      "text": "The people are placeholder forms in poses, with no faces, no hair and no clothing pattern. They must not stand in for real people."
     },
     {
-      "seq": 115,
+      "seq": 152,
       "op": "flag",
-      "time": "2026-11-18T11:55:00Z",
+      "time": "2026-11-18T12:32:00Z",
       "author": "jimmy",
       "note": "flag F6",
       "id": "F6",
+      "kind": "uncertain",
+      "target": "bones",
+      "text": "The skull and vertebrae are a scene choice. They are not a particular skull."
+    },
+    {
+      "seq": 153,
+      "op": "flag",
+      "time": "2026-11-18T12:33:00Z",
+      "author": "jimmy",
+      "note": "flag F7",
+      "id": "F7",
       "kind": "uncertain",
       "target": "ridge",
       "text": "The bluff is invented to frame the camp. It has no source."
     },
     {
-      "seq": 116,
+      "seq": 154,
       "op": "flag",
-      "time": "2026-11-18T11:56:00Z",
+      "time": "2026-11-18T12:34:00Z",
       "author": "jimmy",
-      "note": "flag F7",
-      "id": "F7",
+      "note": "flag F8",
+      "id": "F8",
       "kind": "uncertain",
       "target": "fire-ring",
       "text": "The fire ring size is typical, and the cold ash is an assumption."
     },
     {
-      "seq": 117,
+      "seq": 155,
       "op": "flag",
-      "time": "2026-11-18T11:57:00Z",
+      "time": "2026-11-18T12:35:00Z",
       "author": "jimmy",
-      "note": "flag F8",
-      "id": "F8",
+      "note": "flag F9",
+      "id": "F9",
       "kind": "uncertain",
       "target": "tufts",
       "text": "The grass tufts are decoration; their size is not measured."
+    },
+    {
+      "seq": 156,
+      "op": "flag",
+      "time": "2026-11-18T12:36:00Z",
+      "author": "jimmy",
+      "note": "flag F10",
+      "id": "F10",
+      "kind": "uncertain",
+      "target": "tuft-front",
+      "text": "The grass tuft is decoration; its size is not measured."
     }
   ]
 }

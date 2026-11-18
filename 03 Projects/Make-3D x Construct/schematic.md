@@ -1,6 +1,6 @@
 # Make-3D x Construct — Schematic
 
-**Status:** MVP 0.4 built: Southern Cheyenne camp move, 109 parts, real scale, objects built from real parts (draft, not for display until consultation) · round 5 answers in `convo/convo v0.5.md` · **Updated:** 2026-11-18
+**Status:** MVP 0.5 built: Southern Cheyenne camp move, 146 parts in three planes, real scale, bones and posed figures (draft, not for display until consultation) · round 6 answers in `convo/convo v0.6.md` · **Updated:** 2026-11-18
 **Track:** B. Studio design (`02 Refs/Skills/project_track.md`)
 **Based on:** a review of Construct (`rtmandreyev/construct`, commit `7ea702e`, toolkit version 1.3.2), the Make-3D schematic and to-do list (graduated to `ShimmyCane/Make-3D`), and the nursery's new-project workflow. Nothing is built yet. The first build waits for Jimmy's answers.
 
@@ -143,3 +143,10 @@ See `convo/convo v0.3.md`.
 - Density is detail in the existing objects. The scale is fixed to real sizes (1 in = 2 ft).
 - Objects are built from real parts: lodges (cover, four leaning poles, door), horses (barrel, neck, head, legs), people (torso, arms, head, hair).
 - Next density pass only when asked: bluff, struck cover, travois loads. See `convo/convo v0.5.md`.
+
+## 13. Round 6 (2026-11-18): planes, bones, posed figures
+
+- Three planes: background (ground, layered bluff, backdrop, back tufts), midground (lodges, struck cover, travois, people, fire ring, bones), foreground (horses, front tuft, label).
+- Detail by plane. The lessons for any scene are in `04 AI/3d_scene_craft_lessons.md`.
+- Figures: body, feet and poses. No faces (a decision for Jimmy: see `convo/convo v0.6.md`).
+- Display gate stays on until Jimmy decides.
