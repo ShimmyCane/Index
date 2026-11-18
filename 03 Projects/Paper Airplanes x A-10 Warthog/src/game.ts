@@ -1,4 +1,5 @@
-// Game state and rules: guns, anti-aircraft shells, rings, crashes and free play.
+// Game state and rules: guns and their aim, missiles and their stock, anti-aircraft
+// fire, rings, the safe-flight floor, invincibility, ejection and free play.
 namespace PA {
   export type Phase = 'flying' | 'crashed' | 'landed';
   export type SoundName = 'gun' | 'boom' | 'thud' | 'chime' | 'land' | 'crash';
@@ -11,6 +12,9 @@ namespace PA {
     view: View;
     sound: number;
     forces: number;
+    safeFlight: number;   // 1 = a floor above the ground: the plane levels out and pulls up
+    invincible: number;   // 1 = hits and crashes do no harm
+    autoReload: number;   // 1 = missiles come back over time
     showErrors: number;
   }
 
@@ -19,6 +23,11 @@ namespace PA {
     fire: boolean;
     boost: boolean;
     missile: boolean;
+  }
+
+  export interface Axes {
+    yaw: number;      // -1 left … +1 right
+    pitch: number;    // -1 down … +1 up
   }
 
   // A homing missile. It turns toward its target at a limited rate.
@@ -41,11 +50,6 @@ namespace PA {
     vY: number;
     drift: number;
     life: number;
-  }
-
-  export interface Axes {
-    yaw: number;      // -1 left … +1 right
-    pitch: number;    // -1 down … +1 up
   }
 
   export interface Shot {
@@ -71,19 +75,31 @@ namespace PA {
     size: number;
   }
 
+  // The gun's aim: which way it points, and why (for the HUD).
+  export interface Aim {
+    yaw: number;
+    pitch: number;        // radians; negative is down (the declination)
+    mode: 'straight' | 'ground' | 'air';
+  }
+
+  export const MISSILE_MAX = 6;
   const SHOT_SPEED = 260;     // m/s, the gun, relative to the plane
-  const FLAK_SPEED = 120;     // m/s
   const CRUISE_THROTTLE = 0.6;
   const BULLET_LIFE = 1.6;
   const SHELL_LIFE = 4;
   const RESPAWN_SECONDS = 3.5;
-  const MISSILE_COOL = 3;      // seconds between missiles
-  const MISSILE_SPEED = 180;   // m/s
-  const MISSILE_TURN = 2.2;    // radians per second at most
-  const MISSILE_RANGE = 900;   // metres
-  const MISSILE_CONE = 0.45;   // radians either side of the nose to lock on
-  const PARACHUTE_FALL = 4;    // m/s, the pilot's sink rate under the parachute
-  const KEEP_AHEAD = 6;       // free play keeps this many targets in front of the plane
+  const MISSILE_COOL = 1;        // seconds between missiles
+  const MISSILE_RELOAD = 3;      // seconds for one missile to come back (auto reload)
+  const MISSILE_SPEED = 180;     // m/s
+  const MISSILE_TURN = 2.2;      // radians per second at most
+  const MISSILE_RANGE = 900;     // metres
+  const MISSILE_CONE = 0.45;     // radians either side of the nose to lock on
+  const PARACHUTE_FALL = 4;      // m/s, the pilot's sink rate under the parachute
+  const KEEP_AHEAD = 6;          // free play keeps this many targets in front of the plane
+  const FLOOR = 30;              // safe flight: below this height above ground the plane pulls up
+  const FLOOR_MIN = 8;           // safe flight: below this it must not sink any further
+  const AIR_RANGE = 900;         // the gun aims straight at aircraft within this range
+  const GROUND_RANGE = 700;      // the gun depresses toward ground targets within this range
 
   export class Game {
     phase: Phase = 'flying';
@@ -97,11 +113,15 @@ namespace PA {
     time = 0;
     fireCool = 0;
     respawnIn = 0;
+    missileStock = MISSILE_MAX;
+    missileCool = 0;
+    reloadTimer = 0;
+    aim: Aim = { yaw: 0, pitch: 0, mode: 'straight' };
+    floorActive = false;
     shots: Shot[] = [];
     shells: Shot[] = [];
     missiles: Missile[] = [];
     jumpers: Jumper[] = [];
-    missileCool = 0;
     puffs: Puff[] = [];
     held: Held = { fire: false, boost: false, missile: false };
     axes: Axes = { yaw: 0, pitch: 0 };
@@ -130,12 +150,14 @@ namespace PA {
       this.time = 0;
       this.fireCool = 0;
       this.respawnIn = 0;
+      this.missileStock = MISSILE_MAX;
+      this.missileCool = 0;
+      this.reloadTimer = 0;
       this.shots = [];
       this.shells = [];
-      this.puffs = [];
       this.missiles = [];
       this.jumpers = [];
-      this.missileCool = 0;
+      this.puffs = [];
     }
 
     update(dtIn: number): void {
@@ -157,31 +179,53 @@ namespace PA {
         yaw: clamp(this.axes.yaw),
         throttle: jet ? (this.held.boost ? 1 : CRUISE_THROTTLE) : 0,
       };
+      this.floorActive = false;
+      if (jet && this.settings.safeFlight === 1) this.applyFloor(pilot);
+
       const touched = this.plane.step(dt, pilot, groundAt);
       if (touched) {
-        if (jet) {
-          this.crash();
-        } else {
+        if (!jet) {
           this.phase = 'landed';
           this.onSound('land');
+          return;
         }
-        return;
+        if (this.settings.invincible === 1) {
+          // Invincible: the ground only bounces the plane back up.
+          this.plane.h = groundAt(this.plane.X, this.plane.Z) + 4;
+          this.plane.vy = Math.max(this.plane.vy, 6);
+        } else {
+          this.crash();
+          return;
+        }
       }
 
       if (jet) {
+        this.updateReload(dt);
         this.updateGuns(dt);
         this.updateMissiles(dt);
         this.updateShots(dt);
         this.updateShells(dt);
-        this.updateFlak(dt);
+        this.updateGunners(dt);
         this.keepTargets();
-        if (this.hull <= 0) this.crash();
+        if (this.hull <= 0 && this.settings.invincible !== 1) this.crash();
       } else {
         this.checkRings();
       }
     }
 
-    // Ejection: the explosion, then the pilot drifts down on a parachute.
+    // Safe flight: a floor above the ground. Near it the plane levels out and pulls up;
+    // very close, it cannot sink any further.
+    private applyFloor(pilot: Pilot): void {
+      const p = this.plane;
+      const agl = p.h - groundAt(p.X, p.Z);
+      if (agl < FLOOR && p.vy < 0) {
+        this.floorActive = true;
+        const strength = Math.min(1, (FLOOR - agl) / (FLOOR - FLOOR_MIN));
+        pilot.pitch = Math.max(pilot.pitch, 0.35 + 0.65 * strength);
+        if (agl < FLOOR_MIN) p.vy = Math.max(p.vy, 0);
+      }
+    }
+
     private crash(): void {
       this.phase = 'crashed';
       this.hull = 0;
@@ -193,7 +237,6 @@ namespace PA {
 
     private updateJumpers(dt: number): void {
       for (const j of this.jumpers) {
-        // Free fall for a moment, then the parachute slows the sink to a steady drift.
         j.vY = j.vY > -PARACHUTE_FALL ? Math.max(-PARACHUTE_FALL, j.vY - GRAVITY * dt) : -PARACHUTE_FALL;
         j.h = Math.max(groundAt(j.X, j.Z), j.h + j.vY * dt);
         j.X += j.drift * dt * 0.2;
@@ -202,14 +245,28 @@ namespace PA {
       this.jumpers = this.jumpers.filter(j => j.life > 0);
     }
 
+    // Reload: with auto reload on, one missile comes back every few seconds, up to the maximum.
+    private updateReload(dt: number): void {
+      if (this.settings.autoReload !== 1 || this.missileStock >= MISSILE_MAX) {
+        this.reloadTimer = 0;
+        return;
+      }
+      this.reloadTimer += dt;
+      if (this.reloadTimer >= MISSILE_RELOAD) {
+        this.reloadTimer = 0;
+        this.missileStock++;
+      }
+    }
+
     // The missile locks on to the nearest target in front, and turns to follow it.
     private updateMissiles(dt: number): void {
       this.missileCool -= dt;
       const p = this.plane;
-      if (this.held.missile && this.missileCool <= 0) {
+      if (this.held.missile && this.missileCool <= 0 && this.missileStock > 0) {
         const target = this.findLock();
         if (target) {
           this.missileCool = MISSILE_COOL;
+          this.missileStock--;
           const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
           this.missiles.push({
             X: p.X + sinY * 3, Z: p.Z + cosY * 3, h: p.h,
@@ -222,15 +279,15 @@ namespace PA {
       const keep: Missile[] = [];
       for (const m of this.missiles) {
         m.life -= dt;
-        if (m.target && m.target.alive) {
-          const tx = m.target.X, tz = m.target.Z, th = groundAt(tx, tz) + 1;
-          const dx = tx - m.X, dy = th - m.h, dz = tz - m.Z;
+        const target = m.target;
+        if (target && target.alive) {
+          const tg = groundAt(target.X, target.Z) + 1;
+          const dx = target.X - m.X, dy = tg - m.h, dz = target.Z - m.Z;
           const d = Math.hypot(dx, dy, dz) || 1;
           const sp = Math.hypot(m.vX, m.vY, m.vZ) || MISSILE_SPEED;
           const want = [dx / d * sp, dy / d * sp, dz / d * sp];
           const cur = [m.vX, m.vY, m.vZ];
           const step = MISSILE_TURN * dt * sp;
-          // Turn the velocity toward the target, by at most the turn rate.
           const diff = [want[0] - cur[0], want[1] - cur[1], want[2] - cur[2]];
           const dl = Math.hypot(diff[0], diff[1], diff[2]) || 1;
           const k = Math.min(1, step / dl);
@@ -241,17 +298,12 @@ namespace PA {
         m.X += m.vX * dt;
         m.Z += m.vZ * dt;
         m.h += m.vY * dt;
-        const target = m.target;
         if (target && target.alive) {
-          const size = SIZE[target.kind];
+          const info = KINDS[target.kind];
           const tg = groundAt(target.X, target.Z);
           const dx = m.X - target.X, dz = m.Z - target.Z;
-          if (dx * dx + dz * dz < size.r * size.r * 2.2 && m.h <= tg + size.height + 2 && m.h >= tg - 1) {
-            target.alive = false;
-            this.kills++;
-            this.score += target.points;
-            this.explode(target.X, tg + 1, target.Z, 22);
-            this.onSound('boom');
+          if (dx * dx + dz * dz < info.r * info.r * 2.2 && m.h <= tg + info.height + 2 && m.h >= tg - 1) {
+            this.hitTarget(target, 2, tg);
             continue;
           }
         }
@@ -285,47 +337,68 @@ namespace PA {
       return best;
     }
 
-    // Free play: when the ground targets run low, more appear ahead of the plane.
-    private keepTargets(): void {
-      const m = this.mission;
-      m.targets = m.targets.filter(t => t.alive || t.Z > this.plane.Z - 150);
-      const left = m.targets.filter(t => t.alive && t.kind !== 'flak').length;
-      if (left < KEEP_AHEAD) {
-        m.targets.push(...spawnTargets(this.rand, this.plane.Z + 240, 6));
-      }
-    }
-
-    private checkRings(): void {
-      for (const ring of this.mission.hoops) {
-        if (ring.passed) continue;
-        const dx = this.plane.X - ring.X, dz = this.plane.Z - ring.Z, dh = this.plane.h - ring.h;
-        if (dx * dx + dz * dz + dh * dh < ring.r * ring.r) {
-          ring.passed = true;
-          this.hoopsPassed++;
-          this.score += 100;
-          this.onSound('chime');
+    // The gun aims straight when there are aircraft about, and points down toward a
+    // ground target (with a declination for the bullet's drop) when one is in front.
+    private computeAim(): Aim {
+      const p = this.plane;
+      const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
+      let airborne = false;
+      let best: Target | null = null;
+      let bestD = GROUND_RANGE;
+      for (const t of this.mission.targets) {
+        if (!t.alive) continue;
+        const dx = t.X - p.X, dz = t.Z - p.Z;
+        const d = Math.hypot(dx, dz);
+        if (d < 1 || (dx * sinY + dz * cosY) <= 0) continue;
+        if (t.kind === 'jet' && d < AIR_RANGE) airborne = true;
+        if (t.kind !== 'jet' && d < bestD) {
+          best = t;
+          bestD = d;
         }
       }
+      if (airborne || !best) return { yaw: p.yaw, pitch: 0, mode: airborne ? 'air' : 'straight' };
+      const tg = groundAt(best.X, best.Z) + 1;
+      const dh = tg - p.h;
+      const dd = Math.hypot(best.X - p.X, best.Z - p.Z);
+      // Angle down to the target, plus the bullet's drop over the flight time.
+      const flight = dd / SHOT_SPEED;
+      const drop = 0.5 * GRAVITY * flight * flight;
+      const pitch = Math.atan2(dh + drop, dd);
+      return { yaw: Math.atan2(best.X - p.X, best.Z - p.Z), pitch, mode: 'ground' };
     }
 
     private updateGuns(dt: number): void {
       this.fireCool -= dt;
+      this.aim = this.computeAim();
       if (!this.held.fire || this.fireCool > 0) return;
       this.fireCool = 0.09;
       const p = this.plane;
-      const cosP = Math.cos(p.pitch), sinP = Math.sin(p.pitch);
-      const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
-      const hv = p.vx; // forward speed, horizontal part of the plane's motion
+      const cosP = Math.cos(this.aim.pitch), sinP = Math.sin(this.aim.pitch);
+      const sinY = Math.sin(this.aim.yaw), cosY = Math.cos(this.aim.yaw);
       this.shots.push({
         X: p.X + sinY * cosP * 2,
         Z: p.Z + cosY * cosP * 2,
         h: p.h + sinP * 2,
-        vX: hv * sinY + SHOT_SPEED * cosP * sinY,
-        vZ: hv * cosY + SHOT_SPEED * cosP * cosY,
+        vX: p.vx * sinY + SHOT_SPEED * cosP * sinY,
+        vZ: p.vx * cosY + SHOT_SPEED * cosP * cosY,
         vY: p.vy + SHOT_SPEED * sinP,
         life: BULLET_LIFE,
       });
       this.onSound('gun');
+    }
+
+    private hitTarget(t: Target, damage: number, tg: number): void {
+      t.hp -= damage;
+      if (t.hp > 0) {
+        this.explode(t.X, tg + 1, t.Z, 4);
+        this.onSound('thud');
+        return;
+      }
+      t.alive = false;
+      this.kills++;
+      this.score += t.points;
+      this.explode(t.X, tg + 1, t.Z, KINDS[t.kind].height > 5 ? 26 : 16);
+      this.onSound('boom');
     }
 
     private updateShots(dt: number): void {
@@ -344,15 +417,11 @@ namespace PA {
         let hit = false;
         for (const t of this.mission.targets) {
           if (!t.alive) continue;
-          const size = SIZE[t.kind];
+          const info = KINDS[t.kind];
           const dx = s.X - t.X, dz = s.Z - t.Z;
           const tg = groundAt(t.X, t.Z);
-          if (dx * dx + dz * dz < size.r * size.r && s.h >= tg && s.h <= tg + size.height) {
-            t.alive = false;
-            this.kills++;
-            this.score += t.points;
-            this.explode(t.X, tg + 1, t.Z, t.kind === 'flak' ? 10 : 16);
-            this.onSound('boom');
+          if (dx * dx + dz * dz < info.r * info.r && s.h >= tg && s.h <= tg + info.height) {
+            this.hitTarget(t, 1, tg);
             hit = true;
             break;
           }
@@ -362,17 +431,18 @@ namespace PA {
       this.shots = keep;
     }
 
-    private updateFlak(dt: number): void {
+    // Anti-aircraft guns and SAM sites: each one aims at where the plane will be.
+    private updateGunners(dt: number): void {
       const p = this.plane;
       for (const t of this.mission.targets) {
-        if (t.kind !== 'flak' || !t.alive) continue;
+        const gun = KINDS[t.kind].gun;
+        if (!gun || !t.alive) continue;
         t.cool -= dt;
         const dist = Math.hypot(p.X - t.X, p.Z - t.Z);
-        if (t.cool > 0 || dist > 260 || p.h > 120) continue;
-        t.cool = 1.6 + this.rand() * 1.2;
-        // Aim where the plane will be, with gravity allowed for.
+        if (t.cool > 0 || dist > gun.range || p.h > gun.range * 0.5) continue;
+        t.cool = gun.cool * (0.7 + this.rand() * 0.6);
         const gy = groundAt(t.X, t.Z) + 2;
-        const T = Math.max(0.4, Math.hypot(dist, p.h - gy) / FLAK_SPEED);
+        const T = Math.max(0.4, Math.hypot(dist, p.h - gy) / gun.speed);
         const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
         const aimX = p.X + p.vx * sinY * T;
         const aimZ = p.Z + p.vx * cosY * T;
@@ -383,6 +453,7 @@ namespace PA {
           vZ: (aimZ - t.Z) / T,
           vY: (aimY - gy) / T + 0.5 * GRAVITY * T,
           life: SHELL_LIFE,
+          // The shell's own flight is in the same shape as a bullet
         });
         this.onSound('thud');
       }
@@ -400,7 +471,7 @@ namespace PA {
         if (s.life <= 0 || s.h <= groundAt(s.X, s.Z)) continue;
         const dx = s.X - p.X, dz = s.Z - p.Z, dh = s.h - p.h;
         if (dx * dx + dz * dz + dh * dh < 9) {
-          this.hull = Math.max(0, this.hull - 12);
+          if (this.settings.invincible !== 1) this.hull = Math.max(0, this.hull - 12);
           this.explode(s.X, s.h, s.Z, 6);
           this.onSound('thud');
           continue;
@@ -408,6 +479,29 @@ namespace PA {
         keep.push(s);
       }
       this.shells = keep;
+    }
+
+    // Free play: when the ground targets run low, more appear ahead of the plane.
+    private keepTargets(): void {
+      const m = this.mission;
+      m.targets = m.targets.filter(t => t.alive || t.Z > this.plane.Z - 150);
+      const left = m.targets.filter(t => t.alive).length;
+      if (left < KEEP_AHEAD) {
+        m.targets.push(...spawnTargets(this.rand, this.plane.Z + 240, 6));
+      }
+    }
+
+    private checkRings(): void {
+      for (const ring of this.mission.hoops) {
+        if (ring.passed) continue;
+        const dx = this.plane.X - ring.X, dz = this.plane.Z - ring.Z, dh = this.plane.h - ring.h;
+        if (dx * dx + dz * dz + dh * dh < ring.r * ring.r) {
+          ring.passed = true;
+          this.hoopsPassed++;
+          this.score += 100;
+          this.onSound('chime');
+        }
+      }
     }
 
     private explode(X: number, h: number, Z: number, n: number): void {
