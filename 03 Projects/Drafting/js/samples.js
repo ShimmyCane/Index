@@ -1,6 +1,7 @@
 /* Drafting — bundled synthetic samples (invented for tests). Generated from samples/*.json; the page works from file:// with these. */
 window.DRAFT_SAMPLES = [
  {
+  "id": "synthetic-wall-section",
   "name": "Synthetic wall section (test)",
   "scale": "3\"=1'-0\"",
   "tags": [
@@ -63,6 +64,25 @@ window.DRAFT_SAMPLES = [
     ]
    },
    {
+    "id": "c1",
+    "kind": "stroke",
+    "lt": "dashed",
+    "pts": [
+     [
+      -12,
+      48,
+      0.5,
+      0
+     ],
+     [
+      20,
+      48,
+      0.5,
+      0
+     ]
+    ]
+   },
+   {
     "id": "h1",
     "kind": "hatch",
     "pattern": "steel",
@@ -89,7 +109,7 @@ window.DRAFT_SAMPLES = [
    {
     "id": "h2",
     "kind": "hatch",
-    "pattern": "concrete",
+    "pattern": "brick",
     "pts": [
      [
       -12,
@@ -147,11 +167,80 @@ window.DRAFT_SAMPLES = [
     "at": [
      4,
      104
-    ]
+    ],
+    "size": 0.125
    }
   ]
  },
  {
+  "id": "synthetic-block-use",
+  "name": "Synthetic block use (test)",
+  "scale": "3\"=1'-0\"",
+  "tags": [
+   "export"
+  ],
+  "note": "Invented for tests. Places the synthetic wall section twice: full size and half size.",
+  "items": [
+   {
+    "id": "b1",
+    "kind": "block",
+    "sourceId": "synthetic-wall-section",
+    "at": [
+     20,
+     -40
+    ],
+    "k": 1
+   },
+   {
+    "id": "b2",
+    "kind": "block",
+    "sourceId": "synthetic-wall-section",
+    "at": [
+     60,
+     -40
+    ],
+    "k": 0.5
+   },
+   {
+    "id": "f1",
+    "kind": "stroke",
+    "pts": [
+     [
+      0,
+      -60,
+      0.5,
+      0
+     ],
+     [
+      90,
+      -60,
+      0.5,
+      0
+     ]
+    ]
+   },
+   {
+    "id": "d2",
+    "kind": "dim",
+    "mode": "ortho",
+    "p1": [
+     20,
+     -120
+    ],
+    "p2": [
+     40,
+     -120
+    ],
+    "at": [
+     30,
+     -126
+    ],
+    "size": 0.125
+   }
+  ]
+ },
+ {
+  "id": "synthetic-small-label",
   "name": "Synthetic small label (test)",
   "scale": "1 1/2\"=1'-0\"",
   "tags": [

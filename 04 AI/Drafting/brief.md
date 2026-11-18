@@ -1,7 +1,7 @@
 # Drafting — AI brief
 
 **Updated:** 2026-11-18
-**Status:** MVP 0.1 (increment 1, 2026-11-18). DXF writer (AC1027 default, AC1009 alternate), DXF reader, linter (validity and confidence), one page. Answers from Jimmy in `03 Projects/Drafting/convo/convo v0.2.md`.
+**Status:** MVP 0.2 (increment 2, 2026-11-18). Blocks, line types, hatch patterns, ortho dimensions and two viewers added on top of MVP 0.1 (see `convo/convo v0.4.md`). Earlier status: MVP 0.1 (increment 1). DXF writer (AC1027 default, AC1009 alternate), DXF reader, linter (validity and confidence), one page. Answers from Jimmy in `03 Projects/Drafting/convo/convo v0.2.md`.
 **Track:** B. Studio design.
 
 ## Increment 1: what was built and checked
@@ -9,7 +9,7 @@
 - Files: `js/primitives.js` (one list in real inches from Quick Detail items), `js/dxf_write.js`, `js/dxf_read.js`, `js/linter.js`, `js/pipeline.js`, `js/app.js`, `index.html`, `js/samples.js`, `samples/` (two synthetic details tagged `export`), `tests/test_dxf.js`.
 - Checked: 12 Node tests pass (round trip with coordinates, HATCH and polyline output, R12 behaviour, linter warnings, refused non-finite coordinate, broken file, unknown entity, ezdxf audit). ezdxf (1.4.5, test-only) reports 0 errors and 0 fixes for both versions and both samples. Headless Chromium at iPad and phone widths: no JavaScript errors, no horizontal scroll, download works.
 - Not checked: no AutoCAD or Revit open yet. Confidence was 90% on both samples, so the 80% viewer trigger did not fire on the samples; the test checks the rule, not a live case.
-- Known gaps: `dim` and `block` are listed as not exported (increment 2); pattern hatches are drawn as outlines (increment 2); R12 has no hatch fill; no 3-D (increment 4).
+- Gaps after increment 2: aligned and angular dimensions not exported; the pattern library has three patterns (Quick Detail's own hatch library is not ported); R12 has no hatch fill or pattern; no 3-D (increment 4). Blocks, line types and pattern hatches were gaps in increment 1 and are now built.
 - Assumptions to verify: a note's `size` is paper inches (confirmed in Quick Detail `noteLayout`: height = size × factor); solid hatch keys are `solid` and `steel` (confirmed in `hatch.js`); the y-axis is flipped on export so the drawing reads upright in CAD (a design decision, to confirm in AutoCAD).
 
 ## Goal

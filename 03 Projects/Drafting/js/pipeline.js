@@ -1,7 +1,10 @@
 /* Drafting — pipeline: one entry point for the page and the tests.
-   exportDetail(detail, { version }) -> { ok, filename, dxf, built, parsed, lint }
-   Steps: primitives -> DXF text -> read back -> lint. If the writer refuses (for example a
-   non-finite coordinate), ok is false and lint.validity says why. */
+   exportDetail(detail, { version, library }) -> {
+     ok, filename, version, dxf, lin, pat, built, parsed, lint
+   }
+   Steps: primitives (with blocks) -> DXF text -> .LIN and .PAT text (only if used) -> read the DXF
+   back -> lint. If the writer refuses (for example a non-finite coordinate), ok is false and
+   lint.validity says why. library: { id: detail } so a block item can find its source. */
 (function (root, factory) {
   var api = factory();
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
@@ -9,17 +12,18 @@
 })(typeof self !== 'undefined' ? self : globalThis, function () {
   'use strict';
 
-  var P = (typeof require === 'function' && typeof module !== 'undefined') ? require('./primitives.js') : root_or_draft('buildPrims');
-  var W = (typeof require === 'function' && typeof module !== 'undefined') ? require('./dxf_write.js') : root_or_draft('writeDXF');
-  var R = (typeof require === 'function' && typeof module !== 'undefined') ? require('./dxf_read.js') : root_or_draft('parseDXF');
-  var L = (typeof require === 'function' && typeof module !== 'undefined') ? require('./linter.js') : root_or_draft('lintExport');
-
-  function root_or_draft(name) {
+  var isNode = typeof require === 'function' && typeof module !== 'undefined';
+  function mod(file, name) {
+    if (isNode) return require('./' + file);
     var g = typeof self !== 'undefined' ? self : globalThis;
-    var d = g.DRAFT || {};
-    if (!d[name]) throw new Error('pipeline: ' + name + ' not loaded (load the js files in order)');
-    return d;
+    if (!g.DRAFT || !g.DRAFT[name]) throw new Error('pipeline: ' + file + ' not loaded (load the js files in order)');
+    return g.DRAFT;
   }
+  var P = mod('primitives.js', 'buildPrims');
+  var W = mod('dxf_write.js', 'writeDXF');
+  var R = mod('dxf_read.js', 'parseDXF');
+  var L = mod('linter.js', 'lintExport');
+  var T = mod('text_files.js', 'writeLIN');
 
   function slug(s) {
     return String(s || 'detail').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'detail';
@@ -28,20 +32,26 @@
   function exportDetail(detail, opts) {
     opts = opts || {};
     var version = opts.version === 'AC1009' ? 'AC1009' : 'AC1027';
-    var built = (P.buildPrims || root_or_draft('buildPrims').buildPrims)(detail);
+    var library = opts.library || {};
+    var built = P.buildPrims(detail, library);
     var filename = slug(detail && detail.name) + '.dxf';
+    var lin = null, pat = null;
+    var realLT = built.lineTypes.filter(function (t) { return t && t.name !== 'CONTINUOUS'; });
+    if (realLT.length) lin = T.writeLIN(realLT);
+    if (built.patterns.length) pat = T.writePAT(built.patterns);
+
     var dxf;
     try {
-      dxf = (W.writeDXF || root_or_draft('writeDXF').writeDXF)(built.prims, { version: version });
+      dxf = W.writeDXF(built.prims, { version: version, blocks: built.blocks, lineTypes: built.lineTypes, patterns: built.patterns });
     } catch (e) {
       return {
-        ok: false, filename: filename, dxf: null, built: built, parsed: null,
+        ok: false, filename: filename, version: version, dxf: null, lin: lin, pat: pat, built: built, parsed: null,
         lint: { valid: false, validity: [{ id: 'writer', label: 'Writer', ok: false, reason: e.message }], checks: [], score: 0, showViewer: false, dropped: built.dropped }
       };
     }
-    var parsed = (R.parseDXF || root_or_draft('parseDXF').parseDXF)(dxf);
-    var lint = (L.lintExport || root_or_draft('lintExport').lintExport)({ built: built, parsed: parsed, version: version });
-    return { ok: lint.valid, filename: filename, dxf: dxf, built: built, parsed: parsed, lint: lint, version: version };
+    var parsed = R.parseDXF(dxf);
+    var lint = L.lintExport({ built: built, parsed: parsed, version: version });
+    return { ok: lint.valid, filename: filename, version: version, dxf: dxf, lin: lin, pat: pat, built: built, parsed: parsed, lint: lint };
   }
 
   return { exportDetail: exportDetail, slug: slug };
