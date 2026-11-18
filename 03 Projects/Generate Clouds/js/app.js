@@ -90,14 +90,26 @@
     if (!a) { set(null); return; }
     set(a.map(function (c, i) { var d = (b && b[i]) || c; return [GC.lerp(c[0], d[0], f), GC.lerp(c[1], d[1], f), GC.lerp(c[2], d[2], f)]; }));
   }
+  // The wind over the Earth for the hour on screen, gliding between hours (three layers, each its own picture).
+  function lerpWind(a, b, f) {
+    var out = {};
+    ['L', 'M', 'H'].forEach(function (k) {
+      var x = a[k], y = (b && b[k]) || x, z = new Float32Array(x.length);
+      for (var i = 0; i < x.length; i++) z[i] = GC.lerp(x[i], y[i], f);
+      out[k] = z;
+    });
+    return out;
+  }
   function applyRegional(force) {
     var tl = S.data && S.data.tl; if (!tl) return;
     var last = tl.hours.length - 1, h = GC.clamp(Math.floor(S.simT / 3600), 0, last), f = GC.clamp(S.simT / 3600 - h, 0, 1);
-    var key = h + ':' + Math.round(f * 20) + ':' + (tl.wide ? 1 : 0);
+    var key = h + ':' + Math.round(f * 20) + ':' + (tl.wide ? 1 : 0) + ':' + (tl.series && tl.series.wind ? 1 : 0);
     if (key === S.regKey && !force) return;
     S.regKey = key;
     if (tl.series && tl.series.region) setGlide(R.setRegion, tl.series.region, h, f); else if (R.regionOn) R.setRegion(null);
     if (tl.wide) setGlide(R.setRegion2, tl.wide, h, f); else if (R.region2On) R.setRegion2(null);
+    if (tl.series && tl.series.wind && tl.series.wind[h]) R.setWind(lerpWind(tl.series.wind[h], tl.series.wind[Math.min(h + 1, last)], f), S.place);
+    else if (R.windOn) R.setWind(null, null);
   }
   // The wide region (2000 km) is fetched only when the camera is high enough to see that far.
   function maybeWide() {
@@ -741,6 +753,7 @@
     R.clock = S.clock; R.city = S.place.city ? 1 : 0;
     maybeWide(); maybeSat(); R.satW = R.satOn ? GC.clamp((R.cam.alt - 20) / 40, 0, 1) : 0;
     applyRegional(); applyStars();
+    R.windW = GC.clamp((R.cam.alt - 10) / 20, 0, 1); R.windT = S.simT;     // the wind grid counts from 10 km up, fully from 30 km
     var ftr = S.ov.feature; R.feature = ftr || null;
     S.frame = S.model.at(S.simT, R.cam.alt);
     R.apply(S.frame); R.render();
@@ -781,7 +794,7 @@
       relief: R.exag, bar: !+GC.settings.bar ? 'hidden' : 'shown', spot: S.spot, terrain: { source: GC.Terrain.source, max: GC.Terrain.max },
       precip: S.model && S.model.precipKind, vary: S.model && S.model.vary, feature: S.ov.feature || null, bolts: S.bolts || 0, favs: favs.length, mapPin: GC.Map.pin, mapTiles: GC.Map.tilesOk,
       onGround: !!S.onGround, gesture: S.model ? gestureMode() : null, inCloud: S.model ? inCloudBand() : null, pick: S.pick,
-      mapColours: !!R.osmOn, sat: !!R.satOn, satW: R.satW, stars: !!R.starsOn, figures: +GC.settings.figures, clouds: R.cloudsOn, clock: S.clock, sound: GC.Audio.ready(),
+      mapColours: !!R.osmOn, sat: !!R.satOn, satW: R.satW, wind: !!R.windOn, windW: R.windW, stars: !!R.starsOn, figures: +GC.settings.figures, clouds: R.cloudsOn, clock: S.clock, sound: GC.Audio.ready(),
       frames: R.frames, scale: R.scale, ok: R.ok, sharp: !!S.sharp, fine: R.fineProgress(), now: S.now && { source: S.now.source, groups: S.now.groups.map(function (g) { return [g.id, g.cities.length]; }) },
       sunEl: S.frame && S.frame.sunEl, exposure: S.frame && S.frame.exposure, ov: S.ov, notes: GC.Notes.all().length };
   };

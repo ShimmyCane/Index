@@ -43,7 +43,7 @@
 - [x] Hide-clouds chip in the bottom bar (the Clouds setting already existed).
 - [x] Pan, walk, look, orbit, tap a cloud to orbit it, with a label.
 - [x] Space clouds from the NASA GIBS picture of the day (cover only).
-- [ ] Worldwide wind grid so the space clouds drift with the real wind. NOT built.
+- [x] Worldwide wind grid (9 x 7, three heights) so the space clouds drift with the local wind (0.7.1, convo v0.12).
 - [x] Stars and constellation figures (⚙️, off by default); constellations and ground from convo v0.8 defaults.
 - [x] Ground colours from OpenStreetMap tiles near the place.
 - [ ] Verify live: forecast, marine tide per hour, elevation, GIBS picture, OSM tiles on a phone (all tested with made-up replies only).

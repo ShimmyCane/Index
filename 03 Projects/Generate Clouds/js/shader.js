@@ -62,6 +62,10 @@ uniform sampler2D uSat;          // cloud cover of the whole Earth from a satell
 uniform float uSatW;             // how much the satellite cover counts: 0 near the ground, 1 from space
 uniform sampler2D uOsm;          // ground colours from map tiles, on the fine map's grid (row 0 = north)
 uniform float uOsmOn;            // 1 when the map colours are loaded
+uniform sampler2D uWindL; uniform sampler2D uWindM; uniform sampler2D uWindH;   // wind over the Earth at 850, 500, 300 hPa: 9 x 7 points, (east, south) km a second
+uniform float uWindOn;           // how much the wind grid counts (0 near the ground, 1 from space)
+uniform float uWindT;            // seconds of sky since the start, for the wind to carry the clouds
+uniform vec2 uWindRefL; uniform vec2 uWindRefM; uniform vec2 uWindRefH;   // the wind at the place: the clouds' own drift is measured from it
 
 const float PI = 3.14159265;
 const float RE = 6371.0;
@@ -136,6 +140,7 @@ vec3 sky(vec3 ro, vec3 rd, out vec3 trans, float tHit) {
 }
 
 float satCover(vec2 xz);                       // defined with the world lookups below
+vec2 windAt(vec2 xz, sampler2D tex);           // defined with the world lookups below
 
 // ---------- cloud volumes ----------
 // A = base km, top km, cover 0..1, density per km
@@ -145,7 +150,14 @@ float cloudD(vec3 p, vec4 A, vec4 B, vec4 W, int cheap) {
   float h = length(p) - RE;
   float hn = (h - A.x) / (A.y - A.x); gHn = hn;
   if (hn < 0.0 || hn > 1.0) return 0.0;
-  vec3 q = vec3(p.x - W.x, h + uEvolve * B.x, p.z - W.y) / B.x + uSeed;
+  vec2 Wv = W.xy;                               // the drift of this layer, with the wind grid's own drift added where the grid is used
+  if (uWindOn > 0.0) {
+    vec2 wd;
+    if (gLay < 0.5) wd = windAt(p.xz, uWindL) - uWindRefL; else wd = windAt(p.xz, uWindM) - uWindRefM;
+    Wv += wd * (uWindOn * uWindT);
+  }
+  // the drift of this layer: the place's wind, plus the wind grid's own drift where it is used (measured from the place)
+  vec3 q = vec3(p.x - Wv.x, h + uEvolve * B.x, p.z - Wv.y) / B.x + uSeed;
   vec2 w = p.xz + uCamXZ;                       // km from the chosen place
   // A mixed sky: some cells of the low layer are tall, the rest stop lower.
   float lt = 1.0;
@@ -265,6 +277,7 @@ vec4 marchVol(vec3 ro, vec3 rd, vec2 span, vec4 A, vec4 B, vec4 W, vec3 sunC, ve
 // ---------- thin high layer ----------
 vec4 cirrus(vec3 ro, vec3 rd, float t, vec3 bg) {
   vec3 p = ro + rd * t; vec2 u0 = p.xz - uCw.xy; vec2 w = p.xz + uCamXZ;
+  if (uWindOn > 0.0) u0 += (windAt(p.xz, uWindH) - uWindRefH) * (uWindOn * uWindT);
   float cs = cos(uCw.w); float sn = sin(uCw.w);
   vec2 u = vec2(cs * u0.x + sn * u0.y, -sn * u0.x + cs * u0.y) / uCw.z;
   u.x *= uC.z;
@@ -320,6 +333,11 @@ vec2 worldLL(vec2 xz) {                                           // longitude, 
 }
 vec3 worldTex(vec2 xz) { vec2 ll = worldLL(xz); return texture2D(uWorld, vec2(ll.x / (2.0 * PI) + 0.5, ll.y / PI + 0.5)).rgb; }
 float satCover(vec2 xz) { vec2 ll = worldLL(xz); return texture2D(uSat, vec2(ll.x / (2.0 * PI) + 0.5, ll.y / PI + 0.5)).r; }   // satellite cloud cover under a point
+// the wind at a ground point from the 9 x 7 grid (node centres at every 45 deg of longitude and 30 deg of latitude)
+vec2 windAt(vec2 xz, sampler2D tex) {
+  vec2 ll = worldLL(xz) * (180.0 / PI);
+  return texture2D(tex, vec2((ll.x + 180.0) / 360.0 * (8.0 / 9.0) + 0.5 / 9.0, (clamp(ll.y, -90.0, 90.0) + 90.0) / 180.0 * (6.0 / 7.0) + 0.5 / 7.0)).xy;
+}
 float worldWater(vec2 xz) {                                       // 1 for ocean and lakes in the picture, 0 for land and ice
   vec3 c = worldTex(xz);
   return smoothstep(0.0, 0.07, c.b - max(c.r, c.g * 0.9)) * (1.0 - smoothstep(0.55, 0.8, min(c.r, min(c.g, c.b))));

@@ -83,3 +83,6 @@
 55. **Right ascension in the star file runs −180 to 180 degrees.** Wrap to 0–360 before comparing with a known star; check at least three well-known stars against the data.
 56. **Software WebGL can starve a headless test.** Each frame takes long enough that clicks queue behind the render loop. Use a small viewport and low quality for interaction tests, and keep screenshots for a separate pass.
 57. **A drag test must start on the sky itself.** A bottom bar that covers the middle of a small screen silently takes the pointer; find the first point where the sky is the hit target.
+
+58. **Measure drift from the place, not from zero.** Adding the local wind to a layer that already moves with the place's wind changes the place itself; subtracting the place's wind keeps the place exact and only adds the difference.
+59. **A shader ternary cannot pick between two textures.** Choose with if/else and call the lookup in each branch.

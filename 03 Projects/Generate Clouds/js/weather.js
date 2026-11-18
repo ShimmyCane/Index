@@ -194,6 +194,45 @@
       return cells;
     }).catch(function (e) { GC.logError('Regional cover: ' + ((e && e.name === 'AbortError') ? 'no answer in time' : (e && e.message) || 'no connection')); return null; });
   };
+  // ---------- the wind over the whole Earth at 850, 500 and 300 hPa, for every hour (one call) ----------
+  // 9 x 7 points: longitude every 45 degrees from -180 to 180, latitude every 30 degrees from -90 to 90.
+  // Each point holds (east, south) in km a second, the way the clouds drift (the same as skymodel's vel()).
+  // Returns an array per hour of { L, M, H } (low, mid, high layer), each Float32Array of 63 x 2 values.
+  W.WIND_NX = 9; W.WIND_NY = 7;
+  W.windSeries = function (startMs) {
+    var ageDays = (Date.now() - startMs) / 86400000;
+    if (ageDays < -15 || ageDays > 85) return Promise.resolve(null);
+    var NX = W.WIND_NX, NY = W.WIND_NY, lats = [], lons = [];
+    for (var j = 0; j < NY; j++) for (var i = 0; i < NX; i++) {
+      lats.push(GC.clamp(-90 + 30 * j, -89.9, 89.9).toFixed(1)); lons.push((-180 + 45 * i).toFixed(1));
+    }
+    var url = HOSTS.forecast + '?latitude=' + lats.join(',') + '&longitude=' + lons.join(',') +
+      '&hourly=wind_speed_850hPa,wind_direction_850hPa,wind_speed_500hPa,wind_direction_500hPa,wind_speed_300hPa,wind_direction_300hPa' +
+      '&timezone=GMT&start_date=' + utcDay(startMs) + '&end_date=' + utcDay(startMs + 25 * 3600000);
+    var LV = ['L', 'M', 'H'], SP = ['wind_speed_850hPa', 'wind_speed_500hPa', 'wind_speed_300hPa'], DR = ['wind_direction_850hPa', 'wind_direction_500hPa', 'wind_direction_300hPa'];
+    return fetchJson(url, 15000).then(function (j) {
+      var list = Array.isArray(j) ? j : [j], n = NX * NY;
+      if (list.length !== n) throw new Error('Expected ' + n + ' wind points, got ' + list.length);
+      var out = [];
+      for (var h = 0; h < HOURS; h++) {
+        var key = hourKey(startMs + h * 3600000), f = {};
+        LV.forEach(function (lv, li) {
+          var arr = new Float32Array(n * 2);
+          list.forEach(function (x, k) {
+            var t = x.hourly && x.hourly.time ? x.hourly.time.indexOf(key) : -1;
+            var s = t < 0 || !x.hourly[SP[li]] ? null : x.hourly[SP[li]][t], d = t < 0 || !x.hourly[DR[li]] ? null : x.hourly[DR[li]][t];
+            if (s == null || d == null) return;
+            var r = GC.rad(d);
+            arr[2 * k] = -Math.sin(r) * s / 1000; arr[2 * k + 1] = Math.cos(r) * s / 1000;
+          });
+          f[lv] = arr;
+        });
+        out.push(f);
+      }
+      return out;
+    }).catch(function (e) { GC.logError('Wind grid: ' + ((e && e.name === 'AbortError') ? 'no answer in time' : (e && e.message) || 'no connection') + '. Clouds keep one wind for the view.'); return null; });
+  };
+
   // A sample sky for 24 hours, used when the service cannot be reached.
   function sampleTimeline(place, startLocal, why) {
     var off = W.guessOffset(place.lon), base = W.localToMs(startLocal) - off * 1000, hours = [];
@@ -203,9 +242,9 @@
   }
   // Attach the sea and the cloud grids to a timeline (each one optional).
   function attachSeries(tl, place) {
-    return Promise.all([W.marineSeries(place, tl.startMs), W.gridSeries(place, tl.startMs, W.REGION)]).then(function (r) {
+    return Promise.all([W.marineSeries(place, tl.startMs), W.gridSeries(place, tl.startMs, W.REGION), W.windSeries(tl.startMs)]).then(function (r) {
       tl.hours.forEach(function (h, k) { h.wx.marine = r[0][k]; });
-      tl.series = { region: r[1] };
+      tl.series = { region: r[1], wind: r[2] };
       return tl;
     });
   }

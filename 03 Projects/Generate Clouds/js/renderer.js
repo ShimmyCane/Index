@@ -51,9 +51,11 @@
       uTerr: v4(), uCity: { value: new THREE.Vector2() }, uTSteps: { value: 64 }, uTGrow: { value: 0.085 }, uSea: v4(), uReg: v4(), uVar: { value: new THREE.Vector2(0, 1) },
       uCmix: { value: 0 }, uPrecip: v4(), uFeat: v4(), uFeatB: v4(),
       uTerrainF: { value: null }, uWorld: { value: null }, uRegion2: { value: null }, uFine: v4(), uReg2: v4(), uSea2: v4(), uWorldP: v3(),
-      uStars: { value: null }, uStarsOn: { value: 0 }, uSat: { value: null }, uSatW: { value: 0 }, uOsm: { value: null }, uOsmOn: { value: 0 }
+      uStars: { value: null }, uStarsOn: { value: 0 }, uSat: { value: null }, uSatW: { value: 0 }, uOsm: { value: null }, uOsmOn: { value: 0 },
+      uWindL: { value: null }, uWindM: { value: null }, uWindH: { value: null }, uWindOn: { value: 0 }, uWindT: { value: 0 },
+      uWindRefL: { value: new THREE.Vector2() }, uWindRefM: { value: new THREE.Vector2() }, uWindRefH: { value: new THREE.Vector2() }
     };
-    U.uStars.value = blank(); U.uSat.value = blank(); U.uOsm.value = blank();
+    U.uStars.value = blank(); U.uSat.value = blank(); U.uOsm.value = blank(); U.uWindL.value = blank(); U.uWindM.value = blank(); U.uWindH.value = blank();
     mat = new THREE.ShaderMaterial({ uniforms: U, vertexShader: GC.VERT, fragmentShader: GC.FRAG, depthTest: false, depthWrite: false });
     scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
     canvas.addEventListener('webglcontextlost', function (e) { e.preventDefault(); R.ok = false; GC.logError('The 3-D view was lost (graphics memory). Reload the page.'); });
@@ -165,7 +167,42 @@
     return [d[0] / L, d[1] / L, d[2] / L];
   };
   R.canvasSize = function () { return { w: canvas.clientWidth, h: canvas.clientHeight }; };
-  R.satW = 0; R.satOn = 0; R.starsOn = 0; R.osmOn = 0;
+  R.satW = 0; R.satOn = 0; R.starsOn = 0; R.osmOn = 0; R.windOn = 0; R.windW = 0; R.windT = 0;
+  // The wind over the Earth (js/weather.js, windSeries) for one hour: three 9 x 7 pictures, one per layer.
+  // The clouds are moved by how much the wind here differs from the wind at the place (so the place is unchanged).
+  function toHalfWord(v) {
+    if (v === 0 || isNaN(v)) return 0;
+    var sgn = v < 0 ? 0x8000 : 0; v = Math.abs(v);
+    var e = Math.floor(Math.log(v) / Math.LN2);
+    if (e < -14) return sgn;
+    if (e > 15) return sgn | 0x7bff;
+    return sgn | ((e + 15) << 10) | (Math.round((v / Math.pow(2, e) - 1) * 1024) & 0x3ff);
+  }
+  function sampleNodes(arr, lat, lon) {
+    var NX = GC.Weather.WIND_NX, NY = GC.Weather.WIND_NY;
+    var fx = GC.clamp((lon + 180) / 45, 0, NX - 1.001), fy = GC.clamp((lat + 90) / 30, 0, NY - 1.001);
+    var i = Math.floor(fx), j = Math.floor(fy), u = fx - i, v = fy - j;
+    function at(ii, jj, c) { return arr[2 * (jj * NX + ii) + c]; }
+    var out = [0, 0];
+    for (var c = 0; c < 2; c++) out[c] = GC.lerp(GC.lerp(at(i, j, c), at(i + 1, j, c), u), GC.lerp(at(i, j + 1, c), at(i + 1, j + 1, c), u), v);
+    return out;
+  }
+  var windTex = [null, null, null];
+  R.setWind = function (f, place) {
+    var keys = ['uWindL', 'uWindM', 'uWindH'], lv = ['L', 'M', 'H'], refs = ['uWindRefL', 'uWindRefM', 'uWindRefH'];
+    for (var k = 0; k < 3; k++) {
+      if (windTex[k]) { windTex[k].dispose(); windTex[k] = null; }
+      if (!f) { U[keys[k]].value = blank(); continue; }
+      var NX = GC.Weather.WIND_NX, NY = GC.Weather.WIND_NY, arr = f[lv[k]], data = new Uint16Array(NX * NY * 4);
+      for (var n = 0; n < NX * NY; n++) { data[n * 4] = toHalfWord(arr[2 * n]); data[n * 4 + 1] = toHalfWord(arr[2 * n + 1]); data[n * 4 + 2] = 0; data[n * 4 + 3] = toHalfWord(1); }
+      var t = new THREE.DataTexture(data, NX, NY, THREE.RGBAFormat, THREE.HalfFloatType);
+      t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; t.minFilter = t.magFilter = THREE.LinearFilter; t.generateMipmaps = false; t.needsUpdate = true;
+      windTex[k] = t; U[keys[k]].value = t;
+      var r = place ? sampleNodes(arr, place.lat, place.lon) : [0, 0];
+      U[refs[k]].value.set(r[0], r[1]);
+    }
+    R.windOn = f ? 1 : 0;
+  };
 
   R.setQuality = function (q) {
     R.q = QUALITY[q] || QUALITY.med;
@@ -207,6 +244,7 @@
     var lat0 = GC.clamp(R.place.lat - R.cam.z / 111.19, -89.9, 89.9), lon0 = R.place.lon + R.cam.x / (111.19 * Math.max(Math.cos(GC.rad(R.place.lat)), 0.05));
     U.uWorldP.value.set(GC.rad(lat0), GC.rad(lon0), R.worldOn);
     U.uSatW.value = R.satW || 0; U.uStarsOn.value = R.starsOn ? 1 : 0; U.uOsmOn.value = R.osmOn ? 1 : 0;
+    U.uWindOn.value = R.windOn ? (R.windW || 0) : 0; U.uWindT.value = R.windT || 0;
     U.uSea.value.set(F.sea[0], R.clock, F.sea[1], F.sea[2]);
     // regional data is used unless the cover was set by hand; far-away variety always
     U.uReg.value.set(F.regionMix * R.regionOn, 250, 1, 0);
