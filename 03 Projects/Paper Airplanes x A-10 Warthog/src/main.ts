@@ -3,7 +3,7 @@
 namespace PA {
   const SETTINGS_KEY = 'pa_warthog.settings';
   const DEFAULTS: Settings = {
-    mode: 'jet', control: 'drag', view: 'chase', difficulty: 'normal', sound: 1,
+    mode: 'glider', control: 'drag', view: 'chase', difficulty: 'felix', sound: 1,
     volMusic: 20, volGun: 25, volTurn: 25, volWarn: 60,
     forces: 0, safeFlight: 1, invincible: 0, autoReload: 1,
     enemyWave: 2, allies: 1, showErrors: 0,
