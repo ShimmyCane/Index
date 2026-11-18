@@ -149,7 +149,7 @@ const still = { pitch: 0, yaw: 0, throttle: 0 };
 
 // 9d. Enemy waves come about every minute; allies fly and do not shoot.
 {
-  const settings = { mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 2, allies: 1 };
+  const settings = { mode: 'jet', control: 'drag', view: 'chase', difficulty: 'felix', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 2, allies: 1 };
   const g = new PA.Game(settings);
   g.onSound = () => {};
   g.mission.targets = g.mission.targets.filter(t => t.faction === 'ally');
