@@ -1,0 +1,65 @@
+{
+  "schema": "m3dxc.story/0.1",
+  "title": "A camp moves on the North Fork (draft for consultation)",
+  "status": "draft. Not reviewed by the Cheyenne and Arapaho Tribes. Not for display until the consultation flags are closed.",
+  "intro": "This diorama shows one camp move by Southern Cheyenne families in the 1870s, in Indian Territory. It shows no named person, no particular family or event, and no ceremony or sacred object.",
+  "sources": [
+    { "id": "S1", "title": "Medicine Lodge Treaty (National Park Service)", "ref": "https://home.nps.gov/fols/learn/historyculture/medicine-lodge-treaty.htm" },
+    { "id": "S2", "title": "Cheyenne and Arapaho Indian Reservation; 15 Stat. 593 (primary text)", "ref": "https://oms.library.okstate.edu/s/oklahoma-built/item/19033 ; https://www.wikiwand.com/en/articles/Cheyenne_and_Arapaho_Indian_Reservation (secondary, to check)" },
+    { "id": "S3", "title": "Travois (The Canadian Encyclopedia)", "ref": "https://thecanadianencyclopedia.ca/index.php/en/article/travois" },
+    { "id": "S4", "title": "Southern Plains Indian Museum, Moving Camp (diorama record)", "ref": "https://artsandculture.google.com/asset/moving-camp/3wG9OtjWMnjwAQ" },
+    { "id": "S5", "title": "Women's work in moving camp (UNC Colorado, Hewit Center)", "ref": "https://www.unco.edu/hewit/doing-history/colorado-indians/work-tools/womens-work.aspx" }
+  ],
+  "steps": [
+    {
+      "id": "step-1",
+      "text": "Before dawn the horses are brought in from the grass.",
+      "objects": ["horses"],
+      "claims": [
+        { "id": "c1", "text": "By the 1870s horses were the main way Plains camps moved their loads.", "source": "S3", "certainty": 65 }
+      ]
+    },
+    {
+      "id": "step-2",
+      "text": "Women take down the lodges. The covers are folded and the poles are gathered.",
+      "objects": ["lodges", "struck-cover", "struck-poles"],
+      "claims": [
+        { "id": "c2", "text": "Women took down lodges and packed the camp for a move.", "source": "S5", "certainty": 60, "note": "The source describes Ute camp moves. It is applied here by analogy and must be checked for Cheyenne practice." }
+      ]
+    },
+    {
+      "id": "step-3",
+      "text": "The travois frames are lashed to the horses and loaded with bundles.",
+      "objects": ["travois"],
+      "claims": [
+        { "id": "c3", "text": "After horses came to the Plains, travois could be longer and carry more, which allowed larger lodges.", "source": "S3", "certainty": 65 }
+      ]
+    },
+    {
+      "id": "step-4",
+      "text": "Children and older women walk beside the horses. The fire is cold.",
+      "objects": ["figures", "fire-ring"],
+      "claims": [
+        { "id": "c4", "text": "This grouping of people on the move is a scene choice. No source yet records this exact group.", "source": "scene", "certainty": 30 }
+      ]
+    },
+    {
+      "id": "step-5",
+      "text": "The camp leaves the river terrace for the next camp on the North Fork of the Canadian.",
+      "objects": ["ground", "ridge"],
+      "claims": [
+        { "id": "c5", "text": "In 1869 land on the North Fork of the Canadian River, in western Indian Territory, was set aside for the Southern Cheyenne and Arapaho.", "source": "S2", "certainty": 75 },
+        { "id": "c6", "text": "The Medicine Lodge Treaty, signed 28 October 1867, allowed hunting only while bison remained.", "source": "S1", "certainty": 70, "note": "Sources differ on the exact wording and scope of the hunting clause." }
+      ]
+    },
+    {
+      "id": "step-6",
+      "text": "Background: the bison herds that had fed the camp were nearly gone.",
+      "objects": [],
+      "claims": [
+        { "id": "c7", "text": "By the late 1860s and 1870s bison were nearly gone from the southern Plains.", "source": "S2", "certainty": 60, "note": "Sources describe the decline; exact dates vary." }
+      ]
+    }
+  ],
+  "not_depicted": ["any named person", "any particular family or event", "faces, hair, clothing or regalia", "ceremonial or sacred objects", "any nation other than the Southern Cheyenne"]
+}
