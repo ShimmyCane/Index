@@ -17,8 +17,14 @@ assert.strictEqual(model.objects.filter(o => o.type !== 'group').every(o => Numb
 const bundle = fs.readFileSync(path.join(root, 'js/sample_bundle.js'), 'utf8');
 assert(bundle.includes(model.history_hash), 'js/sample_bundle.js is stale: run node tools/build_sample.js');
 console.log('ok  sample is current, clean and matches the bundle (' + model.objects.length + ' objects, ' + model.flags.length + ' flags)');
-const parts = model.objects.length;
-assert(parts >= 300 && parts <= 500, 'the scene should have 300 to 500 parts, found ' + parts);
+const byName = (g) => model.objects.filter(o => o.parent === g).map(o => o.uuid);
+// Each existing object is built from its real parts (no filler):
+assert.strictEqual(byName('lodge-1').length, 6, 'lodge 1 has a cover, four poles and a door');
+assert.strictEqual(byName('lodge-2').length, 6, 'lodge 2 has a cover, four poles and a door');
+['horse-1', 'horse-2'].forEach(h => assert.strictEqual(model.objects.filter(o => o.parent === h).length, 12, h + ' has barrel, neck, mane, head, muzzle, two ears, tail and four legs'));
+['woman-a', 'woman-b', 'child-a'].forEach(p => assert(model.objects.filter(o => o.parent === p).some(o => o.name === 'Head'), p + ' has a head'));
+assert.strictEqual(model.objects.filter(o => o.parent === 'fire-ring').length, 9, 'fire ring: ash and eight stones');
+assert.strictEqual(model.objects.filter(o => o.parent === 'tufts').length, 9, 'three tufts of three blades each');
 const story2 = JSON.parse(fs.readFileSync(path.join(root, 'exhibit/story.json'), 'utf8'));
 assert.strictEqual(story2.steps.length, 6, 'the story has six steps');
-console.log('ok  scene has ' + parts + ' parts and the story has six steps');
+console.log('ok  each object is built from its real parts; the story has six steps (' + model.objects.length + ' parts)');

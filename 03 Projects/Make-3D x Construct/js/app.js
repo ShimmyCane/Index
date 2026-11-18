@@ -278,6 +278,7 @@
   function renderInspector() {
     var obj = state.selected ? objectByUuid(state.selected) : null;
     var form = $('insp-form'), empty = $('insp-empty');
+    $('f-focus').hidden = !obj;
     empty.textContent = 'Tap a part in the view, or pick one from the Model list.';
     empty.hidden = !!obj && obj.type !== 'group';
     form.hidden = !obj || obj.type === 'group';
@@ -602,6 +603,18 @@
     $('sort-dir').addEventListener('change', renderCert);
     $('insp-form').addEventListener('submit', saveInspector);
     $('f-delete').addEventListener('click', deleteSelected);
+    $('f-focus').addEventListener('click', function () {
+      if (!state.viewer || !state.selected) return;
+      // the selected part, or a group and every part inside it
+      var ids = [state.selected], grew = true;
+      while (grew) {
+        grew = false;
+        state.result.model.objects.forEach(function (o) {
+          if (o.parent && ids.indexOf(o.parent) >= 0 && ids.indexOf(o.uuid) < 0) { ids.push(o.uuid); grew = true; }
+        });
+      }
+      state.viewer.focus(ids);
+    });
     $('flag-form').addEventListener('submit', addFlag);
     $('defect-form').addEventListener('submit', addDefect);
     document.querySelectorAll('button[data-verdict]').forEach(function (b) {

@@ -7,7 +7,7 @@
 (function (root) {
   'use strict';
 
-  var PAPER = 0xfbf6ea, INK = 0x2b2a33;
+  var PAPER = 0xfbf6ea, INK = 0x2b2a33, DEG = Math.PI / 180;
   var LOW = [0.88, 0.647, 0.549], HIGH = [0.184, 0.365, 0.314]; // coral (low certainty) -> sage ink (high)
   var VIEWS = {
     front:   { theta: -Math.PI / 2, phi: Math.PI / 2 - 0.25 },
@@ -22,7 +22,8 @@
     'painted': [0xbfd3dc, 0.85], 'hide': [0xd7b98a, 0.85], 'hide and cloth': [0xc9a77a, 0.9],
     'wood': [0x8a6a45, 0.8], 'stone': [0x8f8a80, 0.9], 'bone': [0xe6dcc6, 0.7], 'iron': [0x5e5a57, 0.5],
     'brass': [0xb5893f, 0.4], 'water': [0x6f97a8, 0.2], 'placeholder grey': [0x9b9ba3, 0.9],
-    'red cloth': [0xa5473a, 0.9], 'default': [0xb8a88a, 0.9]
+    'red cloth': [0xa5473a, 0.9], 'horse bay': [0x6e4a33, 0.8], 'horse dark': [0x2e241d, 0.85],
+    'clay': [0xb9a58a, 0.9], 'dark': [0x2f2a26, 0.8], 'ash': [0x9a948c, 0.95], 'default': [0xb8a88a, 0.9]
   };
 
   // A stable 0..1 number from a string (the uuid), so each part varies a little, the same way every time.
@@ -123,12 +124,14 @@
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         mesh.position.set(obj.position[0], obj.position[1], obj.position[2]);
+        mesh.rotation.set((obj.rotation_x || 0) * DEG, (obj.rotation_y || 0) * DEG, (obj.rotation_z || 0) * DEG);
         mesh.userData.uuid = obj.uuid;
         group.add(mesh);
         if (mode !== 'material') {
           var edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo),
             new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.55 }));
           edges.position.copy(mesh.position);
+          edges.rotation.copy(mesh.rotation);
           group.add(edges);
         }
         meshes[obj.uuid] = mesh;
@@ -154,6 +157,19 @@
     }
 
     function setMode(next, model) { mode = next; if (model) setModel(model); }
+
+    // Close-up: centre the view on one part and move in until it fills the view.
+    // uuids: the part, or a group and every part inside it (the page passes the list).
+    function focus(uuids) {
+      var list = (Array.isArray(uuids) ? uuids : [uuids]).map(function (u) { return meshes[u]; }).filter(Boolean);
+      if (!list.length) return;
+      var box = new THREE.Box3();
+      list.forEach(function (m) { box.union(new THREE.Box3().setFromObject(m)); });
+      var size = box.getSize(new THREE.Vector3()).length();
+      target.copy(box.getCenter(new THREE.Vector3()));
+      orbit.radius = Math.max(2, size * 1.6);
+      render();
+    }
 
     function select(uuid) {
       if (selected && meshes[selected]) meshes[selected].material.emissive.setHex(0x000000);
@@ -264,7 +280,7 @@
     function start() { resize(); render(); }
     root.addEventListener && root.addEventListener('resize', function () { resize(); render(); });
 
-    return { setModel: setModel, setMode: setMode, select: select, setView: setView, render: render,
+    return { setModel: setModel, setMode: setMode, select: select, focus: focus, setView: setView, render: render,
       resize: resize, snapshotViews: snapshotViews, onSelect: onSelect, start: start,
       getMode: function () { return mode; } };
   }

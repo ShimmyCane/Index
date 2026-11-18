@@ -23,6 +23,8 @@ Project rules:
 - Public repo. The sample is synthetic and generic in its figures. It depicts a specific nation, so it stays a draft until the Cheyenne and Arapaho Tribes have reviewed it. Real drawings, client work and the tribes' written answers go in `private/`.
 - Rendering never modifies the model. Rules live in the world file. Every change is an operation in the history.
 - Never write `null` into a model. Unknown values are left out and flagged.
+- No filler objects. "Density" means more real parts in the objects that already exist. New objects (foreground, background) are added only when Jimmy asks. Check each object against its real size at 1 in = 2 ft before anything else.
+- Each existing object is built from its real parts (a lodge: cover, poles, door; a horse: barrel, neck, head, legs; a person: torso, arms, head). A single block does not count as the object.
 - The page never calls an AI service. AI reviews are copy and paste, and each reply is checked first.
 - Construct's code is not copied in. If any is, its LICENSE and NOTICE go into this folder.
 - Do not apply the SQL without Jimmy's go-ahead.

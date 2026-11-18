@@ -23,6 +23,7 @@ for (const o of scene.objects) {
   if (o.dimensions) object.dimensions = o.dimensions;
   if (o.position) object.position = o.position;
   if (o.material) object.material = o.material;
+  for (const k of ['rotation_x', 'rotation_y', 'rotation_z']) if (o[k] !== undefined) object[k] = o[k];
   if (o.certainty) object.certainty = o.certainty;
   ops.push({ seq, op: 'add', time: stamp(seq), author: 'jimmy', note: 'add ' + o.name, object });
 }

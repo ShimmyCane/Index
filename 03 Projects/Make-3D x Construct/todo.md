@@ -2,6 +2,16 @@
 
 Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Jimmy
 
+## Round 5: rollback and density (2026-11-18)
+
+- [x] Rolled back the round 4 fillers (grass, scrub, stones, creek, cottonwoods, bones, goods). Layout is the round 3 layout.
+- [x] Scale corrected to real sizes at 1 in = 2 ft (horses and people had been giants).
+- [x] Lodges: cover, four leaning poles, door. Horses: barrel, neck, mane, head, muzzle, ears, tail, four legs. People: torso, arms, head, hair, skirt or legs.
+- [x] Rotation in the engine (checked) and the viewer; Close up on any selected part.
+- [x] Story v0.3 refers only to objects in the scene.
+- [ ] Next density pass, only when asked: bluff, struck cover, travois loads.
+- [ ] Your answers in `convo/convo v0.5.md`.
+
 ## Round 4: drawer, two panels, scene, story (2026-11-18)
 
 - [x] Settings drawer: items keep their height, the drawer scrolls (touch too), room at the bottom for the gear.
