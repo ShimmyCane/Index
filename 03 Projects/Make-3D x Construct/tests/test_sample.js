@@ -17,3 +17,8 @@ assert.strictEqual(model.objects.filter(o => o.type !== 'group').every(o => Numb
 const bundle = fs.readFileSync(path.join(root, 'js/sample_bundle.js'), 'utf8');
 assert(bundle.includes(model.history_hash), 'js/sample_bundle.js is stale: run node tools/build_sample.js');
 console.log('ok  sample is current, clean and matches the bundle (' + model.objects.length + ' objects, ' + model.flags.length + ' flags)');
+const parts = model.objects.length;
+assert(parts >= 300 && parts <= 500, 'the scene should have 300 to 500 parts, found ' + parts);
+const story2 = JSON.parse(fs.readFileSync(path.join(root, 'exhibit/story.json'), 'utf8'));
+assert.strictEqual(story2.steps.length, 6, 'the story has six steps');
+console.log('ok  scene has ' + parts + ' parts and the story has six steps');

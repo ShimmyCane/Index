@@ -2,6 +2,17 @@
 
 Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Jimmy
 
+## Round 4: drawer, two panels, scene, story (2026-11-18)
+
+- [x] Settings drawer: items keep their height, the drawer scrolls (touch too), room at the bottom for the gear.
+- [x] Two panels: Selected part moved to the left column; the 3-D view is the right panel.
+- [x] Scene: 388 parts, seeded layout, warm late sun with soft shadows, sky gradient, material colours with variation, creek and cottonwoods, bones on the terrace.
+- [x] Colour modes: material (default), certainty, paper and ink; the button cycles.
+- [x] Story v0.2: six steps, seven sources, two scene choices; bones and bone-trade claim (S6).
+- [x] Summary page line numbers updated.
+- [ ] Your answers in `convo/convo v0.4.md` (bones, lighting, public repo, next detail).
+- [ ] Device test on an iPad.
+
 ## Round 3: the Southern Cheyenne camp move (draft), reviews, consultation
 
 - [x] Specific sample: a Southern Cheyenne camp move, 1870s, Indian Territory (48 objects, 8 flags, 5 open for consultation).

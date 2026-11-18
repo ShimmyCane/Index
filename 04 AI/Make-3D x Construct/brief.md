@@ -1,6 +1,6 @@
 # Make-3D x Construct — Brief
 
-**Status (2026-11-18):** MVP 0.2 built and checked headless (not device-tested). The sample is now a Southern Cheyenne camp move, as a draft for consultation (not for display). Round 3 questions in `03 Projects/Make-3D x Construct/convo/convo v0.3.md`.
+**Status (2026-11-18):** MVP 0.3 built (388-part camp scene, two-panel layout, fixed drawer) and checked headless (not device-tested). The sample is now a Southern Cheyenne camp move, as a draft for consultation (not for display). Round 3 questions in `03 Projects/Make-3D x Construct/convo/convo v0.3.md`.
 
 ## Goal
 

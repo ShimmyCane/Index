@@ -16,6 +16,22 @@
     oblique: { theta: -Math.PI / 4 - 0.5, phi: 0.95 }
   };
 
+  // Material look for the 'material' mode: colour (hex) and roughness, per the material name in the model.
+  var PALETTE = {
+    'prairie earth': [0xc7ad80, 0.95], 'grass': [0xa8975a, 0.95], 'sage': [0x7e8a5c, 0.95],
+    'painted': [0xbfd3dc, 0.85], 'hide': [0xd7b98a, 0.85], 'hide and cloth': [0xc9a77a, 0.9],
+    'wood': [0x8a6a45, 0.8], 'stone': [0x8f8a80, 0.9], 'bone': [0xe6dcc6, 0.7], 'iron': [0x5e5a57, 0.5],
+    'brass': [0xb5893f, 0.4], 'water': [0x6f97a8, 0.2], 'placeholder grey': [0x9b9ba3, 0.9],
+    'red cloth': [0xa5473a, 0.9], 'default': [0xb8a88a, 0.9]
+  };
+
+  // A stable 0..1 number from a string (the uuid), so each part varies a little, the same way every time.
+  function hash01(text) {
+    var h = 2166136261;
+    for (var i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    return (h % 1000) / 1000;
+  }
+
   function lerpColor(pct) {
     var t = Math.max(0, Math.min(1, pct / 100));
     var c = [0, 1, 2].map(function (i) { return LOW[i] + (HIGH[i] - LOW[i]) * t; });
@@ -37,18 +53,36 @@
     var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, preserveDrawingBuffer: true });
     renderer.setPixelRatio(Math.min(root.devicePixelRatio || 1, 2));
     renderer.setClearColor(PAPER, 1);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
     var scene = new THREE.Scene();
+    // A soft sky behind the diorama: pale blue at the top, warm light at the horizon.
+    var sky = document.createElement('canvas');
+    sky.width = 4; sky.height = 256;
+    var sctx = sky.getContext('2d');
+    var grad = sctx.createLinearGradient(0, 0, 0, 256);
+    grad.addColorStop(0, '#9fb9c8'); grad.addColorStop(0.7, '#e9dcc0'); grad.addColorStop(1, '#f2e4c8');
+    sctx.fillStyle = grad; sctx.fillRect(0, 0, 4, 256);
+    scene.background = new THREE.CanvasTexture(sky);
     var camera = new THREE.PerspectiveCamera(35, 1, 0.1, 2000);
     camera.up.set(0, 0, 1);
-    scene.add(new THREE.AmbientLight(0xffffff, 0.75));
-    var sun = new THREE.DirectionalLight(0xffffff, 0.6);
-    sun.position.set(40, -60, 90);
+    // Late-afternoon light: a warm low sun from the west, a cool sky light from above, soft shadows.
+    var sky = new THREE.HemisphereLight(0xf2f6ff, 0x8a7356, 0.85);
+    scene.add(sky);
+    var sun = new THREE.DirectionalLight(0xffd6a0, 2.1);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.bias = -0.0004;
+    sun.shadow.normalBias = 0.02;
     scene.add(sun);
+    scene.add(sun.target);
 
     var group = new THREE.Group();
     scene.add(group);
     var meshes = {};
-    var mode = 'provenance';
+    var mode = 'material';
     var selected = null;
     var target = new THREE.Vector3(0, 0, 3);
     var orbit = { theta: VIEWS.oblique.theta, phi: VIEWS.oblique.phi, radius: 60 };
@@ -65,22 +99,38 @@
       meshes = {};
     }
 
+    // Colour for one part, by the current mode.
+    function colourFor(obj) {
+      if (mode === 'provenance') return { color: lerpColor(obj.certainty.percent), rough: 0.8 };
+      if (mode === 'plain') return { color: new THREE.Color(0xe9dcc2), rough: 0.9 };
+      var p = PALETTE[obj.material] || PALETTE['default'];
+      var j = 0.92 + 0.16 * hash01(obj.uuid);
+      return { color: new THREE.Color(p[0]).multiplyScalar(j), rough: p[1] };
+    }
+
     function setModel(model) {
       clearModel();
       var min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
       model.objects.forEach(function (obj) {
         if (obj.type === 'group') return;
         var geo = geometryFor(obj);
-        var color = mode === 'provenance' ? lerpColor(obj.certainty.percent) : new THREE.Color(0xe9dcc2);
-        var mat = new THREE.MeshLambertMaterial({ color: color });
+        var cc = colourFor(obj);
+        // The painted backdrop is drawn flat, so it reads as a painted sky, not as a lit wall.
+        var mat = obj.material === 'painted' && mode === 'material'
+          ? new THREE.MeshBasicMaterial({ color: 0xc4d6de })
+          : new THREE.MeshStandardMaterial({ color: cc.color, roughness: cc.rough, metalness: 0 });
         var mesh = new THREE.Mesh(geo, mat);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
         mesh.position.set(obj.position[0], obj.position[1], obj.position[2]);
         mesh.userData.uuid = obj.uuid;
-        var edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo),
-          new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.55 }));
-        edges.position.copy(mesh.position);
         group.add(mesh);
-        group.add(edges);
+        if (mode !== 'material') {
+          var edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo),
+            new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.55 }));
+          edges.position.copy(mesh.position);
+          group.add(edges);
+        }
         meshes[obj.uuid] = mesh;
         var h = [obj.dimensions.x / 2, obj.dimensions.y / 2, obj.dimensions.z / 2];
         for (var i = 0; i < 3; i++) {
@@ -90,7 +140,14 @@
       });
       if (min[0] !== Infinity) {
         target.set((min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2);
-        orbit.radius = Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]) * 1.9 + 4;
+        orbit.radius = Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]) * 1.4 + 4;
+        // Shadow camera covers the model; the sun sits low in the west.
+        var span = Math.max(max[0] - min[0], max[1] - min[1]) * 0.8 + 6;
+        var sc = sun.shadow.camera;
+        sc.left = -span; sc.right = span; sc.top = span; sc.bottom = -span; sc.near = 1; sc.far = 400;
+        sc.updateProjectionMatrix();
+        sun.target.position.copy(target);
+        sun.position.set(target.x - 70, target.y - 35, target.z + 55);
       }
       if (selected && meshes[selected]) select(selected);
       render();

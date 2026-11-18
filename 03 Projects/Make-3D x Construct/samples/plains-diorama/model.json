@@ -1,20 +1,20 @@
 {
   "schema": "m3dxc.model/0.1",
-  "model_id": "plains-diorama-v02",
+  "model_id": "plains-diorama-v03",
   "name": "Southern Cheyenne camp move, Indian Territory, 1870s (draft for consultation)",
-  "description": "A draft diorama of a camp move. Figures and horses are placeholders. Not reviewed by the Cheyenne and Arapaho Tribes; not for display.",
+  "description": "A draft diorama of a camp move on a river terrace, with bones on the ground. Figures and horses are placeholders. Not reviewed by the Cheyenne and Arapaho Tribes; not for display.",
   "scale": "1:24 (1 in = 2 ft)",
   "units": "in",
   "up": "z",
   "world": "plains-diorama-world",
-  "version": 56,
-  "history_hash": "ee792ded",
+  "version": 401,
+  "history_hash": "4a76e6f8",
   "objects": [
     {
       "uuid": "camp",
       "name": "Camp move (draft)",
       "type": "group",
-      "description": "Root group. A Southern Cheyenne camp move on the North Fork of the Canadian. Not reviewed by the tribes."
+      "description": "Root group. A Southern Cheyenne camp move on a river terrace on the North Fork of the Canadian. Not reviewed by the tribes."
     },
     {
       "uuid": "ground",
@@ -39,25 +39,76 @@
       }
     },
     {
-      "uuid": "ridge",
-      "name": "Low bluff",
+      "uuid": "bluff",
+      "name": "Bluff (layers)",
+      "type": "group",
+      "description": "Three layers at the back of the camp, invented to frame it.",
+      "parent": "camp"
+    },
+    {
+      "uuid": "bluff-low",
+      "name": "Bluff, lower layer",
       "type": "box",
-      "parent": "camp",
+      "parent": "bluff",
       "dimensions": {
-        "x": 22,
-        "y": 5,
-        "z": 3
+        "x": 30,
+        "y": 3,
+        "z": 2
       },
       "position": [
         0,
-        6,
-        2.5
+        8.2,
+        2
       ],
       "material": "prairie earth",
       "certainty": {
         "percent": 35,
         "basis": "inferred",
-        "note": "Invented to frame the camp. Not from a source."
+        "note": "Invented to frame the camp."
+      }
+    },
+    {
+      "uuid": "bluff-stone",
+      "name": "Bluff, stone layer",
+      "type": "box",
+      "parent": "bluff",
+      "dimensions": {
+        "x": 26,
+        "y": 2.5,
+        "z": 2.5
+      },
+      "position": [
+        0,
+        8.4,
+        4.25
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 35,
+        "basis": "inferred",
+        "note": "Invented to frame the camp."
+      }
+    },
+    {
+      "uuid": "bluff-top",
+      "name": "Bluff, top layer",
+      "type": "box",
+      "parent": "bluff",
+      "dimensions": {
+        "x": 22,
+        "y": 2,
+        "z": 2
+      },
+      "position": [
+        0,
+        8.5,
+        6.5
+      ],
+      "material": "prairie earth",
+      "certainty": {
+        "percent": 35,
+        "basis": "inferred",
+        "note": "Invented to frame the camp."
       }
     },
     {
@@ -83,15 +134,37 @@
       }
     },
     {
+      "uuid": "water",
+      "name": "Creek (North Fork side channel)",
+      "type": "box",
+      "parent": "camp",
+      "dimensions": {
+        "x": 6,
+        "y": 18,
+        "z": 0.2
+      },
+      "position": [
+        9,
+        0,
+        1.1
+      ],
+      "material": "water",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "A shallow creek band. Its course and width are not from a survey."
+      }
+    },
+    {
       "uuid": "lodges",
       "name": "Lodges (standing and struck)",
       "type": "group",
-      "description": "Two standing lodges and one struck (taken down) lodge cover with its poles.",
+      "description": "Three standing lodges and one struck lodge cover with its poles.",
       "parent": "camp"
     },
     {
-      "uuid": "tipi-1",
-      "name": "Lodge (standing, large)",
+      "uuid": "lodge-1",
+      "name": "Lodge 1 (standing, large)",
       "type": "cone",
       "parent": "lodges",
       "dimensions": {
@@ -100,7 +173,7 @@
         "z": 8
       },
       "position": [
-        -7,
+        -9,
         3,
         5
       ],
@@ -108,12 +181,12 @@
       "certainty": {
         "percent": 60,
         "basis": "inferred",
-        "note": "General tipi form. Diameter and height approximate, not from a source."
+        "note": "General tipi form. Diameter and height approximate."
       }
     },
     {
-      "uuid": "tipi-2",
-      "name": "Lodge (standing, small)",
+      "uuid": "lodge-2",
+      "name": "Lodge 2 (standing)",
       "type": "cone",
       "parent": "lodges",
       "dimensions": {
@@ -122,9 +195,31 @@
         "z": 7
       },
       "position": [
-        -11,
-        -1,
+        -12.5,
+        -3,
         4.5
+      ],
+      "material": "hide",
+      "certainty": {
+        "percent": 55,
+        "basis": "inferred",
+        "note": "General tipi form. Size approximate."
+      }
+    },
+    {
+      "uuid": "lodge-3",
+      "name": "Lodge 3 (standing, small)",
+      "type": "cone",
+      "parent": "lodges",
+      "dimensions": {
+        "x": 5,
+        "y": 5,
+        "z": 6
+      },
+      "position": [
+        -5,
+        -4,
+        4
       ],
       "material": "hide",
       "certainty": {
@@ -144,15 +239,15 @@
         "z": 0.6
       },
       "position": [
-        -2,
-        -4,
+        -1,
+        -1,
         1.3
       ],
       "material": "hide",
       "certainty": {
         "percent": 50,
         "basis": "inferred",
-        "note": "The folded cover on the ground. Its size is approximate."
+        "note": "The folded cover on the ground. Size approximate."
       }
     },
     {
@@ -166,8 +261,8 @@
         "z": 0.3
       },
       "position": [
-        -2.6,
-        -4,
+        -1.9,
+        -1,
         1.15
       ],
       "material": "wood",
@@ -179,211 +274,306 @@
     },
     {
       "uuid": "travois",
-      "name": "Travois (two frames, loaded)",
+      "name": "Travois (three frames, loaded)",
       "type": "group",
-      "description": "Two drag frames loaded for the move.",
+      "description": "Three drag frames loaded for the move.",
       "parent": "camp"
     },
     {
-      "uuid": "travois-a",
-      "name": "Travois A",
+      "uuid": "travois-1",
+      "name": "Travois 1",
       "type": "group",
-      "description": "A drag frame of two poles and a cross bar, with a load of bundles.",
+      "description": "A drag frame of two poles and a cross bar, with a load.",
       "parent": "travois"
     },
     {
-      "uuid": "travois-a-pole-l",
+      "uuid": "travois-1-pole-l",
       "name": "Pole (left)",
       "type": "box",
-      "parent": "travois-a",
+      "parent": "travois-1",
       "dimensions": {
         "x": 0.4,
         "y": 9,
         "z": 0.4
       },
       "position": [
-        1.1,
-        -3,
+        2.6,
+        -4,
         1.2
       ],
       "material": "wood",
       "certainty": {
         "percent": 55,
         "basis": "inferred",
-        "note": "Travois form from the research; the length is approximate."
+        "note": "Travois form from the research; length approximate."
       }
     },
     {
-      "uuid": "travois-a-pole-r",
+      "uuid": "travois-1-pole-r",
       "name": "Pole (right)",
       "type": "box",
-      "parent": "travois-a",
+      "parent": "travois-1",
       "dimensions": {
         "x": 0.4,
         "y": 9,
         "z": 0.4
       },
       "position": [
-        1.9,
-        -3,
+        3.4,
+        -4,
         1.2
       ],
       "material": "wood",
       "certainty": {
         "percent": 55,
         "basis": "inferred",
-        "note": "As the left pole."
+        "note": "Travois form from the research; length approximate."
       }
     },
     {
-      "uuid": "travois-a-bar",
+      "uuid": "travois-1-bar",
       "name": "Cross bar",
       "type": "box",
-      "parent": "travois-a",
+      "parent": "travois-1",
       "dimensions": {
         "x": 1.6,
         "y": 0.4,
         "z": 0.4
       },
       "position": [
-        1.5,
-        -7.5,
+        3,
+        -8.5,
         1.2
       ],
       "material": "wood",
       "certainty": {
         "percent": 55,
         "basis": "inferred",
-        "note": "Joins the poles at the front."
+        "note": "Travois form from the research; length approximate."
       }
     },
     {
-      "uuid": "travois-a-load",
+      "uuid": "travois-1-load",
       "name": "Load of bundles",
       "type": "box",
-      "parent": "travois-a",
+      "parent": "travois-1",
       "dimensions": {
         "x": 2.4,
         "y": 2.6,
         "z": 1.6
       },
       "position": [
-        1.5,
-        -2.5,
+        3,
+        -3.5,
         2.2
       ],
       "material": "hide and cloth",
       "certainty": {
         "percent": 30,
         "basis": "placeholder",
-        "note": "A block for the load. What it holds is not yet confirmed."
+        "note": "A block for the load. What it holds is not confirmed."
       }
     },
     {
-      "uuid": "travois-b",
-      "name": "Travois B",
+      "uuid": "travois-2",
+      "name": "Travois 2",
       "type": "group",
-      "description": "A drag frame of two poles and a cross bar, with a load of bundles.",
+      "description": "A drag frame of two poles and a cross bar, with a load.",
       "parent": "travois"
     },
     {
-      "uuid": "travois-b-pole-l",
+      "uuid": "travois-2-pole-l",
       "name": "Pole (left)",
       "type": "box",
-      "parent": "travois-b",
+      "parent": "travois-2",
       "dimensions": {
         "x": 0.4,
         "y": 9,
         "z": 0.4
       },
       "position": [
-        5.1,
-        0,
-        1.2
-      ],
-      "material": "wood",
-      "certainty": {
-        "percent": 55,
-        "basis": "inferred",
-        "note": "Travois form from the research; the length is approximate."
-      }
-    },
-    {
-      "uuid": "travois-b-pole-r",
-      "name": "Pole (right)",
-      "type": "box",
-      "parent": "travois-b",
-      "dimensions": {
-        "x": 0.4,
-        "y": 9,
-        "z": 0.4
-      },
-      "position": [
-        5.9,
-        0,
-        1.2
-      ],
-      "material": "wood",
-      "certainty": {
-        "percent": 55,
-        "basis": "inferred",
-        "note": "As the left pole."
-      }
-    },
-    {
-      "uuid": "travois-b-bar",
-      "name": "Cross bar",
-      "type": "box",
-      "parent": "travois-b",
-      "dimensions": {
-        "x": 1.6,
-        "y": 0.4,
-        "z": 0.4
-      },
-      "position": [
-        5.5,
-        -4.5,
-        1.2
-      ],
-      "material": "wood",
-      "certainty": {
-        "percent": 55,
-        "basis": "inferred",
-        "note": "Joins the poles at the front."
-      }
-    },
-    {
-      "uuid": "travois-b-load",
-      "name": "Load of bundles",
-      "type": "box",
-      "parent": "travois-b",
-      "dimensions": {
-        "x": 2.4,
-        "y": 2.6,
-        "z": 1.6
-      },
-      "position": [
-        5.5,
+        5.6,
         0.5,
+        1.2
+      ],
+      "material": "wood",
+      "certainty": {
+        "percent": 55,
+        "basis": "inferred",
+        "note": "Travois form from the research; length approximate."
+      }
+    },
+    {
+      "uuid": "travois-2-pole-r",
+      "name": "Pole (right)",
+      "type": "box",
+      "parent": "travois-2",
+      "dimensions": {
+        "x": 0.4,
+        "y": 9,
+        "z": 0.4
+      },
+      "position": [
+        6.4,
+        0.5,
+        1.2
+      ],
+      "material": "wood",
+      "certainty": {
+        "percent": 55,
+        "basis": "inferred",
+        "note": "Travois form from the research; length approximate."
+      }
+    },
+    {
+      "uuid": "travois-2-bar",
+      "name": "Cross bar",
+      "type": "box",
+      "parent": "travois-2",
+      "dimensions": {
+        "x": 1.6,
+        "y": 0.4,
+        "z": 0.4
+      },
+      "position": [
+        6,
+        -4,
+        1.2
+      ],
+      "material": "wood",
+      "certainty": {
+        "percent": 55,
+        "basis": "inferred",
+        "note": "Travois form from the research; length approximate."
+      }
+    },
+    {
+      "uuid": "travois-2-load",
+      "name": "Load of bundles",
+      "type": "box",
+      "parent": "travois-2",
+      "dimensions": {
+        "x": 2.4,
+        "y": 2.6,
+        "z": 1.6
+      },
+      "position": [
+        6,
+        1,
         2.2
       ],
       "material": "hide and cloth",
       "certainty": {
         "percent": 30,
         "basis": "placeholder",
-        "note": "A block for the load. What it holds is not yet confirmed."
+        "note": "A block for the load. What it holds is not confirmed."
+      }
+    },
+    {
+      "uuid": "travois-3",
+      "name": "Travois 3",
+      "type": "group",
+      "description": "A drag frame of two poles and a cross bar, with a load.",
+      "parent": "travois"
+    },
+    {
+      "uuid": "travois-3-pole-l",
+      "name": "Pole (left)",
+      "type": "box",
+      "parent": "travois-3",
+      "dimensions": {
+        "x": 0.4,
+        "y": 9,
+        "z": 0.4
+      },
+      "position": [
+        9.1,
+        -1,
+        1.2
+      ],
+      "material": "wood",
+      "certainty": {
+        "percent": 55,
+        "basis": "inferred",
+        "note": "Travois form from the research; length approximate."
+      }
+    },
+    {
+      "uuid": "travois-3-pole-r",
+      "name": "Pole (right)",
+      "type": "box",
+      "parent": "travois-3",
+      "dimensions": {
+        "x": 0.4,
+        "y": 9,
+        "z": 0.4
+      },
+      "position": [
+        9.9,
+        -1,
+        1.2
+      ],
+      "material": "wood",
+      "certainty": {
+        "percent": 55,
+        "basis": "inferred",
+        "note": "Travois form from the research; length approximate."
+      }
+    },
+    {
+      "uuid": "travois-3-bar",
+      "name": "Cross bar",
+      "type": "box",
+      "parent": "travois-3",
+      "dimensions": {
+        "x": 1.6,
+        "y": 0.4,
+        "z": 0.4
+      },
+      "position": [
+        9.5,
+        -5.5,
+        1.2
+      ],
+      "material": "wood",
+      "certainty": {
+        "percent": 55,
+        "basis": "inferred",
+        "note": "Travois form from the research; length approximate."
+      }
+    },
+    {
+      "uuid": "travois-3-load",
+      "name": "Load of bundles",
+      "type": "box",
+      "parent": "travois-3",
+      "dimensions": {
+        "x": 2.4,
+        "y": 2.6,
+        "z": 1.6
+      },
+      "position": [
+        9.5,
+        -0.5,
+        2.2
+      ],
+      "material": "hide and cloth",
+      "certainty": {
+        "percent": 30,
+        "basis": "placeholder",
+        "note": "A block for the load. What it holds is not confirmed."
       }
     },
     {
       "uuid": "horses",
       "name": "Horses (placeholder)",
       "type": "group",
-      "description": "Two placeholder horse silhouettes. No breed, tack or colour is claimed.",
+      "description": "Four placeholder horse silhouettes. No breed, tack or colour is claimed.",
       "parent": "camp"
     },
     {
       "uuid": "horse-1",
-      "name": "Horse 1 (front)",
+      "name": "Horse 1",
       "type": "group",
       "description": "Placeholder silhouette. No breed, tack or colour is claimed.",
       "parent": "horses"
@@ -399,8 +589,8 @@
         "z": 2.6
       },
       "position": [
-        6,
-        -8.5,
+        7.5,
+        -7.5,
         4.8
       ],
       "material": "placeholder grey",
@@ -421,8 +611,8 @@
         "z": 2
       },
       "position": [
-        8.5,
-        -8.5,
+        10,
+        -7.5,
         6.3
       ],
       "material": "placeholder grey",
@@ -433,8 +623,8 @@
       }
     },
     {
-      "uuid": "horse-1-leg-fl",
-      "name": "Horse leg (front left)",
+      "uuid": "horse-1-leg-0",
+      "name": "Horse leg 1",
       "type": "cylinder",
       "parent": "horse-1",
       "dimensions": {
@@ -443,8 +633,8 @@
         "z": 2.5
       },
       "position": [
-        8.2,
-        -9.2,
+        9.7,
+        -8.2,
         2.25
       ],
       "material": "placeholder grey",
@@ -455,8 +645,8 @@
       }
     },
     {
-      "uuid": "horse-1-leg-fr",
-      "name": "Horse leg (front right)",
+      "uuid": "horse-1-leg-1",
+      "name": "Horse leg 2",
       "type": "cylinder",
       "parent": "horse-1",
       "dimensions": {
@@ -465,8 +655,8 @@
         "z": 2.5
       },
       "position": [
-        8.2,
-        -7.8,
+        9.7,
+        -6.8,
         2.25
       ],
       "material": "placeholder grey",
@@ -477,8 +667,8 @@
       }
     },
     {
-      "uuid": "horse-1-leg-bl",
-      "name": "Horse leg (back left)",
+      "uuid": "horse-1-leg-2",
+      "name": "Horse leg 3",
       "type": "cylinder",
       "parent": "horse-1",
       "dimensions": {
@@ -487,8 +677,8 @@
         "z": 2.5
       },
       "position": [
-        3.8,
-        -9.2,
+        5.3,
+        -8.2,
         2.25
       ],
       "material": "placeholder grey",
@@ -499,8 +689,8 @@
       }
     },
     {
-      "uuid": "horse-1-leg-br",
-      "name": "Horse leg (back right)",
+      "uuid": "horse-1-leg-3",
+      "name": "Horse leg 4",
       "type": "cylinder",
       "parent": "horse-1",
       "dimensions": {
@@ -509,8 +699,8 @@
         "z": 2.5
       },
       "position": [
-        3.8,
-        -7.8,
+        5.3,
+        -6.8,
         2.25
       ],
       "material": "placeholder grey",
@@ -522,7 +712,7 @@
     },
     {
       "uuid": "horse-2",
-      "name": "Horse 2 (by the cover)",
+      "name": "Horse 2",
       "type": "group",
       "description": "Placeholder silhouette. No breed, tack or colour is claimed.",
       "parent": "horses"
@@ -538,8 +728,8 @@
         "z": 2.6
       },
       "position": [
-        -5,
-        -8.5,
+        -3.5,
+        -7.5,
         4.8
       ],
       "material": "placeholder grey",
@@ -560,8 +750,8 @@
         "z": 2
       },
       "position": [
-        -2.5,
-        -8.5,
+        -1,
+        -7.5,
         6.3
       ],
       "material": "placeholder grey",
@@ -572,8 +762,8 @@
       }
     },
     {
-      "uuid": "horse-2-leg-fl",
-      "name": "Horse leg (front left)",
+      "uuid": "horse-2-leg-0",
+      "name": "Horse leg 1",
       "type": "cylinder",
       "parent": "horse-2",
       "dimensions": {
@@ -582,8 +772,8 @@
         "z": 2.5
       },
       "position": [
-        -2.8,
-        -9.2,
+        -1.2999999999999998,
+        -8.2,
         2.25
       ],
       "material": "placeholder grey",
@@ -594,8 +784,8 @@
       }
     },
     {
-      "uuid": "horse-2-leg-fr",
-      "name": "Horse leg (front right)",
+      "uuid": "horse-2-leg-1",
+      "name": "Horse leg 2",
       "type": "cylinder",
       "parent": "horse-2",
       "dimensions": {
@@ -604,8 +794,8 @@
         "z": 2.5
       },
       "position": [
-        -2.8,
-        -7.8,
+        -1.2999999999999998,
+        -6.8,
         2.25
       ],
       "material": "placeholder grey",
@@ -616,8 +806,8 @@
       }
     },
     {
-      "uuid": "horse-2-leg-bl",
-      "name": "Horse leg (back left)",
+      "uuid": "horse-2-leg-2",
+      "name": "Horse leg 3",
       "type": "cylinder",
       "parent": "horse-2",
       "dimensions": {
@@ -626,8 +816,8 @@
         "z": 2.5
       },
       "position": [
-        -7.2,
-        -9.2,
+        -5.7,
+        -8.2,
         2.25
       ],
       "material": "placeholder grey",
@@ -638,8 +828,8 @@
       }
     },
     {
-      "uuid": "horse-2-leg-br",
-      "name": "Horse leg (back right)",
+      "uuid": "horse-2-leg-3",
+      "name": "Horse leg 4",
       "type": "cylinder",
       "parent": "horse-2",
       "dimensions": {
@@ -648,8 +838,286 @@
         "z": 2.5
       },
       "position": [
-        -7.2,
-        -7.8,
+        -5.7,
+        -6.8,
+        2.25
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-3",
+      "name": "Horse 3",
+      "type": "group",
+      "description": "Placeholder silhouette. No breed, tack or colour is claimed.",
+      "parent": "horses"
+    },
+    {
+      "uuid": "horse-3-body",
+      "name": "Horse body",
+      "type": "box",
+      "parent": "horse-3",
+      "dimensions": {
+        "x": 6,
+        "y": 2,
+        "z": 2.6
+      },
+      "position": [
+        -4.5,
+        5.5,
+        4.8
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-3-neck",
+      "name": "Horse neck",
+      "type": "box",
+      "parent": "horse-3",
+      "dimensions": {
+        "x": 1,
+        "y": 1,
+        "z": 2
+      },
+      "position": [
+        -2,
+        5.5,
+        6.3
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-3-leg-0",
+      "name": "Horse leg 1",
+      "type": "cylinder",
+      "parent": "horse-3",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 2.5
+      },
+      "position": [
+        -2.3,
+        4.8,
+        2.25
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-3-leg-1",
+      "name": "Horse leg 2",
+      "type": "cylinder",
+      "parent": "horse-3",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 2.5
+      },
+      "position": [
+        -2.3,
+        6.2,
+        2.25
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-3-leg-2",
+      "name": "Horse leg 3",
+      "type": "cylinder",
+      "parent": "horse-3",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 2.5
+      },
+      "position": [
+        -6.7,
+        4.8,
+        2.25
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-3-leg-3",
+      "name": "Horse leg 4",
+      "type": "cylinder",
+      "parent": "horse-3",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 2.5
+      },
+      "position": [
+        -6.7,
+        6.2,
+        2.25
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-4",
+      "name": "Horse 4",
+      "type": "group",
+      "description": "Placeholder silhouette. No breed, tack or colour is claimed.",
+      "parent": "horses"
+    },
+    {
+      "uuid": "horse-4-body",
+      "name": "Horse body",
+      "type": "box",
+      "parent": "horse-4",
+      "dimensions": {
+        "x": 6,
+        "y": 2,
+        "z": 2.6
+      },
+      "position": [
+        4.5,
+        7.2,
+        4.8
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-4-neck",
+      "name": "Horse neck",
+      "type": "box",
+      "parent": "horse-4",
+      "dimensions": {
+        "x": 1,
+        "y": 1,
+        "z": 2
+      },
+      "position": [
+        7,
+        7.2,
+        6.3
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-4-leg-0",
+      "name": "Horse leg 1",
+      "type": "cylinder",
+      "parent": "horse-4",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 2.5
+      },
+      "position": [
+        6.7,
+        6.5,
+        2.25
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-4-leg-1",
+      "name": "Horse leg 2",
+      "type": "cylinder",
+      "parent": "horse-4",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 2.5
+      },
+      "position": [
+        6.7,
+        7.9,
+        2.25
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-4-leg-2",
+      "name": "Horse leg 3",
+      "type": "cylinder",
+      "parent": "horse-4",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 2.5
+      },
+      "position": [
+        2.3,
+        6.5,
+        2.25
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 20,
+        "basis": "placeholder",
+        "note": "Silhouette only."
+      }
+    },
+    {
+      "uuid": "horse-4-leg-3",
+      "name": "Horse leg 4",
+      "type": "cylinder",
+      "parent": "horse-4",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 2.5
+      },
+      "position": [
+        2.3,
+        7.9,
         2.25
       ],
       "material": "placeholder grey",
@@ -663,22 +1131,28 @@
       "uuid": "figures",
       "name": "People (placeholder forms)",
       "type": "group",
-      "description": "Three placeholder forms: an older woman, a child and a woman. No faces, hair, clothing or regalia.",
+      "description": "Placeholder forms: women, a child and an older woman. No faces, hair, clothing or regalia.",
       "parent": "camp"
     },
     {
-      "uuid": "figure-woman-a-body",
-      "name": "Woman A body",
+      "uuid": "woman-1",
+      "name": "Woman 1 (placeholder)",
+      "type": "group",
+      "parent": "figures"
+    },
+    {
+      "uuid": "woman-1-body",
+      "name": "Woman 1 body",
       "type": "cylinder",
-      "parent": "figures",
+      "parent": "woman-1",
       "dimensions": {
         "x": 1.6,
         "y": 1.6,
         "z": 4.5
       },
       "position": [
-        -5,
-        -2,
+        -4.9,
+        -0.3,
         3.25
       ],
       "material": "placeholder grey",
@@ -689,19 +1163,19 @@
       }
     },
     {
-      "uuid": "figure-woman-a-head",
-      "name": "Woman A head",
+      "uuid": "woman-1-head",
+      "name": "Woman 1 head",
       "type": "sphere",
-      "parent": "figures",
+      "parent": "woman-1",
       "dimensions": {
-        "x": 1,
-        "y": 1,
-        "z": 1
+        "x": 0.9,
+        "y": 0.9,
+        "z": 0.9
       },
       "position": [
-        -5,
-        -2,
-        6
+        -4.9,
+        -0.3,
+        5.95
       ],
       "material": "placeholder grey",
       "certainty": {
@@ -711,18 +1185,24 @@
       }
     },
     {
-      "uuid": "figure-child-body",
-      "name": "Child body",
+      "uuid": "child-1",
+      "name": "Child 1 (placeholder)",
+      "type": "group",
+      "parent": "figures"
+    },
+    {
+      "uuid": "child-1-body",
+      "name": "Child 1 body",
       "type": "cylinder",
-      "parent": "figures",
+      "parent": "child-1",
       "dimensions": {
         "x": 1,
         "y": 1,
         "z": 2.8
       },
       "position": [
-        -1,
-        1.5,
+        0.5,
+        1.8,
         2.4
       ],
       "material": "placeholder grey",
@@ -733,18 +1213,18 @@
       }
     },
     {
-      "uuid": "figure-child-head",
-      "name": "Child head",
+      "uuid": "child-1-head",
+      "name": "Child 1 head",
       "type": "sphere",
-      "parent": "figures",
+      "parent": "child-1",
       "dimensions": {
-        "x": 0.7,
-        "y": 0.7,
-        "z": 0.7
+        "x": 0.9,
+        "y": 0.9,
+        "z": 0.9
       },
       "position": [
-        -1,
-        1.5,
+        0.5,
+        1.8,
         4.25
       ],
       "material": "placeholder grey",
@@ -755,18 +1235,24 @@
       }
     },
     {
-      "uuid": "figure-woman-b-body",
-      "name": "Woman B body",
+      "uuid": "woman-2",
+      "name": "Woman 2 (placeholder)",
+      "type": "group",
+      "parent": "figures"
+    },
+    {
+      "uuid": "woman-2-body",
+      "name": "Woman 2 body",
       "type": "cylinder",
-      "parent": "figures",
+      "parent": "woman-2",
       "dimensions": {
         "x": 1.6,
         "y": 1.6,
         "z": 4.5
       },
       "position": [
-        9,
-        3,
+        0.8,
+        -6.9,
         3.25
       ],
       "material": "placeholder grey",
@@ -777,19 +1263,19 @@
       }
     },
     {
-      "uuid": "figure-woman-b-head",
-      "name": "Woman B head",
+      "uuid": "woman-2-head",
+      "name": "Woman 2 head",
       "type": "sphere",
-      "parent": "figures",
+      "parent": "woman-2",
       "dimensions": {
-        "x": 1,
-        "y": 1,
-        "z": 1
+        "x": 0.9,
+        "y": 0.9,
+        "z": 0.9
       },
       "position": [
-        9,
-        3,
-        6
+        0.8,
+        -6.9,
+        5.95
       ],
       "material": "placeholder grey",
       "certainty": {
@@ -799,97 +1285,6846 @@
       }
     },
     {
-      "uuid": "fire-ring",
-      "name": "Cold fire ring",
+      "uuid": "older-1",
+      "name": "Older woman 1 (placeholder)",
+      "type": "group",
+      "parent": "figures"
+    },
+    {
+      "uuid": "older-1-body",
+      "name": "Older woman 1 body",
       "type": "cylinder",
-      "parent": "camp",
+      "parent": "older-1",
+      "dimensions": {
+        "x": 1.5,
+        "y": 1.5,
+        "z": 4.2
+      },
+      "position": [
+        -8.5,
+        -6.9,
+        3.1
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Form only."
+      }
+    },
+    {
+      "uuid": "older-1-head",
+      "name": "Older woman 1 head",
+      "type": "sphere",
+      "parent": "older-1",
+      "dimensions": {
+        "x": 0.9,
+        "y": 0.9,
+        "z": 0.9
+      },
+      "position": [
+        -8.5,
+        -6.9,
+        5.65
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Form only."
+      }
+    },
+    {
+      "uuid": "woman-3",
+      "name": "Woman 3 (placeholder)",
+      "type": "group",
+      "parent": "figures"
+    },
+    {
+      "uuid": "woman-3-body",
+      "name": "Woman 3 body",
+      "type": "cylinder",
+      "parent": "woman-3",
+      "dimensions": {
+        "x": 1.6,
+        "y": 1.6,
+        "z": 4.5
+      },
+      "position": [
+        13.4,
+        3.2,
+        3.25
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Form only."
+      }
+    },
+    {
+      "uuid": "woman-3-head",
+      "name": "Woman 3 head",
+      "type": "sphere",
+      "parent": "woman-3",
+      "dimensions": {
+        "x": 0.9,
+        "y": 0.9,
+        "z": 0.9
+      },
+      "position": [
+        13.4,
+        3.2,
+        5.95
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Form only."
+      }
+    },
+    {
+      "uuid": "child-2",
+      "name": "Child 2 (placeholder)",
+      "type": "group",
+      "parent": "figures"
+    },
+    {
+      "uuid": "child-2-body",
+      "name": "Child 2 body",
+      "type": "cylinder",
+      "parent": "child-2",
+      "dimensions": {
+        "x": 1,
+        "y": 1,
+        "z": 2.6
+      },
+      "position": [
+        -0.5,
+        -10.5,
+        2.3
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Form only."
+      }
+    },
+    {
+      "uuid": "child-2-head",
+      "name": "Child 2 head",
+      "type": "sphere",
+      "parent": "child-2",
+      "dimensions": {
+        "x": 0.9,
+        "y": 0.9,
+        "z": 0.9
+      },
+      "position": [
+        -0.5,
+        -10.5,
+        4.05
+      ],
+      "material": "placeholder grey",
+      "certainty": {
+        "percent": 15,
+        "basis": "placeholder",
+        "note": "Form only."
+      }
+    },
+    {
+      "uuid": "fire",
+      "name": "Cold fire",
+      "type": "group",
+      "description": "A ring of stones with cold ash.",
+      "parent": "camp"
+    },
+    {
+      "uuid": "fire-ring",
+      "name": "Fire ring",
+      "type": "cylinder",
+      "parent": "fire",
       "dimensions": {
         "x": 2.4,
         "y": 2.4,
         "z": 0.5
       },
       "position": [
-        -8,
-        -6,
+        -7.5,
+        -7.5,
         1.25
       ],
       "material": "stone",
       "certainty": {
         "percent": 40,
         "basis": "inferred",
-        "note": "Typical size. Not from a source. The fire is out."
+        "note": "Typical size. The fire is out."
       }
     },
     {
-      "uuid": "tufts",
-      "name": "Grass tufts (decorative)",
+      "uuid": "fire-ash",
+      "name": "Cold ash",
+      "type": "cylinder",
+      "parent": "fire",
+      "dimensions": {
+        "x": 1.8,
+        "y": 1.8,
+        "z": 0.05
+      },
+      "position": [
+        -7.5,
+        -7.5,
+        1.03
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Ash, cold. Size approximate."
+      }
+    },
+    {
+      "uuid": "bones",
+      "name": "Bones on the terrace",
       "type": "group",
+      "description": "Bleached bison skulls and fragments. Their number and placement are a scene choice.",
       "parent": "camp"
     },
     {
-      "uuid": "tuft-1",
+      "uuid": "skull-1",
+      "name": "Skull 1",
+      "type": "box",
+      "parent": "bones",
+      "dimensions": {
+        "x": 1.4,
+        "y": 0.8,
+        "z": 0.8
+      },
+      "position": [
+        13.2,
+        -7.4,
+        1.4
+      ],
+      "material": "bone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Scene choice. Shape generic, not a particular skull."
+      }
+    },
+    {
+      "uuid": "skull-2",
+      "name": "Skull 2",
+      "type": "box",
+      "parent": "bones",
+      "dimensions": {
+        "x": 1.4,
+        "y": 0.8,
+        "z": 0.8
+      },
+      "position": [
+        -12.9,
+        8.5,
+        1.4
+      ],
+      "material": "bone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Scene choice. Shape generic, not a particular skull."
+      }
+    },
+    {
+      "uuid": "skull-3",
+      "name": "Skull 3",
+      "type": "box",
+      "parent": "bones",
+      "dimensions": {
+        "x": 1.4,
+        "y": 0.8,
+        "z": 0.8
+      },
+      "position": [
+        13.4,
+        8.4,
+        1.4
+      ],
+      "material": "bone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Scene choice. Shape generic, not a particular skull."
+      }
+    },
+    {
+      "uuid": "skull-4",
+      "name": "Skull 4",
+      "type": "box",
+      "parent": "bones",
+      "dimensions": {
+        "x": 1.4,
+        "y": 0.8,
+        "z": 0.8
+      },
+      "position": [
+        0.1,
+        6.2,
+        1.4
+      ],
+      "material": "bone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Scene choice. Shape generic, not a particular skull."
+      }
+    },
+    {
+      "uuid": "skull-5",
+      "name": "Skull 5",
+      "type": "box",
+      "parent": "bones",
+      "dimensions": {
+        "x": 1.4,
+        "y": 0.8,
+        "z": 0.8
+      },
+      "position": [
+        1.6,
+        3.7,
+        1.4
+      ],
+      "material": "bone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Scene choice. Shape generic, not a particular skull."
+      }
+    },
+    {
+      "uuid": "skull-6",
+      "name": "Skull 6",
+      "type": "box",
+      "parent": "bones",
+      "dimensions": {
+        "x": 1.4,
+        "y": 0.8,
+        "z": 0.8
+      },
+      "position": [
+        -3.6,
+        1.6,
+        1.4
+      ],
+      "material": "bone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Scene choice. Shape generic, not a particular skull."
+      }
+    },
+    {
+      "uuid": "bone-frag-1",
+      "name": "Bone fragment 1",
+      "type": "box",
+      "parent": "bones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.2
+      },
+      "position": [
+        4.2,
+        5.6,
+        1.1
+      ],
+      "material": "bone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Scene choice."
+      }
+    },
+    {
+      "uuid": "bone-frag-2",
+      "name": "Bone fragment 2",
+      "type": "box",
+      "parent": "bones",
+      "dimensions": {
+        "x": 0.2,
+        "y": 0.2,
+        "z": 0.3
+      },
+      "position": [
+        -3.9,
+        2.6,
+        1.15
+      ],
+      "material": "bone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Scene choice."
+      }
+    },
+    {
+      "uuid": "bone-frag-3",
+      "name": "Bone fragment 3",
+      "type": "box",
+      "parent": "bones",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.3
+      },
+      "position": [
+        3.9,
+        3.7,
+        1.15
+      ],
+      "material": "bone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Scene choice."
+      }
+    },
+    {
+      "uuid": "bone-frag-4",
+      "name": "Bone fragment 4",
+      "type": "box",
+      "parent": "bones",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.3
+      },
+      "position": [
+        -10,
+        -6.4,
+        1.15
+      ],
+      "material": "bone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Scene choice."
+      }
+    },
+    {
+      "uuid": "bone-frag-5",
+      "name": "Bone fragment 5",
+      "type": "box",
+      "parent": "bones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.4
+      },
+      "position": [
+        0.5,
+        -5.5,
+        1.2
+      ],
+      "material": "bone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Scene choice."
+      }
+    },
+    {
+      "uuid": "bone-frag-6",
+      "name": "Bone fragment 6",
+      "type": "box",
+      "parent": "bones",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.3
+      },
+      "position": [
+        4.4,
+        8.9,
+        1.15
+      ],
+      "material": "bone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Scene choice."
+      }
+    },
+    {
+      "uuid": "bone-frag-7",
+      "name": "Bone fragment 7",
+      "type": "box",
+      "parent": "bones",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.3
+      },
+      "position": [
+        -1.3,
+        -4.2,
+        1.15
+      ],
+      "material": "bone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Scene choice."
+      }
+    },
+    {
+      "uuid": "bone-frag-8",
+      "name": "Bone fragment 8",
+      "type": "box",
+      "parent": "bones",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.4
+      },
+      "position": [
+        -6,
+        8.7,
+        1.2
+      ],
+      "material": "bone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Scene choice."
+      }
+    },
+    {
+      "uuid": "goods",
+      "name": "Camp goods (bundles and pots)",
+      "type": "group",
+      "description": "Bundles and cooking pots by the lodges and travois.",
+      "parent": "camp"
+    },
+    {
+      "uuid": "bundle-1",
+      "name": "Bundle 1",
+      "type": "box",
+      "parent": "goods",
+      "dimensions": {
+        "x": 1.3,
+        "y": 1.4,
+        "z": 0.9
+      },
+      "position": [
+        -0.8,
+        7.6,
+        1.45
+      ],
+      "material": "hide and cloth",
+      "certainty": {
+        "percent": 45,
+        "basis": "inferred",
+        "note": "Bundle shape generic; contents not known."
+      }
+    },
+    {
+      "uuid": "bundle-2",
+      "name": "Bundle 2",
+      "type": "box",
+      "parent": "goods",
+      "dimensions": {
+        "x": 1.3,
+        "y": 1.2,
+        "z": 0.7
+      },
+      "position": [
+        -0.9,
+        3.8,
+        1.35
+      ],
+      "material": "hide and cloth",
+      "certainty": {
+        "percent": 45,
+        "basis": "inferred",
+        "note": "Bundle shape generic; contents not known."
+      }
+    },
+    {
+      "uuid": "bundle-3",
+      "name": "Bundle 3",
+      "type": "box",
+      "parent": "goods",
+      "dimensions": {
+        "x": 0.8,
+        "y": 1.2,
+        "z": 0.8
+      },
+      "position": [
+        -0.6,
+        -5.3,
+        1.4
+      ],
+      "material": "hide and cloth",
+      "certainty": {
+        "percent": 45,
+        "basis": "inferred",
+        "note": "Bundle shape generic; contents not known."
+      }
+    },
+    {
+      "uuid": "bundle-4",
+      "name": "Bundle 4",
+      "type": "box",
+      "parent": "goods",
+      "dimensions": {
+        "x": 1.4,
+        "y": 0.8,
+        "z": 0.9
+      },
+      "position": [
+        13.3,
+        -2.3,
+        1.45
+      ],
+      "material": "hide and cloth",
+      "certainty": {
+        "percent": 45,
+        "basis": "inferred",
+        "note": "Bundle shape generic; contents not known."
+      }
+    },
+    {
+      "uuid": "bundle-5",
+      "name": "Bundle 5",
+      "type": "box",
+      "parent": "goods",
+      "dimensions": {
+        "x": 0.9,
+        "y": 1.1,
+        "z": 0.7
+      },
+      "position": [
+        -10,
+        -7.7,
+        1.35
+      ],
+      "material": "hide and cloth",
+      "certainty": {
+        "percent": 45,
+        "basis": "inferred",
+        "note": "Bundle shape generic; contents not known."
+      }
+    },
+    {
+      "uuid": "bundle-6",
+      "name": "Bundle 6",
+      "type": "box",
+      "parent": "goods",
+      "dimensions": {
+        "x": 1.4,
+        "y": 0.8,
+        "z": 0.7
+      },
+      "position": [
+        -4.9,
+        7.6,
+        1.35
+      ],
+      "material": "hide and cloth",
+      "certainty": {
+        "percent": 45,
+        "basis": "inferred",
+        "note": "Bundle shape generic; contents not known."
+      }
+    },
+    {
+      "uuid": "bundle-7",
+      "name": "Bundle 7",
+      "type": "box",
+      "parent": "goods",
+      "dimensions": {
+        "x": 1.6,
+        "y": 0.8,
+        "z": 0.7
+      },
+      "position": [
+        -12.8,
+        6.4,
+        1.35
+      ],
+      "material": "hide and cloth",
+      "certainty": {
+        "percent": 45,
+        "basis": "inferred",
+        "note": "Bundle shape generic; contents not known."
+      }
+    },
+    {
+      "uuid": "bundle-8",
+      "name": "Bundle 8",
+      "type": "box",
+      "parent": "goods",
+      "dimensions": {
+        "x": 1.3,
+        "y": 1.1,
+        "z": 0.6
+      },
+      "position": [
+        -2.9,
+        8.7,
+        1.3
+      ],
+      "material": "hide and cloth",
+      "certainty": {
+        "percent": 45,
+        "basis": "inferred",
+        "note": "Bundle shape generic; contents not known."
+      }
+    },
+    {
+      "uuid": "bundle-9",
+      "name": "Bundle 9",
+      "type": "box",
+      "parent": "goods",
+      "dimensions": {
+        "x": 1.4,
+        "y": 0.9,
+        "z": 0.8
+      },
+      "position": [
+        13.1,
+        1.2,
+        1.4
+      ],
+      "material": "hide and cloth",
+      "certainty": {
+        "percent": 45,
+        "basis": "inferred",
+        "note": "Bundle shape generic; contents not known."
+      }
+    },
+    {
+      "uuid": "bundle-10",
+      "name": "Bundle 10",
+      "type": "box",
+      "parent": "goods",
+      "dimensions": {
+        "x": 1.3,
+        "y": 1.1,
+        "z": 0.6
+      },
+      "position": [
+        4.1,
+        2.2,
+        1.3
+      ],
+      "material": "hide and cloth",
+      "certainty": {
+        "percent": 45,
+        "basis": "inferred",
+        "note": "Bundle shape generic; contents not known."
+      }
+    },
+    {
+      "uuid": "bundle-11",
+      "name": "Bundle 11",
+      "type": "box",
+      "parent": "goods",
+      "dimensions": {
+        "x": 1.5,
+        "y": 1,
+        "z": 0.8
+      },
+      "position": [
+        13.7,
+        -0.5,
+        1.4
+      ],
+      "material": "hide and cloth",
+      "certainty": {
+        "percent": 45,
+        "basis": "inferred",
+        "note": "Bundle shape generic; contents not known."
+      }
+    },
+    {
+      "uuid": "bundle-12",
+      "name": "Bundle 12",
+      "type": "box",
+      "parent": "goods",
+      "dimensions": {
+        "x": 1.4,
+        "y": 1.3,
+        "z": 0.9
+      },
+      "position": [
+        -9.6,
+        7.9,
+        1.45
+      ],
+      "material": "hide and cloth",
+      "certainty": {
+        "percent": 45,
+        "basis": "inferred",
+        "note": "Bundle shape generic; contents not known."
+      }
+    },
+    {
+      "uuid": "pot-1",
+      "name": "Cooking pot 1",
+      "type": "cylinder",
+      "parent": "goods",
+      "dimensions": {
+        "x": 0.9,
+        "y": 0.9,
+        "z": 0.5
+      },
+      "position": [
+        -13.8,
+        1.1,
+        1.25
+      ],
+      "material": "iron",
+      "certainty": {
+        "percent": 45,
+        "basis": "inferred",
+        "note": "Pot shape generic."
+      }
+    },
+    {
+      "uuid": "pot-2",
+      "name": "Cooking pot 2",
+      "type": "cylinder",
+      "parent": "goods",
+      "dimensions": {
+        "x": 0.9,
+        "y": 0.9,
+        "z": 0.5
+      },
+      "position": [
+        -13,
+        -7.1,
+        1.25
+      ],
+      "material": "iron",
+      "certainty": {
+        "percent": 45,
+        "basis": "inferred",
+        "note": "Pot shape generic."
+      }
+    },
+    {
+      "uuid": "pot-3",
+      "name": "Cooking pot 3",
+      "type": "cylinder",
+      "parent": "goods",
+      "dimensions": {
+        "x": 0.9,
+        "y": 0.9,
+        "z": 0.5
+      },
+      "position": [
+        -3.3,
+        2.9,
+        1.25
+      ],
+      "material": "iron",
+      "certainty": {
+        "percent": 45,
+        "basis": "inferred",
+        "note": "Pot shape generic."
+      }
+    },
+    {
+      "uuid": "pot-4",
+      "name": "Cooking pot 4",
+      "type": "cylinder",
+      "parent": "goods",
+      "dimensions": {
+        "x": 1,
+        "y": 1,
+        "z": 0.5
+      },
+      "position": [
+        -7.5,
+        8.8,
+        1.25
+      ],
+      "material": "iron",
+      "certainty": {
+        "percent": 45,
+        "basis": "inferred",
+        "note": "Pot shape generic."
+      }
+    },
+    {
+      "uuid": "pot-5",
+      "name": "Cooking pot 5",
+      "type": "cylinder",
+      "parent": "goods",
+      "dimensions": {
+        "x": 0.9,
+        "y": 0.9,
+        "z": 0.5
+      },
+      "position": [
+        -8.6,
+        -2,
+        1.25
+      ],
+      "material": "iron",
+      "certainty": {
+        "percent": 45,
+        "basis": "inferred",
+        "note": "Pot shape generic."
+      }
+    },
+    {
+      "uuid": "pot-6",
+      "name": "Cooking pot 6",
+      "type": "cylinder",
+      "parent": "goods",
+      "dimensions": {
+        "x": 0.8,
+        "y": 0.8,
+        "z": 0.5
+      },
+      "position": [
+        0.3,
+        4.6,
+        1.25
+      ],
+      "material": "iron",
+      "certainty": {
+        "percent": 45,
+        "basis": "inferred",
+        "note": "Pot shape generic."
+      }
+    },
+    {
+      "uuid": "stones",
+      "name": "Stones (generic)",
+      "type": "group",
+      "description": "Scattered stones on the terrace.",
+      "parent": "camp"
+    },
+    {
+      "uuid": "stone-1",
+      "name": "Stone 1",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.5,
+        "z": 0.4
+      },
+      "position": [
+        -0.3,
+        8.8,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-2",
+      "name": "Stone 2",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        4.7,
+        -5.4,
+        1.25
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-3",
+      "name": "Stone 3",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.7,
+        "z": 0.3
+      },
+      "position": [
+        13.4,
+        7.2,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-4",
+      "name": "Stone 4",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.2
+      },
+      "position": [
+        4.5,
+        -3.1,
+        1.1
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-5",
+      "name": "Stone 5",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.8,
+        "y": 0.6,
+        "z": 0.3
+      },
+      "position": [
+        3.6,
+        4.9,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-6",
+      "name": "Stone 6",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.4,
+        "z": 0.4
+      },
+      "position": [
+        -5.4,
+        1,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-7",
+      "name": "Stone 7",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.7,
+        "z": 0.3
+      },
+      "position": [
+        -13.9,
+        -8.4,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-8",
+      "name": "Stone 8",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.7,
+        "z": 0.2
+      },
+      "position": [
+        -9.2,
+        -5,
+        1.1
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-9",
+      "name": "Stone 9",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.7,
+        "z": 0.4
+      },
+      "position": [
+        -9.8,
+        -5.8,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-10",
+      "name": "Stone 10",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.5,
+        "z": 0.3
+      },
+      "position": [
+        1.7,
+        -1.6,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-11",
+      "name": "Stone 11",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.8,
+        "y": 0.4,
+        "z": 0.3
+      },
+      "position": [
+        -2,
+        -5.7,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-12",
+      "name": "Stone 12",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.8,
+        "y": 0.7,
+        "z": 0.2
+      },
+      "position": [
+        1.7,
+        2.1,
+        1.1
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-13",
+      "name": "Stone 13",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.7,
+        "z": 0.3
+      },
+      "position": [
+        -12.1,
+        -8.5,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-14",
+      "name": "Stone 14",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.6,
+        "z": 0.4
+      },
+      "position": [
+        1.1,
+        -8.8,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-15",
+      "name": "Stone 15",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.6,
+        "z": 0.4
+      },
+      "position": [
+        0.8,
+        -4.6,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-16",
+      "name": "Stone 16",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.8,
+        "z": 0.3
+      },
+      "position": [
+        -8.2,
+        7.4,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-17",
+      "name": "Stone 17",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.7,
+        "z": 0.4
+      },
+      "position": [
+        -8,
+        -3.1,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-18",
+      "name": "Stone 18",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.7,
+        "z": 0.3
+      },
+      "position": [
+        -2,
+        7.8,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-19",
+      "name": "Stone 19",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.7,
+        "z": 0.3
+      },
+      "position": [
+        13,
+        -5.5,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-20",
+      "name": "Stone 20",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -4,
+        3.6,
+        1.25
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-21",
+      "name": "Stone 21",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.4,
+        "z": 0.3
+      },
+      "position": [
+        -0.8,
+        2.2,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-22",
+      "name": "Stone 22",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.7,
+        "z": 0.2
+      },
+      "position": [
+        -8.5,
+        -4,
+        1.1
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-23",
+      "name": "Stone 23",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "position": [
+        2.8,
+        1.2,
+        1.25
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-24",
+      "name": "Stone 24",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.4
+      },
+      "position": [
+        13.3,
+        -8.7,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-25",
+      "name": "Stone 25",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.6,
+        "z": 0.5
+      },
+      "position": [
+        1.7,
+        4.9,
+        1.25
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-26",
+      "name": "Stone 26",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.3,
+        "z": 0.3
+      },
+      "position": [
+        -6.9,
+        -1.2,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-27",
+      "name": "Stone 27",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.5,
+        "z": 0.3
+      },
+      "position": [
+        1.4,
+        8.6,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-28",
+      "name": "Stone 28",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.4,
+        "z": 0.2
+      },
+      "position": [
+        -8.3,
+        -5.1,
+        1.1
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-29",
+      "name": "Stone 29",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.7,
+        "z": 0.3
+      },
+      "position": [
+        -13.3,
+        2.8,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-30",
+      "name": "Stone 30",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.5,
+        "z": 0.3
+      },
+      "position": [
+        12.6,
+        -1.2,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-31",
+      "name": "Stone 31",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.7,
+        "z": 0.4
+      },
+      "position": [
+        -10.9,
+        -8.9,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-32",
+      "name": "Stone 32",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.6,
+        "z": 0.2
+      },
+      "position": [
+        -11,
+        7.2,
+        1.1
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-33",
+      "name": "Stone 33",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.7,
+        "z": 0.5
+      },
+      "position": [
+        12.5,
+        6.9,
+        1.25
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-34",
+      "name": "Stone 34",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.4,
+        "z": 0.5
+      },
+      "position": [
+        -12.9,
+        4.5,
+        1.25
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-35",
+      "name": "Stone 35",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.4,
+        "z": 0.2
+      },
+      "position": [
+        -13.7,
+        3.7,
+        1.1
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-36",
+      "name": "Stone 36",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.5,
+        "z": 0.3
+      },
+      "position": [
+        -13,
+        1.8,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-37",
+      "name": "Stone 37",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.4,
+        "z": 0.4
+      },
+      "position": [
+        0.4,
+        -8.3,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-38",
+      "name": "Stone 38",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.6,
+        "z": 0.3
+      },
+      "position": [
+        2.9,
+        3.7,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-39",
+      "name": "Stone 39",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.5,
+        "z": 0.4
+      },
+      "position": [
+        12.7,
+        -3.2,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-40",
+      "name": "Stone 40",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.5,
+        "z": 0.4
+      },
+      "position": [
+        12.7,
+        -4.7,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-41",
+      "name": "Stone 41",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "position": [
+        -9.1,
+        -1.1,
+        1.25
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-42",
+      "name": "Stone 42",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.3,
+        "z": 0.3
+      },
+      "position": [
+        -11.3,
+        8,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-43",
+      "name": "Stone 43",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.7,
+        "z": 0.5
+      },
+      "position": [
+        -11.9,
+        -7,
+        1.25
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-44",
+      "name": "Stone 44",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.6,
+        "z": 0.4
+      },
+      "position": [
+        -1.2,
+        8.7,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-46",
+      "name": "Stone 46",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.7,
+        "z": 0.4
+      },
+      "position": [
+        11.9,
+        -8.6,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-47",
+      "name": "Stone 47",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.8,
+        "y": 0.6,
+        "z": 0.4
+      },
+      "position": [
+        -2.3,
+        3.7,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-48",
+      "name": "Stone 48",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.7,
+        "z": 0.5
+      },
+      "position": [
+        -6.1,
+        7.6,
+        1.25
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-49",
+      "name": "Stone 49",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.8,
+        "z": 0.4
+      },
+      "position": [
+        14,
+        -5,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-50",
+      "name": "Stone 50",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.8,
+        "y": 0.7,
+        "z": 0.3
+      },
+      "position": [
+        -13.2,
+        -8.9,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-51",
+      "name": "Stone 51",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.4,
+        "z": 0.2
+      },
+      "position": [
+        1.6,
+        -3.9,
+        1.1
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-52",
+      "name": "Stone 52",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.4,
+        "z": 0.2
+      },
+      "position": [
+        -11.5,
+        9,
+        1.1
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-53",
+      "name": "Stone 53",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.8,
+        "y": 0.3,
+        "z": 0.2
+      },
+      "position": [
+        4.4,
+        0,
+        1.1
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-54",
+      "name": "Stone 54",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.5,
+        "z": 0.4
+      },
+      "position": [
+        5,
+        5.2,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-55",
+      "name": "Stone 55",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.4,
+        "z": 0.4
+      },
+      "position": [
+        -3.6,
+        7.2,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-56",
+      "name": "Stone 56",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.7,
+        "z": 0.5
+      },
+      "position": [
+        4.3,
+        -4.5,
+        1.25
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-57",
+      "name": "Stone 57",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.2
+      },
+      "position": [
+        -4,
+        8.8,
+        1.1
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-58",
+      "name": "Stone 58",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.5,
+        "z": 0.4
+      },
+      "position": [
+        13.8,
+        -6,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-59",
+      "name": "Stone 59",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.8,
+        "z": 0.3
+      },
+      "position": [
+        2.6,
+        5.1,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-60",
+      "name": "Stone 60",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.7,
+        "z": 0.4
+      },
+      "position": [
+        1.5,
+        5.8,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-61",
+      "name": "Stone 61",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.7,
+        "z": 0.2
+      },
+      "position": [
+        11.7,
+        8.4,
+        1.1
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-62",
+      "name": "Stone 62",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        0.4,
+        -3.8,
+        1.25
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-63",
+      "name": "Stone 63",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.4,
+        "z": 0.5
+      },
+      "position": [
+        -2.7,
+        7.4,
+        1.25
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-64",
+      "name": "Stone 64",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.3
+      },
+      "position": [
+        -2,
+        7,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-65",
+      "name": "Stone 65",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.7,
+        "z": 0.5
+      },
+      "position": [
+        -13.6,
+        4.9,
+        1.25
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-66",
+      "name": "Stone 66",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.6,
+        "z": 0.2
+      },
+      "position": [
+        -11,
+        -6.3,
+        1.1
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-67",
+      "name": "Stone 67",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.8,
+        "y": 0.7,
+        "z": 0.4
+      },
+      "position": [
+        3.1,
+        9,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-68",
+      "name": "Stone 68",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.3
+      },
+      "position": [
+        4.3,
+        -3.8,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-69",
+      "name": "Stone 69",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.5,
+        "z": 0.2
+      },
+      "position": [
+        12.9,
+        -3.9,
+        1.1
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-70",
+      "name": "Stone 70",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.6,
+        "z": 0.4
+      },
+      "position": [
+        -10.1,
+        -8.8,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-71",
+      "name": "Stone 71",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.3
+      },
+      "position": [
+        1.7,
+        -4.9,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-72",
+      "name": "Stone 72",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.7,
+        "z": 0.4
+      },
+      "position": [
+        13,
+        6,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-73",
+      "name": "Stone 73",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.7,
+        "z": 0.3
+      },
+      "position": [
+        1.5,
+        1,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-74",
+      "name": "Stone 74",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        1.3,
+        -2.8,
+        1.25
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-75",
+      "name": "Stone 75",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.2
+      },
+      "position": [
+        -11.3,
+        -7.6,
+        1.1
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-76",
+      "name": "Stone 76",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.4,
+        "z": 0.3
+      },
+      "position": [
+        -0.4,
+        -4.3,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-77",
+      "name": "Stone 77",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.8,
+        "y": 0.7,
+        "z": 0.3
+      },
+      "position": [
+        4.6,
+        -1.2,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-78",
+      "name": "Stone 78",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.8,
+        "z": 0.3
+      },
+      "position": [
+        -13.9,
+        5.7,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-80",
+      "name": "Stone 80",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        13.9,
+        -8.8,
+        1.25
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-81",
+      "name": "Stone 81",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.4,
+        "z": 0.4
+      },
+      "position": [
+        12.8,
+        5.1,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-82",
+      "name": "Stone 82",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.7,
+        "z": 0.4
+      },
+      "position": [
+        -12.5,
+        0.8,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-83",
+      "name": "Stone 83",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.8,
+        "z": 0.3
+      },
+      "position": [
+        -4.8,
+        2.6,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-84",
+      "name": "Stone 84",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.3,
+        "z": 0.4
+      },
+      "position": [
+        2.1,
+        9,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-85",
+      "name": "Stone 85",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.7,
+        "z": 0.4
+      },
+      "position": [
+        2.7,
+        2.1,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-86",
+      "name": "Stone 86",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.3,
+        "z": 0.3
+      },
+      "position": [
+        -3.8,
+        7.9,
+        1.15
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-87",
+      "name": "Stone 87",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.7,
+        "z": 0.4
+      },
+      "position": [
+        4,
+        1,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-88",
+      "name": "Stone 88",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.4
+      },
+      "position": [
+        -6.8,
+        8,
+        1.2
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-89",
+      "name": "Stone 89",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.6,
+        "z": 0.5
+      },
+      "position": [
+        -11.6,
+        6.2,
+        1.25
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "stone-90",
+      "name": "Stone 90",
+      "type": "box",
+      "parent": "stones",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.6,
+        "z": 0.5
+      },
+      "position": [
+        -10.8,
+        8.6,
+        1.25
+      ],
+      "material": "stone",
+      "certainty": {
+        "percent": 40,
+        "basis": "inferred",
+        "note": "Shape generic."
+      }
+    },
+    {
+      "uuid": "shrubs",
+      "name": "Sage shrubs (generic)",
+      "type": "group",
+      "description": "Generic shrub masses. Sizes are not measured.",
+      "parent": "camp"
+    },
+    {
+      "uuid": "shrub-16",
+      "name": "Sage shrub 16",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 1,
+        "y": 1,
+        "z": 1
+      },
+      "position": [
+        -9.1,
+        -8.9,
+        1.5
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic shape. Size not measured."
+      }
+    },
+    {
+      "uuid": "shrub-18",
+      "name": "Sage shrub 18",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 1,
+        "y": 1,
+        "z": 1
+      },
+      "position": [
+        0.6,
+        7.6,
+        1.5
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic shape. Size not measured."
+      }
+    },
+    {
+      "uuid": "shrub-36",
+      "name": "Sage shrub 36",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.9,
+        "y": 0.9,
+        "z": 0.9
+      },
+      "position": [
+        13.9,
+        4.8,
+        1.45
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic shape. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-1",
+      "name": "Sage scrub 1",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.4
+      },
+      "position": [
+        -7.1,
+        7.4,
+        1.2
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-2",
+      "name": "Sage scrub 2",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.7,
+        "z": 0.7
+      },
+      "position": [
+        -8.6,
+        8.5,
+        1.35
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-3",
+      "name": "Sage scrub 3",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "position": [
+        -13.4,
+        0.4,
+        1.25
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-4",
+      "name": "Sage scrub 4",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "position": [
+        -7.9,
+        -1.1,
+        1.25
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-5",
+      "name": "Sage scrub 5",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.8,
+        "y": 0.8,
+        "z": 0.8
+      },
+      "position": [
+        6.2,
+        8.8,
+        1.4
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-6",
+      "name": "Sage scrub 6",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.7,
+        "z": 0.7
+      },
+      "position": [
+        4.7,
+        -2.3,
+        1.35
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-7",
+      "name": "Sage scrub 7",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.8,
+        "y": 0.8,
+        "z": 0.8
+      },
+      "position": [
+        -14,
+        -6.7,
+        1.4
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-8",
+      "name": "Sage scrub 8",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        11.2,
+        -8.9,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-10",
+      "name": "Sage scrub 10",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "position": [
+        4.5,
+        4.6,
+        1.25
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-11",
+      "name": "Sage scrub 11",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "position": [
+        -13.9,
+        2,
+        1.25
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-12",
+      "name": "Sage scrub 12",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        13.8,
+        5.9,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-14",
+      "name": "Sage scrub 14",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.7,
+        "z": 0.7
+      },
+      "position": [
+        -4.8,
+        1.4,
+        1.35
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-16",
+      "name": "Sage scrub 16",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "position": [
+        0.1,
+        3.6,
+        1.25
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-17",
+      "name": "Sage scrub 17",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "position": [
+        14,
+        1.9,
+        1.25
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-19",
+      "name": "Sage scrub 19",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.4
+      },
+      "position": [
+        -13.7,
+        7,
+        1.2
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-20",
+      "name": "Sage scrub 20",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.8,
+        "y": 0.8,
+        "z": 0.8
+      },
+      "position": [
+        13.8,
+        -3.8,
+        1.4
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-21",
+      "name": "Sage scrub 21",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        -4.8,
+        8.8,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-22",
+      "name": "Sage scrub 22",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.7,
+        "z": 0.7
+      },
+      "position": [
+        -0.1,
+        2.7,
+        1.35
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-23",
+      "name": "Sage scrub 23",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.7,
+        "z": 0.7
+      },
+      "position": [
+        -11.8,
+        7.2,
+        1.35
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-24",
+      "name": "Sage scrub 24",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        4.3,
+        -8.8,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-27",
+      "name": "Sage scrub 27",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        12.7,
+        0.1,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-29",
+      "name": "Sage scrub 29",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        -6.2,
+        0,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-30",
+      "name": "Sage scrub 30",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.7,
+        "z": 0.7
+      },
+      "position": [
+        -7.3,
+        -1.9,
+        1.35
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-33",
+      "name": "Sage scrub 33",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        5.3,
+        -5.8,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-35",
+      "name": "Sage scrub 35",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        -10.9,
+        -7.1,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-36",
+      "name": "Sage scrub 36",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        -7.6,
+        -5.7,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-37",
+      "name": "Sage scrub 37",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        1.7,
+        0.1,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-39",
+      "name": "Sage scrub 39",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "position": [
+        12.8,
+        -6.3,
+        1.25
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-42",
+      "name": "Sage scrub 42",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.7,
+        "z": 0.7
+      },
+      "position": [
+        -6.1,
+        -9,
+        1.35
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-44",
+      "name": "Sage scrub 44",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        6.7,
+        -9,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-45",
+      "name": "Sage scrub 45",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        1,
+        -3.3,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-47",
+      "name": "Sage scrub 47",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        3.5,
+        3.3,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-50",
+      "name": "Sage scrub 50",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        -5,
+        3.5,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-51",
+      "name": "Sage scrub 51",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        4.4,
+        3.5,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-53",
+      "name": "Sage scrub 53",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        12.2,
+        7.8,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-57",
+      "name": "Sage scrub 57",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.4
+      },
+      "position": [
+        1,
+        -5.2,
+        1.2
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-58",
+      "name": "Sage scrub 58",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "position": [
+        -9.1,
+        -5.7,
+        1.25
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-62",
+      "name": "Sage scrub 62",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.7,
+        "z": 0.7
+      },
+      "position": [
+        0,
+        -9,
+        1.35
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-65",
+      "name": "Sage scrub 65",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.4
+      },
+      "position": [
+        -1.3,
+        1.8,
+        1.2
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-72",
+      "name": "Sage scrub 72",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        0.6,
+        8.6,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-73",
+      "name": "Sage scrub 73",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "position": [
+        4.6,
+        -6.2,
+        1.25
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-79",
+      "name": "Sage scrub 79",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.4
+      },
+      "position": [
+        -7.4,
+        6.7,
+        1.2
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-82",
+      "name": "Sage scrub 82",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.4
+      },
+      "position": [
+        -7.3,
+        -0.7,
+        1.2
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-85",
+      "name": "Sage scrub 85",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "position": [
+        -10.3,
+        7,
+        1.25
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-86",
+      "name": "Sage scrub 86",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        -12.4,
+        -7.7,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-90",
+      "name": "Sage scrub 90",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        0.7,
+        2.9,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-93",
+      "name": "Sage scrub 93",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "position": [
+        -0.4,
+        -6.4,
+        1.25
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-97",
+      "name": "Sage scrub 97",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "position": [
+        -2.5,
+        1.8,
+        1.25
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-98",
+      "name": "Sage scrub 98",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "position": [
+        1.7,
+        -2.3,
+        1.25
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-100",
+      "name": "Sage scrub 100",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        -8.8,
+        -3.3,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-102",
+      "name": "Sage scrub 102",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.4
+      },
+      "position": [
+        5.2,
+        -5.1,
+        1.2
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-104",
+      "name": "Sage scrub 104",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "position": [
+        -14,
+        2.6,
+        1.25
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-106",
+      "name": "Sage scrub 106",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.4
+      },
+      "position": [
+        1,
+        5.3,
+        1.2
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-111",
+      "name": "Sage scrub 111",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "position": [
+        -6.6,
+        -0.5,
+        1.25
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-114",
+      "name": "Sage scrub 114",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "position": [
+        -6.2,
+        -0.9,
+        1.25
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-116",
+      "name": "Sage scrub 116",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        12.7,
+        -8.6,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-117",
+      "name": "Sage scrub 117",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 0.6
+      },
+      "position": [
+        -9.8,
+        9,
+        1.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "scrub-118",
+      "name": "Sage scrub 118",
+      "type": "sphere",
+      "parent": "shrubs",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.4
+      },
+      "position": [
+        -13.1,
+        -7.9,
+        1.2
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 40,
+        "basis": "decorative",
+        "note": "Generic scrub. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass",
+      "name": "Grass tufts (generic)",
+      "type": "group",
+      "description": "Generic grass tufts. Sizes are not measured.",
+      "parent": "camp"
+    },
+    {
+      "uuid": "grass-1",
       "name": "Grass tuft 1",
       "type": "cone",
-      "parent": "tufts",
+      "parent": "grass",
       "dimensions": {
-        "x": 0.8,
-        "y": 0.8,
+        "x": 0.6,
+        "y": 0.6,
         "z": 1
       },
       "position": [
-        9,
-        6,
+        5.3,
+        8.9,
         1.5
       ],
       "material": "grass",
       "certainty": {
-        "percent": 30,
+        "percent": 35,
         "basis": "decorative",
         "note": "Decoration. Size not measured."
       }
     },
     {
-      "uuid": "tuft-2",
+      "uuid": "grass-2",
       "name": "Grass tuft 2",
       "type": "cone",
-      "parent": "tufts",
+      "parent": "grass",
       "dimensions": {
-        "x": 0.8,
-        "y": 0.8,
-        "z": 1
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.8
       },
       "position": [
-        11,
-        -2,
-        1.5
+        2.2,
+        1.4,
+        1.4
       ],
       "material": "grass",
       "certainty": {
-        "percent": 30,
+        "percent": 35,
         "basis": "decorative",
         "note": "Decoration. Size not measured."
       }
     },
     {
-      "uuid": "tuft-3",
+      "uuid": "grass-3",
       "name": "Grass tuft 3",
       "type": "cone",
-      "parent": "tufts",
+      "parent": "grass",
       "dimensions": {
-        "x": 0.8,
-        "y": 0.8,
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        4.1,
+        4.2,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-5",
+      "name": "Grass tuft 5",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        3.2,
+        0.8,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-7",
+      "name": "Grass tuft 7",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        11.2,
+        8.9,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-8",
+      "name": "Grass tuft 8",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        1.3,
+        -5.6,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-9",
+      "name": "Grass tuft 9",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        2.4,
+        3,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-10",
+      "name": "Grass tuft 10",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.8
+      },
+      "position": [
+        -3.3,
+        3.8,
+        1.4
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-11",
+      "name": "Grass tuft 11",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.8
+      },
+      "position": [
+        -2,
+        -9,
+        1.4
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-12",
+      "name": "Grass tuft 12",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.8
+      },
+      "position": [
+        -13.9,
+        -7.7,
+        1.4
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-14",
+      "name": "Grass tuft 14",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -13.9,
+        8.7,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-15",
+      "name": "Grass tuft 15",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.8
+      },
+      "position": [
+        -11.8,
+        8.4,
+        1.4
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-16",
+      "name": "Grass tuft 16",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        3,
+        3,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-18",
+      "name": "Grass tuft 18",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -8.2,
+        -9,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-20",
+      "name": "Grass tuft 20",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -11.7,
+        -7.9,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-21",
+      "name": "Grass tuft 21",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -11.1,
+        -8.1,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-22",
+      "name": "Grass tuft 22",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -5.2,
+        4,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-23",
+      "name": "Grass tuft 23",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        3.3,
+        5.6,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-24",
+      "name": "Grass tuft 24",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.8
+      },
+      "position": [
+        3,
+        4.4,
+        1.4
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-25",
+      "name": "Grass tuft 25",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.8
+      },
+      "position": [
+        -13,
+        3.6,
+        1.4
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-27",
+      "name": "Grass tuft 27",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        12.4,
+        5.9,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-29",
+      "name": "Grass tuft 29",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
         "z": 1
+      },
+      "position": [
+        -14,
+        8,
+        1.5
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-30",
+      "name": "Grass tuft 30",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 1
+      },
+      "position": [
+        7,
+        9,
+        1.5
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-32",
+      "name": "Grass tuft 32",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 1
+      },
+      "position": [
+        12.3,
+        8.9,
+        1.5
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-33",
+      "name": "Grass tuft 33",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.8
+      },
+      "position": [
+        1.7,
+        -3.2,
+        1.4
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-35",
+      "name": "Grass tuft 35",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -3.5,
+        -9,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-36",
+      "name": "Grass tuft 36",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.6,
+        "z": 1
+      },
+      "position": [
+        -0.5,
+        5,
+        1.5
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-37",
+      "name": "Grass tuft 37",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -1.3,
+        -3.7,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-38",
+      "name": "Grass tuft 38",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -0.3,
+        -3.7,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-39",
+      "name": "Grass tuft 39",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        1.7,
+        -0.9,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-42",
+      "name": "Grass tuft 42",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.8
+      },
+      "position": [
+        -3.5,
+        0.3,
+        1.4
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-43",
+      "name": "Grass tuft 43",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        10.7,
+        9,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-45",
+      "name": "Grass tuft 45",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.8
+      },
+      "position": [
+        12.9,
+        4.5,
+        1.4
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-53",
+      "name": "Grass tuft 53",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.8
+      },
+      "position": [
+        4.7,
+        1.2,
+        1.4
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-55",
+      "name": "Grass tuft 55",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        1,
+        4.7,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-56",
+      "name": "Grass tuft 56",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -6.7,
+        8.9,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-57",
+      "name": "Grass tuft 57",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -3.7,
+        -1.2,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-58",
+      "name": "Grass tuft 58",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        3.4,
+        1.5,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-60",
+      "name": "Grass tuft 60",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -3.7,
+        -0.6,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-62",
+      "name": "Grass tuft 62",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -4.6,
+        -9,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-63",
+      "name": "Grass tuft 63",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        1.6,
+        -8.1,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-67",
+      "name": "Grass tuft 67",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -2.9,
+        -6.1,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-68",
+      "name": "Grass tuft 68",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -1.9,
+        -4.2,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-69",
+      "name": "Grass tuft 69",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.8
+      },
+      "position": [
+        -0.7,
+        -9,
+        1.4
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-70",
+      "name": "Grass tuft 70",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        12.2,
+        -7.6,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-77",
+      "name": "Grass tuft 77",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -1.9,
+        8.7,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-78",
+      "name": "Grass tuft 78",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -0.9,
+        5.6,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-83",
+      "name": "Grass tuft 83",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        4.2,
+        -5.8,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-85",
+      "name": "Grass tuft 85",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -13.3,
+        7.5,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-86",
+      "name": "Grass tuft 86",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        5.3,
+        5.7,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-89",
+      "name": "Grass tuft 89",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.8
+      },
+      "position": [
+        -5.5,
+        9,
+        1.4
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-91",
+      "name": "Grass tuft 91",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -1.2,
+        2.9,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-92",
+      "name": "Grass tuft 92",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -1,
+        6.1,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-93",
+      "name": "Grass tuft 93",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -5.2,
+        1.9,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-94",
+      "name": "Grass tuft 94",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        1,
+        6.8,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-99",
+      "name": "Grass tuft 99",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -13,
+        5.2,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-100",
+      "name": "Grass tuft 100",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -1.7,
+        2.2,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-104",
+      "name": "Grass tuft 104",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -5.9,
+        0.6,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-105",
+      "name": "Grass tuft 105",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.8
+      },
+      "position": [
+        -2.6,
+        -9,
+        1.4
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-106",
+      "name": "Grass tuft 106",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        4.9,
+        -8.9,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-111",
+      "name": "Grass tuft 111",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -2.6,
+        1.2,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-113",
+      "name": "Grass tuft 113",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -4.7,
+        4,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-115",
+      "name": "Grass tuft 115",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -1.4,
+        6.6,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-118",
+      "name": "Grass tuft 118",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -9.2,
+        -8,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-119",
+      "name": "Grass tuft 119",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.8
+      },
+      "position": [
+        2.1,
+        0.6,
+        1.4
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-120",
+      "name": "Grass tuft 120",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -12.5,
+        5.3,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-121",
+      "name": "Grass tuft 121",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -1.1,
+        4.8,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-122",
+      "name": "Grass tuft 122",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        5.5,
+        5.1,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-123",
+      "name": "Grass tuft 123",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.8
+      },
+      "position": [
+        -1.3,
+        -6,
+        1.4
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-124",
+      "name": "Grass tuft 124",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -4,
+        -9,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-125",
+      "name": "Grass tuft 125",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -0.2,
+        -8.4,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-130",
+      "name": "Grass tuft 130",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -6.5,
+        7,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-131",
+      "name": "Grass tuft 131",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.8
+      },
+      "position": [
+        -7.5,
+        7.9,
+        1.4
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-133",
+      "name": "Grass tuft 133",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -2.7,
+        2.3,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-137",
+      "name": "Grass tuft 137",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        4.8,
+        3,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-139",
+      "name": "Grass tuft 139",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -7.9,
+        -4.4,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-144",
+      "name": "Grass tuft 144",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.8
+      },
+      "position": [
+        -9,
+        7,
+        1.4
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-151",
+      "name": "Grass tuft 151",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.8
+      },
+      "position": [
+        13.8,
+        6.6,
+        1.4
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-152",
+      "name": "Grass tuft 152",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -13.3,
+        -6.4,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-155",
+      "name": "Grass tuft 155",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        12.7,
+        -0.6,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-157",
+      "name": "Grass tuft 157",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        1.8,
+        -8.9,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-165",
+      "name": "Grass tuft 165",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -11.7,
+        -9,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-177",
+      "name": "Grass tuft 177",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -10.3,
+        -6.9,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-180",
+      "name": "Grass tuft 180",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.8
+      },
+      "position": [
+        5.9,
+        -9,
+        1.4
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-184",
+      "name": "Grass tuft 184",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -8.7,
+        -2.7,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-189",
+      "name": "Grass tuft 189",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        2.5,
+        4.2,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-198",
+      "name": "Grass tuft 198",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        1.7,
+        -6,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-203",
+      "name": "Grass tuft 203",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -0.9,
+        6.6,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-206",
+      "name": "Grass tuft 206",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -9.7,
+        6.9,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-210",
+      "name": "Grass tuft 210",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        12.3,
+        -8,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-215",
+      "name": "Grass tuft 215",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -1.3,
+        -4.7,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-216",
+      "name": "Grass tuft 216",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -5.8,
+        8.2,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-221",
+      "name": "Grass tuft 221",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -5.4,
+        8.5,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-222",
+      "name": "Grass tuft 222",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        12.4,
+        2.5,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-229",
+      "name": "Grass tuft 229",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -9.7,
+        -6.9,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-232",
+      "name": "Grass tuft 232",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        3.5,
+        4,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-237",
+      "name": "Grass tuft 237",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -12.6,
+        -6.4,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-238",
+      "name": "Grass tuft 238",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        4.8,
+        5.8,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-244",
+      "name": "Grass tuft 244",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
       },
       "position": [
         -12,
-        -6,
-        1.5
+        -6.4,
+        1.25
       ],
       "material": "grass",
       "certainty": {
-        "percent": 30,
+        "percent": 35,
         "basis": "decorative",
         "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-245",
+      "name": "Grass tuft 245",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -4.5,
+        0.9,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-265",
+      "name": "Grass tuft 265",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        12.5,
+        4.2,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-266",
+      "name": "Grass tuft 266",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -5.1,
+        -9,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-274",
+      "name": "Grass tuft 274",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        1.4,
+        -4.5,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-275",
+      "name": "Grass tuft 275",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -11.8,
+        7.8,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-278",
+      "name": "Grass tuft 278",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -14,
+        4.4,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-280",
+      "name": "Grass tuft 280",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        0.1,
+        8.3,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-288",
+      "name": "Grass tuft 288",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -12.7,
+        7.5,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-290",
+      "name": "Grass tuft 290",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.5
+      },
+      "position": [
+        -8.6,
+        -5.7,
+        1.25
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-291",
+      "name": "Grass tuft 291",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -10.7,
+        7.9,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-292",
+      "name": "Grass tuft 292",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -7.8,
+        -2.4,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "grass-293",
+      "name": "Grass tuft 293",
+      "type": "cone",
+      "parent": "grass",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.4,
+        "z": 0.6
+      },
+      "position": [
+        -10.9,
+        6.6,
+        1.3
+      ],
+      "material": "grass",
+      "certainty": {
+        "percent": 35,
+        "basis": "decorative",
+        "note": "Decoration. Size not measured."
+      }
+    },
+    {
+      "uuid": "trees",
+      "name": "Cottonwoods along the creek (generic)",
+      "type": "group",
+      "description": "Generic cottonwoods. Heights and crowns are not measured.",
+      "parent": "camp"
+    },
+    {
+      "uuid": "tree-1-trunk",
+      "name": "Cottonwood 1 trunk",
+      "type": "cylinder",
+      "parent": "trees",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.7,
+        "z": 4.7
+      },
+      "position": [
+        12.5,
+        -8,
+        3.35
+      ],
+      "material": "wood",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "Trunk approximate."
+      }
+    },
+    {
+      "uuid": "tree-1-crown",
+      "name": "Cottonwood 1 crown",
+      "type": "sphere",
+      "parent": "trees",
+      "dimensions": {
+        "x": 4.2,
+        "y": 4.2,
+        "z": 4.2
+      },
+      "position": [
+        12.5,
+        -8,
+        6.9
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 30,
+        "basis": "decorative",
+        "note": "Crown generic; not measured."
+      }
+    },
+    {
+      "uuid": "tree-2-trunk",
+      "name": "Cottonwood 2 trunk",
+      "type": "cylinder",
+      "parent": "trees",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.7,
+        "z": 5.1
+      },
+      "position": [
+        12.5,
+        -3,
+        3.55
+      ],
+      "material": "wood",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "Trunk approximate."
+      }
+    },
+    {
+      "uuid": "tree-2-crown",
+      "name": "Cottonwood 2 crown",
+      "type": "sphere",
+      "parent": "trees",
+      "dimensions": {
+        "x": 4.2,
+        "y": 4.2,
+        "z": 4.2
+      },
+      "position": [
+        12.5,
+        -3,
+        7.3
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 30,
+        "basis": "decorative",
+        "note": "Crown generic; not measured."
+      }
+    },
+    {
+      "uuid": "tree-3-trunk",
+      "name": "Cottonwood 3 trunk",
+      "type": "cylinder",
+      "parent": "trees",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.7,
+        "z": 4.7
+      },
+      "position": [
+        12.5,
+        2,
+        3.35
+      ],
+      "material": "wood",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "Trunk approximate."
+      }
+    },
+    {
+      "uuid": "tree-3-crown",
+      "name": "Cottonwood 3 crown",
+      "type": "sphere",
+      "parent": "trees",
+      "dimensions": {
+        "x": 4.2,
+        "y": 4.2,
+        "z": 4.2
+      },
+      "position": [
+        12.5,
+        2,
+        6.9
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 30,
+        "basis": "decorative",
+        "note": "Crown generic; not measured."
+      }
+    },
+    {
+      "uuid": "tree-4-trunk",
+      "name": "Cottonwood 4 trunk",
+      "type": "cylinder",
+      "parent": "trees",
+      "dimensions": {
+        "x": 0.7,
+        "y": 0.7,
+        "z": 5.4
+      },
+      "position": [
+        12.5,
+        7,
+        3.7
+      ],
+      "material": "wood",
+      "certainty": {
+        "percent": 60,
+        "basis": "inferred",
+        "note": "Trunk approximate."
+      }
+    },
+    {
+      "uuid": "tree-4-crown",
+      "name": "Cottonwood 4 crown",
+      "type": "sphere",
+      "parent": "trees",
+      "dimensions": {
+        "x": 4.2,
+        "y": 4.2,
+        "z": 4.2
+      },
+      "position": [
+        12.5,
+        7,
+        7.6000000000000005
+      ],
+      "material": "sage",
+      "certainty": {
+        "percent": 30,
+        "basis": "decorative",
+        "note": "Crown generic; not measured."
       }
     },
     {
@@ -923,63 +8158,103 @@
       "text": "Display needs review by the Cheyenne and Arapaho Tribes (see research/consultation-plan.md). The whole camp is a draft until then.",
       "kind": "consultation",
       "status": "open",
-      "seq": 49
+      "seq": 389
     },
     {
       "id": "F2",
-      "target": "ridge",
-      "text": "The bluff is invented to frame the camp. It has no source.",
-      "kind": "uncertain",
-      "status": "open",
-      "seq": 50
-    },
-    {
-      "id": "F3",
-      "target": "horses",
-      "text": "The horses are placeholders. Breed, tack and colour are not claimed. Check with consultants before any display.",
-      "kind": "consultation",
-      "status": "open",
-      "seq": 51
-    },
-    {
-      "id": "F4",
-      "target": "figures",
-      "text": "The people are placeholder forms only. They must not stand in for real people. Review before any display.",
-      "kind": "consultation",
-      "status": "open",
-      "seq": 52
-    },
-    {
-      "id": "F5",
-      "target": "fire-ring",
-      "text": "The fire ring size is typical, not sourced.",
-      "kind": "uncertain",
-      "status": "open",
-      "seq": 53
-    },
-    {
-      "id": "F6",
-      "target": "tufts",
-      "text": "The grass tufts are decoration; their size is not measured.",
-      "kind": "uncertain",
-      "status": "open",
-      "seq": 54
-    },
-    {
-      "id": "F7",
       "target": "lodges",
       "text": "The lodge shapes and the way the cover is folded need checking against Cheyenne practice.",
       "kind": "consultation",
       "status": "open",
-      "seq": 55
+      "seq": 390
     },
     {
-      "id": "F8",
+      "id": "F3",
       "target": "travois",
       "text": "The travois sizes and the load are approximate. Check the load and how it was packed.",
       "kind": "consultation",
       "status": "open",
-      "seq": 56
+      "seq": 391
+    },
+    {
+      "id": "F4",
+      "target": "horses",
+      "text": "The horses are placeholders. Breed, tack and colour are not claimed. Check with consultants before any display.",
+      "kind": "consultation",
+      "status": "open",
+      "seq": 392
+    },
+    {
+      "id": "F5",
+      "target": "figures",
+      "text": "The people are placeholder forms only. They must not stand in for real people. Review before any display.",
+      "kind": "consultation",
+      "status": "open",
+      "seq": 393
+    },
+    {
+      "id": "F6",
+      "target": "bluff",
+      "text": "The bluff is invented to frame the camp. It has no source.",
+      "kind": "uncertain",
+      "status": "open",
+      "seq": 394
+    },
+    {
+      "id": "F7",
+      "target": "shrubs",
+      "text": "Shrubs are generic. Their size and count are not measured.",
+      "kind": "uncertain",
+      "status": "open",
+      "seq": 395
+    },
+    {
+      "id": "F8",
+      "target": "grass",
+      "text": "Grass tufts are decoration. Their size is not measured.",
+      "kind": "uncertain",
+      "status": "open",
+      "seq": 396
+    },
+    {
+      "id": "F9",
+      "target": "stones",
+      "text": "Stones are generic. Their size is not measured.",
+      "kind": "uncertain",
+      "status": "open",
+      "seq": 397
+    },
+    {
+      "id": "F10",
+      "target": "trees",
+      "text": "The cottonwoods are generic. Heights and crowns are not measured.",
+      "kind": "uncertain",
+      "status": "open",
+      "seq": 398
+    },
+    {
+      "id": "F11",
+      "target": "fire",
+      "text": "The fire ring size is typical, and the cold ash is an assumption.",
+      "kind": "uncertain",
+      "status": "open",
+      "seq": 399
+    },
+    {
+      "id": "F12",
+      "target": "bones",
+      "text": "The bones show the herds were gone. Their number and placement are a scene choice; sources give the bone trade, not this camp.",
+      "kind": "uncertain",
+      "status": "open",
+      "seq": 400
+    },
+    {
+      "id": "F13",
+      "target": "goods",
+      "text": "Bundles and pots are generic. Their contents are not known.",
+      "kind": "uncertain",
+      "status": "open",
+      "seq": 401
     }
   ]
 }

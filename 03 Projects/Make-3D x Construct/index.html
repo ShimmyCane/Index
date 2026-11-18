@@ -20,7 +20,39 @@
 </header>
 
 <main class="grid">
-  <aside class="col" aria-label="Model and checks">
+  <aside class="col" aria-label="Selected part and model checks">
+    <section class="panel" data-panel="inspector" data-open="true">
+      <button class="panelHead" type="button" aria-expanded="true" aria-controls="insp-body">
+        <span class="panelIcon">🔎</span><span class="panelTitle">Selected part</span><span class="panelMark">▾</span>
+      </button>
+      <div class="panelBody" id="insp-body">
+        <p id="insp-empty" class="help">Tap a part in the view, or pick one from the Model list.</p>
+        <form id="insp-form" class="stack" hidden>
+          <label>Name <input id="f-name" type="text"></label>
+          <label>Certainty percent (0–100)
+            <span class="row"><input id="f-pct" type="number" min="0" max="100" step="1"><span id="f-band" class="band"></span></span>
+          </label>
+          <label>Basis
+            <select id="f-basis">
+              <option>measured</option><option>cited</option><option>user</option><option>inferred</option><option>placeholder</option><option>decorative</option>
+            </select>
+          </label>
+          <label>Note <input id="f-note" type="text"></label>
+          <div class="row">
+            <label>Width x (in) <input id="f-dx" type="number" step="any" min="0.05"></label>
+            <label>Depth y (in) <input id="f-dy" type="number" step="any" min="0.05"></label>
+            <label>Height z (in) <input id="f-dz" type="number" step="any" min="0.05"></label>
+          </div>
+          <label>Centre height z (in) <input id="f-pz" type="number" step="any"></label>
+          <div class="row">
+            <button type="submit" class="btn">Save change</button>
+            <button type="button" id="f-delete" class="btn ghost">Delete part</button>
+          </div>
+          <p id="insp-msg" class="msg" role="status"></p>
+        </form>
+      </div>
+    </section>
+  
     <section class="panel" data-panel="model" data-open="true">
       <button class="panelHead" type="button" aria-expanded="true" aria-controls="model-body">
         <span class="panelIcon">🧱</span><span class="panelTitle">Model</span><span class="panelMark">▾</span>
@@ -139,47 +171,14 @@
           <button type="button" class="btn small" data-view="side">Side</button>
           <button type="button" class="btn small" data-view="top">Top</button>
           <button type="button" class="btn small" data-view="oblique">Oblique</button>
-          <button type="button" id="mode" class="btn small">Colour: certainty</button>
+          <button type="button" id="mode" class="btn small">Colour: material</button>
         </div>
         <canvas id="view" aria-label="3-D model; drag to turn, pinch or wheel to zoom, tap to select"></canvas>
-        <p class="help">Drag to turn. Pinch or scroll to zoom. Tap a part to select it. Colour: coral is low certainty, sage is high.</p>
+        <p class="help">Drag to turn. Pinch or scroll to zoom. Tap a part to select it. Colour: material is the default look; certainty shows coral for low and sage for high.</p>
       </div>
     </section>
   </section>
 
-  <aside class="col" aria-label="Selected part">
-    <section class="panel" data-panel="inspector" data-open="true">
-      <button class="panelHead" type="button" aria-expanded="true" aria-controls="insp-body">
-        <span class="panelIcon">🔎</span><span class="panelTitle">Selected part</span><span class="panelMark">▾</span>
-      </button>
-      <div class="panelBody" id="insp-body">
-        <p id="insp-empty" class="help">Tap a part in the view, or pick one from the Model list.</p>
-        <form id="insp-form" class="stack" hidden>
-          <label>Name <input id="f-name" type="text"></label>
-          <label>Certainty percent (0–100)
-            <span class="row"><input id="f-pct" type="number" min="0" max="100" step="1"><span id="f-band" class="band"></span></span>
-          </label>
-          <label>Basis
-            <select id="f-basis">
-              <option>measured</option><option>cited</option><option>user</option><option>inferred</option><option>placeholder</option><option>decorative</option>
-            </select>
-          </label>
-          <label>Note <input id="f-note" type="text"></label>
-          <div class="row">
-            <label>Width x (in) <input id="f-dx" type="number" step="any" min="0.05"></label>
-            <label>Depth y (in) <input id="f-dy" type="number" step="any" min="0.05"></label>
-            <label>Height z (in) <input id="f-dz" type="number" step="any" min="0.05"></label>
-          </div>
-          <label>Centre height z (in) <input id="f-pz" type="number" step="any"></label>
-          <div class="row">
-            <button type="submit" class="btn">Save change</button>
-            <button type="button" id="f-delete" class="btn ghost">Delete part</button>
-          </div>
-          <p id="insp-msg" class="msg" role="status"></p>
-        </form>
-      </div>
-    </section>
-  </aside>
 </main>
 
 <section id="errors" class="errors" hidden aria-label="Errors and warnings">

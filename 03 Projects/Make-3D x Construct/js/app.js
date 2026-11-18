@@ -28,7 +28,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var state = {
     history: null, result: null, audit: null, run: null, notes: [], story: null,
-    settings: { showErrors: false, roundCap: null, reviews: {} }, selected: null, mode: 'provenance', viewer: null,
+    settings: { showErrors: false, roundCap: null, reviews: {} }, selected: null, mode: 'material', viewer: null,
     factcheck: {}
   };
   REVIEW_ITEMS.forEach(function (r) { state.settings.reviews[r.key] = r.def; });
@@ -621,10 +621,13 @@
     document.querySelectorAll('button[data-view]').forEach(function (b) {
       b.addEventListener('click', function () { if (state.viewer) { state.viewer.setView(b.dataset.view); state.viewer.render(); } });
     });
+    var MODE_NEXT = { material: 'provenance', provenance: 'plain', plain: 'material' };
+    var MODE_LABEL = { material: 'Colour: material', provenance: 'Colour: certainty', plain: 'Colour: paper and ink' };
+    $('mode').textContent = MODE_LABEL[state.mode];
     $('mode').addEventListener('click', function () {
-      state.mode = state.mode === 'provenance' ? 'plain' : 'provenance';
-      $('mode').textContent = state.mode === 'provenance' ? 'Colour: certainty' : 'Colour: paper and ink';
-      if (state.viewer) state.viewer.setMode(state.mode === 'provenance' ? 'provenance' : 'plain', state.result.model);
+      state.mode = MODE_NEXT[state.mode];
+      $('mode').textContent = MODE_LABEL[state.mode];
+      if (state.viewer) state.viewer.setMode(state.mode, state.result.model);
     });
 
     if (typeof THREE !== 'undefined') {
