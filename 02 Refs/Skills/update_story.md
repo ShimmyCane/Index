@@ -83,9 +83,17 @@ update public.adv_chapters
 
 Then mark the scenes used (`adv_turns` status `used`), add the journal notes and any places, and log the run (`adv_runs`), as in `storyteller.md` sections 5 and 7.
 
-## 7. Record the chapter
+## 7. Record the page (bake the audio)
 
-Record the whole page with the Kokoro cast (`storyteller.md`, section 6). If the recording fails, the chapter is still published and the page says it has no recording yet; say so in the run note.
+Only after the page is published (step 6), bake its recording. The page plays `adv_chapters.audio` with line and word highlight.
+
+1. **Model, once per session** (in the scratchpad, never in the repo): set up Kokoro as in the header of `03 Projects/Adventure/tools/make_voice.py` (venv, `kokoro-onnx`, `soundfile`, the `kokoro-q8-shards` weights, and `voices.npz`). Skip if `model_q8.onnx` and `voices.npz` already exist there.
+2. **Dry run first:** `python3 -I tools/make_voice.py --model <scratchpad model dir> --db --dry-run`, run from `03 Projects/Adventure`. It should list this page (new or out of date) and nothing else that is unexpected.
+3. **Bake and upload:** the same command without `--dry-run`. It records with the cast from the **Voices** setting, uploads the MP3 to the private bucket `adv-audio`, and saves the timings on the page.
+4. **Check:** `select number, page, audio is not null as has_audio from public.adv_chapters where status = 'published' order by number desc, page desc limit 1;` should show `has_audio = true`.
+5. **Run note:** if any step fails (the model will not install, the upload is refused, the check is false), keep the page published, say in the run note which step failed, and leave the page to show "no recording yet". Never publish a recording that does not match the text: re-bake after any text change.
+
+Record it in the run note as "Recorded: yes" or "Recorded: no, <step>".
 
 ## 8. Hand over the next page
 
