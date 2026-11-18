@@ -1,289 +1,299 @@
 // The sample scene: a Southern Cheyenne camp move on the North Fork of the Canadian, Indian Territory, 1870s.
-// A DRAFT for consultation: the Cheyenne and Arapaho Tribes have not reviewed it. Not for display until the
-// consultation flags are closed (see research/consultation-plan.md and the gate in ⚙️).
+// A DRAFT. Consultation notes are on the flags (research/consultation-plan.md).
 // It shows no named person, no particular family or event, and no ceremonial or sacred object.
-// Scale 1:24 (1 in = 2 ft). Run: node tools/build_sample.js (never hand-edit samples/ or js/sample_bundle.js).
 //
-// Layout is generated with a fixed seed, so every build is the same. Narrative pieces sit at fixed places;
-// the rest is placed by rejection sampling so nothing overlaps.
+// Scale 1:24, so 1 in = 2 ft: a 16 ft lodge is 8 in tall; a 5 ft horse is 2.5 in at the shoulder; a 5.5 ft person is 2.8 in.
+//
+// Three planes, each with its own detail budget (see 04 AI/3d_scene_craft_lessons.md):
+//   Foreground: the horses, the label, the front tuft. Sharpest, most detailed, strongest contrast.
+//   Midground:  the lodges, the struck cover, the travois, the people, the fire, the bones. Where the story happens.
+//   Background: the bluff (layered, lighter, lower contrast), the backdrop, the ground, the back tufts.
 // Certainty percent = how sure we are the size and shape are right as drawn (0-100).
 // Basis = where the number came from: measured | cited | user | inferred | placeholder | decorative.
 
 const header = {
-  name: 'Southern Cheyenne camp move, Indian Territory, 1870s (draft for consultation)',
-  model_id: 'plains-diorama-v03',
-  description: 'A draft diorama of a camp move on a river terrace, with bones on the ground. Figures and horses are placeholders. Not reviewed by the Cheyenne and Arapaho Tribes; not for display.',
+  name: 'Southern Cheyenne camp move, Indian Territory, 1870s (draft)',
+  model_id: 'plains-diorama-v05',
+  description: 'A draft diorama of a camp move in three planes: horses in front, lodges and travois and people in the middle, a layered bluff behind. Figures are placeholder forms. Not reviewed by the Cheyenne and Arapaho Tribes.',
   scale: '1:24 (1 in = 2 ft)',
   units: 'in',
   up: 'z',
   world: 'plains-diorama-world'
 };
 
-// ---------- seeded random numbers (same every build) ----------
-function rng(seed) {
-  return function () {
-    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
-    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
-    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-    return ((t ^ t >>> 14) >>> 0) / 4294967296;
-  };
-}
-const R = rng(20261118);
-const r1 = (x) => Math.round(x * 10) / 10;
-const between = (a, b) => r1(a + (b - a) * R());
-
-// ---------- footprints: circles, so nothing is placed on top of anything else ----------
-const placed = [];   // { x, y, r }
-const fits = (x, y, r) => {
-  if (x - r < -14.5 || x + r > 14.5 || y - r < -9.5 || y + r > 9.5) return false;
-  return placed.every(c => Math.hypot(c.x - x, c.y - y) >= c.r + r);
-};
-// Marks a long or wide piece as one or more circles along its length (dx by dy, in inches).
-function reserve(x, y, dx, dy) {
-  const len = Math.max(dx, dy), w = Math.min(dx, dy);
-  const n = Math.max(1, Math.ceil(len / 1.2));
-  for (let i = 0; i < n; i++) {
-    const t = n === 1 ? 0 : (i / (n - 1) - 0.5) * (len - w);
-    placed.push({ x: dx >= dy ? x + t : x, y: dx >= dy ? y : y + t, r: w / 2 + 0.2 });
-  }
-}
-function findSpot(dx, dy, zone, pad) {
-  const r = Math.max(dx, dy) / 2 + (pad === undefined ? 0.05 : pad);
-  for (let k = 0; k < 120; k++) {
-    let x, y;
-    if (zone) {
-      const a = R() * Math.PI * 2, d = Math.sqrt(R()) * zone.R;
-      x = zone.x + Math.cos(a) * d; y = zone.y + Math.sin(a) * d * 0.8;
-    } else { x = -14 + R() * 28; y = -9 + R() * 18; }
-    x = r1(x); y = r1(y);
-    if (fits(x, y, r)) { placed.push({ x, y, r }); return { x, y }; }
-  }
-  return null;
-}
-
-// ---------- object helpers ----------
 const objects = [];
 const flags = [];
-const groupsWithLow = new Set();
-const add = (o) => { objects.push(o); return o; };
-const group = (uuid, name, parent, description) => add({ uuid, name, type: 'group', parent, ...(description ? { description } : {}) });
-const solid = (uuid, name, type, parent, dims, pos, material, cert, description) =>
-  add({ uuid, name, type, parent, dimensions: dims, position: pos, material, certainty: cert, ...(description ? { description } : {}) });
-const low = (parent, pct) => { if (pct < 50) groupsWithLow.add(parent); };
-const ph = (note) => ({ percent: 15, basis: 'placeholder', note });
-
-// Horse silhouette, standing on the ground at (x, y), facing +x.
-function horse(id, name, x, y, parent) {
-  group(id, name, parent, 'Placeholder silhouette. No breed, tack or colour is claimed.');
-  const c = { percent: 20, basis: 'placeholder', note: 'Silhouette only.' };
-  solid(id + '-body', 'Horse body', 'box', id, { x: 6, y: 2, z: 2.6 }, [x, y, 4.8], 'placeholder grey', c);
-  solid(id + '-neck', 'Horse neck', 'box', id, { x: 1, y: 1, z: 2 }, [x + 2.5, y, 6.3], 'placeholder grey', c);
-  [[2.2, -0.7], [2.2, 0.7], [-2.2, -0.7], [-2.2, 0.7]].forEach((o, i) =>
-    solid(id + '-leg-' + i, 'Horse leg ' + (i + 1), 'cylinder', id, { x: 0.4, y: 0.4, z: 2.5 }, [x + o[0], y + o[1], 2.25], 'placeholder grey', c));
-  low(parent, 20);
-}
-
-// Travois: two drag poles along y, a cross bar at the front, a load of bundles on the poles.
-function travois(id, name, x, y, parent) {
-  group(id, name, parent, 'A drag frame of two poles and a cross bar, with a load.');
-  const c = { percent: 55, basis: 'inferred', note: 'Travois form from the research; length approximate.' };
-  solid(id + '-pole-l', 'Pole (left)', 'box', id, { x: 0.4, y: 9, z: 0.4 }, [x - 0.4, y, 1.2], 'wood', c);
-  solid(id + '-pole-r', 'Pole (right)', 'box', id, { x: 0.4, y: 9, z: 0.4 }, [x + 0.4, y, 1.2], 'wood', c);
-  solid(id + '-bar', 'Cross bar', 'box', id, { x: 1.6, y: 0.4, z: 0.4 }, [x, y - 4.5, 1.2], 'wood', c);
-  solid(id + '-load', 'Load of bundles', 'box', id, { x: 2.4, y: 2.6, z: 1.6 }, [x, y + 0.5, 2.2], 'hide and cloth',
-    { percent: 30, basis: 'placeholder', note: 'A block for the load. What it holds is not confirmed.' });
-  low(parent, 55); low(parent, 30);
-  reserve(x, y - 0.5, 1.6, 9.5);
-}
-
-// ---------- the fixed narrative pieces ----------
-group('camp', 'Camp move (draft)', undefined, 'Root group. A Southern Cheyenne camp move on a river terrace on the North Fork of the Canadian. Not reviewed by the tribes.');
-
-// The ground, a low bluff at the back, the painted backdrop, and a creek with cottonwoods.
-solid('ground', 'River terrace ground', 'box', 'camp', { x: 30, y: 20, z: 1 }, [0, 0, 0.5], 'prairie earth',
-  { percent: 70, basis: 'inferred', note: 'Flat river terrace. No site survey; the shape is generic.' });
-group('bluff', 'Bluff (layers)', 'camp', 'Three layers at the back of the camp, invented to frame it.');
-solid('bluff-low', 'Bluff, lower layer', 'box', 'bluff', { x: 30, y: 3, z: 2 }, [0, 8.2, 2], 'prairie earth',
-  { percent: 35, basis: 'inferred', note: 'Invented to frame the camp.' });
-solid('bluff-stone', 'Bluff, stone layer', 'box', 'bluff', { x: 26, y: 2.5, z: 2.5 }, [0, 8.4, 4.25], 'stone',
-  { percent: 35, basis: 'inferred', note: 'Invented to frame the camp.' });
-solid('bluff-top', 'Bluff, top layer', 'box', 'bluff', { x: 22, y: 2, z: 2 }, [0, 8.5, 6.5], 'prairie earth',
-  { percent: 35, basis: 'inferred', note: 'Invented to frame the camp.' });
-low('bluff', 35);
-solid('backdrop', 'Painted backdrop wall', 'box', 'camp', { x: 30, y: 0.5, z: 14 }, [0, 10.25, 8], 'painted',
-  { percent: 100, basis: 'decorative', note: 'Flat wall of the diorama box. The painting is not modelled.' });
-solid('water', 'Creek (North Fork side channel)', 'box', 'camp', { x: 6, y: 18, z: 0.2 }, [9, 0, 1.1], 'water',
-  { percent: 60, basis: 'inferred', note: 'A shallow creek band. Its course and width are not from a survey.' });
-reserve(9, 0, 6, 18);
-
-// Lodges: three standing, one struck (cover folded on the ground with its poles).
-group('lodges', 'Lodges (standing and struck)', 'camp', 'Three standing lodges and one struck lodge cover with its poles.');
-solid('lodge-1', 'Lodge 1 (standing, large)', 'cone', 'lodges', { x: 7, y: 7, z: 8 }, [-9, 3, 5], 'hide',
-  { percent: 60, basis: 'inferred', note: 'General tipi form. Diameter and height approximate.' });
-solid('lodge-2', 'Lodge 2 (standing)', 'cone', 'lodges', { x: 6, y: 6, z: 7 }, [-12.5, -3, 4.5], 'hide',
-  { percent: 55, basis: 'inferred', note: 'General tipi form. Size approximate.' });
-solid('lodge-3', 'Lodge 3 (standing, small)', 'cone', 'lodges', { x: 5, y: 5, z: 6 }, [-5, -4, 4], 'hide',
-  { percent: 55, basis: 'inferred', note: 'General tipi form. Size approximate.' });
-solid('struck-cover', 'Struck lodge cover (folded)', 'box', 'lodges', { x: 4.5, y: 3, z: 0.6 }, [-1, -1, 1.3], 'hide',
-  { percent: 50, basis: 'inferred', note: 'The folded cover on the ground. Size approximate.' });
-solid('struck-poles', 'Struck lodge poles', 'box', 'lodges', { x: 0.3, y: 8, z: 0.3 }, [-1.9, -1, 1.15], 'wood',
-  { percent: 50, basis: 'inferred', note: 'Poles laid beside the cover. Length approximate.' });
-[[-9, 3, 7], [-12.5, -3, 6], [-5, -4, 5], [-1, -1, 4.5]].forEach(p => reserve(p[0], p[1], p[2], p[2]));
-reserve(-1.9, -1, 0.3, 8);
-low('lodges', 50); low('lodges', 55);
-
-// Travois: three frames heading across the creek toward the bluff.
-group('travois', 'Travois (three frames, loaded)', 'camp', 'Three drag frames loaded for the move.');
-travois('travois-1', 'Travois 1', 3, -4, 'travois');
-travois('travois-2', 'Travois 2', 6, 0.5, 'travois');
-travois('travois-3', 'Travois 3', 9.5, -1, 'travois');
-
-// Horses: four, two of them hitched near the travois.
-group('horses', 'Horses (placeholder)', 'camp', 'Four placeholder horse silhouettes. No breed, tack or colour is claimed.');
-const travoisAt = [[3, -4], [6, 0.5], [9.5, -1]];
-horse('horse-1', 'Horse 1', 7.5, -7.5, 'horses'); reserve(7.5, -7.5, 6.2, 2);
-horse('horse-2', 'Horse 2', -3.5, -7.5, 'horses'); reserve(-3.5, -7.5, 6.2, 2);
-horse('horse-3', 'Horse 3', -4.5, 5.5, 'horses'); reserve(-4.5, 5.5, 6.2, 2);
-horse('horse-4', 'Horse 4', 4.5, 7.2, 'horses'); reserve(4.5, 7.2, 6.2, 2);
-
-// People: placeholder forms only, near the travois and lodges.
-group('figures', 'People (placeholder forms)', 'camp', 'Placeholder forms: women, a child and an older woman. No faces, hair, clothing or regalia.');
-const people = [
-  ['woman-1', 'Woman 1', 1.6, 4.5, [-6.5, -1]], ['child-1', 'Child 1', 1.0, 2.8, [-1, 2]],
-  ['woman-2', 'Woman 2', 1.6, 4.5, [1.5, -7]], ['older-1', 'Older woman 1', 1.5, 4.2, [-10, -7.5]],
-  ['woman-3', 'Woman 3', 1.6, 4.5, [11.5, 3]], ['child-2', 'Child 2', 1.0, 2.6, [-0.5, -10.5]]
-];
-people.forEach(([id, name, dia, h, p]) => {
-  const at = findSpot(dia + 0.3, dia + 0.3, { x: p[0], y: p[1], R: 2 }) || { x: p[0], y: p[1] };
-  group(id, name + ' (placeholder)', 'figures');
-  solid(id + '-body', name + ' body', 'cylinder', id, { x: dia, y: dia, z: h }, [at.x, at.y, 1 + h / 2], 'placeholder grey', ph('Form only.'));
-  solid(id + '-head', name + ' head', 'sphere', id, { x: 0.9, y: 0.9, z: 0.9 }, [at.x, at.y, 1 + h + 0.45], 'placeholder grey', ph('Form only.'));
-  low(id, 15);
-});
-
-// The fire: a ring of stones, cold ash, a few sticks.
-group('fire', 'Cold fire', 'camp', 'A ring of stones with cold ash.');
-solid('fire-ring', 'Fire ring', 'cylinder', 'fire', { x: 2.4, y: 2.4, z: 0.5 }, [-7.5, -7.5, 1.25], 'stone',
-  { percent: 40, basis: 'inferred', note: 'Typical size. The fire is out.' });
-reserve(-7.5, -7.5, 2.4, 2.4);
-solid('fire-ash', 'Cold ash', 'cylinder', 'fire', { x: 1.8, y: 1.8, z: 0.05 }, [-7.5, -7.5, 1.03], 'stone',
-  { percent: 40, basis: 'inferred', note: 'Ash, cold. Size approximate.' });
-low('fire', 40);
-
-// Bones on the terrace: bleached skulls and fragments, the herds gone.
-group('bones', 'Bones on the terrace', 'camp', 'Bleached bison skulls and fragments. Their number and placement are a scene choice.');
-for (let i = 0; i < 6; i++) {
-  const p = findSpot(1.5, 1.0, null) || { x: -13 + i * 4, y: 6.5 };
-  solid('skull-' + (i + 1), 'Skull ' + (i + 1), 'box', 'bones', { x: 1.4, y: 0.8, z: 0.8 }, [p.x, p.y, 1.4], 'bone',
-    { percent: 40, basis: 'inferred', note: 'Scene choice. Shape generic, not a particular skull.' });
-}
-for (let i = 0; i < 8; i++) {
-  const d = between(0.2, 0.5), h = between(0.2, 0.4);
-  const p = findSpot(d, d, null) || { x: 0, y: 0 };
-  solid('bone-frag-' + (i + 1), 'Bone fragment ' + (i + 1), 'box', 'bones', { x: d, y: d, z: h }, [p.x, p.y, 1 + h / 2], 'bone',
-    { percent: 40, basis: 'inferred', note: 'Scene choice.' });
-}
-low('bones', 40);
-
-// Camp goods: bundles (parfleches) and cooking pots, near the travois and lodges.
-group('goods', 'Camp goods (bundles and pots)', 'camp', 'Bundles and cooking pots by the lodges and travois.');
-for (let i = 0; i < 12; i++) {
-  const dx = between(0.8, 1.6), dy = between(0.8, 1.4), dz = between(0.5, 0.9);
-  const p = findSpot(dx, dy, null) || { x: 0, y: 0 };
-  solid('bundle-' + (i + 1), 'Bundle ' + (i + 1), 'box', 'goods', { x: dx, y: dy, z: dz }, [p.x, p.y, 1 + dz / 2], 'hide and cloth',
-    { percent: 45, basis: 'inferred', note: 'Bundle shape generic; contents not known.' });
-}
-for (let i = 0; i < 6; i++) {
-  const d = between(0.7, 1.0);
-  const p = findSpot(d, d, null) || { x: 0, y: 0 };
-  solid('pot-' + (i + 1), 'Cooking pot ' + (i + 1), 'cylinder', 'goods', { x: d, y: d, z: 0.5 }, [p.x, p.y, 1.25], 'iron',
-    { percent: 45, basis: 'inferred', note: 'Pot shape generic.' });
-}
-low('goods', 45);
-
-// Sage shrubs and grass tufts across the terrace, and stones.
-group('stones', 'Stones (generic)', 'camp', 'Scattered stones on the terrace.');
-for (let i = 0; i < 90; i++) {
-  const dx = between(0.3, 0.8), dy = between(0.3, 0.8), dz = between(0.2, 0.5);
-  const p = findSpot(dx, dy, null, 0.05);
-  if (!p) continue;
-  solid('stone-' + (i + 1), 'Stone ' + (i + 1), 'box', 'stones', { x: dx, y: dy, z: dz }, [p.x, p.y, 1 + dz / 2], 'stone',
-    { percent: 40, basis: 'inferred', note: 'Shape generic.' });
-}
-low('stones', 40);
-
-group('shrubs', 'Sage shrubs (generic)', 'camp', 'Generic shrub masses. Sizes are not measured.');
-for (let i = 0; i < 90; i++) {
-  const d = between(0.9, 1.8);
-  const p = findSpot(d, d, null, 0.05);
-  if (!p) continue;
-  solid('shrub-' + (i + 1), 'Sage shrub ' + (i + 1), 'sphere', 'shrubs', { x: d, y: d, z: d }, [p.x, p.y, 1 + d / 2], 'sage',
-    { percent: 40, basis: 'decorative', note: 'Generic shape. Size not measured.' });
-}
-for (let i = 0; i < 120; i++) {
-  const d = between(0.4, 0.8);
-  const p = findSpot(d, d, null, 0.03);
-  if (!p) continue;
-  solid('scrub-' + (i + 1), 'Sage scrub ' + (i + 1), 'sphere', 'shrubs', { x: d, y: d, z: d }, [p.x, p.y, 1 + d / 2], 'sage',
-    { percent: 40, basis: 'decorative', note: 'Generic scrub. Size not measured.' });
-}
-low('shrubs', 40);
-
-group('grass', 'Grass tufts (generic)', 'camp', 'Generic grass tufts. Sizes are not measured.');
-for (let i = 0; i < 300; i++) {
-  const d = between(0.3, 0.6), h = r1(d * 1.6);
-  const p = findSpot(d, d, null, 0.05);
-  if (!p) continue;
-  solid('grass-' + (i + 1), 'Grass tuft ' + (i + 1), 'cone', 'grass', { x: d, y: d, z: h }, [p.x, p.y, 1 + h / 2], 'grass',
-    { percent: 35, basis: 'decorative', note: 'Decoration. Size not measured.' });
-}
-low('grass', 35);
-
-
-
-// Cottonwoods along the creek: a trunk (on the ground) and a leafy crown above it.
-group('trees', 'Cottonwoods along the creek (generic)', 'camp', 'Generic cottonwoods. Heights and crowns are not measured.');
-[-8, -3, 2, 7].forEach((y, i) => {
-  const trunkH = between(4.5, 5.5);
-  solid('tree-' + (i + 1) + '-trunk', 'Cottonwood ' + (i + 1) + ' trunk', 'cylinder', 'trees', { x: 0.7, y: 0.7, z: trunkH }, [12.5, y, 1 + trunkH / 2], 'wood',
-    { percent: 60, basis: 'inferred', note: 'Trunk approximate.' });
-  solid('tree-' + (i + 1) + '-crown', 'Cottonwood ' + (i + 1) + ' crown', 'sphere', 'trees', { x: 4.2, y: 4.2, z: 4.2 }, [12.5, y, 1 + trunkH + 1.2], 'sage',
-    { percent: 30, basis: 'decorative', note: 'Crown generic; not measured.' });
-  reserve(12.5, y, 0.8, 0.8);
-});
-low('trees', 30);
-
-// The label plate, at the front edge.
-solid('label-plate', 'Label plate', 'box', 'camp', { x: 6, y: 0.3, z: 1.2 }, [0, -9.8, 1.6], 'brass',
-  { percent: 100, basis: 'decorative', note: 'Label carrier.' },
-  'Label text: "Southern Cheyenne camp move, 1870s. Draft. Not reviewed by the Cheyenne and Arapaho Tribes."');
-
-// ---------- flags: consultation for the people, the animals, the lodges and the travois; uncertain for the rest ----------
-const G = (uuid) => objects.find(o => o.uuid === uuid);
-const flagText = {
-  camp: ['consultation', 'Display needs review by the Cheyenne and Arapaho Tribes (see research/consultation-plan.md). The whole camp is a draft until then.'],
-  lodges: ['consultation', 'The lodge shapes and the way the cover is folded need checking against Cheyenne practice.'],
-  travois: ['consultation', 'The travois sizes and the load are approximate. Check the load and how it was packed.'],
-  horses: ['consultation', 'The horses are placeholders. Breed, tack and colour are not claimed. Check with consultants before any display.'],
-  figures: ['consultation', 'The people are placeholder forms only. They must not stand in for real people. Review before any display.'],
-  bluff: ['uncertain', 'The bluff is invented to frame the camp. It has no source.'],
-  shrubs: ['uncertain', 'Shrubs are generic. Their size and count are not measured.'],
-  grass: ['uncertain', 'Grass tufts are decoration. Their size is not measured.'],
-  stones: ['uncertain', 'Stones are generic. Their size is not measured.'],
-  trees: ['uncertain', 'The cottonwoods are generic. Heights and crowns are not measured.'],
-  fire: ['uncertain', 'The fire ring size is typical, and the cold ash is an assumption.'],
-  bones: ['uncertain', 'The bones show the herds were gone. Their number and placement are a scene choice; sources give the bone trade, not this camp.'],
-  goods: ['uncertain', 'Bundles and pots are generic. Their contents are not known.']
+const round = (v) => Math.round(v * 100) / 100;
+const grp = (uuid, name, parent, description) =>
+  objects.push({ uuid, name, type: 'group', parent, ...(description ? { description } : {}) });
+// rot: optional { rotation_x, rotation_y, rotation_z } in degrees
+const part = (uuid, name, type, parent, dims, pos, material, cert, rot) => {
+  const o = { uuid, name, type, parent, dimensions: dims, position: pos.map(round), material, certainty: cert, ...(rot || {}) };
+  objects.push(o);
+  return o;
 };
-let n = 0;
-const flagOrder = ['camp', 'lodges', 'travois', 'horses', 'figures', 'bluff', 'shrubs', 'grass', 'stones', 'trees', 'fire', 'bones', 'goods'];
-flagOrder.forEach((uuid) => {
-  const always = ['camp', 'lodges', 'travois', 'horses', 'figures'];
-  if (always.indexOf(uuid) < 0 && !groupsWithLow.has(uuid)) return;
-  if (!G(uuid)) return;
-  n++;
-  flags.push({ id: 'F' + n, kind: flagText[uuid][0], target: uuid, text: flagText[uuid][1] });
+const C = (percent, note, basis) => ({ percent, basis: basis || 'inferred', note });
+const PH = (note) => ({ percent: 15, basis: 'placeholder', note });
+const SIL = (note) => ({ percent: 20, basis: 'placeholder', note });
+
+// A lofted surface: a smooth spine (joints) with cross-sections (rings: [t, w, h]). The part's position and size
+// are the bounding box of the surface, so the rules and the certainty checks still work.
+function loftPart(uuid, name, parent, joints, rings, facing, material, cert, description) {
+  const maxR = Math.max(...rings.map(q => Math.max(q[1], q[2])));
+  const lo = [0, 1, 2].map(k => Math.min(...joints.map(p => p[k])) - maxR);
+  const hi = [0, 1, 2].map(k => Math.max(...joints.map(p => p[k])) + maxR);
+  const obj = {
+    uuid, name, type: 'loft', parent,
+    joints: joints.map(p => p.map(round)),
+    rings: rings.map(q => q.map(round)),
+    dimensions: { x: round(hi[0] - lo[0]), y: round(hi[1] - lo[1]), z: round(hi[2] - lo[2]) },
+    position: [0, 1, 2].map(k => round((lo[k] + hi[k]) / 2)),
+    material, certainty: cert
+  };
+  if (facing) obj.facing = facing;
+  if (description) obj.description = description;
+  objects.push(obj);
+  return obj;
+}
+
+// A lodge: a hide cover on a cone, four poles meeting at the top (N, S, E, W), a door on the south side.
+function lodge(id, name, x, y, dia, h, parent) {
+  const r = dia / 2;
+  grp(id, name, parent, 'A lodge: hide cover on poles that meet at the top, with a door to the south. Size approximate.');
+  part(id + '-cover', 'Hide cover', 'cone', id, { x: dia, y: dia, z: h }, [x, y, 1 + h / 2], 'hide',
+    C(60, 'General tipi form. Diameter and height approximate.'));
+  const len = Math.sqrt(r * r + h * h) + 0.2;
+  const tilt = Math.atan(r / h) * 180 / Math.PI;
+  const poleC = C(55, 'Lodge pole. Length and angle approximate.');
+  part(id + '-pole-n', 'Pole (north)', 'cylinder', id, { x: 0.2, y: 0.2, z: len }, [x, y + r / 2, 1 + h / 2], 'wood', poleC, { rotation_x: round(tilt) });
+  part(id + '-pole-s', 'Pole (south)', 'cylinder', id, { x: 0.2, y: 0.2, z: len }, [x, y - r / 2, 1 + h / 2], 'wood', poleC, { rotation_x: round(-tilt) });
+  part(id + '-pole-e', 'Pole (east)', 'cylinder', id, { x: 0.2, y: 0.2, z: len }, [x + r / 2, y, 1 + h / 2], 'wood', poleC, { rotation_y: round(-tilt) });
+  part(id + '-pole-w', 'Pole (west)', 'cylinder', id, { x: 0.2, y: 0.2, z: len }, [x - r / 2, y, 1 + h / 2], 'wood', poleC, { rotation_y: round(tilt) });
+  const doorZ = 1 + h * 0.225, doorR = r * (1 - 0.225);
+  part(id + '-door', 'Door opening', 'box', id, { x: dia * 0.22, y: 0.12, z: h * 0.45 }, [x, y - doorR - 0.04, doorZ], 'dark',
+    C(40, 'The door opening. Its size and the flap are approximate.'));
+}
+
+// The struck cover: two folded panels with a fold strip, the poles laid side by side and tied with a strap.
+function struckLodge(parent) {
+  const x = -2, y = -4;
+  part('struck-cover-top', 'Folded cover (top panel)', 'box', parent, { x: 4.5, y: 3, z: 0.25 }, [x, y, 1.6], 'hide',
+    C(50, 'The folded cover. Size approximate.'));
+  part('struck-cover-bottom', 'Folded cover (under panel)', 'box', parent, { x: 4.5, y: 3, z: 0.25 }, [x, y, 1.3], 'hide',
+    C(50, 'The folded cover, under panel. Size approximate.'));
+  part('struck-cover-fold', 'Fold strip', 'box', parent, { x: 4.5, y: 0.2, z: 0.6 }, [x, y, 1.45], 'dark',
+    C(40, 'The fold along the middle of the cover.'));
+  [-0.45, 0, 0.45].forEach((dx, i) =>
+    part('struck-pole-' + (i + 1), 'Struck pole ' + (i + 1), 'box', parent, { x: 0.28, y: 8, z: 0.28 }, [x - 2.4 + dx, y, 1.14], 'wood',
+      C(50, 'Pole laid beside the cover. Length approximate.')));
+  part('struck-strap', 'Tie strap', 'box', parent, { x: 1.6, y: 0.1, z: 0.1 }, [x - 2.4, y, 1.45], 'dark',
+    C(40, 'The strap that ties the poles.'));
+}
+
+// A horse, standing, facing +x. Real proportions at 1:24: about 2.5 in at the shoulder, 3.6 in long.
+// The barrel, neck, head, mane, tail and legs are lofted surfaces with the horse's own shapes.
+function horse(id, name, x, y, parent) {
+  grp(id, name, parent, 'A horse standing, facing right. A placeholder in real proportions; no breed, tack or colour is claimed.');
+  const side = [0, 1, 0];
+  loftPart(id + '-barrel', 'Barrel (body)', id,
+    [[x - 1.7, y, 3.0], [x - 0.6, y, 3.2], [x + 0.8, y, 3.1], [x + 1.6, y, 2.9]],
+    [[0, 0.32, 0.4], [0.3, 0.55, 0.5], [0.6, 0.55, 0.52], [1, 0.42, 0.42]], side, 'horse bay', SIL('Barrel from a horse body plan.'));
+  loftPart(id + '-neck', 'Neck', id,
+    [[x + 1.3, y, 3.1], [x + 1.9, y, 3.7], [x + 2.4, y, 4.4]],
+    [[0, 0.32, 0.34], [0.5, 0.24, 0.26], [1, 0.2, 0.22]], side, 'horse bay', SIL('Neck, raised.'));
+  loftPart(id + '-mane', 'Mane', id,
+    [[x + 1.2, y, 3.7], [x + 1.75, y, 4.3], [x + 2.2, y, 5.0]],
+    [[0, 0.06, 0.1], [1, 0.05, 0.08]], side, 'horse dark', SIL('Mane along the crest of the neck.'));
+  loftPart(id + '-head', 'Head', id,
+    [[x + 2.4, y, 4.3], [x + 2.9, y, 4.2], [x + 3.5, y, 3.6]],
+    [[0, 0.22, 0.27], [0.5, 0.2, 0.22], [1, 0.13, 0.14]], side, 'horse dark', SIL('Head, lowered, tapering to the muzzle.'));
+  part(id + '-ear-l', 'Ear (left)', 'cone', id, { x: 0.12, y: 0.12, z: 0.28 }, [x + 2.75, y - 0.12, 4.75], 'horse dark', SIL('Ear.'));
+  part(id + '-ear-r', 'Ear (right)', 'cone', id, { x: 0.12, y: 0.12, z: 0.28 }, [x + 2.75, y + 0.12, 4.75], 'horse dark', SIL('Ear.'));
+  loftPart(id + '-tail', 'Tail', id,
+    [[x - 1.6, y, 3.1], [x - 2.0, y, 2.4], [x - 2.2, y, 1.4]],
+    [[0, 0.1, 0.12], [0.6, 0.14, 0.14], [1, 0.07, 0.08]], side, 'horse dark', SIL('Tail, hanging from the rump.'));
+  [[1.2, -0.36], [1.2, 0.36], [-1.2, -0.36], [-1.2, 0.36]].forEach((o, i) =>
+    loftPart(id + '-leg-' + (i + 1), 'Leg ' + (i + 1), id,
+      [[x + o[0], y + o[1], 2.9], [x + o[0], y + o[1], 2.05], [x + o[0] + 0.1, y + o[1], 1.22]],
+      [[0, 0.22, 0.22], [0.5, 0.13, 0.13], [0.85, 0.12, 0.12], [1, 0.17, 0.13]], [1, 0, 0], 'horse dark', SIL('Leg with a hoof.')));
+}
+
+// A person, placeholder form, in a pose. Real proportions at 1:24 (5.5 ft = 2.8 in).
+// Lofted torso, neck, head and limbs. Approximate general features on the face (eyes, brows, nose, mouth, ears):
+// a general form, not a portrait of anyone. Clothing: a banded skirt for a woman, a cloth top, cloth sleeves.
+// s = scale (1 adult, 0.7 child). Heights are in units of s above the ground (z = 1).
+function person(id, name, x, y, parent, o) {
+  const s = o.scale, z = (v) => 1 + v * s;
+  const f = o.walk ? 1 : 0;                       // stride: the leading foot forward, the other back
+  grp(id, name, parent, 'A placeholder person in a pose. Approximate general features; a form, not a portrait of anyone. Clothing is generic.');
+  // legs and feet
+  [[-0.2, 0.3 * f, 1], [0.2, -0.2 * f, -1]].forEach(([dx, fy], i) => {
+    loftPart(id + '-leg-' + (i + 1), 'Leg ' + (i + 1), id,
+      [[x + dx * s, y + fy * s * 0.5, z(1.15)], [x + dx * s, y + fy * s * 0.8, z(0.55)], [x + dx * s, y + fy * s, z(0.12)]],
+      [[0, 0.16 * s, 0.16 * s], [0.5, 0.12 * s, 0.12 * s], [1, 0.1 * s, 0.1 * s]], [1, 0, 0], 'hide and cloth', PH('Leg. Form only.'));
+    loftPart(id + '-foot-' + (i + 1), 'Foot ' + (i + 1), id,
+      [[x + dx * s, y + fy * s - 0.15 * s, z(0.08)], [x + dx * s, y + fy * s + 0.3 * s, z(0.08)]],
+      [[0, 0.1 * s, 0.09 * s], [1, 0.13 * s, 0.08 * s]], [1, 0, 0], 'dark', PH('Foot. Form only.'));
+  });
+  // skirt for a woman: from the waist down to the hem, banded pattern
+  if (o.skirt) {
+    loftPart(id + '-skirt', 'Skirt (banded)', id,
+      [[x, y, z(1.45)], [x, y, z(1.0)], [x, y, z(0.45)]],
+      [[0, 0.23 * s, 0.2 * s], [0.5, 0.32 * s, 0.28 * s], [1, 0.42 * s, 0.36 * s]], [1, 0, 0], 'pattern:bands', PH('Skirt with a band pattern. Generic.'));
+  }
+  // torso (a cloth top)
+  loftPart(id + '-torso', 'Torso', id,
+    [[x, y, z(1.15)], [x, y, z(1.5)], [x, y, z(1.8)], [x, y, z(2.02)]],
+    [[0, 0.22 * s, 0.19 * s], [0.35, 0.19 * s, 0.16 * s], [0.7, 0.26 * s, 0.19 * s], [1, 0.3 * s, 0.16 * s]],
+    [1, 0, 0], o.cloth || 'hide and cloth', PH('Torso. Form only.'));
+  // arms: cloth sleeves, a pose with the leading arm forward
+  [-1, 1].forEach((side) => {
+    const ang = o.walk ? (side < 0 ? 1 : -1) : 0;
+    loftPart(id + '-arm-' + (side < 0 ? 'l' : 'r'), side < 0 ? 'Arm (left)' : 'Arm (right)', id,
+      [[x + side * 0.3 * s, y, z(1.95)], [x + side * 0.36 * s, y + ang * 0.2 * s, z(1.5)], [x + side * 0.4 * s, y + ang * 0.35 * s, z(1.08)]],
+      [[0, 0.1 * s, 0.1 * s], [0.5, 0.09 * s, 0.09 * s], [1, 0.075 * s, 0.075 * s]], [1, 0, 0], o.cloth || 'hide and cloth', PH('Arm. Form only.'));
+    part(id + '-hand-' + (side < 0 ? 'l' : 'r'), side < 0 ? 'Hand (left)' : 'Hand (right)', 'sphere', id,
+      { x: 0.14 * s, y: 0.14 * s, z: 0.14 * s }, [x + side * 0.4 * s, y + ang * 0.35 * s, z(0.98)], 'skin', PH('Hand. Form only.'));
+  });
+  // neck and head
+  loftPart(id + '-neck', 'Neck', id,
+    [[x, y, z(2.0)], [x, y + 0.02 * s, z(2.2)]],
+    [[0, 0.1 * s, 0.1 * s], [1, 0.09 * s, 0.09 * s]], [1, 0, 0], 'skin', PH('Neck. Form only.'));
+  loftPart(id + '-head', 'Head', id,
+    [[x, y, z(2.2)], [x, y, z(2.5)], [x, y, z(2.8)]],
+    [[0, 0.14 * s, 0.16 * s], [0.35, 0.22 * s, 0.22 * s], [0.75, 0.22 * s, 0.24 * s], [1, 0.13 * s, 0.14 * s]],
+    [1, 0, 0], 'skin', PH('Head with approximate general features. Not a portrait.'));
+  // approximate general features on the front of the face (the front faces -y, toward the viewer)
+  const zc = z(2.5), fy = y - 0.23 * s;
+  [-1, 1].forEach((side) => {
+    part(id + '-eye-' + (side < 0 ? 'l' : 'r'), 'Eye (' + (side < 0 ? 'left' : 'right') + ')', 'sphere', id,
+      { x: 0.06, y: 0.06, z: 0.06 }, [x + side * 0.09 * s, fy, zc + 0.06 * s], 'dark', PH('Eye, a general form.'));
+    part(id + '-brow-' + (side < 0 ? 'l' : 'r'), 'Brow (' + (side < 0 ? 'left' : 'right') + ')', 'box', id,
+      { x: 0.13 * s, y: 0.05, z: 0.05 }, [x + side * 0.09 * s, fy - 0.01 * s, zc + 0.17 * s], 'dark', PH('Brow, a general form.'));
+    part(id + '-ear-' + (side < 0 ? 'l' : 'r'), 'Ear (' + (side < 0 ? 'left' : 'right') + ')', 'sphere', id,
+      { x: 0.08 * s, y: 0.08 * s, z: 0.08 * s }, [x + side * 0.23 * s, y, zc], 'skin', PH('Ear, a general form.'));
+  });
+  part(id + '-nose', 'Nose', 'cone', id, { x: 0.1 * s, y: 0.1 * s, z: 0.18 * s }, [x, fy - 0.02 * s, zc - 0.02 * s], 'skin',
+    PH('Nose, a general form.'), { rotation_x: 90 });
+  part(id + '-mouth', 'Mouth', 'box', id, { x: 0.14 * s, y: 0.05, z: 0.05 }, [x, fy, zc - 0.15 * s], 'dark', PH('Mouth, a general form.'));
+}
+
+// A travois: two drag poles along y, a cross bar at the front, a load on the poles. The load has
+// a bundle, a rolled hide, two straps and (for the front frame) a cooking pot.
+function travois(id, name, x, y, parent, front) {
+  grp(id, name, parent, 'A drag frame of two poles and a cross bar, with a load. Lengths approximate.');
+  const c = C(55, 'Travois form from the research; length approximate.');
+  part(id + '-pole-l', 'Pole (left)', 'box', id, { x: 0.3, y: 7.5, z: 0.3 }, [x - 0.4, y, 1.15], 'wood', c);
+  part(id + '-pole-r', 'Pole (right)', 'box', id, { x: 0.3, y: 7.5, z: 0.3 }, [x + 0.4, y, 1.15], 'wood', c);
+  part(id + '-bar', 'Cross bar', 'box', id, { x: 1.6, y: 0.3, z: 0.3 }, [x, y - 3.75, 1.15], 'wood', c);
+  part(id + '-load', 'Bundle', 'box', id, { x: 2.0, y: 2.2, z: 1.2 }, [x, y + 0.5, 1.2 + 0.6], 'hide and cloth',
+    C(30, 'A block for the bundle. What it holds is not confirmed.', 'placeholder'));
+  part(id + '-roll', 'Rolled hide', 'cylinder', id, { x: 0.7, y: 0.7, z: 2.0 }, [x, y + 0.5, 2.7], 'hide',
+    C(30, 'A rolled hide on top of the bundle.', 'placeholder'), { rotation_y: 90 });
+  [-0.5, 0.5].forEach((dy, i) =>
+    part(id + '-strap-' + (i + 1), 'Strap ' + (i + 1), 'box', id, { x: 2.1, y: 0.1, z: 0.1 }, [x, y + 0.5 + dy * 2, 2.1], 'dark',
+      C(40, 'A strap over the load.')));
+  if (front) {
+    part(id + '-pot', 'Cooking pot', 'cylinder', id, { x: 0.8, y: 0.8, z: 0.5 }, [x + 0.2, y + 2.0, 2.0 + 0.45], 'iron',
+      C(45, 'Pot shape generic.'));
+  }
+}
+
+// The bones: a bison skull with horns, and three vertebrae in a short line, on the midground terrace.
+function bones(parent) {
+  const x = 3.0, y = 0.5;
+  grp('bones', 'Bison skull and vertebrae', parent, 'One bleached skull with horns and three vertebrae. A scene choice that carries the story: the herds are gone.');
+  part('skull-cranium', 'Skull (cranium)', 'box', 'bones', { x: 1.1, y: 0.9, z: 0.8 }, [x, y, 1.4], 'bone',
+    C(40, 'Scene choice. Shape generic, not a particular skull.'));
+  part('skull-snout', 'Skull (snout)', 'box', 'bones', { x: 0.6, y: 0.6, z: 0.5 }, [x + 0.8, y, 1.3], 'bone',
+    C(40, 'Scene choice.'));
+  [-1, 1].forEach((side) =>
+    part('skull-horn-' + (side < 0 ? 'l' : 'r'), side < 0 ? 'Horn (left)' : 'Horn (right)', 'cone', 'bones',
+      { x: 0.22, y: 0.22, z: 0.8 }, [x - 0.1, y + side * 0.6, 1.9], 'bone', C(40, 'Horn, generic.'), { rotation_x: round(side * 60) }));
+  [0, 1, 2].forEach((i) =>
+    part('vertebra-' + (i + 1), 'Vertebra ' + (i + 1), 'cylinder', 'bones', { x: 0.35, y: 0.35, z: 0.25 }, [x, y - 1.3 - i * 0.5, 1.12], 'bone',
+      C(40, 'Scene choice.')));
+}
+
+// Round the ridge into layers: a lower base, a stone band, a ledge, and a lighter far cap.
+function bluff(parent) {
+  grp('ridge', 'Bluff (layers, background)', parent, 'Layers at the back of the camp, invented to frame it. Heights approximate.');
+  part('ridge-base', 'Bluff base', 'box', 'ridge', { x: 22, y: 3.5, z: 2 }, [0, 8.25, 2.0], 'haze', C(35, 'Invented to frame the camp. Set behind the lodges.'));
+  part('ridge-band', 'Stone band', 'box', 'ridge', { x: 21, y: 3.2, z: 0.7 }, [0, 8.25, 3.35], 'stone', C(35, 'Invented to frame the camp.'));
+  part('ridge-ledge', 'Ledge', 'box', 'ridge', { x: 19, y: 2.6, z: 0.5 }, [0, 8.25, 4.0], 'haze', C(35, 'Invented to frame the camp.'));
+  part('ridge-cap', 'Bluff cap', 'box', 'ridge', { x: 17, y: 2.2, z: 1.0 }, [0, 8.3, 4.75], 'haze', C(35, 'Invented to frame the camp.'));
+}
+
+// ---------- the scene, in three planes ----------
+grp('camp', 'Camp move (draft)', undefined, 'Root group. A Southern Cheyenne camp move on a river terrace on the North Fork of the Canadian. Not reviewed by the tribes.');
+grp('back', 'Background: far ground, bluff, backdrop, back tufts', 'camp', 'The far plane: lower contrast, less detail, place and scale.');
+grp('mid', 'Midground: lodges, travois, people, fire, bones', 'camp', 'The middle plane: where the story happens. The most useful detail.');
+grp('fore', 'Foreground: horses, label, front tuft', 'camp', 'The near plane: sharpest, most detailed, strongest contrast.');
+
+part('ground', 'River terrace ground', 'box', 'back', { x: 30, y: 20, z: 1 }, [0, 0, 0.5], 'prairie earth',
+  C(70, 'Flat river terrace. No site survey; the shape is generic.'));
+bluff('back');
+part('backdrop', 'Painted backdrop wall', 'box', 'back', { x: 30, y: 0.5, z: 14 }, [0, 10.25, 8], 'painted',
+  { percent: 100, basis: 'decorative', note: 'Flat wall of the diorama box. The painting is not modelled.' });
+grp('tufts', 'Grass tufts (back)', 'back', 'Clumps of grass at the back. Decoration; sizes are not measured.');
+[[9, 6], [11, 3]].forEach((p, i) => {
+  [[0, 0, 0.5, 0.8], [0.25, -0.15, 0.35, 0.6], [-0.2, 0.2, 0.4, 0.7]].forEach((b, k) =>
+    part('tuft-' + (i + 1) + '-' + (k + 1), 'Tuft ' + (i + 1) + ' blade ' + (k + 1), 'cone', 'tufts',
+      { x: b[2], y: b[2], z: b[3] }, [p[0] + b[0], p[1] + b[1], 1 + b[3] / 2], 'grass',
+      { percent: 30, basis: 'decorative', note: 'Decoration. Size not measured.' }));
 });
-// Warnings in any group without its own flag would be left unexplained; the build reports them.
+
+grp('lodges', 'Lodges (standing and struck)', 'mid', 'Two standing lodges and one struck lodge cover with its poles.');
+lodge('lodge-1', 'Lodge 1 (standing, large)', -7, 3, 7, 8, 'lodges');
+lodge('lodge-2', 'Lodge 2 (standing, small)', -11, -1, 6, 7, 'lodges');
+struckLodge('lodges');
+
+grp('travois', 'Travois (two frames, loaded)', 'mid', 'Two drag frames loaded for the move.');
+travois('travois-a', 'Travois A', 1.5, -3, 'travois', false);
+travois('travois-b', 'Travois B', 5.5, 0, 'travois', false);
+
+grp('figures', 'People (placeholder forms)', 'mid', 'Three placeholder forms in poses: two women and a child. No faces, no hair, no clothing pattern, no regalia.');
+person('woman-a', 'Woman A (placeholder)', -5, -2, 'figures', { scale: 1, skirt: true, walk: true, cloth: 'hide and cloth' });
+person('child-a', 'Child (placeholder)', -1, 1.5, 'figures', { scale: 0.7, walk: true, cloth: 'red cloth' });
+person('woman-b', 'Woman B (placeholder)', 9, 3, 'figures', { scale: 1, skirt: true, walk: false, cloth: 'hide and cloth' });
+
+grp('fire-ring', 'Fire ring (cold)', 'mid', 'A ring of stones around cold ash.');
+part('fire-ash', 'Cold ash', 'cylinder', 'fire-ring', { x: 1.8, y: 1.8, z: 0.05 }, [-8, -6, 1.03], 'ash', C(40, 'Cold ash. Size approximate.'));
+for (let i = 0; i < 8; i++) {
+  const a = i * Math.PI / 4;
+  part('fire-stone-' + (i + 1), 'Fire stone ' + (i + 1), 'cylinder', 'fire-ring',
+    { x: 0.45, y: 0.45, z: 0.3 }, [-8 + Math.cos(a) * 1.15, -6 + Math.sin(a) * 1.15, 1.15], 'stone', C(40, 'Typical stone. Size approximate.'));
+}
+
+bones('mid');
+
+grp('horses', 'Horses (placeholder)', 'fore', 'Two horses, placeholder silhouettes in real proportions. No breed, tack or colour is claimed.');
+horse('horse-1', 'Horse 1 (front)', 6, -8.5, 'horses');
+horse('horse-2', 'Horse 2 (by the cover)', -5, -8.5, 'horses');
+
+grp('tuft-front', 'Grass tuft (front)', 'fore', 'A clump of grass at the front. Decoration; size not measured.');
+[[0, 0, 0.5, 0.8], [0.25, -0.15, 0.35, 0.6], [-0.2, 0.2, 0.4, 0.7]].forEach((b, k) =>
+  part('tuft-3-' + (k + 1), 'Tuft 3 blade ' + (k + 1), 'cone', 'tuft-front',
+    { x: b[2], y: b[2], z: b[3] }, [-12 + b[0], -6 + b[1], 1 + b[3] / 2], 'grass',
+    { percent: 30, basis: 'decorative', note: 'Decoration. Size not measured.' }));
+
+part('label-plate', 'Label plate', 'box', 'fore', { x: 6, y: 0.3, z: 1.2 }, [0, -9.8, 1.6], 'brass',
+  { percent: 100, basis: 'decorative', note: 'Label carrier.' });
+
+// ---------- flags ----------
+// Consultation: the people, horses, lodges and travois (and the camp as a whole). Uncertain: the rest.
+const flagFor = [
+  ['camp', 'consultation', 'Consultation note: the Cheyenne and Arapaho Tribes have not reviewed this camp (see research/consultation-plan.md).'],
+  ['lodges', 'consultation', 'The lodge shapes, the pole angles, the door and the struck cover need checking against Cheyenne practice.'],
+  ['travois', 'consultation', 'The travois sizes and the loads are approximate. Check the load and how it was packed.'],
+  ['horses', 'consultation', 'The horses are placeholder silhouettes in real proportions. Breed, tack and colour are not claimed.'],
+  ['figures', 'consultation', 'The people are placeholder forms in poses, with no faces, no hair and no clothing pattern. They must not stand in for real people.'],
+  ['bones', 'uncertain', 'The skull and vertebrae are a scene choice. They are not a particular skull.'],
+  ['ridge', 'uncertain', 'The bluff is invented to frame the camp. It has no source.'],
+  ['fire-ring', 'uncertain', 'The fire ring size is typical, and the cold ash is an assumption.'],
+  ['tufts', 'uncertain', 'The grass tufts are decoration; their size is not measured.'],
+  ['tuft-front', 'uncertain', 'The grass tuft is decoration; its size is not measured.']
+];
+flagFor.forEach(([target, kind, text], i) => flags.push({ id: 'F' + (i + 1), kind, target, text }));
 
 module.exports = { header, objects, flags };

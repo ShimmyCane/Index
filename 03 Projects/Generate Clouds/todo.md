@@ -27,6 +27,10 @@
 5. Open the page → ⚙️ → Studio database → Sign in. Your notes on the device are sent and the status line says how many are in the database.
 6. Then ask me to read the notes (`/read-notes-and-update`): archive them as V1, review, update.
 
+## Notes status (2026-11-18)
+- Notes 1, 3, 5, 6, 7, 8, 9 of `convo/notes v1.md` are marked done in the database (with Jimmy's go-ahead: "if the items are built, mark done; I will flag it if it's problematic and reopen it via settings"). Notes 2 (stars) and 4 (real ground cover, partly built) stay open.
+- 0.6.1 adds the Done / Reopen buttons in the Notes box in the settings panel, so a note can be reopened from the page.
+
 ## Round 6 (0.6.0): to confirm on a real device
 - [ ] The marine call returns waves and tide (the variable names were confirmed from documentation for waves; the tide name `sea_level_height_msl` was not).
 - [ ] The elevation service returns the fine map (4 more calls per place); the 81-place wide weather call works; neither was reachable from the build sandbox, so only mocked replies were tested.

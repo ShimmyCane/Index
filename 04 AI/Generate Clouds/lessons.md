@@ -67,3 +67,6 @@
 46. **Ask for the tide separately.** One unknown variable name in a combined request fails the whole request.
 47. **Two debug fields with one name hide each other.** The later key wins; check the name before reading a value you added.
 48. **Decide the picture source with the licence in view.** Photographic satellite tiles are usually non-commercial only; ask whether backdrops are used commercially before choosing.
+
+49. **When the owner says "I will reopen it from settings", check the control exists.** It did not; the notes box only listed notes. Say so and build it in the same turn.
+50. **A change made while signed out must survive the next sync.** Keep a list of unsent changes (note ids) and let the database win only for notes not on it.

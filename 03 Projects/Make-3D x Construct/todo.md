@@ -2,6 +2,43 @@
 
 Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Jimmy
 
+## V2 (round 7, 2026-11-18)
+
+- [x] V1 archived: `archive/Oklahoma diorama V1/` (a copy of the round 6 state), commit `f8d87b8` kept in history; PR #195 closed unmerged. A git tag could not be pushed (the proxy refuses tags), so no tag.
+- [x] Display gate removed (header pill, Display check panel, settings).
+- [x] Loft geometry (`js/core/loft.js`), engine check, build fields, viewer, 7 tests.
+- [x] Horses: lofted barrel, neck, mane, head, legs, tail.
+- [x] People: lofted torso, head, neck, limbs, feet, skirts with a banded pattern; approximate general facial features (eyes, brows, nose, mouth, ears); no hair detail, no portraits.
+- [x] Lighting: image-based room light, key, fill, soft shadows.
+- [x] Homepage (`index.html`), studio (`studio.html`), library on this device, cloud client (`m3dxc_scenes`), sign-in with an existing account only, Supabase library vendored with its licence.
+- [x] `supabase/002_m3dxc_scenes.sql` written with its rolled-back test; NOT applied (Jimmy copies it).
+- [ ] Sign-in and cloud save tested live (needs a code from email).
+- [ ] Device test on an iPad.
+- [ ] Jimmy: skin tone (convo v0.7 Q1), lighting references (Q2), next density step (Q3).
+
+## Round 6: planes, bones, posed figures (2026-11-18)
+
+- [x] Three planes as groups: foreground, midground, background; detail by plane.
+- [x] Bluff in four layers, lighter for distance, placed behind the lodges.
+- [x] Struck cover (folded panels, fold strip, three poles, strap); travois loads (bundle, rolled hide, straps, pot).
+- [x] Bones back: one skull with horns and three vertebrae, midground, on clear terrace.
+- [x] People: torso, arms, hands, legs, feet, walking poses, skirt for women; no hair parts; no faces (see convo v0.6).
+- [x] Lessons file for scene craft: `04 AI/3d_scene_craft_lessons.md`.
+- [x] Close up starts from the oblique view.
+- [ ] Jimmy's decision on faces (A generic camp, B keep faceless, C after review).
+- [ ] Jimmy's decision on the display gate.
+- [ ] Next density pass: choose the plane first (convo v0.6 Q3).
+
+## Round 5: rollback and density (2026-11-18)
+
+- [x] Rolled back the round 4 fillers (grass, scrub, stones, creek, cottonwoods, bones, goods). Layout is the round 3 layout.
+- [x] Scale corrected to real sizes at 1 in = 2 ft (horses and people had been giants).
+- [x] Lodges: cover, four leaning poles, door. Horses: barrel, neck, mane, head, muzzle, ears, tail, four legs. People: torso, arms, head, hair, skirt or legs.
+- [x] Rotation in the engine (checked) and the viewer; Close up on any selected part.
+- [x] Story v0.3 refers only to objects in the scene.
+- [ ] Next density pass, only when asked: bluff, struck cover, travois loads.
+- [ ] Your answers in `convo/convo v0.5.md`.
+
 ## Round 4: drawer, two panels, scene, story (2026-11-18)
 
 - [x] Settings drawer: items keep their height, the drawer scrolls (touch too), room at the bottom for the gear.

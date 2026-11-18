@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Paper Airplanes × A-10 Warthog</title>
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <main class="play" id="play">
+    <canvas id="view" width="400" height="225" aria-label="Chase view behind the plane"></canvas>
+
+    <header class="hud" aria-live="polite">
+      <span class="pill">★ <b id="score">0</b></span>
+      <span class="pill">🎯 <b id="kills">0</b></span>
+      <span class="pill">🪟 <b id="hoops">—</b></span>
+      <span class="pill">🚀 <b id="missile">6/6</b></span>
+      <span class="pill">🎯 <b id="gun">straight</b></span>
+      <span class="hullWrap" title="Hull"><i id="hull"></i></span>
+    </header>
+
+    <div class="readout" aria-hidden="true">
+      <span id="speed">0 kt</span>
+      <span id="alt">0 m</span>
+      <span id="aoa">0°</span>
+      <span class="stall" id="stall" hidden>STALL</span>
+    </div>
+
+    <p class="msg" id="msg" aria-live="polite"></p>
+
+    <canvas class="radar" id="radar" width="150" height="150" aria-label="Radar"></canvas>
+
+    <div class="tutorial" id="tutorial" hidden>
+      <h2>Fly the A-10</h2>
+      <p>Drag from the middle to climb, dive and turn.</p>
+      <p>FIRE shoots the gun. MISSILE locks on to a target ahead.</p>
+      <p>BOOST for speed. Press V (or the view in ⚙️) to change the camera.</p>
+      <p class="tap">Tap to start</p>
+    </div>
+
+    <div class="overlay" id="overlay" hidden>
+      <h2 id="ovTitle"></h2>
+      <p id="ovText"></p>
+      <button class="big" id="again" type="button">Fly again</button>
+    </div>
+
+    <nav class="actions" aria-label="Actions">
+      <button type="button" data-k="missile" class="c-mint">MISSILE</button>
+      <button type="button" data-k="fire" class="c-coral">FIRE</button>
+      <button type="button" data-k="boost" class="c-sun">BOOST</button>
+    </nav>
+
+    <div class="stick" id="stick" aria-label="Joystick">
+      <div class="knob" id="knob"></div>
+    </div>
+  </main>
+
+  <div class="gearHot" id="gearHot" aria-hidden="true"></div>
+  <button class="gear" id="gear" type="button" aria-label="Settings" aria-expanded="false" aria-controls="drawer">⚙️</button>
+
+  <aside class="drawer" id="drawer" hidden aria-label="Settings">
+    <div class="drawerHead">
+      <h2>Settings</h2>
+      <button class="mini" id="closeDrawer" type="button" aria-label="Close">✖</button>
+    </div>
+
+    <details class="group" open>
+      <summary>✈️ Flight</summary>
+      <div class="setting">
+        <label>Plane</label>
+        <div class="seg" data-key="mode">
+          <button type="button" data-v="jet">A-10 jet</button>
+          <button type="button" data-v="glider">Paper glider</button>
+        </div>
+        <p class="hint">Changing this starts a new flight.</p>
+      </div>
+      <div class="setting">
+        <label>Camera view</label>
+        <div class="seg" data-key="view">
+          <button type="button" data-v="chase">Chase</button>
+          <button type="button" data-v="top">Top-down</button>
+          <button type="button" data-v="cockpit">Cockpit</button>
+        </div>
+        <p class="hint">Also V on a keyboard.</p>
+      </div>
+      <div class="setting">
+        <label>Steering</label>
+        <div class="seg" data-key="control">
+          <button type="button" data-v="drag">Drag from the middle</button>
+          <button type="button" data-v="stick">Joystick</button>
+        </div>
+        <p class="hint">Drag: hold above the middle to climb, left of it to turn left. Joystick: a pad in the lower left.</p>
+      </div>
+      <button class="wide" id="restart" type="button">New flight</button>
+    </details>
+
+    <details class="group" open>
+      <summary>🛡️ Safety and reload</summary>
+      <div class="setting">
+        <label>Safe flight</label>
+        <div class="seg" data-key="safeFlight">
+          <button type="button" data-v="1">On</button>
+          <button type="button" data-v="0">Off</button>
+        </div>
+        <p class="hint">On: a floor above the ground. Near it the plane levels out and pulls up, so it cannot crash.</p>
+      </div>
+      <div class="setting">
+        <label>Invincible</label>
+        <div class="seg" data-key="invincible">
+          <button type="button" data-v="1">On</button>
+          <button type="button" data-v="0">Off</button>
+        </div>
+        <p class="hint">On: shells and missiles do no harm, and a crash only bounces the plane.</p>
+      </div>
+      <div class="setting">
+        <label>Missile reload</label>
+        <div class="seg" data-key="autoReload">
+          <button type="button" data-v="1">Automatic</button>
+          <button type="button" data-v="0">Off</button>
+        </div>
+        <p class="hint">Automatic: a missile comes back every few seconds, up to six. Off: six missiles, then none.</p>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>☁️ Family database</summary>
+      <div class="setting">
+        <div id="familyIn">
+          <label for="familyEmail">Family email</label>
+          <input class="field" id="familyEmail" type="email" autocomplete="username" placeholder="email">
+          <label for="familyPassword">Password</label>
+          <input class="field" id="familyPassword" type="password" autocomplete="current-password" placeholder="password">
+          <button class="wide" id="familySignIn" type="button">Sign in</button>
+        </div>
+        <div id="familyOut" hidden>
+          <button class="wide" id="familySignOut" type="button">Sign out</button>
+        </div>
+        <button class="wide" id="familyCheck" type="button">Check database</button>
+        <p class="hint" id="familyStatus" role="status"></p>
+      </div>
+    </details>
+
+    <details class="group" open>
+      <summary>👀 Show</summary>
+      <div class="setting">
+        <label>Force arrows</label>
+        <div class="seg" data-key="forces">
+          <button type="button" data-v="1">On</button>
+          <button type="button" data-v="0">Off</button>
+        </div>
+        <p class="hint">Lift (green), weight (blue), thrust (orange), drag (red). Longer arrow, bigger push.</p>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>🔊 Sound</summary>
+      <div class="setting">
+        <label>Sound</label>
+        <div class="seg" data-key="sound">
+          <button type="button" data-v="1">On</button>
+          <button type="button" data-v="0">Off</button>
+        </div>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>📖 How it is built</summary>
+      <div class="under">
+        <p><b>No pictures are loaded.</b> Each plane, tank and truck is a short list of coloured
+        rectangles in <code>src/sprites.ts</code>. The page paints them once, adds a dark outline, and
+        keeps the result.</p>
+        <p><b>Chase view:</b> the camera sits behind the plane. The ground is a checkerboard in the world,
+        drawn with perspective, so turning the plane turns the ground past it (<code>src/render.ts</code>).</p>
+        <p><b>The flight</b> is in <code>src/flight.ts</code>: lift and drag grow with speed squared, lift
+        also grows with the angle of attack, and past about 15° the lift falls away (a stall). Steering
+        turns the heading and banks the wings.</p>
+        <p><b>Sound</b> is made from a noise burst and tones (<code>src/audio.ts</code>).</p>
+        <p>Source is TypeScript in <code>src/</code>, compiled to <code>js/game.js</code>, which the page runs.</p>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>☁️ Errors</summary>
+      <div class="setting">
+        <label class="toggle"><input type="checkbox" id="showErrors"> Show errors (at the bottom)</label>
+      </div>
+    </details>
+
+    <p class="version" id="version"></p>
+  </aside>
+
+  <div class="errorsPanel" id="errorsPanel" hidden></div>
+
+  <script src="js/game.js"></script>
+</body>
+</html>

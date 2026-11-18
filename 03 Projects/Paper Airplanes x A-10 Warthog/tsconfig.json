@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ES2019",
+    "lib": [
+      "ES2019",
+      "DOM"
+    ],
+    "module": "none",
+    "strict": true,
+    "noImplicitAny": true,
+    "outFile": "js/game.js",
+    "sourceMap": false,
+    "removeComments": false,
+    "types": []
+  },
+  "files": [
+    "src/config.ts",
+    "src/sprites.ts",
+    "src/assets/aircraft.ts",
+    "src/assets/vehicles.ts",
+    "src/assets/buildings.ts",
+    "src/assets/naval.ts",
+    "src/flight.ts",
+    "src/world.ts",
+    "src/audio.ts",
+    "src/family.ts",
+    "src/game.ts",
+    "src/render.ts",
+    "src/radar.ts",
+    "src/main.ts"
+  ]
+}

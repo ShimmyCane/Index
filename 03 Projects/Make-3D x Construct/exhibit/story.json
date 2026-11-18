@@ -1,68 +1,161 @@
 {
-  "schema": "m3dxc.story/0.2",
-  "title": "The camp leaves the bones behind (draft for consultation)",
-  "status": "draft. Not reviewed by the Cheyenne and Arapaho Tribes. Not for display until the consultation flags are closed.",
-  "intro": "This diorama shows one camp move by Southern Cheyenne families in the 1870s, on a river terrace in Indian Territory. The herds that once fed the camp are gone; the camp crosses the creek toward the bluff of the land set aside in 1869. It shows no named person, no particular family or event, and no ceremony or sacred object.",
+  "schema": "m3dxc.story/0.4",
+  "title": "The camp moves toward the bluff (draft for consultation)",
+  "status": "draft. Not reviewed by the Cheyenne and Arapaho Tribes. Consultation notes are on the flags.",
+  "intro": "This diorama shows one camp move by Southern Cheyenne families in the 1870s, in Indian Territory. The herds that once fed the camp are gone. The travois cross the terrace toward the bluff of the land set aside in 1869. It shows no named person, no particular family or event, and no ceremony or sacred object.",
   "sources": [
-    { "id": "S1", "title": "Medicine Lodge Treaty (National Park Service)", "ref": "https://home.nps.gov/fols/learn/historyculture/medicine-lodge-treaty.htm" },
-    { "id": "S2", "title": "Cheyenne and Arapaho Indian Reservation; 15 Stat. 593 (primary text)", "ref": "https://oms.library.okstate.edu/s/oklahoma-built/item/19033 ; https://www.wikiwand.com/en/articles/Cheyenne_and_Arapaho_Indian_Reservation (secondary, to check)" },
-    { "id": "S3", "title": "Travois (The Canadian Encyclopedia)", "ref": "https://thecanadianencyclopedia.ca/index.php/en/article/travois" },
-    { "id": "S4", "title": "Southern Plains Indian Museum, Moving Camp (diorama record)", "ref": "https://artsandculture.google.com/asset/moving-camp/3wG9OtjWMnjwAQ" },
-    { "id": "S5", "title": "Women's work in moving camp (UNC Colorado, Hewit Center)", "ref": "https://www.unco.edu/hewit/doing-history/colorado-indians/work-tools/womens-work.aspx" },
-    { "id": "S6", "title": "What happened to the bones of the American bison (JSTOR Daily)", "ref": "https://daily.jstor.org/what-happened-to-the-bones-of-the-american-bison/" }
+    {
+      "id": "S1",
+      "title": "Medicine Lodge Treaty (National Park Service)",
+      "ref": "https://home.nps.gov/fols/learn/historyculture/medicine-lodge-treaty.htm"
+    },
+    {
+      "id": "S2",
+      "title": "Cheyenne and Arapaho Indian Reservation; 15 Stat. 593 (primary text)",
+      "ref": "https://oms.library.okstate.edu/s/oklahoma-built/item/19033 ; https://www.wikiwand.com/en/articles/Cheyenne_and_Arapaho_Indian_Reservation (secondary, to check)"
+    },
+    {
+      "id": "S3",
+      "title": "Travois (The Canadian Encyclopedia)",
+      "ref": "https://thecanadianencyclopedia.ca/index.php/en/article/travois"
+    },
+    {
+      "id": "S4",
+      "title": "Southern Plains Indian Museum, Moving Camp (diorama record)",
+      "ref": "https://artsandculture.google.com/asset/moving-camp/3wG9OtjWMnjwAQ"
+    },
+    {
+      "id": "S5",
+      "title": "Women's work in moving camp (UNC Colorado, Hewit Center)",
+      "ref": "https://www.unco.edu/hewit/doing-history/colorado-indians/work-tools/womens-work.aspx"
+    },
+    {
+      "id": "S6",
+      "title": "What happened to the bones of the American bison (JSTOR Daily)",
+      "ref": "https://daily.jstor.org/what-happened-to-the-bones-of-the-american-bison/"
+    }
   ],
   "steps": [
     {
       "id": "step-1",
-      "text": "Morning. The herds that once fed the camp are gone. Bleached bones lie on the terrace where the grass is thin.",
-      "objects": ["bones", "shrubs"],
+      "text": "Morning. The herds that once fed the camp are gone. One bleached skull lies on the terrace.",
+      "objects": [
+        "bones",
+        "ground"
+      ],
       "claims": [
-        { "id": "c7", "text": "By the late 1860s and 1870s bison were nearly gone from the southern Plains.", "source": "S2", "certainty": 60, "note": "Sources describe the decline; exact dates vary, and sources disagree on how much of it the hide hunt caused." },
-        { "id": "c8", "text": "In the 1870s bones left on the plains were gathered and sold, and bone piles were a common sight.", "source": "S6", "certainty": 55, "note": "The scattering on this terrace is a scene choice. The source describes the trade, not this camp." }
+        {
+          "id": "c7",
+          "text": "By the late 1860s and 1870s bison were nearly gone from the southern Plains.",
+          "source": "S2",
+          "certainty": 60,
+          "note": "Sources describe the decline; exact dates vary, and sources disagree on how much of it the hide hunt caused."
+        },
+        {
+          "id": "c8",
+          "text": "In the 1870s bones left on the plains were gathered and sold, and bone piles were a common sight.",
+          "source": "S6",
+          "certainty": 55,
+          "note": "The skull and vertebrae are a scene choice in the midground. The source describes the trade, not this camp."
+        }
       ]
     },
     {
       "id": "step-2",
-      "text": "Before the sun is high, the horses are brought in from the grass.",
-      "objects": ["horses"],
+      "text": "Before the sun is high, the horses are brought in.",
+      "objects": [
+        "horses"
+      ],
       "claims": [
-        { "id": "c1", "text": "By the 1870s horses were the main way Plains camps moved their loads.", "source": "S3", "certainty": 65 }
+        {
+          "id": "c1",
+          "text": "By the 1870s horses were the main way Plains camps moved their loads.",
+          "source": "S3",
+          "certainty": 65
+        }
       ]
     },
     {
       "id": "step-3",
       "text": "Women take down the lodges. The covers are folded and the poles are gathered.",
-      "objects": ["lodges", "struck-cover", "struck-poles"],
+      "objects": [
+        "lodges",
+        "struck-cover-top",
+        "struck-cover-fold",
+        "struck-pole-1",
+        "struck-pole-2",
+        "struck-pole-3"
+      ],
       "claims": [
-        { "id": "c2", "text": "Women took down lodges and packed the camp for a move.", "source": "S5", "certainty": 60, "note": "The source describes Ute camp moves. It is applied here by analogy and must be checked for Cheyenne practice." }
+        {
+          "id": "c2",
+          "text": "Women took down lodges and packed the camp for a move.",
+          "source": "S5",
+          "certainty": 60,
+          "note": "The source describes Ute camp moves. It is applied here by analogy and must be checked for Cheyenne practice."
+        }
       ]
     },
     {
       "id": "step-4",
-      "text": "The travois frames are lashed to the horses and loaded: bundles, pots and the folded covers.",
-      "objects": ["travois", "goods"],
+      "text": "The travois frames are lashed to the horses and loaded with bundles and the folded covers.",
+      "objects": [
+        "travois"
+      ],
       "claims": [
-        { "id": "c3", "text": "After horses came to the Plains, travois could be longer and carry more, which allowed larger lodges.", "source": "S3", "certainty": 65 }
+        {
+          "id": "c3",
+          "text": "After horses came to the Plains, travois could be longer and carry more, which allowed larger lodges.",
+          "source": "S3",
+          "certainty": 65
+        }
       ]
     },
     {
       "id": "step-5",
       "text": "Women and children walk beside the horses. The fire is cold.",
-      "objects": ["figures", "fire"],
+      "objects": [
+        "figures",
+        "fire-ring"
+      ],
       "claims": [
-        { "id": "c4", "text": "This grouping of people on the move is a scene choice. No source yet records this exact group.", "source": "scene", "certainty": 30 }
+        {
+          "id": "c4",
+          "text": "This grouping of people on the move is a scene choice. No source yet records this exact group.",
+          "source": "scene",
+          "certainty": 30
+        }
       ]
     },
     {
       "id": "step-6",
-      "text": "The line crosses the creek, under cottonwoods, toward the bluff of the land set aside for the Southern Cheyenne and Arapaho.",
-      "objects": ["water", "trees", "bluff", "ground"],
+      "text": "The travois cross the terrace toward the bluff of the land set aside for the Southern Cheyenne and Arapaho.",
+      "objects": [
+        "ridge",
+        "ground"
+      ],
       "claims": [
-        { "id": "c5", "text": "In 1869 land on the North Fork of the Canadian River, in western Indian Territory, was set aside for the Southern Cheyenne and Arapaho.", "source": "S2", "certainty": 75 },
-        { "id": "c6", "text": "The Medicine Lodge Treaty, signed 28 October 1867, allowed hunting only while bison remained.", "source": "S1", "certainty": 70, "note": "Sources differ on the exact wording and scope of the hunting clause." },
-        { "id": "c9", "text": "Cottonwoods grew along creeks on this part of the Plains.", "source": "scene", "certainty": 40, "note": "Scene choice for the setting. Check the species and the placement with the reviewers." }
+        {
+          "id": "c5",
+          "text": "In 1869 land on the North Fork of the Canadian River, in western Indian Territory, was set aside for the Southern Cheyenne and Arapaho.",
+          "source": "S2",
+          "certainty": 75
+        },
+        {
+          "id": "c6",
+          "text": "The Medicine Lodge Treaty, signed 28 October 1867, allowed hunting only while bison remained.",
+          "source": "S1",
+          "certainty": 70,
+          "note": "Sources differ on the exact wording and scope of the hunting clause."
+        }
       ]
     }
   ],
-  "not_depicted": ["any named person", "any particular family or event", "faces, hair, clothing or regalia", "ceremonial or sacred objects", "any nation other than the Southern Cheyenne", "the bone gatherers themselves"]
+  "not_depicted": [
+    "any named person",
+    "any particular family or event",
+    "faces, hair detail, clothing pattern or regalia",
+    "ceremonial or sacred objects",
+    "any nation other than the Southern Cheyenne"
+  ]
 }

@@ -7,7 +7,8 @@
 (function (root) {
   'use strict';
 
-  var PAPER = 0xfbf6ea, INK = 0x2b2a33;
+  var PAPER = 0xfbf6ea, INK = 0x2b2a33, DEG = Math.PI / 180;
+  var LOFT = (root.M3DXC && root.M3DXC.loft) || null;
   var LOW = [0.88, 0.647, 0.549], HIGH = [0.184, 0.365, 0.314]; // coral (low certainty) -> sage ink (high)
   var VIEWS = {
     front:   { theta: -Math.PI / 2, phi: Math.PI / 2 - 0.25 },
@@ -22,7 +23,9 @@
     'painted': [0xbfd3dc, 0.85], 'hide': [0xd7b98a, 0.85], 'hide and cloth': [0xc9a77a, 0.9],
     'wood': [0x8a6a45, 0.8], 'stone': [0x8f8a80, 0.9], 'bone': [0xe6dcc6, 0.7], 'iron': [0x5e5a57, 0.5],
     'brass': [0xb5893f, 0.4], 'water': [0x6f97a8, 0.2], 'placeholder grey': [0x9b9ba3, 0.9],
-    'red cloth': [0xa5473a, 0.9], 'default': [0xb8a88a, 0.9]
+    'red cloth': [0xa5473a, 0.9], 'horse bay': [0x6e4a33, 0.8], 'horse dark': [0x2e241d, 0.85],
+    'clay': [0xb9a58a, 0.9], 'haze': [0xd6c3a0, 0.9], 'skin': [0x9c6b4a, 0.8],
+    'pattern:bands': [0xffffff, 0.9], 'pattern:stripes': [0xffffff, 0.9], 'dark': [0x2f2a26, 0.8], 'ash': [0x9a948c, 0.95], 'default': [0xb8a88a, 0.9]
   };
 
   // A stable 0..1 number from a string (the uuid), so each part varies a little, the same way every time.
@@ -32,13 +35,45 @@
     return (h % 1000) / 1000;
   }
 
+  // Clothing patterns as canvas textures (u round the part, v along it). Cached per name.
+  var patternCache = {};
+  function patternTexture(name) {
+    if (patternCache[name]) return patternCache[name];
+    var c = document.createElement('canvas'); c.width = 64; c.height = 64;
+    var x = c.getContext('2d');
+    x.fillStyle = '#efe2c4'; x.fillRect(0, 0, 64, 64);
+    x.fillStyle = '#a5473a';
+    if (name === 'pattern:bands') {
+      x.fillRect(0, 6, 64, 8); x.fillRect(0, 26, 64, 4); x.fillRect(0, 46, 64, 8);
+    } else {
+      for (var i = 0; i < 64; i += 16) x.fillRect(i + 4, 0, 6, 64);
+    }
+    var t = new THREE.CanvasTexture(c);
+    t.wrapS = THREE.RepeatWrapping; t.wrapT = THREE.RepeatWrapping;
+    t.colorSpace = THREE.SRGBColorSpace;
+    patternCache[name] = t;
+    return t;
+  }
+
   function lerpColor(pct) {
     var t = Math.max(0, Math.min(1, pct / 100));
     var c = [0, 1, 2].map(function (i) { return LOW[i] + (HIGH[i] - LOW[i]) * t; });
     return new THREE.Color(c[0], c[1], c[2]);
   }
 
+  // A loft is built from its spine and rings (js/core/loft.js): smooth, with normals and UVs.
+  function loftGeometry(obj) {
+    var m = LOFT.mesh(obj, { sides: 18, samples: 30 });
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(m.positions, 3));
+    g.setAttribute('normal', new THREE.Float32BufferAttribute(m.normals, 3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(m.uvs, 2));
+    g.setIndex(m.indices);
+    return g;
+  }
+
   function geometryFor(obj) {
+    if (obj.type === 'loft') return loftGeometry(obj);
     var d = obj.dimensions;
     if (obj.type === 'box') return new THREE.BoxGeometry(d.x, d.y, d.z);
     if (obj.type === 'sphere') return new THREE.SphereGeometry(d.x / 2, 24, 16);
@@ -69,9 +104,22 @@
     var camera = new THREE.PerspectiveCamera(35, 1, 0.1, 2000);
     camera.up.set(0, 0, 1);
     // Late-afternoon light: a warm low sun from the west, a cool sky light from above, soft shadows.
-    var sky = new THREE.HemisphereLight(0xf2f6ff, 0x8a7356, 0.85);
+    var sky = new THREE.HemisphereLight(0xf2f6ff, 0x8a7356, 0.6);
     scene.add(sky);
-    var sun = new THREE.DirectionalLight(0xffd6a0, 2.1);
+    // Image-based light: a soft room made of glowing panels, so the surfaces get reflections and gentle falloff.
+    var envScene = new THREE.Scene();
+    var room = new THREE.Mesh(new THREE.BoxGeometry(60, 60, 60),
+      new THREE.MeshBasicMaterial({ color: 0xf4ead8, side: THREE.BackSide }));
+    envScene.add(room);
+    var warmPanel = new THREE.Mesh(new THREE.PlaneGeometry(30, 14), new THREE.MeshBasicMaterial({ color: 0xffd9a0 }));
+    warmPanel.position.set(-28, 0, 12); warmPanel.lookAt(0, 0, 0); envScene.add(warmPanel);
+    var pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(envScene, 0.04).texture;
+    scene.environmentIntensity = 0.28;
+    var fill = new THREE.DirectionalLight(0xdfe9ff, 0.5);
+    fill.position.set(60, 40, 30);
+    scene.add(fill);
+    var sun = new THREE.DirectionalLight(0xffd6a0, 2.9);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
     sun.shadow.bias = -0.0004;
@@ -105,7 +153,8 @@
       if (mode === 'plain') return { color: new THREE.Color(0xe9dcc2), rough: 0.9 };
       var p = PALETTE[obj.material] || PALETTE['default'];
       var j = 0.92 + 0.16 * hash01(obj.uuid);
-      return { color: new THREE.Color(p[0]).multiplyScalar(j), rough: p[1] };
+      var isPattern = typeof obj.material === 'string' && obj.material.indexOf('pattern:') === 0;
+      return { color: new THREE.Color(p[0]).multiplyScalar(j), rough: p[1], map: isPattern ? patternTexture(obj.material) : null };
     }
 
     function setModel(model) {
@@ -118,17 +167,24 @@
         // The painted backdrop is drawn flat, so it reads as a painted sky, not as a lit wall.
         var mat = obj.material === 'painted' && mode === 'material'
           ? new THREE.MeshBasicMaterial({ color: 0xc4d6de })
-          : new THREE.MeshStandardMaterial({ color: cc.color, roughness: cc.rough, metalness: 0 });
+          : new THREE.MeshStandardMaterial({ color: cc.color, roughness: cc.rough, metalness: 0, map: cc.map || null,
+              side: obj.type === 'loft' ? THREE.DoubleSide : THREE.FrontSide });
         var mesh = new THREE.Mesh(geo, mat);
         mesh.castShadow = true;
         mesh.receiveShadow = true;
-        mesh.position.set(obj.position[0], obj.position[1], obj.position[2]);
+        if (obj.type === 'loft') {
+          mesh.position.set(0, 0, 0); // a loft is already in absolute coordinates
+        } else {
+          mesh.position.set(obj.position[0], obj.position[1], obj.position[2]);
+          mesh.rotation.set((obj.rotation_x || 0) * DEG, (obj.rotation_y || 0) * DEG, (obj.rotation_z || 0) * DEG);
+        }
         mesh.userData.uuid = obj.uuid;
         group.add(mesh);
         if (mode !== 'material') {
           var edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo),
             new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.55 }));
           edges.position.copy(mesh.position);
+          edges.rotation.copy(mesh.rotation);
           group.add(edges);
         }
         meshes[obj.uuid] = mesh;
@@ -154,6 +210,21 @@
     }
 
     function setMode(next, model) { mode = next; if (model) setModel(model); }
+
+    // Close-up: centre the view on one part and move in until it fills the view.
+    // uuids: the part, or a group and every part inside it (the page passes the list).
+    function focus(uuids) {
+      var list = (Array.isArray(uuids) ? uuids : [uuids]).map(function (u) { return meshes[u]; }).filter(Boolean);
+      if (!list.length) return;
+      var box = new THREE.Box3();
+      list.forEach(function (m) { box.union(new THREE.Box3().setFromObject(m)); });
+      var size = box.getSize(new THREE.Vector3()).length();
+      target.copy(box.getCenter(new THREE.Vector3()));
+      orbit.radius = Math.max(2, size * 1.6);
+      // start from the oblique angle, so the part is seen from the front, not from behind the scene
+      orbit.theta = VIEWS.oblique.theta; orbit.phi = VIEWS.oblique.phi;
+      render();
+    }
 
     function select(uuid) {
       if (selected && meshes[selected]) meshes[selected].material.emissive.setHex(0x000000);
@@ -264,7 +335,7 @@
     function start() { resize(); render(); }
     root.addEventListener && root.addEventListener('resize', function () { resize(); render(); });
 
-    return { setModel: setModel, setMode: setMode, select: select, setView: setView, render: render,
+    return { setModel: setModel, setMode: setMode, select: select, focus: focus, setView: setView, render: render,
       resize: resize, snapshotViews: snapshotViews, onSelect: onSelect, start: start,
       getMode: function () { return mode; } };
   }

@@ -15,12 +15,13 @@
   'use strict';
 
   var SCHEMA = { history: 'm3dxc.history/0.1', model: 'm3dxc.model/0.1', world: 'm3dxc.world/0.1' };
-  var SOLID_TYPES = ['box', 'cylinder', 'cone', 'sphere'];
+  var SOLID_TYPES = ['box', 'cylinder', 'cone', 'sphere', 'loft'];
   var TYPES = SOLID_TYPES.concat(['group']);
   var BASES = ['measured', 'cited', 'user', 'inferred', 'placeholder', 'decorative'];
   var FLAG_KINDS = ['uncertain', 'consultation'];
+  var LOFT_FIELDS = ['joints', 'rings', 'facing'];
   var SETTABLE = {
-    name: 'string', description: 'string', material: 'string', rotation_z: 'number', position: 'vector',
+    name: 'string', description: 'string', material: 'string', rotation_x: 'number', rotation_y: 'number', rotation_z: 'number', position: 'vector',
     'dimensions.x': 'number', 'dimensions.y': 'number', 'dimensions.z': 'number',
     'certainty.percent': 'percent', 'certainty.basis': 'basis', 'certainty.note': 'string'
   };
@@ -135,6 +136,23 @@
       if (obj.type === 'sphere' && (d.y !== d.x || d.z !== d.x)) {
         out.push(diag('E125', 'error', path + '.dimensions',
           'sphere is round: x, y and z must be equal (the diameter)', 'Make dimensions.x, y and z the same.'));
+      }
+    }
+
+    ['rotation_x', 'rotation_y', 'rotation_z'].forEach(function (k) {
+      if (obj[k] !== undefined && (!isNum(obj[k]) || Math.abs(obj[k]) > 180)) {
+        out.push(diag('E135', 'error', path + '.' + k, k + ' must be a number of degrees from -180 to 180',
+          'Set ' + k + ' to a number of degrees, or delete the key.'));
+      }
+    });
+
+    if (obj.type === 'loft') {
+      var jn = obj.joints, rn = obj.rings;
+      var shapeOk = Array.isArray(jn) && jn.length >= 2 && jn.every(function (q) { return Array.isArray(q) && q.length === 3 && q.every(isNum); }) &&
+        Array.isArray(rn) && rn.length >= 2 && rn.every(function (q) { return Array.isArray(q) && q.length === 3 && q.every(isNum); });
+      if (!shapeOk) {
+        out.push(diag('E136', 'error', path + '.joints', 'a loft needs joints (two or more [x, y, z]) and rings (two or more [t, w, h])',
+          'Give the spine as joints and the cross-sections as rings. See js/core/loft.js.'));
       }
     }
 
@@ -264,6 +282,22 @@
 
   // ---------- model checks ----------
 
+  // Lowest point of a part, after its rotation (X, then Y, then Z: three.js 'XYZ'). The part is taken as its
+  // bounding box, so this is a lower bound: a part may sit a little higher than reported, never lower.
+  function lowestZ(obj) {
+    var d = obj.dimensions, p = obj.position;
+    var rx = (obj.rotation_x || 0) * Math.PI / 180, ry = (obj.rotation_y || 0) * Math.PI / 180, rz = (obj.rotation_z || 0) * Math.PI / 180;
+    var min = Infinity;
+    [-1, 1].forEach(function (sx) { [-1, 1].forEach(function (sy) { [-1, 1].forEach(function (sz) {
+      var v = [sx * d.x / 2, sy * d.y / 2, sz * d.z / 2];
+      v = [v[0] * Math.cos(rz) - v[1] * Math.sin(rz), v[0] * Math.sin(rz) + v[1] * Math.cos(rz), v[2]];          // Z
+      v = [v[0] * Math.cos(ry) + v[2] * Math.sin(ry), v[1], -v[0] * Math.sin(ry) + v[2] * Math.cos(ry)];        // Y
+      v = [v[0], v[1] * Math.cos(rx) - v[2] * Math.sin(rx), v[1] * Math.sin(rx) + v[2] * Math.cos(rx)];        // X
+      min = Math.min(min, v[2] + p[2]);
+    }); }); });
+    return min;
+  }
+
   // Warnings are explained when an open flag names the object or one of its groups.
   function explainedBy(objects, flags, obj) {
     var chain = ancestorsAndSelf(objects, obj);
@@ -285,8 +319,7 @@
           explained ? 'Explained by an open flag.' : 'Add a flag that says what is uncertain, or raise the certainty after a check.',
           { explained: explained, uuid: obj.uuid }));
       }
-      var half = obj.dimensions.z / 2;
-      var bottom = obj.position[2] - half;
+      var bottom = lowestZ(obj);
       if (bottom < -1e-9) {
         var ex2 = explainedBy(model.objects, model.flags, obj);
         out.push(diag('W202', 'warn', path + '.position',
@@ -395,7 +428,7 @@
     SCHEMA: SCHEMA, TYPES: TYPES, BASES: BASES, SETTABLE: SETTABLE, DEFAULT_WORLD: DEFAULT_WORLD,
     canon: canon, fnv1a: fnv1a, hashHistory: hashHistory,
     replay: replay, checkOperation: checkOperation, checkModel: checkModel, audit: audit,
-    bbox: bbox, band: band, sortSolids: sortSolids, childrenOf: childrenOf, findObject: findObject,
+    lowestZ: lowestZ, bbox: bbox, band: band, sortSolids: sortSolids, childrenOf: childrenOf, findObject: findObject,
     FLAG_KINDS: FLAG_KINDS, openConsultations: openConsultations
   };
 

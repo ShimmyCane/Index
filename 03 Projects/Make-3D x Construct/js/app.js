@@ -21,8 +21,6 @@
     { key: 'person_scores', who: 'You', def: true, label: 'I score the four criteria (0–3) for each round' },
     { key: 'ai_critic', who: 'AI', def: false, label: 'An AI critic judges each round from the packet (paste reply)' },
     { key: 'ai_factcheck', who: 'AI', def: false, label: 'An AI fact-checks the story claims (paste reply)' },
-    { key: 'consultation_gate', who: 'People outside the project', def: true, label: 'Block display until the consultation flags are closed' },
-    { key: 'consultation_close_note', who: 'You', def: true, label: 'Closing a consultation flag needs a note: who reviewed, role and date (no personal names)' }
   ];
 
   var $ = function (id) { return document.getElementById(id); };
@@ -33,6 +31,26 @@
   };
   REVIEW_ITEMS.forEach(function (r) { state.settings.reviews[r.key] = r.def; });
   function on(key) { return !!state.settings.reviews[key]; }
+
+  // ---------- the library and the cloud (the home page signs in; the studio saves) ----------
+  var LIBRARY = window.M3DXC.library.createLibrary(window.M3DXC.library.browserStore(window.localStorage));
+  var CLOUD = window.M3DXC.cloud.createCloud(window.supabase, window.M3DXC.cloud.CONFIG,
+    { redirectTo: (location.protocol.indexOf('http') === 0) ? location.href : undefined });
+
+  function saveToLibrary() {
+    var r = LIBRARY.save({ model: state.result.model, history: state.history, world: BASE.world });
+    return r.ok ? 'Saved to the library on this device.' : r.error;
+  }
+  async function saveToCloud() {
+    if (!CLOUD.available) return CLOUD.reason;
+    var session = null;
+    try { session = await CLOUD.session(); } catch (e) { session = null; }
+    if (!session) return 'Sign in on the home page first. Nothing was sent.';
+    try {
+      await CLOUD.saveScene({ model: state.result.model, history: state.history, world: BASE.world });
+      return 'Saved to the cloud library.';
+    } catch (e) { return window.M3DXC.cloud.cloudFriendly(e); }
+  }
 
   // ---------- storage (this device only; never throws) ----------
   var storageOk = true;
@@ -106,7 +124,6 @@
     var r = state.run;
     $('pill-rounds').textContent = 'rounds: ' + r.rounds.length + ' · best ' + (r.best_round || 'none') +
       (r.status === 'stopped' ? ' · stopped' : '');
-    renderDisplay();
   }
 
   function depthOf(objects, obj) {
@@ -254,30 +271,10 @@
     if (!items.length) list.appendChild(el('li', { text: 'No errors. ' + state.audit.explained + ' warnings are explained by open flags.' }));
   }
 
-  // The display gate: consultation flags that are still open block display while the gate is on.
-  function renderDisplay() {
-    var open = M.openConsultations(state.result.model);
-    var pill = $('pill-display'), status = $('display-status'), list = $('display-list');
-    list.textContent = '';
-    if (!on('consultation_gate')) {
-      pill.className = 'pill bad'; pill.textContent = 'display: gate off';
-      status.textContent = 'The gate is off. Do not show this to the public: the consultation review is not built into the page.';
-    } else if (open.length) {
-      pill.className = 'pill bad'; pill.textContent = 'display: blocked (' + open.length + ' to review)';
-      status.textContent = 'Not for display. Close each consultation flag once the people named have reviewed that part.';
-    } else {
-      pill.className = 'pill ok'; pill.textContent = 'display: no open flags';
-      status.textContent = 'No open consultation flags. The camp still needs the Cheyenne and Arapaho Tribes review recorded in the flag notes.';
-    }
-    open.forEach(function (f) {
-      var t = objectByUuid(f.target);
-      list.appendChild(el('li', {}, [el('span', { class: 'tag', text: f.id }), el('span', { text: (t ? t.name : f.target) + ': ' + f.text })]));
-    });
-  }
-
   function renderInspector() {
     var obj = state.selected ? objectByUuid(state.selected) : null;
     var form = $('insp-form'), empty = $('insp-empty');
+    $('f-focus').hidden = !obj;
     empty.textContent = 'Tap a part in the view, or pick one from the Model list.';
     empty.hidden = !!obj && obj.type !== 'group';
     form.hidden = !obj || obj.type === 'group';
@@ -371,9 +368,8 @@
   // Closing a consultation flag: with the note switch on, a note saying who reviewed, role and date, is required.
   function closeFlag(f) {
     var note = '';
-    if (f.kind === 'consultation' && on('consultation_close_note')) {
-      note = window.prompt('Who reviewed this part, their role, and the date (no personal names in the note):', '') || '';
-      if (!note.trim()) { $('round-msg').textContent = 'Not closed: a consultation flag needs a note.'; return; }
+    if (f.kind === 'consultation') {
+      note = window.prompt('What was decided about this flag (optional):', '') || '';
     }
     var r = commitOp({ op: 'flag_close', id: f.id, note: note.trim() || 'closed in page' }, 'Closed.');
     if (!r.ok) $('round-msg').textContent = 'Not closed: ' + r.errors.join(' ');
@@ -505,7 +501,7 @@
     var txt = storageOk
       ? 'This device only. Saved here: ' + state.history.operations.length + ' operations, ' + state.run.rounds.length + ' rounds, ' + state.notes.length + ' notes.'
       : 'This browser will not save. Changes last until the page is reloaded.';
-    $('db-status').textContent = txt + ' Cloud: not connected (the table is written but not applied).';
+    $('db-status').textContent = txt;
   }
 
   function saveNote(e) {
@@ -535,6 +531,10 @@
     catch (e) { ok = false; }
     storageOk = ok;
     setDbMessage();
+    CLOUD.session().then(function (session) {
+      if (!session) { $('db-status').textContent += ' Cloud: signed out.'; return; }
+      return CLOUD.check().then(function (r) { $('db-status').textContent += ' Cloud: ' + r.text; });
+    }).catch(function () { $('db-status').textContent += ' Cloud: not reachable.'; });
   }
 
   // ---------- panels and drawer ----------
@@ -569,9 +569,10 @@
   }
 
   // ---------- boot ----------
-  function boot() {
+  function start(givenHistory, sceneName) {
     state.story = BASE.story;
-    state.history = initHistory();
+    state.history = givenHistory || initHistory();
+    if (sceneName) state.sceneName = sceneName;
     state.run = load(KEYS.rounds, null) || RD.createRun({ subject: 'plains-camp-move' });
     if (!state.run.settings) state.run.settings = RD.createRun({}).settings;
     state.notes = load(KEYS.notes, []) || [];
@@ -602,6 +603,18 @@
     $('sort-dir').addEventListener('change', renderCert);
     $('insp-form').addEventListener('submit', saveInspector);
     $('f-delete').addEventListener('click', deleteSelected);
+    $('f-focus').addEventListener('click', function () {
+      if (!state.viewer || !state.selected) return;
+      // the selected part, or a group and every part inside it
+      var ids = [state.selected], grew = true;
+      while (grew) {
+        grew = false;
+        state.result.model.objects.forEach(function (o) {
+          if (o.parent && ids.indexOf(o.parent) >= 0 && ids.indexOf(o.uuid) < 0) { ids.push(o.uuid); grew = true; }
+        });
+      }
+      state.viewer.focus(ids);
+    });
     $('flag-form').addEventListener('submit', addFlag);
     $('defect-form').addEventListener('submit', addDefect);
     document.querySelectorAll('button[data-verdict]').forEach(function (b) {
@@ -618,6 +631,8 @@
     $('factcheck-apply').addEventListener('click', applyFactcheck);
     $('note-form').addEventListener('submit', saveNote);
     $('db-check').addEventListener('click', checkDevice);
+    $('save-library').addEventListener('click', function () { $('lib-msg').textContent = saveToLibrary(); });
+    $('save-cloud').addEventListener('click', function () { saveToCloud().then(function (m) { $('lib-msg').textContent = m; }); });
     document.querySelectorAll('button[data-view]').forEach(function (b) {
       b.addEventListener('click', function () { if (state.viewer) { state.viewer.setView(b.dataset.view); state.viewer.render(); } });
     });
@@ -644,5 +659,27 @@
     if (!storageOk) $('db-status').textContent = 'This browser will not save. Changes last until the page is reloaded.';
   }
 
-  boot();
+  // Opened from the home page: ?src=local&id=... (the library), ?src=cloud&id=... (the cloud), or the sample.
+  function bootstrap() {
+    var q = new URLSearchParams(location.search);
+    var src = q.get('src'), id = q.get('id');
+    if (src === 'local' && id) {
+      var saved = LIBRARY.get(id);
+      if (saved && saved.history) return start(saved.history, saved.name);
+      $('subtitle').textContent = 'That scene is not on this device. Showing the sample.';
+      return start(null);
+    }
+    if (src === 'cloud' && id) {
+      if (!CLOUD.available) { $('subtitle').textContent = CLOUD.reason; return start(null); }
+      CLOUD.loadScene(id).then(function (bundle) {
+        start(bundle && bundle.history ? bundle.history : null, id);
+      }).catch(function (e) {
+        $('subtitle').textContent = window.M3DXC.cloud.cloudFriendly(e) + ' Showing the sample.';
+        start(null);
+      });
+      return;
+    }
+    start(null);
+  }
+  bootstrap();
 })();

@@ -319,3 +319,14 @@ Full build rules: `02 Refs/Skills/settings_gear.md` (run as `/settings-gear`).
 ## Content apps and outside links (Better Parenting, 2026-11-16)
 - **Only link a video that a search returned.** The sandbox cannot open YouTube, so an id from memory cannot be checked. Label search-found links as unwatched and add a search link as the fallback.
 - **Family details are a device setting, never content.** A child's grade drives a filter from ⚙️; the public repo holds nothing about the family.
+
+
+## Model iteration (promoted 2026-11-18, from the Make-3D x Construct camp-move diorama)
+
+- Check the scale against real sizes before building anything (1 in = 2 ft: halve the real size). A wrong scale makes every object read wrong.
+- A single block is not the object. Build each object from its real parts, with its real attitude (lean, tilt, pose).
+- Keep filler out. Density is more detail in the objects that exist; add objects only when asked.
+- After every change: tests, then build, then the picture (whole scene plus close-ups from a readable angle), then overlaps.
+- A field the build does not copy is lost without an error. Compare one source object with its model object.
+- Browser tests find what unit tests miss: a viewer that renders once, a number input that blocks a value, a drawer whose items overlap.
+Full notes: `04 AI/Make-3D x Construct/model_iteration_lessons.md`.

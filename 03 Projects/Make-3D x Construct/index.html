@@ -3,291 +3,68 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Make 3D x Construct</title>
+<title>Make 3D x Construct · Home</title>
 <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
 <header class="top">
   <div class="brand">
     <h1>Make 3D x Construct</h1>
-    <p id="subtitle">Sample: Southern Cheyenne camp move (draft) · 1 in = 2 ft · inches, Z up</p>
+    <p>Home: projects, your library, the cloud library, sign-in.</p>
   </div>
   <div class="pills">
-    <span id="pill-display" class="pill">display: checking…</span>
-    <span id="pill-audit" class="pill">checking…</span>
-    <span id="pill-rounds" class="pill">rounds: 0</span>
+    <span id="pill-cloud" class="pill">cloud: checking…</span>
   </div>
 </header>
 
-<main class="grid">
-  <aside class="col" aria-label="Selected part and model checks">
-    <section class="panel" data-panel="inspector" data-open="true">
-      <button class="panelHead" type="button" aria-expanded="true" aria-controls="insp-body">
-        <span class="panelIcon">🔎</span><span class="panelTitle">Selected part</span><span class="panelMark">▾</span>
-      </button>
-      <div class="panelBody" id="insp-body">
-        <p id="insp-empty" class="help">Tap a part in the view, or pick one from the Model list.</p>
-        <form id="insp-form" class="stack" hidden>
-          <label>Name <input id="f-name" type="text"></label>
-          <label>Certainty percent (0–100)
-            <span class="row"><input id="f-pct" type="number" min="0" max="100" step="1"><span id="f-band" class="band"></span></span>
-          </label>
-          <label>Basis
-            <select id="f-basis">
-              <option>measured</option><option>cited</option><option>user</option><option>inferred</option><option>placeholder</option><option>decorative</option>
-            </select>
-          </label>
-          <label>Note <input id="f-note" type="text"></label>
-          <div class="row">
-            <label>Width x (in) <input id="f-dx" type="number" step="any" min="0.05"></label>
-            <label>Depth y (in) <input id="f-dy" type="number" step="any" min="0.05"></label>
-            <label>Height z (in) <input id="f-dz" type="number" step="any" min="0.05"></label>
-          </div>
-          <label>Centre height z (in) <input id="f-pz" type="number" step="any"></label>
-          <div class="row">
-            <button type="submit" class="btn">Save change</button>
-            <button type="button" id="f-delete" class="btn ghost">Delete part</button>
-          </div>
-          <p id="insp-msg" class="msg" role="status"></p>
-        </form>
-      </div>
-    </section>
-  
-    <section class="panel" data-panel="model" data-open="true">
-      <button class="panelHead" type="button" aria-expanded="true" aria-controls="model-body">
-        <span class="panelIcon">🧱</span><span class="panelTitle">Model</span><span class="panelMark">▾</span>
-      </button>
-      <div class="panelBody" id="model-body"><ul id="tree" class="list"></ul></div>
-    </section>
-
-    <section class="panel" data-panel="certainty" data-open="true">
-      <button class="panelHead" type="button" aria-expanded="true" aria-controls="cert-body">
-        <span class="panelIcon">📊</span><span class="panelTitle">Certainty</span><span class="panelMark">▾</span>
-      </button>
-      <div class="panelBody" id="cert-body">
-        <p class="help">Each solid's certainty percent: how sure we are its size and shape are right as drawn. Sort it, then open a part to change it.</p>
-        <div class="row">
-          <label>Sort by
-            <select id="sort-by"><option value="percent">certainty</option><option value="name">name</option></select>
-          </label>
-          <label>Order
-            <select id="sort-dir"><option value="asc">low first</option><option value="desc">high first</option></select>
-          </label>
-        </div>
-        <ul id="cert-list" class="list"></ul>
-      </div>
-    </section>
-
-    <section class="panel" data-panel="flags" data-open="true">
-      <button class="panelHead" type="button" aria-expanded="true" aria-controls="flags-body">
-        <span class="panelIcon">🚩</span><span class="panelTitle">Flags</span><span class="panelMark">▾</span>
-      </button>
-      <div class="panelBody" id="flags-body">
-        <p class="help">A flag says what is unknown (a guess to check) or what needs review by people outside the project before display (a consultation). An open flag explains the warnings it covers.</p>
-        <ul id="flag-list" class="list"></ul>
-        <form id="flag-form" class="stack">
-          <label>Flag the selected part (or the whole camp if none is selected)
-            <textarea id="flag-text" rows="2" placeholder="What is unknown, or what must be reviewed before display"></textarea>
-          </label>
-          <label>Kind
-            <select id="flag-kind"><option value="uncertain">uncertain: a guess to check</option><option value="consultation">consultation: needs review before display</option></select>
-          </label>
-          <button type="submit" class="btn">Add flag</button>
-        </form>
-      </div>
-    </section>
-
-    <section class="panel" data-panel="story" data-open="true">
-      <button class="panelHead" type="button" aria-expanded="true" aria-controls="story-body">
-        <span class="panelIcon">📜</span><span class="panelTitle">Story (draft)</span><span class="panelMark">▾</span>
-      </button>
-      <div class="panelBody" id="story-body">
-        <p id="story-status" class="msg"></p>
-        <p id="story-intro" class="help"></p>
-        <ol id="story-steps" class="list"></ol>
-        <h3>Not depicted</h3>
-        <ul id="story-not" class="plain"></ul>
-        <div id="factcheck" class="stack" hidden>
-          <h3>AI fact-check</h3>
-          <p class="help">Copy the prompt into any AI chat, paste its JSON reply below, then apply. Nothing is sent by this page.</p>
-          <button type="button" id="factcheck-copy" class="btn ghost">Copy fact-check prompt</button>
-          <textarea id="factcheck-reply" rows="4" placeholder="Paste the AI reply here"></textarea>
-          <button type="button" id="factcheck-apply" class="btn">Apply reply</button>
-          <p id="factcheck-msg" class="msg" role="status"></p>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel" data-panel="ledger" data-open="true">
-      <button class="panelHead" type="button" aria-expanded="true" aria-controls="ledger-body">
-        <span class="panelIcon">🔁</span><span class="panelTitle">Ledger and rounds</span><span class="panelMark">▾</span>
-      </button>
-      <div class="panelBody" id="ledger-body">
-        <p class="help">Defects are logged here. Each round works at most four, and the best version is kept. The rules and the review options are in ⚙️.</p>
-        <ul id="ledger-list" class="list"></ul>
-        <form id="defect-form" class="stack">
-          <input id="defect-title" type="text" placeholder="A defect, in a few words">
-          <div class="row">
-            <select id="defect-criterion"></select>
-            <select id="defect-severity">
-              <option value="major">major</option><option value="critical">critical</option><option value="minor">minor</option>
-            </select>
-          </div>
-          <button type="submit" class="btn">Log defect</button>
-        </form>
-        <h3>Record a round</h3>
-        <p class="help">Tick the defects this round worked (at most four), and say what changed for each.</p>
-        <div id="round-items" class="stack"></div>
-        <div id="scores" class="stack" hidden>
-          <p class="help">Score the current version from 0 (missing) to 3 (no visible defect).</p>
-          <div class="row" id="score-selects"></div>
-        </div>
-        <div id="verdicts" class="row">
-          <button type="button" class="btn" data-verdict="won">Won: keep it</button>
-          <button type="button" class="btn ghost" data-verdict="lost">Lost: revert</button>
-          <button type="button" class="btn ghost" data-verdict="tie">Tie</button>
-        </div>
-        <div id="critic" class="stack" hidden>
-          <h3>AI critic</h3>
-          <p class="help">Copy the prompt, then in your AI chat attach the four packet pictures (download them below first). Paste the reply here. The critic says which version is better and scores the current version.</p>
-          <button type="button" id="critic-copy" class="btn ghost">Copy critic prompt</button>
-          <textarea id="critic-reply" rows="4" placeholder="Paste the AI critic's reply here"></textarea>
-          <button type="button" id="critic-apply" class="btn">Apply critic reply</button>
-        </div>
-        <p id="round-msg" class="msg" role="status"></p>
-        <button type="button" id="packet" class="btn ghost">Download review packet (4 views + JSON)</button>
-      </div>
-    </section>
-  </aside>
-
-  <section class="col center" aria-label="3-D view">
-    <section class="panel" data-panel="view" data-open="true">
-      <button class="panelHead" type="button" aria-expanded="true" aria-controls="view-body">
-        <span class="panelIcon">🏛️</span><span class="panelTitle">3-D view</span><span class="panelMark">▾</span>
-      </button>
-      <div class="panelBody" id="view-body">
-        <div class="toolbar">
-          <button type="button" class="btn small" data-view="front">Front</button>
-          <button type="button" class="btn small" data-view="side">Side</button>
-          <button type="button" class="btn small" data-view="top">Top</button>
-          <button type="button" class="btn small" data-view="oblique">Oblique</button>
-          <button type="button" id="mode" class="btn small">Colour: material</button>
-        </div>
-        <canvas id="view" aria-label="3-D model; drag to turn, pinch or wheel to zoom, tap to select"></canvas>
-        <p class="help">Drag to turn. Pinch or scroll to zoom. Tap a part to select it. Colour: material is the default look; certainty shows coral for low and sage for high.</p>
-      </div>
-    </section>
+<main class="home">
+  <section class="panel" data-panel="projects" data-open="true">
+    <button class="panelHead" type="button" aria-expanded="true" aria-controls="projects-body">
+      <span class="panelIcon">🏛️</span><span class="panelTitle">Projects</span><span class="panelMark">▾</span>
+    </button>
+    <div class="panelBody" id="projects-body">
+      <div class="cards" id="project-cards"></div>
+    </div>
   </section>
 
+  <section class="panel" data-panel="library" data-open="true">
+    <button class="panelHead" type="button" aria-expanded="true" aria-controls="library-body">
+      <span class="panelIcon">🗂️</span><span class="panelTitle">Library on this device</span><span class="panelMark">▾</span>
+    </button>
+    <div class="panelBody" id="library-body">
+      <p class="help">Scenes you saved from the studio. They stay on this device.</p>
+      <ul id="library-list" class="list"></ul>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="cloud" data-open="true">
+    <button class="panelHead" type="button" aria-expanded="true" aria-controls="cloud-body">
+      <span class="panelIcon">☁️</span><span class="panelTitle">Cloud library and sign-in</span><span class="panelMark">▾</span>
+    </button>
+    <div class="panelBody" id="cloud-body">
+      <p id="cloud-status" class="msg" role="status"></p>
+      <form id="send-form" class="stack">
+        <label>Email (an existing account only)
+          <input id="email" type="email" autocomplete="email" placeholder="you@example.com">
+        </label>
+        <button type="submit" class="btn">Send a sign-in code</button>
+      </form>
+      <form id="verify-form" class="stack" hidden>
+        <label>Code from the email
+          <input id="code" type="text" inputmode="numeric" autocomplete="one-time-code">
+        </label>
+        <button type="submit" class="btn">Sign in</button>
+      </form>
+      <button type="button" id="signout" class="btn ghost" hidden>Sign out</button>
+      <h3 id="cloud-list-title" hidden>Saved in the cloud</h3>
+      <ul id="cloud-list" class="list"></ul>
+    </div>
+  </section>
 </main>
 
-<section id="errors" class="errors" hidden aria-label="Errors and warnings">
-  <h2>Errors and warnings <span class="help">(shown because Show errors is on in ⚙️)</span></h2>
-  <ul id="error-list" class="list"></ul>
-</section>
-
-<button id="gear" class="gear" type="button" aria-label="Settings" aria-controls="drawer" aria-expanded="false">⚙️</button>
-
-<aside id="drawer" class="drawer" hidden aria-label="Settings">
-  <div class="drawerHead">
-    <strong>Settings</strong>
-    <button type="button" id="drawer-close" class="btn small ghost">Close</button>
-  </div>
-
-  <section class="panel" data-panel="g-errors" data-open="true">
-    <button class="panelHead" type="button" aria-expanded="true" aria-controls="g-errors-body">
-      <span class="panelIcon">⚠️</span><span class="panelTitle">Errors</span><span class="panelMark">▾</span>
-    </button>
-    <div class="panelBody" id="g-errors-body">
-      <label class="switch"><input id="show-errors" type="checkbox"> Show errors at the bottom of the page</label>
-      <p class="help">Off by default. When on, every error and every unexplained warning appears at the bottom, with its fix.</p>
-    </div>
-  </section>
-
-  <section class="panel" data-panel="g-reviews" data-open="true">
-    <button class="panelHead" type="button" aria-expanded="true" aria-controls="g-reviews-body">
-      <span class="panelIcon">👥</span><span class="panelTitle">Reviews (on or off)</span><span class="panelMark">▾</span>
-    </button>
-    <div class="panelBody" id="g-reviews-body">
-      <p class="help">Each item below needs a review by a person or an AI. Turn off what you do not need. AI reviews are done by copying a prompt into any AI chat and pasting the reply back; the page never calls an AI service.</p>
-      <div id="review-toggles" class="stack"></div>
-    </div>
-  </section>
-
-  <section class="panel" data-panel="g-display" data-open="true">
-    <button class="panelHead" type="button" aria-expanded="true" aria-controls="g-display-body">
-      <span class="panelIcon">🚧</span><span class="panelTitle">Display check</span><span class="panelMark">▾</span>
-    </button>
-    <div class="panelBody" id="g-display-body">
-      <p id="display-status" class="msg"></p>
-      <ul id="display-list" class="list"></ul>
-    </div>
-  </section>
-
-  <section class="panel" data-panel="g-rounds" data-open="true">
-    <button class="panelHead" type="button" aria-expanded="true" aria-controls="g-rounds-body">
-      <span class="panelIcon">🔁</span><span class="panelTitle">How rounds work</span><span class="panelMark">▾</span>
-    </button>
-    <div class="panelBody" id="g-rounds-body">
-      <ul class="plain">
-        <li><strong>At most 4 defects per round.</strong> Work a few things at a time, so you can tell which change did what.</li>
-        <li><strong>Keep the best.</strong> A round that wins becomes the best version. A round that loses or ties is reverted, and the next round tries a different fix.</li>
-        <li><strong>Stop after 2 rounds in a row without a win.</strong> Any win starts the count again.</li>
-        <li><strong>No time cap.</strong> A session can run as long as it keeps winning.</li>
-        <li><strong>A defect that stays stuck</strong> after three tries becomes a known limit. It is listed, not worked again.</li>
-        <li><strong>Every criterion at the top score</strong> also ends the run. This needs scores, so it works only while the round scores are on (see Reviews).</li>
-      </ul>
-      <label>Round cap (optional, a number). Leave empty for no cap.
-        <input id="round-cap" type="number" min="1" step="1" placeholder="no cap">
-      </label>
-      <p class="help">The limits are set in the code (4 and 2) and are the same for every run. The round cap is the only setting you can change here.</p>
-    </div>
-  </section>
-
-  <section class="panel" data-panel="g-notes" data-open="true">
-    <button class="panelHead" type="button" aria-expanded="true" aria-controls="g-notes-body">
-      <span class="panelIcon">📝</span><span class="panelTitle">Notes for improvement</span><span class="panelMark">▾</span>
-    </button>
-    <div class="panelBody" id="g-notes-body">
-      <p class="help">A note is saved on this device with the part it is about and the time.</p>
-      <form id="note-form" class="stack">
-        <p id="note-about" class="help">About: the whole model</p>
-        <textarea id="note-text" rows="3" placeholder="What would make this better?"></textarea>
-        <button type="submit" class="btn">Save note</button>
-      </form>
-      <ul id="note-list" class="list"></ul>
-    </div>
-  </section>
-
-  <section class="panel" data-panel="g-db" data-open="true">
-    <button class="panelHead" type="button" aria-expanded="true" aria-controls="g-db-body">
-      <span class="panelIcon">🗄️</span><span class="panelTitle">Database check</span><span class="panelMark">▾</span>
-    </button>
-    <div class="panelBody" id="g-db-body">
-      <p id="db-status" class="msg">This device only.</p>
-      <p class="help">Certainty and rounds are saved on this device. The cloud table (<code>m3dxc_certainty</code>, owner only, in the Architecture project) is written but not applied yet, so nothing is sent anywhere.</p>
-      <button type="button" id="db-check" class="btn ghost">Check this device</button>
-    </div>
-  </section>
-
-  <section class="panel" data-panel="g-about" data-open="false">
-    <button class="panelHead" type="button" aria-expanded="false" aria-controls="g-about-body">
-      <span class="panelIcon">ℹ️</span><span class="panelTitle">About and credits</span><span class="panelMark">▾</span>
-    </button>
-    <div class="panelBody" id="g-about-body">
-      <p>This app takes the working method of <strong>Construct</strong>, by <strong>Artyom Andreyev (rtmandreyev)</strong>, licensed under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a>. Source: <a href="https://github.com/rtmandreyev/construct">github.com/rtmandreyev/construct</a>.</p>
-      <p>Construct's method is inspired by <strong>Anatomy</strong> (github.com/wheresryan22/anatomy, MIT), as its NOTICE says.</p>
-      <p>No Construct code, text or assets are included in this app. Its 3-D viewer is three.js (MIT), and the base for the model is <strong>Make 3D</strong>.</p>
-    </div>
-  </section>
-</aside>
-
-<script src="vendor/three/three.min.js"></script>
-<script src="js/sample_bundle.js"></script>
-<script src="js/core/model.js"></script>
-<script src="js/core/rounds.js"></script>
-<script src="js/core/review.js"></script>
-<script src="js/viewer/viewer.js"></script>
-<script src="js/app.js"></script>
+<script src="vendor/supabase/supabase.js"></script>
+<script src="js/cloud/cloud.js"></script>
+<script src="js/library/library.js"></script>
+<script src="js/ui/home.js"></script>
 </body>
 </html>

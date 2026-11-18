@@ -36,3 +36,18 @@ A new version of Make 3D (`ShimmyCane/Make-3D`), built with Construct's working 
 1. Jimmy confirms the tribes' contact, sends the draft letter, and answers `convo v0.3.md`.
 2. Reviewers' answers go to `private/`; close each consultation flag with its note.
 3. Jimmy copies the SQL by hand; device test on an iPad.
+
+## Round 5 (2026-11-18): rollback and the rule for density
+
+- Jimmy: no objects added for the sake of adding objects. Roll back the round 4 fillers. Density means more detail in the existing objects. The diorama must read correctly first (lodge, horse, person).
+- Found: the scale was wrong (horses about 11 ft, people about 12 ft at 1 in = 2 ft). Fixed to real sizes.
+- Built: lodges from cover, four leaning poles and a door; horses from a barrel body, neck, head, muzzle, ears, tail and four legs; people from torso, arms, head and hair; travois and fire ring with more parts.
+- Engine and viewer now support rotation, and the lowest point of a rotated part is checked.
+- Next pass (only when asked): bluff, struck cover and travois loads from more parts.
+
+## V2 (round 7, 2026-11-18)
+
+- Archived V1 (`archive/Oklahoma diorama V1/`, commit f8d87b8). Closed PR #195 unmerged. A tag could not be pushed (proxy refuses tags).
+- Gate removed. Lofted meshes for horses and people (`js/core/loft.js`, 7 tests). Faces: approximate general features, no portraits (Jimmy's decision, round 6).
+- Home (`index.html`), studio (`studio.html`), library on this device, cloud client for `m3dxc_scenes` (owner only, sign-in by email code to existing accounts). SQL not applied.
+- Not tested live: the cloud sign-in and save (needs a code from email). Not tested on an iPad.
