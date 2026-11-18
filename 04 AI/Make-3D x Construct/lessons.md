@@ -9,3 +9,4 @@
 - **AI replies are untrusted until checked.** The critic's reply maps A or B through the packet's candidate labels; a bad choice, a missing score or an unknown claim id is refused with the reason, and nothing is applied.
 - **Specific subjects need named sources and a consultation step.** Each claim cites a source or says it is a scene choice. The build refuses a story link to a missing object or an unlisted source.
 - **Fix the fields the HTML validator blocks.** A number input with `step="0.1"` refused a value of 3.25 without a message; `step="any"` fixed it.
+- Applied the model iteration and scene craft lessons (`model_iteration_lessons.md`, `scene_craft_lessons.md`), and saved them in the Make-3D repo too. The build dropped `rotation_y` without an error; compare one source object with its model object to find such losses.

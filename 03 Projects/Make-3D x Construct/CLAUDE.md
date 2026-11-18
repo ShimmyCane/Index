@@ -30,3 +30,5 @@ Project rules:
 - Do not apply the SQL without Jimmy's go-ahead.
 
 Scene rules (Jimmy, round 6): three planes (foreground, midground, background) with detail by plane; the lessons are in `04 AI/3d_scene_craft_lessons.md`. Figures: body, pose and feet are in; faces are not (see convo v0.6, decision pending).
+
+Before a model or scene change: read `04 AI/Make-3D x Construct/model_iteration_lessons.md` and `scene_craft_lessons.md` (the same files are in the Make-3D repo under `04 AI/`).
