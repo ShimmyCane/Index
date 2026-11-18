@@ -4,7 +4,7 @@ namespace PA {
   const SETTINGS_KEY = 'pa_warthog.settings';
   const DEFAULTS: Settings = {
     mode: 'jet', control: 'drag', view: 'chase', difficulty: 'normal', sound: 1,
-    volMusic: 30, volGun: 35, volTurn: 30, volWarn: 70,
+    volMusic: 20, volGun: 25, volTurn: 25, volWarn: 60,
     forces: 0, safeFlight: 1, invincible: 0, autoReload: 1,
     enemyWave: 2, allies: 1, showErrors: 0,
   };
@@ -302,9 +302,11 @@ namespace PA {
     };
     gear.addEventListener('click', () => setOpen(drawer.hidden));
     $('closeDrawer').addEventListener('click', () => setOpen(false));
+    // A tap in the upper-right corner brings the gear back and opens the settings in one go.
     $('gearHot').addEventListener('pointerdown', e => {
       e.preventDefault();
       wakeGear();
+      if (drawer.hidden) setOpen(true);
     });
     wakeGear();
   }
@@ -585,7 +587,7 @@ namespace PA {
       if (ctx) render(ctx, game);
       const rc = $<HTMLCanvasElement>('radar').getContext('2d');
       if (rc) radar(rc, game, 150);
-      sound.setFlight(game.plane.throttle, game.phase === 'flying' && game.settings.mode === 'jet', Math.abs(game.axes.yaw));
+      sound.setFlight(game.held.boost, game.phase === 'flying' && game.settings.mode === 'jet', Math.abs(game.axes.yaw));
       hudTimer += dt;
       if (hudTimer > 0.1) {
         hudTimer = 0;

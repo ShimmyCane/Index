@@ -87,6 +87,40 @@ var PA;
         return canvas;
     }
     PA.buildSprite = buildSprite;
+    // Shade a hex colour toward dark (f = 1 is unchanged).
+    function shadeHex(hex, f) {
+        const n = parseInt(hex.slice(1), 16);
+        const ch = (v) => Math.round(v * f);
+        const r = ch((n >> 16) & 255), g = ch((n >> 8) & 255), b = ch(n & 255);
+        return '#' + ((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1);
+    }
+    PA.shadeHex = shadeHex;
+    const stackCache = {};
+    // The same sprite built as a stack: four slices, each one pixel lower than the one above,
+    // the lower slices darker. The top slice is the full colour, so the edge of the stack shows.
+    function stackedSprite(name, layers = 4, step = 1) {
+        const key = name + ':' + layers + ':' + step;
+        if (stackCache[key])
+            return stackCache[key];
+        const paint = PA.PAINT[name];
+        if (!paint)
+            throw new Error('no sprite named ' + name);
+        const base = new Painter();
+        paint(base);
+        const stacked = g => {
+            for (let l = 0; l < layers; l++) {
+                const top = l === layers - 1;
+                const f = top ? 1 : 0.45 + 0.45 * (l / (layers - 1));
+                const dy = (layers - 1 - l) * step;
+                for (const o of base.ops)
+                    g.r(o.x, o.y + dy, o.w, o.h, shadeHex(o.c, f));
+            }
+        };
+        const s = buildSprite(stacked);
+        stackCache[key] = s;
+        return s;
+    }
+    PA.stackedSprite = stackedSprite;
     const cache = {};
     // Built the first time it is needed (so the file also loads without a page).
     function sprite(name) {
@@ -163,6 +197,90 @@ var PA;
             .r(2, 2, 2, 2, '#3d8bff')
             .p(3, 2, '#fffdfa');
     };
+})(PA || (PA = {}));
+// The A-10 Warthog, drawn at its own detail: seen from behind, on a 66-unit grid.
+// The drawing is painted at several crisp sizes (not stretched), and each size is
+// stacked: thin slices one above another, the lower ones shaded darker, so the body reads solid.
+var PA;
+(function (PA) {
+    const DESIGN_W = 66;
+    const DESIGN_H = 40;
+    const LAYERS = 4; // slices in the stack
+    const LIGHT = 2; // how far each slice steps down (design units, before scaling)
+    // Shade a hex colour toward dark (f = 1 is unchanged).
+    const shade = PA.shadeHex;
+    // The drawing itself, in design units: x across (0 … 66), y down (0 … 40).
+    // The A-10 from behind: a broad body, a thick high wing, two fins set wide apart, and
+    // the two engines under the wing, each with its exhaust.
+    function design(g, dy, f) {
+        const c = (hex) => shade(hex, f);
+        const body = c('#c8cfd6'), light = c('#eef3f6'), mid = c('#9aa4ae'), dark = c('#4d5560');
+        const glass = c('#9fdcf5'), hot = c('#ffb02e'), tail = c('#b8c1ca');
+        const R = (x, y, w, h, col) => g.r(x, y + dy, w, h, col);
+        // Fins: two tall, leaning out, with dark tips.
+        R(14, 7, 5, 13, tail);
+        R(13, 4, 4, 4, dark);
+        R(15, 6, 2, 1, light);
+        R(47, 7, 5, 13, tail);
+        R(49, 4, 4, 4, dark);
+        R(49, 6, 2, 1, light);
+        // Wing: a thick, straight, high wing with dark tips.
+        R(3, 18, 60, 6, body);
+        R(3, 18, 60, 1, light);
+        R(3, 22, 60, 2, mid);
+        R(2, 19, 2, 5, dark);
+        R(62, 19, 2, 5, dark);
+        // Fuselage: a broad body, lit on the left, shaded on the right, with a dark belly.
+        R(26, 6, 14, 24, body);
+        R(26, 6, 4, 24, light);
+        R(37, 6, 3, 24, mid);
+        R(27, 28, 12, 2, dark);
+        // Cockpit canopy.
+        R(28, 8, 10, 5, glass);
+        R(29, 9, 3, 2, light);
+        // Camouflage: a few darker patches on the body and the wing.
+        R(31, 15, 3, 2, mid);
+        R(34, 19, 2, 1, mid);
+        R(8, 20, 4, 1, mid);
+        R(55, 20, 4, 1, mid);
+        // Engine nacelles, each with a dark intake and a glowing exhaust.
+        R(20, 24, 7, 11, dark);
+        R(39, 24, 7, 11, dark);
+        R(21, 25, 5, 3, mid);
+        R(40, 25, 5, 3, mid);
+        R(22, 33, 5, 2, hot);
+        R(41, 33, 5, 2, hot);
+        // The nose underneath, a dark line.
+        R(29, 30, 8, 1, mid);
+    }
+    // The design at a whole-size scale k, stacked. Each layer is the same drawing; lower
+    // layers sit a little lower and are shaded darker.
+    function stackedAt(k) {
+        return (g) => {
+            for (let layer = 0; layer < LAYERS; layer++) {
+                const top = layer === LAYERS - 1;
+                const sub = new PA.Painter();
+                const f = top ? 1 : 0.42 + 0.5 * (layer / (LAYERS - 1));
+                design(sub, (LAYERS - 1 - layer) * LIGHT, f);
+                for (const o of sub.ops) {
+                    const x0 = Math.round(o.x * k), y0 = Math.round(o.y * k);
+                    const x1 = Math.round((o.x + o.w) * k), y1 = Math.round((o.y + o.h) * k);
+                    g.r(x0, y0, Math.max(1, x1 - x0), Math.max(1, y1 - y0), o.c);
+                }
+            }
+        };
+    }
+    // The four whole-step sizes: about 25% of the screen width (about 100 px) up to 33% (about 132 px).
+    PA.PLANE_SCALES = [1.6, 1.78, 1.94, 2.1];
+    const planeCache = [];
+    // The plane sprite for a turn tightness of 0 (straight) to 1 (hardest turn).
+    function planeSprite(tight) {
+        const i = Math.max(0, Math.min(PA.PLANE_SCALES.length - 1, Math.round(tight * (PA.PLANE_SCALES.length - 1))));
+        if (!planeCache[i])
+            planeCache[i] = PA.buildSprite(stackedAt(PA.PLANE_SCALES[i]));
+        return { img: planeCache[i], k: PA.PLANE_SCALES[i] };
+    }
+    PA.planeSprite = planeSprite;
 })(PA || (PA = {}));
 // Ground vehicles and guns: tanks, armoured carriers, trucks, a fuel tanker, a SAM launcher, flak.
 var PA;
@@ -495,7 +613,7 @@ var PA;
         jet: { r: 3.0, height: 2.5, hp: 1, points: 150, group: 'airfield' },
         ship: { r: 6.0, height: 3.0, hp: 4, points: 250, group: 'port' },
         rail: { r: 2.5, height: 2.5, hp: 1, points: 40, group: 'rail' },
-        fighter: { r: 3.0, height: 2.5, hp: 1, points: 200, group: 'air', gun: { range: 380, cool: 2.6, speed: 230 } },
+        fighter: { r: 4.5, height: 3.0, hp: 1, points: 200, group: 'air', gun: { range: 380, cool: 2.6, speed: 230 } },
         ally: { r: 3.0, height: 2.5, hp: 1, points: -300, group: 'air' },
     };
     // Which kinds drive along the road (and how fast, metres per second).
@@ -515,6 +633,7 @@ var PA;
             cool: info.gun ? 1 + rand() * info.gun.cool : 0,
         };
     }
+    PA.target = target;
     // Clusters of things in front of baseZ. Each cluster is one kind of place.
     function spawnTargets(rand, baseZ, count) {
         const out = [];
@@ -618,6 +737,7 @@ var PA;
 (function (PA) {
     // A soft pentatonic melody, one note every half second, looping. Gentle on purpose.
     const MELODY = [392, 440, 523, 587, 523, 440, 392, 330, 392, 523, 659, 523, 440, 392, 330, 294];
+    const BOOST_HUM = 0.025; // the engine is only heard, faintly, while boosting
     class Sound {
         constructor() {
             this.ctx = null;
@@ -711,14 +831,15 @@ var PA;
             set(this.busTurn, this.enabled ? this.volumes.turn : 0);
         }
         // The engine and the turn rush follow the flight.
-        setFlight(throttle, flying, turnAmount) {
+        setFlight(boost, flying, turnAmount) {
             if (!this.ctx || !this.engine || !this.engineGain || !this.turnGain)
                 return;
             const now = this.ctx.currentTime;
-            this.engine.frequency.setTargetAtTime(50 + throttle * 40, now, 0.1);
-            this.engineGain.gain.setTargetAtTime(flying ? 0.05 + throttle * 0.03 : 0, now, 0.2);
+            this.engine.frequency.setTargetAtTime(60, now, 0.1);
+            // No hum at all unless the boost is held: then a faint one.
+            this.engineGain.gain.setTargetAtTime(flying && boost ? BOOST_HUM : 0, now, 0.15);
             // A hard turn is a soft rush of air: quiet until the stick is pushed well over.
-            const rush = flying ? Math.max(0, Math.min(1, (turnAmount - 0.35) / 0.65)) * 0.12 : 0;
+            const rush = flying ? Math.max(0, Math.min(1, (turnAmount - 0.35) / 0.65)) * 0.07 : 0;
             this.turnGain.gain.setTargetAtTime(rush, now, 0.15);
         }
         // The background tune: a few soft notes, scheduled ahead, repeating.
@@ -739,7 +860,7 @@ var PA;
                 osc.type = 'sine';
                 osc.frequency.value = f;
                 gain.gain.setValueAtTime(0, this.noteAt);
-                gain.gain.linearRampToValueAtTime(0.06, this.noteAt + 0.05);
+                gain.gain.linearRampToValueAtTime(0.03, this.noteAt + 0.05);
                 gain.gain.exponentialRampToValueAtTime(0.0005, this.noteAt + 0.45);
                 osc.connect(gain).connect(this.busMusic);
                 osc.start(this.noteAt);
@@ -754,14 +875,14 @@ var PA;
             const t = this.ctx.currentTime;
             switch (name) {
                 case 'gun':
-                    this.burst(0.04, 0.5, 1800, t, this.busGun);
+                    this.burst(0.04, 0.2, 1400, t, this.busGun);
                     break;
                 case 'boom':
-                    this.burst(0.6, 0.5, 450, t, this.busGun);
-                    this.tone(90, 0.4, 0.2, t, 'sine', 40, this.busGun);
+                    this.burst(0.6, 0.25, 400, t, this.busGun);
+                    this.tone(90, 0.4, 0.12, t, 'sine', 40, this.busGun);
                     break;
                 case 'thud':
-                    this.tone(140, 0.12, 0.08, t, 'triangle', 80, this.busGun);
+                    this.tone(140, 0.1, 0.04, t, 'sine', 90, this.busGun);
                     break;
                 case 'warn':
                     // Two soft beeps: an incoming shell.
@@ -770,13 +891,13 @@ var PA;
                     break;
                 case 'beep':
                     // Beep, beep: the tag. Speed comes from the game, pitch rises a little.
-                    this.tone(1100, 0.07, 0.3, t, 'square', undefined, this.busWarn);
+                    this.tone(1000, 0.09, 0.14, t, 'sine', undefined, this.busWarn);
                     break;
                 case 'lock':
-                    this.tone(1500, 0.04, 0.12, t, 'sine', undefined, this.busWarn);
+                    this.tone(1300, 0.04, 0.06, t, 'sine', undefined, this.busWarn);
                     break;
                 case 'chaff':
-                    this.burst(0.35, 0.4, 3500, t, this.busGun);
+                    this.burst(0.35, 0.15, 2500, t, this.busGun);
                     break;
                 case 'chime':
                     this.tone(660, 0.25, 0.1, t, 'sine', undefined, this.busMusic);
@@ -787,8 +908,8 @@ var PA;
                     this.tone(523, 0.3, 0.1, t + 0.15, 'triangle', undefined, this.busMusic);
                     break;
                 case 'crash':
-                    this.burst(0.9, 0.5, 300, t, this.busGun);
-                    this.tone(70, 0.6, 0.2, t, 'sawtooth', 30, this.busGun);
+                    this.burst(0.9, 0.3, 300, t, this.busGun);
+                    this.tone(70, 0.6, 0.1, t, 'sine', 30, this.busGun);
                     break;
             }
         }
@@ -1052,7 +1173,7 @@ var PA;
     const AMMO_RECHARGE = 4; // rounds per second, always coming back
     const RESUPPLY_COOL = 45; // seconds between reloads from ⚙️
     const SHOT_SPEED = 260;
-    const CRUISE_THROTTLE = 0.6;
+    const CRUISE_THROTTLE = 0.36; // about 100 knots on the display: a gentler cruise
     const BULLET_LIFE = 1.6;
     const SHELL_LIFE = 4;
     const BLINK_SECONDS = 1.2;
@@ -1082,6 +1203,13 @@ var PA;
     const SHELL_WARN_RANGE = 300;
     const FRIEND_RESPAWN = 40;
     const WISP_LIFE = 1.4;
+    const ATTACK_RANGE = 700; // a fighter starts its attack run inside this distance
+    const BREAK_RANGE = 180; // and breaks off this close, or after BREAK_AFTER seconds
+    const BREAK_AFTER = 3;
+    const BREAK_FOR = 3.5; // it flies straight away this long, then comes back
+    const ALLY_GUN_RANGE = 700; // allies shoot at enemy fighters inside this range
+    const ALLY_COOL = 0.35;
+    const BASE_SPACING = 1400; // a defended base every this many metres along the route
     const KEEP_AHEAD = 6;
     const OBJECTIVE_GROUND = [4, 5, 6]; // ground targets to destroy for a mission (cycles)
     class Game {
@@ -1105,9 +1233,10 @@ var PA;
             this.chaff = PA.CHAFF_MAX;
             this.resupplyCool = 0;
             this.waveTimer = 0;
+            this.nextBaseZ = BASE_SPACING;
             this.enemyMissileCool = 0;
             this.allyTimers = [];
-            this.aim = { yaw: 0, pitch: 0, mode: 'straight' };
+            this.aim = { yaw: 0, pitch: 0, mode: 'straight', dir: [0, 0, 1] };
             this.lock = { target: null, progress: 0 };
             this.tagged = false; // an enemy missile is after the plane
             this.tagDist = 0; // its distance, metres
@@ -1148,7 +1277,7 @@ var PA;
                 this.plane.start(0, 0, 90, 40, 0.08, 0, 0);
             }
             else {
-                this.plane.start(0, 0, PA.groundAt(0, 0) + 10, 60, 0.05, 0, CRUISE_THROTTLE);
+                this.plane.start(0, 0, PA.groundAt(0, 0) + 10, 50, 0.05, 0, CRUISE_THROTTLE);
             }
             this.phase = 'flying';
             this.score = keepScore ? score : 0;
@@ -1165,6 +1294,7 @@ var PA;
             this.missileCool = 0;
             this.reloadTimer = 0;
             this.waveTimer = 8;
+            this.nextBaseZ = BASE_SPACING;
             this.enemyMissileCool = 6;
             this.allyTimers = [];
             this.lock = { target: null, progress: 0 };
@@ -1396,7 +1526,11 @@ var PA;
             this.waveTimer -= dt;
             if (this.waveTimer <= 0) {
                 this.waveTimer = WAVE_SECONDS;
-                for (let i = 0; i < this.settings.enemyWave; i++) {
+                // Felix (easy) has a quarter of the fighters; normal has half as many again.
+                const wave = this.settings.enemyWave === 0 ? 0
+                    : this.felix ? Math.max(1, Math.round(this.settings.enemyWave * 0.25))
+                        : Math.round(this.settings.enemyWave * 1.5);
+                for (let i = 0; i < wave; i++) {
                     this.mission.targets.push(PA.spawnAir(this.rand, this.plane.X, this.plane.Z, true));
                 }
             }
@@ -1412,33 +1546,13 @@ var PA;
             });
         }
         updateAir(dt) {
-            var _a, _b;
             const p = this.plane;
             for (const t of this.mission.targets) {
                 if (!t.alive)
                     continue;
                 t.age = (t.age || 0) + dt;
                 if (t.faction === 'enemy') {
-                    const dx = p.X - t.X, dz = p.Z - t.Z;
-                    const want = Math.atan2(dx, dz);
-                    const cur = t.vH || 0;
-                    let diff = want - cur;
-                    while (diff > Math.PI)
-                        diff -= 2 * Math.PI;
-                    while (diff < -Math.PI)
-                        diff += 2 * Math.PI;
-                    const turn = Math.max(-FIGHTER_TURN * dt, Math.min(FIGHTER_TURN * dt, diff));
-                    t.vH = cur + turn;
-                    t.X += Math.sin(t.vH) * FIGHTER_SPEED * dt;
-                    t.Z += Math.cos(t.vH) * FIGHTER_SPEED * dt;
-                    t.h = ((_a = t.h) !== null && _a !== void 0 ? _a : p.h) + (p.h + 10 - ((_b = t.h) !== null && _b !== void 0 ? _b : p.h)) * Math.min(1, dt * 0.4);
-                    const gun = PA.KINDS.fighter.gun;
-                    t.cool -= dt;
-                    const dist = Math.hypot(dx, dz);
-                    if (t.cool <= 0 && dist < FIGHTER_FIRE_RANGE) {
-                        t.cool = gun.cool * (0.8 + this.rand() * 0.4);
-                        this.fireAt(t, gun.speed, true);
-                    }
+                    this.flyFighter(t, dt);
                     if (t.age > 150 || Math.hypot(t.X - p.X, t.Z - p.Z) > 3000)
                         t.alive = false;
                 }
@@ -1448,6 +1562,15 @@ var PA;
                     t.X = o.cx + Math.cos(o.ang) * o.r;
                     t.Z = o.cz + Math.sin(o.ang) * o.r;
                     t.h = 90;
+                    // Allies defend: they shoot at an enemy fighter that is close to them.
+                    t.cool -= dt;
+                    if (t.cool <= 0) {
+                        const foe = this.nearestEnemy(t, ALLY_GUN_RANGE);
+                        if (foe) {
+                            t.cool = ALLY_COOL * (0.8 + this.rand() * 0.4);
+                            this.friendlyShot(t, foe);
+                        }
+                    }
                 }
             }
             // Enemy fighters also fire a homing missile now and then, when the plane is in front and near.
@@ -1463,6 +1586,110 @@ var PA;
                         break;
                     }
                 }
+            }
+        }
+        // An enemy fighter's flight: approach, make an attack run (firing), break off, come back.
+        flyFighter(t, dt) {
+            var _a, _b, _c, _d;
+            const p = this.plane;
+            const dx = p.X - t.X, dz = p.Z - t.Z;
+            const dist = Math.hypot(dx, dz);
+            t.stateT = ((_a = t.stateT) !== null && _a !== void 0 ? _a : 0) + dt;
+            if (!t.state)
+                t.state = 'approach';
+            if (t.state === 'approach' && dist < ATTACK_RANGE) {
+                t.state = 'attack';
+                t.stateT = 0;
+            }
+            if (t.state === 'attack' && (dist < BREAK_RANGE || t.stateT > BREAK_AFTER)) {
+                // Break away: the nose goes the way it came, and the fighter keeps going for a while.
+                t.state = 'break';
+                t.stateT = 0;
+                t.vH = Math.atan2(-dx, -dz);
+            }
+            if (t.state === 'break' && t.stateT > BREAK_FOR) {
+                t.state = 'approach';
+                t.stateT = 0;
+            }
+            const cur = (_b = t.vH) !== null && _b !== void 0 ? _b : Math.atan2(dx, dz);
+            let want = Math.atan2(dx, dz);
+            let rate = FIGHTER_TURN;
+            let speed = FIGHTER_SPEED * 0.85;
+            if (t.state === 'attack') {
+                rate = 1.6;
+                speed = FIGHTER_SPEED;
+            }
+            if (t.state === 'break') {
+                want = cur;
+                rate = 0.4;
+                speed = FIGHTER_SPEED;
+            }
+            let diff = want - cur;
+            while (diff > Math.PI)
+                diff -= 2 * Math.PI;
+            while (diff < -Math.PI)
+                diff += 2 * Math.PI;
+            const turn = Math.max(-rate * dt, Math.min(rate * dt, diff));
+            t.vH = cur + turn;
+            t.X += Math.sin(t.vH) * speed * dt;
+            t.Z += Math.cos(t.vH) * speed * dt;
+            // Fighters settle toward the plane's height slowly, so a shot can be led.
+            t.h = ((_c = t.h) !== null && _c !== void 0 ? _c : p.h) + (p.h + 10 - ((_d = t.h) !== null && _d !== void 0 ? _d : p.h)) * Math.min(1, dt * 0.15);
+            const gun = PA.KINDS.fighter.gun;
+            t.cool -= dt;
+            if (t.state === 'attack' && t.cool <= 0 && dist < FIGHTER_FIRE_RANGE) {
+                t.cool = gun.cool * (0.8 + this.rand() * 0.4);
+                this.fireAt(t, gun.speed, true);
+            }
+        }
+        nearestEnemy(from, range) {
+            var _a, _b;
+            let best = null;
+            let bestD = range;
+            for (const t of this.mission.targets) {
+                if (!t.alive || t.faction !== 'enemy')
+                    continue;
+                const d = Math.hypot(t.X - from.X, t.Z - from.Z, ((_a = t.h) !== null && _a !== void 0 ? _a : 0) - ((_b = from.h) !== null && _b !== void 0 ? _b : 0));
+                if (d < bestD) {
+                    best = t;
+                    bestD = d;
+                }
+            }
+            return best;
+        }
+        // An ally's bullet toward an enemy fighter, led to where the fighter will be.
+        friendlyShot(from, foe) {
+            var _a, _b, _c;
+            const sp = 260;
+            const vf = this.targetVelocity(foe);
+            const fromH = (_a = from.h) !== null && _a !== void 0 ? _a : 90;
+            let tt = Math.hypot(foe.X - from.X, ((_b = foe.h) !== null && _b !== void 0 ? _b : 0) - fromH, foe.Z - from.Z) / sp;
+            let dir = [0, 0, 1];
+            for (let it = 0; it < 4; it++) {
+                const rx = foe.X + vf[0] * tt - from.X;
+                const ry = ((_c = foe.h) !== null && _c !== void 0 ? _c : 0) + vf[1] * tt - fromH + 0.5 * PA.GRAVITY * tt * tt;
+                const rz = foe.Z + vf[2] * tt - from.Z;
+                const d = Math.hypot(rx, ry, rz) || 1;
+                dir = [rx / d, ry / d, rz / d];
+                tt = d / sp;
+            }
+            this.shots.push({
+                X: from.X, Z: from.Z, h: fromH,
+                vX: dir[0] * sp, vY: dir[1] * sp, vZ: dir[2] * sp,
+                life: 1.6, friendly: true,
+            });
+        }
+        // A defended base: towns, guns and a SAM site, with allies circling it.
+        spawnBase(z) {
+            const X = (this.rand() - 0.5) * 600;
+            const m = this.mission.targets;
+            m.push(PA.target('city', X, z, this.rand), PA.target('city', X + 10, z + 7, this.rand), PA.target('city', X - 9, z + 10, this.rand));
+            m.push(PA.target('sam', X + 14, z - 6, this.rand), PA.target('flak', X - 14, z - 8, this.rand), PA.target('flak', X + 6, z + 16, this.rand));
+            for (let i = 0; i < 2; i++) {
+                m.push({
+                    kind: 'ally', X: X + 450, Z: z, h: 90, alive: true, points: PA.KINDS.ally.points, hp: 1, cool: 0,
+                    faction: 'ally', orbit: { cx: X, cz: z, r: 450, ang: i * Math.PI, w: 0.12 }, age: 0,
+                });
             }
         }
         launchEnemyMissile(t) {
@@ -1701,26 +1928,45 @@ var PA;
                 this.beepTimer = 0;
             }
         }
-        updateGuns(dt) {
-            this.fireCool -= dt;
-            this.aim = this.computeAim();
-            if (!this.held.fire || this.fireCool > 0 || this.ammo < 1)
-                return;
-            this.fireCool = 0.09;
-            this.ammo -= 1;
+        // Where a target is moving to, per second (vehicles on the road, fighters, allies on their orbit).
+        targetVelocity(t) {
+            var _a, _b;
+            if (t.faction === 'enemy' && t.vH !== undefined) {
+                // A fighter also climbs or sinks toward the plane's height (see flyFighter).
+                const climb = (this.plane.h + 10 - ((_a = t.h) !== null && _a !== void 0 ? _a : 0)) * 0.15;
+                return [Math.sin(t.vH) * FIGHTER_SPEED, climb, Math.cos(t.vH) * FIGHTER_SPEED];
+            }
+            if (t.faction === 'ally' && t.orbit) {
+                const o = t.orbit;
+                return [-Math.sin(o.ang) * o.r * o.w, 0, Math.cos(o.ang) * o.r * o.w];
+            }
+            return [0, 0, (_b = t.vZ) !== null && _b !== void 0 ? _b : 0];
+        }
+        // The direction to fire so the bullet reaches where the target WILL be. The bullet starts
+        // with the plane's own speed, and it falls under gravity, so both are allowed for.
+        leadDir(t) {
             const p = this.plane;
-            const cosP = Math.cos(this.aim.pitch), sinP = Math.sin(this.aim.pitch);
-            const sinY = Math.sin(this.aim.yaw), cosY = Math.cos(this.aim.yaw);
-            this.shots.push({
-                X: p.X + sinY * cosP * 2,
-                Z: p.Z + cosY * cosP * 2,
-                h: p.h + sinP * 2,
-                vX: p.vx * sinY + SHOT_SPEED * cosP * sinY,
-                vZ: p.vx * cosY + SHOT_SPEED * cosP * cosY,
-                vY: p.vy + SHOT_SPEED * sinP,
-                life: BULLET_LIFE,
-            });
-            this.onSound('gun');
+            const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
+            const vp = [p.vx * sinY, p.vy, p.vx * cosY];
+            const vt = this.targetVelocity(t);
+            const aimH = PA.altOf(t) + (t.h === undefined ? 1 : 0);
+            let tt = Math.hypot(t.X - p.X, aimH - p.h, t.Z - p.Z) / SHOT_SPEED;
+            let dir = [0, 0, 1];
+            for (let it = 0; it < 5; it++) {
+                // Where the target is at time tt, lifted by the drop the bullet will have fallen.
+                const tx = t.X + vt[0] * tt;
+                const ty = aimH + vt[1] * tt + 0.5 * PA.GRAVITY * tt * tt;
+                const tz = t.Z + vt[2] * tt;
+                // The muzzle velocity is the plane's velocity plus SHOT_SPEED along the gun,
+                // so the gun must point at (target − plane − plane velocity × tt).
+                const rx = tx - p.X - vp[0] * tt;
+                const ry = ty - p.h - vp[1] * tt;
+                const rz = tz - p.Z - vp[2] * tt;
+                const d = Math.hypot(rx, ry, rz) || 1;
+                dir = [rx / d, ry / d, rz / d];
+                tt = d / SHOT_SPEED;
+            }
+            return dir;
         }
         computeAim() {
             const p = this.plane;
@@ -1737,22 +1983,44 @@ var PA;
                     continue;
                 if (t.h !== undefined && d < AIR_RANGE)
                     airborne = true;
-                if (t.kind === 'jet' && d < AIR_RANGE)
-                    airborne = true;
                 if (t.h === undefined && t.kind !== 'jet' && d < bestD) {
                     best = t;
                     bestD = d;
                 }
             }
-            if (airborne || !best)
-                return { yaw: p.yaw, pitch: 0, mode: airborne ? 'air' : 'straight' };
-            const tg = PA.altOf(best) + 1;
-            const dh = tg - p.h;
-            const dd = Math.hypot(best.X - p.X, best.Z - p.Z);
-            const flight = dd / SHOT_SPEED;
-            const drop = 0.5 * PA.GRAVITY * flight * flight;
-            const pitch = Math.atan2(dh + drop, dd);
-            return { yaw: Math.atan2(best.X - p.X, best.Z - p.Z), pitch, mode: 'ground' };
+            if (airborne || !best) {
+                // Planes nearby: the gun points straight ahead, the way the plane is going.
+                return { yaw: p.yaw, pitch: 0, mode: airborne ? 'air' : 'straight', dir: [sinY, 0, cosY] };
+            }
+            const dir = this.leadDir(best);
+            return {
+                yaw: Math.atan2(dir[0], dir[2]),
+                pitch: Math.asin(Math.max(-1, Math.min(1, dir[1]))),
+                mode: 'ground',
+                dir,
+            };
+        }
+        updateGuns(dt) {
+            this.fireCool -= dt;
+            this.aim = this.computeAim();
+            if (!this.held.fire || this.fireCool > 0 || this.ammo < 1)
+                return;
+            this.fireCool = 0.09;
+            this.ammo -= 1;
+            const p = this.plane;
+            const [dx, dy, dz] = this.aim.dir;
+            // The bullet keeps the plane's speed and adds the gun's speed along the aim.
+            const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
+            this.shots.push({
+                X: p.X + dx * 2,
+                Z: p.Z + dz * 2,
+                h: p.h + dy * 2,
+                vX: p.vx * sinY + SHOT_SPEED * dx,
+                vZ: p.vx * cosY + SHOT_SPEED * dz,
+                vY: p.vy + SHOT_SPEED * dy,
+                life: BULLET_LIFE,
+            });
+            this.onSound('gun');
         }
         hitTarget(t, damage, tg) {
             if (t.faction === 'ally') {
@@ -1795,11 +2063,23 @@ var PA;
                 for (const t of this.mission.targets) {
                     if (!t.alive)
                         continue;
+                    // An ally's bullet only hits enemies; the player's never hit allies.
+                    if (s.friendly ? t.faction !== 'enemy' : t.faction === 'ally')
+                        continue;
                     const info = PA.KINDS[t.kind];
                     const dx = s.X - t.X, dz = s.Z - t.Z;
                     const tg = PA.altOf(t);
-                    if (dx * dx + dz * dz < info.r * info.r && s.h >= tg && s.h <= tg + info.height) {
-                        this.hitTarget(t, 1, tg);
+                    // Flying things get a few metres of vertical room: a dogfight is hard to aim exactly.
+                    const slack = t.h !== undefined ? 3 : 0;
+                    if (dx * dx + dz * dz < info.r * info.r && s.h >= tg - slack && s.h <= tg + info.height + slack) {
+                        if (s.friendly) {
+                            t.alive = false;
+                            this.explode(t.X, tg + 1, t.Z, 10);
+                            this.onSound('boom');
+                        }
+                        else {
+                            this.hitTarget(t, 1, tg);
+                        }
                         hit = true;
                         break;
                     }
@@ -1862,6 +2142,11 @@ var PA;
             const left = m.targets.filter(t => t.alive && t.faction === undefined).length;
             if (left < KEEP_AHEAD) {
                 m.targets.push(...PA.spawnTargets(this.rand, this.plane.Z + 240, 6));
+            }
+            // Bases come up ahead of the plane, one every BASE_SPACING metres of route.
+            while (this.plane.Z + 900 > this.nextBaseZ) {
+                this.spawnBase(this.nextBaseZ);
+                this.nextBaseZ += BASE_SPACING;
             }
         }
         checkRings() {
@@ -1937,11 +2222,11 @@ var PA;
     const RANGE = 16; // squares drawn each way from the camera
     const FOG_FAR = 900; // metres where the ground fades into the sky
     const PLANE_SCREEN_Y = 0.72;
-    const PX_PER_M = 0.3; // sprite pixel size in metres (ground and air things)
+    const PX_PER_M = 0.6; // sprite pixel size in metres (ground and air things), twice the first size
     const PLANE_SCALE = 2; // the plane sprite is drawn at a whole-number scale
     const NEAR_BOOST_M = 220; // closer than this, things grow up to three times
-    const MIN_PX = 7; // the smallest a thing is drawn (tall)
-    const MAX_PX = 150; // the largest, so nothing fills the whole screen
+    const MIN_PX = 10; // the smallest a thing is drawn (tall)
+    const MAX_PX = 220; // the largest, so nothing fills the whole screen
     // Camera placement for each view: where it sits behind the plane, how high, and how far it looks down.
     const VIEWS = {
         chase: { back: CAM_BACK, up: CAM_UP, tilt: TILT, range: RANGE },
@@ -2108,12 +2393,20 @@ var PA;
             ctx.fill();
         }
     }
+    // Which way a thing faces, in the ground plane (0 = east, the way the sprites face).
+    function facingOf(t) {
+        if (t.faction === 'enemy' && t.vH !== undefined)
+            return Math.atan2(Math.cos(t.vH), Math.sin(t.vH));
+        if (t.vZ !== undefined && t.vZ !== 0)
+            return t.vZ > 0 ? Math.PI / 2 : -Math.PI / 2;
+        return 0;
+    }
     function collect(g, c) {
         const things = [];
         const range = VIEWS[g.settings.view].range;
         // Trees: a few in each forest square near the camera.
         const ci = Math.round(c.px / CELL), cj = Math.round(c.pz / CELL);
-        const tree = PA.sprite('tree');
+        const tree = PA.stackedSprite('tree', 4, 1);
         for (let i = ci - range; i < ci + range; i++) {
             for (let j = cj - range; j < cj + range; j++) {
                 const cx0 = i * CELL, cz0 = j * CELL;
@@ -2124,7 +2417,7 @@ var PA;
                     const Z = cz0 + PA.cellNoise(i, j, 47 + k) * CELL;
                     const p = project(c, X, PA.groundAt(X, Z), Z);
                     if (p)
-                        things.push({ zc: p[2], img: tree, X, base: PA.groundAt(X, Z), Z });
+                        things.push({ zc: p[2], img: tree, X, base: PA.groundAt(X, Z), Z, facing: 0, flip: false });
                 }
             }
         }
@@ -2136,17 +2429,24 @@ var PA;
                 continue;
             if (p[2] > FOG_FAR * 1.5)
                 continue;
-            things.push({ zc: p[2], img: PA.sprite(t.kind), X: t.X, base: PA.altOf(t), Z: t.Z });
+            // Fighters and allies are stacked like the plane; ground things are single sprites for now.
+            const air = t.h !== undefined;
+            // Every object is stacked. Air things stack finely; ground things stack deeper.
+            const img = air ? PA.stackedSprite(t.kind, 4, 1) : PA.stackedSprite(t.kind, 4, 2);
+            things.push({ zc: p[2], img, X: t.X, base: PA.altOf(t), Z: t.Z, facing: facingOf(t), flip: false });
         }
         things.sort((a, b) => b.zc - a.zc);
         return things;
     }
     // Draws one sprite standing at (X, base, Z), larger the closer it is.
-    function billboard(ctx, c, img, X, Z, base) {
+    // The sprite is mirrored when the camera sees its front, so things change as you pass them.
+    function billboard(ctx, c, img, X, Z, base, facing = 0) {
         const p = project(c, X, base, Z);
         if (!p)
             return;
         const [sx, sy, zc] = p;
+        const toCam = Math.atan2(c.px - X, c.pz - Z);
+        const seesFront = Math.cos(toCam - facing) > 0;
         // Size by distance: true perspective, plus a boost when close (up to three times
         // larger inside 220 m), and a floor so anything far off still shows as a few pixels.
         const near = Math.max(0, Math.min(1, (NEAR_BOOST_M - zc) / NEAR_BOOST_M));
@@ -2155,7 +2455,16 @@ var PA;
         k = Math.min(k, MAX_PX / img.height);
         const w = Math.max(1, Math.round(img.width * k));
         const h = Math.max(1, Math.round(img.height * k));
-        ctx.drawImage(img, Math.round(sx - w / 2), Math.round(sy - h), w, h);
+        if (seesFront) {
+            ctx.save();
+            ctx.translate(Math.round(sx), 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(img, Math.round(-w / 2), Math.round(sy - h), w, h);
+            ctx.restore();
+        }
+        else {
+            ctx.drawImage(img, Math.round(sx - w / 2), Math.round(sy - h), w, h);
+        }
     }
     function shots(ctx, c, list, color, size) {
         ctx.fillStyle = color;
@@ -2222,38 +2531,6 @@ var PA;
             ctx.strokeStyle = ring.passed ? PA.COL.hoopDone : PA.COL.hoop;
             ctx.stroke();
         }
-    }
-    // Sprite stacking: the plane is built from thin slices, one above another. The
-    // lower slices are darker, so the body reads as solid from every angle.
-    const stackCache = {};
-    const STACK_LAYERS = 4;
-    function stacked(img, name) {
-        if (stackCache[name])
-            return stackCache[name];
-        const out = document.createElement('canvas');
-        out.width = img.width;
-        out.height = img.height + STACK_LAYERS;
-        const ctx = out.getContext('2d');
-        if (!ctx)
-            return img;
-        for (let layer = STACK_LAYERS - 1; layer >= 0; layer--) {
-            const y = STACK_LAYERS - layer; // layer 0 is the top slice, drawn last
-            const tmp = document.createElement('canvas');
-            tmp.width = img.width;
-            tmp.height = img.height;
-            const t = tmp.getContext('2d');
-            if (!t)
-                continue;
-            t.drawImage(img, 0, 0);
-            if (layer > 0) {
-                t.globalCompositeOperation = 'source-atop';
-                t.fillStyle = 'rgba(47,45,61,' + (0.12 + 0.12 * layer).toFixed(2) + ')';
-                t.fillRect(0, 0, tmp.width, tmp.height);
-            }
-            ctx.drawImage(tmp, 0, y - (layer === 0 ? 0 : 0));
-        }
-        stackCache[name] = out;
-        return out;
     }
     // Ring of the lock and the collapsing warning ring are drawn in screen space.
     function lockRing(ctx, g, c) {
@@ -2339,22 +2616,24 @@ var PA;
         }
         const blinkOff = g.phase === 'crashed' && Math.floor(g.blink * 8) % 2 === 0;
         const sx = PA.W / 2, sy = PA.H * PLANE_SCREEN_Y;
-        const name = g.settings.mode === 'glider' ? 'glider' : 'plane';
-        const base = PA.sprite(name);
-        const img = name === 'plane' ? stacked(base, name) : base;
+        const glider = g.settings.mode === 'glider';
         const tight = Math.min(1, Math.abs(p.bank) / PA.AIR.bankMax);
-        const targetW = PA.W * (0.25 + 0.08 * tight);
-        const scale = targetW / base.width;
+        // The jet is drawn at its own detail, at one of four crisp sizes (25% to 33% of the width).
+        // The paper glider is drawn at its own size.
+        const plane2 = glider ? null : PA.planeSprite(tight);
+        const img = plane2 ? plane2.img : PA.sprite('glider');
+        const scale = plane2 ? plane2.k : 1.5;
         ctx.save();
         ctx.translate(sx, sy);
         ctx.rotate(p.bank);
         if (!blinkOff) {
-            const dw = img.width * scale, dh = img.height * scale;
+            const dw = img.width, dh = img.height;
             // Flame from the engines when boosting: two flickering tongues.
-            if (g.held.boost && g.phase === 'flying' && name === 'plane') {
-                for (const ex of [-4, 4]) {
+            if (g.held.boost && g.phase === 'flying' && !glider) {
+                // The engine exhausts sit at design x 25 and 42, y 35 (centre 33, 20).
+                for (const ex of [24.5, 43.5]) {
                     const len = (8 + Math.random() * 6) * scale / 2;
-                    const x0 = (ex * scale) / 1, y0 = (6 * scale) / 1;
+                    const x0 = (ex - 33) * scale, y0 = 35 * scale - 20 * scale;
                     ctx.fillStyle = '#ffb02e';
                     ctx.beginPath();
                     ctx.moveTo(x0 - 2, y0);
@@ -2371,7 +2650,7 @@ var PA;
                     ctx.fill();
                 }
             }
-            ctx.drawImage(img, -Math.round(dw / 2), -Math.round(dh / 2), Math.round(dw), Math.round(dh));
+            ctx.drawImage(img, -Math.round(dw / 2), -Math.round(dh / 2));
         }
         // Damage: a cloud of smoke on each wing, slowly lifting.
         for (const m of g.marks) {
@@ -2469,7 +2748,7 @@ var PA;
         if (g.settings.view !== 'cockpit' && g.mission.mode === 'glider')
             rings(ctx, g, c);
         for (const th of collect(g, c))
-            billboard(ctx, c, th.img, th.X, th.Z, th.base);
+            billboard(ctx, c, th.img, th.X, th.Z, th.base, th.facing);
         shots(ctx, c, g.shots, PA.COL.bullet, 2);
         shots(ctx, c, g.shells, PA.COL.shell, 2);
         missiles(ctx, g, c);
@@ -2502,6 +2781,7 @@ var PA;
         air: '#8fe0bd',
     };
     function radar(ctx, g, size) {
+        var _a;
         const c = size / 2, R = size / 2 - 3;
         ctx.clearRect(0, 0, size, size);
         ctx.save();
@@ -2551,8 +2831,41 @@ var PA;
             ctx.stroke();
             ctx.restore();
         }
+        // A flying thing is a triangle with its sharp point on its heading, so you can read where it is going.
+        const tri = g.felix ? 9 : 6;
         for (const t of g.mission.targets) {
-            if (!t.alive)
+            if (!t.alive || t.h === undefined)
+                continue;
+            const q = place(t.X, t.Z);
+            if (!q)
+                continue;
+            let heading;
+            if (t.faction === 'enemy')
+                heading = (_a = t.vH) !== null && _a !== void 0 ? _a : 0;
+            else if (t.orbit)
+                heading = Math.atan2(-Math.sin(t.orbit.ang), Math.cos(t.orbit.ang));
+            else
+                heading = 0;
+            // Turn the heading into a direction on the radar (up is the plane's nose).
+            const rel = heading - p.yaw;
+            const dx2 = Math.sin(rel), dy2 = -Math.cos(rel);
+            const px = q[0], py = q[1];
+            const tipX = px + dx2 * tri, tipY = py + dy2 * tri;
+            const bx = px - dx2 * tri * 0.6, by = py - dy2 * tri * 0.6;
+            const perpX = -dy2 * tri * 0.55, perpY = dx2 * tri * 0.55;
+            ctx.fillStyle = t.faction === 'enemy' ? '#ff3b3b' : '#3d8bff';
+            ctx.strokeStyle = PA.INK;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(tipX, tipY);
+            ctx.lineTo(bx + perpX, by + perpY);
+            ctx.lineTo(bx - perpX, by - perpY);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
+        for (const t of g.mission.targets) {
+            if (!t.alive || t.h !== undefined)
                 continue;
             const q = place(t.X, t.Z);
             if (!q)
@@ -2595,7 +2908,7 @@ var PA;
     const SETTINGS_KEY = 'pa_warthog.settings';
     const DEFAULTS = {
         mode: 'jet', control: 'drag', view: 'chase', difficulty: 'normal', sound: 1,
-        volMusic: 30, volGun: 35, volTurn: 30, volWarn: 70,
+        volMusic: 20, volGun: 25, volTurn: 25, volWarn: 60,
         forces: 0, safeFlight: 1, invincible: 0, autoReload: 1,
         enemyWave: 2, allies: 1, showErrors: 0,
     };
@@ -2887,9 +3200,12 @@ var PA;
         };
         gear.addEventListener('click', () => setOpen(drawer.hidden));
         $('closeDrawer').addEventListener('click', () => setOpen(false));
+        // A tap in the upper-right corner brings the gear back and opens the settings in one go.
         $('gearHot').addEventListener('pointerdown', e => {
             e.preventDefault();
             wakeGear();
+            if (drawer.hidden)
+                setOpen(true);
         });
         wakeGear();
     }
@@ -3169,7 +3485,7 @@ var PA;
             const rc = $('radar').getContext('2d');
             if (rc)
                 PA.radar(rc, game, 150);
-            sound.setFlight(game.plane.throttle, game.phase === 'flying' && game.settings.mode === 'jet', Math.abs(game.axes.yaw));
+            sound.setFlight(game.held.boost, game.phase === 'flying' && game.settings.mode === 'jet', Math.abs(game.axes.yaw));
             hudTimer += dt;
             if (hudTimer > 0.1) {
                 hudTimer = 0;

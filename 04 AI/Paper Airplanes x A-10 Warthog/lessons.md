@@ -15,3 +15,12 @@
 - **Ground squares under the camera vanish if they are dropped when a corner is behind the near plane.** Clamp the depth for ground corners instead.
 - **Synthetic pointer events from a test can have no active pointer.** Guard `setPointerCapture` in a try/catch.
 - **Drive drawer buttons with direct clicks in tests** when a gear is mid-fade; a real tap is needed only for the wake.
+
+## 2026-11-18 (round 8, convo v0.13)
+
+- **A stack must show.** A one-unit step with a light shade reads as a dark edge. Use a visible step (two design units) and a strong shade for the lower slices, then look at it zoomed in.
+- **Enemies that chase at a fixed turn rate orbit.** Give them a phase: approach, attack run, break away, return.
+- **Lead every moving shot, including allies'.** A shot aimed at where a target was misses it. Include the target's motion, and its climb or descent.
+- **Test for the mechanic, not the random outcome.** The ally test failed twice for reasons in the fighter's altitude, not the gun. Trace the frames before changing the code.
+- **Felix mode is for seeing things.** Radar markers should be bigger and clearer there.
+- **A tap command in a shell can hide a failure.** Read the exit code of the test run itself, not of the pipe after it.

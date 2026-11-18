@@ -98,3 +98,13 @@
 * **Art-style option from real research:** start with medieval manuscript and let ⚙️ switch the whole campaign to other historical styles.
 * **A story per level,** with a research folder that plans the plot line.
 * **Counters are the point:** ranged units strong when stacked, assassins and fighters counter them; battle is a free-for-all once it starts.
+
+
+## 9. From the Paper Airplanes x A-10 build (2026-11-18)
+* **Sprites are drawn at their own size.** Do not stretch a small sprite up. Draw the detail at the size it is shown, in crisp steps.
+* **Stacking must be visible.** A stacked sprite needs clear slices, not a faint dark edge.
+* **Enemies have a plan.** Attack runs and breaks, not endless circling.
+* **Felix mode shows everything clearly.** Bigger radar markers; heading triangles.
+* **Radar shows heading.** Flying things are triangles with the point on their heading.
+* **Allies help.** They shoot the enemy near them.
+* **The world goes on.** Defended bases come up as you fly; no edge.

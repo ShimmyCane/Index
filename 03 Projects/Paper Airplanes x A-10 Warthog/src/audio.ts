@@ -11,6 +11,7 @@ namespace PA {
 
   // A soft pentatonic melody, one note every half second, looping. Gentle on purpose.
   const MELODY = [392, 440, 523, 587, 523, 440, 392, 330, 392, 523, 659, 523, 440, 392, 330, 294];
+  const BOOST_HUM = 0.025;   // the engine is only heard, faintly, while boosting
 
   export class Sound {
     private ctx: AudioContext | null = null;
@@ -107,13 +108,14 @@ namespace PA {
     }
 
     // The engine and the turn rush follow the flight.
-    setFlight(throttle: number, flying: boolean, turnAmount: number): void {
+    setFlight(boost: boolean, flying: boolean, turnAmount: number): void {
       if (!this.ctx || !this.engine || !this.engineGain || !this.turnGain) return;
       const now = this.ctx.currentTime;
-      this.engine.frequency.setTargetAtTime(50 + throttle * 40, now, 0.1);
-      this.engineGain.gain.setTargetAtTime(flying ? 0.05 + throttle * 0.03 : 0, now, 0.2);
+      this.engine.frequency.setTargetAtTime(60, now, 0.1);
+      // No hum at all unless the boost is held: then a faint one.
+      this.engineGain.gain.setTargetAtTime(flying && boost ? BOOST_HUM : 0, now, 0.15);
       // A hard turn is a soft rush of air: quiet until the stick is pushed well over.
-      const rush = flying ? Math.max(0, Math.min(1, (turnAmount - 0.35) / 0.65)) * 0.12 : 0;
+      const rush = flying ? Math.max(0, Math.min(1, (turnAmount - 0.35) / 0.65)) * 0.07 : 0;
       this.turnGain.gain.setTargetAtTime(rush, now, 0.15);
     }
 
@@ -134,7 +136,7 @@ namespace PA {
         osc.type = 'sine';
         osc.frequency.value = f;
         gain.gain.setValueAtTime(0, this.noteAt);
-        gain.gain.linearRampToValueAtTime(0.06, this.noteAt + 0.05);
+        gain.gain.linearRampToValueAtTime(0.03, this.noteAt + 0.05);
         gain.gain.exponentialRampToValueAtTime(0.0005, this.noteAt + 0.45);
         osc.connect(gain).connect(this.busMusic);
         osc.start(this.noteAt);
@@ -149,14 +151,14 @@ namespace PA {
       const t = this.ctx.currentTime;
       switch (name) {
         case 'gun':
-          this.burst(0.04, 0.5, 1800, t, this.busGun!);
+          this.burst(0.04, 0.2, 1400, t, this.busGun!);
           break;
         case 'boom':
-          this.burst(0.6, 0.5, 450, t, this.busGun!);
-          this.tone(90, 0.4, 0.2, t, 'sine', 40, this.busGun!);
+          this.burst(0.6, 0.25, 400, t, this.busGun!);
+          this.tone(90, 0.4, 0.12, t, 'sine', 40, this.busGun!);
           break;
         case 'thud':
-          this.tone(140, 0.12, 0.08, t, 'triangle', 80, this.busGun!);
+          this.tone(140, 0.1, 0.04, t, 'sine', 90, this.busGun!);
           break;
         case 'warn':
           // Two soft beeps: an incoming shell.
@@ -165,13 +167,13 @@ namespace PA {
           break;
         case 'beep':
           // Beep, beep: the tag. Speed comes from the game, pitch rises a little.
-          this.tone(1100, 0.07, 0.3, t, 'square', undefined, this.busWarn!);
+          this.tone(1000, 0.09, 0.14, t, 'sine', undefined, this.busWarn!);
           break;
         case 'lock':
-          this.tone(1500, 0.04, 0.12, t, 'sine', undefined, this.busWarn!);
+          this.tone(1300, 0.04, 0.06, t, 'sine', undefined, this.busWarn!);
           break;
         case 'chaff':
-          this.burst(0.35, 0.4, 3500, t, this.busGun!);
+          this.burst(0.35, 0.15, 2500, t, this.busGun!);
           break;
         case 'chime':
           this.tone(660, 0.25, 0.1, t, 'sine', undefined, this.busMusic!);
@@ -182,8 +184,8 @@ namespace PA {
           this.tone(523, 0.3, 0.1, t + 0.15, 'triangle', undefined, this.busMusic!);
           break;
         case 'crash':
-          this.burst(0.9, 0.5, 300, t, this.busGun!);
-          this.tone(70, 0.6, 0.2, t, 'sawtooth', 30, this.busGun!);
+          this.burst(0.9, 0.3, 300, t, this.busGun!);
+          this.tone(70, 0.6, 0.1, t, 'sine', 30, this.busGun!);
           break;
       }
     }

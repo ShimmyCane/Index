@@ -156,7 +156,7 @@ const still = { pitch: 0, yaw: 0, throttle: 0 };
   const enemies0 = g.mission.targets.filter(t => t.faction === 'enemy').length;
   for (let i = 0; i < 10 * 30; i++) g.update(1 / 30);
   const enemies1 = g.mission.targets.filter(t => t.faction === 'enemy').length;
-  check('waves: the first wave arrives soon after take-off', enemies1 >= 2 && enemies0 === 0, 'enemies ' + enemies1);
+  check('waves: the first wave arrives soon after take-off (Felix: a quarter of the setting, at least one)', enemies1 >= 1 && enemies0 === 0, 'enemies ' + enemies1);
   const ally = g.mission.targets.find(t => t.faction === 'ally');
   const a0 = ally.X;
   for (let i = 0; i < 2 * 30; i++) g.update(1 / 30);
@@ -177,7 +177,7 @@ const still = { pitch: 0, yaw: 0, throttle: 0 };
 
 // 10. Safe flight: a plane diving at the ground is pulled up and does not crash.
 {
-  const g = new PA.Game({ mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0, safeFlight: 1, invincible: 0, autoReload: 1 });
+  const g = new PA.Game({ mode: 'jet', control: 'drag', view: 'chase', difficulty: 'felix', sound: 0, forces: 0, showErrors: 0, safeFlight: 1, invincible: 0, autoReload: 1 });
   g.onSound = () => {};
   g.mission.targets = [];
   g.plane.start(0, 0, PA.groundAt(0, 0) + 5, 60, -0.5, 0, 0.6);
@@ -326,6 +326,66 @@ const still = { pitch: 0, yaw: 0, throttle: 0 };
   g.update(1 / 30);
   for (let i = 0; i < 2 * 30; i++) g.update(1 / 30);
   check('loss: a full reset restocks the gun, missiles and chaff', g.ammo === PA.AMMO_MAX && g.missileStock === PA.MISSILE_MAX && g.chaff === PA.CHAFF_MAX && g.phase === 'flying');
+}
+
+// 22. The gun leads: at flying speed it hits a still target ahead, and a target moving along the road.
+{
+  const st = { mode: 'jet', control: 'drag', view: 'chase', difficulty: 'felix', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const still = new PA.Game(st);
+  still.onSound = () => {};
+  still.mission.targets = [{ kind: 'tank_mbt', X: 0, Z: still.plane.Z + 200, alive: true, points: 100, hp: 2, cool: 0 }];
+  const t1 = still.mission.targets[0];
+  still.held.fire = true;
+  for (let i = 0; i < 3 * 30 && t1.alive; i++) still.update(1 / 30);
+  check('gun: hits a still tank 200 m ahead at flying speed', !t1.alive || t1.hp < 2, 'hp ' + t1.hp + ', aim ' + still.aim.mode);
+
+  const moving = new PA.Game(st);
+  moving.onSound = () => {};
+  moving.mission.targets = [{ kind: 'tank_mbt', X: 0, Z: moving.plane.Z + 250, alive: true, points: 100, hp: 2, cool: 0, vZ: 9 }];
+  const t2 = moving.mission.targets[0];
+  moving.held.fire = true;
+  for (let i = 0; i < 3 * 30 && t2.alive; i++) moving.update(1 / 30);
+  check('gun: leads a tank moving along the road', !t2.alive || t2.hp < 2, 'hp ' + t2.hp);
+}
+
+// 23. Fighters make attack runs and break off, instead of circling forever.
+{
+  const st = { mode: 'jet', control: 'drag', view: 'chase', difficulty: 'felix', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const g = new PA.Game(st);
+  g.onSound = () => {};
+  g.mission.targets = [];
+  g.mission.targets.push({ kind: 'fighter', X: g.plane.X + 900, Z: g.plane.Z + 400, h: 90, alive: true, points: 200, hp: 1, cool: 0, faction: 'enemy', age: 0, vH: 0 });
+  const f = g.mission.targets[0];
+  const seen = new Set();
+  for (let i = 0; i < 40 * 30 && f.alive; i++) { g.update(1 / 30); if (f.state) seen.add(f.state); }
+  check('fighters: they go through approach, attack and break', seen.has('approach') && seen.has('attack') && seen.has('break'), 'states ' + [...seen].join(','));
+}
+
+// 24. Allies shoot at an enemy fighter that comes close to them.
+{
+  const st = { mode: 'jet', control: 'drag', view: 'chase', difficulty: 'felix', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const g = new PA.Game(st);
+  g.onSound = () => {};
+  g.mission.targets = [];
+  const ally = { kind: 'ally', X: 0, Z: 1500, h: 90, alive: true, points: -300, hp: 1, cool: 0, faction: 'ally', orbit: { cx: 0, cz: 1500, r: 1, ang: 0, w: 0 }, age: 0 };
+  const foe = { kind: 'fighter', X: 150, Z: 1500, h: 90, alive: true, points: 200, hp: 1, cool: 99, faction: 'enemy', age: 0, vH: 0, state: 'break', stateT: 0 };
+  g.mission.targets.push(ally, foe);
+  let fired = false;
+  for (let i = 0; i < 3 * 30 && foe.alive; i++) { g.update(1 / 30); if (g.shots.some(s => s.friendly)) fired = true; }
+  check('allies: they shoot at a fighter that comes close', fired && !foe.alive);
+}
+
+// 25. Bases: a defended base comes up as the plane passes each stretch of the route.
+{
+  const st = { mode: 'jet', control: 'drag', view: 'chase', difficulty: 'felix', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const g = new PA.Game(st);
+  g.onSound = () => {};
+  const cities0 = g.mission.targets.filter(t => t.kind === 'city').length;
+  g.plane.Z = 900;
+  g.update(1 / 30);
+  const cities1 = g.mission.targets.filter(t => t.kind === 'city').length;
+  const allies = g.mission.targets.filter(t => t.faction === 'ally' && t.orbit && t.orbit.r === 450).length;
+  check('bases: a base comes up ahead with towns and defending allies', cities1 >= cities0 + 3 && allies === 2, 'cities ' + cities1 + ', base allies ' + allies);
 }
 
 console.log(failures === 0 ? '\nAll flight checks passed.' : '\n' + failures + ' check(s) failed.');
