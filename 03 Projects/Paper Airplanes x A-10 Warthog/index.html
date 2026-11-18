@@ -14,7 +14,8 @@
       <span class="pill">★ <b id="score">0</b></span>
       <span class="pill">🎯 <b id="kills">0</b></span>
       <span class="pill">🪟 <b id="hoops">—</b></span>
-      <span class="pill">🚀 <b id="missile">ready</b></span>
+      <span class="pill">🚀 <b id="missile">6/6</b></span>
+      <span class="pill">🎯 <b id="gun">straight</b></span>
       <span class="hullWrap" title="Hull"><i id="hull"></i></span>
     </header>
 
@@ -26,6 +27,8 @@
     </div>
 
     <p class="msg" id="msg" aria-live="polite"></p>
+
+    <canvas class="radar" id="radar" width="150" height="150" aria-label="Radar"></canvas>
 
     <div class="tutorial" id="tutorial" hidden>
       <h2>Fly the A-10</h2>
@@ -89,6 +92,52 @@
         <p class="hint">Drag: hold above the middle to climb, left of it to turn left. Joystick: a pad in the lower left.</p>
       </div>
       <button class="wide" id="restart" type="button">New flight</button>
+    </details>
+
+    <details class="group" open>
+      <summary>🛡️ Safety and reload</summary>
+      <div class="setting">
+        <label>Safe flight</label>
+        <div class="seg" data-key="safeFlight">
+          <button type="button" data-v="1">On</button>
+          <button type="button" data-v="0">Off</button>
+        </div>
+        <p class="hint">On: a floor above the ground. Near it the plane levels out and pulls up, so it cannot crash.</p>
+      </div>
+      <div class="setting">
+        <label>Invincible</label>
+        <div class="seg" data-key="invincible">
+          <button type="button" data-v="1">On</button>
+          <button type="button" data-v="0">Off</button>
+        </div>
+        <p class="hint">On: shells and missiles do no harm, and a crash only bounces the plane.</p>
+      </div>
+      <div class="setting">
+        <label>Missile reload</label>
+        <div class="seg" data-key="autoReload">
+          <button type="button" data-v="1">Automatic</button>
+          <button type="button" data-v="0">Off</button>
+        </div>
+        <p class="hint">Automatic: a missile comes back every few seconds, up to six. Off: six missiles, then none.</p>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>☁️ Family database</summary>
+      <div class="setting">
+        <div id="familyIn">
+          <label for="familyEmail">Family email</label>
+          <input class="field" id="familyEmail" type="email" autocomplete="username" placeholder="email">
+          <label for="familyPassword">Password</label>
+          <input class="field" id="familyPassword" type="password" autocomplete="current-password" placeholder="password">
+          <button class="wide" id="familySignIn" type="button">Sign in</button>
+        </div>
+        <div id="familyOut" hidden>
+          <button class="wide" id="familySignOut" type="button">Sign out</button>
+        </div>
+        <button class="wide" id="familyCheck" type="button">Check database</button>
+        <p class="hint" id="familyStatus" role="status"></p>
+      </div>
     </details>
 
     <details class="group" open>

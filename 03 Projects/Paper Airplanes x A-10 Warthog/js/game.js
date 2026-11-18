@@ -37,7 +37,8 @@ var PA;
 // Sprites are painted in code. Each one is a short list of little rectangles
 // (a "painter"). The builder draws the shapes once in ink, shifted one pixel in
 // each direction, which makes the dark outline, then draws the colours on top.
-// No image files are loaded anywhere in the game.
+// The painters live in src/assets/ (one file per family of things). No image
+// files are loaded anywhere in the game.
 var PA;
 (function (PA) {
     class Painter {
@@ -55,6 +56,8 @@ var PA;
         }
     }
     PA.Painter = Painter;
+    // Every sprite by name. The asset files add their painters here.
+    PA.PAINT = {};
     function buildSprite(paint) {
         const g = new Painter();
         paint(g);
@@ -89,68 +92,174 @@ var PA;
     function sprite(name) {
         if (cache[name])
             return cache[name];
-        let s;
-        if (name === 'plane') {
-            // A-10 Warthog seen from behind: wide wing, twin tails, the cockpit up top, two engines.
-            s = buildSprite(g => {
-                g.r(0, 7, 22, 2, '#c8cfd6') // wing
-                    .r(0, 8, 3, 1, '#6b7480').r(19, 8, 3, 1, '#6b7480') // wing tips
-                    .r(9, 2, 4, 9, '#c8cfd6') // fuselage
-                    .r(9, 2, 1, 9, '#f5fbff') // light side
-                    .r(10, 1, 2, 2, '#8fd3f0') // canopy
-                    .r(5, 1, 2, 7, '#c8cfd6').r(15, 1, 2, 7, '#c8cfd6') // twin tails
-                    .r(5, 0, 2, 1, '#6b7480').r(15, 0, 2, 1, '#6b7480')
-                    .r(7, 9, 2, 3, '#6b7480').r(13, 9, 2, 3, '#6b7480') // engines
-                    .r(7, 12, 2, 1, '#ffb02e').r(13, 12, 2, 1, '#ffb02e'); // exhaust glow
-            });
-        }
-        else if (name === 'glider') {
-            // Classic paper dart seen from behind: a flat sheet with a folded nose.
-            s = buildSprite(g => {
-                g.r(0, 6, 20, 2, '#fffdfa') // wings
-                    .r(0, 6, 20, 1, '#f5fbff')
-                    .r(9, 2, 2, 9, '#fffdfa') // fold line
-                    .p(10, 1, '#fffdfa')
-                    .r(0, 8, 20, 1, '#d6d0f0'); // shaded underside
-            });
-        }
-        else if (name === 'pilot') {
-            // A pilot under a parachute canopy.
-            s = buildSprite(g => {
-                g.r(1, 0, 9, 3, '#ffb3a7') // canopy
-                    .r(1, 0, 9, 1, '#ff9e8a')
-                    .p(2, 3, '#6b7480').p(8, 3, '#6b7480') // lines
-                    .r(4, 4, 3, 3, '#f5d7b0') // head and body
-                    .r(4, 7, 3, 2, '#3d8bff');
-            });
-        }
-        else if (name === 'tank') {
-            s = buildSprite(g => {
-                g.r(0, 5, 15, 2, '#6b7480') // tracks
-                    .p(2, 6, '#f5fbff').p(6, 6, '#f5fbff').p(10, 6, '#f5fbff')
-                    .r(1, 3, 12, 3, '#a9b67e') // hull
-                    .r(4, 1, 6, 2, '#a9b67e') // turret
-                    .r(9, 1, 6, 1, '#6b7480'); // gun
-            });
-        }
-        else if (name === 'truck') {
-            s = buildSprite(g => {
-                g.r(0, 1, 9, 4, '#e6c48a') // cargo
-                    .r(9, 2, 5, 3, '#e6c48a') // cab
-                    .p(11, 3, '#8fd3f0') // window
-                    .r(2, 5, 2, 2, '#6b7480').r(10, 5, 2, 2, '#6b7480'); // wheels
-            });
-        }
-        else {
-            s = buildSprite(g => {
-                g.r(0, 5, 6, 3, '#e89a9a') // mount
-                    .r(1, 0, 1, 6, '#6b7480').r(3, 0, 1, 6, '#6b7480'); // twin barrels
-            });
-        }
+        const paint = PA.PAINT[name];
+        if (!paint)
+            throw new Error('no sprite named ' + name);
+        const s = buildSprite(paint);
         cache[name] = s;
         return s;
     }
     PA.sprite = sprite;
+})(PA || (PA = {}));
+// Aircraft: the player's plane, the paper glider, the pilot under a parachute, and parked jets.
+var PA;
+(function (PA) {
+    PA.PAINT['plane'] = g => {
+        // A-10 Warthog seen from behind: wide wing, twin tails, the cockpit up top, two engines.
+        g.r(0, 7, 22, 2, '#c8cfd6') // wing
+            .r(0, 8, 3, 1, '#6b7480').r(19, 8, 3, 1, '#6b7480') // wing tips
+            .r(9, 2, 4, 9, '#c8cfd6') // fuselage
+            .r(9, 2, 1, 9, '#f5fbff') // light side
+            .r(10, 1, 2, 2, '#8fd3f0') // canopy
+            .r(5, 1, 2, 7, '#c8cfd6').r(15, 1, 2, 7, '#c8cfd6') // twin tails
+            .r(5, 0, 2, 1, '#6b7480').r(15, 0, 2, 1, '#6b7480')
+            .r(7, 9, 2, 3, '#6b7480').r(13, 9, 2, 3, '#6b7480') // engines
+            .r(7, 12, 2, 1, '#ffb02e').r(13, 12, 2, 1, '#ffb02e'); // exhaust glow
+    };
+    PA.PAINT['glider'] = g => {
+        // Classic paper dart seen from behind: a flat sheet with a folded nose.
+        g.r(0, 6, 20, 2, '#fffdfa')
+            .r(0, 6, 20, 1, '#f5fbff')
+            .r(9, 2, 2, 9, '#fffdfa')
+            .p(10, 1, '#fffdfa')
+            .r(0, 8, 20, 1, '#d6d0f0');
+    };
+    PA.PAINT['pilot'] = g => {
+        // A pilot under a parachute canopy.
+        g.r(1, 0, 9, 3, '#ffb3a7')
+            .r(1, 0, 9, 1, '#ff9e8a')
+            .p(2, 3, '#6b7480').p(8, 3, '#6b7480')
+            .r(4, 4, 3, 3, '#f5d7b0')
+            .r(4, 7, 3, 2, '#3d8bff');
+    };
+    // A parked fighter on the airfield, seen from the side and slightly from above.
+    PA.PAINT['jet'] = g => {
+        g.r(0, 4, 16, 2, '#e8eef2')
+            .r(12, 2, 3, 2, '#e8eef2')
+            .r(6, 5, 5, 2, '#b9c0c8')
+            .r(3, 1, 2, 3, '#8fd3f0')
+            .r(4, 6, 2, 1, '#6b7480')
+            .r(14, 3, 2, 1, '#6b7480');
+    };
+})(PA || (PA = {}));
+// Ground vehicles and guns: tanks, armoured carriers, trucks, a fuel tanker, a SAM launcher, flak.
+var PA;
+(function (PA) {
+    // Main battle tank, side view, facing right.
+    PA.PAINT['tank_mbt'] = g => {
+        g.r(0, 8, 20, 2, '#4d5560') // tracks
+            .p(2, 9, '#f5fbff').p(6, 9, '#f5fbff').p(10, 9, '#f5fbff').p(14, 9, '#f5fbff')
+            .r(1, 5, 18, 3, '#8a9470') // hull
+            .r(6, 2, 8, 3, '#9aa77a') // turret
+            .p(9, 1, '#9aa77a') // hatch
+            .r(13, 3, 9, 1, '#4d5560'); // long gun
+    };
+    // Light tank or scout vehicle.
+    PA.PAINT['tank_light'] = g => {
+        g.r(0, 6, 14, 2, '#4d5560')
+            .p(2, 7, '#f5fbff').p(8, 7, '#f5fbff')
+            .r(1, 3, 12, 3, '#b9c79a')
+            .r(4, 1, 5, 2, '#c9d4a8')
+            .r(8, 2, 5, 1, '#4d5560');
+    };
+    // Armoured personnel carrier: a boxy hull with wheels.
+    PA.PAINT['apc'] = g => {
+        g.r(0, 6, 16, 2, '#4d5560')
+            .p(2, 7, '#f5fbff').p(12, 7, '#f5fbff')
+            .r(0, 2, 16, 4, '#9aa77a')
+            .r(2, 1, 5, 1, '#9aa77a')
+            .r(10, 3, 3, 1, '#8fd3f0');
+    };
+    // Cargo truck, facing right.
+    PA.PAINT['truck'] = g => {
+        g.r(0, 1, 9, 4, '#e6c48a')
+            .r(9, 2, 5, 3, '#e6c48a')
+            .p(11, 3, '#8fd3f0')
+            .r(2, 5, 2, 2, '#6b7480').r(10, 5, 2, 2, '#6b7480');
+    };
+    // Fuel tanker: a cab and a red tank trailer.
+    PA.PAINT['fuel'] = g => {
+        g.r(0, 3, 4, 4, '#e6c48a')
+            .p(2, 4, '#8fd3f0')
+            .r(4, 3, 12, 4, '#f5fbff')
+            .r(4, 5, 12, 1, '#ff6b6b')
+            .r(2, 6, 2, 2, '#6b7480').r(9, 6, 2, 2, '#6b7480').r(14, 6, 2, 2, '#6b7480');
+    };
+    // Surface-to-air missile launcher with a radar dish and four tubes.
+    PA.PAINT['sam'] = g => {
+        g.r(0, 9, 22, 3, '#8a9470') // carrier
+            .r(2, 10, 3, 2, '#4d5560').r(15, 10, 3, 2, '#4d5560') // wheels
+            .r(4, 5, 10, 4, '#b9c79a') // launcher body
+            .p(5, 4, '#f5fbff').p(8, 4, '#f5fbff').p(11, 4, '#f5fbff').p(14, 4, '#f5fbff')
+            .r(16, 1, 1, 8, '#4d5560') // radar mast
+            .r(13, 0, 7, 2, '#f5fbff'); // dish
+    };
+    // Anti-aircraft gun on a mount.
+    PA.PAINT['flak'] = g => {
+        g.r(0, 5, 6, 3, '#e89a9a')
+            .r(1, 0, 1, 6, '#6b7480').r(3, 0, 1, 6, '#6b7480');
+    };
+})(PA || (PA = {}));
+// Buildings: farm houses and barns, town houses, city towers, barracks and a hangar.
+var PA;
+(function (PA) {
+    // A farm house with a red roof, a door and a window.
+    PA.PAINT['farm'] = g => {
+        g.r(2, 7, 12, 6, '#f5d7b0')
+            .r(3, 5, 10, 2, '#c85b4a')
+            .r(4, 3, 8, 2, '#c85b4a')
+            .r(5, 1, 6, 2, '#c85b4a')
+            .r(7, 10, 2, 3, '#6b4a3a')
+            .p(4, 8, '#8fd3f0');
+    };
+    // A barn: tall red walls with a grey roof.
+    PA.PAINT['barn'] = g => {
+        g.r(0, 6, 18, 7, '#c85b4a')
+            .r(1, 3, 16, 3, '#6b7480')
+            .r(2, 1, 14, 2, '#6b7480')
+            .r(7, 8, 4, 5, '#f5d7b0');
+    };
+    // A city tower block with a grid of lit windows.
+    PA.PAINT['city'] = g => {
+        g.r(2, 2, 10, 20, '#c9d2dc')
+            .r(2, 2, 2, 20, '#b0bcc8');
+        for (let y = 4; y < 20; y += 3) {
+            for (let x = 5; x < 11; x += 3)
+                g.p(x, y, '#8fd3f0');
+        }
+    };
+    // Army barracks: a long low building with a door row.
+    PA.PAINT['barracks'] = g => {
+        g.r(0, 4, 22, 6, '#8a9470')
+            .r(0, 3, 22, 1, '#6b7480')
+            .r(2, 6, 3, 2, '#4d5560').r(9, 6, 3, 2, '#4d5560').r(16, 6, 3, 2, '#4d5560')
+            .p(5, 5, '#f5fbff').p(12, 5, '#f5fbff');
+    };
+    // Aircraft hangar: a curved roof over a large door.
+    PA.PAINT['hangar'] = g => {
+        g.r(0, 6, 24, 6, '#b9c0c8')
+            .r(2, 4, 20, 2, '#b9c0c8')
+            .r(5, 2, 14, 2, '#b9c0c8')
+            .r(7, 7, 10, 5, '#6b7480');
+    };
+})(PA || (PA = {}));
+// Ships on the sea and railway cars on the track.
+var PA;
+(function (PA) {
+    // A warship seen from the side: a grey hull, a bridge and a mast.
+    PA.PAINT['ship'] = g => {
+        g.r(0, 6, 26, 3, '#6b7480')
+            .r(1, 5, 24, 1, '#8a9470')
+            .r(16, 2, 6, 4, '#f5fbff')
+            .p(18, 3, '#8fd3f0').p(20, 3, '#8fd3f0')
+            .r(19, 0, 1, 2, '#4d5560');
+    };
+    // A railway wagon.
+    PA.PAINT['rail'] = g => {
+        g.r(0, 2, 12, 4, '#8a6a4a')
+            .r(0, 1, 12, 1, '#6b4a3a')
+            .r(2, 6, 2, 2, '#4d5560').r(8, 6, 2, 2, '#4d5560');
+    };
 })(PA || (PA = {}));
 // The four forces, in plain numbers. No drawing here, so it can be tested in Node.
 //
@@ -265,7 +374,7 @@ var PA;
         return Math.max(0, Math.min(1, v));
     }
 })(PA || (PA = {}));
-// The land, the targets and the glider rings. Same seed, same start.
+// The land and the sea, and what is on them. Same seed, same start.
 var PA;
 (function (PA) {
     // A seeded random number generator (mulberry32). Returns 0 up to 1.
@@ -280,27 +389,107 @@ var PA;
         };
     }
     PA.random = random;
-    // Height of the ground in metres at ground position (X, Z).
+    PA.SEA_X = 1300; // east of this is the sea
+    // Height of the ground in metres at ground position (X, Z). The sea is at zero.
     function groundAt(X, Z) {
+        if (X > PA.SEA_X)
+            return 0;
         return Math.max(0, 4 + 3.5 * Math.sin(X / 210) + 1.5 * Math.sin(Z / 61 + 2));
     }
     PA.groundAt = groundAt;
-    // Ground size of each target (radius to hit, height), in metres.
-    PA.SIZE = {
-        tank: { r: 2.6, height: 2.6 },
-        truck: { r: 2.2, height: 2.6 },
-        flak: { r: 2.0, height: 3.0 },
+    function isSea(X) {
+        return X > PA.SEA_X;
+    }
+    PA.isSea = isSea;
+    // What the ground looks like: farm fields, town, army land, or the sea.
+    function biomeAt(X, Z) {
+        if (X > PA.SEA_X)
+            return 'sea';
+        const cell = Math.floor((X + 900) / 320) + Math.floor(Z / 260) * 3;
+        const k = ((cell % 4) + 4) % 4;
+        if (k === 0)
+            return 'farm';
+        if (k === 1)
+            return 'town';
+        return 'army';
+    }
+    PA.biomeAt = biomeAt;
+    PA.KINDS = {
+        tank_mbt: { r: 2.6, height: 2.6, hp: 2, points: 100, group: 'army' },
+        tank_light: { r: 2.2, height: 2.0, hp: 1, points: 60, group: 'army' },
+        apc: { r: 2.4, height: 2.2, hp: 1, points: 50, group: 'army' },
+        truck: { r: 2.0, height: 2.6, hp: 1, points: 40, group: 'farm' },
+        fuel: { r: 2.6, height: 2.6, hp: 1, points: 60, group: 'airfield' },
+        sam: { r: 3.0, height: 3.5, hp: 2, points: 150, group: 'army', gun: { range: 520, cool: 4, speed: 150 } },
+        flak: { r: 2.0, height: 3.0, hp: 1, points: 80, group: 'army', gun: { range: 260, cool: 2, speed: 120 } },
+        farm: { r: 4.0, height: 4.0, hp: 1, points: 30, group: 'farm' },
+        barn: { r: 4.0, height: 3.5, hp: 1, points: 40, group: 'farm' },
+        city: { r: 3.0, height: 12, hp: 3, points: 120, group: 'town' },
+        barracks: { r: 5.0, height: 3.0, hp: 2, points: 120, group: 'army' },
+        hangar: { r: 6.0, height: 5.0, hp: 3, points: 200, group: 'airfield' },
+        jet: { r: 3.0, height: 2.5, hp: 1, points: 150, group: 'airfield' },
+        ship: { r: 6.0, height: 3.0, hp: 4, points: 250, group: 'port' },
+        rail: { r: 2.5, height: 2.5, hp: 1, points: 40, group: 'rail' },
     };
-    // A group of ground targets in front of (baseZ). Every third one has an anti-aircraft gun.
+    function target(kind, X, Z, rand) {
+        const info = PA.KINDS[kind];
+        return {
+            kind, X, Z, alive: true, points: info.points, hp: info.hp,
+            cool: info.gun ? 1 + rand() * info.gun.cool : 0,
+        };
+    }
+    // Clusters of things in front of baseZ. Each cluster is one kind of place.
     function spawnTargets(rand, baseZ, count) {
         const out = [];
         for (let i = 0; i < count; i++) {
-            const X = (rand() - 0.5) * 260;
-            const Z = baseZ + i * 110 + rand() * 60;
-            const kind = rand() < 0.6 ? 'tank' : 'truck';
-            out.push({ kind, X, Z, alive: true, points: kind === 'tank' ? 100 : 60, cool: 0 });
-            if (i % 3 === 0) {
-                out.push({ kind: 'flak', X: X + 8, Z: Z + 8, alive: true, points: 80, cool: 1 + rand() * 1.5 });
+            const Z = baseZ + i * 120 + rand() * 60;
+            const roll = rand();
+            const landX = (rand() - 0.5) * 900;
+            if (roll < 0.32) {
+                // Army: tanks, carriers, a SAM site or a flak gun.
+                const X = landX;
+                out.push(target('tank_mbt', X, Z, rand));
+                out.push(target(rand() < 0.5 ? 'tank_light' : 'apc', X + 9, Z + 4, rand));
+                if (rand() < 0.5)
+                    out.push(target('sam', X - 10, Z + 10, rand));
+                else
+                    out.push(target('flak', X + 14, Z - 6, rand));
+            }
+            else if (roll < 0.5) {
+                // Farm: houses, barns and a lorry.
+                const X = landX;
+                out.push(target('farm', X, Z, rand));
+                out.push(target('barn', X + 12, Z + 9, rand));
+                out.push(target('truck', X - 8, Z + 6, rand));
+            }
+            else if (roll < 0.66) {
+                // Town: towers, barracks and a SAM site.
+                const X = landX;
+                out.push(target('city', X, Z, rand));
+                out.push(target('city', X + 8, Z + 6, rand));
+                out.push(target('city', X - 7, Z + 9, rand));
+                out.push(target('sam', X + 14, Z - 4, rand));
+            }
+            else if (roll < 0.78) {
+                // Airfield: a hangar, parked jets and a fuel tanker.
+                const X = Math.min(PA.SEA_X - 120, landX);
+                out.push(target('hangar', X, Z, rand));
+                out.push(target('jet', X + 12, Z + 8, rand));
+                out.push(target('jet', X + 18, Z + 8, rand));
+                out.push(target('fuel', X - 10, Z + 10, rand));
+            }
+            else if (roll < 0.9) {
+                // Port: a ship on the sea, with a flak gun on the coast.
+                const X = PA.SEA_X + 80 + rand() * 300;
+                out.push(target('ship', X, Z, rand));
+                out.push(target('flak', PA.SEA_X - 30, Z, rand));
+            }
+            else {
+                // Railway: wagons on the line.
+                const X = -320;
+                out.push(target('rail', X, Z, rand));
+                out.push(target('rail', X, Z + 6, rand));
+                out.push(target('barracks', X + 40, Z + 12, rand));
             }
         }
         return out;
@@ -430,22 +619,112 @@ var PA;
     }
     PA.Sound = Sound;
 })(PA || (PA = {}));
-// Game state and rules: guns, anti-aircraft shells, rings, crashes and free play.
+// The family database sign-in (Supabase Auth). Browser code uses only the
+// publishable key. Email and password are sent to the sign-in endpoint and never kept.
 var PA;
 (function (PA) {
+    PA.FAMILY_URL = 'https://twvqvutrcobedvuhnzxq.supabase.co';
+    PA.FAMILY_KEY = 'sb_publishable_eqUo8HEdEB1hMQM4CpSVqA_9i6b0qCo';
+    const SESSION_KEY = 'pa_warthog.family';
+    function loadSession() {
+        try {
+            const raw = localStorage.getItem(SESSION_KEY);
+            return raw ? JSON.parse(raw) : null;
+        }
+        catch (e) {
+            return null;
+        }
+    }
+    PA.loadSession = loadSession;
+    function saveSession(s) {
+        try {
+            if (s)
+                localStorage.setItem(SESSION_KEY, JSON.stringify(s));
+            else
+                localStorage.removeItem(SESSION_KEY);
+        }
+        catch (e) {
+            // Not kept on this device: the user just signs in again next time.
+        }
+    }
+    // Sign in with the family email and password. Throws with a plain message on failure.
+    async function signIn(email, password) {
+        const res = await fetch(PA.FAMILY_URL + '/auth/v1/token?grant_type=password', {
+            method: 'POST',
+            headers: { apikey: PA.FAMILY_KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+        });
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok || !body.access_token) {
+            throw new Error(body.error_description || body.msg || 'Sign-in failed (' + res.status + ')');
+        }
+        const session = {
+            access: body.access_token,
+            refresh: body.refresh_token,
+            email,
+            expires: Math.floor(Date.now() / 1000) + (body.expires_in || 3600),
+        };
+        saveSession(session);
+        return session;
+    }
+    PA.signIn = signIn;
+    async function signOut() {
+        const s = loadSession();
+        saveSession(null);
+        if (!s)
+            return;
+        try {
+            await fetch(PA.FAMILY_URL + '/auth/v1/logout', {
+                method: 'POST',
+                headers: { apikey: PA.FAMILY_KEY, Authorization: 'Bearer ' + s.access },
+            });
+        }
+        catch (e) {
+            // Offline is fine: this device has already signed out.
+        }
+    }
+    PA.signOut = signOut;
+    // Asks the database whether the saved sign-in still works.
+    async function checkSession() {
+        const s = loadSession();
+        if (!s)
+            return { ok: false, message: 'Not signed in: this device only.' };
+        try {
+            const res = await fetch(PA.FAMILY_URL + '/auth/v1/user', {
+                headers: { apikey: PA.FAMILY_KEY, Authorization: 'Bearer ' + s.access },
+            });
+            if (res.ok)
+                return { ok: true, message: 'Signed in and the database answers.' };
+            return { ok: false, message: 'The database refused the sign-in (' + res.status + '). Sign in again.' };
+        }
+        catch (e) {
+            return { ok: false, message: 'The database could not be reached: ' + String(e) };
+        }
+    }
+    PA.checkSession = checkSession;
+})(PA || (PA = {}));
+// Game state and rules: guns and their aim, missiles and their stock, anti-aircraft
+// fire, rings, the safe-flight floor, invincibility, ejection and free play.
+var PA;
+(function (PA) {
+    PA.MISSILE_MAX = 6;
     const SHOT_SPEED = 260; // m/s, the gun, relative to the plane
-    const FLAK_SPEED = 120; // m/s
     const CRUISE_THROTTLE = 0.6;
     const BULLET_LIFE = 1.6;
     const SHELL_LIFE = 4;
     const RESPAWN_SECONDS = 3.5;
-    const MISSILE_COOL = 3; // seconds between missiles
+    const MISSILE_COOL = 1; // seconds between missiles
+    const MISSILE_RELOAD = 3; // seconds for one missile to come back (auto reload)
     const MISSILE_SPEED = 180; // m/s
     const MISSILE_TURN = 2.2; // radians per second at most
     const MISSILE_RANGE = 900; // metres
     const MISSILE_CONE = 0.45; // radians either side of the nose to lock on
     const PARACHUTE_FALL = 4; // m/s, the pilot's sink rate under the parachute
     const KEEP_AHEAD = 6; // free play keeps this many targets in front of the plane
+    const FLOOR = 30; // safe flight: below this height above ground the plane pulls up
+    const FLOOR_MIN = 8; // safe flight: below this it must not sink any further
+    const AIR_RANGE = 900; // the gun aims straight at aircraft within this range
+    const GROUND_RANGE = 700; // the gun depresses toward ground targets within this range
     class Game {
         constructor(settings) {
             this.settings = settings;
@@ -458,11 +737,15 @@ var PA;
             this.time = 0;
             this.fireCool = 0;
             this.respawnIn = 0;
+            this.missileStock = PA.MISSILE_MAX;
+            this.missileCool = 0;
+            this.reloadTimer = 0;
+            this.aim = { yaw: 0, pitch: 0, mode: 'straight' };
+            this.floorActive = false;
             this.shots = [];
             this.shells = [];
             this.missiles = [];
             this.jumpers = [];
-            this.missileCool = 0;
             this.puffs = [];
             this.held = { fire: false, boost: false, missile: false };
             this.axes = { yaw: 0, pitch: 0 };
@@ -489,12 +772,14 @@ var PA;
             this.time = 0;
             this.fireCool = 0;
             this.respawnIn = 0;
+            this.missileStock = PA.MISSILE_MAX;
+            this.missileCool = 0;
+            this.reloadTimer = 0;
             this.shots = [];
             this.shells = [];
-            this.puffs = [];
             this.missiles = [];
             this.jumpers = [];
-            this.missileCool = 0;
+            this.puffs = [];
         }
         update(dtIn) {
             const dt = Math.min(dtIn, 1 / 30);
@@ -515,32 +800,54 @@ var PA;
                 yaw: clamp(this.axes.yaw),
                 throttle: jet ? (this.held.boost ? 1 : CRUISE_THROTTLE) : 0,
             };
+            this.floorActive = false;
+            if (jet && this.settings.safeFlight === 1)
+                this.applyFloor(pilot);
             const touched = this.plane.step(dt, pilot, PA.groundAt);
             if (touched) {
-                if (jet) {
-                    this.crash();
-                }
-                else {
+                if (!jet) {
                     this.phase = 'landed';
                     this.onSound('land');
+                    return;
                 }
-                return;
+                if (this.settings.invincible === 1) {
+                    // Invincible: the ground only bounces the plane back up.
+                    this.plane.h = PA.groundAt(this.plane.X, this.plane.Z) + 4;
+                    this.plane.vy = Math.max(this.plane.vy, 6);
+                }
+                else {
+                    this.crash();
+                    return;
+                }
             }
             if (jet) {
+                this.updateReload(dt);
                 this.updateGuns(dt);
                 this.updateMissiles(dt);
                 this.updateShots(dt);
                 this.updateShells(dt);
-                this.updateFlak(dt);
+                this.updateGunners(dt);
                 this.keepTargets();
-                if (this.hull <= 0)
+                if (this.hull <= 0 && this.settings.invincible !== 1)
                     this.crash();
             }
             else {
                 this.checkRings();
             }
         }
-        // Ejection: the explosion, then the pilot drifts down on a parachute.
+        // Safe flight: a floor above the ground. Near it the plane levels out and pulls up;
+        // very close, it cannot sink any further.
+        applyFloor(pilot) {
+            const p = this.plane;
+            const agl = p.h - PA.groundAt(p.X, p.Z);
+            if (agl < FLOOR && p.vy < 0) {
+                this.floorActive = true;
+                const strength = Math.min(1, (FLOOR - agl) / (FLOOR - FLOOR_MIN));
+                pilot.pitch = Math.max(pilot.pitch, 0.35 + 0.65 * strength);
+                if (agl < FLOOR_MIN)
+                    p.vy = Math.max(p.vy, 0);
+            }
+        }
         crash() {
             this.phase = 'crashed';
             this.hull = 0;
@@ -551,7 +858,6 @@ var PA;
         }
         updateJumpers(dt) {
             for (const j of this.jumpers) {
-                // Free fall for a moment, then the parachute slows the sink to a steady drift.
                 j.vY = j.vY > -PARACHUTE_FALL ? Math.max(-PARACHUTE_FALL, j.vY - PA.GRAVITY * dt) : -PARACHUTE_FALL;
                 j.h = Math.max(PA.groundAt(j.X, j.Z), j.h + j.vY * dt);
                 j.X += j.drift * dt * 0.2;
@@ -559,14 +865,27 @@ var PA;
             }
             this.jumpers = this.jumpers.filter(j => j.life > 0);
         }
+        // Reload: with auto reload on, one missile comes back every few seconds, up to the maximum.
+        updateReload(dt) {
+            if (this.settings.autoReload !== 1 || this.missileStock >= PA.MISSILE_MAX) {
+                this.reloadTimer = 0;
+                return;
+            }
+            this.reloadTimer += dt;
+            if (this.reloadTimer >= MISSILE_RELOAD) {
+                this.reloadTimer = 0;
+                this.missileStock++;
+            }
+        }
         // The missile locks on to the nearest target in front, and turns to follow it.
         updateMissiles(dt) {
             this.missileCool -= dt;
             const p = this.plane;
-            if (this.held.missile && this.missileCool <= 0) {
+            if (this.held.missile && this.missileCool <= 0 && this.missileStock > 0) {
                 const target = this.findLock();
                 if (target) {
                     this.missileCool = MISSILE_COOL;
+                    this.missileStock--;
                     const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
                     this.missiles.push({
                         X: p.X + sinY * 3, Z: p.Z + cosY * 3, h: p.h,
@@ -579,15 +898,15 @@ var PA;
             const keep = [];
             for (const m of this.missiles) {
                 m.life -= dt;
-                if (m.target && m.target.alive) {
-                    const tx = m.target.X, tz = m.target.Z, th = PA.groundAt(tx, tz) + 1;
-                    const dx = tx - m.X, dy = th - m.h, dz = tz - m.Z;
+                const target = m.target;
+                if (target && target.alive) {
+                    const tg = PA.groundAt(target.X, target.Z) + 1;
+                    const dx = target.X - m.X, dy = tg - m.h, dz = target.Z - m.Z;
                     const d = Math.hypot(dx, dy, dz) || 1;
                     const sp = Math.hypot(m.vX, m.vY, m.vZ) || MISSILE_SPEED;
                     const want = [dx / d * sp, dy / d * sp, dz / d * sp];
                     const cur = [m.vX, m.vY, m.vZ];
                     const step = MISSILE_TURN * dt * sp;
-                    // Turn the velocity toward the target, by at most the turn rate.
                     const diff = [want[0] - cur[0], want[1] - cur[1], want[2] - cur[2]];
                     const dl = Math.hypot(diff[0], diff[1], diff[2]) || 1;
                     const k = Math.min(1, step / dl);
@@ -598,17 +917,12 @@ var PA;
                 m.X += m.vX * dt;
                 m.Z += m.vZ * dt;
                 m.h += m.vY * dt;
-                const target = m.target;
                 if (target && target.alive) {
-                    const size = PA.SIZE[target.kind];
+                    const info = PA.KINDS[target.kind];
                     const tg = PA.groundAt(target.X, target.Z);
                     const dx = m.X - target.X, dz = m.Z - target.Z;
-                    if (dx * dx + dz * dz < size.r * size.r * 2.2 && m.h <= tg + size.height + 2 && m.h >= tg - 1) {
-                        target.alive = false;
-                        this.kills++;
-                        this.score += target.points;
-                        this.explode(target.X, tg + 1, target.Z, 22);
-                        this.onSound('boom');
+                    if (dx * dx + dz * dz < info.r * info.r * 2.2 && m.h <= tg + info.height + 2 && m.h >= tg - 1) {
+                        this.hitTarget(target, 2, tg);
                         continue;
                     }
                 }
@@ -643,47 +957,71 @@ var PA;
             }
             return best;
         }
-        // Free play: when the ground targets run low, more appear ahead of the plane.
-        keepTargets() {
-            const m = this.mission;
-            m.targets = m.targets.filter(t => t.alive || t.Z > this.plane.Z - 150);
-            const left = m.targets.filter(t => t.alive && t.kind !== 'flak').length;
-            if (left < KEEP_AHEAD) {
-                m.targets.push(...PA.spawnTargets(this.rand, this.plane.Z + 240, 6));
-            }
-        }
-        checkRings() {
-            for (const ring of this.mission.hoops) {
-                if (ring.passed)
+        // The gun aims straight when there are aircraft about, and points down toward a
+        // ground target (with a declination for the bullet's drop) when one is in front.
+        computeAim() {
+            const p = this.plane;
+            const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
+            let airborne = false;
+            let best = null;
+            let bestD = GROUND_RANGE;
+            for (const t of this.mission.targets) {
+                if (!t.alive)
                     continue;
-                const dx = this.plane.X - ring.X, dz = this.plane.Z - ring.Z, dh = this.plane.h - ring.h;
-                if (dx * dx + dz * dz + dh * dh < ring.r * ring.r) {
-                    ring.passed = true;
-                    this.hoopsPassed++;
-                    this.score += 100;
-                    this.onSound('chime');
+                const dx = t.X - p.X, dz = t.Z - p.Z;
+                const d = Math.hypot(dx, dz);
+                if (d < 1 || (dx * sinY + dz * cosY) <= 0)
+                    continue;
+                if (t.kind === 'jet' && d < AIR_RANGE)
+                    airborne = true;
+                if (t.kind !== 'jet' && d < bestD) {
+                    best = t;
+                    bestD = d;
                 }
             }
+            if (airborne || !best)
+                return { yaw: p.yaw, pitch: 0, mode: airborne ? 'air' : 'straight' };
+            const tg = PA.groundAt(best.X, best.Z) + 1;
+            const dh = tg - p.h;
+            const dd = Math.hypot(best.X - p.X, best.Z - p.Z);
+            // Angle down to the target, plus the bullet's drop over the flight time.
+            const flight = dd / SHOT_SPEED;
+            const drop = 0.5 * PA.GRAVITY * flight * flight;
+            const pitch = Math.atan2(dh + drop, dd);
+            return { yaw: Math.atan2(best.X - p.X, best.Z - p.Z), pitch, mode: 'ground' };
         }
         updateGuns(dt) {
             this.fireCool -= dt;
+            this.aim = this.computeAim();
             if (!this.held.fire || this.fireCool > 0)
                 return;
             this.fireCool = 0.09;
             const p = this.plane;
-            const cosP = Math.cos(p.pitch), sinP = Math.sin(p.pitch);
-            const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
-            const hv = p.vx; // forward speed, horizontal part of the plane's motion
+            const cosP = Math.cos(this.aim.pitch), sinP = Math.sin(this.aim.pitch);
+            const sinY = Math.sin(this.aim.yaw), cosY = Math.cos(this.aim.yaw);
             this.shots.push({
                 X: p.X + sinY * cosP * 2,
                 Z: p.Z + cosY * cosP * 2,
                 h: p.h + sinP * 2,
-                vX: hv * sinY + SHOT_SPEED * cosP * sinY,
-                vZ: hv * cosY + SHOT_SPEED * cosP * cosY,
+                vX: p.vx * sinY + SHOT_SPEED * cosP * sinY,
+                vZ: p.vx * cosY + SHOT_SPEED * cosP * cosY,
                 vY: p.vy + SHOT_SPEED * sinP,
                 life: BULLET_LIFE,
             });
             this.onSound('gun');
+        }
+        hitTarget(t, damage, tg) {
+            t.hp -= damage;
+            if (t.hp > 0) {
+                this.explode(t.X, tg + 1, t.Z, 4);
+                this.onSound('thud');
+                return;
+            }
+            t.alive = false;
+            this.kills++;
+            this.score += t.points;
+            this.explode(t.X, tg + 1, t.Z, PA.KINDS[t.kind].height > 5 ? 26 : 16);
+            this.onSound('boom');
         }
         updateShots(dt) {
             const keep = [];
@@ -703,15 +1041,11 @@ var PA;
                 for (const t of this.mission.targets) {
                     if (!t.alive)
                         continue;
-                    const size = PA.SIZE[t.kind];
+                    const info = PA.KINDS[t.kind];
                     const dx = s.X - t.X, dz = s.Z - t.Z;
                     const tg = PA.groundAt(t.X, t.Z);
-                    if (dx * dx + dz * dz < size.r * size.r && s.h >= tg && s.h <= tg + size.height) {
-                        t.alive = false;
-                        this.kills++;
-                        this.score += t.points;
-                        this.explode(t.X, tg + 1, t.Z, t.kind === 'flak' ? 10 : 16);
-                        this.onSound('boom');
+                    if (dx * dx + dz * dz < info.r * info.r && s.h >= tg && s.h <= tg + info.height) {
+                        this.hitTarget(t, 1, tg);
                         hit = true;
                         break;
                     }
@@ -721,19 +1055,20 @@ var PA;
             }
             this.shots = keep;
         }
-        updateFlak(dt) {
+        // Anti-aircraft guns and SAM sites: each one aims at where the plane will be.
+        updateGunners(dt) {
             const p = this.plane;
             for (const t of this.mission.targets) {
-                if (t.kind !== 'flak' || !t.alive)
+                const gun = PA.KINDS[t.kind].gun;
+                if (!gun || !t.alive)
                     continue;
                 t.cool -= dt;
                 const dist = Math.hypot(p.X - t.X, p.Z - t.Z);
-                if (t.cool > 0 || dist > 260 || p.h > 120)
+                if (t.cool > 0 || dist > gun.range || p.h > gun.range * 0.5)
                     continue;
-                t.cool = 1.6 + this.rand() * 1.2;
-                // Aim where the plane will be, with gravity allowed for.
+                t.cool = gun.cool * (0.7 + this.rand() * 0.6);
                 const gy = PA.groundAt(t.X, t.Z) + 2;
-                const T = Math.max(0.4, Math.hypot(dist, p.h - gy) / FLAK_SPEED);
+                const T = Math.max(0.4, Math.hypot(dist, p.h - gy) / gun.speed);
                 const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
                 const aimX = p.X + p.vx * sinY * T;
                 const aimZ = p.Z + p.vx * cosY * T;
@@ -744,6 +1079,7 @@ var PA;
                     vZ: (aimZ - t.Z) / T,
                     vY: (aimY - gy) / T + 0.5 * PA.GRAVITY * T,
                     life: SHELL_LIFE,
+                    // The shell's own flight is in the same shape as a bullet
                 });
                 this.onSound('thud');
             }
@@ -761,7 +1097,8 @@ var PA;
                     continue;
                 const dx = s.X - p.X, dz = s.Z - p.Z, dh = s.h - p.h;
                 if (dx * dx + dz * dz + dh * dh < 9) {
-                    this.hull = Math.max(0, this.hull - 12);
+                    if (this.settings.invincible !== 1)
+                        this.hull = Math.max(0, this.hull - 12);
                     this.explode(s.X, s.h, s.Z, 6);
                     this.onSound('thud');
                     continue;
@@ -769,6 +1106,28 @@ var PA;
                 keep.push(s);
             }
             this.shells = keep;
+        }
+        // Free play: when the ground targets run low, more appear ahead of the plane.
+        keepTargets() {
+            const m = this.mission;
+            m.targets = m.targets.filter(t => t.alive || t.Z > this.plane.Z - 150);
+            const left = m.targets.filter(t => t.alive).length;
+            if (left < KEEP_AHEAD) {
+                m.targets.push(...PA.spawnTargets(this.rand, this.plane.Z + 240, 6));
+            }
+        }
+        checkRings() {
+            for (const ring of this.mission.hoops) {
+                if (ring.passed)
+                    continue;
+                const dx = this.plane.X - ring.X, dz = this.plane.Z - ring.Z, dh = this.plane.h - ring.h;
+                if (dx * dx + dz * dz + dh * dh < ring.r * ring.r) {
+                    ring.passed = true;
+                    this.hoopsPassed++;
+                    this.score += 100;
+                    this.onSound('chime');
+                }
+            }
         }
         explode(X, h, Z, n) {
             const colors = ['#ffb02e', '#ff9e8a', '#ffe08a', '#ffd9c7'];
@@ -905,7 +1264,12 @@ var PA;
                 if (!ok)
                     continue;
                 const depth = (corners[0][2] + corners[2][2]) / 2;
-                const base = ((i + j) & 1) === 0 ? PA.COL.ground : PA.COL.groundDark;
+                const biome = PA.biomeAt((i + 0.5) * CELL, (j + 0.5) * CELL);
+                const light = ((i + j) & 1) === 0;
+                const base = biome === 'sea' ? (light ? '#9fd3ea' : '#8cc6e2')
+                    : biome === 'farm' ? (light ? '#cfe3a2' : '#e6d9a0')
+                        : biome === 'town' ? (light ? '#cfd3d8' : '#bcc2c9')
+                            : (light ? PA.COL.ground : PA.COL.groundDark);
                 cells.push({
                     pts: corners.map(p => [p[0], p[1]]),
                     depth,
@@ -1132,12 +1496,91 @@ var PA;
         ctx.stroke();
     }
 })(PA || (PA = {}));
+// The radar: a circle centred on the plane, turned to the heading. Each dot is a
+// thing in the world, coloured by what it is. Range rings at 400, 800 and 1200 m.
+var PA;
+(function (PA) {
+    const RANGE = 1200;
+    const DOT = {
+        army: '#ff6b6b',
+        farm: '#b9dea6',
+        town: '#8fd3f0',
+        airfield: '#b48cf0',
+        port: '#3d8bff',
+        rail: '#8a6a4a',
+    };
+    function radar(ctx, g, size) {
+        const c = size / 2, R = size / 2 - 3;
+        ctx.clearRect(0, 0, size, size);
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(c, c, R, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,253,247,0.92)';
+        ctx.fill();
+        ctx.clip();
+        ctx.strokeStyle = 'rgba(47,45,61,0.25)';
+        ctx.lineWidth = 1;
+        for (const r of [400, 800, 1200]) {
+            ctx.beginPath();
+            ctx.arc(c, c, (r / RANGE) * R, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+        const p = g.plane;
+        const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
+        const place = (X, Z) => {
+            const dx = X - p.X, dz = Z - p.Z;
+            const f = dx * sinY + dz * cosY; // ahead
+            const r = dx * cosY - dz * sinY; // to the right
+            if (Math.hypot(f, r) > RANGE)
+                return null;
+            return [c + (r / RANGE) * R, c - (f / RANGE) * R];
+        };
+        for (const t of g.mission.targets) {
+            if (!t.alive)
+                continue;
+            const q = place(t.X, t.Z);
+            if (!q)
+                continue;
+            const info = PA.KINDS[t.kind];
+            const gunner = info && info.gun;
+            ctx.fillStyle = gunner ? '#ffb02e' : DOT[info ? info.group : 'army'];
+            ctx.fillRect(Math.round(q[0]) - 2, Math.round(q[1]) - 2, 4, 4);
+        }
+        for (const h of g.mission.hoops) {
+            if (h.passed)
+                continue;
+            const q = place(h.X, h.Z);
+            if (q) {
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(Math.round(q[0]) - 1, Math.round(q[1]) - 1, 3, 3);
+            }
+        }
+        // The plane: a point at the centre, pointing up (the heading).
+        ctx.fillStyle = PA.INK;
+        ctx.beginPath();
+        ctx.moveTo(c, c - 7);
+        ctx.lineTo(c - 5, c + 5);
+        ctx.lineTo(c + 5, c + 5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+        ctx.strokeStyle = PA.INK;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(c, c, R, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+    PA.radar = radar;
+})(PA || (PA = {}));
 // Boot: the page, the controls (drag or joystick, action buttons), the fading
 // settings gear, the HUD, the settings drawer, opt-in errors, and the frame loop.
 var PA;
 (function (PA) {
     const SETTINGS_KEY = 'pa_warthog.settings';
-    const DEFAULTS = { mode: 'jet', control: 'drag', view: 'chase', sound: 1, forces: 0, showErrors: 0 };
+    const DEFAULTS = {
+        mode: 'jet', control: 'drag', view: 'chase', sound: 1, forces: 0,
+        safeFlight: 1, invincible: 0, autoReload: 1, showErrors: 0,
+    };
     const VIEW_ORDER = ['chase', 'top', 'cockpit'];
     const TUTORIAL_KEY = 'pa_warthog.tutorialSeen';
     const DEAD = 0.06; // a small dead zone around the centre
@@ -1418,7 +1861,12 @@ var PA;
         $('kills').textContent = String(g.kills);
         $('hoops').textContent = g.mission.hoops.length ? g.hoopsPassed + ' / ' + g.mission.hoops.length : '—';
         $('hull').style.width = Math.max(0, g.hull) + '%';
-        $('missile').textContent = g.missileCool > 0 ? Math.ceil(g.missileCool) + 's' : 'ready';
+        const stock = g.missileStock;
+        $('missile').textContent = stock + '/' + PA.MISSILE_MAX + (stock === 0 ? (settings.autoReload === 1 ? ' reloading' : ' empty') : '');
+        const a = g.aim;
+        $('gun').textContent = a.mode === 'air' ? 'air: straight'
+            : a.mode === 'ground' ? (Math.abs(a.pitch) * 180 / Math.PI).toFixed(1) + '° down'
+                : 'straight';
         $('speed').textContent = Math.round(p.speed * 1.94) + ' kt';
         $('alt').textContent = Math.round(p.h - PA.groundAt(p.X, p.Z)) + ' m';
         $('aoa').textContent = (p.alpha * 180 / Math.PI).toFixed(0) + '°';
@@ -1431,6 +1879,10 @@ var PA;
             return 'Ejected! The parachute is open. Back in the air soon.';
         if (g.phase !== 'flying')
             return '';
+        if (g.floorActive)
+            return 'Safe flight: pulling up off the ground.';
+        if (settings.invincible === 1)
+            return 'Invincible: nothing can hurt you.';
         if (p.stalled)
             return 'Too steep! Ease the nose down to get the air flowing.';
         if (g.settings.mode === 'glider')
@@ -1449,6 +1901,43 @@ var PA;
         box.hidden = false;
         $('ovTitle').textContent = 'Landed!';
         $('ovText').textContent = 'Rings flown: ' + g.hoopsPassed + ' of ' + g.mission.hoops.length + '.';
+    }
+    // ---- Family database sign-in (drawer) ---------------------------------
+    function setFamilyStatus(text, ok) {
+        const el = $('familyStatus');
+        el.textContent = text;
+        el.classList.toggle('bad', !ok);
+    }
+    function renderFamily() {
+        const s = PA.loadSession();
+        $('familyIn').hidden = !!s;
+        $('familyOut').hidden = !s;
+        if (s)
+            setFamilyStatus('Signed in as ' + s.email + '. Scores can be saved to the family database.', true);
+        else
+            setFamilyStatus('Not signed in: this device only.', true);
+    }
+    async function familySignIn() {
+        const email = $('familyEmail').value.trim();
+        const password = $('familyPassword').value;
+        $('familyPassword').value = '';
+        if (!email || !password) {
+            setFamilyStatus('Type the family email and password first.', false);
+            return;
+        }
+        setFamilyStatus('Signing in…', true);
+        try {
+            await PA.signIn(email, password);
+            renderFamily();
+        }
+        catch (e) {
+            setFamilyStatus(String(e.message || e), false);
+        }
+    }
+    async function familyCheck() {
+        setFamilyStatus('Checking…', true);
+        const r = await PA.checkSession();
+        setFamilyStatus(r.message, r.ok);
     }
     // ---- First-run tutorial (shown once per device) -----------------------
     function tutorialSeen() {
@@ -1495,6 +1984,9 @@ var PA;
             const ctx = $('view').getContext('2d');
             if (ctx)
                 PA.render(ctx, game);
+            const rc = $('radar').getContext('2d');
+            if (rc)
+                PA.radar(rc, game, 150);
             sound.setThrottle(game.plane.throttle, game.phase === 'flying' && game.settings.mode === 'jet');
             hudTimer += dt;
             if (hudTimer > 0.1) {
@@ -1525,6 +2017,12 @@ var PA;
             renderErrors();
         });
         $('restart').addEventListener('click', () => { restart(); $('drawer').hidden = true; });
+        $('familySignIn').addEventListener('click', () => void familySignIn());
+        $('familyCheck').addEventListener('click', () => void familyCheck());
+        $('familySignOut').addEventListener('click', () => void PA.signOut().then(renderFamily));
+        $('familyPassword').addEventListener('keydown', e => { if (e.key === 'Enter')
+            void familySignIn(); });
+        renderFamily();
         $('again').addEventListener('click', () => restart());
         $('version').textContent = 'Version ' + PA.VERSION;
         bindKeys();

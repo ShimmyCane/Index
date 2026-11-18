@@ -9,6 +9,7 @@ const ctx = { console, Math, Date };
 vm.createContext(ctx);
 vm.runInContext(code, ctx);
 const PA = vm.runInContext('PA', ctx);
+PA.PAINT = vm.runInContext('PA.PAINT', ctx);
 
 let failures = 0;
 function check(name, ok, detail) {
@@ -97,7 +98,7 @@ const still = { pitch: 0, yaw: 0, throttle: 0 };
   const settings = { mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0 };
   const g = new PA.Game(settings);
   g.onSound = () => {};
-  const ahead = { kind: 'tank', X: g.plane.X, Z: g.plane.Z + 200, alive: true, points: 100, cool: 0 };
+  const ahead = { kind: 'tank_mbt', X: g.plane.X, Z: g.plane.Z + 200, alive: true, points: 100, hp: 2, cool: 0 };
   g.mission.targets = [ahead];
   g.held.missile = true;
   g.update(1 / 30);
@@ -116,6 +117,60 @@ const still = { pitch: 0, yaw: 0, throttle: 0 };
   check('eject: a crash starts the sequence with a pilot in the air', g.phase === 'crashed' && g.jumpers.length === 1);
   for (let i = 0; i < 5 * 30; i++) g.update(1 / 30);
   check('eject: the flight restarts after the parachute', g.phase === 'flying' && g.hull === 100);
+}
+
+// 10. Safe flight: a plane diving at the ground is pulled up and does not crash.
+{
+  const g = new PA.Game({ mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0, safeFlight: 1, invincible: 0, autoReload: 1 });
+  g.onSound = () => {};
+  g.mission.targets = [];
+  g.plane.start(0, 0, PA.groundAt(0, 0) + 5, 60, -0.5, 0, 0.6);
+  let crashed = false;
+  for (let i = 0; i < 8 * 30; i++) { g.update(1 / 30); if (g.phase !== 'flying') { crashed = true; break; } }
+  check('safe flight: a dive into the ground is pulled up, no crash', !crashed, 'phase = ' + g.phase + ', height above ground = ' + (g.plane.h - PA.groundAt(g.plane.X, g.plane.Z)).toFixed(1) + ' m');
+}
+
+// 11. Invincible: a crash with no hull does not end the flight.
+{
+  const g = new PA.Game({ mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 1, autoReload: 1 });
+  g.onSound = () => {};
+  g.hull = 0;
+  g.update(1 / 30);
+  check('invincible: no crash with zero hull', g.phase === 'flying');
+}
+
+// 12. Missiles: six to start; with auto reload one comes back; without it none does.
+{
+  const on = new PA.Game({ mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1 });
+  on.onSound = () => {};
+  check('missiles: six to start', on.missileStock === 6);
+  on.missileStock = 0;
+  for (let i = 0; i < 3.2 * 30; i++) on.update(1 / 30);
+  check('missiles: automatic reload brings one back', on.missileStock === 1, 'stock = ' + on.missileStock);
+  const off = new PA.Game({ mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 0 });
+  off.onSound = () => {};
+  off.missileStock = 0;
+  for (let i = 0; i < 6 * 30; i++) off.update(1 / 30);
+  check('missiles: no reload when it is off', off.missileStock === 0);
+}
+
+// 13. Gun aim: straight with nothing in front; down toward a ground target ahead.
+{
+  const g = new PA.Game({ mode: 'jet', control: 'drag', view: 'chase', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 1 });
+  g.onSound = () => {};
+  g.mission.targets = [];
+  g.update(1 / 30);
+  check('gun: straight with nothing in front', g.aim.mode === 'straight' && g.aim.pitch === 0);
+  g.mission.targets = [{ kind: 'tank_mbt', X: g.plane.X, Z: g.plane.Z + 300, alive: true, points: 100, hp: 2, cool: 0 }];
+  g.update(1 / 30);
+  check('gun: depressed toward a tank ahead', g.aim.mode === 'ground' && g.aim.pitch < 0, 'pitch = ' + (g.aim.pitch * 180 / Math.PI).toFixed(2) + ' deg');
+}
+
+// 14. The world: every kind of thing has a sprite painted for it, and the sea is at the east.
+{
+  const names = Object.keys(PA.KINDS);
+  check('assets: every kind has a painter', names.every(k => PA.PAINT[k]), 'kinds: ' + names.length);
+  check('world: the sea is at the east', PA.biomeAt(PA.SEA_X + 200, 0) === 'sea' && PA.groundAt(PA.SEA_X + 200, 0) === 0);
 }
 
 console.log(failures === 0 ? '\nAll flight checks passed.' : '\n' + failures + ' check(s) failed.');

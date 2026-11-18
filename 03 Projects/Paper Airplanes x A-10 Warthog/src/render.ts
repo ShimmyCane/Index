@@ -103,7 +103,12 @@ namespace PA {
         }
         if (!ok) continue;
         const depth = (corners[0][2] + corners[2][2]) / 2;
-        const base = ((i + j) & 1) === 0 ? COL.ground : COL.groundDark;
+        const biome = biomeAt((i + 0.5) * CELL, (j + 0.5) * CELL);
+        const light = ((i + j) & 1) === 0;
+        const base = biome === 'sea' ? (light ? '#9fd3ea' : '#8cc6e2')
+          : biome === 'farm' ? (light ? '#cfe3a2' : '#e6d9a0')
+          : biome === 'town' ? (light ? '#cfd3d8' : '#bcc2c9')
+          : (light ? COL.ground : COL.groundDark);
         cells.push({
           pts: corners.map(p => [p[0], p[1]] as [number, number]),
           depth,

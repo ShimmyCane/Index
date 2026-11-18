@@ -2,7 +2,10 @@
 // settings gear, the HUD, the settings drawer, opt-in errors, and the frame loop.
 namespace PA {
   const SETTINGS_KEY = 'pa_warthog.settings';
-  const DEFAULTS: Settings = { mode: 'jet', control: 'drag', view: 'chase', sound: 1, forces: 0, showErrors: 0 };
+  const DEFAULTS: Settings = {
+    mode: 'jet', control: 'drag', view: 'chase', sound: 1, forces: 0,
+    safeFlight: 1, invincible: 0, autoReload: 1, showErrors: 0,
+  };
   const VIEW_ORDER: View[] = ['chase', 'top', 'cockpit'];
   const TUTORIAL_KEY = 'pa_warthog.tutorialSeen';
   const DEAD = 0.06;          // a small dead zone around the centre
@@ -293,7 +296,12 @@ namespace PA {
     $('kills').textContent = String(g.kills);
     $('hoops').textContent = g.mission.hoops.length ? g.hoopsPassed + ' / ' + g.mission.hoops.length : '—';
     $('hull').style.width = Math.max(0, g.hull) + '%';
-    $('missile').textContent = g.missileCool > 0 ? Math.ceil(g.missileCool) + 's' : 'ready';
+    const stock = g.missileStock;
+    $('missile').textContent = stock + '/' + MISSILE_MAX + (stock === 0 ? (settings.autoReload === 1 ? ' reloading' : ' empty') : '');
+    const a = g.aim;
+    $('gun').textContent = a.mode === 'air' ? 'air: straight'
+      : a.mode === 'ground' ? (Math.abs(a.pitch) * 180 / Math.PI).toFixed(1) + '° down'
+      : 'straight';
     $('speed').textContent = Math.round(p.speed * 1.94) + ' kt';
     $('alt').textContent = Math.round(p.h - groundAt(p.X, p.Z)) + ' m';
     $('aoa').textContent = (p.alpha * 180 / Math.PI).toFixed(0) + '°';
@@ -305,6 +313,8 @@ namespace PA {
     const p = g.plane;
     if (g.phase === 'crashed') return 'Ejected! The parachute is open. Back in the air soon.';
     if (g.phase !== 'flying') return '';
+    if (g.floorActive) return 'Safe flight: pulling up off the ground.';
+    if (settings.invincible === 1) return 'Invincible: nothing can hurt you.';
     if (p.stalled) return 'Too steep! Ease the nose down to get the air flowing.';
     if (g.settings.mode === 'glider') return 'Fly through the rings.';
     if (p.vy < -2 && p.h - groundAt(p.X, p.Z) < 25) return 'Losing height: nose up or hold BOOST.';
@@ -321,6 +331,45 @@ namespace PA {
     box.hidden = false;
     $('ovTitle').textContent = 'Landed!';
     $('ovText').textContent = 'Rings flown: ' + g.hoopsPassed + ' of ' + g.mission.hoops.length + '.';
+  }
+
+  // ---- Family database sign-in (drawer) ---------------------------------
+
+  function setFamilyStatus(text: string, ok: boolean): void {
+    const el = $('familyStatus');
+    el.textContent = text;
+    el.classList.toggle('bad', !ok);
+  }
+
+  function renderFamily(): void {
+    const s = loadSession();
+    $('familyIn').hidden = !!s;
+    $('familyOut').hidden = !s;
+    if (s) setFamilyStatus('Signed in as ' + s.email + '. Scores can be saved to the family database.', true);
+    else setFamilyStatus('Not signed in: this device only.', true);
+  }
+
+  async function familySignIn(): Promise<void> {
+    const email = $<HTMLInputElement>('familyEmail').value.trim();
+    const password = $<HTMLInputElement>('familyPassword').value;
+    $<HTMLInputElement>('familyPassword').value = '';
+    if (!email || !password) {
+      setFamilyStatus('Type the family email and password first.', false);
+      return;
+    }
+    setFamilyStatus('Signing in…', true);
+    try {
+      await signIn(email, password);
+      renderFamily();
+    } catch (e) {
+      setFamilyStatus(String((e as Error).message || e), false);
+    }
+  }
+
+  async function familyCheck(): Promise<void> {
+    setFamilyStatus('Checking…', true);
+    const r = await checkSession();
+    setFamilyStatus(r.message, r.ok);
   }
 
   // ---- First-run tutorial (shown once per device) -----------------------
@@ -367,6 +416,8 @@ namespace PA {
       game.update(dt);
       const ctx = $<HTMLCanvasElement>('view').getContext('2d');
       if (ctx) render(ctx, game);
+      const rc = $<HTMLCanvasElement>('radar').getContext('2d');
+      if (rc) radar(rc, game, 150);
       sound.setThrottle(game.plane.throttle, game.phase === 'flying' && game.settings.mode === 'jet');
       hudTimer += dt;
       if (hudTimer > 0.1) {
@@ -399,6 +450,11 @@ namespace PA {
       renderErrors();
     });
     $('restart').addEventListener('click', () => { restart(); $('drawer').hidden = true; });
+    $('familySignIn').addEventListener('click', () => void familySignIn());
+    $('familyCheck').addEventListener('click', () => void familyCheck());
+    $('familySignOut').addEventListener('click', () => void signOut().then(renderFamily));
+    $('familyPassword').addEventListener('keydown', e => { if (e.key === 'Enter') void familySignIn(); });
+    renderFamily();
     $('again').addEventListener('click', () => restart());
     $('version').textContent = 'Version ' + VERSION;
 

@@ -1,6 +1,6 @@
 # Paper Airplanes × A-10 Warthog — Schematic
 
-**Status:** MVP 0.3 (chase, top-down and cockpit views; missile; ejection; first-run tutorial; headless-tested; not device-tested). Track A, family play. Questions and answers: `convo/convo v0.1.md` to `convo v0.3.md`.
+**Status:** MVP 0.4 (round 3: family sign-in, radar, missile stock and auto reload, gun modes, safe flight, invincibility, a first world of 15 kinds of target and sea; headless-tested; not device-tested). Questions: `convo/convo v0.5.md`. Track A, family play. Questions and answers: `convo/convo v0.1.md` to `convo v0.3.md`.
 **Platform:** TypeScript source (`src/`) compiled to `js/game.js`, which the page runs. Canvas 400 × 225 internal, scaled with no smoothing. No image files, no server, no database.
 **Remix:** taken from fighter-jet-eject (a standalone export of the UI8 Forge fighter; no licence file; not copied): the sprite-stacked look as a goal, and the chase camera. From the 1990s A-10 Tank Killer (Jimmy's reference): free play, shooting ground targets. From Paper Airplanes: the four forces, and a paper glider mode.
 
@@ -68,3 +68,13 @@ Flight: plane (A-10 jet / paper glider), steering (drag / joystick), new flight.
 - Imported models (Jimmy: "eventually").
 - Loop and missile actions in the lower right, as the controls skill allows.
 - A feedback box (Notes for improvement) once the game is in family hands.
+
+## Round 3 (0.4)
+
+- **Family database:** sign-in in ⚙️ (publishable key only). Flights are not saved yet.
+- **Radar:** top left, heading-up, 1,200 m.
+- **Missiles:** six in stock; automatic reload (3 s each) or none (Safety and reload).
+- **Gun:** straight when aircraft are within 900 m ahead; depressed toward ground targets within 700 m (with bullet drop).
+- **Safe flight** (default on): floor at 30 m; cannot sink below 8 m.
+- **Invincible:** no hull loss from shells or missiles; a crash only bounces.
+- **World:** `src/assets/` holds the painters (aircraft, vehicles, buildings, naval). Biomes: sea east of 1,300 m, farm, town and army land. Targets come in clusters (army, farm, town, airfield, port, railway). Kinds and hit boxes are in `src/world.ts`.

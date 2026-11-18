@@ -47,3 +47,10 @@ A browser 2.5D pixel-art flight game, built small enough to read, so Jimmy can s
 - Added the phases shown by the reference as new code: camera views (chase, top-down, cockpit), a homing missile, ejection with a parachute, a first-run tutorial.
 - Declined: copying fighter-jet-eject's code or sounds, and broadening its licence. That repo is UI8's work with no licence; nothing from it is in the repo.
 - Checks: `npm test` (19 checks, incl. missile lock and eject); Playwright views, tutorial, missile label, no console errors.
+
+## Round 4 (convo v0.5)
+
+- Added: family sign-in (publishable key; flights not saved yet), radar, missile stock with auto reload, gun modes (straight vs depressed), safe flight floor, invincibility, first world iteration (15 kinds, sea, biomes, `src/assets/`).
+- Checks: 26 flight and rule checks (`npm test`); browser: no page errors; sign-in with a wrong password gives a plain 401 message.
+- Known: the HUD is limited to half the screen width so it wraps before the speed readout.
+- Next: art iterations 2–3, moving aircraft and ships, railway and roads, saving flights (needs a table SQL and Jimmy's paste).
