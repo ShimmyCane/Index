@@ -97,6 +97,13 @@ namespace PA {
   // Which kinds drive along the road (and how fast, metres per second).
   export const DRIVES: { [k: string]: number } = { tank_mbt: 3, tank_light: 6, apc: 6, truck: 9, fuel: 7 };
 
+  // Is this a mission target? Ground places and vehicles count; ships, rail and the air do not.
+  export function isObjective(t: { kind: string; faction?: string }): boolean {
+    if (t.faction) return false;
+    const group = KINDS[t.kind].group;
+    return group === 'army' || group === 'farm' || group === 'town';
+  }
+
   export interface Target {
     kind: string;
     X: number;

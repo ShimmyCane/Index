@@ -316,5 +316,17 @@ const still = { pitch: 0, yaw: 0, throttle: 0 };
   check('objective: finishing it restocks gun, missiles and chaff', g.ammo === PA.AMMO_MAX && g.missileStock === PA.MISSILE_MAX && g.chaff === PA.CHAFF_MAX && g.missionNumber === 2);
 }
 
+// 21. A loss in normal mode is a full reset: restocked, and the mission starts again.
+{
+  const st = { mode: 'jet', control: 'drag', view: 'chase', difficulty: 'normal', sound: 0, forces: 0, showErrors: 0, safeFlight: 0, invincible: 0, autoReload: 0, volMusic: 0, volGun: 0, volTurn: 0, volWarn: 0, enemyWave: 0, allies: 0 };
+  const g = new PA.Game(st);
+  g.onSound = () => {};
+  g.ammo = 3; g.missileStock = 0; g.chaff = 0;
+  g.hull = 0;
+  g.update(1 / 30);
+  for (let i = 0; i < 2 * 30; i++) g.update(1 / 30);
+  check('loss: a full reset restocks the gun, missiles and chaff', g.ammo === PA.AMMO_MAX && g.missileStock === PA.MISSILE_MAX && g.chaff === PA.CHAFF_MAX && g.phase === 'flying');
+}
+
 console.log(failures === 0 ? '\nAll flight checks passed.' : '\n' + failures + ' check(s) failed.');
 process.exit(failures ? 1 : 0);

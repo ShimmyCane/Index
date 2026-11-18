@@ -324,6 +324,10 @@ namespace PA {
     $('tag').hidden = !g.tagged;
     $('tag').textContent = 'TAGGED ' + Math.round(g.tagDist) + ' m';
     const left = Math.max(0, g.objectiveGoal - g.objectiveDone);
+    const card = $('missionCard');
+    card.hidden = g.missionCard <= 0;
+    $('missionTitle').textContent = 'Mission ' + g.missionNumber;
+    $('missionBody').textContent = 'Destroy ' + g.objectiveGoal + ' ground targets. Arrows on the radar point to them.';
     $('objective').textContent = g.resupplied > 0
       ? 'Mission complete! Everything restocked.'
       : g.settings.mode === 'glider' ? 'Fly through the rings.'

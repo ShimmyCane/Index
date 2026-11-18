@@ -181,6 +181,7 @@ namespace PA {
     objectiveDone = 0;
     missionNumber = 1;
     resupplied = 0;            // seconds left of the "resupplied" banner
+    missionCard = 0;           // seconds left of the mission pop-up card
     floorActive = false;
     shots: Shot[] = [];
     shells: Shot[] = [];
@@ -238,6 +239,7 @@ namespace PA {
       this.breakTimer = 0;
       this.objectiveGoal = OBJECTIVE_GROUND[(this.missionNumber - 1) % OBJECTIVE_GROUND.length];
       this.objectiveDone = 0;
+      this.missionCard = this.settings.mode === 'jet' ? 5 : 0;
       for (let i = 0; i < this.settings.allies; i++) {
         this.mission.targets.push(spawnAir(this.rand, 0, 0, false));
       }
@@ -283,10 +285,12 @@ namespace PA {
       this.updateWisps(dt);
       this.blink = Math.max(0, this.blink - dt);
       this.resupplied = Math.max(0, this.resupplied - dt);
+      this.missionCard = Math.max(0, this.missionCard - dt);
       this.resupplyCool = Math.max(0, this.resupplyCool - dt);
 
       if (this.phase === 'crashed') {
-        if (this.blink <= 0) this.newFlight(this.seed + 1, true, false);
+        // A full reset: the plane is restocked and the mission starts again.
+        if (this.blink <= 0) this.newFlight(this.seed + 1, true, true);
         return;
       }
       if (this.phase !== 'flying') return;
@@ -816,8 +820,7 @@ namespace PA {
       this.kills++;
       this.score += t.points;
       // The mission objective counts ground places and vehicles (not ships, rail, or the air).
-      const group = KINDS[t.kind].group;
-      if (!t.faction && (group === 'army' || group === 'farm' || group === 'town')) this.objectiveDone++;
+      if (isObjective(t)) this.objectiveDone++;
       this.explode(t.X, tg + 1, t.Z, KINDS[t.kind].height > 5 ? 26 : 16);
       this.onSound('boom');
     }

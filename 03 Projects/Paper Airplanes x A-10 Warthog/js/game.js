@@ -500,6 +500,14 @@ var PA;
     };
     // Which kinds drive along the road (and how fast, metres per second).
     PA.DRIVES = { tank_mbt: 3, tank_light: 6, apc: 6, truck: 9, fuel: 7 };
+    // Is this a mission target? Ground places and vehicles count; ships, rail and the air do not.
+    function isObjective(t) {
+        if (t.faction)
+            return false;
+        const group = PA.KINDS[t.kind].group;
+        return group === 'army' || group === 'farm' || group === 'town';
+    }
+    PA.isObjective = isObjective;
     function target(kind, X, Z, rand) {
         const info = PA.KINDS[kind];
         return {
@@ -1109,6 +1117,7 @@ var PA;
             this.objectiveDone = 0;
             this.missionNumber = 1;
             this.resupplied = 0; // seconds left of the "resupplied" banner
+            this.missionCard = 0; // seconds left of the mission pop-up card
             this.floorActive = false;
             this.shots = [];
             this.shells = [];
@@ -1163,6 +1172,7 @@ var PA;
             this.breakTimer = 0;
             this.objectiveGoal = OBJECTIVE_GROUND[(this.missionNumber - 1) % OBJECTIVE_GROUND.length];
             this.objectiveDone = 0;
+            this.missionCard = this.settings.mode === 'jet' ? 5 : 0;
             for (let i = 0; i < this.settings.allies; i++) {
                 this.mission.targets.push(PA.spawnAir(this.rand, 0, 0, false));
             }
@@ -1211,10 +1221,12 @@ var PA;
             this.updateWisps(dt);
             this.blink = Math.max(0, this.blink - dt);
             this.resupplied = Math.max(0, this.resupplied - dt);
+            this.missionCard = Math.max(0, this.missionCard - dt);
             this.resupplyCool = Math.max(0, this.resupplyCool - dt);
             if (this.phase === 'crashed') {
+                // A full reset: the plane is restocked and the mission starts again.
                 if (this.blink <= 0)
-                    this.newFlight(this.seed + 1, true, false);
+                    this.newFlight(this.seed + 1, true, true);
                 return;
             }
             if (this.phase !== 'flying')
@@ -1760,8 +1772,7 @@ var PA;
             this.kills++;
             this.score += t.points;
             // The mission objective counts ground places and vehicles (not ships, rail, or the air).
-            const group = PA.KINDS[t.kind].group;
-            if (!t.faction && (group === 'army' || group === 'farm' || group === 'town'))
+            if (PA.isObjective(t))
                 this.objectiveDone++;
             this.explode(t.X, tg + 1, t.Z, PA.KINDS[t.kind].height > 5 ? 26 : 16);
             this.onSound('boom');
@@ -2516,6 +2527,30 @@ var PA;
                 return null;
             return [c + (r / RANGE) * R, c - (f / RANGE) * R];
         };
+        // Mission targets beyond the rim: an arrow on the rim pointing toward each one.
+        for (const t of g.mission.targets) {
+            if (!t.alive || !PA.isObjective(t) || place(t.X, t.Z))
+                continue;
+            const dx = t.X - p.X, dz = t.Z - p.Z;
+            const f = dx * sinY + dz * cosY;
+            const r = dx * cosY - dz * sinY;
+            const ang = Math.atan2(r, f); // from straight ahead, clockwise
+            const ex = c + Math.sin(ang) * (R - 8), ey = c - Math.cos(ang) * (R - 8);
+            ctx.save();
+            ctx.translate(ex, ey);
+            ctx.rotate(ang);
+            ctx.fillStyle = '#ffe08a';
+            ctx.strokeStyle = PA.INK;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(7, 0);
+            ctx.lineTo(-5, -5);
+            ctx.lineTo(-5, 5);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+        }
         for (const t of g.mission.targets) {
             if (!t.alive)
                 continue;
@@ -2872,6 +2907,10 @@ var PA;
         $('tag').hidden = !g.tagged;
         $('tag').textContent = 'TAGGED ' + Math.round(g.tagDist) + ' m';
         const left = Math.max(0, g.objectiveGoal - g.objectiveDone);
+        const card = $('missionCard');
+        card.hidden = g.missionCard <= 0;
+        $('missionTitle').textContent = 'Mission ' + g.missionNumber;
+        $('missionBody').textContent = 'Destroy ' + g.objectiveGoal + ' ground targets. Arrows on the radar point to them.';
         $('objective').textContent = g.resupplied > 0
             ? 'Mission complete! Everything restocked.'
             : g.settings.mode === 'glider' ? 'Fly through the rings.'
