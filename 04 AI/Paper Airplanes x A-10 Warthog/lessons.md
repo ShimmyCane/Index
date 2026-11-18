@@ -8,3 +8,10 @@
 - **Test a stall with the nose set after `start()`.** `start()` aims velocity along the nose, so the angle of attack starts at zero.
 - **The drawer's button margins double** inside a group with side margins. Use a calc width, not 100% plus margin.
 - **Node tests can load the compiled script in `vm`** if the page boot is guarded by `typeof document`.
+
+## 2026-11-18 (round 2)
+
+- **A class name on `<body>` can hide the whole page.** `body.stick` picked up the base `.stick { display:none }` rule meant for the joystick pad. Use names that no component uses (`joy`).
+- **Ground squares under the camera vanish if they are dropped when a corner is behind the near plane.** Clamp the depth for ground corners instead.
+- **Synthetic pointer events from a test can have no active pointer.** Guard `setPointerCapture` in a try/catch.
+- **Drive drawer buttons with direct clicks in tests** when a gear is mid-fade; a real tap is needed only for the wake.

@@ -1,57 +1,62 @@
 # Paper Airplanes × A-10 Warthog — Schematic
 
-**Status:** MVP 0.1.0 (headless-tested; not device-tested). Track A, family play. Questions in `convo/convo v0.1.md`.
+**Status:** MVP 0.2 (chase view; headless-tested; not device-tested). Track A, family play. Questions and answers: `convo/convo v0.1.md` to `convo v0.3.md`.
 **Platform:** TypeScript source (`src/`) compiled to `js/game.js`, which the page runs. Canvas 400 × 225 internal, scaled with no smoothing. No image files, no server, no database.
-**Remix:** the reference is `remix.ui8.ai/fly` (not reachable from the build container; known only from social posts: "No 3D engine, no polygons, 32 KB of code"), and a 1990s floppy A-10 flight game (probably *A-10 Tank Killer*, to confirm, Q2). Taken: the idea of a tiny game built from code, a flight that teaches the four forces, and the paper-plane lessons. Not copied: any code or art.
+**Remix:** taken from fighter-jet-eject (a standalone export of the UI8 Forge fighter; no licence file; not copied): the sprite-stacked look as a goal, and the chase camera. From the 1990s A-10 Tank Killer (Jimmy's reference): free play, shooting ground targets. From Paper Airplanes: the four forces, and a paper glider mode.
 
 ## Purpose
 
-Learn how sprite games work by making one small enough to read. Fly the A-10 (or a paper glider) and see the forces that make it fly.
+Learn how a sprite game is made by building a small one: a chase view, a flight that follows the four forces, and controls a child can use on an iPad.
 
 ## Pieces
 
 | File | What it is |
 |---|---|
-| `src/config.ts` | Screen size, scale (pixels per metre), palette |
-| `src/sprites.ts` | Sprites as painted rectangles; the outline is added by the builder |
-| `src/flight.ts` | The four forces, lift, stall, the ground (pure, testable) |
-| `src/world.ts` | Ground height, seeded missions (targets, anti-aircraft guns, rings) |
-| `src/game.ts` | Rules: guns, shells, hits, crash, landing, win |
-| `src/render.ts` | Drawing: sky, clouds, two hill layers, ground, targets, plane, force arrows |
+| `src/config.ts` | Screen size, scale, palette |
+| `src/sprites.ts` | Sprites as painted rectangles; the outline is added by the builder. Rear-view A-10 and paper glider |
+| `src/flight.ts` | The four forces, lift, stall, yaw (turning), bank, the ground |
+| `src/world.ts` | Ground height (of X, Z), targets, glider rings |
+| `src/game.ts` | Guns, shells, hits, crash and respawn, free-play targets, rings |
+| `src/render.ts` | Chase camera: sky, perspective checkerboard ground, billboards, rings, the plane |
 | `src/audio.ts` | Sounds from the Web Audio API |
-| `src/main.ts` | Page: keys and touch buttons, HUD, ⚙️ drawer, errors, frame loop |
+| `src/main.ts` | Controls (drag, joystick, keys), action buttons, gear fade, HUD, drawer, errors |
 | `js/game.js` | Compiled output (committed) |
-| `tools/flight_test.js` | Headless check of the flight model and mission seeds |
+| `tools/flight_test.js` | Headless checks: flight model, turning, missions |
 
-## Screen
+## Chase view
 
-- Top: score, kills, ammo, rings, hull bar.
-- Scene: the plane at 30% of the width, the ground as a sage line with scrolling field stripes, two hill layers that move slower (parallax), targets on the ground, shadow under the plane.
-- Readout (corner): speed in knots, height above ground, angle of attack, STALL pill.
-- Message line under the scene: one plain sentence (what to do next).
-- Five big buttons: ▲ nose up, ▼ nose down, − power, + power, FIRE (paper mode hides power and FIRE).
-- ⚙️ lower right (family pattern).
+- The camera sits 26 m behind and 8 m above the plane, looks down 0.2 rad, and rolls with the bank.
+- The ground is a checkerboard of 40 m squares in world space, so turning turns the ground past the plane. Squares fade toward the sky with distance.
+- Targets and rings are placed in world space and projected with perspective. Targets are sprites standing on the ground, larger when near.
+- The plane is always at the same place on screen (72% down, centred). Its shadow shows on the ground.
+
+## Controls (`game-controls` skill)
+
+- **Default: drag from the middle.** Above the middle: nose up. Left of it: turn left. The further from the centre, the stronger. Keys (arrows or WASD) also steer.
+- **Joystick setting:** a pad in the lower left, sized to 22% of the width (120–260 px).
+- **Action buttons, lower right:** FIRE (hold) and BOOST (hold).
+- **⚙️:** in the jet view it sits in the upper right and fades after two seconds; tapping the upper right corner brings it back. In the glider view it stays in the lower right.
 
 ## Rules
 
-- **Jet:** 12 targets (tanks 2 hits, trucks 1, far targets worth double) and 4 anti-aircraft guns (quick: 6 and 2). Shells come up at the plane; each hit costs 12 hull. Crash (ground touch) or 0 hull ends the flight. All targets down = mission complete, stars from the hull.
-- **Paper glider:** no engine, no gun. Start at 90 m, 40 m/s. Fly through rings (24, or 12 quick). Touching ground ends the glide ("Landed!").
-- **Ammo** 240 (quick 160).
+- **Jet (free play):** ground targets (tanks, trucks) and anti-aircraft guns appear ahead of the plane as you fly, six at a time, and more come as they are shot. No mission end. Score is shown small. Shells fly up at the plane (12 hull each). Crash or zero hull: back in the air after 2.5 s.
+- **Glider:** no engine, no gun. Start at 90 m, 40 m/s. Fly through 24 rings. Touching ground ends the flight ("Landed!").
 
-## The flight model (what the numbers mean)
+## The flight model
 
-- Lift = q × cl; q = 0.012 × speed²; cl = camber (0.22) + 4.5 × angle of attack (radians); past 15° (0.26 rad) lift falls away (stall).
-- Drag = q × (0.06 + 0.03 × cl²). Thrust up to 6 along the nose. Weight = 9.8 (mass 1).
-- The tail pulls the nose toward the flight path (stability 0.5/s), so a plane with no input drifts toward its path.
-- Verified in `tools/flight_test.js`: level flight holds height with the nose; full power climbs; a steep nose stalls; a paper glider glides and lands; the ground stops the plane; the same seed gives the same mission.
+- Lift = q × cl; q = 0.012 × speed²; cl = camber (0.22) + 4.5 × angle of attack (radians); past 15° lift falls away (stall).
+- Drag = q × (0.06 + 0.03 × cl²). Thrust up to 6 along the nose. Weight 9.8 (mass 1).
+- The tail pulls the nose toward the flight path (stability 0.5/s).
+- Steering turns the heading at up to 1 rad/s and banks the wings up to 0.6 rad.
+- Checked in `tools/flight_test.js`: level flight holds height, full power climbs, a steep nose stalls, the glider lands, the ground stops the plane, right steering turns right.
 
 ## Settings (⚙️)
 
-Flight: plane (A-10 jet / paper glider), mission (full / quick), new mission. Show: force arrows (thrust orange, lift green, drag red, weight blue; length = size). Sound. How it is built (a short explanation). Errors: opt-in, at the bottom.
+Flight: plane (A-10 jet / paper glider), steering (drag / joystick), new flight. Show: force arrows. Sound. How it is built. Errors: opt-in, at the bottom.
 
-## Later (not in MVP)
+## Later (not in this version)
 
-- A behind-the-plane view, or a real depth layer (Q5).
-- Best scores per device; a feedback box (Notes for improvement) when the game is in family hands.
-- More targets and sprites (the sprite list is the easy part to extend).
-- Link to the Paper Airplanes sheets (Q4).
+- The plane drawn as stacked slices (the reference's look). The current plane is a flat rear-view sprite.
+- Imported models (Jimmy: "eventually").
+- Loop and missile actions in the lower right, as the controls skill allows.
+- A feedback box (Notes for improvement) once the game is in family hands.

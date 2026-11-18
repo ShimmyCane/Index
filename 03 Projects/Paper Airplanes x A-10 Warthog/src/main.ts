@@ -1,7 +1,10 @@
-// Boot: the page, the buttons, the keyboard, the settings drawer, and the frame loop.
+// Boot: the page, the controls (drag or joystick, action buttons), the fading
+// settings gear, the HUD, the settings drawer, opt-in errors, and the frame loop.
 namespace PA {
   const SETTINGS_KEY = 'pa_warthog.settings';
-  const DEFAULTS: Settings = { mode: 'jet', size: 'full', sound: 1, forces: 0, showErrors: 0 };
+  const DEFAULTS: Settings = { mode: 'jet', control: 'drag', sound: 1, forces: 0, showErrors: 0 };
+  const DEAD = 0.06;          // a small dead zone around the centre
+  const GEAR_SECONDS = 2000;  // the settings gear fades after this long untouched
 
   const $ = <T extends HTMLElement>(id: string): T => {
     const el = document.getElementById(id);
@@ -43,6 +46,19 @@ namespace PA {
   sound.enabled = settings.sound === 1;
   let game: Game;
 
+  // Input sources. The one in use wins: drag, then joystick, then keys.
+  const keys = { up: false, down: false, left: false, right: false };
+  let dragAxes: Axes | null = null;
+  let stickAxes: Axes | null = null;
+  let dragId = -1;
+  let stickId = -1;
+
+  function applyBodyClasses(): void {
+    document.body.classList.toggle('glider', settings.mode === 'glider');
+    document.body.classList.toggle('jet', settings.mode === 'jet');
+    document.body.classList.toggle('joy', settings.control === 'stick');
+  }
+
   function renderSettings(): void {
     document.querySelectorAll<HTMLElement>('.seg').forEach(seg => {
       const key = seg.dataset.key as keyof Settings;
@@ -50,13 +66,12 @@ namespace PA {
       seg.querySelectorAll<HTMLButtonElement>('button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
     });
     $<HTMLInputElement>('showErrors').checked = settings.showErrors === 1;
-    document.body.classList.toggle('paper', settings.mode === 'paper');
+    applyBodyClasses();
     renderErrors();
   }
 
   function onSeg(key: keyof Settings, value: string): void {
-    const restarts = key === 'mode' || key === 'size';
-    if (key === 'mode' || key === 'size') {
+    if (key === 'mode' || key === 'control') {
       (settings as unknown as Record<string, unknown>)[key] = value;
     } else {
       settings[key] = +value;
@@ -64,72 +79,208 @@ namespace PA {
     if (key === 'sound') sound.enabled = settings.sound === 1;
     saveSettings();
     renderSettings();
-    if (restarts) {
-      game.settings = settings;
-      newMission();
+    if (key === 'mode') restart();
+    if (key === 'control') {
+      dragAxes = null;
+      stickAxes = null;
+      dragId = -1;
+      stickId = -1;
     }
   }
 
-  function newMission(): void {
+  function restart(): void {
     game.settings = settings;
-    game.onSound = name => sound.play(name);
-    game.newMission(Math.floor(Math.random() * 100000));
+    game.newFlight(Math.floor(Math.random() * 100000));
     $('overlay').hidden = true;
   }
 
-  // Keys and touch buttons both set the same held flags.
-  const keyMap: { [code: string]: keyof Held } = {
-    ArrowUp: 'up', KeyW: 'up',
-    ArrowDown: 'down', KeyS: 'down',
-    ArrowRight: 'more', KeyD: 'more',
-    ArrowLeft: 'less', KeyA: 'less',
-    Space: 'fire', KeyF: 'fire',
-  };
-
-  function setHeld(k: keyof Held, on: boolean): void {
-    if (on) sound.unlock();
-    game.held[k] = on;
+  // Capture can fail for a pointer the browser no longer tracks; that is not a reason to stop.
+  function capture(el: HTMLElement, id: number): void {
+    try {
+      el.setPointerCapture(id);
+    } catch (e) {
+      // Ignored: the pointer still reaches the element through its events.
+    }
   }
 
-  function bindInput(): void {
+  // ---- Keys -------------------------------------------------------------
+
+  const keyMap: { [code: string]: string } = {
+    ArrowUp: 'up', KeyW: 'up',
+    ArrowDown: 'down', KeyS: 'down',
+    ArrowLeft: 'left', KeyA: 'left',
+    ArrowRight: 'right', KeyD: 'right',
+    Space: 'fire',
+    ShiftLeft: 'boost', ShiftRight: 'boost',
+  };
+
+  function bindKeys(): void {
     window.addEventListener('keydown', e => {
       const k = keyMap[e.code];
       if (!k) return;
       e.preventDefault();
-      setHeld(k, true);
+      if (k === 'fire' || k === 'boost') {
+        sound.unlock();
+        game.held[k] = true;
+      } else {
+        keys[k as 'up' | 'down' | 'left' | 'right'] = true;
+      }
     });
     window.addEventListener('keyup', e => {
       const k = keyMap[e.code];
-      if (k) setHeld(k, false);
+      if (!k) return;
+      if (k === 'fire' || k === 'boost') game.held[k] = false;
+      else keys[k as 'up' | 'down' | 'left' | 'right'] = false;
     });
     window.addEventListener('blur', () => {
-      (Object.keys(game.held) as (keyof Held)[]).forEach(k => setHeld(k, false));
+      keys.up = keys.down = keys.left = keys.right = false;
+      game.held.fire = game.held.boost = false;
+      dragAxes = null;
+      stickAxes = null;
     });
-    document.querySelectorAll<HTMLButtonElement>('.controls button').forEach(b => {
-      const k = b.dataset.k as keyof Held;
-      const press = (e: PointerEvent) => {
+  }
+
+  // ---- Drag relative to the centre of the screen ------------------------
+
+  const IGNORE = '.actions, .stick, #gear, .gearHot, .drawer, .errorsPanel, button, input, label';
+
+  function dz(v: number): number {
+    if (Math.abs(v) < DEAD) return 0;
+    return Math.sign(v) * (Math.abs(v) - DEAD) / (1 - DEAD);
+  }
+
+  function axesFromPoint(x: number, y: number): Axes {
+    const nx = Math.max(-1, Math.min(1, (x - window.innerWidth / 2) / (window.innerWidth / 2)));
+    const ny = Math.max(-1, Math.min(1, (y - window.innerHeight / 2) / (window.innerHeight / 2)));
+    return { yaw: dz(nx), pitch: dz(-ny) };
+  }
+
+  function bindDrag(): void {
+    const play = $('play');
+    play.addEventListener('pointerdown', e => {
+      if (settings.control !== 'drag') return;
+      if ((e.target as Element).closest(IGNORE)) return;
+      sound.unlock();
+      dragId = e.pointerId;
+      capture(play, e.pointerId);
+      dragAxes = axesFromPoint(e.clientX, e.clientY);
+    });
+    play.addEventListener('pointermove', e => {
+      if (e.pointerId === dragId) dragAxes = axesFromPoint(e.clientX, e.clientY);
+    });
+    const end = (e: PointerEvent) => {
+      if (e.pointerId === dragId) {
+        dragId = -1;
+        dragAxes = null;
+      }
+    };
+    play.addEventListener('pointerup', end);
+    play.addEventListener('pointercancel', end);
+  }
+
+  // ---- Joystick (lower left) --------------------------------------------
+
+  function bindStick(): void {
+    const stick = $('stick');
+    const knob = $('knob');
+    const move = (e: PointerEvent) => {
+      const r = stick.getBoundingClientRect();
+      const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      const radius = r.width / 2;
+      let dx = (e.clientX - cx) / radius, dy = (e.clientY - cy) / radius;
+      const len = Math.hypot(dx, dy);
+      if (len > 1) { dx /= len; dy /= len; }
+      knob.style.transform = `translate(${dx * radius * 0.6}px, ${dy * radius * 0.6}px)`;
+      stickAxes = { yaw: dz(dx), pitch: dz(-dy) };
+    };
+    stick.addEventListener('pointerdown', e => {
+      sound.unlock();
+      stickId = e.pointerId;
+      capture(stick, e.pointerId);
+      move(e);
+    });
+    stick.addEventListener('pointermove', e => {
+      if (e.pointerId === stickId) move(e);
+    });
+    const end = (e: PointerEvent) => {
+      if (e.pointerId !== stickId) return;
+      stickId = -1;
+      stickAxes = null;
+      knob.style.transform = '';
+    };
+    stick.addEventListener('pointerup', end);
+    stick.addEventListener('pointercancel', end);
+  }
+
+  // ---- Action buttons (lower right) -------------------------------------
+
+  function bindActions(): void {
+    document.querySelectorAll<HTMLButtonElement>('.actions button').forEach(b => {
+      const k = b.dataset.k as 'fire' | 'boost';
+      b.addEventListener('pointerdown', e => {
         e.preventDefault();
-        b.setPointerCapture(e.pointerId);
-        setHeld(k, true);
-      };
-      const release = () => setHeld(k, false);
-      b.addEventListener('pointerdown', press);
+        sound.unlock();
+        capture(b, e.pointerId);
+        game.held[k] = true;
+        wakeGear();
+      });
+      const release = () => { game.held[k] = false; };
       b.addEventListener('pointerup', release);
       b.addEventListener('pointercancel', release);
       b.addEventListener('lostpointercapture', release);
     });
   }
 
+  // ---- Settings gear: fades in the jet view, after two seconds untouched ---
+
+  let gearTimer = 0;
+
+  function drawerOpen(): boolean {
+    return !$('drawer').hidden;
+  }
+
+  function wakeGear(): void {
+    const gear = $('gear');
+    gear.classList.add('awake');
+    window.clearTimeout(gearTimer);
+    if (!drawerOpen()) {
+      gearTimer = window.setTimeout(() => gear.classList.remove('awake'), GEAR_SECONDS);
+    }
+  }
+
+  function bindGear(): void {
+    const gear = $('gear');
+    const drawer = $('drawer');
+    const setOpen = (open: boolean) => {
+      drawer.hidden = !open;
+      gear.setAttribute('aria-expanded', String(open));
+      if (open) {
+        window.clearTimeout(gearTimer);
+        gear.classList.add('awake');
+      } else {
+        wakeGear();
+      }
+    };
+    gear.addEventListener('click', () => setOpen(drawer.hidden));
+    $('closeDrawer').addEventListener('click', () => setOpen(false));
+    $('gearHot').addEventListener('pointerdown', e => {
+      e.preventDefault();
+      wakeGear();
+    });
+    wakeGear();
+  }
+
+  // ---- HUD and messages -------------------------------------------------
+
   function hud(): void {
     const g = game;
     const p = g.plane;
     $('score').textContent = String(g.score);
-    $('kills').textContent = g.kills + ' / ' + g.mission.targets.length;
-    $('ammo').textContent = g.mission.mode === 'jet' ? String(g.ammo) : '—';
-    $('hoops').textContent = g.hoopsPassed + ' / ' + g.mission.hoops.length;
+    $('kills').textContent = String(g.kills);
+    $('hoops').textContent = g.mission.hoops.length ? g.hoopsPassed + ' / ' + g.mission.hoops.length : '—';
     $('hull').style.width = Math.max(0, g.hull) + '%';
     $('speed').textContent = Math.round(p.speed * 1.94) + ' kt';
-    $('alt').textContent = Math.round(p.h - groundAt(p.x)) + ' m';
+    $('alt').textContent = Math.round(p.h - groundAt(p.X, p.Z)) + ' m';
     $('aoa').textContent = (p.alpha * 180 / Math.PI).toFixed(0) + '°';
     $('stall').hidden = !p.stalled || g.phase !== 'flying';
   }
@@ -137,39 +288,34 @@ namespace PA {
   function message(): string {
     const g = game;
     const p = g.plane;
+    if (g.phase === 'crashed') return 'Back in the air in a moment…';
     if (g.phase !== 'flying') return '';
-    if (p.stalled) return 'Too steep! Nose down to get the air flowing again.';
-    if (g.mission.mode === 'paper') {
-      return p.vy < -1 ? 'Gliding down. Fly through the rings.' : 'Let the wings carry you.';
-    }
-    if (p.vy < -2 && p.h - groundAt(p.x) < 25) return 'Losing height: nose up or add power.';
-    if (p.speed < 35) return 'Slow: add power (+) to keep the wings working.';
-    return g.targetsLeft() > 0 ? 'Hold FIRE over the targets.' : '';
+    if (p.stalled) return 'Too steep! Ease the nose down to get the air flowing.';
+    if (g.settings.mode === 'glider') return 'Fly through the rings.';
+    if (p.vy < -2 && p.h - groundAt(p.X, p.Z) < 25) return 'Losing height: nose up or hold BOOST.';
+    return 'Drag from the middle to steer. Hold FIRE over the targets.';
   }
 
   function overlay(): void {
     const g = game;
     const box = $('overlay');
-    if (g.phase === 'flying') {
+    if (g.phase !== 'landed') {
       box.hidden = true;
       return;
     }
     box.hidden = false;
-    let title = '', text = '';
-    if (g.phase === 'crashed') {
-      title = 'Crashed!';
-      text = g.mission.mode === 'paper'
-        ? 'The glider touched down.'
-        : 'Try again: keep the speed up and the nose level.';
-    } else if (g.phase === 'landed') {
-      title = 'Landed!';
-      text = 'Rings flown: ' + g.hoopsPassed + ' of ' + g.mission.hoops.length + '. Score ' + g.score + '.';
-    } else if (g.phase === 'won') {
-      title = 'Mission complete';
-      text = '★'.repeat(g.stars) + '☆'.repeat(3 - g.stars) + '  Score ' + g.score + ', hull ' + Math.round(g.hull) + '%.';
-    }
-    $('ovTitle').textContent = title;
-    $('ovText').textContent = text;
+    $('ovTitle').textContent = 'Landed!';
+    $('ovText').textContent = 'Rings flown: ' + g.hoopsPassed + ' of ' + g.mission.hoops.length + '.';
+  }
+
+  // ---- Frame loop -------------------------------------------------------
+
+  function resolveAxes(): Axes {
+    if (dragAxes) return dragAxes;
+    if (stickAxes) return stickAxes;
+    const yaw = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+    const pitch = (keys.up ? 1 : 0) - (keys.down ? 1 : 0);
+    return { yaw, pitch };
   }
 
   let last = 0;
@@ -178,11 +324,11 @@ namespace PA {
     const dt = last ? (now - last) / 1000 : 0;
     last = now;
     try {
+      game.axes = resolveAxes();
       game.update(dt);
-      const scene = $<HTMLCanvasElement>('view');
-      const ctx = scene.getContext('2d');
+      const ctx = $<HTMLCanvasElement>('view').getContext('2d');
       if (ctx) render(ctx, game);
-      sound.setThrottle(game.plane.throttle, game.phase === 'flying' && game.mission.mode === 'jet');
+      sound.setThrottle(game.plane.throttle, game.phase === 'flying' && game.settings.mode === 'jet');
       hudTimer += dt;
       if (hudTimer > 0.1) {
         hudTimer = 0;
@@ -198,20 +344,12 @@ namespace PA {
 
   function boot(): void {
     game = new Game(settings);
+    game.settings = settings;
     game.onSound = name => sound.play(name);
     renderSettings();
 
     window.addEventListener('error', e => logError(e.message));
     window.addEventListener('unhandledrejection', e => logError('Promise: ' + String(e.reason)));
-
-    const gear = $('gear');
-    const drawer = $('drawer');
-    const setOpen = (open: boolean) => {
-      drawer.hidden = !open;
-      gear.setAttribute('aria-expanded', String(open));
-    };
-    gear.addEventListener('click', () => setOpen(drawer.hidden));
-    $('closeDrawer').addEventListener('click', () => setOpen(false));
 
     document.querySelectorAll<HTMLButtonElement>('.seg button').forEach(b => {
       b.addEventListener('click', () => onSeg(b.parentElement!.dataset.key as keyof Settings, b.dataset.v || '0'));
@@ -221,11 +359,15 @@ namespace PA {
       saveSettings();
       renderErrors();
     });
-    $('restart').addEventListener('click', () => { newMission(); setOpen(false); });
-    $('again').addEventListener('click', () => newMission());
+    $('restart').addEventListener('click', () => { restart(); $('drawer').hidden = true; });
+    $('again').addEventListener('click', () => restart());
     $('version').textContent = 'Version ' + VERSION;
 
-    bindInput();
+    bindKeys();
+    bindDrag();
+    bindStick();
+    bindActions();
+    bindGear();
     renderErrors();
     requestAnimationFrame(frame);
   }

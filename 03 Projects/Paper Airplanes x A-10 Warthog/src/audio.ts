@@ -65,9 +65,6 @@ namespace PA {
           this.tone(392, 0.2, 0.15, t, 'triangle');
           this.tone(523, 0.3, 0.15, t + 0.15, 'triangle');
           break;
-        case 'win':
-          [523, 659, 784, 1046].forEach((f, i) => this.tone(f, 0.3, 0.16, t + i * 0.12, 'square'));
-          break;
         case 'crash':
           this.burst(0.9, 0.4, 300, t);
           this.tone(70, 0.6, 0.25, t, 'sawtooth', 30);

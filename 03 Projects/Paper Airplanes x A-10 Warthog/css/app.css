@@ -1,13 +1,12 @@
-/* Family look: soft vanilla, pastel fills, bold ink outlines with offset shadows. */
+/* Family look: soft vanilla and sky pastels, bold ink outlines with offset shadows.
+   The play area fills the screen; the 16:9 scene is centred and letterboxed. */
 :root {
   --ink: #2f2d3d;
-  --paper: #fff8f1;
   --card: #fffdf7;
   --sage: #bfe8d2;
-  --peach: #ffd2b8;
-  --mint: #c9f0e0;
   --coral: #ffb3a7;
   --sun: #ffe9a8;
+  --stick: min(22vw, 26vh, 260px);
 }
 [hidden] { display: none !important; }
 * { box-sizing: border-box; }
@@ -15,7 +14,7 @@
 html, body { height: 100%; }
 body {
   margin: 0;
-  background: var(--paper);
+  background: #cfe9f5;
   color: var(--ink);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   overflow: hidden;
@@ -24,37 +23,40 @@ body {
   touch-action: none;
 }
 
-.stage {
-  height: 100%;
+.play {
+  position: fixed;
+  inset: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px 0;
-  padding-bottom: calc(10px + env(safe-area-inset-bottom));
-  min-height: 0;
+  justify-content: center;
+  overflow: hidden;
+}
+canvas {
+  display: block;
+  width: min(100vw, calc(100dvh * 16 / 9));
+  height: auto;
+  aspect-ratio: 16 / 9;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  pointer-events: none;
 }
 
-.top {
-  width: min(960px, 100%);
+/* Top left: score and hull. */
+.hud {
+  position: absolute;
+  left: 14px;
+  top: 12px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
+  max-width: calc(100% - 200px);
 }
-h1 {
-  margin: 0;
-  font-size: clamp(1.1rem, 3vw, 1.6rem);
-  font-weight: 800;
-  letter-spacing: -0.01em;
-}
-.hud { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .pill {
   background: var(--card);
   border: 3px solid var(--ink);
   border-radius: 999px;
-  padding: 4px 12px;
+  padding: 3px 12px;
   font-weight: 700;
   box-shadow: 0 3px 0 var(--ink);
   white-space: nowrap;
@@ -78,30 +80,14 @@ h1 {
   transition: width 0.3s ease;
 }
 
-.scene {
-  position: relative;
-  width: min(960px, 100%, calc((100dvh - 250px) * 16 / 9));
-  aspect-ratio: 16 / 9;
-  border: 3px solid var(--ink);
-  border-radius: 18px;
-  box-shadow: 0 6px 0 var(--ink);
-  overflow: hidden;
-  background: #cfe9f5;
-}
-canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-}
+/* Top centre: speed, height, angle, and one plain message. */
 .readout {
   position: absolute;
-  left: 10px;
-  top: 8px;
+  left: 50%;
+  top: 12px;
+  transform: translateX(-50%);
   display: flex;
   gap: 6px;
-  flex-wrap: wrap;
   pointer-events: none;
 }
 .readout span {
@@ -115,6 +101,21 @@ canvas {
 }
 .readout .stall { background: var(--coral); animation: blink 0.6s steps(2) infinite; }
 @keyframes blink { 50% { opacity: 0.35; } }
+.msg {
+  position: absolute;
+  left: 50%;
+  top: 52px;
+  transform: translateX(-50%);
+  margin: 0;
+  max-width: min(90vw, 560px);
+  text-align: center;
+  font-weight: 700;
+  font-size: 15px;
+  background: rgba(255, 253, 247, 0.82);
+  border-radius: 12px;
+  padding: 2px 10px;
+  pointer-events: none;
+}
 
 .overlay {
   position: absolute;
@@ -131,67 +132,70 @@ canvas {
 .overlay h2 { margin: 0; font-size: clamp(1.4rem, 4vw, 2.2rem); font-weight: 800; }
 .overlay p { margin: 0; font-weight: 700; }
 
-.msg {
-  margin: 0;
-  min-height: 1.4em;
-  font-weight: 700;
-  text-align: center;
-  font-size: 15px;
-}
-
-.controls {
-  width: min(960px, 100%);
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-  padding-right: 92px; /* room for the ⚙️ in the lower right */
-}
-.controls button {
-  min-height: 68px;
-  border: 3px solid var(--ink);
-  border-radius: 18px;
-  box-shadow: 0 4px 0 var(--ink);
-  font: inherit;
-  font-size: 24px;
-  font-weight: 800;
-  color: var(--ink);
-  background: var(--card);
-  cursor: pointer;
+/* Lower right: FIRE and BOOST, big and held down. */
+.actions {
+  position: absolute;
+  right: 18px;
+  bottom: calc(18px + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
+  gap: 12px;
 }
-.controls button small { font-size: 12px; font-weight: 700; margin-top: 4px; }
-.controls button:active,
-.controls button.down { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
-.c-sage { background: var(--sage); }
-.c-peach { background: var(--peach); }
-.c-mint { background: var(--mint); }
-.c-coral { background: var(--coral); }
-body.paper .controls button[data-k="more"],
-body.paper .controls button[data-k="less"],
-body.paper .controls button[data-k="fire"] { display: none; }
-body.paper .controls { grid-template-columns: repeat(2, 1fr); }
-
-.big,
-.wide {
-  min-height: 60px;
-  padding: 0 22px;
+.actions button {
+  width: 112px;
+  min-height: 80px;
   border: 3px solid var(--ink);
-  border-radius: 18px;
+  border-radius: 20px;
   box-shadow: 0 4px 0 var(--ink);
-  background: var(--sun);
   font: inherit;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   color: var(--ink);
   cursor: pointer;
 }
-.wide { display: block; width: calc(100% - 24px); margin: 8px 12px 12px; background: var(--sage); }
+.actions button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+.c-coral { background: var(--coral); }
+.c-sun { background: var(--sun); }
+body.glider .actions { display: none; }
 
-/* ⚙️ and the drawer */
+/* Lower left: the joystick, shown only with the joystick setting. */
+.stick {
+  position: absolute;
+  left: 18px;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  width: var(--stick);
+  aspect-ratio: 1;
+  min-width: 120px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: rgba(255, 253, 247, 0.6);
+  box-shadow: 0 4px 0 var(--ink);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+body.joy .stick { display: flex; }
+.knob {
+  width: 40%;
+  aspect-ratio: 1;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--sage);
+  box-shadow: 0 3px 0 var(--ink);
+  pointer-events: none;
+}
+
+/* The settings gear. Jet: upper right, faded until touched. Glider: lower right. */
+.gearHot {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 120px;
+  height: 120px;
+  z-index: 29;
+  display: none;
+}
+body.jet .gearHot { display: block; }
 .gear {
   position: fixed;
   right: 18px;
@@ -205,13 +209,26 @@ body.paper .controls { grid-template-columns: repeat(2, 1fr); }
   border: 3px solid var(--ink);
   box-shadow: 0 4px 0 var(--ink);
   cursor: pointer;
+  transition: opacity 0.5s ease, top 0.3s ease, bottom 0.3s ease;
 }
+body.jet .gear {
+  top: 12px;
+  bottom: auto;
+  opacity: 0;
+  pointer-events: none;
+}
+body.jet .gear.awake,
+body.jet .gear[aria-expanded="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .drawer {
   position: fixed;
   right: 18px;
-  bottom: 100px;
+  top: 92px;
   width: min(380px, 92vw);
-  max-height: 70vh;
+  max-height: calc(100dvh - 120px);
   overflow-y: auto;
   z-index: 40;
   background: var(--card);
@@ -223,6 +240,7 @@ body.paper .controls { grid-template-columns: repeat(2, 1fr); }
   -webkit-user-select: text;
   user-select: text;
 }
+body.glider .drawer { top: auto; bottom: 100px; max-height: 70vh; }
 .drawerHead { display: flex; align-items: center; justify-content: space-between; }
 .drawerHead h2 { margin: 4px 0 8px; font-size: 20px; }
 .mini {
@@ -266,12 +284,39 @@ body.paper .controls { grid-template-columns: repeat(2, 1fr); }
   border-radius: 16px;
   background: #fff;
   font: inherit;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--ink);
   cursor: pointer;
 }
 .seg button.on { background: var(--sage); }
+.wide {
+  display: block;
+  width: calc(100% - 24px);
+  min-height: 52px;
+  margin: 8px 12px 12px;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  background: var(--sage);
+  font: inherit;
+  font-size: 17px;
+  font-weight: 800;
+  box-shadow: 0 3px 0 var(--ink);
+  cursor: pointer;
+}
+.big {
+  min-height: 60px;
+  padding: 0 22px;
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  box-shadow: 0 4px 0 var(--ink);
+  background: var(--sun);
+  font: inherit;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--ink);
+  cursor: pointer;
+}
 .toggle { display: flex; align-items: center; gap: 10px; min-height: 48px; font-weight: 700; }
 .toggle input { width: 24px; height: 24px; }
 .under p { font-size: 14px; line-height: 1.45; margin: 6px 0; }
@@ -294,13 +339,12 @@ body.paper .controls { grid-template-columns: repeat(2, 1fr); }
   white-space: pre-wrap;
 }
 
-@media (max-width: 600px) {
-  .controls { grid-template-columns: repeat(5, 1fr); gap: 6px; padding-right: 0; padding-bottom: 80px; }
-  .controls button { min-height: 60px; font-size: 20px; }
-  .controls button small { display: none; }
-  body.paper .controls { grid-template-columns: repeat(2, 1fr); }
-}
-
 @media print {
   .gear, .drawer, .errorsPanel { display: none !important; }
+}
+
+/* Phones: keep only the hull bar at the top left, so the speed readout and the message stay clear. */
+@media (max-width: 600px) {
+  .hud .pill { display: none; }
+  .msg { font-size: 13px; top: 46px; }
 }

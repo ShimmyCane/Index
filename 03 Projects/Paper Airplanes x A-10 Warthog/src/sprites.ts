@@ -50,23 +50,30 @@ namespace PA {
   const cache: { [name: string]: HTMLCanvasElement } = {};
 
   // Built the first time it is needed (so the file also loads without a page).
-  export function sprite(name: 'plane' | 'tank' | 'truck' | 'flak'): HTMLCanvasElement {
+  export function sprite(name: 'plane' | 'glider' | 'tank' | 'truck' | 'flak'): HTMLCanvasElement {
     if (cache[name]) return cache[name];
     let s: HTMLCanvasElement;
     if (name === 'plane') {
-      // A-10 Warthog, side view, facing right: twin tails, high wing, the
-      // canopy up front, two engines under the back.
+      // A-10 Warthog seen from behind: wide wing, twin tails, the cockpit up top, two engines.
       s = buildSprite(g => {
-        g.r(2, 1, 2, 5, '#c8cfd6').p(2, 0, '#c8cfd6')             // tail fin
-         .r(4, 6, 22, 4, '#c8cfd6')                              // fuselage
-         .r(6, 6, 16, 1, '#f5fbff')                              // top light
-         .r(26, 7, 2, 2, '#c8cfd6').p(28, 7, '#6b7480')          // nose
-         .r(6, 10, 18, 1, '#6b7480')                             // belly shade
-         .r(19, 3, 5, 3, '#8fd3f0').r(20, 2, 3, 1, '#8fd3f0')    // canopy
-         .r(11, 9, 8, 2, '#c8cfd6').r(12, 11, 6, 1, '#6b7480')   // wing
-         .p(10, 9, '#6b7480').p(19, 9, '#6b7480')                // wing tips
-         .r(7, 10, 4, 2, '#6b7480')                              // engine
-         .p(5, 11, '#ffb02e').p(6, 11, '#ffb02e');               // exhaust glow
+        g.r(0, 7, 22, 2, '#c8cfd6')                              // wing
+         .r(0, 8, 3, 1, '#6b7480').r(19, 8, 3, 1, '#6b7480')     // wing tips
+         .r(9, 2, 4, 9, '#c8cfd6')                               // fuselage
+         .r(9, 2, 1, 9, '#f5fbff')                               // light side
+         .r(10, 1, 2, 2, '#8fd3f0')                              // canopy
+         .r(5, 1, 2, 7, '#c8cfd6').r(15, 1, 2, 7, '#c8cfd6')     // twin tails
+         .r(5, 0, 2, 1, '#6b7480').r(15, 0, 2, 1, '#6b7480')
+         .r(7, 9, 2, 3, '#6b7480').r(13, 9, 2, 3, '#6b7480')     // engines
+         .r(7, 12, 2, 1, '#ffb02e').r(13, 12, 2, 1, '#ffb02e');  // exhaust glow
+      });
+    } else if (name === 'glider') {
+      // Classic paper dart seen from behind: a flat sheet with a folded nose.
+      s = buildSprite(g => {
+        g.r(0, 6, 20, 2, '#fffdfa')                              // wings
+         .r(0, 6, 20, 1, '#f5fbff')
+         .r(9, 2, 2, 9, '#fffdfa')                               // fold line
+         .p(10, 1, '#fffdfa')
+         .r(0, 8, 20, 1, '#d6d0f0');                             // shaded underside
       });
     } else if (name === 'tank') {
       s = buildSprite(g => {

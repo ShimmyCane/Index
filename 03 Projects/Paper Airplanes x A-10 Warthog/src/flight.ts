@@ -6,6 +6,9 @@
 //   thrust  pushes along the nose (the A-10 engines; zero for a paper plane)
 //   weight  pulls down: mass × gravity
 //
+// The vertical plane (forward speed vx, climb vy, altitude h) is worked out as a
+// side view. Yaw turns that plane round the vertical axis, so the plane can
+// turn left and right over the ground: X and Z are the ground position.
 // Past the stall angle, lift falls away, so the plane sinks.
 namespace PA {
   export const AIR = {
@@ -18,23 +21,28 @@ namespace PA {
     stall: 0.26,      // radians, about 15 degrees
     maxThrust: 6,
     pitchRate: 1.1,   // radians per second when the nose is moved
+    turnRate: 1.0,    // radians per second of yaw at full steering
+    bankMax: 0.6,     // radians of bank at full steering (the wings tilt into the turn)
     stability: 0.5,   // the tail pulls the nose back toward the flight path
-    throttleRate: 0.6,
   };
 
   export interface Pilot {
     pitch: number;    // -1 nose down … +1 nose up
-    throttle: number; // -1 less … +1 more
+    yaw: number;      // -1 turn left … +1 turn right
+    throttle: number; // 0 … 1 (engine plane only)
   }
 
   export type Vec = [number, number];
 
   export class Aircraft {
-    x = 0;
-    h = 0;
-    vx = 0;
-    vy = 0;
-    pitch = 0;
+    X = 0;            // ground position, metres (east)
+    Z = 0;            // ground position, metres (north, the start heading)
+    h = 0;            // altitude, metres
+    vx = 0;           // forward speed in the vertical plane
+    vy = 0;           // climb speed
+    pitch = 0;        // nose angle (radians)
+    yaw = 0;          // heading (radians, 0 = north, positive = turned right)
+    bank = 0;         // wing tilt for drawing (radians, positive = right wing down)
     throttle = 0;
     alpha = 0;
     stalled = false;
@@ -49,22 +57,25 @@ namespace PA {
       return Math.hypot(this.vx, this.vy);
     }
 
-    start(x: number, h: number, speed: number, pitch: number, throttle: number): void {
-      this.x = x;
+    start(X: number, Z: number, h: number, speed: number, pitch: number, yaw: number, throttle: number): void {
+      this.X = X;
+      this.Z = Z;
       this.h = h;
       this.vx = speed * Math.cos(pitch);
       this.vy = speed * Math.sin(pitch);
       this.pitch = pitch;
+      this.yaw = yaw;
+      this.bank = 0;
       this.throttle = throttle;
     }
 
     // Moves the plane by dt seconds. Returns true if it touched the ground.
-    step(dtIn: number, pilot: Pilot, groundAt: (x: number) => number): boolean {
+    step(dtIn: number, pilot: Pilot, groundAt: (X: number, Z: number) => number): boolean {
       const dt = Math.min(dtIn, 1 / 30);
       this.pitch += pilot.pitch * AIR.pitchRate * dt;
-      if (this.engine) {
-        this.throttle = clamp01(this.throttle + pilot.throttle * AIR.throttleRate * dt);
-      }
+      this.yaw += pilot.yaw * AIR.turnRate * dt;
+      this.bank += (pilot.yaw * AIR.bankMax - this.bank) * Math.min(1, dt * 4);
+      if (this.engine) this.throttle = clamp01(pilot.throttle);
 
       const v = this.speed;
       const gamma = v > 0.01 ? Math.atan2(this.vy, this.vx) : this.pitch;
@@ -97,10 +108,14 @@ namespace PA {
       const ay = (this.thrust[1] + this.lift[1] + this.drag[1] + this.weight[1]) / AIR.mass;
       this.vx += ax * dt;
       this.vy += ay * dt;
-      this.x += this.vx * dt;
+
+      // Move along the heading, and climb or sink.
+      const run = this.vx * dt;
+      this.X += run * Math.sin(this.yaw);
+      this.Z += run * Math.cos(this.yaw);
       this.h += this.vy * dt;
 
-      const ground = groundAt(this.x);
+      const ground = groundAt(this.X, this.Z);
       if (this.h <= ground) {
         this.h = ground;
         return true;

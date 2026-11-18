@@ -1,164 +1,171 @@
-// Game state and rules: guns, flak, hoops, crashes and the mission end.
+// Game state and rules: guns, anti-aircraft shells, rings, crashes and free play.
 namespace PA {
-  export type Phase = 'flying' | 'crashed' | 'landed' | 'won';
-  export type SoundName = 'gun' | 'boom' | 'thud' | 'chime' | 'land' | 'win' | 'crash';
+  export type Phase = 'flying' | 'crashed' | 'landed';
+  export type SoundName = 'gun' | 'boom' | 'thud' | 'chime' | 'land' | 'crash';
+  export type Control = 'drag' | 'stick';
 
   export interface Settings {
     mode: Mode;
-    size: Size;
+    control: Control;
     sound: number;
     forces: number;
     showErrors: number;
   }
 
+  // Held action buttons (fire, boost) and the steering axes from the drag, the joystick or the keys.
+  export interface Held {
+    fire: boolean;
+    boost: boolean;
+  }
+
+  export interface Axes {
+    yaw: number;      // -1 left … +1 right
+    pitch: number;    // -1 down … +1 up
+  }
+
   export interface Shot {
-    x: number;
+    X: number;
+    Z: number;
     h: number;
-    vx: number;
-    vy: number;
+    vX: number;
+    vY: number;
+    vZ: number;
     life: number;
   }
 
   export interface Puff {
-    x: number;
+    X: number;
+    Z: number;
     h: number;
-    vx: number;
-    vy: number;
+    vX: number;
+    vY: number;
+    vZ: number;
     life: number;
     max: number;
     color: string;
     size: number;
   }
 
-  export interface Held {
-    up: boolean;
-    down: boolean;
-    more: boolean;
-    less: boolean;
-    fire: boolean;
-  }
-
-  const SHOT_SPEED = 260;   // m/s, the gun, relative to the plane
-  const FLAK_SPEED = 120;   // m/s
+  const SHOT_SPEED = 260;     // m/s, the gun, relative to the plane
+  const FLAK_SPEED = 120;     // m/s
+  const CRUISE_THROTTLE = 0.6;
   const BULLET_LIFE = 1.6;
   const SHELL_LIFE = 4;
+  const RESPAWN_SECONDS = 2.5;
+  const KEEP_AHEAD = 6;       // free play keeps this many targets in front of the plane
 
   export class Game {
     phase: Phase = 'flying';
     plane!: Aircraft;
     mission!: Mission;
-    camX = 0;
+    seed = 1;
     score = 0;
     kills = 0;
-    ammo = 0;
     hull = 100;
     hoopsPassed = 0;
     time = 0;
-    stars = 0;
     fireCool = 0;
+    respawnIn = 0;
     shots: Shot[] = [];
     shells: Shot[] = [];
     puffs: Puff[] = [];
-    held: Held = { up: false, down: false, more: false, less: false, fire: false };
+    held: Held = { fire: false, boost: false };
+    axes: Axes = { yaw: 0, pitch: 0 };
     onSound: (name: SoundName) => void = () => {};
     private rand = random(1);
 
     constructor(public settings: Settings) {
-      this.newMission(Math.floor(Math.random() * 100000));
+      this.newFlight(Math.floor(Math.random() * 100000));
     }
 
-    newMission(seed: number): void {
-      this.mission = makeMission(this.settings.mode, this.settings.size, seed);
-      const m = this.mission;
-      this.plane = new Aircraft(m.mode === 'jet');
-      this.plane.start(m.startX, m.startH, m.startSpeed, m.startPitch, m.startThrottle);
+    newFlight(seed: number): void {
+      this.seed = seed;
+      this.mission = makeMission(this.settings.mode, seed);
+      this.rand = random(seed + 7);
+      this.plane = new Aircraft(this.settings.mode === 'jet');
+      if (this.settings.mode === 'glider') {
+        this.plane.start(0, 0, 90, 40, 0.08, 0, 0);
+      } else {
+        this.plane.start(0, 0, groundAt(0, 0) + 10, 60, 0.05, 0, CRUISE_THROTTLE);
+      }
       this.phase = 'flying';
-      this.camX = 0;
       this.score = 0;
       this.kills = 0;
-      this.ammo = m.ammo;
       this.hull = 100;
       this.hoopsPassed = 0;
       this.time = 0;
-      this.stars = 0;
       this.fireCool = 0;
+      this.respawnIn = 0;
       this.shots = [];
       this.shells = [];
       this.puffs = [];
-      this.rand = random(seed + 7);
-      this.snapCamera();
-    }
-
-    snapCamera(): void {
-      this.camX = this.plane.x - (W * PLANE_X) / PPM_X;
-    }
-
-    targetsLeft(): number {
-      return this.mission.targets.filter(t => t.alive).length;
     }
 
     update(dtIn: number): void {
       const dt = Math.min(dtIn, 1 / 30);
       this.updatePuffs(dt);
+
+      if (this.phase === 'crashed') {
+        this.respawnIn -= dt;
+        if (this.respawnIn <= 0) this.newFlight(this.seed + 1);
+        return;
+      }
       if (this.phase !== 'flying') return;
 
       this.time += dt;
+      const jet = this.settings.mode === 'jet';
       const pilot: Pilot = {
-        pitch: (this.held.up ? 1 : 0) - (this.held.down ? 1 : 0),
-        throttle: this.mission.mode === 'jet' ? (this.held.more ? 1 : 0) - (this.held.less ? 1 : 0) : 0,
+        pitch: clamp(this.axes.pitch),
+        yaw: clamp(this.axes.yaw),
+        throttle: jet ? (this.held.boost ? 1 : CRUISE_THROTTLE) : 0,
       };
       const touched = this.plane.step(dt, pilot, groundAt);
-      this.camX += ((this.plane.x - (W * PLANE_X) / PPM_X) - this.camX) * Math.min(1, dt * 8);
-
       if (touched) {
-        if (this.mission.mode === 'paper') {
-          this.landed();
-        } else {
+        if (jet) {
           this.crash();
+        } else {
+          this.phase = 'landed';
+          this.onSound('land');
         }
         return;
       }
 
-      this.checkHoops();
-      if (this.mission.mode === 'jet') {
+      if (jet) {
         this.updateGuns(dt);
         this.updateShots(dt);
         this.updateShells(dt);
         this.updateFlak(dt);
-        if (this.hull <= 0) {
-          this.crash();
-          return;
-        }
-        if (this.targetsLeft() === 0) {
-          this.finish();
-        }
+        this.keepTargets();
+        if (this.hull <= 0) this.crash();
+      } else {
+        this.checkRings();
       }
     }
 
     private crash(): void {
       this.phase = 'crashed';
       this.hull = 0;
-      this.explode(this.plane.x, this.plane.h, 26);
+      this.respawnIn = RESPAWN_SECONDS;
+      this.explode(this.plane.X, this.plane.h, this.plane.Z, 26);
       this.onSound('crash');
     }
 
-    private landed(): void {
-      this.phase = 'landed';
-      this.onSound('land');
+    // Free play: when the ground targets run low, more appear ahead of the plane.
+    private keepTargets(): void {
+      const m = this.mission;
+      m.targets = m.targets.filter(t => t.alive || t.Z > this.plane.Z - 150);
+      const left = m.targets.filter(t => t.alive && t.kind !== 'flak').length;
+      if (left < KEEP_AHEAD) {
+        m.targets.push(...spawnTargets(this.rand, this.plane.Z + 240, 6));
+      }
     }
 
-    private finish(): void {
-      this.phase = 'won';
-      this.stars = this.hull >= 70 ? 3 : this.hull >= 40 ? 2 : 1;
-      this.onSound('win');
-    }
-
-    private checkHoops(): void {
-      if (this.mission.mode !== 'paper') return;
-      for (const hoop of this.mission.hoops) {
-        if (hoop.passed) continue;
-        if (Math.abs(this.plane.x - hoop.x) < 1.2 && Math.abs(this.plane.h - hoop.h) <= hoop.r) {
-          hoop.passed = true;
+    private checkRings(): void {
+      for (const ring of this.mission.hoops) {
+        if (ring.passed) continue;
+        const dx = this.plane.X - ring.X, dz = this.plane.Z - ring.Z, dh = this.plane.h - ring.h;
+        if (dx * dx + dz * dz + dh * dh < ring.r * ring.r) {
+          ring.passed = true;
           this.hoopsPassed++;
           this.score += 100;
           this.onSound('chime');
@@ -168,44 +175,50 @@ namespace PA {
 
     private updateGuns(dt: number): void {
       this.fireCool -= dt;
-      if (this.held.fire && this.ammo > 0 && this.fireCool <= 0) {
-        this.fireCool = 0.09;
-        this.ammo--;
-        const p = this.plane;
-        const dx = Math.cos(p.pitch), dy = Math.sin(p.pitch);
-        this.shots.push({
-          x: p.x + dx * 2,
-          h: p.h + dy * 2,
-          vx: p.vx + dx * SHOT_SPEED,
-          vy: p.vy + dy * SHOT_SPEED,
-          life: BULLET_LIFE,
-        });
-        this.onSound('gun');
-      }
+      if (!this.held.fire || this.fireCool > 0) return;
+      this.fireCool = 0.09;
+      const p = this.plane;
+      const cosP = Math.cos(p.pitch), sinP = Math.sin(p.pitch);
+      const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
+      const hv = p.vx; // forward speed, horizontal part of the plane's motion
+      this.shots.push({
+        X: p.X + sinY * cosP * 2,
+        Z: p.Z + cosY * cosP * 2,
+        h: p.h + sinP * 2,
+        vX: hv * sinY + SHOT_SPEED * cosP * sinY,
+        vZ: hv * cosY + SHOT_SPEED * cosP * cosY,
+        vY: p.vy + SHOT_SPEED * sinP,
+        life: BULLET_LIFE,
+      });
+      this.onSound('gun');
     }
 
     private updateShots(dt: number): void {
       const keep: Shot[] = [];
       for (const s of this.shots) {
-        s.vy -= GRAVITY * dt;
-        s.x += s.vx * dt;
-        s.h += s.vy * dt;
+        s.vY -= GRAVITY * dt;
+        s.X += s.vX * dt;
+        s.Z += s.vZ * dt;
+        s.h += s.vY * dt;
         s.life -= dt;
-        if (s.life <= 0 || s.h <= groundAt(s.x)) {
-          if (s.h <= groundAt(s.x)) this.dust(s.x, groundAt(s.x));
+        const ground = groundAt(s.X, s.Z);
+        if (s.life <= 0 || s.h <= ground) {
+          if (s.h <= ground) this.dust(s.X, ground, s.Z);
           continue;
         }
         let hit = false;
         for (const t of this.mission.targets) {
           if (!t.alive) continue;
-          const half = t.kind === 'truck' ? 1.6 : 2.2;
-          const scale = t.far ? 0.5 : 1;
-          const top = groundAt(t.x) + (t.kind === 'truck' ? 2 : 2.5) * scale;
-          if (Math.abs(s.x - t.x) < half * scale && s.h >= groundAt(t.x) && s.h <= top) {
-            t.hp--;
+          const size = SIZE[t.kind];
+          const dx = s.X - t.X, dz = s.Z - t.Z;
+          const tg = groundAt(t.X, t.Z);
+          if (dx * dx + dz * dz < size.r * size.r && s.h >= tg && s.h <= tg + size.height) {
+            t.alive = false;
+            this.kills++;
+            this.score += t.points;
+            this.explode(t.X, tg + 1, t.Z, t.kind === 'flak' ? 10 : 16);
+            this.onSound('boom');
             hit = true;
-            if (t.hp <= 0) this.destroy(t);
-            else this.onSound('thud');
             break;
           }
         }
@@ -214,49 +227,46 @@ namespace PA {
       this.shots = keep;
     }
 
-    private destroy(t: Target): void {
-      t.alive = false;
-      this.kills++;
-      this.score += t.points;
-      this.explode(t.x, groundAt(t.x) + 1, t.kind === 'flak' ? 10 : 16);
-      this.onSound('boom');
-    }
-
     private updateFlak(dt: number): void {
+      const p = this.plane;
       for (const t of this.mission.targets) {
         if (t.kind !== 'flak' || !t.alive) continue;
         t.cool -= dt;
-        const dist = Math.abs(this.plane.x - t.x);
-        if (t.cool <= 0 && dist < 220 && this.plane.h < 90) {
-          t.cool = 1.6 + this.rand() * 1.2;
-          const gx = t.x, gy = groundAt(t.x) + 2;
-          const T = Math.max(0.3, Math.hypot(this.plane.x - gx, this.plane.h - gy) / FLAK_SPEED);
-          const aimX = this.plane.x + this.plane.vx * T;
-          const aimY = this.plane.h + this.plane.vy * T;
-          const dx = aimX - gx, dy = aimY - gy;
-          const d = Math.hypot(dx, dy) || 1;
-          this.shells.push({
-            x: gx, h: gy,
-            vx: (dx / d) * FLAK_SPEED,
-            vy: (dy / d) * FLAK_SPEED + 0.5 * GRAVITY * T,
-            life: SHELL_LIFE,
-          });
-          this.onSound('thud');
-        }
+        const dist = Math.hypot(p.X - t.X, p.Z - t.Z);
+        if (t.cool > 0 || dist > 260 || p.h > 120) continue;
+        t.cool = 1.6 + this.rand() * 1.2;
+        // Aim where the plane will be, with gravity allowed for.
+        const gy = groundAt(t.X, t.Z) + 2;
+        const T = Math.max(0.4, Math.hypot(dist, p.h - gy) / FLAK_SPEED);
+        const sinY = Math.sin(p.yaw), cosY = Math.cos(p.yaw);
+        const aimX = p.X + p.vx * sinY * T;
+        const aimZ = p.Z + p.vx * cosY * T;
+        const aimY = p.h + p.vy * T;
+        this.shells.push({
+          X: t.X, Z: t.Z, h: gy,
+          vX: (aimX - t.X) / T,
+          vZ: (aimZ - t.Z) / T,
+          vY: (aimY - gy) / T + 0.5 * GRAVITY * T,
+          life: SHELL_LIFE,
+        });
+        this.onSound('thud');
       }
     }
 
     private updateShells(dt: number): void {
       const keep: Shot[] = [];
+      const p = this.plane;
       for (const s of this.shells) {
-        s.vy -= GRAVITY * dt;
-        s.x += s.vx * dt;
-        s.h += s.vy * dt;
+        s.vY -= GRAVITY * dt;
+        s.X += s.vX * dt;
+        s.Z += s.vZ * dt;
+        s.h += s.vY * dt;
         s.life -= dt;
-        if (s.life <= 0 || s.h <= groundAt(s.x)) continue;
-        if (Math.abs(s.x - this.plane.x) < 2.2 && Math.abs(s.h - this.plane.h) < 1.8) {
+        if (s.life <= 0 || s.h <= groundAt(s.X, s.Z)) continue;
+        const dx = s.X - p.X, dz = s.Z - p.Z, dh = s.h - p.h;
+        if (dx * dx + dz * dz + dh * dh < 9) {
           this.hull = Math.max(0, this.hull - 12);
-          this.explode(s.x, s.h, 6);
+          this.explode(s.X, s.h, s.Z, 6);
           this.onSound('thud');
           continue;
         }
@@ -265,23 +275,25 @@ namespace PA {
       this.shells = keep;
     }
 
-    private explode(x: number, h: number, n: number): void {
+    private explode(X: number, h: number, Z: number, n: number): void {
       const colors = ['#ffb02e', '#ff9e8a', '#ffe08a', '#ffd9c7'];
       for (let i = 0; i < n; i++) {
         const a = this.rand() * Math.PI * 2;
         const sp = 8 + this.rand() * 26;
         this.puffs.push({
-          x, h, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * 0.6 + 6,
+          X, h, Z,
+          vX: Math.cos(a) * sp, vY: Math.sin(a) * sp * 0.6 + 6, vZ: Math.sin(a) * sp,
           life: 0.5 + this.rand() * 0.6, max: 1.1,
           color: colors[i % colors.length], size: 2 + this.rand() * 3,
         });
       }
     }
 
-    private dust(x: number, h: number): void {
+    private dust(X: number, h: number, Z: number): void {
       for (let i = 0; i < 4; i++) {
         this.puffs.push({
-          x, h, vx: (this.rand() - 0.5) * 10, vy: 4 + this.rand() * 4,
+          X, h, Z,
+          vX: (this.rand() - 0.5) * 10, vY: 4 + this.rand() * 4, vZ: (this.rand() - 0.5) * 10,
           life: 0.4, max: 0.4, color: '#e6e0c8', size: 2,
         });
       }
@@ -289,12 +301,17 @@ namespace PA {
 
     private updatePuffs(dt: number): void {
       for (const p of this.puffs) {
-        p.vy -= GRAVITY * 0.5 * dt;
-        p.x += p.vx * dt;
-        p.h += p.vy * dt;
+        p.vY -= GRAVITY * 0.5 * dt;
+        p.X += p.vX * dt;
+        p.Z += p.vZ * dt;
+        p.h += p.vY * dt;
         p.life -= dt;
       }
       this.puffs = this.puffs.filter(p => p.life > 0);
     }
+  }
+
+  function clamp(v: number): number {
+    return Math.max(-1, Math.min(1, v));
   }
 }

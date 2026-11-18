@@ -7,44 +7,42 @@
   <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
-  <main class="stage">
-    <header class="top">
-      <h1>Paper Airplanes × A-10 Warthog</h1>
-      <div class="hud" aria-live="polite">
-        <span class="pill">★ <b id="score">0</b></span>
-        <span class="pill">🎯 <b id="kills">0</b></span>
-        <span class="pill">🔫 <b id="ammo">0</b></span>
-        <span class="pill">🪟 <b id="hoops">0 / 0</b></span>
-        <span class="hullWrap" title="Hull"><i id="hull"></i></span>
-      </div>
+  <main class="play" id="play">
+    <canvas id="view" width="400" height="225" aria-label="Chase view behind the plane"></canvas>
+
+    <header class="hud" aria-live="polite">
+      <span class="pill">★ <b id="score">0</b></span>
+      <span class="pill">🎯 <b id="kills">0</b></span>
+      <span class="pill">🪟 <b id="hoops">—</b></span>
+      <span class="hullWrap" title="Hull"><i id="hull"></i></span>
     </header>
 
-    <div class="scene">
-      <canvas id="view" width="400" height="225" aria-label="Side view of the flight"></canvas>
-      <div class="readout" aria-hidden="true">
-        <span id="speed">0 kt</span>
-        <span id="alt">0 m</span>
-        <span id="aoa">0°</span>
-        <span class="stall" id="stall" hidden>STALL</span>
-      </div>
-      <div class="overlay" id="overlay" hidden>
-        <h2 id="ovTitle"></h2>
-        <p id="ovText"></p>
-        <button class="big" id="again" type="button">Fly again</button>
-      </div>
+    <div class="readout" aria-hidden="true">
+      <span id="speed">0 kt</span>
+      <span id="alt">0 m</span>
+      <span id="aoa">0°</span>
+      <span class="stall" id="stall" hidden>STALL</span>
     </div>
 
     <p class="msg" id="msg" aria-live="polite"></p>
 
-    <nav class="controls" aria-label="Flight controls">
-      <button type="button" data-k="up" class="c-sage" aria-label="Nose up">▲<small>nose up</small></button>
-      <button type="button" data-k="down" class="c-peach" aria-label="Nose down">▼<small>nose down</small></button>
-      <button type="button" data-k="less" class="c-mint" aria-label="Less power">−<small>power</small></button>
-      <button type="button" data-k="more" class="c-mint" aria-label="More power">+<small>power</small></button>
-      <button type="button" data-k="fire" class="c-coral" aria-label="Fire the gun">FIRE</button>
+    <div class="overlay" id="overlay" hidden>
+      <h2 id="ovTitle"></h2>
+      <p id="ovText"></p>
+      <button class="big" id="again" type="button">Fly again</button>
+    </div>
+
+    <nav class="actions" aria-label="Actions">
+      <button type="button" data-k="fire" class="c-coral">FIRE</button>
+      <button type="button" data-k="boost" class="c-sun">BOOST</button>
     </nav>
+
+    <div class="stick" id="stick" aria-label="Joystick">
+      <div class="knob" id="knob"></div>
+    </div>
   </main>
 
+  <div class="gearHot" id="gearHot" aria-hidden="true"></div>
   <button class="gear" id="gear" type="button" aria-label="Settings" aria-expanded="false" aria-controls="drawer">⚙️</button>
 
   <aside class="drawer" id="drawer" hidden aria-label="Settings">
@@ -59,19 +57,19 @@
         <label>Plane</label>
         <div class="seg" data-key="mode">
           <button type="button" data-v="jet">A-10 jet</button>
-          <button type="button" data-v="paper">Paper glider</button>
+          <button type="button" data-v="glider">Paper glider</button>
         </div>
-        <p class="hint">Changing this starts a new mission.</p>
+        <p class="hint">Changing this starts a new flight.</p>
       </div>
       <div class="setting">
-        <label>Mission</label>
-        <div class="seg" data-key="size">
-          <button type="button" data-v="full">Full</button>
-          <button type="button" data-v="quick">Quick game</button>
+        <label>Steering</label>
+        <div class="seg" data-key="control">
+          <button type="button" data-v="drag">Drag from the middle</button>
+          <button type="button" data-v="stick">Joystick</button>
         </div>
-        <p class="hint">Quick game: half the targets, or half the rings. Changing this starts a new mission.</p>
+        <p class="hint">Drag: hold above the middle to climb, left of it to turn left. Joystick: a pad in the lower left.</p>
       </div>
-      <button class="wide" id="restart" type="button">New mission</button>
+      <button class="wide" id="restart" type="button">New flight</button>
     </details>
 
     <details class="group" open>
@@ -82,7 +80,7 @@
           <button type="button" data-v="1">On</button>
           <button type="button" data-v="0">Off</button>
         </div>
-        <p class="hint">Thrust (orange), lift (green), drag (red), weight (blue). The longer the arrow, the bigger the push.</p>
+        <p class="hint">Lift (green), weight (blue), thrust (orange), drag (red). Longer arrow, bigger push.</p>
       </div>
     </details>
 
@@ -103,14 +101,13 @@
         <p><b>No pictures are loaded.</b> Each plane, tank and truck is a short list of coloured
         rectangles in <code>src/sprites.ts</code>. The page paints them once, adds a dark outline, and
         keeps the result.</p>
-        <p><b>Every frame</b> the game does four things: read the keys, move the plane, move the bullets and
-        shells, and draw the sky, hills, ground and sprites back to front. The layers scroll at
-        different speeds, which is what gives the flat side view depth.</p>
-        <p><b>The flight</b> is in <code>src/flight.ts</code>: lift and drag grow with speed squared,
-        lift also grows with the angle of attack, and past about 15° the lift falls away (a stall).</p>
-        <p><b>The sound</b> is made from a noise burst and tones (<code>src/audio.ts</code>).</p>
-        <p>Source is TypeScript in <code>src/</code>. It is compiled to <code>js/game.js</code>, which is
-        what the page runs.</p>
+        <p><b>Chase view:</b> the camera sits behind the plane. The ground is a checkerboard in the world,
+        drawn with perspective, so turning the plane turns the ground past it (<code>src/render.ts</code>).</p>
+        <p><b>The flight</b> is in <code>src/flight.ts</code>: lift and drag grow with speed squared, lift
+        also grows with the angle of attack, and past about 15° the lift falls away (a stall). Steering
+        turns the heading and banks the wings.</p>
+        <p><b>Sound</b> is made from a noise burst and tones (<code>src/audio.ts</code>).</p>
+        <p>Source is TypeScript in <code>src/</code>, compiled to <code>js/game.js</code>, which the page runs.</p>
       </div>
     </details>
 

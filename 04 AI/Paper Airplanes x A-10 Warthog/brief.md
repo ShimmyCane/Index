@@ -1,6 +1,6 @@
 # Paper Airplanes × A-10 Warthog — Brief
 
-**Status (2026-11-18):** MVP 0.1.0 built and checked headless (no console errors, no horizontal scroll at 1180×820, 768×1024, 390×844; flight model tests pass). Not device-tested. Round 1 questions in `03 Projects/Paper Airplanes x A-10 Warthog/convo/convo v0.1.md`.
+**Status (2026-11-18):** MVP 0.2.0 (chase view, free play, drag or joystick steering, FIRE/BOOST, gear fade) built after convo v0.3. Earlier: MVP 0.1.0 built and checked headless (no console errors, no horizontal scroll at 1180×820, 768×1024, 390×844; flight model tests pass). Not device-tested. Round 1 questions in `03 Projects/Paper Airplanes x A-10 Warthog/convo/convo v0.1.md`.
 
 ## Goal
 
@@ -34,3 +34,10 @@ A browser 2.5D pixel-art flight game, built small enough to read, so Jimmy can s
 - A real iPad (touch on the five buttons, pinch, the bottom errors panel).
 - Balance of difficulty by a real player (targets, shells, ammo).
 - The drawer's force arrows (rendered only in a screenshot with the setting off).
+
+## Round 2 (convo v0.3)
+
+- Rebuilt for chase view: 3-D position (X, Z, h) with heading; perspective checkerboard ground; rear-view A-10 and paper glider sprites; free-play targets that keep coming; glider rings across the heading.
+- Controls per `game-controls`: drag from the centre (default), joystick lower left (setting), FIRE and BOOST lower right, ⚙️ upper right and faded (jet view).
+- Checks: `npm test` (7 groups, incl. turning); Playwright at 1180×820 and 390×844: drag climbs (12 → 43 m), joystick shows, gear fades after 2 s and returns on an upper-right tap, glider view renders, no console errors, no horizontal scroll.
+- Not verified: a real iPad touch; difficulty; the flat plane sprite (stacking not built yet).

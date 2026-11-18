@@ -1,7 +1,7 @@
-// The land and the missions. Same seed, same mission: the balance test relies on it.
+// The land, the targets and the glider rings. Same seed, same start.
 namespace PA {
-  export type Mode = 'jet' | 'paper';
-  export type Size = 'full' | 'quick';
+  export type Mode = 'jet' | 'glider';
+  export type TargetKind = 'tank' | 'truck' | 'flak';
 
   // A seeded random number generator (mulberry32). Returns 0 up to 1.
   export function random(seed: number): () => number {
@@ -15,25 +15,23 @@ namespace PA {
     };
   }
 
-  // Height of the ground in metres at distance x (the same line is drawn).
-  export function groundAt(x: number): number {
-    return Math.max(0, 4 + 3.5 * Math.sin(x / 210) + 1.5 * Math.sin(x / 61 + 2));
+  // Height of the ground in metres at ground position (X, Z).
+  export function groundAt(X: number, Z: number): number {
+    return Math.max(0, 4 + 3.5 * Math.sin(X / 210) + 1.5 * Math.sin(Z / 61 + 2));
   }
-
-  export type TargetKind = 'tank' | 'truck' | 'flak';
 
   export interface Target {
     kind: TargetKind;
-    x: number;
-    far: boolean;      // drawn half size, higher on the screen: further away
-    hp: number;
+    X: number;
+    Z: number;
     alive: boolean;
     points: number;
     cool: number;      // flak only: seconds until the next shot
   }
 
   export interface Hoop {
-    x: number;
+    X: number;
+    Z: number;
     h: number;
     r: number;
     passed: boolean;
@@ -41,60 +39,43 @@ namespace PA {
 
   export interface Mission {
     mode: Mode;
-    size: Size;
-    seed: number;
     targets: Target[];
     hoops: Hoop[];
-    startX: number;
-    startH: number;
-    startSpeed: number;
-    startPitch: number;
-    startThrottle: number;
-    ammo: number;
   }
 
-  export function makeMission(mode: Mode, size: Size, seed: number): Mission {
-    const rand = random(seed);
-    const full = size === 'full';
+  // Ground size of each target (radius to hit, height), in metres.
+  export const SIZE: { [k in TargetKind]: { r: number; height: number } } = {
+    tank: { r: 2.6, height: 2.6 },
+    truck: { r: 2.2, height: 2.6 },
+    flak: { r: 2.0, height: 3.0 },
+  };
 
-    if (mode === 'paper') {
-      const count = full ? 24 : 12;
-      const hoops: Hoop[] = [];
-      for (let i = 0; i < count; i++) {
-        const x = 260 + i * 110 + rand() * 40;
-        hoops.push({ x, h: groundAt(x) + 12 + rand() * 40, r: 6, passed: false });
-      }
-      return {
-        mode, size, seed, targets: [], hoops,
-        startX: 0, startH: 90, startSpeed: 40, startPitch: 0.08, startThrottle: 0, ammo: 0,
-      };
-    }
-
-    const count = full ? 12 : 6;
-    const targets: Target[] = [];
+  // A group of ground targets in front of (baseZ). Every third one has an anti-aircraft gun.
+  export function spawnTargets(rand: () => number, baseZ: number, count: number): Target[] {
+    const out: Target[] = [];
     for (let i = 0; i < count; i++) {
-      const x = 500 + i * 260 + rand() * 120;
-      const far = rand() < 0.4;
+      const X = (rand() - 0.5) * 260;
+      const Z = baseZ + i * 110 + rand() * 60;
       const kind: TargetKind = rand() < 0.6 ? 'tank' : 'truck';
-      targets.push({
-        kind, x, far,
-        hp: kind === 'tank' ? 2 : 1,
-        alive: true,
-        points: (kind === 'tank' ? 100 : 60) * (far ? 2 : 1),
-        cool: 0,
-      });
-      // Every third target has an anti-aircraft gun beside it.
+      out.push({ kind, X, Z, alive: true, points: kind === 'tank' ? 100 : 60, cool: 0 });
       if (i % 3 === 0) {
-        targets.push({
-          kind: 'flak', x: x + 22, far: false, hp: 1, alive: true,
-          points: 80, cool: 1 + rand() * 1.5,
-        });
+        out.push({ kind: 'flak', X: X + 8, Z: Z + 8, alive: true, points: 80, cool: 1 + rand() * 1.5 });
       }
     }
-    return {
-      mode, size, seed, targets, hoops: [],
-      startX: 0, startH: groundAt(0) + 10, startSpeed: 60, startPitch: 0.05, startThrottle: 0.5,
-      ammo: full ? 240 : 160,
-    };
+    return out;
+  }
+
+  export function makeMission(mode: Mode, seed: number): Mission {
+    const rand = random(seed);
+    if (mode === 'glider') {
+      const hoops: Hoop[] = [];
+      for (let i = 0; i < 24; i++) {
+        const X = (rand() - 0.5) * 60;
+        const Z = 220 + i * 110 + rand() * 30;
+        hoops.push({ X, Z, h: groundAt(X, Z) + 12 + rand() * 40, r: 6, passed: false });
+      }
+      return { mode, targets: [], hoops };
+    }
+    return { mode, targets: spawnTargets(rand, 260, 10), hoops: [] };
   }
 }
