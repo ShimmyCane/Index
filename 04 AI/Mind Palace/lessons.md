@@ -31,3 +31,14 @@
 21. **Software GL with 170,000 blended splats runs many times slower than a device.** Tests set the fewest splats and wait on state.
 22. **Carry every array through a join.** The `.ply` export failed because the join of palace and little-me dropped the normals and scales; only clicking the button showed it.
 
+## 2026-11-17, round 4 (fog, moving things, default page)
+
+23. **A fog of war in a splat renderer is one smooth fade in the vertex shader.** Multiply both the colour and the opacity by a visibility that falls from 1 inside a radius to 0 outside. Fading the colour only leaves dark smudges on the sky; fading both makes the far splats vanish.
+24. **Moving a part of a splat scene is a block id plus one rigid transform.** Store the block in a spare slot of the texture; each frame upload one rotation and one position per block. The shader moves the splats, and the CPU applies the same move to the centres it sorts by. No splat data is rewritten.
+25. **Make every motion periodic and phase-shifted.** Each loop is a function of time over its period, so it repeats exactly; a phase per object keeps a flock from moving in step. Orbits turn the model to face along the path.
+26. **Don't reuse a helper's argument order by eye.** A positional helper called with an array where a scalar was expected produced NaN positions that only showed as blank splats; a finite-check over the shapes found it in one run.
+27. **Renaming a page is a link audit.** Moving the splat view to `index.html` meant rewriting every link and the notes' page names; the Node check and the headless run both confirmed the new paths.
+28. **Names belong to the fog too.** A label that stays on screen across the fog gives away what can't be seen; hide it by the same radius.
+
+29. **Say which technique is in use before saying what is missing.** Jimmy asked whether SDF and splats were in use. The web view uses splats only, and the Godot port also uses splats only, though it has never been run. Answer with a table of "used / not used / run" before proposing the next step.
+

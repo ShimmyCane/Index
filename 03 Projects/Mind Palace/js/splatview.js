@@ -9,12 +9,12 @@
 (function () {
   'use strict';
   var MP = window.MP = window.MP || {};
-  var PER_ROW = 682, TEX_W = PER_ROW * 3;
+  var PER_ROW = 682, TEX_W = PER_ROW * 3, NB = 40;
 
   var VERT = '#version 300 es\n' +
     'precision highp float; precision highp int; precision highp sampler2D;\n' +
     'uniform sampler2D uData; uniform mat4 uView; uniform mat4 uProj; uniform vec2 uFocal; uniform vec2 uViewport;\n' +
-    'uniform int uAvStart; uniform mat3 uAvRot; uniform vec3 uAvPos; uniform float uSize;\n' +
+    'uniform mat3 uBR[40]; uniform vec3 uBP[40]; uniform vec3 uSeeAt; uniform float uSeeR; uniform float uSize;\n' +
     'in vec2 aQuad; in uint aIndex;\n' +
     'out vec4 vColor; out vec2 vPos;\n' +
     'void main() {\n' +
@@ -22,7 +22,8 @@
     '  vec4 t0 = texelFetch(uData, tc, 0); vec4 t1 = texelFetch(uData, tc + ivec2(1, 0), 0); vec4 t2 = texelFetch(uData, tc + ivec2(2, 0), 0);\n' +
     '  vec3 c = t0.xyz;\n' +
     '  mat3 V = mat3(t1.x, t1.y, t1.z, t1.y, t2.x, t2.y, t1.z, t2.y, t2.z);\n' +
-    '  if (i >= uAvStart) { c = uAvRot * c + uAvPos; V = uAvRot * V * transpose(uAvRot); }\n' +
+    '  int blk = int(t2.w + 0.5);\n' +
+    '  if (blk > 0) { mat3 R = uBR[blk]; c = R * c + uBP[blk]; V = R * V * transpose(R); }\n' +
     '  vec4 cam = uView * vec4(c, 1.0);\n' +
     '  float d = -cam.z;\n' +
     '  if (d < 0.25) { gl_Position = vec4(0.0, 0.0, 2.0, 1.0); return; }\n' +
@@ -37,7 +38,8 @@
     '  vec4 clip = uProj * cam;\n' +
     '  vPos = aQuad;\n' +
     '  float rgb = t0.w;\n' +
-    '  vColor = vec4(mod(rgb, 256.0) / 255.0, mod(floor(rgb / 256.0), 256.0) / 255.0, floor(rgb / 65536.0) / 255.0, t1.w);\n' +
+    '  float vis = uSeeR > 0.0 ? 1.0 - smoothstep(uSeeR * 0.55, uSeeR, distance(c, uSeeAt)) : 1.0;\n' +
+    '  vColor = vec4(vis * vec3(mod(rgb, 256.0), mod(floor(rgb / 256.0), 256.0), floor(rgb / 65536.0)) / 255.0, vis * t1.w);\n' +
     '  gl_Position = vec4(clip.xy / clip.w + (aQuad.x * major + aQuad.y * minor) * 2.0 / uViewport, clip.z / clip.w, 1.0);\n' +
     '}\n';
   var FRAG = '#version 300 es\n' +
@@ -51,7 +53,8 @@
     '}\n';
 
   var gl, canvas, prog, loc = {}, vao, indexBuf, tex, data = null, order = null, sortCenter = null, depth = null, counts = new Uint32Array(65536), starts = new Uint32Array(65536);
-  var view = new Float32Array(16), proj = new Float32Array(16), avPos = [0, 0, 0], avHeading = 0, size = 1;
+  var view = new Float32Array(16), proj = new Float32Array(16), size = 1;
+  var BR = new Float32Array(9 * NB), BP = new Float32Array(3 * NB), blockIdx = [], fogR = 0, fogAt = [0, 0, 0];
 
   function shader(type, src) {
     var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
@@ -64,7 +67,8 @@
     if (!gl) return false;
     prog = gl.createProgram(); gl.attachShader(prog, shader(gl.VERTEX_SHADER, VERT)); gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, FRAG)); gl.linkProgram(prog);
     if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error('link: ' + gl.getProgramInfoLog(prog));
-    ['uData', 'uView', 'uProj', 'uFocal', 'uViewport', 'uAvStart', 'uAvRot', 'uAvPos', 'uSize'].forEach(function (n) { loc[n] = gl.getUniformLocation(prog, n); });
+    ['uData', 'uView', 'uProj', 'uFocal', 'uViewport', 'uSeeAt', 'uSeeR', 'uSize'].forEach(function (n) { loc[n] = gl.getUniformLocation(prog, n); });
+    loc.uBR = gl.getUniformLocation(prog, 'uBR[0]'); loc.uBP = gl.getUniformLocation(prog, 'uBP[0]');
     vao = gl.createVertexArray(); gl.bindVertexArray(vao);
     var quad = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quad); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-2, -2, 2, -2, -2, 2, 2, 2]), gl.STATIC_DRAW);
     var aQuad = gl.getAttribLocation(prog, 'aQuad'); gl.enableVertexAttribArray(aQuad); gl.vertexAttribPointer(aQuad, 2, gl.FLOAT, false, 0, 0);
@@ -85,21 +89,26 @@
       buf[o + 3] = g.rgba[i * 4] + g.rgba[i * 4 + 1] * 256 + g.rgba[i * 4 + 2] * 65536;
       buf[o + 4] = g.cov[i * 6]; buf[o + 5] = g.cov[i * 6 + 1]; buf[o + 6] = g.cov[i * 6 + 2]; buf[o + 7] = g.rgba[i * 4 + 3] / 255;
       buf[o + 8] = g.cov[i * 6 + 3]; buf[o + 9] = g.cov[i * 6 + 4]; buf[o + 10] = g.cov[i * 6 + 5];
+      buf[o + 11] = g.block ? g.block[i] : 0;
     }
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, TEX_W, rows, 0, gl.RGBA, gl.FLOAT, buf);
     order = new Uint32Array(g.n); depth = new Uint16Array(g.n); sortCenter = new Float32Array(g.center);
+    blockIdx = [];
+    if (g.block) for (var q = 0; q < g.n; q++) { var bk = g.block[q]; if (bk) (blockIdx[bk] = blockIdx[bk] || []).push(q); }
   }
 
   function sort() {
-    var n = data.n, c = sortCenter, split = data.split == null ? n : data.split, i;
-    // Little-me's splats move with little-me.
-    var ch = Math.cos(avHeading), sh = Math.sin(avHeading), src = data.center;
-    for (i = split; i < n; i++) {
-      var x = src[i * 3], z = src[i * 3 + 2];
-      c[i * 3] = ch * x + sh * z + avPos[0]; c[i * 3 + 1] = src[i * 3 + 1] + avPos[1]; c[i * 3 + 2] = -sh * x + ch * z + avPos[2];
+    var n = data.n, c = sortCenter, src = data.center, i;
+    for (var bi = 1; bi < NB; bi++) {
+      var list = blockIdx[bi]; if (!list) continue;
+      var R = BR.subarray(bi * 9, bi * 9 + 9), P = BP.subarray(bi * 3, bi * 3 + 3);
+      for (var q = 0; q < list.length; q++) {
+        var j = list[q], x = src[j * 3], y = src[j * 3 + 1], z = src[j * 3 + 2];
+        c[j * 3] = R[0] * x + R[3] * y + R[6] * z + P[0]; c[j * 3 + 1] = R[1] * x + R[4] * y + R[7] * z + P[1]; c[j * 3 + 2] = R[2] * x + R[5] * y + R[8] * z + P[2];
+      }
     }
     var a = view[2], b = view[6], e = view[10], min = Infinity, max = -Infinity, zs = sort.z && sort.z.length === n ? sort.z : (sort.z = new Float32Array(n));
     for (i = 0; i < n; i++) { var zc = a * c[i * 3] + b * c[i * 3 + 1] + e * c[i * 3 + 2]; zs[i] = zc; if (zc < min) min = zc; if (zc > max) max = zc; }
@@ -110,20 +119,23 @@
     for (i = 0; i < n; i++) order[starts[depth[i]]++] = i;
   }
 
+  var frameNo = 0, lastView = new Float32Array(16);
   function draw() {
     if (!data || !gl) return;
     var w = canvas.width, h = canvas.height;
-    sort();
+    // Sorting costs the most per frame. Re-sort when the view has turned, and otherwise every third frame
+    // (moving things are a few frames behind in the sort, which no eye sees).
+    var moved = false; for (var q = 0; q < 16; q++) if (view[q] !== lastView[q]) { moved = true; break; }
+    if (moved || frameNo % 3 === 0) { sort(); lastView.set(view); }
+    frameNo++;
     gl.viewport(0, 0, w, h); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
     gl.useProgram(prog); gl.bindVertexArray(vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, indexBuf); gl.bufferData(gl.ARRAY_BUFFER, order, gl.DYNAMIC_DRAW);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex); gl.uniform1i(loc.uData, 0);
     gl.uniformMatrix4fv(loc.uView, false, view); gl.uniformMatrix4fv(loc.uProj, false, proj);
     gl.uniform2f(loc.uFocal, proj[0] * w / 2, proj[5] * h / 2); gl.uniform2f(loc.uViewport, w, h);
-    gl.uniform1i(loc.uAvStart, data.split == null ? data.n : data.split);
-    var ch = Math.cos(avHeading), sh = Math.sin(avHeading);
-    gl.uniformMatrix3fv(loc.uAvRot, false, new Float32Array([ch, 0, -sh, 0, 1, 0, sh, 0, ch]));
-    gl.uniform3f(loc.uAvPos, avPos[0], avPos[1], avPos[2]); gl.uniform1f(loc.uSize, size);
+    gl.uniformMatrix3fv(loc.uBR, false, BR); gl.uniform3fv(loc.uBP, BP);
+    gl.uniform3f(loc.uSeeAt, fogAt[0], fogAt[1], fogAt[2]); gl.uniform1f(loc.uSeeR, fogR); gl.uniform1f(loc.uSize, size);
     gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, data.n);
   }
 
@@ -154,7 +166,16 @@
 
   MP.Splat = {
     init: init, setData: setData, draw: draw, perspective: perspective, lookAt: lookAt, toScreen: toScreen, ray: ray,
-    setAvatar: function (p, heading) { avPos = p; avHeading = heading; },
+    // list[b] = { R: 9 numbers (columns), P: 3 numbers } moves block b; a block left out stays where it was built.
+    setBlocks: function (list) {
+      BR.fill(0); BP.fill(0);
+      for (var b = 0; b < NB; b++) {
+        var m = list[b], r = m ? m.R : [1, 0, 0, 0, 1, 0, 0, 0, 1], p = m ? m.P : [0, 0, 0], q;
+        for (q = 0; q < 9; q++) BR[b * 9 + q] = r[q];
+        for (q = 0; q < 3; q++) BP[b * 3 + q] = p[q];
+      }
+    },
+    setFog: function (radius, at) { fogR = radius; fogAt = at; },
     setSize: function (s) { size = s; },
     count: function () { return data ? data.n : 0; },
     pixel: function (x, y) { var b = new Uint8Array(4); gl.readPixels(x, canvas.height - y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, b); return Array.prototype.slice.call(b); }

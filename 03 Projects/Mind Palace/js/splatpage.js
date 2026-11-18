@@ -31,10 +31,13 @@
   function rebuild() {
     desc = L.build(M.data);
     scene = MP.Scene.build(desc, MP.objectShapes);
-    var world = MP.Gauss.build(scene.shapes, { budget: BUDGET[MP.settings.quality] || BUDGET.medium, fuzzOf: fuzzOf,
-      // Memory objects get the most splats, rooms the usual amount, the big islands fewer.
-      detailOf: function (s) { return s.pick && M.node(s.pick) ? 5 : s.pick && M.world(s.pick) ? 0.3 : 1; } });
-    var me = MP.Gauss.build(MP.Scene.avatar(), { budget: 6000, density: 1600, seed: 7 });
+    var deco = MP.Scene.decorate(desc);                 // trees, and the things that move
+    motions = deco.motions;
+    var meShapes = MP.Scene.avatar(); meShapes.forEach(function (sh) { sh.group = 1; });   // little-me is block 1
+    var world = MP.Gauss.build(scene.shapes.concat(deco.shapes), { budget: BUDGET[MP.settings.quality] || BUDGET.medium, fuzzOf: fuzzOf,
+      // Memory objects get the most splats, moving things many, rooms the usual amount, the big islands fewer.
+      detailOf: function (sh) { if (sh.group > 1) return 3; return sh.pick && M.node(sh.pick) ? 5 : sh.pick && M.world(sh.pick) ? 0.3 : 1; } });
+    var me = MP.Gauss.build(meShapes, { budget: 6000, density: 1600, seed: 7 });
     gauss = MP.Gauss.join(world, me);
     if (ok) S.setData(gauss);
     buildSigns(); dirty = true;
@@ -104,7 +107,7 @@
   }
   function renderBubble() {
     var b = $('bubble');
-    if (!near || !M.node(near)) { b.hidden = true; MP.Notes.setContext({ page: 'splat.html', item: '', label: 'Whole palace (splats)' }); return; }
+    if (!near || !M.node(near)) { b.hidden = true; MP.Notes.setContext({ page: 'index.html', item: '', label: 'Whole palace (splats)' }); return; }
     var n = M.node(near), a = M.asset(n.asset_id), p = M.place(n.place_id), w = p && M.world(p.parent_id);
     var first = (n.description || '').split(/(?<=[.!?])\s/)[0] || '';
     var html = '<h2><span>' + esc(emojiOf(a)) + '</span>' + esc(n.title) + '</h2>';
@@ -123,7 +126,7 @@
       html += '<div class="rowBtns"><button class="btn small" type="button" data-b="less">Close</button></div>';
     }
     b.innerHTML = html; b.hidden = false;
-    MP.Notes.setContext({ page: 'splat.html', item: n.id, label: 'Memory (splats): ' + n.title });
+    MP.Notes.setContext({ page: 'index.html', item: n.id, label: 'Memory (splats): ' + n.title });
   }
   function updateNear() {
     var id = av.travel && !wander ? null : findNear();
@@ -174,6 +177,8 @@
     var showTags = MP.settings.labels !== 'off';
     signs.forEach(function (s) {
       var p = S.toScreen(s.pos, cssW, cssH), on = !!p && p.x > -80 && p.x < cssW + 80 && p.y > -40 && p.y < cssH + 40;
+      // Names fade with the fog too: no name for a place little-me cannot see.
+      if (on && MP.settings.fog && Math.hypot(s.pos[0] - av.pos[0], s.pos[2] - av.pos[2]) > fogRadius() * 0.9) on = false;
       if (on && s.kind === 'node') on = showTags && p.d < 34;
       if (on && s.kind === 'emoji') on = p.d < 90;
       if (on && s.kind === 'room') on = p.d < 150;
@@ -249,6 +254,7 @@
       seg.querySelectorAll('button').forEach(function (b) { b.classList.toggle('on', b.dataset.v === v); });
     });
     $('fuzz').value = MP.settings.fuzz; $('fuzzVal').textContent = MP.settings.fuzz;
+    $('sight').value = MP.settings.sight; $('sightVal').textContent = MP.settings.sight < 25 ? 'near' : MP.settings.sight > 75 ? 'far' : 'middle';
     $('showErrors').checked = !!MP.settings.showErrors; renderErrors();
     var cur = MP.palaces.current();
     $('palacePick').innerHTML = MP.palaces.list().map(function (p) { return '<option value="' + esc(p.id) + '"' + (p.id === cur.id ? ' selected' : '') + '>' + esc(p.name) + '</option>'; }).join('');
@@ -276,6 +282,9 @@
       MP.settings.fuzz = +e.target.value; $('fuzzVal').textContent = MP.settings.fuzz; MP.saveSettings();
       clearTimeout(fuzzTimer); fuzzTimer = setTimeout(rebuild, 120);
     });
+    $('sight').addEventListener('input', function (e) {
+      MP.settings.sight = +e.target.value; $('sightVal').textContent = MP.settings.sight < 25 ? 'near' : MP.settings.sight > 75 ? 'far' : 'middle'; MP.saveSettings(); dirty = true;
+    });
     $('palacePick').addEventListener('change', function (e) {
       MP.palaces.choose(e.target.value); setWander(false); near = null; renderBubble(); loadPalace(); rebuild(); home(); frameAll(); toast('This is ' + MP.palaces.current().name + '.');
     });
@@ -288,6 +297,32 @@
     MP.onError = renderErrors;
     window.addEventListener('error', function (e) { MP.logError(e.message + (e.filename ? ' (' + e.filename.split('/').pop() + ':' + e.lineno + ')' : '')); });
     renderSettings();
+  }
+
+  /* ---------- moving things: each motion moves one block of splats rigidly, on a loop ---------- */
+  var clock = 0, motions = [];
+  function rx(a) { var c = Math.cos(a), sn = Math.sin(a); return [1, 0, 0, 0, c, sn, 0, -sn, c]; }
+  function ry(a) { var c = Math.cos(a), sn = Math.sin(a); return [c, 0, -sn, 0, 1, 0, sn, 0, c]; }
+  function rz(a) { var c = Math.cos(a), sn = Math.sin(a); return [c, sn, 0, -sn, c, 0, 0, 0, 1]; }
+  function rot(axis, a) { return axis === 'x' ? rx(a) : axis === 'y' ? ry(a) : rz(a); }
+  function mv(R, v) { return [R[0] * v[0] + R[3] * v[1] + R[6] * v[2], R[1] * v[0] + R[4] * v[1] + R[7] * v[2], R[2] * v[0] + R[5] * v[1] + R[8] * v[2]]; }
+  /* How far little-me can see. Zooming out widens the view, so the whole palace can still be looked over. */
+  function fogRadius() { return MP.settings.fog ? 12 + MP.settings.sight * 0.9 + cam.dist * 0.7 : 0; }   // doubled in 0.3.1
+  /* Where every block is this frame. Each motion is periodic, so it loops exactly. */
+  function blockMats() {
+    var out = [], t = clock, bob = Math.abs(Math.sin(av.bob)) * 0.07;
+    out[1] = { R: ry(av.heading), P: [av.pos[0], av.pos[1] + bob, av.pos[2]] };       // little-me
+    motions.forEach(function (m) {
+      var ph = 2 * Math.PI * t / m.period + (m.phase || 0), R, P;
+      if (m.type === 'spin') { R = rot(m.axis, ph); var q = mv(R, m.pivot); P = [m.pivot[0] - q[0], m.pivot[1] - q[1], m.pivot[2] - q[2]]; }
+      else if (m.type === 'orbit') {
+        R = ry(-ph);                                                                  // turns to face along the path
+        var pos = [m.centre[0] + m.radius * Math.cos(ph), m.centre[1], m.centre[2] + m.radius * Math.sin(ph)], qr = mv(R, m.rest);
+        P = [pos[0] - qr[0], pos[1] - qr[1], pos[2] - qr[2]];
+      } else { R = [1, 0, 0, 0, 1, 0, 0, 0, 1]; P = [0, m.amp * Math.sin(ph), 0]; }   // bob
+      out[m.block] = { R: R, P: P };
+    });
+    return out;
   }
 
   /* ---------- start and loop ---------- */
@@ -304,9 +339,12 @@
     if (!desc || !ok) return;
     try {
       stepAvatar(dt); stepCamera(dt); updateNear();
+      if (MP.settings.animate && motions.length) { clock += dt; dirty = true; }     // moving things keep the picture changing
       if (!dirty) return;
       dirty = false;
-      S.setAvatar([av.pos[0], av.pos[1] + Math.abs(Math.sin(av.bob)) * 0.07, av.pos[2]], av.heading);
+      S.setBlocks(blockMats());
+      // Fog of war: what little-me can see stays lit; beyond it the palace fades to black. Zooming out widens the view a little.
+      S.setFog(fogRadius(), [av.pos[0], av.pos[1] + 1, av.pos[2]]);
       S.draw(); placeSigns();
     } catch (e) { MP.logError('draw: ' + e.message); ok = false; }
   }
@@ -360,7 +398,7 @@
     MP.debug = function () {
       return { version: MP.VERSION, ok: ok, splats: gauss ? gauss.n : 0, shapes: scene ? scene.shapes.length : 0, signs: signs.filter(function (s) { return s.shown; }).length,
         cam: { yaw: goal.yaw, pitch: goal.pitch, dist: goal.dist, target: goal.target.slice() }, avatar: av.pos.slice(), traveling: !!av.travel, follow: follow, walk: walk,
-        wander: !!wander, near: near, nearOpen: nearOpen, results: results.map(function (r) { return r.id; }), errors: MP.errors.slice(), palace: MP.palaces.current() };
+        wander: !!wander, near: near, nearOpen: nearOpen, moving: motions.length, clock: +clock.toFixed(2), fogR: fogRadius(), results: results.map(function (r) { return r.id; }), errors: MP.errors.slice(), palace: MP.palaces.current() };
     };
     MP.debugScreen = function (id) { var o = desc.byId[id]; return o ? S.toScreen([o.pos[0], o.pos[1] + 1.1, o.pos[2]], cssW, cssH) : null; };
     requestAnimationFrame(loop);

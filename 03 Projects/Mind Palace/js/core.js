@@ -20,7 +20,7 @@
     }
   };
 
-  MP.DEFAULTS = { sound: 1, labels: 'all', links: 'selected', shadows: 1, speed: 'normal', showErrors: false, quality: 'medium', fuzz: 30, fuzzByPractice: 1 };
+  MP.DEFAULTS = { sound: 1, labels: 'all', links: 'selected', shadows: 1, speed: 'normal', showErrors: false, quality: 'medium', fuzz: 20, fuzzByPractice: 1, fog: 1, sight: 60, animate: 1 };
   MP.settings = Object.assign({}, MP.DEFAULTS);
   (function () {
     var saved = MP.store.get(MP.KEYS.settings, {}) || {};

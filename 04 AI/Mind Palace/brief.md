@@ -32,3 +32,14 @@
 - **Unrun:** `godot/`.
 - **Open:** convo v0.3 (main renderer, homes, how to enter a plan, units, doors, visiting rights, AI objects, what drives fuzz).
 
+**Round 4 (2026-11-17), version 0.3.0, from Jimmy's request to make the splat view the default, add fog of war and more life.** The splat view is now `index.html` (the nursery tile opens it); the Build page is `build.html`.
+
+- **Done:** fog of war (radius around little-me, black beyond, names fade too, widens when zoomed out; settings: on/off, how far); moving things on loops (windmill, three birds, balloon, walker, gear) as rigid blocks in the splat shader, with the same motion on the CPU for the sort; trees (round, pine, blossom) on each island; settings for fog and moving things.
+- **Checked:** the default page opens with no errors; the clock runs and the 21 moving parts are present; screenshots show the fog, the trees, the birds and the balloon, and the boat close-up with its pop-up. The full suite is run again at the end (see the lessons).
+- **Not built:** an explored (dim) memory of where little-me has been; animals, boats, cars, stars, a lantern; moving things in Godot.
+- **Open:** convo v0.4 (explored memory, how far to see, more life, Godot).
+
+**0.3.1 (2026-11-18), from convo v0.4:** fog radius doubled (12 + sight × 0.9 + distance × 0.7); a lantern on little-me (a glowing splat block); fireflies on each island, spinning above the plaza. Checked: the default page loads with no errors and 24 moving parts. SDF is not used anywhere yet; the web view and the Godot port both use Gaussian splats only; Godot has never been run. Answered in convo v0.5.
+
+**Godot run (2026-11-18), on request.** The engine (4.3 stable) was run headless in the sandbox on the project. Import ran; the main scene ran 240 frames with no script or parse errors. The only output is 465 `mesh_get_surface_count` errors from the headless dummy renderer; they are not a script error. The picture itself still needs a screen to check. Not run: the splat look, the search and walk, the keys.
+

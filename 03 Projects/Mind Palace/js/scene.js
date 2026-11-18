@@ -169,8 +169,110 @@
     sph(out, '#ffe0c2', 0.25, [0, 1.13, 0]); sph(out, '#6b4a3a', 0.27, [0, 1.2, -0.04], [1, 0.75, 1]);
     sph(out, '#2b2a33', 0.04, [-0.09, 1.14, 0.23]); sph(out, '#2b2a33', 0.04, [0.09, 1.14, 0.23]);
     box(out, '#8fd3b0', [0.3, 0.34, 0.14], [0, 0.7, -0.24]);
+    sph(out, '#ffd76a', 0.2, [0.32, 1.0, 0.22], null, true);          // a lantern that glows
     return out;
   }
 
-  MP.Scene = { build: build, avatar: avatar, apply: apply, FLOOR: FLOOR };
+  /* ---------- decorations: trees, a windmill, birds, a balloon, a walker and a gear. Some of them move, on a loop. ----------
+     A moving part is a "motion": every shape in it moves together, rigidly, around its rest pivot.
+     Motions are numbered as blocks from 2 (block 1 is little-me). A shape's group is its block; 0 is static. */
+  function rotZ(a) { var c = Math.cos(a), s = Math.sin(a); return [c, s, 0, -s, c, 0, 0, 0, 1]; }
+  function rng(seed) { var a = seed >>> 0; return function () { a = (a * 1664525 + 1013904223) >>> 0; return a / 4294967296; }; }
+  var LEAF = ['#8fd3b0', '#7bd389', '#a8e6a1', '#6cc39a'], BLOSSOM = ['#ffb3d1', '#ffd1e3', '#f7b6d2'];
+
+  /* A spot on a world's ground, away from the plaza and from that world's rooms. */
+  function freeSpot(desc, w, rand, lo, hi, margin) {
+    var rooms = desc.rooms.filter(function (q) { return q.worldId === w.id; });
+    for (var k = 0; k < 40; k++) {
+      var a = rand() * Math.PI * 2, r = w.radius * (lo + (hi - lo) * rand());
+      var x = w.pos[0] + Math.cos(a) * r, z = w.pos[2] + Math.sin(a) * r;
+      if (Math.hypot(x - w.pos[0], z - w.pos[2]) < 5) continue;
+      var clash = rooms.some(function (q) { return Math.abs(x - q.pos[0]) < q.half + margin && Math.abs(z - q.pos[2]) < q.half + margin; });
+      if (!clash) return [x, w.pos[1], z];
+    }
+    return null;
+  }
+  /* Three kinds of tree: round, pine and blossom. */
+  function tree(out, rand, p) {
+    var k = rand(), s = 0.8 + rand() * 0.5;
+    function at(dx, dy, dz) { return [p[0] + dx * s, p[1] + dy * s, p[2] + dz * s]; }
+    cyl(out, '#c49a6c', 0.16 * s, 0.22 * s, 1.5 * s, at(0, 0.75, 0));
+    if (k < 0.45) {
+      var c = LEAF[Math.floor(rand() * LEAF.length)];
+      sph(out, c, 1.1 * s, at(0, 2.3, 0)); sph(out, c, 0.75 * s, at(0.5, 2.9, 0.2)); sph(out, LEAF[Math.floor(rand() * LEAF.length)], 0.7 * s, at(-0.5, 2.8, -0.3));
+    } else if (k < 0.8) {
+      var g = '#5fb88a';
+      cyl(out, g, 0, 1.1 * s, 1.7 * s, at(0, 1.9, 0)); cyl(out, g, 0, 0.8 * s, 1.4 * s, at(0, 2.8, 0)); cyl(out, g, 0, 0.5 * s, 1.1 * s, at(0, 3.6, 0));
+    } else {
+      sph(out, BLOSSOM[Math.floor(rand() * BLOSSOM.length)], 1.0 * s, at(0, 2.3, 0)); sph(out, '#ffffff', 0.5 * s, at(0.6, 2.7, 0.3));
+    }
+  }
+  /* Returns { shapes, motions }. A motion: { block, type: 'spin' | 'orbit' | 'bob', ...params }. */
+  function decorate(desc) {
+    var shapes = [], motions = [];
+    function motion(type, opts, parts) {
+      var block = motions.length + 2;
+      parts.forEach(function (s) { s.group = block; shapes.push(s); });
+      opts.block = block; opts.type = type; motions.push(opts);
+    }
+    desc.worlds.forEach(function (w) {
+      var rand = rng(hash(w.id) * 7 + 3), i, k;
+      for (i = 0; i < 9; i++) { var p = freeSpot(desc, w, rand, 0.3, 0.9, 2.2); if (p) tree(shapes, rand, p); }
+
+      // A windmill: the blades turn about the hub.
+      var wm = freeSpot(desc, w, rand, 0.3, 0.6, 3);
+      if (wm) {
+        cyl(shapes, '#fff6e0', 0.42, 0.6, 3.0, add3(wm, 0, 1.5, 0));
+        cyl(shapes, '#ff9f8a', 0, 0.85, 0.9, add3(wm, 0, 3.45, 0));
+        var hub = [wm[0], wm[1] + 3.2, wm[2] + 0.7], blades = [];
+        sph(blades, '#ffd76a', 0.28, hub);
+        for (k = 0; k < 4; k++) { var a = k * Math.PI / 2; box(blades, '#fffdf7', [1.7, 0.22, 0.12], add3(hub, Math.cos(a) * 0.85, Math.sin(a) * 0.85, 0), '', rotZ(a)); }
+        motion('spin', { axis: 'z', pivot: hub, period: 8 }, blades);
+      }
+
+      // Three birds, each flying a wide loop high over the island.
+      for (i = 0; i < 3; i++) {
+        var r = 9 + i * 2.5, C = [w.pos[0], w.pos[1] + 9 + i * 1.6, w.pos[2]], Pr = [C[0] + r, C[1], C[2]], col = ['#ffd76a', '#ff9fc0', '#9fd3ff'][i], bird = [];
+        sph(bird, col, 0.6, Pr, [0.6, 0.5, 1.0]);
+        sph(bird, col, 0.36, add3(Pr, 0, 0.12, 0.7));
+        box(bird, '#ffffff', [1.6, 0.06, 0.5], add3(Pr, 0, 0.08, -0.05));
+        motion('orbit', { centre: C, radius: r, rest: Pr, period: 14 + i * 4, phase: i * 2.1 }, bird);
+      }
+
+      // A balloon bobbing above the ground.
+      var bl = freeSpot(desc, w, rand, 0.2, 0.7, 2.5);
+      if (bl) {
+        var balloon = [], base = add3(bl, 0, 6, 0);
+        sph(balloon, '#ff8fa3', 0.9, add3(base, 0, 0.9, 0));
+        cyl(balloon, '#c49a6c', 0.3, 0.3, 0.4, add3(base, 0, -0.5, 0));
+        motion('bob', { amp: 0.7, period: 5 + rand() * 3, phase: rand() * 6.28 }, balloon);
+      }
+
+      // A little walker going round the plaza.
+      var wr = 5.5, Wr = [w.pos[0] + wr, w.pos[1], w.pos[2]], walker = avatar();
+      walker.forEach(function (s) { s.xf.o = [s.xf.o[0] + Wr[0], s.xf.o[1] + Wr[1], s.xf.o[2] + Wr[2]]; });
+      motion('orbit', { centre: [w.pos[0], w.pos[1], w.pos[2]], radius: wr, rest: Wr, period: 22, phase: rand() * 6.28 }, walker);
+
+      // Fireflies: a ring of glowing dots turning slowly above the plaza.
+      var ff = [], fc = [w.pos[0], w.pos[1] + 3.2, w.pos[2]];
+      for (k = 0; k < 6; k++) {
+        var fa = k * Math.PI / 3, fr = 3.5 + (k % 2) * 1.5;
+        sph(ff, '#fff3a0', 0.16, [fc[0] + Math.cos(fa) * fr, fc[1] + (k % 3) * 0.5, fc[2] + Math.sin(fa) * fr], null, true);
+      }
+      motion('spin', { axis: 'y', pivot: fc, period: 12 }, ff);
+
+      // A gear on a post, turning.
+      var gp = freeSpot(desc, w, rand, 0.45, 0.8, 2.5);
+      if (gp) {
+        var gc = add3(gp, 0, 1.7, 0), gear = [];
+        cyl(shapes, '#c49a6c', 0.08, 0.08, 1.7, add3(gp, 0, 0.85, 0));
+        gear.push({ t: 'cyl', color: '#9fc5e8', xf: { b: rotX(Math.PI / 2), o: gc }, rt: 0.7, rb: 0.7, h: 0.25, glow: false, pick: '' });
+        for (k = 0; k < 8; k++) { var ga = k * Math.PI / 4; box(gear, '#9fc5e8', [0.32, 0.3, 0.3], add3(gc, Math.cos(ga) * 0.85, Math.sin(ga) * 0.85, 0), '', rotZ(ga)); }
+        motion('spin', { axis: 'z', pivot: gc, period: 9 }, gear);
+      }
+    });
+    return { shapes: shapes, motions: motions };
+  }
+
+  MP.Scene = { build: build, avatar: avatar, decorate: decorate, apply: apply, FLOOR: FLOOR };
 })();

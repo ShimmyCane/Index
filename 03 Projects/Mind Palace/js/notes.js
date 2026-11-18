@@ -3,7 +3,7 @@
 (function () {
   'use strict';
   var MP = window.MP = window.MP || {};
-  var where = { page: 'index.html', item: '', label: 'Whole palace' };
+  var where = { page: location.pathname.split('/').pop() || 'index.html', item: '', label: 'Whole palace' };
   var notes = MP.store.get(MP.KEYS.notes, []) || [];
   if (!Array.isArray(notes)) notes = [];
   function save() { MP.store.set(MP.KEYS.notes, notes); }
@@ -27,7 +27,7 @@
     box.value = ''; save(); render();
   }
   MP.Notes = {
-    setContext: function (ctx) { where = Object.assign({ page: 'index.html' }, ctx); render(); },
+    setContext: function (ctx) { where = Object.assign({ page: where.page }, ctx); render(); },
     all: function () { return notes.slice(); },
     init: function () {
       document.getElementById('noteSave').addEventListener('click', add);

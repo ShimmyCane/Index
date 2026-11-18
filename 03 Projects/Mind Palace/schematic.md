@@ -2,9 +2,9 @@
 
 **Track: A. Family play** (a palace for each family member; Jimmy's first, for the others to walk through), with studio-level depth kept in collapsed panels.
 
-Status (2026-11-17), version 0.2.0, headless-tested, not yet tried on an iPad:
-- **`splat.html`**: the palace drawn with Gaussian splats in plain WebGL 2 (no three.js). Walk, search, walk-up pop-ups, Wander, a fuzziness slider. This is the view Jimmy asked for.
-- **`index.html`** (three.js): the Build page, where things are added, changed, connected and practised. A placeholder for its 3-D view.
+Status (2026-11-18), version 0.3.1 (fog radius doubled; lantern and fireflies added), headless-tested, not yet tried on an iPad:
+- **`index.html`** (the default page): the palace drawn with Gaussian splats in plain WebGL 2 (no three.js). Walk, search, walk-up pop-ups, Wander, a fuzziness slider, fog of war, moving things on loops.
+- **`build.html`** (three.js): the Build page, where things are added, changed, connected and practised.
 - **`godot/`**: a Godot 4.3 application, written and never run (`godot/schematic.md`). Jimmy tests it himself.
 
 ## Purpose
@@ -79,10 +79,10 @@ Differences from the specification's example: a world does not store `places` an
 | `js/layout.js` | Database → scene description; routes; which room a point is in |
 | `js/objects.js` | 29 objects made from simple shapes, and emoji cards |
 | `js/view.js` | three.js: islands, rooms, bridges, little-me, camera, picking, dragging |
-| `js/scene.js` | Layout → a flat list of simple shapes (box, cylinder, sphere, ring, prism) and signs. No DOM |
+| `js/scene.js` | Layout → a flat list of simple shapes (box, cylinder, sphere, ring, prism) and signs; `decorate` adds trees, a windmill, birds, a balloon, a walker and a gear, the last five moving on loops. No DOM |
 | `js/gauss.js` | Shapes → Gaussian splats (sampling, fuzz, `.ply`). No DOM |
-| `js/splatview.js` | The splat renderer: WebGL 2, sort far to near, blend |
-| `js/splatpage.js`, `splat.html`, `css/splat.css` | The splat page |
+| `js/splatview.js` | The splat renderer: WebGL 2; moves blocks, fog of war, sort far to near, blend |
+| `js/splatpage.js`, `index.html`, `css/splat.css` | The splat page (default) |
 | `js/objects_data.js` | The object library as simple shapes. Made by `tools/export_godot_data.js` |
 | `js/audio.js` | Sounds made with Web Audio |
 | `js/notes.js` | Notes for improvement |
@@ -95,7 +95,34 @@ Differences from the specification's example: a world does not store `places` an
 
 "Notes for improvement" in ⚙️. Each note is saved with the thing selected (a memory, a room, a world, or the whole palace), the time and the version. Open and All filter, Copy notes. Device storage only, key `mindpalace.notes`. Sent nowhere. A family table is question 3.
 
-## Splats (how `splat.html` works)
+## Moving things and fog of war (0.3.0)
+
+| Thing | Motion (every splat of it moves together, rigidly) | Loop |
+|---|---|---|
+| Windmill blades | spin about the hub | 8 s |
+| Birds (three) | fly a wide loop over the island, turning to face along the path | 14, 18, 22 s |
+| Balloon | bobs up and down | 5 to 8 s |
+| A walker | goes round the plaza, facing along the path | 22 s |
+| A gear on a post | turns | 9 s |
+| Little-me | follows her own position and heading | as you walk |
+
+Each moving part is a block (1 is little-me; the rest from 2). A splat keeps its block in its texture. Every frame the page gives each block a rotation and a position; the shader moves the splats, and the CPU moves the same splats for the back-to-front sort. Trees (round, pine, blossom) are still.
+
+Fog of war: within a radius around little-me the palace is lit; beyond it the splats fade to black, and their names go too. The radius is 6 + the "How far you can see" setting (10 to 100, times 0.45) + 0.35 times the camera distance, so zooming out reveals more. Settings: Fog of war on/off, How far you can see, Moving things Move/Still.
+
+Not in Godot yet: the moving things and the fog exist only on the web splat view.
+
+## Technique in use (2026-11-18)
+
+| Part | Gaussian splats | SDF |
+|---|---|---|
+| Web splat view | yes | no |
+| Build page | no (three.js meshes) | no |
+| Godot project (never run) | yes (a port) | no |
+
+SDF is a proposed next step for shaping rooms and objects (convo v0.5).
+
+## Splats (how the splat view works)
 
 | Step | File | What happens |
 |---|---|---|

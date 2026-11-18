@@ -1,7 +1,7 @@
 /* Mind Palace: write the data the Godot project reads.
      node tools/export_godot_data.js
    - godot/data/objects.json : every object in js/objects.js as a list of simple shapes (so the two renderers share one object library)
-   - js/objects_data.js      : the same library as a script, for splat.html
+   - js/objects_data.js      : the same library as a script, for index.html (the splat view)
    - godot/data/palace.json  : the sample palace, cleaned by the same repair step the page uses
    Run it again after changing js/objects.js or js/sample.js. */
 'use strict';
