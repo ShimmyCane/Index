@@ -421,7 +421,7 @@
       var typed = ((doc.getElementById('delConfirm') || {}).value || '').trim().toLowerCase();
       if (typed !== 'delete everything') { UI.syncMsg = 'Type "delete everything" to confirm. Nothing was deleted.'; return; }
       return dbAction(function () {
-        return SS.cloud.deleteAll(store.settings().keepNames).then(function (res) {
+        return SS.cloud.deleteAll(store.current ? store.current.keepNames : '').then(function (res) {
           UI.deleteOpen = false;
           return 'Deleted ' + res.removed + ' cloud project' + (res.removed === 1 ? '' : 's') +
             (res.kept ? ', kept ' + res.kept + ' by name' : '') +
@@ -478,6 +478,8 @@
         if (f) return readFile(f).then(render, function (err) { SS.errors.log(err); render(); });
       } else if (kind === 'setting') {
         store.setSetting(el.dataset.set, el.type === 'checkbox' ? el.checked : el.value);
+      } else if (kind === 'project') {
+        store.setProjectField(el.dataset.set, el.type === 'checkbox' ? el.checked : el.value);
       } else if (kind === 'filter-flags') {
         UI.flagFilter = el.value;
       } else if (kind === 'filter-dec-section') {

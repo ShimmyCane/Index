@@ -397,13 +397,13 @@
   // Database management: every cloud project, its sync state, conflicts, and "Delete everything".
   function databasePage(ui2) {
     var c = SS.cloud;
-    var s = store.settings();
+    var pr = store.current || {};
     var h = '<h1>Database management</h1>';
     if (!c.configured()) return h + '<p>The database is not set up yet, so projects are saved on this device only (see the config block in <code>index.html</code>).</p>';
     if (!c.session()) return h + '<p>Sign in on the <a href="#/start">Start</a> page first.</p>';
 
-    h += '<section class="card"><label><input type="checkbox" data-chg="setting" data-set="autoSave"' + (s.autoSave !== false ? ' checked' : '') + ' /> ' +
-      'Auto save: save each change to the account as you work</label>' +
+    h += '<section class="card"><label><input type="checkbox" data-chg="project" data-set="autoSave"' + (pr.autoSave !== false ? ' checked' : '') + (store.current ? '' : ' disabled') + ' /> ' +
+      'Auto save this project: save each change to the account as you work (saved with the project)</label>' +
       '<p class="muted">⚠ means this device and the cloud both changed since the last sync. Nothing is overwritten until you choose.</p>' +
       (ui2.syncMsg ? '<p class="hint">' + ui.esc(ui2.syncMsg) + '</p>' : '') +
       '<p><button class="btn small" data-act="db-refresh"' + (ui2.dbBusy ? ' disabled' : '') + '>Refresh list</button></p></section>' +
@@ -441,7 +441,7 @@
       h += '<h3>Never track</h3>' +
         '<p><strong>Cloud database management: only local files will be unaffected.</strong> ' +
         'This deletes the cloud copy of every project on the account, except the names you keep below. Projects stay on this device.</p>' +
-        '<label>Keep these names (comma separated) <input type="text" data-chg="setting" data-set="keepNames" value="' + ui.esc(s.keepNames || '') + '" /></label>' +
+        '<label>Keep these names (comma separated; kept with this project) <input type="text" data-chg="project" data-set="keepNames" value="' + ui.esc(pr.keepNames || '') + '"' + (store.current ? '' : ' disabled') + ' /></label>' +
         '<label>Type <code>delete everything</code> to confirm <input id="delConfirm" type="text" autocomplete="off" /></label>' +
         '<p><button class="btn primary" data-act="db-delete-all"' + (ui2.dbBusy ? ' disabled' : '') + '>Delete everything</button></p>';
     }
