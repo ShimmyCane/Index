@@ -242,9 +242,14 @@
   }
   // Attach the sea and the cloud grids to a timeline (each one optional).
   function attachSeries(tl, place) {
-    return Promise.all([W.marineSeries(place, tl.startMs), W.gridSeries(place, tl.startMs, W.REGION), W.windSeries(tl.startMs)]).then(function (r) {
+    return Promise.all([W.marineSeries(place, tl.startMs), W.gridSeries(place, tl.startMs, W.REGION), W.windSeries(tl.startMs), W.cloudGrid(tl.startMs)]).then(function (r) {
       tl.hours.forEach(function (h, k) { h.wx.marine = r[0][k]; });
-      tl.series = { region: r[1], wind: r[2] };
+      var cloud;
+      if (r[3]) cloud = { hours: r[3], source: 'live', note: 'Cloud cover from space: the live model, this hour.' };
+      else if (W.cloudGridSaved()) { var sv = W.cloudGridSaved(); cloud = { hours: sv.hours, source: 'saved', note: 'Cloud cover from space: a saved copy from ' + new Date(sv.at).toLocaleString() + '.' }; }
+      else cloud = { hours: null, source: 'none', note: "Cloud cover from space: not available, so the sky's own cover is used." };
+      tl.cloudNote = cloud.note;
+      tl.series = { region: r[1], wind: r[2], cloud: cloud };
       return tl;
     });
   }
@@ -365,33 +370,38 @@
       return list;
     });
   };
-  // ---------- the whole Earth's cloud cover from a satellite picture (NASA GIBS, public domain, one picture a day) ----------
-  // The picture is true colour from the Terra satellite (about 10:30 local time), 720 x 360, north at the top.
-  // Bright, colourless pixels count as cloud: the result is a grey picture, white = full cover.
-  W.SAT_URL = 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=MODIS_Terra_CorrectedReflectance_TrueColor&STYLES=&CRS=EPSG:4326&BBOX=-90,-180,90,180&WIDTH=720&HEIGHT=360&FORMAT=image/jpeg&TIME=';
-  W.satellite = function (day) {
-    return new Promise(function (resolve, reject) {
-      var im = new Image(); im.crossOrigin = 'anonymous';
-      var t = setTimeout(function () { im.src = ''; reject(new Error('the satellite picture did not answer in time')); }, 20000);
-      im.onload = function () { clearTimeout(t); try { resolve(cloudMask(im)); } catch (e) { reject(new Error('the satellite picture could not be read')); } };
-      im.onerror = function () { clearTimeout(t); reject(new Error('the satellite picture could not be loaded')); };
-      im.src = W.SAT_URL + day;
-    });
-  };
-  function cloudMask(im) {
-    var w = 720, h = 360, c = document.createElement('canvas'); c.width = w; c.height = h;
-    var g = c.getContext('2d'); g.drawImage(im, 0, 0, w, h);
-    var px = g.getImageData(0, 0, w, h).data, out = document.createElement('canvas'); out.width = w; out.height = h;
-    var o = out.getContext('2d'), od = o.createImageData(w, h);
-    for (var i = 0; i < w * h; i++) {
-      var r = px[i * 4], gg = px[i * 4 + 1], b = px[i * 4 + 2], mn = Math.min(r, gg, b), mx = Math.max(r, gg, b);
-      var bright = GC.clamp((mn - 150) / 80, 0, 1), plain = 1 - GC.clamp((mx - mn - 20) / 50, 0, 1);
-      var v = Math.round(255 * bright * bright * (3 - 2 * bright) * plain);
-      od.data[i * 4] = v; od.data[i * 4 + 1] = v; od.data[i * 4 + 2] = v; od.data[i * 4 + 3] = 255;
+  // ---------- the live model's cloud cover over the whole Earth, for the view from space ----------
+  // 13 x 7 points: longitude every 30 degrees from -180 to 180, latitude every 30 degrees from -90 to 90.
+  // Each point holds [low, mid, high] cover (0..1) for each hour. The last good copy is kept on this device with its date,
+  // so the view can say how old it is when the live model cannot be reached.
+  W.CLOUD_NX = 13; W.CLOUD_NY = 7;
+  var CLOUD_KEY = 'gc.cloudgrid';
+  W.cloudGridSaved = function () { var c = GC.store.get(CLOUD_KEY, null); return c && c.hours ? c : null; };
+  W.cloudGrid = function (startMs) {
+    var ageDays = (Date.now() - startMs) / 86400000;
+    if (ageDays < -15 || ageDays > 85) return Promise.resolve(null);
+    var NX = W.CLOUD_NX, NY = W.CLOUD_NY, lats = [], lons = [];
+    for (var j = 0; j < NY; j++) for (var i = 0; i < NX; i++) {
+      lats.push(GC.clamp(-90 + 30 * j, -89.9, 89.9).toFixed(1)); lons.push((-180 + 30 * i).toFixed(1));
     }
-    o.putImageData(od, 0, 0);
-    return out;
-  }
+    var url = HOSTS.forecast + '?latitude=' + lats.join(',') + '&longitude=' + lons.join(',') +
+      '&hourly=cloud_cover_low,cloud_cover_mid,cloud_cover_high&timezone=GMT&start_date=' + utcDay(startMs) + '&end_date=' + utcDay(startMs + 25 * 3600000);
+    return fetchJson(url, 15000).then(function (j) {
+      var list = Array.isArray(j) ? j : [j], n = NX * NY;
+      if (list.length !== n) throw new Error('Expected ' + n + ' cloud points, got ' + list.length);
+      var hours = [];
+      for (var h = 0; h < HOURS; h++) {
+        var key = hourKey(startMs + h * 3600000);
+        hours.push(list.map(function (x) {
+          var k = x.hourly && x.hourly.time ? x.hourly.time.indexOf(key) : -1;
+          function v(name) { var a = x.hourly[name]; return (k < 0 || !a || a[k] == null) ? 0 : GC.clamp(a[k] / 100, 0, 1); }
+          return k < 0 ? [0, 0, 0] : [v('cloud_cover_low'), v('cloud_cover_mid'), v('cloud_cover_high')];
+        }));
+      }
+      GC.store.set(CLOUD_KEY, { at: Date.now(), startMs: startMs, hours: hours });
+      return hours;
+    }).catch(function (e) { GC.logError('Cloud cover from space: ' + ((e && e.name === 'AbortError') ? 'no answer in time' : (e && e.message) || 'no connection')); return null; });
+  };
 
   W.cacheCount = function () { return readCache().length; };
 })();
