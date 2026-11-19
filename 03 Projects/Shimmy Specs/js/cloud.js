@@ -309,6 +309,24 @@
       }).catch(handleAuthError);
     },
 
+    // Saves the open project (saved text notes included) to the account, then reads it back and
+    // compares it, so the owner can see it arrived. Creates the cloud copy if there is none yet.
+    syncProject: function (project) {
+      if (!configured() || !session()) return Promise.reject(new Error('Sign in on the Start page first.'));
+      var expected = project.cloudId && project.cloudBase ? project.cloudBase.updatedAt : null;
+      return push(project, expected).then(function (res) {
+        if (res.conflict) return { status: 'conflict' };
+        SS.store.writeProject(project);
+        return rpc('ss_load_project', { p_token: requireToken(), p_id: res.id }).then(function (state) {
+          var matches = !!state && hashOf(state) === hashOf(project);
+          return {
+            status: matches ? 'verified' : 'mismatch',
+            notes: state && Array.isArray(state.textNotes) ? state.textNotes.length : 0
+          };
+        });
+      });
+    },
+
     // Checks that the database answers and the ss_ functions exist. Used by ⚙️ "Check database".
     health: function () {
       return rpc('ss_sign_out', { p_token: 'health-check' }).then(function () {

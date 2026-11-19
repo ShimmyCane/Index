@@ -406,6 +406,16 @@
         });
       });
     },
+    'project-sync': function () {
+      if (!store.current) return;
+      return dbAction(function () {
+        return SS.cloud.syncProject(store.current).then(function (r) {
+          if (r.status === 'conflict') return 'The cloud copy changed on another device. Resolve it with ⚠ on the Database page; nothing was overwritten.';
+          if (r.status !== 'verified') return 'Sent, but the cloud copy does not match this device. Try again.';
+          return 'In the cloud and checked: ' + r.notes + ' saved note' + (r.notes === 1 ? '' : 's') + ' and the current text.';
+        });
+      });
+    },
     'db-toggle-delete': function () { UI.deleteOpen = !UI.deleteOpen; },
     'db-delete-all': function () {
       var typed = ((doc.getElementById('delConfirm') || {}).value || '').trim().toLowerCase();

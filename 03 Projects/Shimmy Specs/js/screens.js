@@ -85,6 +85,22 @@
   }
 
   // ---- Import ---------------------------------------------------------------
+  // Sends the open project, with its saved text notes, to the account and checks it arrived.
+  function cloudSyncCard(ui2) {
+    var p = store.current;
+    if (!p) return '';
+    var c = SS.cloud;
+    var ready = c.configured() && !!c.session();
+    var notes = (p.textNotes || []).length;
+    return '<section class="card"><h2>Cloud copy</h2>' +
+      '<p class="muted">' + (ready
+        ? 'Saves this project, with its ' + notes + ' saved text note' + (notes === 1 ? '' : 's') + ', to the account and reads it back to check it arrived. Nothing is overwritten if the cloud copy changed on another device.'
+        : 'Sign in on the Start page to sync this project to the cloud.') + '</p>' +
+      '<p><button class="btn primary" data-act="project-sync"' + (ready && !ui2.dbBusy ? '' : ' disabled') + '>Sync to cloud</button></p>' +
+      (ui2.syncMsg ? '<p class="hint">' + ui.esc(ui2.syncMsg) + '</p>' : '') +
+      '</section>';
+  }
+
   // Text replaced by "Read text", newest first. Each has a red ✕ and a confirmation.
   function textNotesCard(p, ui2) {
     var notes = p.textNotes || [];
@@ -122,6 +138,7 @@
             '<button class="btn small" data-act="hit-accept" data-idx="' + i + '">Accept</button> ' +
             '<button class="btn small" data-act="hit-reject" data-idx="' + i + '">Reject</button></td></tr>';
         }).join('') + '</tbody></table>' : '<p class="muted">No hits yet.</p>') + '</section>' +
+      cloudSyncCard(ui2 || {}) +
       textNotesCard(p, ui2 || {}) +
       '<section class="card"><h2>Keynotes</h2>' +
       '<p class="muted">One per line: <code>07 54 23.A1 | TPO membrane, fully adhered</code></p>' +
@@ -389,7 +406,8 @@
       'Auto save: save each change to the account as you work</label>' +
       '<p class="muted">⚠ means this device and the cloud both changed since the last sync. Nothing is overwritten until you choose.</p>' +
       (ui2.syncMsg ? '<p class="hint">' + ui.esc(ui2.syncMsg) + '</p>' : '') +
-      '<p><button class="btn small" data-act="db-refresh"' + (ui2.dbBusy ? ' disabled' : '') + '>Refresh list</button></p></section>';
+      '<p><button class="btn small" data-act="db-refresh"' + (ui2.dbBusy ? ' disabled' : '') + '>Refresh list</button></p></section>' +
+      (store.current ? cloudSyncCard(ui2) : '');
 
     if (ui2.cloudError) h += '<p class="error-text">' + ui.esc(ui2.cloudError) + '</p>';
     if (ui2.cloudList === null) h += '<p class="muted">Loading your projects…</p>';
