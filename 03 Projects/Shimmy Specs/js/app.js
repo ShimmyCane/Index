@@ -25,7 +25,8 @@
 
   var UI = {
     focus: null, editing: null, flagFilter: 'open', decSection: '', decKind: '', drawer: false,
-    layout: loadLayout(), cloudList: null, cloudError: '', cloudLoading: false, authError: '', dbMessage: ''
+    layout: loadLayout(), cloudList: null, cloudError: '', cloudLoading: false, authError: '', dbMessage: '',
+    syncMsg: '', dbBusy: false, conflictId: null, deleteOpen: false
   };
 
   function saveLayout() {
@@ -75,6 +76,7 @@
     if (root.navigator && root.navigator.onLine === false) return { cls: 'device', text: 'Offline · saved on this device' };
     if (c.status === 'saving') return { cls: 'saving', text: 'Saving to account…' };
     if (c.status === 'error') return { cls: 'error', text: 'Not saved to account' };
+    if (c.status === 'conflict') return { cls: 'error', text: 'Cloud and device both changed · resolve in Database' };
     return { cls: 'saved', text: 'Saved to account · ' + SS.cloud.session().username };
   }
 
@@ -109,6 +111,7 @@
       ['decisions', 'Decisions', decs ? String(decs) : ''],
       ['outputs', 'Outputs', '']
     ];
+    if (store.settings().databaseManagement !== false) links.push(['database', 'Database', '']);
     return '<nav class="nav"><div class="proj">' + (p ? ui.esc(p.name) : 'No project') + '</div>' +
       links.map(function (l) {
         return '<a href="#/' + l[0] + '"' + (current === l[0] ? ' class="on"' : '') + '>' + l[1] +
@@ -144,6 +147,7 @@
         '</select></label>' +
         '<label><input type="checkbox" data-chg="setting" data-set="showNotes"' + (s.showNotes ? ' checked' : '') + ' /> Show decision notes</label>' +
         '<label><input type="checkbox" data-chg="setting" data-set="showErrors"' + (s.showErrors ? ' checked' : '') + ' /> Show errors</label>' +
+        '<label><input type="checkbox" data-chg="setting" data-set="databaseManagement"' + (s.databaseManagement !== false ? ' checked' : '') + ' /> Database management (Database page, cloud sync)</label>' +
         '<h3>Database</h3>' +
         '<p class="muted">' + (SS.cloud.configured() ? 'Connection set in index.html.' : 'Not set up: the two values in index.html still have placeholders.') + '</p>' +
         '<p><button class="btn small" data-act="check-db"' + (SS.cloud.configured() ? '' : ' disabled') + '>Check database</button></p>' +
@@ -186,7 +190,7 @@
     doc.documentElement.dataset.theme = store.settings().theme === 'auto' ? '' : store.settings().theme;
     refreshStatus();
     renderErrors();
-    if (r.name === 'start') ensureCloudList();
+    if (r.name === 'start' || r.name === 'database') ensureCloudList();
   }
 
   // ---- files ----------------------------------------------------------------
@@ -223,6 +227,27 @@
   }
 
   // ---- actions --------------------------------------------------------------
+  // Database page helpers. Each run clears the list so it is read again from the cloud.
+  function findCloudRow(id) {
+    var row = (UI.cloudList || []).filter(function (x) { return x.id === id; })[0];
+    if (!row) throw new Error('That project is no longer in the list. Refresh and try again.');
+    return row;
+  }
+  function dbAction(run) {
+    UI.dbBusy = true;
+    UI.syncMsg = '';
+    return Promise.resolve().then(run).then(function (msg) {
+      UI.syncMsg = msg || '';
+    }, function (err) {
+      SS.errors.log(err);
+      UI.syncMsg = 'Not done: ' + err.message;
+    }).then(function () {
+      UI.dbBusy = false;
+      UI.conflictId = null;
+      UI.cloudList = null;
+    });
+  }
+
   var handlers = {
     'new-project': function () {
       var name = (doc.getElementById('newName').value || '').trim() || 'Untitled sketch';
@@ -333,9 +358,7 @@
       return SS.cloud.signOut().then(function () { UI.cloudList = null; UI.authError = ''; });
     },
     'cloud-open': function (el) {
-      return SS.cloud.load(el.dataset.id).then(function (state) {
-        if (!state) throw new Error('That project was not found on the account.');
-        state.cloudId = el.dataset.id;
+      return SS.cloud.adopt(el.dataset.id).then(function (state) {
         store.current = state;
         store.saveNow();
         root.location.hash = '#/survey';
@@ -348,6 +371,40 @@
     },
     'cloud-save-now': function () {
       if (store.current) return SS.cloud.saveNow(store.current).catch(function (err) { SS.errors.log(err); });
+    },
+    // Database page
+    'db-refresh': function () { UI.cloudList = null; },
+    'db-sync': function (el) {
+      return dbAction(function () {
+        var row = findCloudRow(el.dataset.id);
+        return SS.cloud.syncRow(row).then(function (s) {
+          if (s === 'conflict') return 'Both changed since the last sync. Choose a version with ⚠.';
+          return s === 'download' ? 'Downloaded the cloud version.' : s === 'upload' ? 'Uploaded this device\'s version.' : 'Already in sync.';
+        });
+      });
+    },
+    'db-conflict': function (el) { UI.conflictId = UI.conflictId === el.dataset.id ? null : el.dataset.id; },
+    'db-resolve': function (el) {
+      return dbAction(function () {
+        var row = findCloudRow(el.dataset.id);
+        return SS.cloud.resolve(row, el.dataset.choice).then(function (choice) {
+          return { both: 'Kept both: this device\'s copy is a second project.', local: 'Cloud copy replaced with this device\'s version.', cloud: 'This device\'s copy replaced with the cloud version.' }[choice];
+        });
+      });
+    },
+    'db-toggle-delete': function () { UI.deleteOpen = !UI.deleteOpen; },
+    'db-delete-all': function () {
+      var typed = ((doc.getElementById('delConfirm') || {}).value || '').trim().toLowerCase();
+      if (typed !== 'delete everything') { UI.syncMsg = 'Type "delete everything" to confirm. Nothing was deleted.'; return; }
+      return dbAction(function () {
+        return SS.cloud.deleteAll(store.settings().keepNames).then(function (res) {
+          UI.deleteOpen = false;
+          return 'Deleted ' + res.removed + ' cloud project' + (res.removed === 1 ? '' : 's') +
+            (res.kept ? ', kept ' + res.kept + ' by name' : '') +
+            '. Local files are unchanged.' +
+            (res.listed >= 100 ? ' The list shows at most 100 projects, so check the page again.' : '');
+        });
+      });
     },
     'check-db': function () {
       UI.dbMessage = 'Checking…';
