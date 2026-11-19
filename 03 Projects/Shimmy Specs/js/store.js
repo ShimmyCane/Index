@@ -54,6 +54,7 @@
       sections: {},
       keynotes: [],
       textDump: '',
+      textNotes: [],
       keywordHits: [],
       decisions: [],
       flags: [],
@@ -199,11 +200,22 @@
     readDump: function (text) {
       var old = {};
       (this.current.keywordHits || []).forEach(function (h) { old[h.label] = h.status; });
+      // The text being replaced is kept as a note (newest first), so nothing is lost on a re-read.
+      var previous = this.current.textDump || '';
+      if (previous.trim() && previous !== text) {
+        this.current.textNotes = [{ id: newId(), text: previous, at: new Date().toISOString() }]
+          .concat(this.current.textNotes || []);
+      }
       this.current.textDump = text;
       this.current.keywordHits = SS.importer.textHits(text, this.data).map(function (h) {
         h.status = old[h.label] || 'open';
         return h;
       });
+      this.touch();
+    },
+
+    deleteNote: function (id) {
+      this.current.textNotes = (this.current.textNotes || []).filter(function (n) { return n.id !== id; });
       this.touch();
     },
 

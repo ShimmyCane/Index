@@ -85,7 +85,27 @@
   }
 
   // ---- Import ---------------------------------------------------------------
-  function importPage() {
+  // Text replaced by "Read text", newest first. Each has a red ✕ and a confirmation.
+  function textNotesCard(p, ui2) {
+    var notes = p.textNotes || [];
+    if (!notes.length) return '';
+    return '<section class="card"><h2>Saved text notes</h2>' + notes.map(function (n) {
+      var id = ui.esc(n.id);
+      var confirming = ui2.confirmNote === n.id;
+      return '<div class="note">' +
+        '<button class="note-x" data-act="note-x" data-id="' + id + '" aria-label="Delete this note" title="Delete note">✕</button>' +
+        '<p class="muted">' + ui.esc(shortDate(n.at)) + '</p><pre class="note-text">' + ui.esc(n.text) + '</pre>' +
+        (confirming
+          ? '<div class="row"><span>Are you sure you want to delete this note?</span>' +
+            '<button class="btn small primary" data-act="note-confirm" data-id="' + id + '">Delete</button>' +
+            '<button class="btn small" data-act="note-quiet" data-id="' + id + '">Delete, don\'t remind me for 5 minutes</button>' +
+            '<button class="btn small quiet" data-act="note-cancel">Cancel</button></div>'
+          : '') +
+        '</div>';
+    }).join('') + '</section>';
+  }
+
+  function importPage(ui2) {
     var p = store.current;
     if (!p) return needProject();
     var hits = p.keywordHits || [];
@@ -102,6 +122,7 @@
             '<button class="btn small" data-act="hit-accept" data-idx="' + i + '">Accept</button> ' +
             '<button class="btn small" data-act="hit-reject" data-idx="' + i + '">Reject</button></td></tr>';
         }).join('') + '</tbody></table>' : '<p class="muted">No hits yet.</p>') + '</section>' +
+      textNotesCard(p, ui2 || {}) +
       '<section class="card"><h2>Keynotes</h2>' +
       '<p class="muted">One per line: <code>07 54 23.A1 | TPO membrane, fully adhered</code></p>' +
       '<textarea id="keynotes" rows="4" data-chg="keynotes">' + ui.esc((p.keynotes || []).map(function (k) { return k.key + ' | ' + k.text; }).join('\n')) + '</textarea></section>' +
