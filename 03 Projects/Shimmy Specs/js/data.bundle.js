@@ -811,6 +811,41 @@
     "sets": [
      "use-R-2"
     ]
+   },
+   {
+    "label": "Roof edges and drains",
+    "pattern": "parapets?|gutters?|downspouts?|scuppers?|roof drains?|drain outlets?",
+    "sets": [
+     "repair-roofing"
+    ]
+   },
+   {
+    "label": "Roof curbs and hook-ups",
+    "pattern": "curbs?|rooftop (units?|equipment)|roof (penetrations?|hook-?ups?)",
+    "sets": [
+     "repair-roofing"
+    ]
+   },
+   {
+    "label": "PVC membrane and vapor barrier",
+    "pattern": "\\bpvc\\b|vapou?r barriers?",
+    "sets": [
+     "repair-roofing"
+    ]
+   },
+   {
+    "label": "Roof tear-off",
+    "pattern": "tear-?offs?|demo(lition)? of (the )?(existing )?roof",
+    "sets": [
+     "repair-roofing"
+    ]
+   },
+   {
+    "label": "Paint touch-ups",
+    "pattern": "paint touch-?ups?|touch-?ups?",
+    "sets": [
+     "repair-coatings"
+    ]
    }
   ]
  },
