@@ -192,3 +192,9 @@ h1 { letter-spacing: -0.01em; }
   .side { position: static; }
   .side details.panel > summary .mv { display: none; }
 }
+
+/* Saved text notes on the Import page: a red ✕ in the upper right corner. */
+.note { position: relative; background: var(--gray); border: 1px solid var(--rule); border-radius: 8px; padding: 0.5rem 2.2rem 0.5rem 0.7rem; margin: 0.5rem 0; }
+.note-text { white-space: pre-wrap; margin: 0.3rem 0; font-size: 0.85rem; max-height: 9rem; overflow: auto; }
+.note-x { position: absolute; top: 0.3rem; right: 0.4rem; width: 32px; height: 32px; border: 0; background: transparent; color: #c62828; font-size: 1.1rem; font-weight: 700; cursor: pointer; border-radius: 6px; }
+.note-x:hover { background: #fdecea; }

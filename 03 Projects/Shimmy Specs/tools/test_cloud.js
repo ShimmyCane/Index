@@ -191,5 +191,23 @@ async function test(name, fn) {
     assert.strictEqual(local.get('LG').cloudId, undefined, 'local copy kept, unlinked');
   });
 
+  await test('sync to cloud: sends the saved notes, reads them back, reports verified', async () => {
+    local.clear();
+    calls.length = 0;
+    const newId = 'ffffffff-ffff-4fff-8fff-ffffffffffff';
+    let sent = null;
+    fakeFetch((url, opts) => {
+      if (url.endsWith('ss_save_project')) { sent = JSON.parse(opts.body).p_state; return { status: 200, body: newId }; }
+      if (url.endsWith('ss_list_projects')) return { status: 200, body: [{ id: newId, name: 'Notes', kind: 'sketch', updated_at: 'T9' }] };
+      if (url.endsWith('ss_load_project')) return { status: 200, body: sent };
+      return { status: 200, body: null };
+    });
+    const p = { id: 'N1', name: 'Notes', kind: 'sketch', answers: {}, textNotes: [{ id: 'n1', text: 'old text', at: 'x' }] };
+    const out = await cloud.syncProject(p);
+    assert.strictEqual(out.status, 'verified');
+    assert.strictEqual(out.notes, 1);
+    assert.strictEqual(p.cloudId, newId);
+  });
+
   console.log(`\n${passed} cloud checks passed${process.exitCode ? ', some FAILED' : ''}`);
 })();

@@ -26,7 +26,8 @@
   var UI = {
     focus: null, editing: null, flagFilter: 'open', decSection: '', decKind: '', drawer: false,
     layout: loadLayout(), cloudList: null, cloudError: '', cloudLoading: false, authError: '', dbMessage: '',
-    syncMsg: '', dbBusy: false, conflictId: null, deleteOpen: false
+    syncMsg: '', dbBusy: false, conflictId: null, deleteOpen: false,
+    confirmNote: null, noteQuietUntil: 0
   };
 
   function saveLayout() {
@@ -249,6 +250,19 @@
   }
 
   var handlers = {
+    // Saved text notes: ✕ asks first, unless the owner chose "don't remind me" in the last 5 minutes.
+    'note-x': function (el) {
+      if (Date.now() < UI.noteQuietUntil) { store.deleteNote(el.dataset.id); return; }
+      UI.confirmNote = el.dataset.id;
+    },
+    'note-confirm': function (el) { UI.confirmNote = null; store.deleteNote(el.dataset.id); },
+    'note-quiet': function (el) {
+      UI.noteQuietUntil = Date.now() + 5 * 60 * 1000;
+      UI.confirmNote = null;
+      store.deleteNote(el.dataset.id);
+    },
+    'note-cancel': function () { UI.confirmNote = null; },
+
     'new-project': function () {
       var name = (doc.getElementById('newName').value || '').trim() || 'Untitled sketch';
       store.create(name, doc.getElementById('newKind').value);
@@ -389,6 +403,16 @@
         var row = findCloudRow(el.dataset.id);
         return SS.cloud.resolve(row, el.dataset.choice).then(function (choice) {
           return { both: 'Kept both: this device\'s copy is a second project.', local: 'Cloud copy replaced with this device\'s version.', cloud: 'This device\'s copy replaced with the cloud version.' }[choice];
+        });
+      });
+    },
+    'project-sync': function () {
+      if (!store.current) return;
+      return dbAction(function () {
+        return SS.cloud.syncProject(store.current).then(function (r) {
+          if (r.status === 'conflict') return 'The cloud copy changed on another device. Resolve it with ⚠ on the Database page; nothing was overwritten.';
+          if (r.status !== 'verified') return 'Sent, but the cloud copy does not match this device. Try again.';
+          return 'In the cloud and checked: ' + r.notes + ' saved note' + (r.notes === 1 ? '' : 's') + ' and the current text.';
         });
       });
     },
