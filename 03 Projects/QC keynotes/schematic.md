@@ -1,23 +1,36 @@
 # QC keynotes — schematic
 
-Status: seed (questions open in `convo/convo v0.1.md`). No build yet.
+Status: first build = start page and guideline builder (v0.1.0). Steps 2–4 are placeholders. Questions answered in `convo/convo v0.1.md`; next questions in `convo/convo v0.2.md`.
 
-Track: **B. Studio design** (dense but orderly, collapsible panels, precise labels, keyboard and pointer).
+Track: **B. Studio design** (dense but orderly, collapsible panels, precise labels).
 
 ## Purpose
-A first-pass QC tool for keynotes and general notes on architectural drawing sets (restroom, accessibility and barrier-removal scopes first). It does not replace the reviewer. It flags what breaks the guideline so the reviewer checks less by eye.
+A first-pass QC tool for keynotes and general notes on architectural drawing sets. Scopes: restroom, accessibility and barrier removal, existing walls and tile, partitions, faucets and accessories, doors, fire rating, and others. It does not replace the reviewer.
 
-## Steps on the start page
-1. **Define the keynote guideline**, or pick a saved one.
-2. **Upload a PDF** of the drawing set.
-3. **Scan and mark**: green = matches the format; yellow = similar but questionable; red = breaks a rule.
-4. **Export** a marked-up PDF with unflattened annotations (the markup stays editable).
+## Decisions (from convo v0.1)
+- **No existing guideline.** The guideline is built together, typed in through a framework. Bathroom repair concepts are the starting point.
+- **Vector PDFs only** in v1. Scanned pages are marked "cannot read" (yellow). No OCR.
+- **Colours.** Green = matches the format exactly. Yellow = close but questionable (synonym, number out of sequence, missing scope word). Red = breaks a rule (wrong prefix, duplicate number, undefined keynote, fire rating missing).
+- **General notes:** a stub for now, to be developed later.
+- **Export:** marked-up PDF with editable highlight and square annotations, each with a comment; plus a findings list (page, keynote, colour, reason).
+- **Privacy:** drawings and guidelines are offline only. The page says so. The uploaded PDF is never committed. Sample sheets are synthetic.
+- **Data:** the architecture database is for feedback and comments only. Guidelines are saved in this browser. Each guideline carries a choice, "keep local and secure" (default) or "safe to cloud". Cloud sync is not built yet.
+  (Reading of the answer: "super faces" in the answer was taken to mean the architecture database, Supabase. To confirm.)
+- **Settings:** ⚙️ lower right, with strictness, export options, dark mode and an opt-in "Show errors" panel at the bottom.
 
-## Proposed approach (to confirm)
-- Single page, plain HTML/CSS/JS, no build step, GitHub Pages. PDF reading with pdf.js and writing annotations with pdf-lib, both from cdnjs at a pinned version.
-- Everything runs in the browser. No database in v1. Guidelines are saved in the browser and can be exported and imported as JSON.
-- Guideline = a list of rules: keynote number pattern, allowed prefixes (e.g. demolition vs new work), allowed text style, required fire-rating wording, required general notes, and a synonym list for "similar" matches.
-- Scan = read the text layer per page, find keynote callouts and note blocks, test each against the rules, and colour the matches.
+## Built (v0.1.0)
+- `index.html`: title, one-line intro, offline notice, four steps (step 1 open; steps 2–4 "next build").
+- Guideline builder: name; cloud choice; scopes checklist; demolition and new-work syntax; examples; rules with colour; general-notes stub; save in the browser (auto-save); export and import as JSON; clear.
+- ⚙️ drawer: strictness, export options, dark mode, Show errors.
+- Checked headless at 390×844, 768×1024 and 1180×820: no horizontal scroll, drawer opens, rule text persists on reload, no console errors (favicon 404 fixed).
+- Home-page tile added to the Nursery list in the root `index.html` (standing exception).
+
+## Next (not built)
+1. Step 2: upload a PDF (pdf.js from cdnjs, pinned version), kept in memory only.
+2. Step 3: read the text layer per page, find keynotes and note blocks, apply the guideline rules, colour each match.
+3. Step 4: export with pdf-lib annotations, plus the findings list.
+4. Feedback notes and the database link (architecture project), feedback and comments only.
+5. Strictness setting wired into the scan.
 
 ## Open
-See `convo/convo v0.1.md` for the questions to Jimmy: guideline source, keynote syntax, PDF type (vector or scanned), yellow/red rules, export form, privacy, settings gear, and sample client.
+See `convo/convo v0.2.md`.

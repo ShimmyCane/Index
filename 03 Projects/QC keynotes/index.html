@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QC keynotes</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --paper: #fbf8f1; --ink: #2b2a33; --muted: #6b6878; --line: #2b2a33;
+    --green: #bfe8d2; --yellow: #fff0a8; --red: #ffd0cb; --card: #ffffff; --accent: #e7dcc4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --paper: #1f1e25; --ink: #f1eee6; --muted: #aaa6b6; --line: #f1eee6; --card: #2a2930; --accent: #3a3742; }
+  }
+  :root[data-theme="dark"] { --paper: #1f1e25; --ink: #f1eee6; --muted: #aaa6b6; --line: #f1eee6; --card: #2a2930; --accent: #3a3742; }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; min-height: 100vh; padding-bottom: 120px; }
+  header, main { max-width: 880px; margin: 0 auto; padding: 0 16px; }
+  header { padding-top: 28px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 19px; margin: 0; }
+  .lede { color: var(--muted); margin: 0 0 18px; }
+  .offline { display: inline-block; font-size: 14px; background: var(--accent); border: 2px solid var(--line); border-radius: 999px; padding: 4px 12px; margin-bottom: 18px; }
+
+  .steps { display: grid; gap: 12px; }
+  .step { background: var(--card); border: 2px solid var(--line); border-radius: 14px; box-shadow: 0 3px 0 var(--line); }
+  .stepHead { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 10px 14px; background: none; border: 0; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+  .stepHead:disabled { cursor: default; opacity: .6; }
+  .num { flex: 0 0 34px; height: 34px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; font-weight: 700; }
+  .stepBody { padding: 0 14px 14px 60px; color: var(--muted); }
+  .tag { font-size: 13px; margin-left: auto; color: var(--muted); }
+
+  .panel { margin-top: 22px; background: var(--card); border: 2px solid var(--line); border-radius: 14px; }
+  .panel > summary, .panelHead { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 10px 14px; font-weight: 700; }
+  .panel > summary::-webkit-details-marker { display: none; }
+  .panel[open] > summary .mark::before { content: "▾"; }
+  .panel:not([open]) > summary .mark::before { content: "▸"; }
+  .panel .inner { padding: 0 14px 14px; }
+  .field { display: grid; gap: 4px; margin: 10px 0; }
+  .field > label, .field > .lbl { font-weight: 700; font-size: 15px; }
+  .hint { color: var(--muted); font-size: 13px; }
+  input[type=text], textarea, select { width: 100%; font: inherit; color: var(--ink); background: var(--paper); border: 2px solid var(--line); border-radius: 10px; padding: 8px 10px; min-height: 48px; }
+  textarea { min-height: 80px; resize: vertical; }
+  .check { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+  .check input { width: 22px; height: 22px; }
+  .ruleRow { display: grid; grid-template-columns: 1fr 130px 40px; gap: 8px; align-items: start; margin: 8px 0; }
+  .ruleRow textarea { min-height: 48px; }
+  .btn { min-height: 48px; padding: 0 16px; border: 2px solid var(--line); border-radius: 12px; background: var(--card); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; box-shadow: 0 3px 0 var(--line); }
+  .btn:disabled { opacity: .5; cursor: default; box-shadow: none; }
+  .btn.sw-green { background: var(--green); } .btn.sw-yellow { background: var(--yellow); } .btn.sw-red { background: var(--red); }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+  .pill { font-size: 13px; border: 2px solid var(--line); border-radius: 999px; padding: 2px 10px; }
+  .swatch { display: inline-block; width: 14px; height: 14px; border-radius: 4px; border: 2px solid var(--line); vertical-align: -2px; margin-right: 4px; }
+  .seg { display: flex; gap: 8px; flex-wrap: wrap; }
+  .seg button { flex: 1 1 120px; min-height: 48px; border: 2px solid var(--line); border-radius: 12px; background: var(--paper); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; }
+  .seg button.on { background: var(--green); }
+  .notice { border: 2px dashed var(--line); border-radius: 12px; padding: 10px 12px; color: var(--muted); font-size: 14px; }
+
+  .gear { position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); width: 64px; height: 64px; border-radius: 50%; font-size: 30px; z-index: 30; background: var(--accent); border: 2px solid var(--line); box-shadow: 0 4px 0 var(--line); cursor: pointer; }
+  .drawer { position: fixed; right: 18px; bottom: 96px; width: min(380px, 92vw); max-height: 70vh; overflow-y: auto; z-index: 40; background: var(--card); color: var(--ink); border: 2px solid var(--line); border-radius: 16px; box-shadow: 0 6px 0 var(--line); padding: 14px; }
+  .drawerHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .mini { min-width: 48px; min-height: 48px; border: 2px solid var(--line); border-radius: 12px; background: var(--paper); color: var(--ink); font: inherit; cursor: pointer; }
+  .drawer .setting { padding: 10px 0; border-bottom: 1px solid var(--accent); }
+  .drawer .setting:last-child { border-bottom: 0; }
+  .errorsPanel { position: fixed; left: 16px; right: 100px; bottom: 16px; max-height: 30vh; overflow: auto; z-index: 25; background: var(--red); color: #2b2a33; border: 2px solid var(--line); border-radius: 14px; padding: 8px 12px; font: 13px/1.4 ui-monospace, Menlo, monospace; white-space: pre-wrap; }
+  .footerNote { color: var(--muted); font-size: 13px; margin-top: 28px; }
+
+  @media print { .gear, .drawer, .errorsPanel, .btn, .panel, .stepHead { display: none !important; } body { padding-bottom: 0; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>QC keynotes</h1>
+  <p class="lede">A first-pass check of keynotes and general notes on architectural drawing PDFs. It marks each note against your keynote guideline, so the reviewer looks at fewer things by eye.</p>
+  <span class="offline">🔒 Offline only: the guideline and the drawings stay in this browser and are never uploaded.</span>
+</header>
+
+<main>
+  <section class="steps" aria-label="Next steps">
+    <div class="step">
+      <button class="stepHead" id="s1Head" aria-expanded="false" aria-controls="s1Body">
+        <span class="num">1</span><span>Define the keynote guideline</span><span class="tag" id="s1Tag">start here</span>
+      </button>
+      <div class="stepBody" id="s1Body" hidden>Build the guideline below, or open a saved one. Nothing is sent anywhere.</div>
+    </div>
+    <div class="step">
+      <button class="stepHead" disabled><span class="num">2</span><span>Upload a PDF drawing set</span><span class="tag">next build</span></button>
+    </div>
+    <div class="step">
+      <button class="stepHead" disabled><span class="num">3</span><span>Scan and mark: green, yellow, red</span><span class="tag">next build</span></button>
+    </div>
+    <div class="step">
+      <button class="stepHead" disabled><span class="num">4</span><span>Export a marked-up PDF and findings list</span><span class="tag">next build</span></button>
+    </div>
+  </section>
+
+  <!-- STEP 1: GUIDELINE BUILDER -->
+  <details class="panel" id="guide" open>
+    <summary><span class="mark"></span> 📋 Guideline <span class="tag" id="guideStatus"></span></summary>
+    <div class="inner">
+      <p class="hint">Type your rules in. Each section is a framework to fill in; leave a section empty if it does not apply yet. Examples in the grey boxes are generic placeholders, not a standard.</p>
+
+      <div class="field">
+        <label for="gName">Guideline name</label>
+        <input type="text" id="gName" placeholder="e.g. Restroom and accessibility keynotes, v1">
+      </div>
+
+      <div class="field">
+        <span class="lbl">Cloud storage for this guideline</span>
+        <div class="seg" id="cloudSeg">
+          <button type="button" data-v="local">Keep local and secure</button>
+          <button type="button" data-v="cloud">Safe to cloud</button>
+        </div>
+        <span class="hint">Default: keep local. Choose "safe to cloud" only for guidelines with no firm or client content. Cloud sync is not built yet, so this is recorded for later.</span>
+      </div>
+
+      <div class="field">
+        <span class="lbl">Scopes this guideline covers</span>
+        <div id="scopes"></div>
+      </div>
+
+      <div class="field">
+        <label for="syntaxDemo">Demolition keynote syntax</label>
+        <textarea id="syntaxDemo" placeholder="Prefix, number format, placement, case, max words. e.g. 'Prefix D, then a number, in a shape placed next to the item.'"></textarea>
+      </div>
+      <div class="field">
+        <label for="syntaxNew">New work keynote syntax</label>
+        <textarea id="syntaxNew" placeholder="e.g. 'Prefix N, then a number, in a shape placed next to the item.'"></textarea>
+      </div>
+      <div class="field">
+        <label for="examples">Examples</label>
+        <textarea id="examples" placeholder="Correct and incorrect examples, one per line. Prefix each wrong one with ✖."></textarea>
+        <span class="hint">Generic example to copy the form: "✔ D3 — remove existing tile" and "✖ d-3 remove tile".</span>
+      </div>
+
+      <div class="field">
+        <span class="lbl">Rules and their colour</span>
+        <span class="hint">Green = matches. Yellow = close but questionable. Red = breaks a rule. Each rule is one line you type.</span>
+        <div id="rules"></div>
+        <div class="row"><button type="button" class="btn" id="addRule">+ Add a rule</button></div>
+      </div>
+
+      <div class="field">
+        <span class="lbl">General notes</span>
+        <div class="notice">Stub. Which note blocks to check (general, demolition, fire rating) and how unlisted notes are coloured will be developed later.</div>
+      </div>
+
+      <div class="field">
+        <span class="lbl">Saving</span>
+        <div class="row">
+          <button type="button" class="btn" id="saveG">Save in this browser</button>
+          <button type="button" class="btn" id="exportG">Export as file</button>
+          <label class="btn" for="importG">Import file</label>
+          <input type="file" id="importG" accept="application/json,.json" hidden>
+          <button type="button" class="btn" id="clearG">Clear form</button>
+        </div>
+        <span class="hint" id="saveMsg"></span>
+      </div>
+    </div>
+  </details>
+
+  <p class="footerNote">Feedback and comments will go to the architecture database in the next build. Drawings and guidelines never leave this browser.</p>
+</main>
+
+<!-- ⚙️ SETTINGS -->
+<button class="gear" id="gear" aria-label="Settings" aria-expanded="false" aria-controls="drawer">⚙️</button>
+<aside class="drawer" id="drawer" hidden>
+  <div class="drawerHead"><h2>Settings</h2><button class="mini" id="closeDrawer" aria-label="Close">✖</button></div>
+  <p class="hint">Options for the checker and the page. Changes are saved in this browser.</p>
+
+  <div class="setting">
+    <span class="lbl">Strictness</span>
+    <p class="hint">Strict turns yellow checks into red. Relaxed leaves them yellow. Used once the scan is built.</p>
+    <div class="seg" data-key="strictness"><button type="button" data-v="relaxed">Relaxed</button><button type="button" data-v="standard">Standard</button><button type="button" data-v="strict">Strict</button></div>
+  </div>
+
+  <div class="setting">
+    <span class="lbl">Export</span>
+    <p class="hint">Marked-up PDF uses editable highlight and square annotations with a comment. Findings list is a separate file.</p>
+    <label class="check"><input type="checkbox" id="optFindings"> Include findings list</label>
+    <label class="check"><input type="checkbox" id="optComments" checked> Add a comment to each mark</label>
+  </div>
+
+  <div class="setting">
+    <span class="lbl">Display</span>
+    <label class="check"><input type="checkbox" id="optTheme"> Dark mode</label>
+  </div>
+
+  <div class="setting">
+    <span class="lbl">About this page</span>
+    <p class="hint">Version 0.1.0 (guideline builder only). Track B, studio design. Offline only.</p>
+  </div>
+
+  <div class="setting">
+    <label class="check"><input type="checkbox" id="showErrors"> Show errors</label>
+    <p class="hint">Errors appear at the bottom of the page. Off by default.</p>
+  </div>
+</aside>
+<div id="errorsPanel" class="errorsPanel" hidden></div>
+
+<script>
+(() => {
+  'use strict';
+  // ---------- storage (try/catch everywhere) ----------
+  const SETTINGS_KEY = 'qckeynotes.settings';
+  const GUIDE_KEY = 'qckeynotes.guideline';
+  const DEFAULTS = { strictness: 'standard', showErrors: false, findings: false, comments: true, dark: false, cloud: 'local' };
+  const errors = [];
+  let settings = { ...DEFAULTS };
+  try { settings = { ...DEFAULTS, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}') }; } catch (e) { logError('Settings could not be read: ' + e.message); }
+  const saveSettings = () => { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) { logError('Settings could not be saved: ' + e.message); } };
+
+  function logError(msg) { errors.push(new Date().toLocaleTimeString() + '  ' + msg); renderErrors(); }
+  function renderErrors() {
+    const box = document.getElementById('errorsPanel');
+    box.hidden = !settings.showErrors;
+    box.textContent = errors.length ? errors.join('\n') : 'No problems so far.';
+  }
+  window.addEventListener('error', e => logError(e.message));
+
+  // ---------- scopes ----------
+  const SCOPES = [
+    ['restroom', 'Restroom'],
+    ['access', 'Accessibility and barrier removal'],
+    ['walls', 'Existing walls and tile'],
+    ['partitions', 'Partitions'],
+    ['fixtures', 'Faucets, towel holders and accessories'],
+    ['doors', 'Doors'],
+    ['fire', 'Fire rating'],
+    ['other', 'Other (type in the guideline name or rules)'],
+  ];
+  const scopesBox = document.getElementById('scopes');
+  scopesBox.innerHTML = SCOPES.map(([k, label]) =>
+    `<label class="check"><input type="checkbox" data-scope="${k}"> ${label}</label>`).join('');
+
+  // ---------- rules ----------
+  const rulesBox = document.getElementById('rules');
+  const SEV = { green: '🟢 Green (matches)', yellow: '🟡 Yellow (questionable)', red: '🔴 Red (breaks a rule)' };
+  function addRule(data = {}) {
+    const row = document.createElement('div');
+    row.className = 'ruleRow';
+    row.innerHTML = `
+      <textarea aria-label="Rule" placeholder="One rule, e.g. 'New work keynotes start with N followed by a number'">${esc(data.text || '')}</textarea>
+      <select aria-label="Colour when the rule is broken">
+        <option value="red">🔴 Red</option>
+        <option value="yellow">🟡 Yellow</option>
+        <option value="green">🟢 Green</option>
+      </select>
+      <button type="button" class="mini" aria-label="Remove rule">✖</button>`;
+    row.querySelector('select').value = data.severity || 'red';
+    row.querySelector('button').addEventListener('click', () => row.remove());
+    rulesBox.appendChild(row);
+  }
+  document.getElementById('addRule').addEventListener('click', () => addRule());
+
+  // ---------- read / write the form ----------
+  const $ = id => document.getElementById(id);
+  function readForm() {
+    return {
+      version: 1,
+      name: $('gName').value.trim(),
+      cloud: settings.cloud,
+      scopes: [...scopesBox.querySelectorAll('input:checked')].map(i => i.dataset.scope),
+      syntax: { demolition: $('syntaxDemo').value, newWork: $('syntaxNew').value },
+      examples: $('examples').value,
+      rules: [...rulesBox.querySelectorAll('.ruleRow')].map(r => ({
+        text: r.querySelector('textarea').value.trim(),
+        severity: r.querySelector('select').value,
+      })).filter(r => r.text),
+      generalNotes: 'stub',
+    };
+  }
+  function writeForm(g) {
+    $('gName').value = g.name || '';
+    scopesBox.querySelectorAll('input').forEach(i => i.checked = (g.scopes || []).includes(i.dataset.scope));
+    $('syntaxDemo').value = g.syntax?.demolition || '';
+    $('syntaxNew').value = g.syntax?.newWork || '';
+    $('examples').value = g.examples || '';
+    rulesBox.innerHTML = '';
+    (g.rules || []).forEach(addRule);
+    if (!(g.rules || []).length) addRule({ severity: 'red' });
+  }
+  function showMsg(t) { $('saveMsg').textContent = t; }
+  function guideStatus() {
+    const g = readForm();
+    const parts = [g.name || 'untitled', `${g.scopes.length} scope(s)`, `${g.rules.length} rule(s)`, g.cloud === 'cloud' ? 'safe to cloud' : 'local only'];
+    $('guideStatus').textContent = parts.join(' · ');
+  }
+  function saveGuideline() {
+    try { localStorage.setItem(GUIDE_KEY, JSON.stringify(readForm())); showMsg('Saved in this browser.'); }
+    catch (e) { logError('Guideline could not be saved: ' + e.message); showMsg('Not saved: browser storage is blocked. Use Export as file.'); }
+    guideStatus();
+  }
+  function loadGuideline() {
+    try {
+      const raw = localStorage.getItem(GUIDE_KEY);
+      if (raw) writeForm(JSON.parse(raw));
+      else addRule({ severity: 'red' });
+    } catch (e) { logError('Saved guideline could not be read: ' + e.message); addRule({ severity: 'red' }); }
+    guideStatus();
+  }
+
+  // Save on typing (debounced) so the form keeps its content on reload
+  let timer = null;
+  document.querySelectorAll('#guide input, #guide textarea, #guide select').forEach(el => {
+    el.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(saveGuideline, 400); });
+    el.addEventListener('change', () => { clearTimeout(timer); timer = setTimeout(saveGuideline, 150); });
+  });
+  rulesBox.addEventListener('click', () => { clearTimeout(timer); timer = setTimeout(saveGuideline, 150); });
+  $('saveG').addEventListener('click', saveGuideline);
+
+  $('exportG').addEventListener('click', () => {
+    try {
+      const g = readForm();
+      const blob = new Blob([JSON.stringify(g, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = (g.name || 'keynote-guideline').replace(/[^\w\- ]+/g, '').trim() + '.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      showMsg('Exported. Keep it on this computer unless it is marked safe to cloud.');
+    } catch (e) { logError('Export failed: ' + e.message); }
+  });
+  $('importG').addEventListener('change', e => {
+    const f = e.target.files[0]; if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const g = JSON.parse(reader.result);
+        if (g.version !== 1) throw new Error('unknown guideline version');
+        writeForm(g);
+        settings.cloud = g.cloud === 'cloud' ? 'cloud' : 'local'; saveSettings(); renderSettings();
+        saveGuideline(); showMsg('Imported.');
+      } catch (err) { logError('Import failed: ' + err.message); showMsg('That file is not a guideline.'); }
+      e.target.value = '';
+    };
+    reader.readAsText(f);
+  });
+  $('clearG').addEventListener('click', () => {
+    if (!confirm('Clear the guideline form? A saved copy in this browser is replaced when you save.')) return;
+    writeForm({}); saveGuideline();
+  });
+
+  // ---------- cloud choice (stored with the guideline) ----------
+  document.querySelectorAll('#cloudSeg button').forEach(b => b.addEventListener('click', () => {
+    settings.cloud = b.dataset.v; saveSettings(); renderSettings(); saveGuideline();
+  }));
+
+  // ---------- step 1 accordion ----------
+  const s1Head = $('s1Head'), s1Body = $('s1Body');
+  s1Head.addEventListener('click', () => {
+    const open = s1Body.hidden;
+    s1Body.hidden = !open; s1Head.setAttribute('aria-expanded', String(open));
+    if (open) $('guide').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  $('s1Tag').textContent = 'start here';
+
+  // ---------- ⚙️ drawer ----------
+  const gear = $('gear'), drawer = $('drawer');
+  const setOpen = open => { drawer.hidden = !open; gear.setAttribute('aria-expanded', String(open)); };
+  gear.addEventListener('click', () => setOpen(drawer.hidden));
+  $('closeDrawer').addEventListener('click', () => setOpen(false));
+
+  document.querySelectorAll('.seg[data-key] button').forEach(b => b.addEventListener('click', () => {
+    settings[b.parentElement.dataset.key] = b.dataset.v; saveSettings(); renderSettings();
+  }));
+  $('showErrors').addEventListener('change', e => { settings.showErrors = e.target.checked; saveSettings(); renderErrors(); });
+  $('optFindings').addEventListener('change', e => { settings.findings = e.target.checked; saveSettings(); });
+  $('optComments').addEventListener('change', e => { settings.comments = e.target.checked; saveSettings(); });
+  $('optTheme').addEventListener('change', e => { settings.dark = e.target.checked; saveSettings(); applyTheme(); });
+
+  function applyTheme() {
+    document.documentElement.setAttribute('data-theme', settings.dark ? 'dark' : 'light');
+  }
+  function renderSettings() {
+    document.querySelectorAll('.seg[data-key]').forEach(seg => {
+      const v = String(settings[seg.dataset.key]);
+      seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+    });
+    document.querySelectorAll('#cloudSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === settings.cloud));
+    $('showErrors').checked = !!settings.showErrors;
+    $('optFindings').checked = !!settings.findings;
+    $('optComments').checked = !!settings.comments;
+    $('optTheme').checked = !!settings.dark;
+    renderErrors();
+  }
+
+  // ---------- start ----------
+  applyTheme();
+  renderSettings();
+  loadGuideline();
+  setOpen(false);
+
+  function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+})();
+</script>
+</body>
+</html>

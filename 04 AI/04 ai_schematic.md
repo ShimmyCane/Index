@@ -22,7 +22,7 @@ Projects with notes:
 - Adventure/ — family story game (Athena's story); world of Ondra, ten-book plan, voiced chapter 1, voices page, recording step (2026-11-10); recording only, no browser voice, story skills (2026-11-10). `brief.md`, `lessons.md`, `story_lessons.md`.
 - Living Room Scene/ — scene built from a photo over ten versions (V1–V10), render-and-compare loop. `brief.md` (version log), `lessons.md`.
 - Shimmy Specs/ — spec-writing process app; MVP built, accounts and cloud saving built (`mvp schematic.md`, `mvp tasks.md`, `convo/convo v0.3.md`). Architecture project tables are indexed in `table_index`. `brief.md`, `lessons.md`.
-- QC keynotes/ — seed only. `brief.md`, `lessons.md`. Questions in `03 Projects/QC keynotes/convo/convo v0.1.md`.
+- QC keynotes/ — first build v0.1.0 (guideline builder). `brief.md`, `lessons.md`. Questions in `03 Projects/QC keynotes/convo/convo v0.1.md`.
 - Critique Detail/ — MVP 0.2.0 (2026-11-14): results page and script around a written detail review; CSI rulebook library, adaptive QC list, hard gate, lean proof toggles; no AI call in the code. `brief.md`, `lessons.md`. Questions in `03 Projects/Critique Detail/convo/convo v0.2.md`.
 - Better Parenting/ — MVP 0.1.0 (2026-11-16): parenting scenarios and practice for K to grade 5; 144 scenarios, 18 skills, own-scenario AI loop, family tables written. `brief.md`, `lessons.md`. Questions in `03 Projects/Better Parenting/convo/convo v0.1.md`.
 - Rhythm Sticks/ — MVP 0.3.1 (2026-11-13): wordless rhythm and sound toy, eleven modes plus a hidden breathing garden, random on load. `brief.md`, `lessons.md`. Questions in `03 Projects/Rhythm Sticks/convo/convo v0.8.md`.
