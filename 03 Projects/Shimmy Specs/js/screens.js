@@ -356,7 +356,61 @@
       }).join('');
   }
 
+  // Database management: every cloud project, its sync state, conflicts, and "Delete everything".
+  function databasePage(ui2) {
+    var c = SS.cloud;
+    var s = store.settings();
+    var h = '<h1>Database management</h1>';
+    if (!c.configured()) return h + '<p>The database is not set up yet, so projects are saved on this device only (see the config block in <code>index.html</code>).</p>';
+    if (!c.session()) return h + '<p>Sign in on the <a href="#/start">Start</a> page first.</p>';
+
+    h += '<section class="card"><label><input type="checkbox" data-chg="setting" data-set="autoSave"' + (s.autoSave !== false ? ' checked' : '') + ' /> ' +
+      'Auto save: save each change to the account as you work</label>' +
+      '<p class="muted">⚠ means this device and the cloud both changed since the last sync. Nothing is overwritten until you choose.</p>' +
+      (ui2.syncMsg ? '<p class="hint">' + ui.esc(ui2.syncMsg) + '</p>' : '') +
+      '<p><button class="btn small" data-act="db-refresh"' + (ui2.dbBusy ? ' disabled' : '') + '>Refresh list</button></p></section>';
+
+    if (ui2.cloudError) h += '<p class="error-text">' + ui.esc(ui2.cloudError) + '</p>';
+    if (ui2.cloudList === null) h += '<p class="muted">Loading your projects…</p>';
+    else if (!ui2.cloudList.length) h += '<p class="muted">No projects on the account.</p>';
+    else {
+      h += '<section class="card"><h2>Cloud projects</h2><ul class="plain rows">' + ui2.cloudList.map(function (x) {
+        var local = store.findByCloudId(x.id);
+        var st = c.syncStatus(x, local);
+        var action = {
+          same: '<button class="btn small quiet" disabled>In sync</button>',
+          upload: '<button class="btn small" data-act="db-sync" data-id="' + ui.esc(x.id) + '"' + (ui2.dbBusy ? ' disabled' : '') + '>Sync ↑ upload</button>',
+          download: '<button class="btn small" data-act="db-sync" data-id="' + ui.esc(x.id) + '"' + (ui2.dbBusy ? ' disabled' : '') + '>Sync ↓ download</button>',
+          conflict: '<button class="btn small" data-act="db-conflict" data-id="' + ui.esc(x.id) + '" aria-label="Conflict: choose a version" title="Both changed">⚠</button>'
+        }[st];
+        var panel = '';
+        if (st === 'conflict' && ui2.conflictId === x.id) {
+          panel = '<div class="row">' +
+            '<button class="btn small" data-act="db-resolve" data-id="' + ui.esc(x.id) + '" data-choice="both">Keep both (split into two projects)</button>' +
+            '<button class="btn small" data-act="db-resolve" data-id="' + ui.esc(x.id) + '" data-choice="local">Override cloud with this device</button>' +
+            '<button class="btn small" data-act="db-resolve" data-id="' + ui.esc(x.id) + '" data-choice="cloud">Override this device with cloud</button></div>';
+        }
+        return '<li><span class="row">' + action + ' <strong>' + ui.esc(x.name) + '</strong> ' +
+          '<span class="muted">' + ui.esc(x.kind) + ' · cloud ' + shortDate(x.updated_at) +
+          (local ? '' : ' · not on this device') + '</span></span>' + panel + '</li>';
+      }).join('') + '</ul></section>';
+    }
+
+    h += '<section class="card danger"><h2>Delete everything</h2>' +
+      '<p><button class="btn small" data-act="db-toggle-delete">' + (ui2.deleteOpen ? 'Close' : 'Open delete panel') + '</button></p>';
+    if (ui2.deleteOpen) {
+      h += '<h3>Never track</h3>' +
+        '<p><strong>Cloud database management: only local files will be unaffected.</strong> ' +
+        'This deletes the cloud copy of every project on the account, except the names you keep below. Projects stay on this device.</p>' +
+        '<label>Keep these names (comma separated) <input type="text" data-chg="setting" data-set="keepNames" value="' + ui.esc(s.keepNames || '') + '" /></label>' +
+        '<label>Type <code>delete everything</code> to confirm <input id="delConfirm" type="text" autocomplete="off" /></label>' +
+        '<p><button class="btn primary" data-act="db-delete-all"' + (ui2.dbBusy ? ' disabled' : '') + '>Delete everything</button></p>';
+    }
+    return h + '</section>';
+  }
+
   SS.screens = {
+    database: databasePage,
     start: start,
     import: importPage,
     survey: survey,

@@ -28,7 +28,16 @@
     }
   }
 
-  var DEFAULT_SETTINGS = { name: '', theme: 'auto', showNotes: false, showErrors: false };
+  var DEFAULT_SETTINGS = {
+    name: '', theme: 'auto', showNotes: false, showErrors: false,
+    databaseManagement: true,  // shows the Database page and allows cloud sync
+    autoSave: true,            // saves each change to the account (needs databaseManagement and a sign-in)
+    keepNames: ''              // comma-separated project names that "Delete everything" keeps
+  };
+
+  function newId() {
+    return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  }
 
   function newProject(name, kind) {
     var now = new Date().toISOString();
@@ -96,11 +105,32 @@
       if (saveTimer) { root.clearTimeout(saveTimer); saveTimer = null; }
       var p = this.current;
       p.updated = new Date().toISOString();
+      this.writeProject(p);
+      safeSet(CURRENT_KEY, p.id);
+    },
+
+    // Writes one project to this device without changing which project is open
+    // (used by cloud sync). If it is the open project, the open copy is replaced.
+    writeProject: function (p) {
+      if (this.current && this.current.id === p.id) this.current = p;
       safeSet('ss.project.' + p.id, p);
       var list = this.list().filter(function (x) { return x.id !== p.id; });
       list.unshift({ id: p.id, name: p.name, kind: p.kind, updated: p.updated });
       safeSet(INDEX_KEY, list.slice(0, 50));
-      safeSet(CURRENT_KEY, p.id);
+    },
+
+    newId: newId,
+
+    // The local copy linked to a cloud project, or undefined. Prefers the open project in memory.
+    findByCloudId: function (cloudId) {
+      if (this.current && this.current.cloudId === cloudId) return this.current;
+      var found;
+      this.list().some(function (entry) {
+        var p = safeGet('ss.project.' + entry.id, null);
+        if (p && p.cloudId === cloudId) { found = p; return true; }
+        return false;
+      });
+      return found;
     },
 
     // Reopens the project that was open when the page was last used.
