@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Piano Companion</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎹%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/companion.css">
+</head>
+<body class="recPage">
+<header class="topbar">
+  <div class="who" id="who" role="group" aria-label="Who is playing"></div>
+  <nav class="quick">
+    <a class="btn icon" href="player.html" aria-label="Listen" title="Listen">🎧</a>
+    <a class="btn icon" href="library.html" aria-label="Library" title="Library">📚</a>
+    <a class="btn icon" href="compose.html" aria-label="Compose" title="Compose">🎛️</a>
+  </nav>
+  <button class="pill" id="pill" type="button">💾 this device</button>
+</header>
+
+<main class="stage">
+  <div class="bigWrap">
+    <button class="big" id="big" type="button" data-state="idle" aria-live="polite">
+      <span class="bigIcon" id="bigIcon">🎹</span>
+      <span class="bigWord" id="bigWord">Tap to wake</span>
+    </button>
+    <div class="count" id="count" aria-hidden="true"></div>
+  </div>
+  <div class="dots" id="dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <p class="hint" id="hint"></p>
+  <button class="btn small" id="skip" type="button" hidden>Skip for now</button>
+</main>
+
+<section class="strip" id="strip" aria-label="Takes">
+  <div class="stripEmpty" id="stripEmpty">Your takes will show up here</div>
+</section>
+
+<script src="js/app.js"></script>
+<script src="js/family.js"></script>
+<script src="js/store.js"></script>
+<script src="js/notes.js"></script>
+<script src="js/chrome.js"></script>
+<script src="js/cues.js"></script>
+<script src="js/trim.js"></script>
+<script src="js/listen.js"></script>
+<script src="js/voice.js"></script>
+<script src="js/strip.js"></script>
+<script src="js/recorder.js"></script>
+</body>
+</html>

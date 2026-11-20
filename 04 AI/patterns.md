@@ -137,3 +137,11 @@ Patterns that repeat often enough to become a template in `02 Refs/Templates/` o
 - **Fuzz as a meaning:** vague when not practised, sharp when known. _(Mind Palace)_
 - **One object library for two renderers:** build each object with the real library in Node, read back the meshes, write simple shapes as JSON. _(Mind Palace `tools/export_godot_data.js`)_
 
+
+## Hands-free recorder (Athena's Piano Companion, 2026-11-20)
+- **Audio-clock listener:** microphone → AudioWorklet (ScriptProcessor fallback) → `feed(samples)` → level with a learned noise floor, onsets (jump over the last four steps), rough pitch by autocorrelation, capture buffer. Testable by feeding arrays. _(`js/listen.js`)_
+- **Trim a take:** envelope in 10 ms windows, threshold from the take's own peak, skip the count-in leak, keep a short lead-in and a natural decay, cosine fades. Pure function. _(`js/trim.js`)_
+- **Learned stop gesture:** store rhythm and rough pitch; match the tail of the onset list; require a pause before it. _(`js/listen.js`, `js/recorder.js`)_
+- **Local-first store with sync:** IndexedDB holds records and audio; `_dirty`, `_up` flags; push (audio first, then row, upsert), pull (never overwrite a dirty record); sync only when idle. _(`js/store.js`)_
+- **Clip engine:** snip, repeat, extend by tail loop with overlap-add, speed by linear resampling, reverse, fades, mix with a limiter. Pure function. _(`js/mixer.js`)_
+- Template candidates: the shared ⚙️ builder (`js/chrome.js`) and the sync store could become skills.
