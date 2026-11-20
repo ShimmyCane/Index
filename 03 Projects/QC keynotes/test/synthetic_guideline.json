@@ -1,0 +1,57 @@
+{
+  "version": 2,
+  "name": "SYNTHETIC restroom and accessibility keynotes (test)",
+  "cloud": "local",
+  "scopes": [
+    "restroom",
+    "access",
+    "walls",
+    "partitions",
+    "fixtures",
+    "doors",
+    "fire"
+  ],
+  "prefixes": {
+    "demolition": "D",
+    "newWork": "N"
+  },
+  "numberDigits": {
+    "min": 1,
+    "max": 2
+  },
+  "maxWords": 12,
+  "upperCase": true,
+  "scopeWords": {
+    "restroom": "RESTROOM, TOILET, LAVATORY",
+    "access": "ACCESSIBLE, GRAB BAR, BARRIER",
+    "walls": "WALL TILE, CERAMIC, WALL",
+    "partitions": "PARTITION",
+    "fixtures": "FAUCET, TOWEL, ACCESSORY, HOLDER",
+    "doors": "DOOR, HARDWARE",
+    "fire": "FIRE"
+  },
+  "fireWords": "HR, HOUR",
+  "approved": [
+    "REMOVE EXISTING CERAMIC WALL TILE AT RESTROOM WALLS",
+    "INSTALL NEW GRAB BAR, 36 INCH LONG",
+    "INSTALL NEW 1-HR FIRE-RATED PARTITION",
+    "REMOVE EXISTING PARTITION AND DOOR",
+    "INSTALL NEW TOWEL HOLDERS"
+  ],
+  "similarity": 0.8,
+  "checks": {
+    "badPrefix": "red",
+    "badNumber": "red",
+    "duplicate": "red",
+    "undefinedKeynote": "red",
+    "unusedKeynote": "yellow",
+    "sequence": "yellow",
+    "tooLong": "yellow",
+    "caseIssue": "yellow",
+    "missingScopeWord": "yellow",
+    "fireMissing": "red",
+    "nearApproved": "yellow",
+    "notApproved": "yellow"
+  },
+  "generalNotes": "stub"
+}

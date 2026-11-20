@@ -1,6 +1,6 @@
 # QC keynotes — schematic
 
-Status: first build = start page and guideline builder (v0.1.0). Steps 2–4 are placeholders. Questions answered in `convo/convo v0.1.md`; next questions in `convo/convo v0.2.md`.
+Status: all four steps built (v0.2.0). Tested headless on synthetic data (`test/smoke.js`). Not yet tested on a real iPad or on a real drawing set. Questions answered in `convo/convo v0.1.md`; next questions in `convo/convo v0.2.md`.
 
 Track: **B. Studio design** (dense but orderly, collapsible panels, precise labels).
 
@@ -25,12 +25,23 @@ A first-pass QC tool for keynotes and general notes on architectural drawing set
 - Checked headless at 390×844, 768×1024 and 1180×820: no horizontal scroll, drawer opens, rule text persists on reload, no console errors (favicon 404 fixed).
 - Home-page tile added to the Nursery list in the root `index.html` (standing exception).
 
-## Next (not built)
-1. Step 2: upload a PDF (pdf.js from cdnjs, pinned version), kept in memory only.
-2. Step 3: read the text layer per page, find keynotes and note blocks, apply the guideline rules, colour each match.
-3. Step 4: export with pdf-lib annotations, plus the findings list.
-4. Feedback notes and the database link (architecture project), feedback and comments only.
-5. Strictness setting wired into the scan.
+## Built in v0.2.0
+- Step 2: PDF read in memory with pdf.js (vendored), text layer checked per page.
+- Step 3: keynote entries (code + words) and callouts (code only) found by line; checks run from the structured guideline; findings table, preview with boxes, page picker.
+- Step 4: marked-up PDF with editable Highlight (entries) and Square (undefined callouts, unreadable pages) annotations, each with a comment; findings CSV.
+- Synthetic test: `test/make_synthetic.js` makes `test/synthetic_restroom_set.pdf` and `test/synthetic_guideline.json`; `test/smoke.js` checks the colours, counts, export and layout.
+
+## Known limits (v0.2.0)
+- Keynote codes must be letters then digits, no separator (D3, not D-3). A sheet number such as A-101 is not read as a code.
+- Keynote text must sit on one line with its code. Text split over several lines is read as separate lines.
+- Callouts are found by a bubble that holds only the code.
+- General notes are not checked (stub).
+- Feedback notes are not built.
+
+## Next
+1. Test on a real vector drawing set (Jimmy's own file, kept out of the repo) and adjust the line reading.
+2. Feedback notes and the database link (architecture project), feedback and comments only.
+3. General-notes checks, when Jimmy is ready.
 
 ## Open
 See `convo/convo v0.2.md`.

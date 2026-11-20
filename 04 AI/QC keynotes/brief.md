@@ -1,10 +1,9 @@
 # QC keynotes — brief
 
-Current state: first build (v0.1.0). `index.html` has the start page, the guideline builder (type in, auto-save in this browser, export and import as JSON), and the ⚙️ panel. Steps 2–4 are placeholders. Home-page tile added.
+Current state: v0.2.0. All four steps built: guideline builder (structured, v2), PDF upload (in memory), scan with green/yellow/red findings and a preview, and export of a marked-up PDF (editable annotations) plus a findings CSV. Libraries are vendored (pdf.js 3.11.174, pdf-lib 1.17.1), so nothing loads from the internet.
 
-Verified: headless Chromium at 390×844, 768×1024 and 1180×820, no horizontal scroll, no console errors, rule text persists on reload.
-Not verified: the framework on a real iPad; pdf.js and pdf-lib (not yet used).
+Verified: `test/smoke.js` in headless Chromium on the synthetic sheet: 4 green, 5 yellow, 4 red (3 entries + 1 undefined callout), 13 annotations in the export, selectable text kept, no horizontal scroll at 390 and 768 px, no console errors, guideline kept after reload. Visual check of the scan layout and the exported page done with screenshots.
 
-Decisions: see `03 Projects/QC keynotes/schematic.md`. Open questions: `convo/convo v0.2.md`.
+Not verified: a real drawing set, a real iPad, Acrobat or Bluebeam opening the export.
 
-Next: step 2 (PDF upload) and step 3 (text-layer scan), once Jimmy answers v0.2.
+Next: Jimmy's answers in `convo/convo v0.2.md`.
