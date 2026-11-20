@@ -1,64 +1,72 @@
 # Athena's Piano Companion — schematic
 
-**Track: A. Family play** (proposed; confirm in `convo/convo v0.1.md`, question 1)
-**Status: idea (2026-11-20).** Nothing built yet. Questions in `convo/convo v0.1.md`.
+**Track: A. Family play** (confirmed, `convo/convo v0.1.md` question 1)
+**Status: MVP 0.1.0 (2026-11-20; headless-tested, not tried on a real iPad or piano; SQL written, not applied).** Answers: `convo/convo v0.1.md`. Build notes and open questions: `convo/convo v0.2.md`.
 
 ## Purpose
 
-A companion page that sits beside the piano and listens while Athena plays freely. Her hands stay on the keys; her voice and her playing run the page. It catches short clips ("takes"), keeps them as a numbered series, and later lets her step away from the piano to play them back and handle them (trim, rename, favourite, layer, loop). Felix can jam the same way. Aim: make free play sustainable, fun and delightful for the player and for a listener.
+A companion that sits beside the digital piano and listens while Athena (and sometimes Felix) plays freely. Her hands stay on the keys; her voice and her playing run the page. It catches takes, saves them with her name and the date, and syncs them to the family database, where other web apps can use them. Away from the piano she can listen, organise and compose with them.
 
 ## Track A defaults
 
 | Setting | Value |
 |---|---|
-| Words on screen | few, with icons; large status word only (Listening, 3·2·1, Recording, Saved) |
-| Options visible | one big state circle; the take strip below it |
-| ⚙️ holds | everything secondary: phrases, silence time, sensitivity, stop-key, volume, notes, errors |
-| Panels | collapsible, closed on a small screen |
-| Palette | light pastel (vanilla, sage, peach, mint, coral), 2.5–3.5px dark lines, offset shadows |
-| Database | none at first; device storage only |
-| Private data | recordings stay on the device; never committed |
-| Skills | `ipad_website`, `settings_gear`, `feedback_notes` |
+| Words on screen | few: the circle's one word, one hint line, take cards |
+| Options visible | one big circle; who is playing (two chips); three page buttons |
+| ⚙️ holds | everything secondary (count-in, pause, stop ways, voice phrases, card look, database, notes, errors) |
+| Panels | collapsible; ⚙️ sections closed except the first |
+| Palette | pastel family look (vanilla, sage, peach, mint, coral); 3px ink lines; offset shadows |
+| Database | Family project, family login, tables `pc_*`, bucket `pc-takes`; device first |
+| Private data | recordings are never committed; they live in the browser and the private bucket |
+| Skills | `ipad_website`, `settings_gear`, `feedback_notes`, `project_track`, `supabase_link` |
 
-## The loop (hands-free)
+## Pages
 
-1. **Waiting.** The page listens to the microphone. A quiet breathing circle shows it is awake.
-2. **Start.** Athena says a start phrase ("start recording", "I want to record something", "let's record"; list editable in ⚙️). The page answers with a countdown: beep, beep, beep, higher beep (the circle fills three dots, then blooms). Recording begins on the high beep.
-3. **Recording.** She plays. The circle pulses with the sound level.
-4. **Stop, three ways** (all on at first; each can be turned off in ⚙️):
-   - **Silence:** about 3 seconds of quiet. The circle blinks (a visible "I think you're done") for a short grace, then ends the take. Playing again in the grace cancels the stop.
-   - **Stop key:** a chosen note or short motif (for example the lowest A pressed three times). The take is trimmed to remove the stop gesture.
-   - **Voice:** "stop" (optional, off by default, since she should not have to speak).
-5. **Snip.** The take is cut at the end of her last note, so the trailing silence and the stop gesture are removed.
-6. **Saved.** A short chime, a new take card appears in the strip, and the page is ready for the next take at once.
-7. **Away from the piano.** A take strip (screen) lets her play, trim, rename, star and layer takes by touch.
+| Page | File | Purpose |
+|---|---|---|
+| Record | `index.html` | hands-free recording loop |
+| Listen | `player.html` | albums, artists, ratings, playlists; playback |
+| Library | `library.html` | edit take details; playback; download a file |
+| Compose | `compose.html` | four-layer composer |
 
-## Pieces (planned)
+## The recording loop
 
-- **Listener:** microphone input, level meter, onset and silence detector (`js/listen.js`).
-- **Voice commands:** browser speech recognition for the start phrase; falls back to a big touch circle if speech recognition is unavailable (`js/voice.js`).
-- **Recorder:** MediaRecorder with a short rolling pre-buffer so the first note is never clipped (`js/record.js`).
-- **Takes:** stored on the device in IndexedDB, with a name, time, length and star (`js/takes.js`).
-- **Strip and player:** waveform per take, play, loop, trim handles, layer two takes (`js/strip.js`).
-- **Sound cues:** Web Audio synthesized beeps and chimes only (`js/cues.js`).
-- **Gear:** ⚙️ drawer per `02 Refs/Skills/settings_gear.md` (`js/gear.js`).
-- **Notes for improvement:** per `02 Refs/Skills/feedback_notes.md`, saved with the take or screen they are about (`js/notes.js`).
+1. **Wake.** One tap (the browser needs it for the microphone and sound). The microphone is opened with echo cancelling, noise suppression and auto volume **off**, since they chew up piano notes.
+2. **First use: learn the stop notes.** Play 3 to 5 notes, wait; play them again to check. Stored on the device (rhythm and a rough pitch for each note). "Skip for now" and "Learn again" in ⚙️.
+3. **Waiting.** The circle breathes with the sound. Start by voice (`let's record`, `please record`, `start recording`, `start`; editable) or by tapping the circle.
+4. **Count-in.** Four beats 0.7 s apart; the take starts on the fourth (short) one. Six styles in ⚙️: beeps, chimes, wood clicks, drum, voice, lights only.
+5. **Recording.** Ends by any of: a **pause** (default 5 s; the circle blinks and a big 3, 2, 1 shows for the last three seconds; playing again cancels), the **stop notes** (only after a pause of about a second; cut from the take), the voice **stop recording / stop recording please** (the page cuts back to the last quiet moment before the words), or a **tap on the circle**. Each of the first three can be switched off in ⚙️.
+6. **Trim.** The lead-in before the first note and the quiet tail are cut. A 0.15 s lead-in and 0.45 s of natural decay are kept, with a short fade in and a cosine fade out. Nothing is saved if no real playing was heard.
+7. **Save.** `Take N` (counted per player), player, album (`Free play YYYY-MM` unless set), a colour, a loudness picture, file name `player-date-time-takeN.wav`. 16-bit mono WAV. Saved in the browser (IndexedDB) first.
+8. **Ready again** at once. A chime marks the save.
+
+## Data
+
+`pc_takes` (id, name, player, album, take_no, file_name, file_path, mime, duration_ms, size_bytes, sample_rate, rating 0–5, description, color, peaks, source `recorder`/`composer`, taken_at, updated_at) · `pc_playlists` · `pc_playlist_items` (playlist_id, take_id, position) · `pc_projects` (composer pieces as JSON) · `pc_notes`. Audio in the private bucket `pc-takes` at `<take id>.wav`. SQL: `supabase/` (`test_001_pc`, `001_pc_family`, `verify_001_pc`). Registered under app `piano-companion`.
+
+**Sync** (`js/store.js`): upload audio, then upsert the row; pull other devices' rows. Runs only while the page is waiting (not recording, not playing, 8 s after the last sound) and after sign-in. An unsynced local edit is never overwritten. Status pill: `💾 this device`, `☁️ synced`, `⚠️ check`.
+
+## Compose
+
+Four layers; a clip has `start` (shift), `in`/`out` (snip), `rate` (speed), `reverse`, `gain`, fades, `repeat`, `extend` (loops the clip's last moment). Cut = split at the play position. Drag to move (and between layers); drag an edge to snip. Undo and redo. The mix is made in the page, limited so it never clips, and can be saved as a take (`source = composer`) or downloaded.
+
+## Feedback notes
+
+Notes for improvement in ⚙️ on every page (`02 Refs/Skills/feedback_notes.md`). Each note carries the page and the take or piece on screen, the time and the version. Device first; sent to `pc_notes` when signed in.
 
 ## Increments
 
-1. Listener, level circle, touch start, countdown beeps, silence stop with blink, take strip with playback, ⚙️, notes. (first build, if Jimmy says go)
-2. Voice start phrase; stop key; snip of the stop gesture.
-3. Trim handles, rename, star, delete with undo, export a take as a file.
-4. Layering and looping; metronome-free "loop what I just played".
-5. Optional: MIDI keyboard input (more reliable than a microphone), eyes or gestures only if wanted.
+1. ✅ 0.1.0 — everything above.
+2. Next: real-piano test and fixes from notes; apply the SQL; try voice start on the iPad.
+3. Later: MIDI input (laptop Chrome), beat grid in Compose, time-stretch, a "hold to stop" circle, share a take.
 
 ## Risks and limits
 
-- Speech recognition in browsers often needs internet and a secure page (https or localhost); iPad Safari support varies. The touch fallback must always work.
-- The page hears the piano through the microphone, so the voice phrase must be told apart from piano sound. A MIDI or USB keyboard would be sturdier, if she has one.
-- The page cannot hear the voice and the piano equally well from the same microphone; testing on her own piano is needed.
-- A recording kept on the device can be lost if browser storage is cleared. An export button is planned.
+- Speech recognition needs internet and may not work in every browser; the circle always works. Voice and microphone capture at the same time can conflict on some iPads (to test).
+- The page cannot tell the piano from speech, so voice stop is cut by finding a quiet moment.
+- Browser storage can be cleared; sync to the family database is the safety net.
+- A three-minute take is about 16 MB (WAV).
 
 ## Privacy
 
-Recordings, if any, stay on the device in the browser. Nothing is uploaded, and no recording is ever committed to this public repo. Samples in the repo, if any, are synthetic.
+No recordings, names beyond first names, or family details in the repo. The database holds recordings; the repo holds only code and SQL.
