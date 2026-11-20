@@ -91,6 +91,17 @@
   .noteText { margin: 4px 0; white-space: pre-wrap; }
   .wide { width: 100%; margin-top: 4px; }
   textarea.small { min-height: 60px; }
+  details.ruleDraft { border: 2px solid var(--line); border-radius: 12px; margin: 8px 0; background: var(--paper); }
+  details.ruleDraft > summary { list-style: none; cursor: pointer; padding: 8px 12px; min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 700; }
+  details.ruleDraft > summary::-webkit-details-marker { display: none; }
+  .ruleBody { padding: 0 12px 12px; }
+  .ruleBody input[type=text], .ruleBody textarea { margin-bottom: 6px; }
+  .ruleName { flex: 1; }
+  .pill:empty { display: none; }
+  .wg, .wy, .wr { }
+  .wg { text-decoration: underline; text-decoration-color: #2e9e57; text-decoration-thickness: 3px; }
+  .wy { text-decoration: underline; text-decoration-color: #f2c419; text-decoration-thickness: 3px; }
+  .wr { text-decoration: underline; text-decoration-color: #d93a2a; text-decoration-thickness: 3px; }
   @media print { .gear, .drawer, .errorsPanel, .btn, .seg, .row, .field input[type=file] { display: none !important; } body { padding-bottom: 0; background: #fff; color: #000; } details.step { box-shadow: none; } }
 </style>
 </head>
@@ -127,18 +138,17 @@
         <span class="hint">Tick the scopes this guideline covers. Scope words are the words an entry must use for that scope (comma separated). A keynote with none of the selected scope words is yellow.</span>
         <div id="scopeRows"></div></div>
 
-      <div class="field"><span class="lbl">Number format</span>
+      <div class="field"><span class="lbl">Keynote rows</span>
         <div class="grid2">
-          <div><label for="pDem">Demolition prefix</label><input type="text" id="pDem" placeholder="D"></div>
-          <div><label for="pNew">New work prefix</label><input type="text" id="pNew" placeholder="N"></div>
-          <div><label for="digMin">Fewest digits</label><input type="number" id="digMin" min="1" max="3" value="1"></div>
-          <div><label for="digMax">Most digits</label><input type="number" id="digMax" min="1" max="3" value="3"></div>
+          <div><label for="types">Keynote types (comma separated)</label><input type="text" id="types" placeholder="Demo, New"></div>
+          <div><label for="digMin">Fewest digits in the number</label><input type="number" id="digMin" min="1" max="3" value="1"></div>
+          <div><label for="digMax">Most digits in the number</label><input type="number" id="digMax" min="1" max="3" value="3"></div>
         </div>
-        <span class="hint">Codes are letters then digits with no separator, e.g. D3 or N12. Any other prefix is red.</span></div>
+        <span class="hint">Each row is: Type, Number, CSI code (four digits, e.g. 02 00), Description. Example: Demo | 1 | 02 00 | Demolish existing roofing assembly down to concrete substrate.</span></div>
 
       <div class="field"><span class="lbl">Wording</span>
         <div class="grid2">
-          <div><label for="maxWords">Most words in an entry</label><input type="number" id="maxWords" min="1" value="12"></div>
+          <div><label for="maxWords">Most words in an entry</label><input type="number" id="maxWords" min="1" value="100"></div>
           <div><label for="fireWords">Rating words for a FIRE keynote</label><input type="text" id="fireWords" placeholder="HR, HOUR"></div>
           <div><label for="similarity">Closeness to an approved phrase (%)</label><input type="number" id="similarity" min="50" max="100" value="80"></div>
         </div>
@@ -148,8 +158,8 @@
         <textarea id="approved" placeholder="REMOVE EXISTING CERAMIC WALL TILE AT RESTROOM WALLS&#10;INSTALL NEW GRAB BAR, 36 INCH LONG"></textarea>
         <span class="hint">Exact matches are green. Close ones are yellow and show the closest phrase. Anything else is yellow when the check below is on. Leave empty to skip this.</span></div>
 
-      <div class="field"><span class="lbl">Checks and their colour</span>
-        <span class="hint">Choose the colour a broken check gives. Off ignores that check.</span>
+      <div class="field"><span class="lbl">Rules (drafts until approved)</span>
+        <span class="hint">Each rule has a colour, a short description and a full narrative. A draft rule does not run in the scan. Tick Approved to apply it.</span>
         <div id="checkRows"></div></div>
 
       <div class="field"><label for="syntaxDemo">Demolition keynote syntax (notes for people)</label>
@@ -174,7 +184,7 @@
 
   <!-- STEP 2 -->
   <details class="step" id="step2">
-    <summary><span class="num">2</span><span>Upload a PDF drawing set</span><span class="tag" id="tag2">no file yet</span></summary>
+    <summary><span class="num">2</span><span>Upload a PDF drawing set (it is read straight away)</span><span class="tag" id="tag2">no file yet</span></summary>
     <div class="body">
       <p class="hint">Use a vector PDF, where the text can be selected. Scanned pages cannot be read in this version and are marked yellow.</p>
       <div class="row">
@@ -188,10 +198,10 @@
 
   <!-- STEP 3 -->
   <details class="step" id="step3">
-    <summary><span class="num">3</span><span>Scan and mark green, yellow, red</span><span class="tag" id="tag3">waiting for a PDF</span></summary>
+    <summary><span class="num">3</span><span>The drawing: keynotes at full strength, the rest faded</span><span class="tag" id="tag3">waiting for a PDF</span></summary>
     <div class="body">
       <div class="row">
-        <button type="button" class="btn primary" id="scanBtn" disabled>Scan the drawing</button>
+        <button type="button" class="btn" id="scanBtn" disabled>Scan again</button>
         <span class="muted" id="scanInfo"></span>
       </div>
 
@@ -215,11 +225,11 @@
         <div>
           <div class="tableWrap">
             <table aria-label="Findings">
-              <thead><tr><th>Mark</th><th>Page</th><th>Item</th><th>Why</th></tr></thead>
+              <thead><tr><th>Mark</th><th>Page</th><th>Keynote</th><th>Why</th></tr></thead>
               <tbody id="findBody"></tbody>
             </table>
           </div>
-          <p class="hint">Click a row to see it on the sheet.</p>
+          <p class="hint">Click a row to see it on the sheet. Underlined words in the description: green agrees with the approved phrase, yellow differs from it.</p>
         </div>
       </div>
     </div>

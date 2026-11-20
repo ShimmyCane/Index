@@ -15,7 +15,7 @@
   let renderToken = 0;
 
   // Draw page n at a given width, then draw a box for each finding on that page.
-  QC.renderPreview = async (pdfDoc, pageNum, canvas, findings, cssWidth) => {
+  QC.renderPreview = async (pdfDoc, pageNum, canvas, findings, cssWidth, fade) => {
     const token = ++renderToken;
     const page = await pdfDoc.getPage(pageNum);
     const base = page.getViewport({ scale: 1 });
@@ -30,6 +30,24 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     await page.render({ canvasContext: ctx, viewport: vp }).promise;
     if (token !== renderToken) return null; // a newer render has started
+
+    // Fade the sheet, but keep the keynote rows and callouts at full strength.
+    if (fade) {
+      const copy = document.createElement('canvas');
+      copy.width = canvas.width; copy.height = canvas.height;
+      copy.getContext('2d').drawImage(canvas, 0, 0);
+      ctx.save();
+      ctx.fillStyle = 'rgba(251, 248, 241, 0.8)';
+      ctx.fillRect(0, 0, vp.width, vp.height);
+      for (const f of findings) {
+        if (f.page !== pageNum || f.kind === 'page') continue;
+        const [x0, y0, x1, y1] = vp.convertToViewportRectangle(f.rect);
+        const x = Math.min(x0, x1) - 3, y = Math.min(y0, y1) - 3;
+        const w = Math.abs(x1 - x0) + 6, h = Math.abs(y1 - y0) + 6;
+        ctx.drawImage(copy, x * dpr, y * dpr, w * dpr, h * dpr, x, y, w, h);
+      }
+      ctx.restore();
+    }
 
     for (const f of findings) {
       if (f.page !== pageNum) continue;

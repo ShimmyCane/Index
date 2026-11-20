@@ -10,9 +10,10 @@ const out = path.resolve(process.argv[2] || '/tmp/qc-test');
 const base = `http://localhost:${process.env.PORT || 8765}/index.html`;
 fs.mkdirSync(out, { recursive: true });
 
-const EXPECT = { // entry/callout code -> colour (D3 is listed twice: first green, second red)
-  D1: 'green', D2: 'yellow', 'D3#1': 'green', 'D3#2': 'red', X5: 'red', D4: 'red', D6: 'yellow',
-  D5: 'yellow', N1: 'yellow', N2: 'green', N4: 'green', N5: 'yellow', N9: 'yellow',
+const EXPECT = { // keynote row -> colour ("Demo 3" is listed twice: first green, second red)
+  'Demo 1': 'green', 'Demo 2': 'yellow', 'Demo 3#1': 'green', 'Demo 3#2': 'red', 'Note 5': 'red', 'Demo 4': 'red',
+  'Demo 5': 'yellow', 'Demo 6': 'yellow', 'New 11': 'yellow', 'New 12': 'green', 'New 14': 'green',
+  'New 15': 'yellow', 'New 17': 'yellow', 'New 18': 'red',
 };
 const fails = [];
 const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!ok) fails.push(msg); };
@@ -40,14 +41,16 @@ const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!o
   check(true, 'step 2: PDF loaded: ' + (await page.textContent('#fileInfo')));
 
   // Step 3: scan
-  await page.click('#scanBtn');
+  // the scan runs on upload; 'Scan again' runs it once more
   await page.waitForFunction(() => !document.getElementById('chips').hidden);
+  await page.click('#scanBtn');
+  await page.waitForFunction(() => !document.getElementById('scanBtn').disabled);
   const chips = await page.$$eval('#chips .chip', els => els.map(e => e.textContent.trim()));
   console.log('chips:', chips.join(' | '));
   check(chips[0] === 'Green: 4', 'green count 4');
-  check(chips[1] === 'Yellow: 6', 'yellow count 6 (incl. D5: approved text, wrong case and period)');
-  check(chips[2] === 'Red: 4', 'red count 4 (3 entries + 1 undefined callout)');
-  check(chips[3] === 'Undefined callouts: 1', 'one undefined callout (D8)');
+  check(chips[1] === 'Yellow: 6', 'yellow count 6');
+  check(chips[2] === 'Red: 5', 'red count 5 (4 rows + 1 undefined callout)');
+  check(chips[3] === 'Undefined callouts: 1', 'one undefined callout (#30)');
 
   const rows = await page.$$eval('#findBody tr[data-id]', trs => trs.map(tr => {
     const cells = tr.querySelectorAll('td');
@@ -57,15 +60,14 @@ const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!o
   // The table is sorted red first, so the two D3 rows are told apart by their reason text.
   const got = {};
   for (const r of rows) {
-    if (r.code === 'D3') got[r.why.includes('used more than once') ? 'D3#2' : 'D3#1'] = r.colour;
-    else got[r.code.replace(/^Callout /, '')] = r.colour;
+    if (r.code === 'Demo 3') got[r.why.includes('used more than once') ? 'Demo 3#2' : 'Demo 3#1'] = r.colour;
+    else got[r.code] = r.colour;
   }
   for (const [code, colour] of Object.entries(EXPECT)) {
-    const key = code.startsWith('D3') ? code : code;
-    check(got[key] === colour, `${key} is ${colour} (got ${got[key]})`);
+    check(got[code] === colour, `${code} is ${colour} (got ${got[code]})`);
   }
-  check(got.D8 === 'red', 'D8 callout is red (undefined)');
-  check(rows.length === 14, `14 findings in the table: 13 entries + 1 undefined callout (got ${rows.length})`);
+  check(got['#30'] === 'red', 'callout #30 is red (no keynote row)');
+  check(rows.length === 15, `15 findings in the table: 14 keynote rows + 1 undefined callout (got ${rows.length})`);
 
   // Click a red row: the preview should move to page 1 with that row picked
   await page.click('#findBody tr[data-id] >> nth=0');
@@ -102,10 +104,10 @@ const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!o
     canvas.width = vp.width; canvas.height = vp.height; canvas.id = 'exportedView';
     document.body.appendChild(canvas);
     await pg.render({ canvasContext: canvas.getContext('2d'), viewport: vp, annotationMode: pdfjsLib.AnnotationMode.ENABLE_STORAGE }).promise;
-    return { annots: annots.map(a => ({ subtype: a.subtype, contents: a.contentsObj && a.contentsObj.str || a.contents || '' })), hasText: text.includes('D1') && text.includes('REMOVE EXISTING') };
+    return { annots: annots.map(a => ({ subtype: a.subtype, contents: a.contentsObj && a.contentsObj.str || a.contents || '' })), hasText: text.includes('Demo') && text.includes('REMOVE EXISTING') };
   }, exported);
   console.log('annotations in exported file:', annotInfo.annots.length, annotInfo.annots.map(a => a.subtype).join(','));
-  check(annotInfo.annots.length === 14, `14 annotations: 13 entries + 1 undefined callout (got ${annotInfo.annots.length})`);
+  check(annotInfo.annots.length === 15, `15 annotations: 14 rows + 1 undefined callout (got ${annotInfo.annots.length})`);
   check(annotInfo.hasText, 'exported PDF keeps selectable text (not flattened)');
   const sampleComment = annotInfo.annots.find(a => a.contents.includes('RED'));
   check(!!sampleComment, 'annotations carry a comment with the colour');
