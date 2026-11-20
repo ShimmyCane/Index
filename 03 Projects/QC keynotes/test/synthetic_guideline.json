@@ -51,6 +51,7 @@
     "missingScopeWord": "yellow",
     "fireMissing": "red",
     "nearApproved": "yellow",
+    "punctCase": "yellow",
     "notApproved": "yellow"
   },
   "generalNotes": "stub"

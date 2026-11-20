@@ -86,6 +86,11 @@
   .drawer .setting:last-child { border-bottom: 0; }
   .errorsPanel { position: fixed; left: 16px; right: 100px; bottom: 16px; max-height: 30vh; overflow: auto; z-index: 25; background: var(--red); color: var(--ink); border: 2px solid var(--line); border-radius: 14px; padding: 8px 12px; font: 13px/1.4 ui-monospace, Menlo, monospace; white-space: pre-wrap; }
 
+  .noteItem { list-style: none; border: 2px solid var(--line); border-radius: 12px; padding: 8px 10px; margin: 8px 0; background: var(--paper); }
+  .noteItem.done { opacity: .6; }
+  .noteText { margin: 4px 0; white-space: pre-wrap; }
+  .wide { width: 100%; margin-top: 4px; }
+  textarea.small { min-height: 60px; }
   @media print { .gear, .drawer, .errorsPanel, .btn, .seg, .row, .field input[type=file] { display: none !important; } body { padding-bottom: 0; background: #fff; color: #000; } details.step { box-shadow: none; } }
 </style>
 </head>
@@ -116,7 +121,7 @@
           <button type="button" data-v="local">Keep local and secure</button>
           <button type="button" data-v="cloud">Safe to cloud</button>
         </div>
-        <span class="hint">Default: keep local. Choose safe to cloud only for guidelines with no firm or client content. Cloud sync is not built, so this is recorded in the file.</span></div>
+        <span class="hint">Default: keep local and secure. Choose safe to cloud only for guidelines with no firm or client content. Guidelines are never sent to the database in this version; the choice is recorded in the saved file for later.</span></div>
 
       <div class="field"><span class="lbl">Scopes and their scope words</span>
         <span class="hint">Tick the scopes this guideline covers. Scope words are the words an entry must use for that scope (comma separated). A keynote with none of the selected scope words is yellow.</span>
@@ -234,7 +239,7 @@
     </div>
   </details>
 
-  <p class="hint" style="margin-top:24px">Feedback notes are not built in this version. Nothing you load is saved or sent.</p>
+  <p class="hint" style="margin-top:24px">Nothing you load is saved or sent. Notes for improvement are in ⚙️.</p>
 </main>
 
 <!-- ⚙️ SETTINGS -->
@@ -265,6 +270,39 @@
     <label class="check"><input type="checkbox" id="optDark"> Dark mode</label>
   </div>
 
+
+  <div class="setting">
+    <span class="lbl">Notes for improvement</span>
+    <p class="hint">Say what to change. Each note is saved on this device with the part of the page it is about and the time.</p>
+    <label for="noteItem" class="hint">About</label>
+    <select id="noteItem">
+      <option>General</option><option>Step 1: guideline</option><option>Step 2: upload</option>
+      <option>Step 3: scan</option><option>Step 4: export</option><option>Settings</option>
+    </select>
+    <textarea id="noteText" class="small" aria-label="Note" placeholder="What should change?"></textarea>
+    <div class="row"><button type="button" class="btn primary" id="noteSave">Save note</button>
+      <button type="button" class="btn" id="noteCopy">Copy all notes</button></div>
+    <p class="hint" id="noteCount"></p>
+    <ul id="noteList" style="padding:0;margin:0"></ul>
+  </div>
+
+  <div class="setting">
+    <span class="lbl">Architecture database</span>
+    <p class="hint">Only notes and their done or reopened status go there, and only after you sign in. Guidelines and drawings are never sent.</p>
+    <div id="dbSignInBox">
+      <label for="dbEmail" class="hint">Email</label><input type="text" id="dbEmail" autocomplete="username">
+      <label for="dbPassword" class="hint">Password (not stored)</label><input type="password" id="dbPassword" autocomplete="current-password">
+      <div class="row"><button type="button" class="btn" id="dbSignIn">Sign in</button></div>
+    </div>
+    <div id="dbSignedIn" hidden>
+      <div class="row"><button type="button" class="btn" id="dbSync">Sync notes now</button>
+        <button type="button" class="btn" id="dbSignOut">Sign out</button></div>
+    </div>
+    <div class="row"><button type="button" class="btn" id="dbCheck">Check database</button></div>
+    <ul id="dbCheckOut" class="hint"></ul>
+    <p class="hint" id="dbStatus" role="status"></p>
+  </div>
+
   <div class="setting">
     <label class="check"><input type="checkbox" id="showErrors"> Show errors</label>
     <p class="hint">Errors appear at the bottom of the page. Off by default.</p>
@@ -279,10 +317,12 @@
 
 <script src="vendor/pdf.min.js"></script>
 <script src="vendor/pdf-lib.min.js"></script>
+<script src="js/config.js"></script>
 <script src="js/core.js"></script>
 <script src="js/guideline.js"></script>
 <script src="js/scan.js"></script>
 <script src="js/markup.js"></script>
+<script src="js/feedback.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

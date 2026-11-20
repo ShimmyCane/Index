@@ -28,6 +28,7 @@
     { key: 'missingScopeWord', label: 'No scope word', hint: 'None of the scope words for the selected scopes.', def: 'yellow' },
     { key: 'fireMissing', label: 'Fire keynote without a rating', hint: 'Says FIRE but has no rating word such as HR or HOUR.', def: 'red' },
     { key: 'nearApproved', label: 'Close to an approved phrase', hint: 'Similar, not exact. The closest phrase is shown.', def: 'yellow' },
+    { key: 'punctCase', label: 'Approved phrase, but case or punctuation differs', hint: 'Same words; only the capitals, periods or commas are different.', def: 'yellow' },
     { key: 'notApproved', label: 'Not in the approved list', hint: 'Only checked when an approved list is typed in.', def: 'yellow' },
     { key: 'noText', label: 'Page with no text layer', hint: 'Scanned or image-only page: cannot read.', def: 'yellow' },
   ];

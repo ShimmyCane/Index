@@ -1,6 +1,6 @@
 # QC keynotes — schematic
 
-Status: all four steps built (v0.2.0). Tested headless on synthetic data (`test/smoke.js`). Not yet tested on a real iPad or on a real drawing set. Questions answered in `convo/convo v0.1.md`; next questions in `convo/convo v0.2.md`.
+Status: all four steps built (v0.2.0), notes for improvement built (database table not yet pasted). Tested headless on synthetic data (`test/smoke.js`). Not yet tested on a real iPad or on a real drawing set. Questions answered in `convo/convo v0.1.md`; next questions in `convo/convo v0.2.md`.
 
 Track: **B. Studio design** (dense but orderly, collapsible panels, precise labels).
 
@@ -30,6 +30,19 @@ A first-pass QC tool for keynotes and general notes on architectural drawing set
 - Step 3: keynote entries (code + words) and callouts (code only) found by line; checks run from the structured guideline; findings table, preview with boxes, page picker.
 - Step 4: marked-up PDF with editable Highlight (entries) and Square (undefined callouts, unreadable pages) annotations, each with a comment; findings CSV.
 - Synthetic test: `test/make_synthetic.js` makes `test/synthetic_restroom_set.pdf` and `test/synthetic_guideline.json`; `test/smoke.js` checks the colours, counts, export and layout.
+
+## Matching (convo v0.2, Q6)
+- Green: the entry text matches an approved phrase exactly (spacing aside; case and punctuation included).
+- Yellow: same words, different case or punctuation (`punctCase`); close wording (`nearApproved`); not in the list (`notApproved`); and the other yellow checks.
+- Red: wrong prefix, wrong digits, duplicate number, FIRE with no rating, undefined callout.
+
+## Notes and database (convo v0.2, Q4)
+- ⚙️ "Notes for improvement": saved on the device with the part of the page and the time; done/reopen.
+- ⚙️ "Architecture database": sign-in (password not stored; renewal token kept until sign-out), sync, check. Table `qk_notes` (prefix `qk_`), owner only, through `platform_is_owner()`. SQL in `supabase/` (test, 001, verify). Not pasted yet.
+- Guidelines and drawings are never sent to the database, even when marked safe to cloud.
+
+## Reference
+- Map Photos (index tile, separate GitHub Pages repo): PDF export is the model for step 4. Not in this repo; see `convo/convo v0.3.md`.
 
 ## Known limits (v0.2.0)
 - Keynote codes must be letters then digits, no separator (D3, not D-3). A sheet number such as A-101 is not read as a code.

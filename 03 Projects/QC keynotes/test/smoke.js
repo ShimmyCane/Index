@@ -12,7 +12,7 @@ fs.mkdirSync(out, { recursive: true });
 
 const EXPECT = { // entry/callout code -> colour (D3 is listed twice: first green, second red)
   D1: 'green', D2: 'yellow', 'D3#1': 'green', 'D3#2': 'red', X5: 'red', D4: 'red', D6: 'yellow',
-  N1: 'yellow', N2: 'green', N4: 'green', N5: 'yellow', N9: 'yellow',
+  D5: 'yellow', N1: 'yellow', N2: 'green', N4: 'green', N5: 'yellow', N9: 'yellow',
 };
 const fails = [];
 const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!ok) fails.push(msg); };
@@ -45,7 +45,7 @@ const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!o
   const chips = await page.$$eval('#chips .chip', els => els.map(e => e.textContent.trim()));
   console.log('chips:', chips.join(' | '));
   check(chips[0] === 'Green: 4', 'green count 4');
-  check(chips[1] === 'Yellow: 5', 'yellow count 5');
+  check(chips[1] === 'Yellow: 6', 'yellow count 6 (incl. D5: approved text, wrong case and period)');
   check(chips[2] === 'Red: 4', 'red count 4 (3 entries + 1 undefined callout)');
   check(chips[3] === 'Undefined callouts: 1', 'one undefined callout (D8)');
 
@@ -65,7 +65,7 @@ const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!o
     check(got[key] === colour, `${key} is ${colour} (got ${got[key]})`);
   }
   check(got.D8 === 'red', 'D8 callout is red (undefined)');
-  check(rows.length === 13, `13 findings in the table: 12 entries + 1 undefined callout (got ${rows.length})`);
+  check(rows.length === 14, `14 findings in the table: 13 entries + 1 undefined callout (got ${rows.length})`);
 
   // Click a red row: the preview should move to page 1 with that row picked
   await page.click('#findBody tr[data-id] >> nth=0');
@@ -105,7 +105,7 @@ const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!o
     return { annots: annots.map(a => ({ subtype: a.subtype, contents: a.contentsObj && a.contentsObj.str || a.contents || '' })), hasText: text.includes('D1') && text.includes('REMOVE EXISTING') };
   }, exported);
   console.log('annotations in exported file:', annotInfo.annots.length, annotInfo.annots.map(a => a.subtype).join(','));
-  check(annotInfo.annots.length === 13, `13 annotations: 12 entries + 1 undefined callout (got ${annotInfo.annots.length})`);
+  check(annotInfo.annots.length === 14, `14 annotations: 13 entries + 1 undefined callout (got ${annotInfo.annots.length})`);
   check(annotInfo.hasText, 'exported PDF keeps selectable text (not flattened)');
   const sampleComment = annotInfo.annots.find(a => a.contents.includes('RED'));
   check(!!sampleComment, 'annotations carry a comment with the colour');
@@ -122,12 +122,28 @@ const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!o
     await page.screenshot({ path: path.join(out, `6-mobile-${w}.png`), fullPage: false });
   }
 
+  // Notes for improvement: saved on this device, kept after reload, and the database check says so when signed out
+  await page.click('#gear');
+  await page.fill('#noteText', 'Test note: make the scan button bigger');
+  await page.click('#noteSave');
+  check((await page.textContent('#noteCount')).includes('1 note'), 'note saved on this device');
+  await page.click('#dbCheck');
+  await page.waitForFunction(() => document.getElementById('dbCheckOut').textContent.includes('this device only'));
+  check(true, 'database check says this device only when signed out');
+  await page.click('#closeDrawer');
+
   // Reload keeps the guideline (saved in this browser)
   await page.setViewportSize({ width: 1180, height: 900 });
   await page.reload({ waitUntil: 'load' });
   check((await page.inputValue('#gName')).includes('SYNTHETIC'), 'guideline name kept after reload');
+  await page.click('#gear');
+  check((await page.textContent('#noteCount')).includes('1 note'), 'note kept after reload');
+  await page.click('#closeDrawer');
 
-  check(errs.length === 0, 'no console or page errors' + (errs.length ? ': ' + errs.join(' | ') : ''));
+  // The sandbox browser gets a 401 from the live database health check (curl gets 200). It is the
+  // one expected network message; anything else is a failure.
+  const real = errs.filter(e => !/Failed to load resource: the server responded with a status of 401/.test(e));
+  check(real.length === 0, 'no console or page errors' + (real.length ? ': ' + real.join(' | ') : '') + ` (${errs.length - real.length} known sandbox 401 from the database check)`);
   await browser.close();
   console.log(fails.length ? `\n${fails.length} FAILED` : '\nALL PASSED');
   process.exit(fails.length ? 1 : 0);

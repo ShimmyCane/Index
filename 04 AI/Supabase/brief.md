@@ -75,3 +75,4 @@ Rules:
 
 1. When a nursery project first needs data, follow `/supabase-project`.
 2. Run the template once on that project and check that `app_table_unregistered` is empty.
+- QC keynotes (Architecture project, prefix `qk_`, 2026-11-20): `qk_notes` written (owner-only through `platform_is_owner()`, registered in `table_index` as project "QC keynotes"), **not applied**. SQL in `03 Projects/QC keynotes/supabase/` (`test_001_qk`, `001_qk_notes`, `verify_001_qk`). The page signs in with plain fetch and the publishable key from `js/config.js`; notes stay on the device until signed in.

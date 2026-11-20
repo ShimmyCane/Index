@@ -4,6 +4,10 @@
   const QC = (window.QC = window.QC || {});
 
   QC.norm = s => String(s || '').replace(/\s+/g, ' ').trim().toUpperCase();
+  // Spacing only: case and punctuation are kept (exact match).
+  QC.squash = s => String(s || '').replace(/\s+/g, ' ').trim();
+  // Ignores case, spacing and punctuation (near match).
+  QC.loose = s => QC.squash(s).toUpperCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
   QC.wordCount = s => String(s || '').trim().split(/\s+/).filter(Boolean).length;
   QC.lines = s => String(s || '').split(/\r?\n/).map(x => x.trim()).filter(Boolean);
   QC.splitList = s => String(s || '').split(/[,\n]+/).map(x => x.trim()).filter(Boolean);

@@ -280,5 +280,6 @@
   applyTheme();
   renderSettings();
   loadGuide();
+  QC.Feedback.init();
   setOpen(false);
 })();

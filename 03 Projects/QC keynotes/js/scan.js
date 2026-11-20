@@ -98,7 +98,9 @@
       .flatMap(s => QC.splitList(guide.scopeWords[s]))
       .map(w => new RegExp('\\b' + QC.escRe(QC.norm(w)) + '\\b'));
     const fireRes = QC.splitList(guide.fireWords).map(w => new RegExp('\\b' + QC.escRe(QC.norm(w)) + '\\b'));
-    const approved = guide.approved.map(QC.norm);
+    const approvedRaw = guide.approved.map(QC.squash);
+    const approvedLoose = guide.approved.map(a => ({ raw: QC.squash(a), loose: QC.loose(a) }));
+    const approved = approvedRaw;
     const calloutCodes = new Set(callouts.map(c => c.code));
     const seen = {};
     const lastNum = {};
@@ -130,14 +132,24 @@
       if (/\bFIRE\b/.test(nd) && fireRes.length && !fireRes.some(r => r.test(nd)))
         add('fireMissing', 'Mentions FIRE but no rating word (e.g. HR or HOUR)');
 
-      if (approved.length && !approved.includes(nd)) {
-        let best = { s: 0, t: '' };
-        for (const a of approved) {
-          const s = QC.similarity(a, nd);
-          if (s > best.s) best = { s, t: a };
+      // Approved phrases, strict: exact text (case and punctuation included) is green.
+      // Same words with different case or punctuation is yellow. Close wording is yellow.
+      if (approved.length) {
+        const raw = QC.squash(e.desc);
+        if (!approvedRaw.includes(raw)) {
+          const loose = QC.loose(e.desc);
+          const hit = approvedLoose.find(a => a.loose === loose);
+          if (hit) add('punctCase', `Approved as "${hit.raw}": check the capitals and punctuation`);
+          else {
+            let best = { s: 0, t: '' };
+            for (const a of approvedLoose) {
+              const s = QC.similarity(a.loose, loose);
+              if (s > best.s) best = { s, t: a.raw };
+            }
+            if (best.s >= guide.similarity) add('nearApproved', `Close to "${best.t}" (${Math.round(best.s * 100)}% alike)`);
+            else add('notApproved', 'Not in the approved phrase list');
+          }
         }
-        if (best.s >= guide.similarity) add('nearApproved', `Close to "${best.t}" (${Math.round(best.s * 100)}% alike)`);
-        else add('notApproved', 'Not in the approved phrase list');
       }
 
       if (!calloutCodes.has(e.code)) add('unusedKeynote', 'No callout on the sheet');

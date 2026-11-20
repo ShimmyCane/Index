@@ -14,6 +14,7 @@ const KEY = [
   'D3 REMOVE EXISTING TOWEL DISPENSER',                    // duplicate number -> red
   'X5 REMOVE EXISTING GRAB BAR',                           // unknown prefix -> red
   'D4 REMOVE EXISTING FIRE-RATED DOOR ASSEMBLY',           // no rating -> red
+  'D5 Remove existing partition and door.',                // approved text, wrong case and period -> yellow
   'D6 REMOVE EXISTING WALL TILES AT SHOWER AREA AND ALSO THE ADJACENT FLOOR TRANSITION STRIPS', // too long -> yellow
   'N1 INSTALL NEW ACCESSIBLE LAVATORY, SEE DETAIL',
   'N2 INSTALL NEW GRAB BAR, 36 INCH LONG',
@@ -25,7 +26,7 @@ const KEY = [
 // Callouts placed on the plan: code and position on page (x, y in points from bottom-left).
 const CALLOUTS = [
   ['D1', 120, 500], ['D2', 200, 470], ['D3', 260, 430], ['X5', 320, 400],
-  ['D4', 380, 370], ['D8', 430, 340],   // D8 has no key entry -> red
+  ['D4', 380, 370], ['D5', 180, 380], ['D8', 430, 340],   // D8 has no key entry -> red
   ['N1', 120, 300], ['N2', 200, 270], ['N4', 280, 240], ['N5', 340, 210], ['D6', 400, 180],
 ];
 
@@ -94,7 +95,7 @@ async function main() {
     checks: {
       badPrefix: 'red', badNumber: 'red', duplicate: 'red', undefinedKeynote: 'red',
       unusedKeynote: 'yellow', sequence: 'yellow', tooLong: 'yellow', caseIssue: 'yellow',
-      missingScopeWord: 'yellow', fireMissing: 'red', nearApproved: 'yellow', notApproved: 'yellow',
+      missingScopeWord: 'yellow', fireMissing: 'red', nearApproved: 'yellow', punctCase: 'yellow', notApproved: 'yellow',
     },
     generalNotes: 'stub',
   };
