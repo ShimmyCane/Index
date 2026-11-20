@@ -109,6 +109,8 @@ async function main() {
     examples: '',
     generalNotes: 'stub',
   };
+  // Numbering and CSI are off: the phrasing is what is checked
+  for (const k of ['badType', 'badNumber', 'csi', 'duplicate', 'undefinedKeynote', 'unusedKeynote', 'sequence']) guideline.checks[k].colour = 'off';
   fs.writeFileSync(path.join(here, 'synthetic_guideline.json'), JSON.stringify(guideline, null, 2) + '\n');
   console.log('wrote synthetic_restroom_set.pdf and synthetic_guideline.json');
 }

@@ -18,27 +18,30 @@
 
   // Draft rules. Each one: the colour it gives when broken, a short description and a full narrative.
   QC.CHECKS = [
-    { key: 'badType', label: 'Keynote type not in the list', def: 'red',
+    { key: 'badType', label: 'Keynote type not in the list', def: 'off',
       short: 'The keynote type must be one of the listed types (Demo, New).',
       narrative: 'Each keynote row names its type in the first column. Only the types in the guideline are allowed. Any other word in that column is red, because the keynote cannot be filed with the right scope.' },
-    { key: 'badNumber', label: 'Number outside the digit range', def: 'red',
+    { key: 'badNumber', label: 'Number outside the digit range', def: 'off',
       short: 'The keynote number has too many or too few digits.',
       narrative: 'The keynote number sits in the second column. The guideline sets the fewest and most digits allowed. A number outside that range is red.' },
-    { key: 'csi', label: 'CSI code not 4 digits', def: 'red',
+    { key: 'csi', label: 'CSI code not 4 digits', def: 'off',
       short: 'The CSI code is 4 digits, written as 02 00 or 0200.',
       narrative: 'The third column holds the CSI code. The code is four digits, written as two pairs (02 00). A row with no CSI code, or with a different count of digits, is red because it cannot be linked to the specification.' },
-    { key: 'duplicate', label: 'Keynote number used twice', def: 'red',
+    { key: 'duplicate', label: 'Keynote number used twice', def: 'off',
       short: 'The same type and number must not appear twice.',
       narrative: 'Within one type, each number names one keynote. The second use of Demo 3 is red, because a reader cannot tell which one a callout means.' },
-    { key: 'undefinedKeynote', label: 'Callout with no keynote row', def: 'red',
+    { key: 'undefinedKeynote', label: 'Callout with no keynote row', def: 'off',
       short: 'Every number called out on the sheet has a keynote row.',
       narrative: 'A bubble on the sheet with a number and no matching keynote row is red. The bubble is boxed in red on the drawing so the reviewer can find it.' },
-    { key: 'unusedKeynote', label: 'Keynote row with no callout', def: 'yellow',
+    { key: 'unusedKeynote', label: 'Keynote row with no callout', def: 'off',
       short: 'Every keynote row is called out on the sheet.',
       narrative: 'A keynote row whose number never appears as a callout is yellow. It may be correct (a note kept for the spec), so the reviewer decides.' },
-    { key: 'sequence', label: 'Numbers out of order', def: 'yellow',
+    { key: 'sequence', label: 'Numbers out of order', def: 'off',
       short: 'Numbers within a type run in order.',
       narrative: 'Within one type, a number lower than an earlier one is yellow. Gaps are not checked.' },
+    { key: 'verb', label: 'Opening word is not an approved verb', def: 'red',
+      short: 'The keynote starts with an approved verb (REMOVE, INSTALL, PROVIDE and so on).',
+      narrative: 'A keynote states what the work is. It opens with a verb from the approved list. A word that is not a verb in that list, such as BASH, is red and underlined, because the phrase does not follow the standard.' },
     { key: 'tooLong', label: 'More words than the maximum', def: 'yellow',
       short: 'A keynote description stays within the word maximum.',
       narrative: 'The guideline sets the most words in one description. The maximum is set high on purpose: a long keynote is a wording question, not a rule break. Over the maximum is yellow.' },
@@ -75,6 +78,7 @@
     scopes: [],
     scopeWords: Object.fromEntries(QC.SCOPES.map(s => [s.key, s.words])),
     types: ['Demo', 'New'],
+    verbs: ['REMOVE', 'DEMOLISH', 'INSTALL', 'PROVIDE', 'PATCH', 'REPAIR', 'REPLACE', 'RELOCATE', 'PROTECT', 'FURNISH'],
     numberDigits: { min: 1, max: 3 },
     maxWords: 100,
     upperCase: true,
@@ -105,6 +109,7 @@
     return {
       ...structuredClone(D), ...raw,
       types: Array.isArray(raw.types) ? raw.types : QC.splitList(raw.types || 'Demo, New'),
+      verbs: Array.isArray(raw.verbs) ? raw.verbs : QC.splitList(raw.verbs || D.verbs.join(', ')),
       scopeWords: { ...D.scopeWords, ...(raw.scopeWords || {}) },
       numberDigits: { ...D.numberDigits, ...(raw.numberDigits || {}) },
       checks,
@@ -162,6 +167,7 @@
       scopes: [...document.querySelectorAll('[data-scope]')].filter(i => i.checked).map(i => i.dataset.scope),
       scopeWords: Object.fromEntries([...document.querySelectorAll('[data-scopeword]')].map(i => [i.dataset.scopeword, i.value.trim()])),
       types: QC.splitList($('types').value),
+      verbs: QC.splitList($('verbs').value).map(v => v.toUpperCase()),
       numberDigits: { min: Math.max(1, +$('digMin').value || 1), max: Math.max(1, +$('digMax').value || 1) },
       maxWords: Math.max(1, +$('maxWords').value || 1),
       upperCase: $('upperCase').checked,
@@ -180,6 +186,7 @@
     document.querySelectorAll('[data-scope]').forEach(i => i.checked = g.scopes.includes(i.dataset.scope));
     document.querySelectorAll('[data-scopeword]').forEach(i => i.value = g.scopeWords[i.dataset.scopeword] || '');
     $('types').value = g.types.join(', ');
+    $('verbs').value = g.verbs.join(', ');
     $('digMin').value = g.numberDigits.min;
     $('digMax').value = g.numberDigits.max;
     $('maxWords').value = g.maxWords;

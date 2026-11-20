@@ -7,13 +7,12 @@
 (function () {
   'use strict';
   const QC = window.QC;
-  const ROW_RE = /^([A-Za-z]+)\s+(\d{1,3})\s+(\d{2}\s?\d{2})\s+(.+)$/;
-  const ROW_START_RE = /^([A-Za-z]+)\s+(\d{1,3})(\s|$)/;
   const CALLOUT_RE = /^(\d{1,3})$/;
   const RANK = { red: 2, yellow: 1, green: 0 };
 
   // Lines of text with their position, in PDF points (origin bottom-left).
-  QC.extractPage = async page => {
+  QC.extractPage = async (page, types) => {
+    const typeWords = (types || []).map(t => t.toLowerCase());
     const vp = page.getViewport({ scale: 1 });
     const tc = await page.getTextContent();
     const items = tc.items.filter(it => it.str && it.str.trim()).map(it => {
@@ -36,7 +35,9 @@
       let cur = [];
       for (const it of r.items) {
         const prev = cur[cur.length - 1];
-        if (prev && it.x0 - prev.x1 > Math.max(12, 6 * it.h)) { segments.push(cur); cur = []; }
+        // A keynote row (it starts with its type) stays on one line, even across an empty CSI column.
+        const isRow = cur.length && typeWords.includes(cur[0].str.toLowerCase());
+        if (prev && !isRow && it.x0 - prev.x1 > Math.max(12, 6 * it.h)) { segments.push(cur); cur = []; }
         cur.push(it);
       }
       if (cur.length) segments.push(cur);
@@ -53,7 +54,7 @@
     const pages = [];
     for (let n = 1; n <= pdfDoc.numPages; n++) {
       const page = await pdfDoc.getPage(n);
-      pages.push({ num: n, ...(await QC.extractPage(page)) });
+      pages.push({ num: n, ...(await QC.extractPage(page, guide.types)) });
     }
     return QC.analyse(pages, guide, strictness);
   };
@@ -91,6 +92,10 @@
     const findings = [];
     const rows = [];
     const callouts = [];
+    // A keynote row starts with a keynote type from the guideline. Number and CSI are optional.
+    const rowRe = guide.types.length
+      ? new RegExp('^(' + guide.types.map(QC.escRe).join('|') + ')\\b\\s*(\\d{1,3})?\\s*(\\d{2}\\s?\\d{2})?\\s*(.*)$', 'i')
+      : null;
     const legendRects = [];   // kept in focus on the drawing
 
     // Pass 1: find keynote rows and callouts
@@ -112,14 +117,8 @@
           continue;
         }
         if (CALLOUT_RE.test(t)) { callouts.push({ number: t, page: pg.num, rect: ln.rect }); continue; }
-        const full = ROW_RE.exec(t);
-        if (full) {
-          rows.push({ type: full[1], number: full[2], csi: full[3].replace(/\s/g, ''), desc: full[4], page: pg.num, rect: ln.rect, csiOk: true });
-          continue;
-        }
-        const start = ROW_START_RE.exec(t);
-        if (start) // a keynote row that has no CSI code
-          rows.push({ type: start[1], number: start[2], csi: '', desc: t.slice(start[0].length).trim(), page: pg.num, rect: ln.rect, csiOk: false });
+        const row = rowRe ? rowRe.exec(t) : null;
+        if (row) rows.push({ type: row[1], number: row[2] || '', csi: (row[3] || '').replace(/\s/g, ''), desc: row[4].trim(), page: pg.num, rect: ln.rect });
       }
     }
 
@@ -142,21 +141,20 @@
         if (colour !== 'off') reasons.push({ check, label: QC.CHECK_LABEL[check], colour, detail });
       };
       const typeKey = r.type.toLowerCase();
-      const code = `${r.type} ${r.number}`;
+      const code = r.number ? `${r.type} ${r.number}` : r.type;
       const desc = r.desc;
 
-      if (!types.includes(typeKey)) add('badType', `"${r.type}" is not a keynote type in the guideline`);
-      if (r.number.length < guide.numberDigits.min || r.number.length > guide.numberDigits.max)
+      if (r.number && (r.number.length < guide.numberDigits.min || r.number.length > guide.numberDigits.max))
         add('badNumber', `${r.number} has ${r.number.length} digit(s); the guideline allows ${guide.numberDigits.min} to ${guide.numberDigits.max}`);
-      if (!r.csiOk || r.csi.length !== 4) add('csi', 'No 4-digit CSI code in the third column');
+      if (r.csi.length !== 4) add('csi', r.csi ? 'CSI code is not 4 digits' : 'No CSI code in the row');
 
       const key = typeKey + ' ' + r.number;
       seen[key] = (seen[key] || 0) + 1;
-      if (seen[key] > 1) add('duplicate', `${code} is used more than once`);
+      if (r.number && seen[key] > 1) add('duplicate', `${code} is used more than once`);
 
-      if (lastNum[typeKey] !== undefined && +r.number < lastNum[typeKey])
+      if (r.number && lastNum[typeKey] !== undefined && +r.number < lastNum[typeKey])
         add('sequence', `${code} comes after ${r.type} ${lastNum[typeKey]}`);
-      lastNum[typeKey] = Math.max(lastNum[typeKey] ?? -1, +r.number);
+      if (r.number) lastNum[typeKey] = Math.max(lastNum[typeKey] ?? -1, +r.number);
 
       const words = QC.wordCount(desc);
       if (words > guide.maxWords) add('tooLong', `${words} words; the maximum is ${guide.maxWords}`);
@@ -167,7 +165,15 @@
       if (/\bFIRE\b/.test(nd) && fireRes.length && !fireRes.some(x => x.test(nd)))
         add('fireMissing', 'Mentions FIRE but no rating word (e.g. HR or HOUR)');
 
-      // Word colours: how much of the wording agrees with the nearest approved phrase.
+      // Verb: the first word must be an approved verb.
+      const words0 = desc.split(' ').filter(Boolean);
+      const firstWord = (words0[0] || '').toUpperCase().replace(/[^A-Z]/g, '');
+      if (guide.verbs.length && firstWord && !guide.verbs.includes(firstWord)) add('verb', `"${words0[0]}" is not an approved opening verb`);
+
+      // Word colours. Each word gets the colour of its own problem:
+      //   green highlight  = the whole phrase is exactly an approved phrase
+      //   red underline    = the word breaks a rule (verb, lower case, FIRE without a rating)
+      //   yellow underline = the word differs from the nearest approved phrase (wording or scope question)
       let wordMarks = null;
       if (approvedRaw.length) {
         const raw = QC.squash(desc);
@@ -179,8 +185,8 @@
           if (hit) add('punctCase', `Approved as "${hit.raw}": check the capitals and punctuation`);
           let best = { s: 0, a: null };
           for (const a of approvedLoose) {
-            const s = QC.similarity(a.loose, loose);
-            if (s > best.s) best = { s, a };
+            const sim = QC.similarity(a.loose, loose);
+            if (sim > best.s) best = { s: sim, a };
           }
           if (!hit) {
             if (best.a && best.s >= guide.similarity) add('nearApproved', `Close to "${best.a.raw}" (${Math.round(best.s * 100)}% alike)`);
@@ -188,11 +194,21 @@
           }
           const own = raw.split(' ');
           const agree = best.a ? QC.alignWords(own.map(w => QC.loose(w)), best.a.words.map(w => QC.loose(w))) : own.map(() => false);
-          wordMarks = own.map((t, i) => ({ t, c: agree[i] ? 'green' : 'yellow' }));
+          wordMarks = own.map((t, i) => ({ t, c: agree[i] ? 'neutral' : 'yellow' }));
         }
+      } else {
+        wordMarks = desc.split(' ').filter(Boolean).map(t => ({ t, c: 'neutral' }));
+      }
+      if (wordMarks) {
+        const caseBad = guide.upperCase && sev('caseIssue') !== 'off';
+        wordMarks.forEach((w, i) => {
+          if (i === 0 && firstWord && !guide.verbs.includes(firstWord) && sev('verb') !== 'off') w.c = 'red';
+          if (caseBad && /[a-z]/.test(w.t)) w.c = 'red';
+          if (sev('fireMissing') !== 'off' && /^FIRE/i.test(w.t.replace(/[^A-Za-z-]/g, '')) && reasons.some(x => x.check === 'fireMissing')) w.c = 'red';
+        });
       }
 
-      if (!calloutNums.has(r.number)) add('unusedKeynote', 'No callout with this number on the sheet');
+      if (r.number && !calloutNums.has(r.number)) add('unusedKeynote', 'No callout with this number on the sheet');
 
       const colour = colourOf(reasons);
       findings.push({ kind: 'entry', page: r.page, code, number: r.number, type: r.type, csi: r.csi, desc, words: wordMarks, colour, reasons, rect: r.rect });

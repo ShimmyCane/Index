@@ -7,20 +7,21 @@ const { PDFDocument, StandardFonts, rgb } = require('../vendor/pdf-lib.min.js');
 const out = path.resolve(__dirname, '..', 'samples');
 const INK = rgb(0.17, 0.16, 0.2), GREY = rgb(0.5, 0.5, 0.5);
 
-// Keynote rows: type, number, CSI, description (matrix on sheet A-101 only).
+// Keynote rows: type and keynote text only. No numbers or CSI codes: the wording is what is checked.
 const ROWS = [
-  ['Demo', '1', '02 00', 'REMOVE EXISTING CERAMIC WALL TILE AT RESTROOM WALLS'],
-  ['Demo', '2', '10 00', 'REMOVE EXISTING LAVATORY FAUCET AND SUPPLY LINES'],
-  ['Demo', '3', '10 00', 'REMOVE EXISTING PARTITION AND DOOR'],
-  ['Demo', '4', '08 10', 'REMOVE EXISTING FIRE-RATED DOOR ASSEMBLY'],
-  ['Demo', '5', '10 00', 'REMOVE EXISTING TOWEL DISPENSER AND BACKING'],
-  ['New', '11', '09 30', 'INSTALL NEW ACCESSIBLE LAVATORY, SEE DETAIL'],
-  ['New', '12', '10 00', 'INSTALL NEW GRAB BAR, 36 INCH LONG'],
-  ['New', '14', '09 30', 'INSTALL NEW 1-HR FIRE-RATED PARTITION'],
-  ['New', '15', '10 00', 'INSTALL NEW TOWEL HOLDERS'],
-  ['New', '16', '10 00', 'INSTALL NEW FAUCET WITH LEVER HANDLE'],
-  ['New', '17', '08 10', 'INSTALL NEW DOOR HARDWARE'],
-  ['New', '18', '', 'INSTALL NEW SIGNAGE'],
+  ['Demo', 'REMOVE EXISTING CERAMIC WALL TILE AT RESTROOM WALLS'],     // approved exact -> green
+  ['Demo', 'REMOVE EXISTING LAVATORY FAUCET AND SUPPLY LINES'],         // not approved -> yellow
+  ['Demo', 'REMOVE EXISTING PARTITION AND DOOR'],                        // approved exact -> green
+  ['Demo', 'REMOVE EXISTING FIRE-RATED DOOR ASSEMBLY'],                  // FIRE, no rating -> red on FIRE-RATED
+  ['Demo', 'REMOVE EXISTING TOWEL DISPENSER AND BACKING'],               // not approved -> yellow
+  ['Demo', 'BASH OUT EXISTING GRAB BAR'],                                // BASH is not an approved verb -> red
+  ['New', 'INSTALL NEW ACCESSIBLE LAVATORY, SEE DETAIL'],                // not approved -> yellow
+  ['New', 'INSTALL NEW GRAB BAR, 36 INCH LONG'],                         // approved exact -> green
+  ['New', 'INSTALL NEW 1-HR FIRE-RATED PARTITION'],                      // approved exact -> green
+  ['New', 'INSTALL NEW TOWEL HOLDERS'],                                  // approved exact -> green
+  ['New', 'INSTALL NEW FAUCET WITH LEVER HANDLE'],                       // not approved -> yellow
+  ['New', 'INSTALL NEW DOOR HARDWARE'],                                  // not approved -> yellow
+  ['New', 'INSTALL NEW SIGNAGE'],                                        // no scope word -> yellow
 ];
 // Callouts: page, type (drives the symbol), number, x, y (points from bottom-left).
 const CALLOUTS = [
@@ -93,13 +94,11 @@ async function main() {
   y = 440;
   p1.drawText('KEYNOTES', { x: 660, y, size: 10, font: bold, color: INK });
   y -= 18;
-  for (const [h, x] of [['TYPE', 660], ['NO.', 710], ['CSI', 740], ['DESCRIPTION', 780]]) p1.drawText(h, { x, y, size: 6.5, font: bold, color: INK });
+  for (const [h, x] of [['TYPE', 660], ['KEYNOTE', 712]]) p1.drawText(h, { x, y, size: 6.5, font: bold, color: INK });
   y -= 13;
-  for (const [type, num, csi, desc] of ROWS) {
+  for (const [type, desc] of ROWS) {
     p1.drawText(type, { x: 660, y, size: 7, font, color: INK });
-    p1.drawText(num, { x: 710, y, size: 7, font, color: INK });
-    if (csi) p1.drawText(csi, { x: 740, y, size: 7, font, color: INK });
-    p1.drawText(desc, { x: 780, y, size: 7, font, color: INK });
+    p1.drawText(desc, { x: 712, y, size: 7, font, color: INK });
     y -= 12;
   }
   titleBlock(p1, font, bold, 'A-101', 'FLOOR PLAN AND KEYNOTES');
@@ -126,6 +125,10 @@ async function main() {
   // Synthetic guideline: same checks as the test guideline, with the approved phrases for this sheet.
   const g = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'synthetic_guideline.json'), 'utf8'));
   g.name = 'SYNTHETIC sample guideline (restroom keynotes)';
+  // Numbering and CSI are off; the phrasing is checked, including the opening verb.
+  for (const k of ['badType', 'badNumber', 'csi', 'duplicate', 'undefinedKeynote', 'unusedKeynote', 'sequence']) g.checks[k].colour = 'off';
+  g.checks.verb = { colour: 'red', status: 'approved', short: 'Opening verb', narrative: 'Control rule: the keynote opens with an approved verb.' };
+  g.verbs = ['REMOVE', 'DEMOLISH', 'INSTALL', 'PROVIDE', 'PATCH', 'REPAIR', 'REPLACE', 'RELOCATE', 'PROTECT', 'FURNISH'];
   g.approved = [
     'REMOVE EXISTING CERAMIC WALL TILE AT RESTROOM WALLS',
     'INSTALL NEW GRAB BAR, 36 INCH LONG',

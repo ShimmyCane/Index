@@ -215,7 +215,8 @@
     const sorted = [...findings].sort((a, b) => a.page - b.page || order[a.colour] - order[b.colour]);
     $('findBody').innerHTML = sorted.map(f => {
       const why = f.reasons.map(r => `<div><span class="muted">${QC.esc(r.label)}:</span> ${QC.esc(r.detail)}</div>`).join('') || 'Matches the guideline';
-      const words = f.words ? f.words.map(w => `<span class="w${w.c === 'green' ? 'g' : (w.c === 'yellow' ? 'y' : 'r')}">${QC.esc(w.t)}</span>`).join(' ') : QC.esc(f.desc);
+      const cls = { green: 'hg', yellow: 'wy', red: 'wr', neutral: '' };
+      const words = f.words ? f.words.map(w => `<span class="${cls[w.c] || ''}">${QC.esc(w.t)}</span>`).join(' ') : QC.esc(f.desc);
       const item = f.kind === 'page' ? 'Page' : QC.esc(f.code);
       return `<tr data-id="${f.id}"><td><span class="dot ${f.colour}"></span>${f.colour}</td><td>${f.page}</td><td>${item}<div>${words}</div></td><td>${why}</td></tr>`;
     }).join('') || '<tr><td colspan="4">Nothing found to mark.</td></tr>';

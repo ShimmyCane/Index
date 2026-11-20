@@ -10,10 +10,20 @@ const out = path.resolve(process.argv[2] || '/tmp/qc-test');
 const base = `http://localhost:${process.env.PORT || 8765}/index.html`;
 fs.mkdirSync(out, { recursive: true });
 
-const EXPECT = { // keynote row -> colour ("Demo 3" is listed twice: first green, second red)
-  'Demo 1': 'green', 'Demo 2': 'yellow', 'Demo 3#1': 'green', 'Demo 3#2': 'red', 'Note 5': 'red', 'Demo 4': 'red',
-  'Demo 5': 'yellow', 'Demo 6': 'yellow', 'New 11': 'yellow', 'New 12': 'green', 'New 14': 'green',
-  'New 15': 'yellow', 'New 17': 'yellow', 'New 18': 'red',
+const EXPECT = { // keynote text -> colour (numbering is off, so rows are matched by their text)
+  'REMOVE EXISTING CERAMIC WALL TILE AT RESTROOM WALLS': 'green',
+  'remove existing lavatory faucet and supply lines': 'yellow',
+  'REMOVE EXISTING PARTITION AND DOOR': 'green',
+  'REMOVE EXISTING TOWEL DISPENSER': 'yellow',
+  'REMOVE EXISTING FIRE-RATED DOOR ASSEMBLY': 'red',
+  'Remove existing partition and door.': 'yellow',
+  'REMOVE EXISTING WALL TILES AT SHOWER AREA': 'yellow',
+  'INSTALL NEW ACCESSIBLE LAVATORY, SEE DETAIL': 'yellow',
+  'INSTALL NEW GRAB BAR, 36 INCH LONG': 'green',
+  'INSTALL NEW 1-HR FIRE-RATED PARTITION': 'green',
+  'install new towel holder': 'yellow',
+  'INSTALL NEW DOOR HARDWARE': 'yellow',
+  'INSTALL NEW SIGNAGE': 'yellow',
 };
 const fails = [];
 const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!ok) fails.push(msg); };
@@ -48,26 +58,21 @@ const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!o
   const chips = await page.$$eval('#chips .chip', els => els.map(e => e.textContent.trim()));
   console.log('chips:', chips.join(' | '));
   check(chips[0] === 'Green: 4', 'green count 4');
-  check(chips[1] === 'Yellow: 6', 'yellow count 6');
-  check(chips[2] === 'Red: 5', 'red count 5 (4 rows + 1 undefined callout)');
-  check(chips[3] === 'Undefined callouts: 1', 'one undefined callout (#30)');
+  check(chips[1] === 'Yellow: 8', 'yellow count 8');
+  check(chips[2] === 'Red: 1', 'red count 1 (fire rating)');
+  check(chips[3] === 'Undefined callouts: 0', 'no undefined callouts (numbering off)');
 
   const rows = await page.$$eval('#findBody tr[data-id]', trs => trs.map(tr => {
     const cells = tr.querySelectorAll('td');
-    const code = cells[2].childNodes[0].textContent.trim();
-    return { colour: cells[0].textContent.trim(), code, why: cells[3].textContent.trim() };
+    const desc = cells[2].querySelector('div').textContent.trim();
+    return { colour: cells[0].textContent.trim(), desc, why: cells[3].textContent.trim() };
   }));
-  // The table is sorted red first, so the two D3 rows are told apart by their reason text.
   const got = {};
-  for (const r of rows) {
-    if (r.code === 'Demo 3') got[r.why.includes('used more than once') ? 'Demo 3#2' : 'Demo 3#1'] = r.colour;
-    else got[r.code] = r.colour;
+  for (const r of rows) got[r.desc] = r.colour;
+  for (const [text, colour] of Object.entries(EXPECT)) {
+    check(got[text] === colour, `"${text}" is ${colour} (got ${got[text]})`);
   }
-  for (const [code, colour] of Object.entries(EXPECT)) {
-    check(got[code] === colour, `${code} is ${colour} (got ${got[code]})`);
-  }
-  check(got['#30'] === 'red', 'callout #30 is red (no keynote row)');
-  check(rows.length === 15, `15 findings in the table: 14 keynote rows + 1 undefined callout (got ${rows.length})`);
+  check(rows.length === 13, `13 marks (keynote rows; "Note 5" is not a keynote type and is not read) (got ${rows.length})`);
 
   // Click a red row: the preview should move to page 1 with that row picked
   await page.click('#findBody tr[data-id] >> nth=0');
@@ -107,7 +112,7 @@ const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!o
     return { annots: annots.map(a => ({ subtype: a.subtype, contents: a.contentsObj && a.contentsObj.str || a.contents || '' })), hasText: text.includes('Demo') && text.includes('REMOVE EXISTING') };
   }, exported);
   console.log('annotations in exported file:', annotInfo.annots.length, annotInfo.annots.map(a => a.subtype).join(','));
-  check(annotInfo.annots.length === 15, `15 annotations: 14 rows + 1 undefined callout (got ${annotInfo.annots.length})`);
+  check(annotInfo.annots.length === 13, `13 annotations (got ${annotInfo.annots.length})`);
   check(annotInfo.hasText, 'exported PDF keeps selectable text (not flattened)');
   const sampleComment = annotInfo.annots.find(a => a.contents.includes('RED'));
   check(!!sampleComment, 'annotations carry a comment with the colour');

@@ -25,23 +25,48 @@ const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!o
 
   const chips = await page.$$eval('#chips .chip', els => els.map(e => e.textContent.trim()));
   console.log('chips:', chips.join(' | '));
-  check(chips[0] === 'Green: 5', 'green 5 (Demo 1, Demo 3, New 12, New 14, New 15)');
-  check(chips[1] === 'Yellow: 5', 'yellow 5 (Demo 2, Demo 5, New 11, New 16, New 17)');
-  check(chips[2] === 'Red: 3', 'red 3 (Demo 4 fire rating, New 18 no CSI, callout 30)');
-  check(chips[3] === 'Undefined callouts: 1', 'one undefined callout (30)');
-  check(/page 1 of|Page 1/i.test(await page.textContent('#pageSel').catch(() => '')) || (await page.$$eval('#pageSel option', o => o.length)) === 2, 'two pages in the page picker');
+  check(chips[0] === 'Green: 5', 'green 5 (exact approved phrases)');
+  check(chips[1] === 'Yellow: 6', 'yellow 6 (not approved, or no scope word)');
+  check(chips[2] === 'Red: 2', 'red 2 (FIRE with no rating, BASH is not an approved verb)');
+  check(chips[3] === 'Undefined callouts: 0', 'no undefined callouts (numbering is off by default)');
+  check((await page.$$eval('#pageSel option', o => o.length)) === 2, 'two pages in the page picker');
 
+  // Rows are matched by their keynote text (the sheet has no numbers)
   const rows = await page.$$eval('#findBody tr[data-id]', trs => trs.map(tr => {
     const c = tr.querySelectorAll('td');
-    return { code: c[2].childNodes[0].textContent.trim(), colour: c[0].textContent.trim() };
+    return { text: c[2].querySelector('div').textContent.trim(), colour: c[0].textContent.trim() };
   }));
-  const want = { 'Demo 1': 'green', 'Demo 2': 'yellow', 'Demo 3': 'green', 'Demo 4': 'red', 'Demo 5': 'yellow', 'New 11': 'yellow',
-    'New 12': 'green', 'New 14': 'green', 'New 15': 'green', 'New 16': 'yellow', 'New 17': 'yellow', 'New 18': 'red', '#30': 'red' };
-  for (const [code, colour] of Object.entries(want)) {
-    const r = rows.find(x => x.code === code);
-    check(!!r && r.colour === colour, `${code} is ${colour} (got ${r ? r.colour : 'missing'})`);
+  const want = {
+    'REMOVE EXISTING CERAMIC WALL TILE AT RESTROOM WALLS': 'green',
+    'REMOVE EXISTING LAVATORY FAUCET AND SUPPLY LINES': 'yellow',
+    'REMOVE EXISTING PARTITION AND DOOR': 'green',
+    'REMOVE EXISTING FIRE-RATED DOOR ASSEMBLY': 'red',
+    'REMOVE EXISTING TOWEL DISPENSER AND BACKING': 'yellow',
+    'BASH OUT EXISTING GRAB BAR': 'red',
+    'INSTALL NEW ACCESSIBLE LAVATORY, SEE DETAIL': 'yellow',
+    'INSTALL NEW GRAB BAR, 36 INCH LONG': 'green',
+    'INSTALL NEW 1-HR FIRE-RATED PARTITION': 'green',
+    'INSTALL NEW TOWEL HOLDERS': 'green',
+    'INSTALL NEW FAUCET WITH LEVER HANDLE': 'yellow',
+    'INSTALL NEW DOOR HARDWARE': 'yellow',
+    'INSTALL NEW SIGNAGE': 'yellow',
+  };
+  for (const [text, colour] of Object.entries(want)) {
+    const r = rows.find(x => x.text === text);
+    check(!!r && r.colour === colour, `"${text}" is ${colour} (got ${r ? r.colour : 'missing'})`);
   }
-  check(rows.length === 13, `13 marks: 12 keynote rows + 1 callout (got ${rows.length})`);
+  check(rows.length === 13, `13 keynote rows marked (got ${rows.length})`);
+  // Word marks: the exact phrase is highlighted green; the bad verb and the FIRE word are underlined red
+  const marks = await page.$$eval('#findBody tr[data-id]', trs => trs.map(tr => {
+    const div = tr.querySelectorAll('td')[2].querySelector('div');
+    return { text: div.textContent.trim(), hg: div.querySelectorAll('.hg').length, wr: [...div.querySelectorAll('.wr')].map(e => e.textContent) };
+  }));
+  const exact = marks.find(m => m.text === 'INSTALL NEW GRAB BAR, 36 INCH LONG');
+  check(exact && exact.hg === 'INSTALL NEW GRAB BAR, 36 INCH LONG'.split(' ').length, 'exact phrase: every word highlighted green (' + (exact && exact.hg) + ' of 7)');
+  const bash = marks.find(m => m.text === 'BASH OUT EXISTING GRAB BAR');
+  check(bash && bash.wr.join(' ') === 'BASH', 'BASH underlined red');
+  const fire = marks.find(m => m.text === 'REMOVE EXISTING FIRE-RATED DOOR ASSEMBLY');
+  check(fire && fire.wr.includes('FIRE-RATED'), 'FIRE-RATED underlined red (no rating word)');
 
   await page.screenshot({ path: path.join(out, '1-sample-loaded.png'), fullPage: true });
   check(errs.length === 0, 'no page errors' + (errs.length ? ': ' + errs.join(' | ') : ''));

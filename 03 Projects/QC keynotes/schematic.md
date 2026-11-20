@@ -31,6 +31,13 @@ A first-pass QC tool for keynotes and general notes on architectural drawing set
 - Step 4: marked-up PDF with editable Highlight (entries) and Square (undefined callouts, unreadable pages) annotations, each with a comment; findings CSV.
 - Synthetic test: `test/make_synthetic.js` makes `test/synthetic_restroom_set.pdf` and `test/synthetic_guideline.json`; `test/smoke.js` checks the colours, counts, export and layout.
 
+## Phrasing standard (convo v0.4)
+- Numbers and CSI codes are off by default. The phrasing is checked.
+- Keynote rows: type, then the text. A row starts with a keynote type (Demo, New).
+- Rules: opening verb (red), FIRE rating (red), lower case (red), scope words (yellow), approved phrases (green exact; yellow near or not listed).
+- Word colours: green highlight (exact phrase), red underline (word breaks a rule), yellow underline (word differs from the nearest approved phrase).
+- An LLM review is not built: the word colours are rule-based.
+
 ## Matching (convo v0.2, Q6)
 - Green: the entry text matches an approved phrase exactly (spacing aside; case and punctuation included).
 - Yellow: same words, different case or punctuation (`punctCase`); close wording (`nearApproved`); not in the list (`notApproved`); and the other yellow checks.

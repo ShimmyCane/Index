@@ -42,43 +42,43 @@
   "similarity": 0.8,
   "checks": {
     "badType": {
-      "colour": "red",
+      "colour": "off",
       "status": "approved",
       "short": "Type must be Demo or New",
       "narrative": "Control rule: the type column is checked against the list."
     },
     "badNumber": {
-      "colour": "red",
+      "colour": "off",
       "status": "approved",
       "short": "Digit count",
       "narrative": "Control rule: number digits."
     },
     "csi": {
-      "colour": "red",
+      "colour": "off",
       "status": "approved",
       "short": "CSI 4 digits",
       "narrative": "Control rule: CSI code."
     },
     "duplicate": {
-      "colour": "red",
+      "colour": "off",
       "status": "approved",
       "short": "No repeats",
       "narrative": "Control rule: duplicates."
     },
     "undefinedKeynote": {
-      "colour": "red",
+      "colour": "off",
       "status": "approved",
       "short": "Every callout has a row",
       "narrative": "Control rule: callouts."
     },
     "unusedKeynote": {
-      "colour": "yellow",
+      "colour": "off",
       "status": "approved",
       "short": "Every row is called out",
       "narrative": "Control rule: unused rows."
     },
     "sequence": {
-      "colour": "yellow",
+      "colour": "off",
       "status": "approved",
       "short": "In order",
       "narrative": "Control rule: order."
@@ -130,6 +130,12 @@
       "status": "approved",
       "short": "Text layer",
       "narrative": "Control rule: unreadable pages."
+    },
+    "verb": {
+      "colour": "red",
+      "status": "approved",
+      "short": "Opening verb",
+      "narrative": "Control rule: the keynote opens with an approved verb."
     }
   },
   "syntax": {
@@ -137,5 +143,17 @@
     "newWork": ""
   },
   "examples": "",
-  "generalNotes": "stub"
+  "generalNotes": "stub",
+  "verbs": [
+    "REMOVE",
+    "DEMOLISH",
+    "INSTALL",
+    "PROVIDE",
+    "PATCH",
+    "REPAIR",
+    "REPLACE",
+    "RELOCATE",
+    "PROTECT",
+    "FURNISH"
+  ]
 }
