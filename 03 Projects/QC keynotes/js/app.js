@@ -48,6 +48,7 @@
   let summary = null;
   let previewPage = 1;
   let guide = null;
+  let keepRects = [];   // symbols and legend, kept at full strength in the preview
 
   // ---------- step 1: guideline ----------
   QC.buildGuideForm();
@@ -109,33 +110,57 @@
   }));
 
   // ---------- step 2: upload ----------
+  // One path for an uploaded file and the sample: read the PDF, then scan it.
+  async function loadPdf(bytes, name) {
+    if (!window.pdfjsLib) throw new Error('the PDF reader did not load (vendor/pdf.min.js)');
+    pdfDoc = await pdfjsLib.getDocument({ data: bytes.slice(0) }).promise;
+    pdfBytes = bytes;
+    fileName = name;
+    findings = []; summary = null;
+    const withText = await countPagesWithText(pdfDoc);
+    $('fileInfo').textContent = `${fileName}: ${pdfDoc.numPages} page(s), ${withText} with a readable text layer`;
+    $('tag2').textContent = `${pdfDoc.numPages} page(s) loaded`;
+    $('scanBtn').disabled = false;
+    $('tag3').textContent = 'reading…';
+    $('exportBtn').disabled = true; $('csvBtn').disabled = true;
+    $('results').hidden = true; $('chips').hidden = true; $('howto').hidden = true;
+    $('tag4').textContent = 'after a scan';
+    document.getElementById('step2').open = false;
+    document.getElementById('step3').open = true;
+    await runScan();
+  }
+
   $('pdfIn').addEventListener('change', async e => {
     const f = e.target.files[0];
+    e.target.value = '';
     if (!f) return;
     try {
-      if (!window.pdfjsLib) throw new Error('the PDF reader did not load (vendor/pdf.min.js)');
-      const bytes = new Uint8Array(await f.arrayBuffer());
-      pdfDoc = await pdfjsLib.getDocument({ data: bytes.slice(0) }).promise;
-      pdfBytes = bytes;
-      fileName = f.name;
-      findings = []; summary = null;
-      const withText = await countPagesWithText(pdfDoc);
-      $('fileInfo').textContent = `${fileName}: ${pdfDoc.numPages} page(s), ${withText} with a readable text layer`;
-      $('tag2').textContent = `${pdfDoc.numPages} page(s) loaded`;
-      $('scanBtn').disabled = false;
-      $('scanInfo').textContent = 'Ready to scan.';
-      $('tag3').textContent = 'ready to scan';
-      $('exportBtn').disabled = true; $('csvBtn').disabled = true;
-      $('results').hidden = true; $('chips').hidden = true; $('howto').hidden = true;
-      $('tag4').textContent = 'after a scan';
-      document.getElementById('step2').open = false;
-      document.getElementById('step3').open = true;
+      await loadPdf(new Uint8Array(await f.arrayBuffer()), f.name);
     } catch (err) {
       QC.logError('Could not open the PDF: ' + err.message);
       $('fileInfo').textContent = 'That file could not be opened as a PDF.';
     }
-    e.target.value = '';
   });
+
+  // "Load sample": the synthetic guideline and sheet from samples/, then the scan.
+  $('loadSample').addEventListener('click', async () => {
+    const msg = $('sampleMsg');
+    msg.textContent = 'Loading the sample…';
+    try {
+      const [gRes, pRes] = await Promise.all([fetch('samples/sample_guideline.json'), fetch('samples/sample_sheet.pdf')]);
+      if (!gRes.ok || !pRes.ok) throw new Error('the sample files could not be fetched (open the page over http, not as a file)');
+      const g = QC.normalizeGuide(await gRes.json());
+      QC.writeForm(g);
+      settings.cloud = g.cloud; saveSettings(); renderSettings();
+      saveGuide('Sample guideline loaded and saved.');
+      await loadPdf(new Uint8Array(await pRes.arrayBuffer()), 'sample_sheet.pdf');
+      msg.textContent = 'Sample loaded: a fictional two-page sheet against a fictional guideline.';
+    } catch (err) {
+      QC.logError('Sample: ' + err.message);
+      msg.textContent = 'The sample did not load: ' + err.message;
+    }
+  });
+
   async function countPagesWithText(doc) {
     let n = 0;
     for (let i = 1; i <= doc.numPages; i++) {
@@ -145,13 +170,14 @@
     return n;
   }
 
-  // ---------- step 3: scan ----------
-  $('scanBtn').addEventListener('click', async () => {
+  // ---------- step 3: scan (runs on upload, and again on request) ----------
+  async function runScan() {
     if (!pdfDoc) return;
     try {
       guide = currentGuide();
-      if (!Object.values(guide.checks).some(v => v !== 'off')) {
-        $('scanInfo').textContent = 'All checks are off. Turn some on in step 1 before scanning.';
+      const live = Object.values(guide.checks).some(v => v.status === 'approved' && v.colour !== 'off');
+      if (!live) {
+        $('scanInfo').textContent = 'No rule is approved yet. Approve rules in step 1 to mark the drawing.';
         return;
       }
       $('scanBtn').disabled = true;
@@ -159,15 +185,17 @@
       const result = await QC.scanDocument(pdfDoc, guide, settings.strictness);
       findings = result.findings;
       summary = result.summary;
+      keepRects = result.keep;
       renderResults();
-      $('scanInfo').textContent = `Done. ${summary.entries} keynote entries, ${summary.callouts} callouts.`;
+      $('scanInfo').textContent = `Done. ${summary.entries} keynote rows, ${summary.callouts} callouts.`;
     } catch (err) {
       QC.logError('Scan failed: ' + err.message);
       $('scanInfo').textContent = 'The scan failed. See the errors panel.';
     } finally {
       $('scanBtn').disabled = false;
     }
-  });
+  }
+  $('scanBtn').addEventListener('click', runScan);
 
   function renderResults() {
     $('results').hidden = false;
@@ -187,8 +215,10 @@
     const sorted = [...findings].sort((a, b) => a.page - b.page || order[a.colour] - order[b.colour]);
     $('findBody').innerHTML = sorted.map(f => {
       const why = f.reasons.map(r => `<div><span class="muted">${QC.esc(r.label)}:</span> ${QC.esc(r.detail)}</div>`).join('') || 'Matches the guideline';
-      const item = f.kind === 'page' ? 'Page' : (f.kind === 'callout' ? 'Callout ' : '') + QC.esc(f.code);
-      return `<tr data-id="${f.id}"><td><span class="dot ${f.colour}"></span>${f.colour}</td><td>${f.page}</td><td>${item}<div class="muted">${QC.esc(f.desc)}</div></td><td>${why}</td></tr>`;
+      const cls = { green: 'hg', yellow: 'wy', red: 'wr', neutral: '' };
+      const words = f.words ? f.words.map(w => `<span class="${cls[w.c] || ''}">${QC.esc(w.t)}</span>`).join(' ') : QC.esc(f.desc);
+      const item = f.kind === 'page' ? 'Page' : QC.esc(f.code);
+      return `<tr data-id="${f.id}"><td><span class="dot ${f.colour}"></span>${f.colour}</td><td>${f.page}</td><td>${item}<div>${words}</div></td><td>${why}</td></tr>`;
     }).join('') || '<tr><td colspan="4">Nothing found to mark.</td></tr>';
 
     const pageSel = $('pageSel');
@@ -212,7 +242,7 @@
     const count = findings.filter(f => f.page === previewPage).length;
     $('pageInfo').textContent = `${count} mark(s) on this page`;
     const size = Math.min(760, ($('preview').parentElement.clientWidth || 700) - 16);
-    await QC.renderPreview(pdfDoc, previewPage, $('preview'), findings, size);
+    await QC.renderPreview(pdfDoc, previewPage, $('preview'), findings, size, true, keepRects);
   }
   $('pageSel').addEventListener('change', e => { previewPage = +e.target.value; showPreview(); });
   $('findBody').addEventListener('click', e => {
