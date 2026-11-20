@@ -15,7 +15,7 @@
   let renderToken = 0;
 
   // Draw page n at a given width, then draw a box for each finding on that page.
-  QC.renderPreview = async (pdfDoc, pageNum, canvas, findings, cssWidth, fade) => {
+  QC.renderPreview = async (pdfDoc, pageNum, canvas, findings, cssWidth, fade, keep) => {
     const token = ++renderToken;
     const page = await pdfDoc.getPage(pageNum);
     const base = page.getViewport({ scale: 1 });
@@ -39,9 +39,13 @@
       ctx.save();
       ctx.fillStyle = 'rgba(251, 248, 241, 0.8)';
       ctx.fillRect(0, 0, vp.width, vp.height);
-      for (const f of findings) {
-        if (f.page !== pageNum || f.kind === 'page') continue;
-        const [x0, y0, x1, y1] = vp.convertToViewportRectangle(f.rect);
+      const keepRects = [
+        ...findings.filter(f => f.kind !== 'page').map(f => ({ page: f.page, rect: f.rect })),
+        ...(keep || []),
+      ];
+      for (const k of keepRects) {
+        if (k.page !== pageNum) continue;
+        const [x0, y0, x1, y1] = vp.convertToViewportRectangle(k.rect);
         const x = Math.min(x0, x1) - 3, y = Math.min(y0, y1) - 3;
         const w = Math.abs(x1 - x0) + 6, h = Math.abs(y1 - y0) + 6;
         ctx.drawImage(copy, x * dpr, y * dpr, w * dpr, h * dpr, x, y, w, h);
@@ -55,13 +59,19 @@
       const x = Math.min(x0, x1), y = Math.min(y0, y1), w = Math.abs(x1 - x0), h = Math.abs(y1 - y0);
       const c = COLOUR[f.colour].css;
       ctx.save();
-      ctx.globalAlpha = f.kind === 'entry' ? 0.3 : 0.15;
-      ctx.fillStyle = c;
-      ctx.fillRect(x, y, w, h);
-      ctx.globalAlpha = 1;
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = c;
-      ctx.strokeRect(x, y, w, h);
+      if (f.kind === 'entry') {
+        // keynote rows: a thick underline, so the words stay readable
+        ctx.fillStyle = c;
+        ctx.fillRect(x, y + h - 2, w, 3);
+      } else {
+        ctx.globalAlpha = 0.15;
+        ctx.fillStyle = c;
+        ctx.fillRect(x, y, w, h);
+        ctx.globalAlpha = 1;
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = c;
+        ctx.strokeRect(x, y, w, h);
+      }
       ctx.restore();
     }
     return { width: vp.width, height: vp.height };

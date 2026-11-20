@@ -91,6 +91,7 @@
     const findings = [];
     const rows = [];
     const callouts = [];
+    const legendRects = [];   // kept in focus on the drawing
 
     // Pass 1: find keynote rows and callouts
     for (const pg of pages) {
@@ -105,6 +106,11 @@
       }
       for (const ln of pg.lines) {
         const t = ln.text;
+        if (/^LEGEND\b/i.test(t)) {
+          const [x0, y0, x1, y1] = ln.rect;
+          legendRects.push({ page: pg.num, rect: [x0 - 12, y0 - 95, x0 + 330, y1 + 6] });
+          continue;
+        }
         if (CALLOUT_RE.test(t)) { callouts.push({ number: t, page: pg.num, rect: ln.rect }); continue; }
         const full = ROW_RE.exec(t);
         if (full) {
@@ -215,6 +221,11 @@
       undefinedCallouts: findings.filter(f => f.kind === 'callout').length,
       unreadPages: findings.filter(f => f.kind === 'page').length,
     };
-    return { findings, summary, calloutRects: callouts };
+    // Rects kept at full strength: the symbols (padded to the shape) and the legend.
+    const keep = [
+      ...callouts.map(c => ({ page: c.page, rect: [c.rect[0] - 12, c.rect[1] - 12, c.rect[2] + 12, c.rect[3] + 12] })),
+      ...legendRects,
+    ];
+    return { findings, summary, keep };
   };
 })();

@@ -58,3 +58,8 @@ A first-pass QC tool for keynotes and general notes on architectural drawing set
 
 ## Open
 See `convo/convo v0.2.md`.
+
+## Sample (for trying the page)
+- Upper-right **Load sample** button: loads `samples/sample_guideline.json` (synthetic, approved rules) and `samples/sample_sheet.pdf` (two fictional pages: plan A-101 with legend, keynote matrix and title block; details and general notes A-102), then scans them.
+- Made by `test/make_sample.js`. Tested by `test/sample_test.js`: 5 green, 5 yellow, 3 red (2 rows + 1 undefined callout), 13 marks.
+- Legend, symbols (circle existing, hexagon demo, square new work) and keynote rows stay at full strength in the preview; other sheet content is faded.

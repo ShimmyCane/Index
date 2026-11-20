@@ -98,16 +98,18 @@
   .ruleBody input[type=text], .ruleBody textarea { margin-bottom: 6px; }
   .ruleName { flex: 1; }
   .pill:empty { display: none; }
-  .wg, .wy, .wr { }
   .wg { text-decoration: underline; text-decoration-color: #2e9e57; text-decoration-thickness: 3px; }
   .wy { text-decoration: underline; text-decoration-color: #f2c419; text-decoration-thickness: 3px; }
   .wr { text-decoration: underline; text-decoration-color: #d93a2a; text-decoration-thickness: 3px; }
+  .topRight { position: fixed; top: 12px; right: 16px; z-index: 20; min-height: 44px; }
   @media print { .gear, .drawer, .errorsPanel, .btn, .seg, .row, .field input[type=file] { display: none !important; } body { padding-bottom: 0; background: #fff; color: #000; } details.step { box-shadow: none; } }
 </style>
 </head>
 <body>
+<button type="button" class="btn primary topRight" id="loadSample" aria-describedby="sampleMsg">Load sample</button>
 <main>
   <h1>QC keynotes</h1>
+  <p class="hint" id="sampleMsg" role="status" style="margin-top:-2px"></p>
   <p class="lede">A first pass over keynotes and general notes on an architectural drawing set. The page checks each keynote against your keynote guideline and marks it green (matches), yellow (questionable) or red (breaks a rule). You then export a marked-up PDF whose marks you can still edit.</p>
   <p><span class="pill offline">🔒 Offline only: the guideline and the drawings stay in this browser. Nothing is uploaded.</span></p>
 
