@@ -35,3 +35,4 @@ Notes:
 - The root `index.html` lists nursery projects in its Nursery section. Add a tile when a project gets a page.
 - This repo is public. Keep private data out of every project. See `CLAUDE.md`.
 - When new projects are added, add an entry here describing their intent and location.
+- Athena's Piano Companion/ — status: idea (2026-11-20; nothing built). A hands-free companion page for free piano play: it listens, starts a take on a spoken phrase after a beep countdown, ends it after about 3 seconds of silence (the page blinks) or a chosen stop note, snips the tail, saves the take and is ready for the next; takes are handled later away from the piano. Track A (proposed). Questions in `convo/convo v0.1.md`. (`schematic.md`, `CLAUDE.md`, `convo/`)
