@@ -34,3 +34,5 @@
 - Test a rest-after-silence feature with a silent `MediaStreamDestination` stream; the browser's fake microphone beeps and never goes quiet.
 - Test multi-touch through the debugging protocol (`Input.dispatchTouchEvent` with several touch points), not with the single mouse.
 - A shared setting default that has already been saved on a device never changes by itself; add a one-time migration key when a default is meant to change for existing users.
+- 2026-11-21 (later): Jimmy's rule is to mark all of a round's notes done and let him reopen the ones that are still a problem. The earlier lesson above (wait until he has seen each one work) is replaced by this. Marked all 22 and read the table back.
+

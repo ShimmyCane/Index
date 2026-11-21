@@ -29,7 +29,7 @@ Sound by ear on iPad; real two-finger touch; clap vs speech against the real ons
 
 ## Version 0.4.0 (2026-11-21)
 
-Built from the 22 open notes and the answers in `convo v0.13`; checked in headless Chromium, not on an iPad. Questions in `convo/convo v0.14.md`. All 22 notes are still open in `rs_notes` until Jimmy has tried it and says yes (nine were marked done earlier and put back to open the same day).
+Built from the 22 open notes and the answers in `convo v0.13`; checked in headless Chromium, not on an iPad. Questions in `convo/convo v0.14.md`. All 22 notes were marked done in `rs_notes` at Jimmy's request (the table now has 36 notes, all done); he reopens any that are still a problem.
 - **Two fingers** is a new mode on the same id (`js/modes/span.js`): one finger draws a melody line or a closed loop (one long note); two fingers hold a note by distance; three make a triangle chord; four make a square four-beat pulse; two fingers put down later (after 0.28 s) set the loudness; trails fade; no split screen.
 - **Dot loop:** a new ring grows at the outside and is selected; the others shrink to dots (on) and dashes (rest).
 - **Marbles:** two fingers set speed (up/down), mood (left minor, right major) and bounce (apart/pinch, default 0.8, range 0.5 to 1.5, speed capped); a switch for each in ⚙️; wider sides; stuck marbles nudged.
