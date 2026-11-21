@@ -1,6 +1,6 @@
 # Rhythm Sticks — brief
 
-**Updated:** 2026-11-12
+**Updated:** 2026-11-21
 **Status:** MVP 0.3.1, not device-tested. All six modes built in one pass after `convo v0.2` answers.
 
 ## Goal
@@ -26,6 +26,10 @@ Six modes × three sizes: zero errors, no horizontal scroll; gear circle, fade, 
 ## Not verified
 
 Sound by ear on iPad; real two-finger touch; clap vs speech against the real onset detector (thresholds are a first guess); real sign-in; the SQL has not been run (checked only with `sql_paste_check.py`).
+
+## Notes round 2026-11-21 (22 open notes, version 0.3.3; questions in `convo/convo v0.12.md`)
+
+Read from `rs_notes` on 2026-11-21. Eight notes are built in 0.3.3 and wait for Jimmy's yes to be marked done. Fourteen are not built: two-finger shapes and trails, dot loop outward rings, echo timing and mic delay toggle, treble clef, ripples default, breathing garden session record, and the marbles controls. Nothing marked done in the table. Items in `todo.md`.
 
 ## Notes round 2026-11-14 (ten open notes, version 0.3.0)
 
