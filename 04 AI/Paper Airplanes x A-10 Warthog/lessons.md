@@ -47,3 +47,5 @@
 - **A constant sideways drift makes a straight trail, not a curve.** Make the drift grow with each point's age, as a point further behind a turning plane swings further.
 - **Mood comes from consequence and one shared wind.** Burning wrecks show what the player did; one wind for smoke and flags ties the scene together.
 - **Bridge gaps in ribbons.** When a ribbon trail restarts, insert an invisible point so it does not join the old end with a straight line.
+
+- **Bump the version every release.** VERSION sat at 0.1.0 for eleven rounds, so Jimmy could not tell whether he had the update. Bump `VERSION` and the `?v=` cache-buster on the script and CSS links together.

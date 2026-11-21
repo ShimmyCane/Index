@@ -7,7 +7,7 @@ A remix: a small TypeScript + Canvas 2.5D pixel-art flight game, inspired by the
 - Shared conventions: the Index repo's root `CLAUDE.md` (public repo, privacy, ⚙️ and iPad rules)
 
 How to run: open `index.html` (works from the file or GitHub Pages). No server.
-Build: `npm install` once, then `npm run build` (compiles `src/` to `js/game.js`). Commit both.
+Build: `npm install` once, then `npm run build` (compiles `src/` to `js/game.js`). Commit both. Each release: bump `VERSION` in `src/config.ts` and the `?v=` on the script and CSS links in `index.html`, so browsers load the new code.
 Test: `npm test` (flight model, mission seeds, headless, no browser). The browser smoke test is in the Index skills (`smoke-test`).
 
 Rules:
