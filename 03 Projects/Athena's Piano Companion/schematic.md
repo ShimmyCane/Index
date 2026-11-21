@@ -1,7 +1,7 @@
 # Athena's Piano Companion — schematic
 
 **Track: A. Family play** (confirmed, `convo/convo v0.1.md` question 1)
-**Status: MVP 0.1.0 (2026-11-20; headless-tested, not tried on a real iPad or piano; SQL written, not applied).** Answers: `convo/convo v0.1.md`. Build notes and open questions: `convo/convo v0.2.md`.
+**Status: 0.2.0 (2026-11-21). 0.1.0 was tried on a real iPad (the notes show it); 0.2.0 is headless-tested only. SQL 001 applied; SQL 002 written, not applied.** Answers: `convo/convo v0.1.md`, `v0.3.md`. Build notes: `convo/convo v0.2.md`, `v0.4.md`.
 
 ## Purpose
 
@@ -24,10 +24,14 @@ A companion that sits beside the digital piano and listens while Athena (and som
 
 | Page | File | Purpose |
 |---|---|---|
-| Record | `index.html` | hands-free recording loop |
+| Home | `index.html` | big buttons to every page; today; days; back to where you were |
+| Record | `record.html` | hands-free recording loop |
 | Listen | `player.html` | albums, artists, ratings, playlists; playback |
-| Library | `library.html` | edit take details; playback; download a file |
-| Compose | `compose.html` | four-layer composer |
+| Library | `library.html` | edit take details; playback; download a file; delete |
+| Browse | `browse.html` | every take, best first, star filter, bulk delete, recycle bin |
+| Compose | `compose.html` | four-layer composer; quick bar on a picked clip; pinch zoom |
+
+Players (a name a take is saved under, not a sign-in): one button cycles Athena, Felix, Ying, Jimmy, Guest. A **session is one day**; the first take of a new day is Take 1 again. Deleted takes are marked (`deleted_at`) and wait 30 days in the recycle bin, then the page removes them (and the audio file) when signed in.
 
 ## The recording loop
 
@@ -36,13 +40,13 @@ A companion that sits beside the digital piano and listens while Athena (and som
 3. **Waiting.** The circle breathes with the sound. Start by voice (`let's record`, `please record`, `start recording`, `start`; editable) or by tapping the circle.
 4. **Count-in.** Four beats 0.7 s apart; the take starts on the fourth (short) one. Six styles in ⚙️: beeps, chimes, wood clicks, drum, voice, lights only.
 5. **Recording.** Ends by any of: a **pause** (default 5 s; the circle blinks and a big 3, 2, 1 shows for the last three seconds; playing again cancels), the **stop notes** (only after a pause of about a second; cut from the take), the voice **stop recording / stop recording please** (the page cuts back to the last quiet moment before the words), or a **tap on the circle**. Each of the first three can be switched off in ⚙️.
-6. **Trim.** The lead-in before the first note and the quiet tail are cut. A 0.15 s lead-in and 0.45 s of natural decay are kept, with a short fade in and a cosine fade out. Nothing is saved if no real playing was heard.
+6. **Trim.** The lead-in before the first note is cut (0.15 s kept). After the music ends (the sound last above about 8% of the take's peak) only **2 s of pause** is kept (1 to 3 s in ⚙️), with a cosine fade over the last 0.8 s. Nothing is saved if no real playing was heard.
 7. **Save.** `Take N` (counted per player), player, album (`Free play YYYY-MM` unless set), a colour, a loudness picture, file name `player-date-time-takeN.wav`. 16-bit mono WAV. Saved in the browser (IndexedDB) first.
 8. **Ready again** at once. A chime marks the save.
 
 ## Data
 
-`pc_takes` (id, name, player, album, take_no, file_name, file_path, mime, duration_ms, size_bytes, sample_rate, rating 0–5, description, color, peaks, source `recorder`/`composer`, taken_at, updated_at) · `pc_playlists` · `pc_playlist_items` (playlist_id, take_id, position) · `pc_projects` (composer pieces as JSON) · `pc_notes`. Audio in the private bucket `pc-takes` at `<take id>.wav`. SQL: `supabase/` (`test_001_pc`, `001_pc_family`, `verify_001_pc`). Registered under app `piano-companion`.
+`pc_takes` (id, name, player, session_id, deleted_at, album, take_no, file_name, file_path, mime, duration_ms, size_bytes, sample_rate, rating 0–5, description, color, peaks, source `recorder`/`composer`, taken_at, updated_at) · `pc_sessions` (one per day) · `pc_playlists` · `pc_playlist_items` (playlist_id, take_id, position) · `pc_projects` (composer pieces as JSON) · `pc_notes`. Audio in the private bucket `pc-takes` at `<take id>.wav`. SQL: `supabase/` (`test_001_pc`, `001_pc_family`, `verify_001_pc`; round 2: `test_002_pc`, `002_pc_bin_sessions`, `verify_002_pc`). Registered under app `piano-companion`.
 
 **Sync** (`js/store.js`): upload audio, then upsert the row; pull other devices' rows. Runs only while the page is waiting (not recording, not playing, 8 s after the last sound) and after sign-in. An unsynced local edit is never overwritten. Status pill: `💾 this device`, `☁️ synced`, `⚠️ check`.
 
@@ -57,8 +61,9 @@ Notes for improvement in ⚙️ on every page (`02 Refs/Skills/feedback_notes.md
 ## Increments
 
 1. ✅ 0.1.0 — everything above.
-2. Next: real-piano test and fixes from notes; apply the SQL; try voice start on the iPad.
-3. Later: MIDI input (laptop Chrome), beat grid in Compose, time-stretch, a "hold to stop" circle, share a take.
+2. ✅ 0.2.0 — round 2 from the first notes: 2 s pause trim, Ways to start and start notes, more stop phrases, recycle bin, sessions per day, Browse, Home, player cycle, Compose quick bar and pinch.
+3. Next: apply SQL 002; real-piano test of 0.2.0; fixes from new notes.
+4. Later: MIDI input (laptop Chrome), beat grid in Compose, time-stretch, a "hold to stop" circle, share a take.
 
 ## Risks and limits
 

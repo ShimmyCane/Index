@@ -34,26 +34,30 @@
   };
 
   // opt: { cut: seconds (do not keep anything after this), thr: listener threshold, ignore: seconds of count-in leakage to skip,
-  //        pre: lead-in kept, tail: natural decay kept }
+  //        pre: lead-in kept, tail: seconds of pause kept after the music ends (default 2), heard: how loud (share of the take's
+  //        peak) still counts as music (default 0.08) }
+  // The music "ends" when the sound last rises above both the listener threshold and `heard` of the peak. The pause after it
+  // (a piano's fading ring and the quiet that followed) is trimmed back to `tail` seconds, with a cosine fade over the end.
   // Returns { data, startSec, endSec } or null when no real playing was heard (or under minSec).
   Trim.run = function (data, sr, opt) {
     opt = opt || {};
     var e = envelope(data, sr), t = threshold(e, opt), ignore = Math.ceil((opt.ignore != null ? opt.ignore : 0.2) / WIN);
+    var tHeard = Math.max(t, e.peak * (opt.heard != null ? opt.heard : 0.08));
     var cutIdx = opt.cut != null ? Math.min(e.env.length, Math.floor(opt.cut / WIN)) : e.env.length;
     var first = -1, last = -1, i;
     for (i = ignore; i < cutIdx; i++) if (e.env[i] > t) { first = i; break; }
-    for (i = cutIdx - 1; i >= ignore; i--) if (e.env[i] > t) { last = i; break; }
-    if (first < 0 || (last - first) * WIN < (opt.minSec != null ? opt.minSec : 0.4)) return null;
-    var pre = Math.round((opt.pre != null ? opt.pre : 0.15) * sr), tail = Math.round((opt.tail != null ? opt.tail : 0.45) * sr);
+    for (i = cutIdx - 1; i >= ignore; i--) if (e.env[i] > tHeard) { last = i; break; }
+    if (first < 0 || last < first || (last - first) * WIN < (opt.minSec != null ? opt.minSec : 0.4)) return null;
+    var pre = Math.round((opt.pre != null ? opt.pre : 0.15) * sr), tail = Math.round((opt.tail != null ? opt.tail : 2.0) * sr);
     var start = Math.max(Math.round(ignore * e.w * 0.9), first * e.w - pre);
     var end = Math.min(data.length, (last + 1) * e.w + tail);
     if (opt.cut != null) end = Math.min(end, Math.round(opt.cut * sr));
     if (end - start < sr * 0.3) return null;
     var out = data.slice(start, end);
-    var fi = Math.min(Math.round(0.02 * sr), out.length >> 2), fo = Math.min(Math.round(0.4 * sr), out.length >> 1), k;
+    var fi = Math.min(Math.round(0.02 * sr), out.length >> 2), fo = Math.min(Math.round(0.8 * sr), out.length >> 1), k;
     for (k = 0; k < fi; k++) out[k] *= 0.5 - 0.5 * Math.cos(Math.PI * k / fi);
     for (k = 0; k < fo; k++) out[out.length - 1 - k] *= 0.5 - 0.5 * Math.cos(Math.PI * k / fo);   // cosine: no click, no abrupt stop
-    return { data: out, startSec: start / sr, endSec: end / sr };
+    return { data: out, startSec: start / sr, endSec: end / sr, musicEndSec: (last + 1) * e.w / sr };
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = Trim; else root.Trim = Trim;

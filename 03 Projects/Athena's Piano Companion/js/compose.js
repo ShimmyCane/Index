@@ -7,7 +7,7 @@
   var project = null, sources = {}, cache = {}, SR = 44100, px = 40, playhead = 0, selId = null, selLayer = 0;
   var undoS = [], redoS = [], mixed = null, mixTimer = null, saveTimer = null, loopOn = false, takesCache = [];
   var play = { src: null, startedAt: 0, offset: 0, on: false };
-  var lanes, scroller, canvases = [], rulerCv, drawQueued = false, drag = null, msgTimer = null;
+  var lanes, scroller, canvases = [], rulerCv, drawQueued = false, drag = null, msgTimer = null, quick = null, ptrs = {}, pinch = null;
 
   // ---- project
   function newProject(name) {
@@ -104,7 +104,9 @@
       c.fillStyle = 'rgba(47,45,61,.08)'; for (var t = 0; t * px < w; t += (px >= 25 ? 1 : 5)) c.fillRect(t * px, 0, 1, LH);
       L.clips.forEach(function (clip) { drawClip(c, clip, li, L.mute); });
     });
-    $('playhead').style.height = (Y0 + 4 * (LH + GAP)) + 'px'; $('lanes').style.width = w + 'px'; movePlayhead();
+    $('playhead').style.height = (Y0 + 4 * (LH + GAP)) + 'px'; $('lanes').style.width = w + 'px';
+    if (pinch) scroller.scrollLeft = Math.max(0, pinch.t * px - pinch.sx);
+    movePlayhead(); placeQuick();
   }
   function drawClip(c, clip, li, muted) {
     var d = rendered(clip), x = clip.start * px, wd = Math.max(8, clipDur(clip) * px), sel = clip.id === selId;
@@ -132,7 +134,17 @@
     var found = null; layers()[li].clips.forEach(function (c) { var sx = c.start * px, ex = sx + Math.max(8, clipDur(c) * px); if (x >= sx && x <= ex) found = c; });
     return { li: li, c: found };
   }
+  function dist(a, b) { return Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)); }
+  function startPinch() {                                     // two fingers: zoom the timeline
+    if (drag && drag.mode !== 'pan' && !drag.moved) undoS.pop();
+    drag = null; var k = Object.keys(ptrs), a = ptrs[k[0]], b = ptrs[k[1]];
+    var sx = (a.x + b.x) / 2 - scroller.getBoundingClientRect().left;
+    pinch = { d0: dist(a, b), px0: px, sx: sx, t: (scroller.scrollLeft + sx) / px };
+  }
   function onDown(e) {
+    ptrs[e.pointerId] = { x: e.clientX, y: e.clientY }; try { $('lanes').setPointerCapture(e.pointerId); } catch (err) { /* synthetic pointer */ }
+    if (Object.keys(ptrs).length === 2) { startPinch(); return; }
+    if (Object.keys(ptrs).length > 2) return;
     var r = $('lanes').getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, ht = hit(x, y);
     selLayer = ht.li; paintHeads();
     if (y < Y0) { playhead = Math.max(0, x / px); if (play.on) { stopSource(); startPlay(playhead); } movePlayhead(); return; }
@@ -140,9 +152,14 @@
       selId = ht.c.id; var c = ht.c, sx = c.start * px, ex = sx + Math.max(8, clipDur(c) * px);
       pushUndo(); drag = { id: c.id, mode: ex - x < 16 ? 'out' : (x - sx < 16 ? 'in' : 'move'), x0: e.clientX, orig: JSON.parse(JSON.stringify(c)), li0: ht.li, moved: false };
     } else drag = { mode: 'pan', x0: e.clientX, sl: scroller.scrollLeft, tap: x, moved: false };
-    $('lanes').setPointerCapture(e.pointerId); renderInspector(); draw();
+    renderInspector(); draw();
   }
   function onMove(e) {
+    if (ptrs[e.pointerId]) ptrs[e.pointerId] = { x: e.clientX, y: e.clientY };
+    if (pinch) {
+      var k = Object.keys(ptrs); if (k.length < 2) return;
+      px = Math.max(10, Math.min(120, Math.round(pinch.px0 * dist(ptrs[k[0]], ptrs[k[1]]) / pinch.d0))); $('zoom').value = px; draw(); return;
+    }
     if (!drag) return;
     var dx = e.clientX - drag.x0; if (Math.abs(dx) > 4) drag.moved = true;
     if (drag.mode === 'pan') { scroller.scrollLeft = drag.sl - dx; return; }
@@ -156,7 +173,9 @@
     } else c.out = Math.max(o['in'] + 0.05, Math.min(sources[c.take_id] ? sources[c.take_id].data.length / sources[c.take_id].sr : o.out + 60, o.out + ds * (o.rate || 1)));
     draw();
   }
-  function onUp() {
+  function onUp(e) {
+    if (e) delete ptrs[e.pointerId];
+    if (pinch) { if (Object.keys(ptrs).length < 2) { pinch = null; } drag = null; return; }
     if (!drag) return;
     if (drag.mode === 'pan' && !drag.moved) { playhead = Math.max(0, drag.tap / px); if (play.on) { stopSource(); startPlay(playhead); } movePlayhead(); }
     else if (drag.mode !== 'pan') { if (!drag.moved) undoS.pop(); changed(); }
@@ -186,8 +205,7 @@
           var d = clipDur(c); if (playhead > c.start && playhead < c.start + d && c.repeat === 1 && !c.extend) c.out = round(c['in'] + (playhead - c.start) * c.rate); else note('Move the play position over the clip first (repeat 1, no extend).'); }))])]));
     ins.appendChild(h('div', { 'class': 'grp' }, [h('h4', { text: '🔪 Cut' }),
       h('div', { 'class': 'btns' }, [btn('Split at play position', function () { split(c); })]),
-      h('div', { 'class': 'btns' }, [btn('Duplicate', function () { mutate(function () { var n = JSON.parse(JSON.stringify(c)); n.id = PC.uid('c'); n.start = round(c.start + clipDur(c)); layers()[f.li].clips.push(n); selId = n.id; }); }),
-        btn('Delete', function () { mutate(function () { layers()[f.li].clips.splice(f.ci, 1); selId = null; }); }, '')])]));
+      h('div', { 'class': 'btns' }, [btn('Duplicate', function () { dupClip(f); }), btn('Delete', function () { delClip(f); }, '')])]));
     ins.appendChild(h('div', { 'class': 'grp' }, [h('h4', { text: '↔️ Shift' }),
       h('div', { 'class': 'btns' }, [btn('◀ 1s', set(function (c) { c.start = Math.max(0, round(c.start - 1)); })), btn('◀ .1', set(function (c) { c.start = Math.max(0, round(c.start - 0.1)); })),
         btn('.1 ▶', set(function (c) { c.start = round(c.start + 0.1); })), btn('1s ▶', set(function (c) { c.start = round(c.start + 1); }))]),
@@ -209,6 +227,15 @@
       stepper('Extend', function () { return c.extend; }, function (v) { return '+' + v + 's'; }, set(function (c) { c.extend = Math.max(0, c.extend - 1); }), set(function (c) { c.extend = Math.min(60, c.extend + 1); })),
       h('div', { 'class': 'hint', text: 'Extend keeps the last moment of the clip going, like holding the pedal down.' })]));
     box.appendChild(ins);
+  }
+  function dupClip(f) { mutate(function () { var n = JSON.parse(JSON.stringify(f.c)); n.id = PC.uid('c'); n.start = Math.round((f.c.start + clipDur(f.c)) * 100) / 100; layers()[f.li].clips.push(n); selId = n.id; }); }
+  function delClip(f) { mutate(function () { layers()[f.li].clips.splice(f.ci, 1); selId = null; }); }
+  // A small bar right above the picked clip: Split, Duplicate, Delete, Undo (Delete asks nothing; Undo is one tap).
+  function placeQuick() {
+    if (!quick) return; var f = sel();
+    if (!f) { quick.hidden = true; return; }
+    quick.hidden = false; quick.style.left = Math.max(0, Math.min(f.c.start * px, parseFloat($('lanes').style.width || 0) - 190)) + 'px';
+    quick.style.top = Math.max(0, Y0 + f.li * (LH + GAP) - 44) + 'px';
   }
   function split(c) {
     var d = clipDur(c), f = findClip(c.id);
@@ -240,7 +267,7 @@
     });
   }
   async function paintPick() {
-    takesCache = (await Store.all('takes')).sort(function (a, b) { return a.taken_at < b.taken_at ? 1 : -1; });
+    takesCache = Store.live(await Store.all('takes')).sort(function (a, b) { return a.taken_at < b.taken_at ? 1 : -1; });
     var box = $('pick'); box.textContent = '';
     if (!takesCache.length) box.appendChild(h('p', { 'class': 'hint', text: 'No takes yet. Record some on the first page.' }));
     takesCache.forEach(function (t) {
@@ -293,6 +320,13 @@
     rulerCv = h('canvas', { height: RULER, style: 'display:block;margin-bottom:2px' }); lanes.insertBefore(rulerCv, $('playhead'));
     for (var i = 0; i < 4; i++) { var cv = h('canvas', { height: LH }); canvases.push(cv); lanes.insertBefore(cv, $('playhead')); }
     lanes.style.touchAction = 'none';
+    quick = h('div', { 'class': 'quickBar', hidden: true }, [
+      h('button', { type: 'button', 'aria-label': 'Split at the play position', text: '✂️', onclick: function () { var f = sel(); if (f) split(f.c); } }),
+      h('button', { type: 'button', 'aria-label': 'Duplicate', text: '⧉', onclick: function () { var f = sel(); if (f) dupClip(f); } }),
+      h('button', { type: 'button', 'aria-label': 'Delete', text: '🗑', onclick: function () { var f = sel(); if (f) delClip(f); } }),
+      h('button', { type: 'button', 'aria-label': 'Undo', text: '↩️', onclick: undo })]);
+    ['pointerdown', 'pointermove', 'pointerup'].forEach(function (n) { quick.addEventListener(n, function (ev) { ev.stopPropagation(); }); });
+    lanes.appendChild(quick);
     lanes.addEventListener('pointerdown', onDown); lanes.addEventListener('pointermove', onMove); lanes.addEventListener('pointerup', onUp); lanes.addEventListener('pointercancel', onUp);
     $('play').addEventListener('click', togglePlay);
     $('stop').addEventListener('click', function () { playhead = 0; if (play.on) { stopSource(); startPlay(0); } movePlayhead(); scroller.scrollLeft = 0; });

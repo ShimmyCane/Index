@@ -11,7 +11,7 @@
 </head>
 <body class="listPage">
 <header class="bar">
-  <a class="btn icon" href="index.html" aria-label="Record">🎹</a>
+  <a class="btn icon" href="index.html" aria-label="Home" title="Home">🏠</a>
   <h1>📚 Library</h1>
   <button class="pill" id="pill" type="button">💾 this device</button>
 </header>
@@ -26,6 +26,7 @@
         <select id="fSource"><option value="">All sources</option><option value="recorder">Recorded</option><option value="composer">Composed</option></select>
       </div>
       <p class="hint" id="count"></p>
+      <p class="hint">Looking for the best takes, or the recycle bin? Open <a href="browse.html">🗂️ Browse</a>.</p>
     </div>
   </section>
   <div id="list" class="takeList"></div>
@@ -36,6 +37,7 @@
 <script src="js/notes.js"></script>
 <script src="js/chrome.js"></script>
 <script src="js/panels.js"></script>
+<script src="js/bin.js"></script>
 <script src="js/library.js"></script>
 </body>
 </html>

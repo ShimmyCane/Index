@@ -4,8 +4,8 @@
 (function () {
   'use strict';
   var S = PC.settings, h = PC.h, $ = function (id) { return document.getElementById(id); };
-  var state = 'idle', token = null, capStartT = 0, gesture = PC.store.get('gesture', null), learn = null, flashTimer = null;
-  var big, word, icon, count, dotsEl, hint, skipBtn;
+  var state = 'idle', token = null, capStartT = 0, gesture = PC.store.get('gesture', null), startGesture = PC.store.get('startGesture', null), learn = null, flashTimer = null;
+  var big, word, icon, count, dotsEl, hint, skipBtn, pendingLearn = null;
 
   var LOOK = {
     idle: ['🎹', 'Tap to wake'], waiting: ['🎤', 'Listening'], countin: ['✨', 'Get ready'], recording: ['⏺', 'Recording'],
@@ -33,7 +33,8 @@
       setState('error', 'The microphone is blocked or busy. ' + (e && e.name === 'NotAllowedError' ? 'Allow it in the browser settings.' : 'Another app or tab may be using it.'));
       return;
     }
-    if (S.stopNote && !gesture) startLearn(); else enterWaiting();
+    if (pendingLearn) { var k = pendingLearn; pendingLearn = null; startLearn(k); }
+    else if (S.stopNote && !gesture) startLearn('stop'); else enterWaiting();
   }
   function enterWaiting() {
     setState('waiting', waitingHint());
@@ -80,8 +81,16 @@
       state = 'recording'; big.dataset.state = 'recording'; big.classList.remove('blink'); count.textContent = '';
     }
   });
-  PC.on('pitch', function (o) {                               // the stop notes: the end of the take matches what she taught
-    if ((state !== 'recording' && state !== 'ending') || !S.stopNote || !gesture) return;
+  PC.on('pitch', function (o) {
+    if (state === 'waiting' && S.startNote && startGesture) {   // the start notes: begin a take by playing what she taught
+      var l = Listen.onsets;
+      if (l[l.length - 1] === o && Listen.matches(l, startGesture)) {
+        var fs = l.length - startGesture.n, pv = l[fs - 1];
+        if (!pv || l[fs].t - pv.t >= 0.8) { Listen.onsets = []; startRecording(); }
+      }
+      return;
+    }
+    if ((state !== 'recording' && state !== 'ending') || !S.stopNote || !gesture) return;   // the stop notes: the end of the take matches what she taught
     var list = Listen.onsets;
     if (list[list.length - 1] !== o || !Listen.matches(list, gesture)) return;
     var first = list.length - gesture.n, prev = list[first - 1], startT = list[first].t;
@@ -96,7 +105,7 @@
     try {
       var cut = o.cutAt != null ? o.cutAt : null;
       if (o.voiceHeard != null) cut = Trim.voiceCut(c.data, c.sr, o.voiceHeard, Listen.thr);
-      var tr = Trim.run(c.data, c.sr, { thr: Listen.thr, cut: cut });
+      var tr = Trim.run(c.data, c.sr, { thr: Listen.thr, cut: cut, tail: S.tailSec });
       if (!tr) { enterWaiting(); flash('Nothing to keep that time'); return; }
       var take = await saveTake(tr.data, c.sr);
       word.textContent = take.name + ' saved'; hint.textContent = '';
@@ -106,27 +115,34 @@
   }
 
   async function saveTake(data, sr) {
-    var d = new Date(), player = S.player, all = await Store.all('takes');
-    var n = all.filter(function (t) { return t.player === player; }).reduce(function (m, t) { return Math.max(m, t.take_no || 0); }, 0) + 1;
-    var blob = PC.encodeWav(data, sr);
+    var d = new Date(), who = Players.name(), sid = PC.sessionId(d), all = await Store.all('takes');
+    // a session is one day: the first take of a new day is take 1 again (counted for each player)
+    var n = all.filter(function (t) { return t.player === who && PC.sessionOf(t) === sid; })
+      .reduce(function (m, t) { return Math.max(m, t.take_no || 0); }, 0) + 1;
+    var blob = PC.encodeWav(data, sr), iso = d.toISOString(), slug = who.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     var take = {
-      id: PC.uid('t'), name: 'Take ' + n, player: player,
+      id: PC.uid('t'), name: 'Take ' + n, player: who, session_id: sid, deleted_at: null,
       album: S.album || 'Free play ' + d.getFullYear() + '-' + PC.pad(d.getMonth() + 1),
-      take_no: n, file_name: (player + '-' + PC.stamp(d) + '-take' + n + '.wav').toLowerCase(), file_path: '',
+      take_no: n, file_name: slug + '-' + PC.stamp(d) + '-take' + n + '.wav', file_path: '',
       mime: 'audio/wav', duration_ms: Math.round(data.length / sr * 1000), size_bytes: blob.size, sample_rate: sr,
-      rating: 0, description: '', color: PC.colorFor(n + (player === 'Felix' ? 3 : 0)),
-      peaks: PC.peaks(data, 64), source: 'recorder', taken_at: d.toISOString(), blob: blob
+      rating: 0, description: '', color: PC.colorFor(n + PC.PLAYERS.indexOf(S.player) * 3),
+      peaks: PC.peaks(data, 64), source: 'recorder', taken_at: iso, blob: blob
     };
     await Store.save('takes', take);
+    var sess = (await Store.get('sessions', sid)) || { id: sid, day: sid.slice(2), started_at: iso, note: '' };
+    sess.ended_at = iso; await Store.save('sessions', sess);
     Notes.setContext({ item: take.id, label: take.name + ' (' + take.player + ')' });
     return take;
   }
 
-  // ---- learning the stop notes (first use, or again from ⚙️)
-  function startLearn() {
-    learn = { step: 'play', tries: 0, sig: null };
+  // ---- learning the stop notes or the start notes (first use for stop; the rest from ⚙️)
+  function sigOnsets(sig) { var t = 0; return sig.midi.map(function (m, i) { if (i) t += sig.ioi[i - 1]; return { t: t, midi: m }; }); }
+  function tooClose(a, b) { return !!(a && b && a.n === b.n && Listen.matches(sigOnsets(a), b)); }
+  function startLearn(kind) {
+    learn = { kind: kind || 'stop', step: 'play', tries: 0, sig: null };
     Listen.reset(); Voice.listen('off');
-    setState('learning', 'Play 3 to 5 notes you would like to mean “stop”, then wait a moment.');
+    setState('learning', 'Play 3 to 5 notes you would like to mean “' + (learn.kind === 'start' ? 'start' : 'stop') + '”, then wait a moment.');
+    word.textContent = learn.kind === 'start' ? 'Play your start notes' : 'Play your stop notes';
     skipBtn.hidden = false;
   }
   function learnStep(L) {
@@ -136,11 +152,15 @@
     if (learn.step === 'play') {
       if (n < 3) { hint.textContent = 'Try at least 3 notes, so it never happens by accident.'; Listen.onsets = []; return; }
       if (n > 8) { hint.textContent = 'That is a lot. Try 3 to 5 notes.'; Listen.onsets = []; return; }
-      learn.sig = Listen.signature(list.slice()); learn.step = 'confirm'; Listen.onsets = [];
+      var sig = Listen.signature(list.slice());
+      if (tooClose(sig, learn.kind === 'start' ? gesture : startGesture)) { hint.textContent = 'Too close to your ' + (learn.kind === 'start' ? 'stop' : 'start') + ' notes. Pick different notes.'; Listen.onsets = []; return; }
+      learn.sig = sig; learn.step = 'confirm'; Listen.onsets = [];
       hint.textContent = 'Got it. Play the same notes once more to check.';
     } else if (Listen.matches(list, learn.sig)) {
-      gesture = learn.sig; PC.store.set('gesture', gesture); Cues.saved(); PC.emit('gesture');
-      endLearn('Your stop notes are saved.');
+      if (learn.kind === 'start') { startGesture = learn.sig; PC.store.set('startGesture', startGesture); PC.set('startNote', 1); }
+      else { gesture = learn.sig; PC.store.set('gesture', gesture); }
+      Cues.saved(); PC.emit('gesture');
+      endLearn('Your ' + learn.kind + ' notes are saved.');
     } else {
       learn.tries++; Listen.onsets = [];
       if (learn.tries >= 2) { learn.step = 'play'; learn.tries = 0; hint.textContent = 'Not quite. Let us start again: play your 3 to 5 notes.'; }
@@ -161,14 +181,25 @@
 
   // ---- ⚙️ for this page
   function sections() {
-    var learnState = h('div', { 'class': 'hint' });
-    function paintGesture() { learnState.textContent = gesture ? 'Stop notes saved: ' + gesture.n + ' notes.' : 'No stop notes yet.'; }
+    var stopState = h('div', { 'class': 'hint' }), startState = h('div', { 'class': 'hint' });
+    function paintGesture() {
+      stopState.textContent = gesture ? 'Stop notes saved: ' + gesture.n + ' notes.' : 'No stop notes yet.';
+      startState.textContent = startGesture ? 'Start notes saved: ' + startGesture.n + ' notes.' : 'No start notes yet.';
+    }
     paintGesture(); PC.on('gesture', paintGesture);
-    var learnBtn = h('button', { 'class': 'btn wide', type: 'button', text: '🎵 Learn the stop notes', onclick: function () {
-      Chrome.open(false);
-      if (state === 'waiting' || state === 'learning') startLearn(); else if (state === 'idle' || state === 'error') { gesture = null; wake(); }
-    } });
-    var forget = h('button', { 'class': 'btn wide', type: 'button', text: 'Forget the stop notes', onclick: function () { gesture = null; PC.store.set('gesture', null); paintGesture(); } });
+    function learnBtn(kind, label) {
+      return h('button', { 'class': 'btn wide', type: 'button', text: '🎵 ' + label, onclick: function () {
+        Chrome.open(false);
+        if (state === 'waiting' || state === 'learning') startLearn(kind);
+        else if (state === 'idle' || state === 'error') { pendingLearn = kind; wake(); }
+      } });
+    }
+    function forgetBtn(kind, label) {
+      return h('button', { 'class': 'btn wide', type: 'button', text: label, onclick: function () {
+        if (kind === 'stop') { gesture = null; PC.store.set('gesture', null); } else { startGesture = null; PC.store.set('startGesture', null); PC.set('startNote', 0); }
+        paintGesture();
+      } });
+    }
     var meter = h('div', { 'class': 'meter' }, [h('i')]);
     (function loop() { var m = meter.firstChild; m.style.width = Math.min(100, Listen.level * 600) + '%'; m.style.background = Listen.active ? '#7fd6a6' : '#d9d3c4'; requestAnimationFrame(loop); })();
     return [
@@ -179,25 +210,34 @@
         Chrome.seg('cue', Cues.kinds.map(function (k) { return { v: k.v, label: k.label, hint: k.hint }; }), 'grid2', function (v) { if (state === 'waiting' || state === 'idle') Cues.preview(v); }),
         h('div', { 'class': 'row' }, [h('span', {}, ['Pause that ends a take', h('small', { text: 'Seconds of quiet. The 3, 2, 1 shows during the last three.' })])]),
         Chrome.seg('pause', [3, 4, 5, 6, 8, 10].map(function (n) { return { v: n, label: n + 's' }; })),
+        h('div', { 'class': 'row' }, [h('span', {}, ['Pause kept at the end of a take', h('small', { text: 'The quiet after the last note is trimmed back to this.' })])]),
+        Chrome.seg('tailSec', [1, 2, 3].map(function (n) { return { v: n, label: n + 's' }; })),
         Chrome.range('volume', 'Sound volume', 10, 100, 5, '%')
       ]; } },
+      { id: 'starts', icon: '▶️', title: 'Ways to start', build: function () {
+        var st = h('div', { 'class': 'hint', text: Voice.status });
+        PC.on('voice', function (v) { st.textContent = v; });
+        return [
+          h('div', { 'class': 'hint', text: 'Tapping the big circle always starts. Turn on any of these as well:' }),
+          h('label', { 'class': 'row check' }, [h('input', { type: 'checkbox', checked: true, disabled: true }), h('span', {}, ['Tap the circle', h('small', { text: 'Always on' })])]),
+          Chrome.check('voice', 'Voice commands', 'Say one of the start phrases and the count-in begins'), st,
+          Chrome.text('startPhrases', 'Start phrases', 'Separate with commas'),
+          Chrome.check('startNote', 'Your start notes', 'A few notes you choose, after a short pause, begin the count-in'),
+          startState, learnBtn('start', 'Learn the start notes'), forgetBtn('start', 'Forget the start notes'),
+          h('div', { 'class': 'hint', text: 'Voice commands need an internet connection and may not work on every device.' })]; } },
       { id: 'stops', icon: '🛑', title: 'Ways to stop', build: function () { return [
-        h('div', { 'class': 'hint', text: 'Tapping the circle always stops. Turn on any of these as well:' }),
+        h('div', { 'class': 'hint', text: 'Tapping the big circle always stops. Turn on any of these as well:' }),
         Chrome.check('stopPause', 'A pause', 'The circle blinks, counts 3, 2, 1, then stops. Playing again cancels it.'),
         Chrome.check('stopNote', 'Your stop notes', 'A few notes you choose, after a short pause. They are cut off the take.'),
-        learnState, learnBtn, forget,
-        Chrome.check('stopVoice', 'Saying “stop recording”', 'Needs voice commands to work')
+        stopState, learnBtn('stop', 'Learn the stop notes'), forgetBtn('stop', 'Forget the stop notes'),
+        Chrome.check('stopVoice', 'Saying a stop phrase', 'Needs voice commands to work'),
+        Chrome.text('stopPhrases', 'Stop phrases', 'Separate with commas')
       ]; } },
-      { id: 'voice', icon: '🗣️', title: 'Voice', build: function () {
-        var st = h('div', { 'class': 'hint', text: Voice.status });
-        PC.on('voice', function (s) { st.textContent = s; });
-        return [Chrome.check('voice', 'Voice commands', 'Say a start phrase and the count-in begins'), st,
-          Chrome.text('startPhrases', 'Start phrases', 'Separate with commas'), Chrome.text('stopPhrases', 'Stop phrases', 'Separate with commas'),
-          h('div', { 'class': 'hint', text: 'Voice commands need an internet connection and may not work on every device. The big circle always works.' })]; } },
       { id: 'cards', icon: '🃏', title: 'Take cards', build: function () { return [
         h('div', { 'class': 'hint', text: 'What each take card shows. Try them on and off to see which you like.' }),
         Chrome.check('cardColor', 'Colour'), Chrome.check('cardWave', 'Picture of the sound'), Chrome.check('cardNumber', 'Take number'),
-        Chrome.text('album', 'Album name for new takes', 'Empty means “Free play” and the month')
+        Chrome.text('album', 'Album name for new takes', 'Empty means “Free play” and the month'),
+        Chrome.text('guestName', 'Guest name', 'Shown when Guest is playing')
       ]; } }
     ];
   }
@@ -205,25 +245,15 @@
   document.addEventListener('DOMContentLoaded', function () {
     big = $('big'); word = $('bigWord'); icon = $('bigIcon'); count = $('count'); dotsEl = $('dots'); hint = $('hint'); skipBtn = $('skip');
     big.addEventListener('click', onBig);
-    skipBtn.addEventListener('click', function () { endLearn('You can set the stop notes later in ⚙️.'); });
-    // who is playing
-    var who = $('who');
-    function paintWho() {
-      who.textContent = '';
-      ['Athena', 'Felix'].forEach(function (name) {
-        var b = h('button', { 'class': 'chip' + (S.player === name ? ' on' : ''), type: 'button', text: name });
-        b.addEventListener('click', function () { PC.set('player', name); paintWho(); });
-        who.appendChild(b);
-      });
-    }
-    paintWho();
-    Chrome.init({ page: 'index', desc: 'Everything you can change about recording lives here, so the front stays calm.', sections: sections() });
+    skipBtn.addEventListener('click', function () { endLearn('You can set the notes later in ⚙️.'); });
+    Players.mount($('who'));
+    Chrome.init({ page: 'record', desc: 'Everything you can change about recording lives here, so the front stays calm.', sections: sections() });
     Strip.init($('strip'), $('stripEmpty')); Strip.locked = function () { return state === 'countin' || state === 'recording' || state === 'ending'; };
     Store.idleWhen(function () { return state !== 'waiting' || Listen.t - Listen.lastActiveAt < 8 || PC.isPlaying(); });
     setState('idle', 'The page listens while you play, and keeps what you play.');
     (function pulse() {                                       // the circle breathes with the sound
       big.style.setProperty('--lv', Math.min(1, Listen.level * 9).toFixed(3)); requestAnimationFrame(pulse);
     })();
-    window.Rec = { state: function () { return state; }, finish: finish, start: startRecording, gesture: function () { return gesture; } };
+    window.Rec = { state: function () { return state; }, finish: finish, start: startRecording, gesture: function () { return gesture; }, startGesture: function () { return startGesture; } };
   });
 })();

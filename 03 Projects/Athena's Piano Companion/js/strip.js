@@ -27,7 +27,7 @@
     },
     refresh: async function () {
       if (!box) return;
-      var list = (await Store.all('takes')).sort(function (a, b) { return a.taken_at < b.taken_at ? 1 : -1; }).slice(0, max);
+      var list = Store.live(await Store.all('takes')).sort(function (a, b) { return a.taken_at < b.taken_at ? 1 : -1; }).slice(0, max);
       box.querySelectorAll('.card').forEach(function (n) { n.remove(); });
       empty.hidden = list.length > 0;
       list.forEach(function (t) { box.appendChild(Strip.card(t)); });
