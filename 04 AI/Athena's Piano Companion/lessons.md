@@ -15,3 +15,5 @@
 - 2026-11-21: "Trim the tail" meant two different things (the fade, or the quiet). The owner's answer: measure the pause from where the music ends and keep only 2 s of it. Define "the music ends" by a share of the take's own peak, not a fixed low threshold, or a piano's slow fade counts as music.
 - 2026-11-21: A re-render on every saved edit steals the cursor from a text box. Re-render lists on explicit events (delete, restore, sync) and not on the save of an edit.
 - 2026-11-21: Test pinch and drag with synthetic pointer events and `try/catch` around `setPointerCapture`; a synthetic pointer id is not capturable.
+- 2026-11-21: **Any sound the page makes while it listens is heard.** A tick on each number of the ending countdown was taken for playing and cancelled the pause. Keep the page silent during any step that depends on the microphone hearing quiet, or exclude its own sounds.
+- 2026-11-21: **Stamp the build into every script and style link** (`?v=0.2.0`). A note stamped with an older version than the page's file proves the browser served a cached script.

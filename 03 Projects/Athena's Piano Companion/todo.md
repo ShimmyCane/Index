@@ -25,3 +25,14 @@ Source: `pc_notes` (live). Note ids are in `convo/convo v0.3.md`. Nothing below 
 - [x] Database change for the above: `supabase/002_pc_bin_sessions.sql` written with its test and verify; **not applied** (Jimmy pastes). Was:  (a new numbered SQL file, with its test): `deleted_at` on takes, a sessions table, `session_id` on takes, delete rights for the 30-day purge. Written only after the answers.
 - [ ] Jimmy: paste `test_002_pc`, `002_pc_bin_sessions`, `verify_002_pc`; paste the verify result back
 - [ ] Jimmy: confirm which notes are done, then mark them in `pc_notes`
+
+## Round 3 — notes read from the family table on 2026-11-21 (two new open notes)
+
+Source: `pc_notes` (live). The seven notes from round 2 are built in 0.2.0 but still `open` in the table until Jimmy says which are done. Nothing below is built yet.
+
+- [ ] **The 3, 2, 1 tick hears itself** (note 9, Take 10): the tick sound played with each number of the ending countdown is heard by the microphone as a note, so the pause is cancelled and the take keeps recording. Found in the code (`js/recorder.js` calls `Cues.tick()` on every number). Fix as Jimmy suggests: make the countdown silent (the circle blinks and the big number shows); optional sound only if it can be kept out of the take. Bug, clear.
+- [ ] **A take sometimes stops by itself, and a soft reset** (note 8): needs the reason for each ending, and a "restart listening" that does not reload the page. Needs answers (convo v0.5 Q2).
+- [ ] **Older files can be served from the browser's cache:** note 9 came from `record.html` but carries version 0.1.0, so the browser used an old `app.js`. Add a version to every script and style link so a new build always loads. Small.
+- [ ] **Silent wait, then silent 3-2-1** (note 12): after a gap of about 3 to 4 seconds of quiet, then a silent 3, 2, 1, then stop. This replaces the current rule (the countdown starts 2 seconds into a 5-second pause). Needs an answer on the number (convo v0.6 Q1).
+- [ ] **A live card while recording** (note 10): a card appears as soon as recording starts, with a growing picture of the sound and a running time; when it ends it shows "Saving..." for a moment, then settles into the normal take card. Needs an answer (Q2).
+- [ ] **A red line moving over the card while it plays** (note 11): the position marker on the card's picture during playback from the Record screen. Needs an answer on other pages (Q3).

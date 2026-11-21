@@ -2,6 +2,8 @@
 
 **State (2026-11-21):** 0.2.0 built from the first seven real notes and Jimmy's answers (convo v0.3, v0.4). 0.1.0 was used on a real iPad (the notes show it). 0.2.0 is headless-tested only. SQL 001 applied; SQL 002 (recycle bin, sessions, delete rights) written with test and verify, **not applied**. Notes not marked done yet (waiting for Jimmy).
 
+**Round 3 (2026-11-21):** two new notes read (convo v0.5, todo round 3): the 3-2-1 tick is heard by the microphone and cancels the pause (bug, found in `js/recorder.js`), and "sometimes it stops by itself, is there a soft reset". Also a note from `record.html` carried version 0.1.0, so a browser cache served an old script. Three more notes the same evening (convo v0.6): a live card while recording, a red position line while a card plays, and "wait 3 to 4 s of quiet, then a silent 3-2-1" (replaces the 2 s into a 5 s pause rule). These came from version 0.2.0, so the new build loads on the iPad. Nothing built; waiting for Jimmy's go and answers.
+
 **0.2.0 changes:** trim keeps 2 s of pause (setting 1 to 3 s); Ways to start panel and learned start notes; stop phrases add "stop" and "I'm done" (migrated); soft delete with recycle bin, undo bar (5 min), 30-day purge when signed in; sessions = one day, Take N restarts each day; Browse page; Home page (`index.html`), Record at `record.html`, 🏠 on every page; player button cycles five names; Compose quick bar and pinch zoom. Sync keeps working before 002 is applied (new columns are left out).
 
 **Earlier state (2026-11-20):** MVP 0.1.0 built in one round from Jimmy's answers (convo v0.1). Headless-tested.
