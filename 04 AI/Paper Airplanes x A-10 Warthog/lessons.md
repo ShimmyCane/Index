@@ -33,3 +33,11 @@
 - **Size the cache to the view.** A 2 km cache under a 3 km view made near and far cells evict each other every frame.
 - **Check the camera roll's sign.** A right bank must tip the land to the left.
 - **Put the sun behind the player** when shadows should be seen: they then fall ahead and objects are lit from the front.
+
+## 2026-11-21 (round 10, vapour and animations)
+
+- **Attach effects to the drawn model, not the world.** Vapour placed in world space drifted off the wing tips because the plane is drawn with an extra bank and size. Use `modelToScreen` on the model's tip and spawn on the screen.
+- **A single frame's timing lies.** The canvas defers its drawing, so the cost lands wherever it flushes. Time many frames and force a flush (`getImageData` of one pixel) at the end.
+- **Profile both the stress case and normal play.** A stack cache halved a dense forest but slowed normal flight, because it kept creating canvases. Reuse fixed-size canvases from a pool, cap new entries per frame, and only cache what is expensive to draw.
+- **Things that look the same from every side can be cached by size and viewing angle only.** Roll and sway then become a turn and a shear of one image.
+- **Check where a test click lands.** A drag started at the right edge hit the CHAFF button, so the "turn" screenshot showed level flight.

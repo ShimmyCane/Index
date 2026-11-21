@@ -93,11 +93,19 @@ namespace PA {
     v.paint((x, y, z, c) => (c === 0x4c5157 && y % 2 === 0 && z === 1) ? 0x5e646b : c);
     v.box(2, 6, 1, 12, 22, 4, 0x7d8a55);
     v.cut(2, 6, 3, 12, 7, 4);                                    // the sloped front
-    v.ellipsoid(7, 14, 4.8, 3.6, 4.4, 1.7, 0x8a9862);
-    v.box(6, 15, 6, 8, 17, 7, 0x5f6b40);                         // hatch
-    v.tubeY(7, 5, 0, 11, 0.6, 0.6, 0x4f5a36);
-    v.box(6, 0, 4, 8, 1, 6, 0x3a4228);                           // muzzle
-    v.paint((x, y, z, c) => (c === 0x7d8a55 || c === 0x8a9862) && noise2(x / 3 + 5, y / 3) > 0.66 ? 0x66733f : c);
+    v.paint((x, y, z, c) => c === 0x7d8a55 && noise2(x / 3 + 5, y / 3) > 0.66 ? 0x66733f : c);
+    return v;
+  }
+
+  // The main tank's turret and gun, drawn on its own so it can turn toward the plane.
+  // The turret ring sits at the middle of the model; the gun points to the front (y = 0).
+  function turretMbt(): Voxels {
+    const v = new Voxels(10, 20, 4, 0.42);
+    v.ellipsoid(5, 10, 0.8, 3.6, 4.4, 1.7, 0x8a9862);
+    v.box(4, 11, 2, 6, 13, 3, 0x5f6b40);                         // hatch
+    v.tubeY(5, 1, 0, 8, 0.6, 0.6, 0x4f5a36);
+    v.box(4, 0, 0, 6, 1, 2, 0x3a4228);                           // muzzle
+    v.paint((x, y, z, c) => c === 0x8a9862 && noise2(x / 3 + 9, y / 3) > 0.66 ? 0x66733f : c);
     return v;
   }
 
@@ -105,8 +113,13 @@ namespace PA {
     const v = new Voxels(12, 20, 7, 0.4);
     v.box(0, 4, 0, 2, 19, 2, 0x4c5157).box(10, 4, 0, 12, 19, 2, 0x4c5157);
     v.box(1, 5, 1, 11, 18, 3, 0xc9b27a);
-    v.ellipsoid(6, 11, 3.8, 2.8, 3.2, 1.3, 0xd6c08a);
-    v.tubeY(6, 4, 1, 9, 0.5, 0.5, 0x6b5f3e);
+    return v;
+  }
+
+  function turretLight(): Voxels {
+    const v = new Voxels(8, 16, 3, 0.4);
+    v.ellipsoid(4, 8, 0.8, 2.8, 3.2, 1.3, 0xd6c08a);
+    v.tubeY(4, 1, 0, 7, 0.5, 0.5, 0x6b5f3e);
     return v;
   }
 
@@ -165,7 +178,24 @@ namespace PA {
       for (let k = 0; k < 9; k++) v.set(x, 15 - k, 5 + k * 0.75, k > 6 ? 0xe05555 : 0xf2f2f2);
     }
     v.cone(11.5, 4, 4, 9, 0.6, 0.5, 0x5f676d);
-    v.ellipsoid(11.5, 4, 10, 2.6, 0.7, 2.2, 0xdde1e4);
+    return v;
+  }
+
+  // The SAM's radar dish: a thin upright disc that spins on its mast.
+  function samDish(): Voxels {
+    const v = new Voxels(6, 4, 5, 0.45);
+    v.ellipsoid(3, 2, 2.5, 2.8, 0.8, 2.4, 0xdde1e4);
+    v.set(3, 1, 2, 0x8e979d);
+    return v;
+  }
+
+  // A windmill on the farms: a white tower with a red cap. Its sails are drawn turning.
+  function windmill(): Voxels {
+    const v = new Voxels(10, 10, 22, 0.7);
+    v.cone(5, 5, 0, 18, 3.8, 2.2, 0xf2ede3);
+    v.paint((x, y, z, c) => (z % 5 === 0 ? 0xe2dccf : c));
+    v.box(4, 2, 5, 6, 3, 9, 0x8a5a3c);                           // door
+    v.cone(5, 5, 18, 22, 2.8, 0.5, 0xc4473d);                    // cap
     return v;
   }
 
@@ -317,7 +347,11 @@ namespace PA {
     ally: () => fighter(0x4f8fe0, 0x2e5d9e, 0xffd77a),
     jet: () => fighter(0xc9ced3, 0x9aa1a8, 0x3a4652),
     tank_mbt: tankMbt,
+    turret_mbt: turretMbt,
     tank_light: tankLight,
+    turret_light: turretLight,
+    samdish: samDish,
+    windmill,
     apc,
     truck: () => truck(0xe07b53, 0xc9b07e),
     fuel: fuelTruck,

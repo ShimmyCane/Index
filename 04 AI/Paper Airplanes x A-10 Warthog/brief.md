@@ -83,3 +83,11 @@ A browser 2.5D pixel-art flight game, built small enough to read, so Jimmy can s
 - Rebuilt the look: voxel models with true sprite stacking for every object; the land and sky painted per pixel; shadows of each object's shape; richer effects; the camera roll fixed (it rolled the wrong way); 480×270.
 - Checks: 58 (`npm test`); browser: no page errors; about 11–13 ms a frame headless.
 - Not verified on an iPad (speed and look).
+
+## Round 10 (convo v0.17): vapour from the wing tips, animations
+
+- Wing tip vapour and engine heat are screen-space streams from the drawn model's tips (`render.ts` `plane()`), plus a thin line fixed to each tip.
+- Animations: turrets track the plane (`turret_mbt`, `turret_light`), flak and SAM face it, spinning `samdish`, chimney smoke, windmills with sails, bird flocks, fighters bank, trees sway (`Pose.sway`), ships bob.
+- Speed: big trees use `drawModelCached` (`voxel.ts`): a pooled cache of whole stacks by tree, heading quarter, viewing angle and size. Forest about twice as fast; normal flight unchanged.
+- Checks: 58 (`npm test`); browser screenshots of a hard turn and a banked forest.
+- Not verified on an iPad.

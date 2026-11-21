@@ -204,6 +204,7 @@ namespace PA {
     yaw: number;
     elev: number;
     roll: number;
+    sway?: number;             // the top leans this many pixels sideways (a tree in the breeze)
   }
 
   // The 2-D part of the placement, shared by the drawing and by modelToScreen.
@@ -242,15 +243,86 @@ namespace PA {
     const ey = -(f.b * (m.w / 2) + f.d * (m.l / 2));
     const sub = Math.min(5, Math.max(1, Math.ceil(f.step)));
     const skip = wide < 9 ? 2 : 1;
+    const sway = p.sway || 0;
     for (let z = 0; z <= m.top; z += skip) {
       const slice = m.slices[z];
       if (!slice) continue;
+      // The higher the layer, the further it leans (the sway grows with the square of the height).
+      const k = m.top > 0 ? (z / m.top) * (z / m.top) * sway : 0;
       for (let s = 0; s < sub; s++) {
         const off = (z + s / sub) * f.step;
-        ctx.setTransform(f.a, f.b, f.c, f.d, p.sx + ex + f.sr * off, p.sy + ey - f.cr * off);
+        ctx.setTransform(f.a, f.b, f.c, f.d, p.sx + ex + f.sr * off + f.cr * k, p.sy + ey - f.cr * off + f.sr * k);
         ctx.drawImage(slice, 0, 0);
       }
     }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+
+  // A cache of finished stacks, for models that look the same from every heading (trees).
+  // Each entry is the whole stack drawn once, upright, at one viewing angle and one size.
+  // Drawing from it is one image instead of dozens of layers; roll and sway are a turn and a lean of that image.
+  type Stack = { img: HTMLCanvasElement; cls: number; ox: number; oy: number; px: number; lift: number };
+  const stackCache = new Map<string, Stack>();
+  const CACHE_MAX = 320;
+  const SIZES = [32, 64, 128, 256];                  // square canvases, reused, never resized
+  const spare: HTMLCanvasElement[][] = SIZES.map(() => []);
+  export const cacheStats = { hits: 0, misses: 0 };
+  const NEW_PER_FRAME = 8;    // at most this many new stacks a frame; the rest draw layer by layer
+  let madeThisFrame = 0;
+  export function cacheFrame(): void { madeThisFrame = 0; }
+
+  export function drawModelCached(ctx: CanvasRenderingContext2D, m: Model, id: string, p: Pose): void {
+    const wide = Math.max(m.w, m.l) * p.px;
+    if (wide < 9) { drawModel(ctx, m, p); return; }        // small ones are cheap already
+    const eb = Math.round(Math.max(0, Math.min(Math.PI / 2, p.elev)) / 0.05);
+    const pb = Math.round(Math.log(p.px) / Math.log(1.1));
+    const yb = Math.round((((p.yaw % 6.2832) + 6.2832) % 6.2832) / (Math.PI / 2)) % 4;
+    const key = id + '|' + yb + '|' + eb + '|' + pb;
+    let e = stackCache.get(key);
+    if (e) {
+      stackCache.delete(key); stackCache.set(key, e);       // keep the most used at the end
+      cacheStats.hits++;
+    } else {
+      if (madeThisFrame >= NEW_PER_FRAME) { drawModel(ctx, m, p); return; }
+      const px = Math.pow(1.1, pb);
+      const q: Pose = { sx: 0, sy: 0, px, yaw: yb * (Math.PI / 2), elev: eb * 0.05, roll: 0 };
+      const f = frame(m, q);
+      let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+      for (const [lx, ly] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+        const x = f.a * lx * m.w / 2 + f.c * ly * m.l / 2, y = f.b * lx * m.w / 2 + f.d * ly * m.l / 2;
+        x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+      }
+      const lift = (m.top + 1) * f.step;
+      const need = Math.max(x1 - x0, y1 - y0 + lift) + 4;
+      const cls = SIZES.findIndex(n => n >= need);
+      if (cls < 0) { drawModel(ctx, m, p); return; }        // too big to keep: draw it directly
+      madeThisFrame++;
+      cacheStats.misses++;
+      if (stackCache.size >= CACHE_MAX) {
+        const old = stackCache.keys().next().value as string;
+        const o = stackCache.get(old) as Stack;
+        stackCache.delete(old);
+        spare[o.cls].push(o.img);
+      }
+      let img = spare[cls].pop();
+      if (!img) { img = document.createElement('canvas'); img.width = img.height = SIZES[cls]; }
+      const g = img.getContext('2d') as CanvasRenderingContext2D;
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      g.clearRect(0, 0, img.width, img.height);
+      g.imageSmoothingEnabled = false;
+      const ox = Math.ceil(-x0) + 2, oy = Math.ceil(-y0 + lift) + 2;
+      q.sx = ox; q.sy = oy;
+      drawModel(g, m, q);
+      e = { img, cls, ox, oy, px, lift };
+      stackCache.set(key, e);
+    }
+    // Place it: scale to the exact size, turn by the roll, and lean the top by the sway.
+    const s = p.px / e.px;
+    const cr = Math.cos(p.roll), sr = Math.sin(p.roll);
+    const lean = e.lift > 1 ? -(p.sway || 0) / (e.lift * s) : 0;   // sideways per pixel of height
+    // Matrix = translate(sx,sy) * rotate(roll) * scale(s) * shear(lean)
+    ctx.setTransform(cr * s, sr * s, (cr * lean - sr) * s, (sr * lean + cr) * s, p.sx, p.sy);
+    ctx.drawImage(e.img, -e.ox, -e.oy);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 }

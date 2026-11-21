@@ -462,6 +462,8 @@ namespace PA {
     yaw: number;           // world heading of the model's front
     zc: number;
     air: boolean;
+    phase: number;         // a fixed random number, so each tree sways and each sail turns in its own time
+    t?: Target;            // the target, when it is one
   }
 
   // Which model a target uses, and which way it faces.
@@ -483,15 +485,19 @@ namespace PA {
   // Everything to stack this frame: targets, trees in the forests, houses in the towns.
   function collect(g: Game, c: Cam): Thing[] {
     const out: Thing[] = [];
-    const add = (name: string, X: number, base: number, Z: number, yaw: number, air: boolean) => {
+    const add = (name: string, X: number, base: number, Z: number, yaw: number, air: boolean, t?: Target) => {
       const dx = X - c.px, dz = Z - c.pz;
       const zc = dx * c.fx + (base - c.py) * c.fy + dz * c.fz;
       if (zc < 2 || zc > FOG * 1.6) return;
-      out.push({ name, X, Z, base, yaw, zc, air });
+      out.push({ name, X, Z, base, yaw, zc, air, phase: hash2(Math.round(X * 7), Math.round(Z * 7)) * 6.28, t });
     };
+    const p = g.plane;
     for (const t of g.mission.targets) {
       if (!t.alive) continue;
-      add(modelOf(t), t.X, altOf(t), t.Z, yawOf(t), t.h !== undefined);
+      let yaw = yawOf(t);
+      // Flak guns and SAM launchers swing round to face the plane when it is near.
+      if ((t.kind === 'flak' || t.kind === 'sam') && Math.hypot(p.X - t.X, p.Z - t.Z) < 900) yaw = Math.atan2(p.X - t.X, p.Z - t.Z);
+      add(modelOf(t), t.X, altOf(t), t.Z, yaw, t.h !== undefined, t);
     }
     const CELL = 40;
     const ci = Math.floor(c.px / CELL), cj = Math.floor(c.pz / CELL);
@@ -501,8 +507,8 @@ namespace PA {
         if ((cx - c.px) * c.fx + (cz - c.pz) * c.fz < -CELL) continue;   // behind the camera
         const biome = biomeAt(cx, cz);
         if (biome === 'forest') {
-          const close = Math.hypot(cx - c.px, cz - c.pz) < 300;
-          for (let k = 0; k < (close ? 6 : 3); k++) {
+          const close = Math.hypot(cx - c.px, cz - c.pz) < 220;
+          for (let k = 0; k < (close ? 4 : 3); k++) {
             const X = i * CELL + cellNoise(i, j, 41 + k) * CELL, Z = j * CELL + cellNoise(i, j, 47 + k) * CELL;
             if (!isForest(X, Z)) continue;
             const v = cellNoise(i, j, 53 + k);
@@ -513,6 +519,8 @@ namespace PA {
           const v = cellNoise(i, j, 67);
           const name = v < 0.4 ? 'house1' : v < 0.7 ? 'house2' : v < 0.85 ? 'city1' : 'city';
           add(name, cx + 4, 0, cz + 4, Math.floor(v * 4) * (Math.PI / 2), false);
+        } else if (biome === 'farm' && cellNoise(i, j, 89) < 0.035) {
+          add('windmill', cx - 6, 0, cz + 3, cellNoise(i, j, 91) * 6.28, false);
         } else if (biome === 'farm' && cellNoise(i, j, 71) < 0.05) {
           add(cellNoise(i, j, 73) < 0.5 ? 'farm' : 'barn', cx, 0, cz, cellNoise(i, j, 79) * 6.28, false);
         } else if ((biome === 'army' || biome === 'farm') && cellNoise(i, j, 83) < 0.08) {
@@ -556,16 +564,135 @@ namespace PA {
   function objects(ctx: CanvasRenderingContext2D, g: Game, c: Cam): void {
     const things = collect(g, c);
     for (const th of things) drawShadow(ctx, c, th.name, th.X, th.base, th.Z, th.yaw);
+    const time = g.time;
+    const p = g.plane;
     for (const th of things) {
       const m = model(th.name);
-      const pose = poseOf(c, m, th.X, th.base, th.Z, th.yaw);
+      const ship = th.name === 'ship';
+      const base = ship ? th.base + Math.sin(time * 0.9 + th.phase) * 0.25 : th.base;
+      const pose = poseOf(c, m, th.X, base, th.Z, th.yaw);
       if (!pose) continue;
-      ctx.globalAlpha = fogAlpha(th.zc);
-      drawModel(ctx, m, pose);
-      // Fighters and allies show their exhaust as a small glow.
-      if (th.air && pose.px > 0.6) {
+      const alpha = fogAlpha(th.zc);
+      ctx.globalAlpha = alpha;
+      if (th.name.startsWith('tree')) pose.sway = Math.sin(time * 1.3 + th.phase) * pose.px * 0.8;
+      if (ship) pose.roll += Math.sin(time * 0.7 + th.phase) * 0.04;
+      if (th.air && th.t) pose.roll += bankOf(th.t, pose.yaw);
+      if (th.name.startsWith('tree')) drawModelCached(ctx, m, th.name, { ...pose, yaw: th.yaw });   // a tree looks the same from every side
+      else drawModel(ctx, m, pose);
+
+      if (pose.px < 0.5) continue;
+      if (th.name === 'tank_mbt' || th.name === 'tank_light') {
+        // The turret turns to track the plane when it is near.
+        const mbt = th.name === 'tank_mbt';
+        const tm = model(mbt ? 'turret_mbt' : 'turret_light');
+        const [tx, ty] = modelToScreen(m, pose, mbt ? 7 : 6, mbt ? 14 : 11, mbt ? 4 : 3);
+        const near = Math.hypot(p.X - th.X, p.Z - th.Z) < 900;
+        const aim = near ? Math.atan2(p.X - th.X, p.Z - th.Z) : th.yaw;
+        drawModel(ctx, tm, { ...pose, sx: tx, sy: ty, yaw: aim - c.yaw });
+      } else if (th.name === 'sam') {
+        // The radar dish spins on its mast.
+        const [dx, dy] = modelToScreen(m, pose, 11.5, 4, 9);
+        drawModel(ctx, model('samdish'), { ...pose, sx: dx, sy: dy, yaw: time * 2.2 + th.phase - c.yaw });
+      } else if (th.name === 'farm' || th.name === 'house1' || th.name === 'house2') {
+        const [hx, hy] = modelToScreen(m, pose, 12, 5, 13);
+        chimneySmoke(ctx, hx, hy, pose.px, time + th.phase, alpha);
+      } else if (th.name === 'windmill') {
+        const [wx, wy] = modelToScreen(m, pose, 5, 2, 19);
+        sails(ctx, wx, wy, pose.px, time * 1.4 + th.phase, pose.roll, alpha);
+      } else if (th.air) {
+        // Fighters and allies show their exhaust as a small glow.
         const [ex, ey] = modelToScreen(m, pose, m.w / 2, m.l - 1, 3);
         glow(ctx, ex, ey, 4 + pose.px * 3);
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // A fighter banks into its turn: worked out from how fast its heading changes.
+  const lastYaw = new WeakMap<Target, number>();
+  const bankNow = new WeakMap<Target, number>();
+  let bankClock = 0;
+  function bankOf(t: Target, yawRel: number): number {
+    const now = performance.now();
+    const dt = Math.min(0.1, Math.max(0.001, (now - bankClock) / 1000));
+    bankClock = now;
+    const yaw = t.faction === 'ally' && t.orbit ? Math.atan2(-Math.sin(t.orbit.ang), Math.cos(t.orbit.ang)) : (t.vH ?? 0);
+    const prev = lastYaw.get(t) ?? yaw;
+    lastYaw.set(t, yaw);
+    let d = yaw - prev;
+    while (d > Math.PI) d -= 2 * Math.PI;
+    while (d < -Math.PI) d += 2 * Math.PI;
+    const want = Math.max(-0.9, Math.min(0.9, (d / dt) * 0.9));
+    const was = bankNow.get(t) ?? 0;
+    const b = was + (want - was) * Math.min(1, dt * 4);
+    bankNow.set(t, b);
+    // Seen from the front, a right bank turns the other way on screen.
+    return Math.cos(yawRel) >= 0 ? b : -b;
+  }
+
+  // Smoke curling up from a chimney: three puffs that rise, grow and fade, over and over.
+  function chimneySmoke(ctx: CanvasRenderingContext2D, x: number, y: number, px: number, t: number, alpha: number): void {
+    const tex = textures();
+    for (let k = 0; k < 3; k++) {
+      const a = (t * 0.35 + k / 3) % 1;
+      const r = px * (1.5 + a * 4);
+      ctx.globalAlpha = alpha * (1 - a) * 0.55;
+      ctx.drawImage(tex.mist, x - r + Math.sin(t + k) * px * 2 * a, y - r - a * px * 14, r * 2, r * 2);
+    }
+    ctx.globalAlpha = alpha;
+  }
+
+  // A windmill's four sails, turning in the breeze.
+  function sails(ctx: CanvasRenderingContext2D, x: number, y: number, px: number, angle: number, roll: number, alpha: number): void {
+    const len = px * 9;
+    ctx.globalAlpha = alpha;
+    for (let k = 0; k < 4; k++) {
+      const a = angle + roll + k * (Math.PI / 2);
+      const ex = x + Math.cos(a) * len, ey = y + Math.sin(a) * len;
+      ctx.strokeStyle = '#6b4a32';
+      ctx.lineWidth = Math.max(1, px * 0.5);
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(ex, ey); ctx.stroke();
+      // The canvas on the outer part of each sail.
+      const sx = x + Math.cos(a) * len * 0.3, sy = y + Math.sin(a) * len * 0.3;
+      ctx.strokeStyle = '#f7f2e8';
+      ctx.lineWidth = Math.max(1, px * 1.6);
+      ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+    }
+    ctx.fillStyle = '#6b4a32';
+    ctx.fillRect(Math.round(x - px * 0.6), Math.round(y - px * 0.6), Math.max(1, px * 1.2), Math.max(1, px * 1.2));
+  }
+
+  // Flocks of birds flapping across the sky in a V.
+  function birds(ctx: CanvasRenderingContext2D, g: Game, c: Cam): void {
+    const cell = 700;
+    const ci = Math.floor(c.px / cell), cj = Math.floor(c.pz / cell);
+    ctx.strokeStyle = 'rgba(52,56,72,0.85)';
+    for (let i = ci - 3; i <= ci + 3; i++) {
+      for (let j = cj - 3; j <= cj + 3; j++) {
+        if (cellNoise(i, j, 97) < 0.5) continue;
+        const dir = cellNoise(i, j, 101) * 6.28, sp = 9;
+        const travel = ((g.time * sp + cellNoise(i, j, 103) * 1400) % 1400) - 700;
+        const bx = i * cell + cellNoise(i, j, 107) * cell + Math.sin(dir) * travel;
+        const bz = j * cell + cellNoise(i, j, 109) * cell + Math.cos(dir) * travel;
+        const bh = 55 + cellNoise(i, j, 113) * 55;
+        const n = 5 + Math.floor(cellNoise(i, j, 127) * 5);
+        for (let k = 0; k < n; k++) {
+          const rank = Math.ceil(k / 2), side = k % 2 ? 1 : -1;
+          const X = bx - Math.sin(dir) * rank * 3 + Math.cos(dir) * side * rank * 3;
+          const Z = bz - Math.cos(dir) * rank * 3 - Math.sin(dir) * side * rank * 3;
+          const q = project(c, X, bh, Z);
+          if (!q) continue;
+          const size = (0.9 * FOCAL) / q[2];
+          if (size < 0.7) continue;
+          const flap = Math.sin(g.time * 9 + k * 1.7 + i) * size * 0.7;
+          ctx.globalAlpha = fogAlpha(q[2]);
+          ctx.lineWidth = Math.max(1, size * 0.35);
+          ctx.beginPath();
+          ctx.moveTo(q[0] - size, q[1] - flap);
+          ctx.lineTo(q[0], q[1]);
+          ctx.lineTo(q[0] + size, q[1] - flap);
+          ctx.stroke();
+        }
       }
     }
     ctx.globalAlpha = 1;
@@ -608,19 +735,6 @@ namespace PA {
       }
     }
     ctx.globalCompositeOperation = 'source-over';
-    ctx.globalAlpha = 1;
-  }
-
-  function wisps(ctx: CanvasRenderingContext2D, g: Game, c: Cam): void {
-    const tex = textures();
-    for (const w of g.wisps) {
-      const q = project(c, w.X, w.h, w.Z);
-      if (!q) continue;
-      const k = Math.max(0, w.life / w.max);
-      const r = Math.max(1, (w.size * (1.3 - k) * FOCAL * 0.5) / q[2]);
-      ctx.globalAlpha = Math.min(0.5, k * 0.6);
-      ctx.drawImage(tex.mist, q[0] - r, q[1] - r, r * 2, r * 2);
-    }
     ctx.globalAlpha = 1;
   }
 
@@ -692,6 +806,33 @@ namespace PA {
 
   // ---- The plane --------------------------------------------------------------------
 
+  // Vapour from the wing tips and heat from the engines. These come from the plane as it is
+  // drawn on the screen (it is drawn larger than life, so world-space trails would miss it),
+  // and stream back past it.
+  interface Stream { x: number; y: number; vx: number; vy: number; life: number; max: number; r: number; grow: number; alpha: number; }
+  const streams: Stream[] = [];
+  let streamClock = 0;
+
+  const tipLines: [number, number, number, number, number][] = [];   // wing tip, backward direction, turn tightness
+  function updateStreams(dt: number): void {
+    for (const s of streams) {
+      s.x += s.vx * dt;
+      s.y += s.vy * dt;
+      s.r += s.grow * dt;
+      s.life -= dt;
+    }
+    for (let k = streams.length - 1; k >= 0; k--) if (streams[k].life <= 0) streams.splice(k, 1);
+  }
+
+  function drawStreams(ctx: CanvasRenderingContext2D): void {
+    const tex = textures();
+    for (const s of streams) {
+      ctx.globalAlpha = Math.max(0, s.alpha * (s.life / s.max));
+      ctx.drawImage(tex.mist, s.x - s.r, s.y - s.r, s.r * 2, s.r * 2);
+    }
+    ctx.globalAlpha = 1;
+  }
+
   // The plane sits in the same place on the screen; the world moves past it. It is a voxel
   // model too, a quarter to a third of the screen wide as the turn tightens, banked with the
   // part of the roll the camera does not take, with glowing engines, a muzzle flash when the
@@ -719,6 +860,58 @@ namespace PA {
       roll: g.settings.view === 'top' ? p.bank : p.bank * (1 - ROLL_FOLLOW),
     };
     drawModel(ctx, m, pose);
+
+    // Streams: the air rushes back past the plane, from nose to tail on the screen.
+    const now = performance.now();
+    const dt = Math.min(0.05, Math.max(0, (now - streamClock) / 1000));
+    streamClock = now;
+    if (!g.paused) {
+      updateStreams(dt);
+      if (g.phase === 'flying') {
+        const [nx, ny] = modelToScreen(m, pose, m.w / 2, 0, 3);
+        const [bx2, by2] = modelToScreen(m, pose, m.w / 2, m.l, 3);
+        const bl = Math.hypot(bx2 - nx, by2 - ny) || 1;
+        const backX = (bx2 - nx) / bl, backY = (by2 - ny) / bl;
+        // Vapour from both wing tips in a tight turn.
+        if (tight > 0.4) {
+          const tips: [number, number, number][] = glider ? [[0.5, 28, 4.5], [m.w - 0.5, 28, 4.5]] : [[1.5, 14.5, 3.5], [34.5, 14.5, 3.5]];
+          const n = tight > 0.7 ? 3 : 2;
+          for (const [tx, ty, tz] of tips) {
+            const [sx, sy] = modelToScreen(m, pose, tx, ty, tz);
+            for (let k = 0; k < n; k++) {
+              const sp = 120 + Math.random() * 60;
+              streams.push({ x: sx + (Math.random() - 0.5) * 2, y: sy + (Math.random() - 0.5) * 2, vx: backX * sp, vy: backY * sp, life: 0.6, max: 0.6, r: 1.2, grow: 9, alpha: 0.4 + 0.4 * tight });
+            }
+            tipLines.push([sx, sy, backX, backY, tight]);
+          }
+        }
+        // Heat from the engines: a soft shimmer behind each, stronger with the boost.
+        if (!glider) {
+          const boost = g.held.boost;
+          for (const ex of [13.5, 22.5]) {
+            if (!boost && Math.random() > 0.35) continue;
+            const [sx, sy] = modelToScreen(m, pose, ex, 26.5, 6.8);
+            const sp = 90 + Math.random() * 40;
+            streams.push({ x: sx, y: sy, vx: backX * sp + (Math.random() - 0.5) * 10, vy: backY * sp, life: boost ? 0.6 : 0.35, max: boost ? 0.6 : 0.35, r: 2, grow: boost ? 16 : 9, alpha: boost ? 0.35 : 0.18 });
+          }
+        }
+      }
+    }
+    drawStreams(ctx);
+    // A thin bright line of vapour fixed to each wing tip, fading behind it.
+    for (const [sx, sy, bx, by, t] of tipLines) {
+      const len = 14 + 26 * t;
+      const grad = ctx.createLinearGradient(sx, sy, sx + bx * len, sy + by * len);
+      grad.addColorStop(0, `rgba(255,255,255,${0.55 * t})`);
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(sx + bx * len, sy + by * len);
+      ctx.stroke();
+    }
+    tipLines.length = 0;
 
     const tex = textures();
     if (!glider) {
@@ -861,6 +1054,7 @@ namespace PA {
 
   export function render(ctx: CanvasRenderingContext2D, g: Game): void {
     const t0 = performance.now();
+    cacheFrame();
     ctx.imageSmoothingEnabled = false;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     const c = makeCam(g);
@@ -868,12 +1062,12 @@ namespace PA {
     const t1 = performance.now();
     clouds(ctx, g, c);
     objects(ctx, g, c);
+    birds(ctx, g, c);
     const t2 = performance.now();
     if (g.settings.view !== 'cockpit' && g.mission.mode === 'glider') rings(ctx, g, c);
     tracers(ctx, c, g.shots, 'rgba(255,236,150,0.95)', 0.35);
     tracers(ctx, c, g.shells, 'rgba(255,150,90,0.9)', 0.5);
     missiles(ctx, g, c);
-    wisps(ctx, g, c);
     puffs(ctx, g, c);
     lockRing(ctx, g, c);
     if (g.settings.view !== 'cockpit') plane(ctx, g, c);

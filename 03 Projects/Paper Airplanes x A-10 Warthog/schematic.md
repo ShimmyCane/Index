@@ -113,3 +113,9 @@ Flight: plane (A-10 jet / paper glider), steering (drag / joystick), new flight.
 - **Camera roll** follows 40% of the bank, the right way round.
 - **Resolution** 480×270; the ground is flat (`groundAt` is 0).
 - **Speed:** about 11–13 ms a frame in headless Chromium; slow devices drop to every other ground column on their own.
+
+## Round 10 (0.10): vapour and animations
+
+- **Wing tip vapour** spawns on the screen at the drawn wing tips and blows back nose to tail; a thin line is fixed to each tip. Engine heat behind the engines.
+- **Animations:** turrets, flak and SAMs turn to the plane; the radar dish spins; chimneys smoke; windmills turn; birds fly in a V; fighters bank; trees sway; ships bob.
+- **Stack cache** (`voxel.ts` `drawModelCached`): big trees are drawn once per size and viewing angle into pooled canvases, then turned and leaned for roll and sway.

@@ -147,7 +147,6 @@ namespace PA {
   const FIGHTER_FIRE_RANGE = 380;
   const SHELL_WARN_RANGE = 300;
   const FRIEND_RESPAWN = 40;
-  const WISP_LIFE = 1.4;
   const ATTACK_RANGE = 700;      // a fighter starts its attack run inside this distance
   const BREAK_RANGE = 180;       // and breaks off this close, or after BREAK_AFTER seconds
   const BREAK_AFTER = 3;
@@ -200,7 +199,6 @@ namespace PA {
     decoys: Decoy[] = [];
     puffs: Puff[] = [];
     marks: Mark[] = [];
-    wisps: Puff[] = [];
     warned = false;
     held: Held = { fire: false, boost: false, missile: false };
     axes: Axes = { yaw: 0, pitch: 0 };
@@ -261,7 +259,6 @@ namespace PA {
       this.decoys = [];
       this.puffs = [];
       this.marks = [];
-      this.wisps = [];
     }
 
     // A reload from ⚙️ (normal mode only): the gun and missiles come back, with a cooldown.
@@ -294,7 +291,6 @@ namespace PA {
       const dt = Math.min(dtIn, 1 / 30);
       this.updatePuffs(dt);
       this.updateMarks(dt);
-      this.updateWisps(dt);
       this.blink = Math.max(0, this.blink - dt);
       this.resupplied = Math.max(0, this.resupplied - dt);
       this.missionCard = Math.max(0, this.missionCard - dt);
@@ -348,7 +344,6 @@ namespace PA {
         this.updateTag(dt);
         this.updateObjective();
         this.keepTargets();
-        this.emitWisps(dt);
         this.emitDust();
         if (this.hull <= 0 && !this.felix && this.settings.invincible !== 1) this.crash();
       } else {
@@ -390,30 +385,6 @@ namespace PA {
       for (const m of this.marks) m.age += dt;
     }
 
-    // Wisps stream from the wing tips in a tight turn; clouds come from the boost.
-    private emitWisps(dt: number): void {
-      const p = this.plane;
-      const tight = Math.abs(p.bank) / AIR.bankMax;
-      if (tight < 0.5 || this.phase !== 'flying') return;
-      const count = Math.floor(tight * 5 * dt * 30) + (this.rand() < tight * dt * 6 ? 1 : 0);
-      const cosY = Math.cos(p.yaw), sinY = Math.sin(p.yaw);
-      for (let i = 0; i < count; i++) {
-        const side = this.rand() < 0.5 ? -1 : 1;
-        const span = 8;
-        this.wisps.push({
-          X: p.X + cosY * side * span, Z: p.Z - sinY * side * span, h: p.h,
-          vX: 0, vY: 1, vZ: 0, life: WISP_LIFE, max: WISP_LIFE, color: '#ffffff', size: 2 + this.rand() * 2,
-        });
-      }
-      if (this.held.boost && this.rand() < 0.4) {
-        this.wisps.push({
-          X: p.X - Math.sin(p.yaw) * 10, Z: p.Z - Math.cos(p.yaw) * 10, h: p.h - 1,
-          vX: (this.rand() - 0.5) * 2, vY: 1.5, vZ: (this.rand() - 0.5) * 2,
-          life: 1.2, max: 1.2, color: '#fffdfa', size: 4 + this.rand() * 3,
-        });
-      }
-    }
-
     // Dust is kicked up when the plane is low and moving fast.
     private emitDust(): void {
       const p = this.plane;
@@ -424,16 +395,6 @@ namespace PA {
         vX: (this.rand() - 0.5) * 6, vY: 2 + this.rand() * 3, vZ: (this.rand() - 0.5) * 6,
         life: 0.6, max: 0.6, color: '#e6dcc0', size: 2 + this.rand() * 2, kind: 'dust',
       });
-    }
-
-    private updateWisps(dt: number): void {
-      for (const w of this.wisps) {
-        w.life -= dt;
-        w.X += w.vX * dt;
-        w.Z += w.vZ * dt;
-        w.h += w.vY * dt;
-      }
-      this.wisps = this.wisps.filter(w => w.life > 0);
     }
 
     private updateReload(dt: number): void {
