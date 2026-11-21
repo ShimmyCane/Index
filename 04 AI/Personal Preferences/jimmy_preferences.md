@@ -108,3 +108,7 @@
 * **Radar shows heading.** Flying things are triangles with the point on their heading.
 * **Allies help.** They shoot the enemy near them.
 * **The world goes on.** Defended bases come up as you fly; no edge.
+
+## 10. Notes in the family table (2026-11-21, Rhythm Sticks)
+* **After a build, mark every note from that round done.** He reopens any that are still a problem. This replaces waiting for a per-note yes. Update only the ids that were read, read the rows back, and say what was marked. Questions and unbuilt ideas stay in the convo, so a done mark loses nothing.
+

@@ -77,3 +77,23 @@ A browser 2.5D pixel-art flight game, built small enough to read, so Jimmy can s
 
 - Fixed: the settings open with one tap in the upper-right corner. The gun leads moving targets and allows for the plane's speed and the bullet's drop. "Planes nearby" counts flying aircraft only.
 - Checks: 52 (exit 0, five runs); browser taps at two sizes.
+
+## Round 9 (convo v0.16): graphics
+
+- Rebuilt the look: voxel models with true sprite stacking for every object; the land and sky painted per pixel; shadows of each object's shape; richer effects; the camera roll fixed (it rolled the wrong way); 480×270.
+- Checks: 58 (`npm test`); browser: no page errors; about 11–13 ms a frame headless.
+- Not verified on an iPad (speed and look).
+
+## Round 10 (convo v0.17): vapour from the wing tips, animations
+
+- Wing tip vapour and engine heat are screen-space streams from the drawn model's tips (`render.ts` `plane()`), plus a thin line fixed to each tip.
+- Animations: turrets track the plane (`turret_mbt`, `turret_light`), flak and SAM face it, spinning `samdish`, chimney smoke, windmills with sails, bird flocks, fighters bank, trees sway (`Pose.sway`), ships bob.
+- Speed: big trees use `drawModelCached` (`voxel.ts`): a pooled cache of whole stacks by tree, heading quarter, viewing angle and size. Forest about twice as fast; normal flight unchanged.
+- Checks: 58 (`npm test`); browser screenshots of a hard turn and a banked forest.
+- Not verified on an iPad.
+
+## Round 11 (convo v0.18): curved trail, mood
+
+- Vapour is a ribbon per tip (`ribbons` in `render.ts`) plus puffs; both drift out of the turn by `CURVE`, growing with age, so the trail curves.
+- Mood: burning wrecks (`Game.wrecks`, `burnWrecks`, model `wreck`, ember glow), one `WIND` in `world.ts` (smoke and flags), flags at bases (`Game.bases`, model `flagpole`, `flag()` in `render.ts`).
+- Merged at Jimmy's request.

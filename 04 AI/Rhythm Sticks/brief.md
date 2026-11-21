@@ -1,7 +1,7 @@
 # Rhythm Sticks — brief
 
-**Updated:** 2026-11-12
-**Status:** MVP 0.3.1, not device-tested. All six modes built in one pass after `convo v0.2` answers.
+**Updated:** 2026-11-21
+**Status:** 0.4.0, not device-tested. All six modes built in one pass after `convo v0.2` answers.
 
 ## Goal
 
@@ -26,6 +26,19 @@ Six modes × three sizes: zero errors, no horizontal scroll; gear circle, fade, 
 ## Not verified
 
 Sound by ear on iPad; real two-finger touch; clap vs speech against the real onset detector (thresholds are a first guess); real sign-in; the SQL has not been run (checked only with `sql_paste_check.py`).
+
+## Version 0.4.0 (2026-11-21)
+
+Built from the 22 open notes and the answers in `convo v0.13`; checked in headless Chromium, not on an iPad. Questions in `convo/convo v0.14.md`. All 22 notes were marked done in `rs_notes` at Jimmy's request (the table now has 36 notes, all done); he reopens any that are still a problem.
+- **Two fingers** is a new mode on the same id (`js/modes/span.js`): one finger draws a melody line or a closed loop (one long note); two fingers hold a note by distance; three make a triangle chord; four make a square four-beat pulse; two fingers put down later (after 0.28 s) set the loudness; trails fade; no split screen.
+- **Dot loop:** a new ring grows at the outside and is selected; the others shrink to dots (on) and dashes (rest).
+- **Marbles:** two fingers set speed (up/down), mood (left minor, right major) and bounce (apart/pinch, default 0.8, range 0.5 to 1.5, speed capped); a switch for each in ⚙️; wider sides; stuck marbles nudged.
+- **Echo:** the mic listens more softly (`RS.mic.setBoost`), a switch makes it wait while Echo sings. The mini autograph is still a question.
+- **Heat:** treble clef redrawn. **Ripples:** default Sustain with slow rings (a one-time migration resets a saved "None"). **Breathing garden:** tap in, tap out; last five sessions kept on this device only, listed in ⚙️.
+
+## Notes round 2026-11-21 (22 open notes, version 0.3.3; questions in `convo/convo v0.13.md`)
+
+Read from `rs_notes` on 2026-11-21. Eight notes are built in 0.3.3 and wait for Jimmy's yes to be marked done. Fourteen are not built: two-finger shapes and trails, dot loop outward rings, echo timing and mic delay toggle, treble clef, ripples default, breathing garden session record, and the marbles controls. Nothing marked done in the table. Items in `todo.md`.
 
 ## Notes round 2026-11-14 (ten open notes, version 0.3.0)
 

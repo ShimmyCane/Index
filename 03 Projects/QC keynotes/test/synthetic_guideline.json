@@ -1,0 +1,141 @@
+{
+  "version": 2,
+  "name": "SYNTHETIC restroom and accessibility keynotes (test)",
+  "cloud": "local",
+  "scopes": [
+    "restroom",
+    "access",
+    "walls",
+    "partitions",
+    "fixtures",
+    "doors",
+    "fire"
+  ],
+  "scopeWords": {
+    "restroom": "RESTROOM, TOILET, LAVATORY",
+    "access": "ACCESSIBLE, GRAB BAR, BARRIER",
+    "walls": "WALL TILE, CERAMIC, WALL",
+    "partitions": "PARTITION",
+    "fixtures": "FAUCET, TOWEL, ACCESSORY, HOLDER",
+    "doors": "DOOR, HARDWARE",
+    "fire": "FIRE",
+    "other": ""
+  },
+  "types": [
+    "Demo",
+    "New"
+  ],
+  "numberDigits": {
+    "min": 1,
+    "max": 3
+  },
+  "maxWords": 100,
+  "upperCase": true,
+  "fireWords": "HR, HOUR",
+  "approved": [
+    "REMOVE EXISTING CERAMIC WALL TILE AT RESTROOM WALLS",
+    "INSTALL NEW GRAB BAR, 36 INCH LONG",
+    "INSTALL NEW 1-HR FIRE-RATED PARTITION",
+    "REMOVE EXISTING PARTITION AND DOOR",
+    "INSTALL NEW TOWEL HOLDERS"
+  ],
+  "similarity": 0.8,
+  "checks": {
+    "badType": {
+      "colour": "off",
+      "status": "approved",
+      "short": "Type must be Demo or New",
+      "narrative": "Control rule: the type column is checked against the list."
+    },
+    "badNumber": {
+      "colour": "off",
+      "status": "approved",
+      "short": "Digit count",
+      "narrative": "Control rule: number digits."
+    },
+    "csi": {
+      "colour": "off",
+      "status": "approved",
+      "short": "CSI 4 digits",
+      "narrative": "Control rule: CSI code."
+    },
+    "duplicate": {
+      "colour": "off",
+      "status": "approved",
+      "short": "No repeats",
+      "narrative": "Control rule: duplicates."
+    },
+    "undefinedKeynote": {
+      "colour": "off",
+      "status": "approved",
+      "short": "Every callout has a row",
+      "narrative": "Control rule: callouts."
+    },
+    "unusedKeynote": {
+      "colour": "off",
+      "status": "approved",
+      "short": "Every row is called out",
+      "narrative": "Control rule: unused rows."
+    },
+    "sequence": {
+      "colour": "off",
+      "status": "approved",
+      "short": "In order",
+      "narrative": "Control rule: order."
+    },
+    "tooLong": {
+      "colour": "yellow",
+      "status": "approved",
+      "short": "Within the maximum",
+      "narrative": "Control rule: word maximum."
+    },
+    "caseIssue": {
+      "colour": "yellow",
+      "status": "approved",
+      "short": "Upper case",
+      "narrative": "Control rule: case."
+    },
+    "missingScopeWord": {
+      "colour": "yellow",
+      "status": "approved",
+      "short": "Scope word",
+      "narrative": "Control rule: scope words."
+    },
+    "fireMissing": {
+      "colour": "red",
+      "status": "approved",
+      "short": "Fire rating",
+      "narrative": "Control rule: fire ratings."
+    },
+    "punctCase": {
+      "colour": "yellow",
+      "status": "approved",
+      "short": "Case and punctuation",
+      "narrative": "Control rule: approved text with other case or punctuation."
+    },
+    "nearApproved": {
+      "colour": "yellow",
+      "status": "approved",
+      "short": "Close to approved",
+      "narrative": "Control rule: near matches."
+    },
+    "notApproved": {
+      "colour": "yellow",
+      "status": "approved",
+      "short": "Approved list",
+      "narrative": "Control rule: not approved."
+    },
+    "noText": {
+      "colour": "yellow",
+      "status": "approved",
+      "short": "Text layer",
+      "narrative": "Control rule: unreadable pages."
+    }
+  },
+  "syntax": {
+    "demolition": "",
+    "newWork": ""
+  },
+  "examples": "",
+  "generalNotes": "stub"
+}

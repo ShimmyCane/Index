@@ -5,8 +5,8 @@ var PA;
     PA.VERSION = '0.1.0';
     // Internal resolution. The canvas is small on purpose: every pixel is a
     // "pixel-art pixel", and the page scales it up with no smoothing.
-    PA.W = 400;
-    PA.H = 225;
+    PA.W = 480;
+    PA.H = 270;
     // Side view, 2.5D: screen pixels per metre, across and up.
     PA.PPM_X = 2;
     PA.PPM_Y = 1.5;
@@ -34,383 +34,976 @@ var PA;
         shell: '#ff9e4a',
     };
 })(PA || (PA = {}));
-// Sprites are painted in code. Each one is a short list of little rectangles
-// (a "painter"). The builder draws the shapes once in ink, shifted one pixel in
-// each direction, which makes the dark outline, then draws the colours on top.
-// The painters live in src/assets/ (one file per family of things). No image
-// files are loaded anywhere in the game.
+// The land and the sea, and what is on them. Same seed, same start.
 var PA;
 (function (PA) {
-    class Painter {
-        constructor() {
-            this.ops = [];
+    // A seeded random number generator (mulberry32). Returns 0 up to 1.
+    function random(seed) {
+        let s = seed >>> 0;
+        return () => {
+            s = (s + 0x6d2b79f5) >>> 0;
+            let t = s;
+            t = Math.imul(t ^ (t >>> 15), t | 1);
+            t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+    }
+    PA.random = random;
+    PA.SEA_X = 1300; // the coast runs north near here; east of it is the sea
+    PA.ROAD_X = -120; // the main road runs north along this line
+    PA.ROAD_W = 7; // half its width, metres
+    // One gentle wind for the whole world (metres a second): smoke and flags lean with it.
+    PA.WIND = { X: 2.2, Z: -1.2 };
+    PA.RAIL_X = -320; // the railway runs north along this line
+    // The ground is flat (the land is shaped by colour, not height), so every object sits
+    // exactly on what is drawn. The sea is at the same level.
+    function groundAt(_X, _Z) {
+        return 0;
+    }
+    PA.groundAt = groundAt;
+    // A repeatable pseudo-random number from a cell (so the same place always looks the same).
+    function cellNoise(i, j, salt) {
+        let h = (i * 374761393 + j * 668265263 + salt * 2246822519) | 0;
+        h = Math.imul(h ^ (h >>> 13), 1274126177);
+        return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+    }
+    PA.cellNoise = cellNoise;
+    // Integer hash of a grid point, 0 up to 1.
+    function hash2(ix, iz) {
+        let h = (ix * 374761393 + iz * 668265263) | 0;
+        h = Math.imul(h ^ (h >>> 13), 1274126177);
+        return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+    }
+    PA.hash2 = hash2;
+    // Smooth value noise, 0 up to 1: the same place always gives the same value.
+    function noise2(x, z) {
+        const ix = Math.floor(x), iz = Math.floor(z);
+        const fx = x - ix, fz = z - iz;
+        const ux = fx * fx * (3 - 2 * fx), uz = fz * fz * (3 - 2 * fz);
+        const a = hash2(ix, iz), b = hash2(ix + 1, iz), c = hash2(ix, iz + 1), d = hash2(ix + 1, iz + 1);
+        return a + (b - a) * ux + (c - a) * uz + (a - b - c + d) * ux * uz;
+    }
+    PA.noise2 = noise2;
+    // The coastline wanders a little east and west as it runs north.
+    function coastX(Z) {
+        return PA.SEA_X - 45 + 90 * noise2(Z / 380, 13.7);
+    }
+    PA.coastX = coastX;
+    function isSea(X, Z = 0) {
+        return X > coastX(Z);
+    }
+    PA.isSea = isSea;
+    // One field shapes both lakes and forests: lakes at its peaks, forests on the slopes round them.
+    function wildValue(X, Z) {
+        return noise2(X / 300 + 31.1, Z / 300 - 7.3) * 0.72 + noise2(X / 90 + 3.7, Z / 90 + 1.9) * 0.28;
+    }
+    PA.wildValue = wildValue;
+    // The kind of country: farms where it is low, towns where it is high, open grass between.
+    function regionValue(X, Z) {
+        return noise2(X / 900 + 50.5, Z / 900 - 20.25);
+    }
+    PA.regionValue = regionValue;
+    PA.LAKE_LEVEL = 0.74; // wildValue above this is a lake
+    PA.FOREST_LEVEL = 0.6; // between this and the lake level is forest
+    function isLake(X, Z) {
+        if (isSea(X, Z) || Math.abs(X - PA.ROAD_X) < 30 || Math.abs(X - PA.RAIL_X) < 20)
+            return false;
+        return wildValue(X, Z) > PA.LAKE_LEVEL;
+    }
+    PA.isLake = isLake;
+    function isForest(X, Z) {
+        if (isSea(X, Z) || Math.abs(X - PA.ROAD_X) < 16 || Math.abs(X - PA.RAIL_X) < 10)
+            return false;
+        const w = wildValue(X, Z);
+        return w > PA.FOREST_LEVEL && w < PA.LAKE_LEVEL - 0.02;
+    }
+    PA.isForest = isForest;
+    function biomeAt(X, Z) {
+        if (isSea(X, Z))
+            return 'sea';
+        if (isLake(X, Z))
+            return 'lake';
+        if (isForest(X, Z))
+            return 'forest';
+        const r = regionValue(X, Z);
+        if (r < 0.42)
+            return 'farm';
+        if (r > 0.66)
+            return 'town';
+        return 'army';
+    }
+    PA.biomeAt = biomeAt;
+    // Where a thing is in the air, or its ground height when it is on the ground.
+    function altOf(t) {
+        return t.h !== undefined ? t.h : groundAt(t.X, t.Z);
+    }
+    PA.altOf = altOf;
+    PA.KINDS = {
+        tank_mbt: { r: 2.6, height: 2.6, hp: 2, points: 100, group: 'army' },
+        tank_light: { r: 2.2, height: 2.0, hp: 1, points: 60, group: 'army' },
+        apc: { r: 2.4, height: 2.2, hp: 1, points: 50, group: 'army' },
+        truck: { r: 2.0, height: 2.6, hp: 1, points: 40, group: 'farm' },
+        fuel: { r: 2.6, height: 2.6, hp: 1, points: 60, group: 'airfield' },
+        sam: { r: 3.0, height: 3.5, hp: 2, points: 150, group: 'army', gun: { range: 520, cool: 4, speed: 150 } },
+        flak: { r: 2.0, height: 3.0, hp: 1, points: 80, group: 'army', gun: { range: 260, cool: 2, speed: 120 } },
+        farm: { r: 4.0, height: 4.0, hp: 1, points: 30, group: 'farm' },
+        barn: { r: 4.0, height: 3.5, hp: 1, points: 40, group: 'farm' },
+        city: { r: 3.0, height: 12, hp: 3, points: 120, group: 'town' },
+        barracks: { r: 5.0, height: 3.0, hp: 2, points: 120, group: 'army' },
+        hangar: { r: 6.0, height: 5.0, hp: 3, points: 200, group: 'airfield' },
+        jet: { r: 3.0, height: 2.5, hp: 1, points: 150, group: 'airfield' },
+        ship: { r: 6.0, height: 3.0, hp: 4, points: 250, group: 'port' },
+        rail: { r: 2.5, height: 2.5, hp: 1, points: 40, group: 'rail' },
+        fighter: { r: 4.5, height: 3.0, hp: 1, points: 200, group: 'air', gun: { range: 380, cool: 2.6, speed: 230 } },
+        ally: { r: 3.0, height: 2.5, hp: 1, points: -300, group: 'air' },
+    };
+    // Which kinds drive along the road (and how fast, metres per second).
+    PA.DRIVES = { tank_mbt: 3, tank_light: 6, apc: 6, truck: 9, fuel: 7 };
+    // Is this a mission target? Ground places and vehicles count; ships, rail and the air do not.
+    function isObjective(t) {
+        if (t.faction)
+            return false;
+        const group = PA.KINDS[t.kind].group;
+        return group === 'army' || group === 'farm' || group === 'town';
+    }
+    PA.isObjective = isObjective;
+    function target(kind, X, Z, rand) {
+        const info = PA.KINDS[kind];
+        return {
+            kind, X, Z, alive: true, points: info.points, hp: info.hp,
+            cool: info.gun ? 1 + rand() * info.gun.cool : 0,
+        };
+    }
+    PA.target = target;
+    // Clusters of things in front of baseZ. Each cluster is one kind of place.
+    function spawnTargets(rand, baseZ, count) {
+        const out = [];
+        for (let i = 0; i < count; i++) {
+            const Z = baseZ + i * 120 + rand() * 60;
+            const roll = rand();
+            const landX = (rand() - 0.5) * 900;
+            // Some vehicles drive along the road, north or south.
+            const driver = (kind, X, Z) => {
+                const t = target(kind, X, Z, rand);
+                if (PA.DRIVES[kind] !== undefined && rand() < 0.5)
+                    t.vZ = (rand() < 0.5 ? -1 : 1) * PA.DRIVES[kind];
+                return t;
+            };
+            if (roll < 0.32) {
+                // Army: tanks, carriers, a SAM site or a flak gun.
+                const X = landX;
+                out.push(driver('tank_mbt', PA.ROAD_X + 4, Z));
+                out.push(driver(rand() < 0.5 ? 'tank_light' : 'apc', PA.ROAD_X - 6, Z + 4));
+                if (rand() < 0.5)
+                    out.push(target('sam', X - 10, Z + 10, rand));
+                else
+                    out.push(target('flak', X + 14, Z - 6, rand));
+            }
+            else if (roll < 0.5) {
+                // Farm: houses, barns and a lorry.
+                const X = landX;
+                out.push(target('farm', X, Z, rand));
+                out.push(target('barn', X + 12, Z + 9, rand));
+                out.push(driver('truck', PA.ROAD_X + 3, Z + 6));
+            }
+            else if (roll < 0.66) {
+                // Town: towers, barracks and a SAM site.
+                const X = landX;
+                out.push(target('city', X, Z, rand));
+                out.push(target('city', X + 8, Z + 6, rand));
+                out.push(target('city', X - 7, Z + 9, rand));
+                out.push(target('sam', X + 14, Z - 4, rand));
+            }
+            else if (roll < 0.78) {
+                // Airfield: a hangar, parked jets and a fuel tanker.
+                const X = Math.min(PA.SEA_X - 120, landX);
+                out.push(target('hangar', X, Z, rand));
+                out.push(target('jet', X + 12, Z + 8, rand));
+                out.push(target('jet', X + 18, Z + 8, rand));
+                out.push(target('fuel', X - 10, Z + 10, rand));
+            }
+            else if (roll < 0.9) {
+                // Port: a ship on the sea, with a flak gun on the coast.
+                const X = PA.SEA_X + 80 + rand() * 300;
+                out.push(target('ship', X, Z, rand));
+                out.push(target('flak', PA.SEA_X - 30, Z, rand));
+            }
+            else {
+                // Railway: wagons on the line.
+                const X = PA.RAIL_X;
+                out.push(target('rail', X, Z, rand));
+                out.push(target('rail', X, Z + 6, rand));
+                out.push(target('barracks', X + 40, Z + 12, rand));
+            }
         }
-        // A rectangle of one colour. Later rectangles cover earlier ones.
-        r(x, y, w, h, c) {
-            this.ops.push({ x, y, w, h, c });
+        return out;
+    }
+    PA.spawnTargets = spawnTargets;
+    // An enemy fighter or an ally, flying in from far off.
+    function spawnAir(rand, px, pz, enemy) {
+        const bearing = (rand() - 0.5) * 1.2; // radians either side of the nose
+        const dist = 1100 + rand() * 200;
+        const X = px + Math.sin(bearing) * dist;
+        const Z = pz + Math.cos(bearing) * dist;
+        const h = 80 + rand() * 40;
+        if (enemy) {
+            return { kind: 'fighter', X, Z, h, alive: true, points: PA.KINDS.fighter.points, hp: 1,
+                cool: 1 + rand() * 2, faction: 'enemy', age: 0 };
+        }
+        // Allies orbit a point near the front, at a steady height.
+        const cx = px + (rand() - 0.5) * 600, cz = pz + 500 + rand() * 500;
+        return { kind: 'ally', X: cx + 900, Z: cz, h: 90, alive: true, points: PA.KINDS.ally.points, hp: 1, cool: 0,
+            faction: 'ally', orbit: { cx, cz, r: 900, ang: rand() * Math.PI * 2, w: 0.09 }, age: 0 };
+    }
+    PA.spawnAir = spawnAir;
+    function makeMission(mode, seed) {
+        const rand = random(seed);
+        if (mode === 'glider') {
+            const hoops = [];
+            for (let i = 0; i < 24; i++) {
+                const X = (rand() - 0.5) * 60;
+                const Z = 220 + i * 110 + rand() * 30;
+                hoops.push({ X, Z, h: groundAt(X, Z) + 12 + rand() * 40, r: 6, passed: false });
+            }
+            return { mode, targets: [], hoops };
+        }
+        return { mode, targets: spawnTargets(rand, 260, 10), hoops: [] };
+    }
+    PA.makeMission = makeMission;
+})(PA || (PA = {}));
+// Voxel models and sprite stacking.
+//
+// Each object is a small 3-D grid of coloured cubes (voxels): x across (left to right),
+// y along (the nose or front at y = 0, the back at the far end), z up from the ground.
+// The model is baked once into horizontal slices, one image per layer of voxels. To draw
+// it, the slices are stacked from the bottom up, each turned to the camera and squashed
+// by the viewing angle. The stack reads as a solid 3-D object from any direction, and it
+// changes as you fly round it. This is "sprite stacking".
+var PA;
+(function (PA) {
+    class Voxels {
+        // w, l, h: size in voxels. size: metres per voxel.
+        constructor(w, l, h, size) {
+            this.w = w;
+            this.l = l;
+            this.h = h;
+            this.size = size;
+            this.data = new Uint32Array(w * l * h);
+        }
+        at(x, y, z) {
+            return (z * this.l + y) * this.w + x;
+        }
+        inside(x, y, z) {
+            return x >= 0 && y >= 0 && z >= 0 && x < this.w && y < this.l && z < this.h;
+        }
+        set(x, y, z, rgb) {
+            x = Math.floor(x);
+            y = Math.floor(y);
+            z = Math.floor(z);
+            if (this.inside(x, y, z))
+                this.data[this.at(x, y, z)] = (rgb & 0xffffff) | 0x1000000;
+        }
+        clear(x, y, z) {
+            x = Math.floor(x);
+            y = Math.floor(y);
+            z = Math.floor(z);
+            if (this.inside(x, y, z))
+                this.data[this.at(x, y, z)] = 0;
+        }
+        get(x, y, z) {
+            if (!this.inside(x, y, z))
+                return 0;
+            return this.data[this.at(x, y, z)];
+        }
+        // A solid box, from (x0, y0, z0) up to but not including (x1, y1, z1).
+        box(x0, y0, z0, x1, y1, z1, rgb) {
+            for (let z = Math.floor(z0); z < z1; z++)
+                for (let y = Math.floor(y0); y < y1; y++)
+                    for (let x = Math.floor(x0); x < x1; x++)
+                        this.set(x, y, z, rgb);
             return this;
         }
-        // One pixel.
-        p(x, y, c) {
-            return this.r(x, y, 1, 1, c);
+        // Remove a box of voxels (to shape a slope, a notch or a gap).
+        cut(x0, y0, z0, x1, y1, z1) {
+            for (let z = Math.floor(z0); z < z1; z++)
+                for (let y = Math.floor(y0); y < y1; y++)
+                    for (let x = Math.floor(x0); x < x1; x++)
+                        this.clear(x, y, z);
+            return this;
         }
-    }
-    PA.Painter = Painter;
-    // Every sprite by name. The asset files add their painters here.
-    PA.PAINT = {};
-    function buildSprite(paint) {
-        const g = new Painter();
-        paint(g);
-        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-        for (const o of g.ops) {
-            minX = Math.min(minX, o.x);
-            minY = Math.min(minY, o.y);
-            maxX = Math.max(maxX, o.x + o.w);
-            maxY = Math.max(maxY, o.y + o.h);
+        // An ellipsoid centred at (cx, cy, cz) with radii rx, ry, rz (in voxels).
+        ellipsoid(cx, cy, cz, rx, ry, rz, rgb) {
+            for (let z = Math.floor(cz - rz); z <= cz + rz; z++)
+                for (let y = Math.floor(cy - ry); y <= cy + ry; y++)
+                    for (let x = Math.floor(cx - rx); x <= cx + rx; x++) {
+                        const dx = (x + 0.5 - cx) / rx, dy = (y + 0.5 - cy) / ry, dz = (z + 0.5 - cz) / rz;
+                        if (dx * dx + dy * dy + dz * dz <= 1)
+                            this.set(x, y, z, rgb);
+                    }
+            return this;
         }
-        const canvas = document.createElement('canvas');
-        canvas.width = maxX - minX + 2; // one pixel of room for the outline
-        canvas.height = maxY - minY + 2;
-        const ctx = canvas.getContext('2d');
-        if (!ctx)
-            throw new Error('2D canvas is not available');
-        const ox = 1 - minX, oy = 1 - minY;
-        ctx.fillStyle = PA.INK;
-        for (const o of g.ops) {
-            ctx.fillRect(o.x + ox - 1, o.y + oy, o.w + 2, o.h);
-            ctx.fillRect(o.x + ox, o.y + oy - 1, o.w, o.h + 2);
+        // A tube running along y (front to back), with an elliptical cross-section.
+        tubeY(cx, cz, y0, y1, rx, rz, rgb) {
+            for (let y = Math.floor(y0); y < y1; y++)
+                for (let z = Math.floor(cz - rz); z <= cz + rz; z++)
+                    for (let x = Math.floor(cx - rx); x <= cx + rx; x++) {
+                        const dx = (x + 0.5 - cx) / rx, dz = (z + 0.5 - cz) / rz;
+                        if (dx * dx + dz * dz <= 1)
+                            this.set(x, y, z, rgb);
+                    }
+            return this;
         }
-        for (const o of g.ops) {
-            ctx.fillStyle = o.c;
-            ctx.fillRect(o.x + ox, o.y + oy, o.w, o.h);
+        // A tube running along x (side to side).
+        tubeX(cy, cz, x0, x1, ry, rz, rgb) {
+            for (let x = Math.floor(x0); x < x1; x++)
+                for (let z = Math.floor(cz - rz); z <= cz + rz; z++)
+                    for (let y = Math.floor(cy - ry); y <= cy + ry; y++) {
+                        const dy = (y + 0.5 - cy) / ry, dz = (z + 0.5 - cz) / rz;
+                        if (dy * dy + dz * dz <= 1)
+                            this.set(x, y, z, rgb);
+                    }
+            return this;
         }
-        return canvas;
-    }
-    PA.buildSprite = buildSprite;
-    // Shade a hex colour toward dark (f = 1 is unchanged).
-    function shadeHex(hex, f) {
-        const n = parseInt(hex.slice(1), 16);
-        const ch = (v) => Math.round(v * f);
-        const r = ch((n >> 16) & 255), g = ch((n >> 8) & 255), b = ch(n & 255);
-        return '#' + ((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1);
-    }
-    PA.shadeHex = shadeHex;
-    const stackCache = {};
-    // The same sprite built as a stack: four slices, each one pixel lower than the one above,
-    // the lower slices darker. The top slice is the full colour, so the edge of the stack shows.
-    function stackedSprite(name, layers = 4, step = 1) {
-        const key = name + ':' + layers + ':' + step;
-        if (stackCache[key])
-            return stackCache[key];
-        const paint = PA.PAINT[name];
-        if (!paint)
-            throw new Error('no sprite named ' + name);
-        const base = new Painter();
-        paint(base);
-        const stacked = g => {
-            for (let l = 0; l < layers; l++) {
-                const top = l === layers - 1;
-                const f = top ? 1 : 0.45 + 0.45 * (l / (layers - 1));
-                const dy = (layers - 1 - l) * step;
-                for (const o of base.ops)
-                    g.r(o.x, o.y + dy, o.w, o.h, shadeHex(o.c, f));
+        // A round column or cone standing on the ground, radius r0 at the bottom and r1 at the top.
+        cone(cx, cy, z0, z1, r0, r1, rgb) {
+            for (let z = Math.floor(z0); z < z1; z++) {
+                const t = (z - z0) / Math.max(1, z1 - z0 - 1);
+                const r = r0 + (r1 - r0) * t;
+                for (let y = Math.floor(cy - r); y <= cy + r; y++)
+                    for (let x = Math.floor(cx - r); x <= cx + r; x++) {
+                        const dx = x + 0.5 - cx, dy = y + 0.5 - cy;
+                        if (dx * dx + dy * dy <= r * r)
+                            this.set(x, y, z, rgb);
+                    }
             }
-        };
-        const s = buildSprite(stacked);
-        stackCache[key] = s;
-        return s;
+            return this;
+        }
+        // A pitched roof over the rectangle x0..x1, y0..y1, starting at height z0.
+        // The ridge runs along x when alongX, otherwise along y.
+        roof(x0, y0, x1, y1, z0, alongX, rgb, ridge) {
+            const span = alongX ? y1 - y0 : x1 - x0;
+            const layers = Math.ceil(span / 2);
+            for (let k = 0; k < layers; k++) {
+                const z = z0 + k;
+                const col = k === layers - 1 && ridge !== undefined ? ridge : rgb;
+                if (alongX)
+                    this.box(x0, y0 + k, z, x1, y1 - k, z + 1, col);
+                else
+                    this.box(x0 + k, y0, z, x1 - k, y1, z + 1, col);
+            }
+            return this;
+        }
+        // Change the colour of every voxel by a rule (for patterns: windows, camouflage, stripes).
+        paint(rule) {
+            for (let z = 0; z < this.h; z++)
+                for (let y = 0; y < this.l; y++)
+                    for (let x = 0; x < this.w; x++) {
+                        const v = this.data[this.at(x, y, z)];
+                        if (!v)
+                            continue;
+                        const next = rule(x, y, z, v & 0xffffff);
+                        if (next === null)
+                            this.data[this.at(x, y, z)] = 0;
+                        else
+                            this.data[this.at(x, y, z)] = (next & 0xffffff) | 0x1000000;
+                    }
+            return this;
+        }
     }
-    PA.stackedSprite = stackedSprite;
-    const cache = {};
-    // Built the first time it is needed (so the file also loads without a page).
-    function sprite(name) {
-        if (cache[name])
-            return cache[name];
-        const paint = PA.PAINT[name];
-        if (!paint)
-            throw new Error('no sprite named ' + name);
-        const s = buildSprite(paint);
-        cache[name] = s;
-        return s;
+    PA.Voxels = Voxels;
+    function shadeRGB(rgb, f) {
+        const r = Math.min(255, ((rgb >> 16) & 255) * f);
+        const g = Math.min(255, ((rgb >> 8) & 255) * f);
+        const b = Math.min(255, (rgb & 255) * f);
+        return [r, g, b];
     }
-    PA.sprite = sprite;
-})(PA || (PA = {}));
-// Aircraft: the player's plane, the paper glider, the pilot under a parachute, and parked jets.
-var PA;
-(function (PA) {
-    PA.PAINT['plane'] = g => {
-        // A-10 Warthog seen from behind: wide wing, twin tails, the cockpit up top, two engines.
-        g.r(0, 7, 22, 2, '#c8cfd6') // wing
-            .r(0, 8, 3, 1, '#6b7480').r(19, 8, 3, 1, '#6b7480') // wing tips
-            .r(9, 2, 4, 9, '#c8cfd6') // fuselage
-            .r(9, 2, 1, 9, '#f5fbff') // light side
-            .r(10, 1, 2, 2, '#8fd3f0') // canopy
-            .r(5, 1, 2, 7, '#c8cfd6').r(15, 1, 2, 7, '#c8cfd6') // twin tails
-            .r(5, 0, 2, 1, '#6b7480').r(15, 0, 2, 1, '#6b7480')
-            .r(7, 9, 2, 3, '#6b7480').r(13, 9, 2, 3, '#6b7480') // engines
-            .r(7, 12, 2, 1, '#ffb02e').r(13, 12, 2, 1, '#ffb02e'); // exhaust glow
-    };
-    PA.PAINT['glider'] = g => {
-        // Classic paper dart seen from behind: a flat sheet with a folded nose.
-        g.r(0, 6, 20, 2, '#fffdfa')
-            .r(0, 6, 20, 1, '#f5fbff')
-            .r(9, 2, 2, 9, '#fffdfa')
-            .p(10, 1, '#fffdfa')
-            .r(0, 8, 20, 1, '#d6d0f0');
-    };
-    PA.PAINT['pilot'] = g => {
-        // A pilot under a parachute canopy.
-        g.r(1, 0, 9, 3, '#ffb3a7')
-            .r(1, 0, 9, 1, '#ff9e8a')
-            .p(2, 3, '#6b7480').p(8, 3, '#6b7480')
-            .r(4, 4, 3, 3, '#f5d7b0')
-            .r(4, 7, 3, 2, '#3d8bff');
-    };
-    // A parked fighter on the airfield, seen from the side and slightly from above.
-    PA.PAINT['jet'] = g => {
-        g.r(0, 4, 16, 2, '#e8eef2')
-            .r(12, 2, 3, 2, '#e8eef2')
-            .r(6, 5, 5, 2, '#b9c0c8')
-            .r(3, 1, 2, 3, '#8fd3f0')
-            .r(4, 6, 2, 1, '#6b7480')
-            .r(14, 3, 2, 1, '#6b7480');
-    };
-})(PA || (PA = {}));
-(function (PA) {
-    // An enemy fighter, seen from the side: dark red, swept wings, a nose cone.
-    PA.PAINT['fighter'] = g => {
-        g.r(0, 4, 16, 2, '#7a3b44')
-            .r(9, 2, 4, 3, '#a85560')
-            .r(4, 5, 6, 2, '#c97080')
-            .r(12, 3, 4, 1, '#7a3b44')
-            .p(15, 4, '#2f2d3d')
-            .r(2, 2, 2, 2, '#7a3b44')
-            .p(12, 2, '#8fd3f0');
-    };
-    // An allied fighter: blue with a white star on the tail.
-    PA.PAINT['ally'] = g => {
-        g.r(0, 4, 16, 2, '#3d8bff')
-            .r(9, 2, 4, 3, '#8fb8f5')
-            .r(4, 5, 6, 2, '#5b9fff')
-            .r(12, 3, 4, 1, '#3d8bff')
-            .p(15, 4, '#2f2d3d')
-            .r(2, 2, 2, 2, '#3d8bff')
-            .p(3, 2, '#fffdfa');
-    };
-})(PA || (PA = {}));
-// The A-10 Warthog, drawn at its own detail: seen from behind, on a 66-unit grid.
-// The drawing is painted at several crisp sizes (not stretched), and each size is
-// stacked: thin slices one above another, the lower ones shaded darker, so the body reads solid.
-var PA;
-(function (PA) {
-    const DESIGN_W = 66;
-    const DESIGN_H = 40;
-    const LAYERS = 4; // slices in the stack
-    const LIGHT = 2; // how far each slice steps down (design units, before scaling)
-    // Shade a hex colour toward dark (f = 1 is unchanged).
-    const shade = PA.shadeHex;
-    // The drawing itself, in design units: x across (0 … 66), y down (0 … 40).
-    // The A-10 from behind: a broad body, a thick high wing, two fins set wide apart, and
-    // the two engines under the wing, each with its exhaust.
-    function design(g, dy, f) {
-        const c = (hex) => shade(hex, f);
-        const body = c('#c8cfd6'), light = c('#eef3f6'), mid = c('#9aa4ae'), dark = c('#4d5560');
-        const glass = c('#9fdcf5'), hot = c('#ffb02e'), tail = c('#b8c1ca');
-        const R = (x, y, w, h, col) => g.r(x, y + dy, w, h, col);
-        // Fins: two tall, leaning out, with dark tips.
-        R(14, 7, 5, 13, tail);
-        R(13, 4, 4, 4, dark);
-        R(15, 6, 2, 1, light);
-        R(47, 7, 5, 13, tail);
-        R(49, 4, 4, 4, dark);
-        R(49, 6, 2, 1, light);
-        // Wing: a thick, straight, high wing with dark tips.
-        R(3, 18, 60, 6, body);
-        R(3, 18, 60, 1, light);
-        R(3, 22, 60, 2, mid);
-        R(2, 19, 2, 5, dark);
-        R(62, 19, 2, 5, dark);
-        // Fuselage: a broad body, lit on the left, shaded on the right, with a dark belly.
-        R(26, 6, 14, 24, body);
-        R(26, 6, 4, 24, light);
-        R(37, 6, 3, 24, mid);
-        R(27, 28, 12, 2, dark);
-        // Cockpit canopy.
-        R(28, 8, 10, 5, glass);
-        R(29, 9, 3, 2, light);
-        // Camouflage: a few darker patches on the body and the wing.
-        R(31, 15, 3, 2, mid);
-        R(34, 19, 2, 1, mid);
-        R(8, 20, 4, 1, mid);
-        R(55, 20, 4, 1, mid);
-        // Engine nacelles, each with a dark intake and a glowing exhaust.
-        R(20, 24, 7, 11, dark);
-        R(39, 24, 7, 11, dark);
-        R(21, 25, 5, 3, mid);
-        R(40, 25, 5, 3, mid);
-        R(22, 33, 5, 2, hot);
-        R(41, 33, 5, 2, hot);
-        // The nose underneath, a dark line.
-        R(29, 30, 8, 1, mid);
-    }
-    // The design at a whole-size scale k, stacked. Each layer is the same drawing; lower
-    // layers sit a little lower and are shaded darker.
-    function stackedAt(k) {
-        return (g) => {
-            for (let layer = 0; layer < LAYERS; layer++) {
-                const top = layer === LAYERS - 1;
-                const sub = new PA.Painter();
-                const f = top ? 1 : 0.42 + 0.5 * (layer / (LAYERS - 1));
-                design(sub, (LAYERS - 1 - layer) * LIGHT, f);
-                for (const o of sub.ops) {
-                    const x0 = Math.round(o.x * k), y0 = Math.round(o.y * k);
-                    const x1 = Math.round((o.x + o.w) * k), y1 = Math.round((o.y + o.h) * k);
-                    g.r(x0, y0, Math.max(1, x1 - x0), Math.max(1, y1 - y0), o.c);
+    // Bake the voxels into slices. Light is baked in: top faces bright, sides darker, the
+    // lower layers a little darker again (shade under the body), a soft lit side on the left,
+    // and a tiny variation per voxel so surfaces are not flat.
+    function bake(v) {
+        const slices = [];
+        let top = 0, sr = 0, sg = 0, sb = 0, n = 0;
+        for (let z = 0; z < v.h; z++) {
+            let any = false;
+            const img = new ImageData(v.w, v.l);
+            for (let y = 0; y < v.l; y++) {
+                for (let x = 0; x < v.w; x++) {
+                    const c = v.get(x, y, z);
+                    if (!c)
+                        continue;
+                    any = true;
+                    const rgb = c & 0xffffff;
+                    const exposedTop = !v.get(x, y, z + 1);
+                    let f = exposedTop ? 1.1 : 0.8;
+                    f *= 0.82 + 0.18 * (z / Math.max(1, v.h - 1));
+                    if (!v.get(x - 1, y, z))
+                        f *= 1.05;
+                    if (!v.get(x + 1, y, z))
+                        f *= 0.93;
+                    if (!v.get(x, y - 1, z))
+                        f *= 1.02;
+                    if (!v.get(x, y + 1, z))
+                        f *= 0.95;
+                    f *= 0.97 + 0.06 * PA.hash2(x * 7 + z * 131, y * 13 + z * 17);
+                    const [r, g, b] = shadeRGB(rgb, f);
+                    const o = (y * v.w + x) * 4;
+                    img.data[o] = r;
+                    img.data[o + 1] = g;
+                    img.data[o + 2] = b;
+                    img.data[o + 3] = 255;
+                    if (exposedTop) {
+                        sr += r;
+                        sg += g;
+                        sb += b;
+                        n++;
+                    }
                 }
             }
-        };
-    }
-    // The four whole-step sizes: about 25% of the screen width (about 100 px) up to 33% (about 132 px).
-    PA.PLANE_SCALES = [1.6, 1.78, 1.94, 2.1];
-    const planeCache = [];
-    // The plane sprite for a turn tightness of 0 (straight) to 1 (hardest turn).
-    function planeSprite(tight) {
-        const i = Math.max(0, Math.min(PA.PLANE_SCALES.length - 1, Math.round(tight * (PA.PLANE_SCALES.length - 1))));
-        if (!planeCache[i])
-            planeCache[i] = PA.buildSprite(stackedAt(PA.PLANE_SCALES[i]));
-        return { img: planeCache[i], k: PA.PLANE_SCALES[i] };
-    }
-    PA.planeSprite = planeSprite;
-})(PA || (PA = {}));
-// Ground vehicles and guns: tanks, armoured carriers, trucks, a fuel tanker, a SAM launcher, flak.
-var PA;
-(function (PA) {
-    // Main battle tank, side view, facing right.
-    PA.PAINT['tank_mbt'] = g => {
-        g.r(0, 8, 20, 2, '#4d5560') // tracks
-            .p(2, 9, '#f5fbff').p(6, 9, '#f5fbff').p(10, 9, '#f5fbff').p(14, 9, '#f5fbff')
-            .r(1, 5, 18, 3, '#8a9470') // hull
-            .r(6, 2, 8, 3, '#9aa77a') // turret
-            .p(9, 1, '#9aa77a') // hatch
-            .r(13, 3, 9, 1, '#4d5560'); // long gun
-    };
-    // Light tank or scout vehicle.
-    PA.PAINT['tank_light'] = g => {
-        g.r(0, 6, 14, 2, '#4d5560')
-            .p(2, 7, '#f5fbff').p(8, 7, '#f5fbff')
-            .r(1, 3, 12, 3, '#b9c79a')
-            .r(4, 1, 5, 2, '#c9d4a8')
-            .r(8, 2, 5, 1, '#4d5560');
-    };
-    // Armoured personnel carrier: a boxy hull with wheels.
-    PA.PAINT['apc'] = g => {
-        g.r(0, 6, 16, 2, '#4d5560')
-            .p(2, 7, '#f5fbff').p(12, 7, '#f5fbff')
-            .r(0, 2, 16, 4, '#9aa77a')
-            .r(2, 1, 5, 1, '#9aa77a')
-            .r(10, 3, 3, 1, '#8fd3f0');
-    };
-    // Cargo truck, facing right.
-    PA.PAINT['truck'] = g => {
-        g.r(0, 1, 9, 4, '#e6c48a')
-            .r(9, 2, 5, 3, '#e6c48a')
-            .p(11, 3, '#8fd3f0')
-            .r(2, 5, 2, 2, '#6b7480').r(10, 5, 2, 2, '#6b7480');
-    };
-    // Fuel tanker: a cab and a red tank trailer.
-    PA.PAINT['fuel'] = g => {
-        g.r(0, 3, 4, 4, '#e6c48a')
-            .p(2, 4, '#8fd3f0')
-            .r(4, 3, 12, 4, '#f5fbff')
-            .r(4, 5, 12, 1, '#ff6b6b')
-            .r(2, 6, 2, 2, '#6b7480').r(9, 6, 2, 2, '#6b7480').r(14, 6, 2, 2, '#6b7480');
-    };
-    // Surface-to-air missile launcher with a radar dish and four tubes.
-    PA.PAINT['sam'] = g => {
-        g.r(0, 9, 22, 3, '#8a9470') // carrier
-            .r(2, 10, 3, 2, '#4d5560').r(15, 10, 3, 2, '#4d5560') // wheels
-            .r(4, 5, 10, 4, '#b9c79a') // launcher body
-            .p(5, 4, '#f5fbff').p(8, 4, '#f5fbff').p(11, 4, '#f5fbff').p(14, 4, '#f5fbff')
-            .r(16, 1, 1, 8, '#4d5560') // radar mast
-            .r(13, 0, 7, 2, '#f5fbff'); // dish
-    };
-    // Anti-aircraft gun on a mount.
-    PA.PAINT['flak'] = g => {
-        g.r(0, 5, 6, 3, '#e89a9a')
-            .r(1, 0, 1, 6, '#6b7480').r(3, 0, 1, 6, '#6b7480');
-    };
-})(PA || (PA = {}));
-// Buildings: farm houses and barns, town houses, city towers, barracks and a hangar.
-var PA;
-(function (PA) {
-    // A farm house with a red roof, a door and a window.
-    PA.PAINT['farm'] = g => {
-        g.r(2, 7, 12, 6, '#f5d7b0')
-            .r(3, 5, 10, 2, '#c85b4a')
-            .r(4, 3, 8, 2, '#c85b4a')
-            .r(5, 1, 6, 2, '#c85b4a')
-            .r(7, 10, 2, 3, '#6b4a3a')
-            .p(4, 8, '#8fd3f0');
-    };
-    // A barn: tall red walls with a grey roof.
-    PA.PAINT['barn'] = g => {
-        g.r(0, 6, 18, 7, '#c85b4a')
-            .r(1, 3, 16, 3, '#6b7480')
-            .r(2, 1, 14, 2, '#6b7480')
-            .r(7, 8, 4, 5, '#f5d7b0');
-    };
-    // A city tower block with a grid of lit windows.
-    PA.PAINT['city'] = g => {
-        g.r(2, 2, 10, 20, '#c9d2dc')
-            .r(2, 2, 2, 20, '#b0bcc8');
-        for (let y = 4; y < 20; y += 3) {
-            for (let x = 5; x < 11; x += 3)
-                g.p(x, y, '#8fd3f0');
+            if (!any) {
+                slices.push(null);
+                continue;
+            }
+            top = z;
+            const cv = document.createElement('canvas');
+            cv.width = v.w;
+            cv.height = v.l;
+            const cx = cv.getContext('2d');
+            if (cx)
+                cx.putImageData(img, 0, 0);
+            slices.push(cv);
         }
-    };
-    // Army barracks: a long low building with a door row.
-    PA.PAINT['barracks'] = g => {
-        g.r(0, 4, 22, 6, '#8a9470')
-            .r(0, 3, 22, 1, '#6b7480')
-            .r(2, 6, 3, 2, '#4d5560').r(9, 6, 3, 2, '#4d5560').r(16, 6, 3, 2, '#4d5560')
-            .p(5, 5, '#f5fbff').p(12, 5, '#f5fbff');
-    };
-    // Aircraft hangar: a curved roof over a large door.
-    PA.PAINT['hangar'] = g => {
-        g.r(0, 6, 24, 6, '#b9c0c8')
-            .r(2, 4, 20, 2, '#b9c0c8')
-            .r(5, 2, 14, 2, '#b9c0c8')
-            .r(7, 7, 10, 5, '#6b7480');
-    };
+        const avg = n ? 'rgb(' + Math.round(sr / n) + ',' + Math.round(sg / n) + ',' + Math.round(sb / n) + ')' : '#888';
+        return { w: v.w, l: v.l, h: v.h, size: v.size, slices, top, avg };
+    }
+    PA.bake = bake;
+    // The 2-D part of the placement, shared by the drawing and by modelToScreen.
+    function frame(m, p) {
+        const sinE = Math.max(0.14, Math.sin(p.elev));
+        const cosE = Math.cos(Math.min(Math.PI / 2, Math.max(0, p.elev)));
+        const cr = Math.cos(p.roll), sr = Math.sin(p.roll);
+        const cy = Math.cos(p.yaw), sy = Math.sin(p.yaw);
+        // Linear map: rotate by yaw, squash by the viewing angle, roll, scale.
+        const a = (cr * cy - sr * sinE * sy) * p.px;
+        const b = (sr * cy + cr * sinE * sy) * p.px;
+        const c = (-cr * sy - sr * sinE * cy) * p.px;
+        const d = (-sr * sy + cr * sinE * cy) * p.px;
+        const step = p.px * cosE; // screen pixels from one layer to the next
+        return { a, b, c, d, cr, sr, step };
+    }
+    // Where a point of the model (in voxels) lands on the screen.
+    function modelToScreen(m, p, mx, my, mz) {
+        const f = frame(m, p);
+        const lx = mx - m.w / 2, ly = my - m.l / 2;
+        const off = mz * f.step;
+        return [p.sx + f.a * lx + f.c * ly + f.sr * off, p.sy + f.b * lx + f.d * ly - f.cr * off];
+    }
+    PA.modelToScreen = modelToScreen;
+    // Draw the stack. Far away it becomes a few layers, then a single dot.
+    function drawModel(ctx, m, p) {
+        const wide = Math.max(m.w, m.l) * p.px;
+        if (wide < 2.5) {
+            ctx.fillStyle = m.avg;
+            ctx.fillRect(Math.round(p.sx - 1), Math.round(p.sy - 2), 2, 2);
+            return;
+        }
+        const f = frame(m, p);
+        const ex = -(f.a * (m.w / 2) + f.c * (m.l / 2));
+        const ey = -(f.b * (m.w / 2) + f.d * (m.l / 2));
+        const sub = Math.min(5, Math.max(1, Math.ceil(f.step)));
+        const skip = wide < 9 ? 2 : 1;
+        const sway = p.sway || 0;
+        for (let z = 0; z <= m.top; z += skip) {
+            const slice = m.slices[z];
+            if (!slice)
+                continue;
+            // The higher the layer, the further it leans (the sway grows with the square of the height).
+            const k = m.top > 0 ? (z / m.top) * (z / m.top) * sway : 0;
+            for (let s = 0; s < sub; s++) {
+                const off = (z + s / sub) * f.step;
+                ctx.setTransform(f.a, f.b, f.c, f.d, p.sx + ex + f.sr * off + f.cr * k, p.sy + ey - f.cr * off + f.sr * k);
+                ctx.drawImage(slice, 0, 0);
+            }
+        }
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+    PA.drawModel = drawModel;
+    const stackCache = new Map();
+    const CACHE_MAX = 320;
+    const SIZES = [32, 64, 128, 256]; // square canvases, reused, never resized
+    const spare = SIZES.map(() => []);
+    PA.cacheStats = { hits: 0, misses: 0 };
+    const NEW_PER_FRAME = 8; // at most this many new stacks a frame; the rest draw layer by layer
+    let madeThisFrame = 0;
+    function cacheFrame() { madeThisFrame = 0; }
+    PA.cacheFrame = cacheFrame;
+    function drawModelCached(ctx, m, id, p) {
+        const wide = Math.max(m.w, m.l) * p.px;
+        if (wide < 9) {
+            drawModel(ctx, m, p);
+            return;
+        } // small ones are cheap already
+        const eb = Math.round(Math.max(0, Math.min(Math.PI / 2, p.elev)) / 0.05);
+        const pb = Math.round(Math.log(p.px) / Math.log(1.1));
+        const yb = Math.round((((p.yaw % 6.2832) + 6.2832) % 6.2832) / (Math.PI / 2)) % 4;
+        const key = id + '|' + yb + '|' + eb + '|' + pb;
+        let e = stackCache.get(key);
+        if (e) {
+            stackCache.delete(key);
+            stackCache.set(key, e); // keep the most used at the end
+            PA.cacheStats.hits++;
+        }
+        else {
+            if (madeThisFrame >= NEW_PER_FRAME) {
+                drawModel(ctx, m, p);
+                return;
+            }
+            const px = Math.pow(1.1, pb);
+            const q = { sx: 0, sy: 0, px, yaw: yb * (Math.PI / 2), elev: eb * 0.05, roll: 0 };
+            const f = frame(m, q);
+            let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+            for (const [lx, ly] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+                const x = f.a * lx * m.w / 2 + f.c * ly * m.l / 2, y = f.b * lx * m.w / 2 + f.d * ly * m.l / 2;
+                x0 = Math.min(x0, x);
+                x1 = Math.max(x1, x);
+                y0 = Math.min(y0, y);
+                y1 = Math.max(y1, y);
+            }
+            const lift = (m.top + 1) * f.step;
+            const need = Math.max(x1 - x0, y1 - y0 + lift) + 4;
+            const cls = SIZES.findIndex(n => n >= need);
+            if (cls < 0) {
+                drawModel(ctx, m, p);
+                return;
+            } // too big to keep: draw it directly
+            madeThisFrame++;
+            PA.cacheStats.misses++;
+            if (stackCache.size >= CACHE_MAX) {
+                const old = stackCache.keys().next().value;
+                const o = stackCache.get(old);
+                stackCache.delete(old);
+                spare[o.cls].push(o.img);
+            }
+            let img = spare[cls].pop();
+            if (!img) {
+                img = document.createElement('canvas');
+                img.width = img.height = SIZES[cls];
+            }
+            const g = img.getContext('2d');
+            g.setTransform(1, 0, 0, 1, 0, 0);
+            g.clearRect(0, 0, img.width, img.height);
+            g.imageSmoothingEnabled = false;
+            const ox = Math.ceil(-x0) + 2, oy = Math.ceil(-y0 + lift) + 2;
+            q.sx = ox;
+            q.sy = oy;
+            drawModel(g, m, q);
+            e = { img, cls, ox, oy, px, lift };
+            stackCache.set(key, e);
+        }
+        // Place it: scale to the exact size, turn by the roll, and lean the top by the sway.
+        const s = p.px / e.px;
+        const cr = Math.cos(p.roll), sr = Math.sin(p.roll);
+        const lean = e.lift > 1 ? -(p.sway || 0) / (e.lift * s) : 0; // sideways per pixel of height
+        // Matrix = translate(sx,sy) * rotate(roll) * scale(s) * shear(lean)
+        ctx.setTransform(cr * s, sr * s, (cr * lean - sr) * s, (sr * lean + cr) * s, p.sx, p.sy);
+        ctx.drawImage(e.img, -e.ox, -e.oy);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+    PA.drawModelCached = drawModelCached;
 })(PA || (PA = {}));
-// Ships on the sea and railway cars on the track.
+// The 3-D models, each built from voxels in code (no image files). Every model faces its
+// front toward y = 0. Colours are a warm, modern palette; light is baked in by bake().
 var PA;
 (function (PA) {
-    // A warship seen from the side: a grey hull, a bridge and a mast.
-    PA.PAINT['ship'] = g => {
-        g.r(0, 6, 26, 3, '#6b7480')
-            .r(1, 5, 24, 1, '#8a9470')
-            .r(16, 2, 6, 4, '#f5fbff')
-            .p(18, 3, '#8fd3f0').p(20, 3, '#8fd3f0')
-            .r(19, 0, 1, 2, '#4d5560');
+    // Pick one of a few colours by a repeatable hash, for natural variation.
+    function pick(list, x, y, z) {
+        return list[Math.floor(PA.hash2(x * 31 + z * 7, y * 17 + z * 3) * list.length) % list.length];
+    }
+    const A10_GREY = 0xa6b0b8, A10_DARK = 0x7d878f, A10_CAMO = 0x8e9a8c, GLASS = 0x7fd0f5, EXHAUST = 0xffb347;
+    // The A-10 Warthog: a straight high wing, twin tails, two engines high on the back, and
+    // the long nose with its gun. 18 m across.
+    function a10() {
+        const v = new PA.Voxels(36, 34, 12, 0.5);
+        // Fuselage: thick in the middle, tapering to the nose and the tail.
+        for (let y = 1; y < 32; y++) {
+            let r = 2.4;
+            if (y < 6)
+                r = 1.1 + (y - 1) * 0.28;
+            if (y > 25)
+                r = 2.4 - (y - 25) * 0.24;
+            v.tubeY(18, 3.6, y, y + 1, r, r * 0.9, A10_GREY);
+        }
+        v.box(17, 0, 3, 19, 1, 4, 0x3a3f44); // the gun at the nose
+        v.ellipsoid(18, 8.5, 5.6, 1.6, 2.8, 1.4, GLASS); // canopy
+        v.set(18, 7, 6, 0xd4f3ff); // a glint on the glass
+        // Wing, with darker tips and stores hanging under it.
+        v.box(1, 12, 3, 35, 17, 4, A10_GREY);
+        for (const x of [1, 2, 33, 34])
+            v.cut(x, 16, 3, x + 1, 17, 4);
+        v.box(1, 12, 3, 2, 16, 4, 0x929ca4).box(34, 12, 3, 35, 16, 4, 0x929ca4);
+        for (const x of [9, 27])
+            v.box(x, 13, 2, x + 1, 16, 3, 0x7b848b);
+        // Engines high on the back, each with a dark intake and a hot exhaust.
+        for (const cx of [13.5, 22.5]) {
+            v.tubeY(cx, 6.8, 18, 26, 1.8, 1.7, 0x8d969e);
+            v.tubeY(cx, 6.8, 18, 19, 1.2, 1.1, 0x40464c);
+            v.tubeY(cx, 6.8, 25, 26, 1.2, 1.1, EXHAUST);
+        }
+        v.box(14, 20, 4, 23, 24, 6, 0x8d969e); // engine pylons
+        // Tailplane and the two fins.
+        v.box(8, 27, 4, 28, 30, 5, A10_GREY);
+        for (const x0 of [8, 26]) {
+            v.box(x0, 25, 4, x0 + 2, 31, 11, A10_GREY);
+            v.box(x0, 25, 10, x0 + 2, 31, 11, A10_DARK);
+        }
+        // Two-tone camouflage on the top surfaces, and a roundel on each wing.
+        v.paint((x, y, z, c) => (c === A10_GREY && PA.noise2(x / 4, y / 4 + z) > 0.62) ? A10_CAMO : c);
+        for (const cx of [7, 29]) {
+            v.ellipsoid(cx, 14.5, 3.5, 1.6, 1.6, 0.6, 0x3d6db5);
+            v.set(cx, 14, 3, 0xf4f4f4);
+        }
+        return v;
+    }
+    // The classic paper dart: a pointed sheet folded down the middle, the wings tilted up a little.
+    function glider() {
+        const v = new PA.Voxels(27, 30, 6, 0.45);
+        for (let y = 0; y < 30; y++) {
+            const half = Math.min(12.5, (y / 29) * 13);
+            for (let d = 0; d <= half; d++) {
+                const z = 2 + Math.floor(d * 0.2);
+                const edge = d > half - 1.2;
+                const fold = Math.abs(d - half * 0.5) < 0.6;
+                const col = edge && y > 20 ? 0xf07c6a : fold ? 0xe6e0d2 : 0xfbf8f0;
+                v.set(13 + d, y, z, col);
+                v.set(13 - d, y, z, col);
+            }
+            if (y > 5)
+                v.box(13, y, 0, 14, y + 1, 2, 0xefe9dc); // the folded keel underneath
+        }
+        return v;
+    }
+    // A fighter jet: delta wings, two canted fins, and a glowing exhaust.
+    function fighter(body, dark, glass) {
+        const v = new PA.Voxels(22, 26, 8, 0.5);
+        for (let y = 1; y < 25; y++) {
+            const r = y < 6 ? 0.6 + (y - 1) * 0.22 : 1.7;
+            v.tubeY(11, 3, y, y + 1, r, r, body);
+        }
+        for (let y = 10; y < 23; y++) {
+            const half = (y - 10) * 0.75;
+            v.box(11 - half, y, 3, 11 + half + 1, y + 1, 4, body);
+        }
+        for (const x of [8, 13])
+            v.box(x, 19, 4, x + 1, 25, 8, dark);
+        v.ellipsoid(11, 7, 4.4, 1.1, 2.2, 1, glass);
+        v.tubeY(11, 3, 24, 25, 1, 1, EXHAUST);
+        return v;
+    }
+    // Main battle tank: tracks, a sloped hull, a round turret and a long gun.
+    function tankMbt() {
+        const v = new PA.Voxels(14, 24, 8, 0.42);
+        v.box(0, 5, 0, 3, 23, 2, 0x4c5157).box(11, 5, 0, 14, 23, 2, 0x4c5157);
+        v.paint((x, y, z, c) => (c === 0x4c5157 && y % 2 === 0 && z === 1) ? 0x5e646b : c);
+        v.box(2, 6, 1, 12, 22, 4, 0x7d8a55);
+        v.cut(2, 6, 3, 12, 7, 4); // the sloped front
+        v.paint((x, y, z, c) => c === 0x7d8a55 && PA.noise2(x / 3 + 5, y / 3) > 0.66 ? 0x66733f : c);
+        return v;
+    }
+    // The main tank's turret and gun, drawn on its own so it can turn toward the plane.
+    // The turret ring sits at the middle of the model; the gun points to the front (y = 0).
+    function turretMbt() {
+        const v = new PA.Voxels(10, 20, 4, 0.42);
+        v.ellipsoid(5, 10, 0.8, 3.6, 4.4, 1.7, 0x8a9862);
+        v.box(4, 11, 2, 6, 13, 3, 0x5f6b40); // hatch
+        v.tubeY(5, 1, 0, 8, 0.6, 0.6, 0x4f5a36);
+        v.box(4, 0, 0, 6, 1, 2, 0x3a4228); // muzzle
+        v.paint((x, y, z, c) => c === 0x8a9862 && PA.noise2(x / 3 + 9, y / 3) > 0.66 ? 0x66733f : c);
+        return v;
+    }
+    function tankLight() {
+        const v = new PA.Voxels(12, 20, 7, 0.4);
+        v.box(0, 4, 0, 2, 19, 2, 0x4c5157).box(10, 4, 0, 12, 19, 2, 0x4c5157);
+        v.box(1, 5, 1, 11, 18, 3, 0xc9b27a);
+        return v;
+    }
+    function turretLight() {
+        const v = new PA.Voxels(8, 16, 3, 0.4);
+        v.ellipsoid(4, 8, 0.8, 2.8, 3.2, 1.3, 0xd6c08a);
+        v.tubeY(4, 1, 0, 7, 0.5, 0.5, 0x6b5f3e);
+        return v;
+    }
+    // Armoured carrier: a boxy hull on eight wheels, a hatch and an aerial.
+    function apc() {
+        const v = new PA.Voxels(12, 20, 9, 0.42);
+        for (const y of [4, 8, 12, 16]) {
+            v.tubeX(y, 1.4, 0, 1.6, 1.4, 1.4, 0x33383d);
+            v.tubeX(y, 1.4, 10.4, 12, 1.4, 1.4, 0x33383d);
+        }
+        v.box(1, 2, 1, 11, 19, 5, 0x6f8f5a);
+        v.cut(1, 2, 4, 11, 4, 5);
+        v.box(4, 10, 5, 8, 13, 6, 0x5d7a4a);
+        v.box(9, 15, 5, 10, 16, 9, 0x2f3438);
+        return v;
+    }
+    // Cargo truck: an orange cab and a covered load.
+    function truck(cab, load) {
+        const v = new PA.Voxels(10, 21, 9, 0.4);
+        for (const y of [3, 13, 17]) {
+            v.tubeX(y, 1.2, 0, 1.2, 1.2, 1.2, 0x2f3438);
+            v.tubeX(y, 1.2, 8.8, 10, 1.2, 1.2, 0x2f3438);
+        }
+        v.box(1, 0, 1, 9, 5, 6, cab);
+        v.box(2, 0, 4, 8, 1, 5, 0x9fd8f0); // windscreen
+        v.box(1, 6, 1, 9, 20, 2, 0x6b5440);
+        v.tubeY(5, 4.2, 6, 20, 4, 3, load);
+        v.paint((x, y, z, c) => (z < 2 ? (c === load ? null : c) : c));
+        return v;
+    }
+    function fuelTruck() {
+        const v = new PA.Voxels(10, 21, 9, 0.4);
+        for (const y of [3, 13, 17]) {
+            v.tubeX(y, 1.2, 0, 1.2, 1.2, 1.2, 0x2f3438);
+            v.tubeX(y, 1.2, 8.8, 10, 1.2, 1.2, 0x2f3438);
+        }
+        v.box(1, 0, 1, 9, 5, 6, 0xe07b53);
+        v.box(2, 0, 4, 8, 1, 5, 0x9fd8f0);
+        v.tubeY(5, 4.6, 6, 20, 3.8, 3.4, 0xe9edf0);
+        v.paint((x, y, z, c) => (c === 0xe9edf0 && z === 4 ? 0xe05a4a : c));
+        return v;
+    }
+    // SAM launcher: a carrier with four white missiles tilted up, and a radar dish on a mast.
+    function sam() {
+        const v = new PA.Voxels(14, 20, 13, 0.45);
+        for (const y of [4, 10, 16]) {
+            v.tubeX(y, 1.3, 0, 1.4, 1.3, 1.3, 0x2f3438);
+            v.tubeX(y, 1.3, 12.6, 14, 1.3, 1.3, 0x2f3438);
+        }
+        v.box(1, 2, 1, 13, 19, 4, 0x7d8a55);
+        v.box(3, 9, 4, 11, 16, 5, 0x66733f);
+        for (const x of [3, 5, 8, 10]) {
+            for (let k = 0; k < 9; k++)
+                v.set(x, 15 - k, 5 + k * 0.75, k > 6 ? 0xe05555 : 0xf2f2f2);
+        }
+        v.cone(11.5, 4, 4, 9, 0.6, 0.5, 0x5f676d);
+        return v;
+    }
+    // The SAM's radar dish: a thin upright disc that spins on its mast.
+    function samDish() {
+        const v = new PA.Voxels(6, 4, 5, 0.45);
+        v.ellipsoid(3, 2, 2.5, 2.8, 0.8, 2.4, 0xdde1e4);
+        v.set(3, 1, 2, 0x8e979d);
+        return v;
+    }
+    // What is left of something destroyed: charred, broken blocks with a few glowing embers.
+    function wreck() {
+        const v = new PA.Voxels(14, 14, 5, 0.5);
+        v.ellipsoid(7, 7, 0, 6.5, 6, 1.2, 0x2f2a28); // scorched patch
+        v.box(3, 4, 1, 9, 9, 3, 0x3b3735); // the hull, burnt out
+        v.box(6, 2, 1, 11, 6, 2, 0x4a4542);
+        v.box(4, 9, 1, 7, 12, 4, 0x332f2d); // a broken piece standing up
+        v.box(9, 8, 1, 12, 10, 2, 0x55504c);
+        v.paint((x, y, z, c) => ((x * 7 + y * 13 + z * 5) % 11 === 0 ? 0xe8742c : (x + y) % 3 === 0 ? c - 0x080808 : c));
+        return v;
+    }
+    // A flag pole at each base. The flag itself is drawn waving in the wind.
+    function flagpole() {
+        const v = new PA.Voxels(4, 4, 30, 0.5);
+        v.box(0, 0, 0, 4, 4, 1, 0x9aa0a6); // base
+        v.box(1, 1, 1, 3, 3, 29, 0xd8dde2); // pole
+        v.box(1, 1, 29, 3, 3, 30, 0xf2c94c); // gold top
+        return v;
+    }
+    // A windmill on the farms: a white tower with a red cap. Its sails are drawn turning.
+    function windmill() {
+        const v = new PA.Voxels(10, 10, 22, 0.7);
+        v.cone(5, 5, 0, 18, 3.8, 2.2, 0xf2ede3);
+        v.paint((x, y, z, c) => (z % 5 === 0 ? 0xe2dccf : c));
+        v.box(4, 2, 5, 6, 3, 9, 0x8a5a3c); // door
+        v.cone(5, 5, 18, 22, 2.8, 0.5, 0xc4473d); // cap
+        return v;
+    }
+    // Flak gun in a ring of sandbags, two barrels raised.
+    function flak() {
+        const v = new PA.Voxels(13, 13, 8, 0.45);
+        for (let y = 0; y < 13; y++)
+            for (let x = 0; x < 13; x++) {
+                const d = Math.hypot(x + 0.5 - 6.5, y + 0.5 - 6.5);
+                if (d > 4.6 && d < 6.4)
+                    v.box(x, y, 0, x + 1, y + 1, 2, pick([0xcbb37b, 0xbfa66d, 0xd6bf88], x, y, 0));
+            }
+        v.box(5, 5, 0, 8, 8, 3, 0x6b7378);
+        for (const x of [5, 7])
+            for (let k = 0; k < 7; k++)
+                v.set(x, 6 - k * 0.8, 3 + k * 0.65, 0x3f454b);
+        return v;
+    }
+    // A farm house: cream walls, windows, a door, a red pitched roof and a chimney.
+    function house(wall, roof) {
+        const v = new PA.Voxels(16, 14, 14, 0.6);
+        v.box(1, 1, 0, 15, 13, 7, wall);
+        v.paint((x, y, z, c) => {
+            const face = x === 1 || x === 14 || y === 1 || y === 12;
+            if (face && z >= 3 && z <= 4 && ((x + y) % 4 === 1))
+                return 0x8ccfe8;
+            return c;
+        });
+        v.box(7, 1, 0, 9, 2, 4, 0x8a5a3c); // door
+        v.roof(0, 0, 16, 14, 7, true, roof, shade(roof, 0.8));
+        v.box(11, 4, 8, 13, 6, 13, 0xb85c45); // chimney
+        return v;
+    }
+    function shade(rgb, f) {
+        const r = Math.min(255, Math.round(((rgb >> 16) & 255) * f));
+        const g = Math.min(255, Math.round(((rgb >> 8) & 255) * f));
+        const b = Math.min(255, Math.round((rgb & 255) * f));
+        return (r << 16) | (g << 8) | b;
+    }
+    // A red barn with white trim, big doors and a grey roof.
+    function barn() {
+        const v = new PA.Voxels(16, 20, 15, 0.6);
+        v.box(1, 1, 0, 15, 19, 8, 0xc4473d);
+        v.paint((x, y, z, c) => ((x === 1 || x === 14) && (y === 1 || y === 18)) ? 0xf5f0e6 : c);
+        v.box(5, 1, 0, 11, 2, 6, 0xa53a32);
+        v.paint((x, y, z, c) => (y === 1 && x >= 5 && x < 11 && z < 6 && (x - 5 === z || 10 - x === z)) ? 0xf5f0e6 : c);
+        v.roof(0, 0, 16, 20, 8, false, 0x6f7d7a, 0x5c6866);
+        return v;
+    }
+    // A city tower block: a pale body, rows of windows (some lit), and a roof with machinery.
+    function tower(storeys, body) {
+        const h = storeys * 3 + 3;
+        const v = new PA.Voxels(12, 12, h, 0.9);
+        v.box(1, 1, 0, 11, 11, h - 2, body);
+        v.box(1, 1, 0, 11, 11, 2, 0xc96f5a); // shop fronts at street level
+        v.paint((x, y, z, c) => {
+            const face = x === 1 || x === 10 || y === 1 || y === 10;
+            if (!face || z < 3 || z >= h - 2 || z % 3 !== 1)
+                return c;
+            if ((x + y) % 2 !== 0)
+                return c;
+            return PA.hash2(x * 11 + z, y * 5 + z * 3) > 0.8 ? 0xffe39a : 0x8fc6e8;
+        });
+        v.box(1, 1, h - 2, 11, 11, h - 1, shade(body, 0.75));
+        v.box(3, 3, h - 1, 6, 6, h, 0x9aa3ab);
+        v.box(7, 6, h - 1, 9, 8, h, 0x9aa3ab);
+        return v;
+    }
+    function barracks() {
+        const v = new PA.Voxels(24, 12, 9, 0.6);
+        v.box(1, 1, 0, 23, 11, 5, 0x8a9a6a);
+        v.paint((x, y, z, c) => ((y === 1 || y === 10) && z === 3 && x % 3 === 1) ? 0x8ccfe8 : c);
+        v.box(11, 1, 0, 13, 2, 3, 0x5a4632);
+        v.roof(0, 0, 24, 12, 5, true, 0x6e7a72, 0x5d6862);
+        return v;
+    }
+    // An aircraft hangar: an arched roof with ribs, and a wide dark door.
+    function hangar() {
+        const v = new PA.Voxels(22, 26, 12, 0.8);
+        for (let y = 1; y < 25; y++)
+            for (let z = 0; z < 12; z++)
+                for (let x = 0; x < 22; x++) {
+                    const dx = (x + 0.5 - 11) / 11, dz = (z + 0.5) / 11.5;
+                    if (dx * dx + dz * dz <= 1)
+                        v.set(x, y, z, y % 4 === 0 ? 0x9aa4ad : 0xb7c0c8);
+                }
+        v.paint((x, y, z, c) => (y === 1 && Math.abs(x + 0.5 - 11) < 7 && z < 8) ? 0x545b62 : c);
+        return v;
+    }
+    // A warship: a pointed grey hull with a red waterline, a bridge, a funnel, a mast and a gun.
+    function ship() {
+        const v = new PA.Voxels(12, 42, 12, 0.7);
+        for (let y = 0; y < 42; y++) {
+            let hw = 5.5;
+            if (y < 11)
+                hw = 0.8 + y * 0.45;
+            if (y > 36)
+                hw = 5.5 - (y - 36) * 0.4;
+            v.box(6 - hw, y, 0, 6 + hw, y + 1, 3, 0x6f7a84);
+            v.box(6 - hw, y, 0, 6 + hw, y + 1, 1, 0xb64a42);
+            v.box(6 - hw, y, 3, 6 + hw, y + 1, 4, 0x9aa5ad);
+        }
+        v.box(3, 18, 4, 9, 28, 7, 0xc8cfd5);
+        v.paint((x, y, z, c) => (c === 0xc8cfd5 && z === 6 && (x === 3 || x === 8) && y % 2 === 0) ? 0x3e4a55 : c);
+        v.box(4, 16, 7, 8, 21, 9, 0xd6dce1);
+        v.cone(6, 20, 9, 12, 0.5, 0.4, 0x5f676d);
+        v.box(5, 28, 4, 7, 32, 9, 0x3e4a55);
+        v.ellipsoid(6, 9, 4.3, 1.7, 1.7, 0.9, 0xb0b9c0);
+        v.tubeY(6, 4.6, 4, 9, 0.4, 0.4, 0x4f5860);
+        return v;
+    }
+    function wagon() {
+        const v = new PA.Voxels(8, 20, 8, 0.45);
+        for (const y of [3, 16])
+            v.box(1, y - 2, 0, 7, y + 2, 2, 0x33383d);
+        v.box(0, 1, 2, 8, 19, 7, 0x8a5a3c);
+        v.paint((x, y, z, c) => (c === 0x8a5a3c && y % 3 === 0) ? 0x744a30 : c);
+        v.box(0, 1, 7, 8, 19, 8, 0x6f4a32);
+        return v;
+    }
+    // Trees: a round one, a pine, an autumn one, a blossom tree and a bush.
+    function roundTree(colors) {
+        const v = new PA.Voxels(10, 10, 12, 0.8);
+        v.cone(5, 5, 0, 5, 0.8, 0.7, 0x7a5236);
+        v.ellipsoid(5, 5, 7.5, 4.2, 4.2, 3.8, colors[0]);
+        v.paint((x, y, z, c) => (c === colors[0] ? pick(colors, x, y, z) : c));
+        return v;
+    }
+    function pine() {
+        const v = new PA.Voxels(10, 10, 14, 0.8);
+        v.cone(5, 5, 0, 3, 0.7, 0.7, 0x6e4a30);
+        v.cone(5, 5, 2, 14, 4.4, 0.4, 0x3f8f58);
+        v.paint((x, y, z, c) => (c === 0x3f8f58 ? pick([0x3f8f58, 0x357d4d, 0x4ea066], x, y, z) : c));
+        return v;
+    }
+    function bush() {
+        const v = new PA.Voxels(8, 8, 6, 0.7);
+        v.ellipsoid(4, 4, 2.5, 3.6, 3.6, 2.6, 0x6cbf5c);
+        v.paint((x, y, z, c) => pick([0x6cbf5c, 0x5aae52, 0x86cf6c], x, y, z));
+        return v;
+    }
+    // Every model by name. City towers and trees have several versions.
+    PA.MODEL_BUILDERS = {
+        plane: a10,
+        glider,
+        fighter: () => fighter(0xc4515a, 0x8e3640, 0x2f3b4a),
+        ally: () => fighter(0x4f8fe0, 0x2e5d9e, 0xffd77a),
+        jet: () => fighter(0xc9ced3, 0x9aa1a8, 0x3a4652),
+        tank_mbt: tankMbt,
+        turret_mbt: turretMbt,
+        tank_light: tankLight,
+        turret_light: turretLight,
+        samdish: samDish,
+        windmill,
+        wreck,
+        flagpole,
+        apc,
+        truck: () => truck(0xe07b53, 0xc9b07e),
+        fuel: fuelTruck,
+        sam,
+        flak,
+        farm: () => house(0xf4e7cc, 0xd65a4a),
+        house1: () => house(0xe8eef2, 0x5b8fbf),
+        house2: () => house(0xf6dcc4, 0x7aa86a),
+        barn,
+        city: () => tower(6, 0xe9e4da),
+        city1: () => tower(8, 0xd6e1ea),
+        city2: () => tower(10, 0xf0d6c6),
+        barracks,
+        hangar,
+        ship,
+        rail: wagon,
+        tree0: () => roundTree([0x6cbf5c, 0x5aae52, 0x7fcd6a]),
+        tree1: pine,
+        tree2: () => roundTree([0xe9a043, 0xd9822f, 0xf2b85a]),
+        tree3: () => roundTree([0xf3a7c4, 0xf7c6d8, 0xe98fb3]),
+        tree4: bush,
     };
-    // A railway wagon.
-    PA.PAINT['rail'] = g => {
-        g.r(0, 2, 12, 4, '#8a6a4a')
-            .r(0, 1, 12, 1, '#6b4a3a')
-            .r(2, 6, 2, 2, '#4d5560').r(8, 6, 2, 2, '#4d5560');
-    };
-})(PA || (PA = {}));
-// Things that are only to look at: trees. They have no hit box and cannot be shot.
-var PA;
-(function (PA) {
-    // A round-topped tree with a trunk.
-    PA.PAINT['tree'] = g => {
-        g.r(3, 8, 2, 4, '#6b4a3a')
-            .r(1, 3, 6, 6, '#7bd389')
-            .r(2, 1, 4, 3, '#8fe0bd')
-            .p(2, 6, '#5fb870').p(6, 4, '#5fb870');
-    };
+    const baked = {};
+    // The baked model by name (built and baked the first time it is asked for).
+    function model(name) {
+        if (!baked[name])
+            baked[name] = PA.bake(PA.MODEL_BUILDERS[name]());
+        return baked[name];
+    }
+    PA.model = model;
 })(PA || (PA = {}));
 // The four forces, in plain numbers. No drawing here, so it can be tested in Node.
 //
@@ -524,211 +1117,6 @@ var PA;
     function clamp01(v) {
         return Math.max(0, Math.min(1, v));
     }
-})(PA || (PA = {}));
-// The land and the sea, and what is on them. Same seed, same start.
-var PA;
-(function (PA) {
-    // A seeded random number generator (mulberry32). Returns 0 up to 1.
-    function random(seed) {
-        let s = seed >>> 0;
-        return () => {
-            s = (s + 0x6d2b79f5) >>> 0;
-            let t = s;
-            t = Math.imul(t ^ (t >>> 15), t | 1);
-            t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-        };
-    }
-    PA.random = random;
-    PA.SEA_X = 1300; // east of this is the sea
-    PA.ROAD_X = -120; // the main road runs north along this line
-    PA.ROAD_W = 7; // half its width, metres
-    // Height of the ground in metres at ground position (X, Z). The sea is at zero.
-    function groundAt(X, Z) {
-        if (X > PA.SEA_X)
-            return 0;
-        return Math.max(0, 4 + 3.5 * Math.sin(X / 210) + 1.5 * Math.sin(Z / 61 + 2));
-    }
-    PA.groundAt = groundAt;
-    function isSea(X) {
-        return X > PA.SEA_X;
-    }
-    PA.isSea = isSea;
-    // What the ground looks like: farm fields, town, army land, or the sea.
-    // A repeatable pseudo-random number from a cell (so the same place always looks the same).
-    function cellNoise(i, j, salt) {
-        let h = (i * 374761393 + j * 668265263 + salt * 2246822519) | 0;
-        h = Math.imul(h ^ (h >>> 13), 1274126177);
-        return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
-    }
-    PA.cellNoise = cellNoise;
-    // Lakes: some 200 m cells on land are water.
-    function isLake(X, Z) {
-        if (X > PA.SEA_X)
-            return false;
-        const i = Math.floor(X / 200), j = Math.floor(Z / 200);
-        return cellNoise(i, j, 7) > 0.86 && Math.abs(X - PA.ROAD_X) > 30;
-    }
-    PA.isLake = isLake;
-    // Forest: some cells of farm and army land have trees.
-    function isForest(X, Z) {
-        const i = Math.floor(X / 120), j = Math.floor(Z / 120);
-        return cellNoise(i, j, 11) > 0.7 && Math.abs(X - PA.ROAD_X) > 14;
-    }
-    PA.isForest = isForest;
-    function biomeAt(X, Z) {
-        if (X > PA.SEA_X)
-            return 'sea';
-        if (isLake(X, Z))
-            return 'lake';
-        if (isForest(X, Z))
-            return 'forest';
-        const cell = Math.floor((X + 900) / 320) + Math.floor(Z / 260) * 3;
-        const k = ((cell % 4) + 4) % 4;
-        if (k === 0)
-            return 'farm';
-        if (k === 1)
-            return 'town';
-        return 'army';
-    }
-    PA.biomeAt = biomeAt;
-    // Where a thing is in the air, or its ground height when it is on the ground.
-    function altOf(t) {
-        return t.h !== undefined ? t.h : groundAt(t.X, t.Z);
-    }
-    PA.altOf = altOf;
-    PA.KINDS = {
-        tank_mbt: { r: 2.6, height: 2.6, hp: 2, points: 100, group: 'army' },
-        tank_light: { r: 2.2, height: 2.0, hp: 1, points: 60, group: 'army' },
-        apc: { r: 2.4, height: 2.2, hp: 1, points: 50, group: 'army' },
-        truck: { r: 2.0, height: 2.6, hp: 1, points: 40, group: 'farm' },
-        fuel: { r: 2.6, height: 2.6, hp: 1, points: 60, group: 'airfield' },
-        sam: { r: 3.0, height: 3.5, hp: 2, points: 150, group: 'army', gun: { range: 520, cool: 4, speed: 150 } },
-        flak: { r: 2.0, height: 3.0, hp: 1, points: 80, group: 'army', gun: { range: 260, cool: 2, speed: 120 } },
-        farm: { r: 4.0, height: 4.0, hp: 1, points: 30, group: 'farm' },
-        barn: { r: 4.0, height: 3.5, hp: 1, points: 40, group: 'farm' },
-        city: { r: 3.0, height: 12, hp: 3, points: 120, group: 'town' },
-        barracks: { r: 5.0, height: 3.0, hp: 2, points: 120, group: 'army' },
-        hangar: { r: 6.0, height: 5.0, hp: 3, points: 200, group: 'airfield' },
-        jet: { r: 3.0, height: 2.5, hp: 1, points: 150, group: 'airfield' },
-        ship: { r: 6.0, height: 3.0, hp: 4, points: 250, group: 'port' },
-        rail: { r: 2.5, height: 2.5, hp: 1, points: 40, group: 'rail' },
-        fighter: { r: 4.5, height: 3.0, hp: 1, points: 200, group: 'air', gun: { range: 380, cool: 2.6, speed: 230 } },
-        ally: { r: 3.0, height: 2.5, hp: 1, points: -300, group: 'air' },
-    };
-    // Which kinds drive along the road (and how fast, metres per second).
-    PA.DRIVES = { tank_mbt: 3, tank_light: 6, apc: 6, truck: 9, fuel: 7 };
-    // Is this a mission target? Ground places and vehicles count; ships, rail and the air do not.
-    function isObjective(t) {
-        if (t.faction)
-            return false;
-        const group = PA.KINDS[t.kind].group;
-        return group === 'army' || group === 'farm' || group === 'town';
-    }
-    PA.isObjective = isObjective;
-    function target(kind, X, Z, rand) {
-        const info = PA.KINDS[kind];
-        return {
-            kind, X, Z, alive: true, points: info.points, hp: info.hp,
-            cool: info.gun ? 1 + rand() * info.gun.cool : 0,
-        };
-    }
-    PA.target = target;
-    // Clusters of things in front of baseZ. Each cluster is one kind of place.
-    function spawnTargets(rand, baseZ, count) {
-        const out = [];
-        for (let i = 0; i < count; i++) {
-            const Z = baseZ + i * 120 + rand() * 60;
-            const roll = rand();
-            const landX = (rand() - 0.5) * 900;
-            // Some vehicles drive along the road, north or south.
-            const driver = (kind, X, Z) => {
-                const t = target(kind, X, Z, rand);
-                if (PA.DRIVES[kind] !== undefined && rand() < 0.5)
-                    t.vZ = (rand() < 0.5 ? -1 : 1) * PA.DRIVES[kind];
-                return t;
-            };
-            if (roll < 0.32) {
-                // Army: tanks, carriers, a SAM site or a flak gun.
-                const X = landX;
-                out.push(driver('tank_mbt', PA.ROAD_X + 4, Z));
-                out.push(driver(rand() < 0.5 ? 'tank_light' : 'apc', PA.ROAD_X - 6, Z + 4));
-                if (rand() < 0.5)
-                    out.push(target('sam', X - 10, Z + 10, rand));
-                else
-                    out.push(target('flak', X + 14, Z - 6, rand));
-            }
-            else if (roll < 0.5) {
-                // Farm: houses, barns and a lorry.
-                const X = landX;
-                out.push(target('farm', X, Z, rand));
-                out.push(target('barn', X + 12, Z + 9, rand));
-                out.push(driver('truck', PA.ROAD_X + 3, Z + 6));
-            }
-            else if (roll < 0.66) {
-                // Town: towers, barracks and a SAM site.
-                const X = landX;
-                out.push(target('city', X, Z, rand));
-                out.push(target('city', X + 8, Z + 6, rand));
-                out.push(target('city', X - 7, Z + 9, rand));
-                out.push(target('sam', X + 14, Z - 4, rand));
-            }
-            else if (roll < 0.78) {
-                // Airfield: a hangar, parked jets and a fuel tanker.
-                const X = Math.min(PA.SEA_X - 120, landX);
-                out.push(target('hangar', X, Z, rand));
-                out.push(target('jet', X + 12, Z + 8, rand));
-                out.push(target('jet', X + 18, Z + 8, rand));
-                out.push(target('fuel', X - 10, Z + 10, rand));
-            }
-            else if (roll < 0.9) {
-                // Port: a ship on the sea, with a flak gun on the coast.
-                const X = PA.SEA_X + 80 + rand() * 300;
-                out.push(target('ship', X, Z, rand));
-                out.push(target('flak', PA.SEA_X - 30, Z, rand));
-            }
-            else {
-                // Railway: wagons on the line.
-                const X = -320;
-                out.push(target('rail', X, Z, rand));
-                out.push(target('rail', X, Z + 6, rand));
-                out.push(target('barracks', X + 40, Z + 12, rand));
-            }
-        }
-        return out;
-    }
-    PA.spawnTargets = spawnTargets;
-    // An enemy fighter or an ally, flying in from far off.
-    function spawnAir(rand, px, pz, enemy) {
-        const bearing = (rand() - 0.5) * 1.2; // radians either side of the nose
-        const dist = 1100 + rand() * 200;
-        const X = px + Math.sin(bearing) * dist;
-        const Z = pz + Math.cos(bearing) * dist;
-        const h = 80 + rand() * 40;
-        if (enemy) {
-            return { kind: 'fighter', X, Z, h, alive: true, points: PA.KINDS.fighter.points, hp: 1,
-                cool: 1 + rand() * 2, faction: 'enemy', age: 0 };
-        }
-        // Allies orbit a point near the front, at a steady height.
-        const cx = px + (rand() - 0.5) * 600, cz = pz + 500 + rand() * 500;
-        return { kind: 'ally', X: cx + 900, Z: cz, h: 90, alive: true, points: PA.KINDS.ally.points, hp: 1, cool: 0,
-            faction: 'ally', orbit: { cx, cz, r: 900, ang: rand() * Math.PI * 2, w: 0.09 }, age: 0 };
-    }
-    PA.spawnAir = spawnAir;
-    function makeMission(mode, seed) {
-        const rand = random(seed);
-        if (mode === 'glider') {
-            const hoops = [];
-            for (let i = 0; i < 24; i++) {
-                const X = (rand() - 0.5) * 60;
-                const Z = 220 + i * 110 + rand() * 30;
-                hoops.push({ X, Z, h: groundAt(X, Z) + 12 + rand() * 40, r: 6, passed: false });
-            }
-            return { mode, targets: [], hoops };
-        }
-        return { mode, targets: spawnTargets(rand, 260, 10), hoops: [] };
-    }
-    PA.makeMission = makeMission;
 })(PA || (PA = {}));
 // Sound made in the page with the Web Audio API. No sound files.
 // Four channels, each with its own slider: music (with the engine hum), guns,
@@ -1165,6 +1553,7 @@ var PA;
 // warns of them, and a tight turn or chaff can break them off.
 var PA;
 (function (PA) {
+    const WRECK_LIFE = 50; // seconds a wreck burns and smokes
     PA.MISSILE_MAX = 6;
     PA.AMMO_MAX = 240;
     PA.CHAFF_MAX = 4;
@@ -1202,7 +1591,6 @@ var PA;
     const FIGHTER_FIRE_RANGE = 380;
     const SHELL_WARN_RANGE = 300;
     const FRIEND_RESPAWN = 40;
-    const WISP_LIFE = 1.4;
     const ATTACK_RANGE = 700; // a fighter starts its attack run inside this distance
     const BREAK_RANGE = 180; // and breaks off this close, or after BREAK_AFTER seconds
     const BREAK_AFTER = 3;
@@ -1253,8 +1641,9 @@ var PA;
             this.missiles = [];
             this.decoys = [];
             this.puffs = [];
+            this.wrecks = []; // burning remains
+            this.bases = []; // where each base's flag stands
             this.marks = [];
-            this.wisps = [];
             this.warned = false;
             this.held = { fire: false, boost: false, missile: false };
             this.axes = { yaw: 0, pitch: 0 };
@@ -1294,6 +1683,8 @@ var PA;
             this.missileCool = 0;
             this.reloadTimer = 0;
             this.waveTimer = 8;
+            this.wrecks = [];
+            this.bases = [];
             this.nextBaseZ = BASE_SPACING;
             this.enemyMissileCool = 6;
             this.allyTimers = [];
@@ -1312,7 +1703,6 @@ var PA;
             this.decoys = [];
             this.puffs = [];
             this.marks = [];
-            this.wisps = [];
         }
         // A reload from ⚙️ (normal mode only): the gun and missiles come back, with a cooldown.
         reloadFromSettings() {
@@ -1347,8 +1737,8 @@ var PA;
                 return;
             const dt = Math.min(dtIn, 1 / 30);
             this.updatePuffs(dt);
+            this.burnWrecks(dt);
             this.updateMarks(dt);
-            this.updateWisps(dt);
             this.blink = Math.max(0, this.blink - dt);
             this.resupplied = Math.max(0, this.resupplied - dt);
             this.missionCard = Math.max(0, this.missionCard - dt);
@@ -1402,7 +1792,6 @@ var PA;
                 this.updateTag(dt);
                 this.updateObjective();
                 this.keepTargets();
-                this.emitWisps(dt);
                 this.emitDust();
                 if (this.hull <= 0 && !this.felix && this.settings.invincible !== 1)
                     this.crash();
@@ -1444,30 +1833,6 @@ var PA;
             for (const m of this.marks)
                 m.age += dt;
         }
-        // Wisps stream from the wing tips in a tight turn; clouds come from the boost.
-        emitWisps(dt) {
-            const p = this.plane;
-            const tight = Math.abs(p.bank) / PA.AIR.bankMax;
-            if (tight < 0.5 || this.phase !== 'flying')
-                return;
-            const count = Math.floor(tight * 5 * dt * 30) + (this.rand() < tight * dt * 6 ? 1 : 0);
-            const cosY = Math.cos(p.yaw), sinY = Math.sin(p.yaw);
-            for (let i = 0; i < count; i++) {
-                const side = this.rand() < 0.5 ? -1 : 1;
-                const span = 8;
-                this.wisps.push({
-                    X: p.X + cosY * side * span, Z: p.Z - sinY * side * span, h: p.h,
-                    vX: 0, vY: 1, vZ: 0, life: WISP_LIFE, max: WISP_LIFE, color: '#ffffff', size: 2 + this.rand() * 2,
-                });
-            }
-            if (this.held.boost && this.rand() < 0.4) {
-                this.wisps.push({
-                    X: p.X - Math.sin(p.yaw) * 10, Z: p.Z - Math.cos(p.yaw) * 10, h: p.h - 1,
-                    vX: (this.rand() - 0.5) * 2, vY: 1.5, vZ: (this.rand() - 0.5) * 2,
-                    life: 1.2, max: 1.2, color: '#fffdfa', size: 4 + this.rand() * 3,
-                });
-            }
-        }
         // Dust is kicked up when the plane is low and moving fast.
         emitDust() {
             const p = this.plane;
@@ -1477,17 +1842,8 @@ var PA;
             this.puffs.push({
                 X: p.X + (this.rand() - 0.5) * 10, Z: p.Z + (this.rand() - 0.5) * 10, h: PA.groundAt(p.X, p.Z) + 0.5,
                 vX: (this.rand() - 0.5) * 6, vY: 2 + this.rand() * 3, vZ: (this.rand() - 0.5) * 6,
-                life: 0.6, max: 0.6, color: '#e6dcc0', size: 2 + this.rand() * 2,
+                life: 0.6, max: 0.6, color: '#e6dcc0', size: 2 + this.rand() * 2, kind: 'dust',
             });
-        }
-        updateWisps(dt) {
-            for (const w of this.wisps) {
-                w.life -= dt;
-                w.X += w.vX * dt;
-                w.Z += w.vZ * dt;
-                w.h += w.vY * dt;
-            }
-            this.wisps = this.wisps.filter(w => w.life > 0);
         }
         updateReload(dt) {
             if (this.felix) {
@@ -1683,6 +2039,9 @@ var PA;
         spawnBase(z) {
             const X = (this.rand() - 0.5) * 600;
             const m = this.mission.targets;
+            this.bases.push({ X: X + 22, Z: z - 2 });
+            if (this.bases.length > 8)
+                this.bases.shift();
             m.push(PA.target('city', X, z, this.rand), PA.target('city', X + 10, z + 7, this.rand), PA.target('city', X - 9, z + 10, this.rand));
             m.push(PA.target('sam', X + 14, z - 6, this.rand), PA.target('flak', X - 14, z - 8, this.rand), PA.target('flak', X + 6, z + 16, this.rand));
             for (let i = 0; i < 2; i++) {
@@ -1794,6 +2153,7 @@ var PA;
                 m.X += m.vX * dt;
                 m.Z += m.vZ * dt;
                 m.h += m.vY * dt;
+                this.trail(m.X, m.h, m.Z);
                 if (target && target.alive) {
                     const info = PA.KINDS[target.kind];
                     const tg = PA.altOf(target);
@@ -1857,6 +2217,7 @@ var PA;
                 m.X += m.vX * dt;
                 m.Z += m.vZ * dt;
                 m.h += m.vY * dt;
+                this.trail(m.X, m.h, m.Z);
                 const dp = Math.hypot(m.X - p.X, m.h - p.h, m.Z - p.Z);
                 // A decoy caught it: it bursts there.
                 const hitDecoy = this.decoys.find(d => Math.hypot(m.X - d.X, m.h - d.h, m.Z - d.Z) < 8);
@@ -2043,6 +2404,12 @@ var PA;
             if (PA.isObjective(t))
                 this.objectiveDone++;
             this.explode(t.X, tg + 1, t.Z, PA.KINDS[t.kind].height > 5 ? 26 : 16);
+            // Ground targets leave a wreck that burns and smokes for a while.
+            if (t.h === undefined && t.kind !== 'ship') {
+                this.wrecks.push({ X: t.X, Z: t.Z, size: PA.KINDS[t.kind].height > 5 ? 1.6 : 1, age: 0 });
+                if (this.wrecks.length > 14)
+                    this.wrecks.shift();
+            }
             this.onSound('boom');
         }
         updateShots(dt) {
@@ -2162,31 +2529,95 @@ var PA;
                 }
             }
         }
+        // An explosion: a fireball that flares and fades, smoke that rolls up and spreads, and sparks.
         explode(X, h, Z, n) {
-            const colors = ['#ffb02e', '#ff9e8a', '#ffe08a', '#ffd9c7'];
-            for (let i = 0; i < n; i++) {
-                const a = this.rand() * Math.PI * 2;
-                const sp = 8 + this.rand() * 26;
+            const fire = Math.max(3, Math.round(n * 0.5)), smoke = Math.max(3, Math.round(n * 0.45)), sparks = Math.round(n * 0.4);
+            for (let i = 0; i < fire; i++) {
+                const a = this.rand() * Math.PI * 2, sp = 3 + this.rand() * 10;
                 this.puffs.push({
-                    X, h, Z,
-                    vX: Math.cos(a) * sp, vY: Math.sin(a) * sp * 0.6 + 6, vZ: Math.sin(a) * sp,
-                    life: 0.5 + this.rand() * 0.6, max: 1.1,
-                    color: colors[i % colors.length], size: 2 + this.rand() * 3,
+                    X, h, Z, vX: Math.cos(a) * sp, vY: 2 + this.rand() * 6, vZ: Math.sin(a) * sp,
+                    life: 0.35 + this.rand() * 0.35, max: 0.7, color: '#ffb02e', size: 2.5 + this.rand() * 3, kind: 'fire',
                 });
             }
+            for (let i = 0; i < smoke; i++) {
+                const a = this.rand() * Math.PI * 2, sp = 1 + this.rand() * 4;
+                this.puffs.push({
+                    X, h, Z, vX: Math.cos(a) * sp, vY: 2 + this.rand() * 3, vZ: Math.sin(a) * sp,
+                    life: 1.4 + this.rand() * 1.2, max: 2.6, color: '#777777', size: 2.5 + this.rand() * 2.5, kind: 'smoke',
+                });
+            }
+            for (let i = 0; i < sparks; i++) {
+                const a = this.rand() * Math.PI * 2, sp = 14 + this.rand() * 22;
+                this.puffs.push({
+                    X, h, Z, vX: Math.cos(a) * sp, vY: 6 + this.rand() * 14, vZ: Math.sin(a) * sp,
+                    life: 0.4 + this.rand() * 0.4, max: 0.8, color: '#fff1b8', size: 0.6, kind: 'spark',
+                });
+            }
+            if (this.puffs.length > 700)
+                this.puffs.splice(0, this.puffs.length - 700);
+        }
+        // A thin smoke trail behind a missile.
+        trail(X, h, Z) {
+            this.puffs.push({
+                X, h, Z, vX: 0, vY: 0.6, vZ: 0, life: 1.1, max: 1.1, color: '#cccccc', size: 0.9, kind: 'smoke',
+            });
         }
         dust(X, h, Z) {
             for (let i = 0; i < 4; i++) {
                 this.puffs.push({
                     X, h, Z,
                     vX: (this.rand() - 0.5) * 10, vY: 4 + this.rand() * 4, vZ: (this.rand() - 0.5) * 10,
-                    life: 0.4, max: 0.4, color: '#e6e0c8', size: 2,
+                    life: 0.4, max: 0.4, color: '#e6e0c8', size: 1.2, kind: 'dust',
                 });
             }
         }
+        // Smoke rises and slows; fire slows; sparks and dust fall.
+        // A wreck burns for a while, then only smokes, then goes out. Its smoke drifts with the wind.
+        burnWrecks(dt) {
+            const p = this.plane;
+            for (const w of this.wrecks) {
+                w.age += dt;
+                if (w.age > WRECK_LIFE || this.puffs.length > 640)
+                    continue;
+                if (Math.hypot(w.X - p.X, w.Z - p.Z) > 1600)
+                    continue;
+                const left = 1 - w.age / WRECK_LIFE;
+                if (this.rand() < dt * 7 * left) {
+                    const g = 0.16 + this.rand() * 0.1;
+                    const shade = Math.round(g * 255).toString(16).padStart(2, '0');
+                    this.puffs.push({
+                        X: w.X + (this.rand() - 0.5) * 3, Z: w.Z + (this.rand() - 0.5) * 3, h: 1.5,
+                        vX: PA.WIND.X * 0.5, vY: 3 + this.rand() * 2, vZ: PA.WIND.Z * 0.5,
+                        life: 5, max: 5, color: '#' + shade + shade + shade, size: (2.2 + this.rand()) * w.size, kind: 'smoke',
+                    });
+                }
+                if (w.age < WRECK_LIFE * 0.45 && this.rand() < dt * 9) {
+                    this.puffs.push({
+                        X: w.X + (this.rand() - 0.5) * 3 * w.size, Z: w.Z + (this.rand() - 0.5) * 3 * w.size, h: 0.8,
+                        vX: 0, vY: 2.5 + this.rand() * 2, vZ: 0,
+                        life: 0.6, max: 0.6, color: this.rand() < 0.5 ? '#ffb347' : '#ff7a3c', size: 1.2 * w.size, kind: 'fire',
+                    });
+                }
+            }
+            this.wrecks = this.wrecks.filter(w => w.age < WRECK_LIFE + 20);
+        }
         updatePuffs(dt) {
             for (const p of this.puffs) {
-                p.vY -= PA.GRAVITY * 0.5 * dt;
+                if (p.kind === 'smoke') {
+                    p.vY += 1.5 * dt;
+                    const drag = Math.max(0, 1 - 1.5 * dt);
+                    p.vX = PA.WIND.X + (p.vX - PA.WIND.X) * drag;
+                    p.vZ = PA.WIND.Z + (p.vZ - PA.WIND.Z) * drag;
+                }
+                else if (p.kind === 'fire') {
+                    const drag = Math.max(0, 1 - 3 * dt);
+                    p.vX *= drag;
+                    p.vZ *= drag;
+                    p.vY *= drag;
+                }
+                else {
+                    p.vY -= PA.GRAVITY * 0.5 * dt;
+                }
                 p.X += p.vX * dt;
                 p.Z += p.vZ * dt;
                 p.h += p.vY * dt;
@@ -2200,38 +2631,56 @@ var PA;
         return {
             X, h, Z,
             vX: (rand() - 0.5) * 14, vY: 2 + rand() * 6, vZ: (rand() - 0.5) * 14,
-            life: 0.9, max: 0.9, color: '#fff1b8', size: 2,
+            life: 0.9, max: 0.9, color: '#fff1b8', size: 0.8, kind: 'spark',
         };
     }
     function clamp(v) {
         return Math.max(-1, Math.min(1, v));
     }
 })(PA || (PA = {}));
-// Drawing the chase view (and the top-down and cockpit views). The camera sits
-// behind the plane and turns with its heading and bank. The ground is a checkerboard
-// in world space, with lakes, forests, a road with stripes, and clouds high up.
-// Everything standing on the ground or flying is a sprite placed by perspective and
-// sorted from far to near.
+// Drawing the world: a modern 2.5D look.
+//
+//  1. The sky and the ground are painted pixel by pixel. Each screen pixel casts a ray from
+//     the camera; rays that go up colour the sky (a gradient, the sun, far mountains), rays
+//     that go down hit the flat ground and take its colour there (fields, towns, roads,
+//     rails, lakes, forest floor, the sea with surf), with drifting cloud shadows, and fade
+//     into the haze with distance.
+//  2. Clouds are soft billboards high in the air.
+//  3. Every object is a voxel model drawn by sprite stacking (see voxel.ts), sorted far to
+//     near, each with a shadow of its own shape cast away from the sun.
+//  4. Effects on top: fire, smoke, sparks, tracers, engine glow, then the plane, a lens
+//     flare when the sun is in view, and a soft vignette.
 var PA;
 (function (PA) {
-    const FOCAL = 200; // pixels: how big a metre looks at distance one
+    const FOCAL = 240; // pixels: how big a metre looks at distance one
     const CAM_BACK = 26; // metres behind the plane
     const CAM_UP = 8; // metres above the plane
     const TILT = 0.2; // radians the camera looks down
-    const CELL = 40; // metres per ground square
-    const RANGE = 16; // squares drawn each way from the camera
-    const FOG_FAR = 900; // metres where the ground fades into the sky
+    const ROLL_FOLLOW = 0.4; // the camera follows this share of the bank; the plane shows the rest
     const PLANE_SCREEN_Y = 0.72;
-    const PX_PER_M = 0.6; // sprite pixel size in metres (ground and air things), twice the first size
-    const PLANE_SCALE = 2; // the plane sprite is drawn at a whole-number scale
-    const NEAR_BOOST_M = 220; // closer than this, things grow up to three times
-    const MIN_PX = 10; // the smallest a thing is drawn (tall)
-    const MAX_PX = 220; // the largest, so nothing fills the whole screen
-    // Camera placement for each view: where it sits behind the plane, how high, and how far it looks down.
+    const FOG = 1150; // metres: how quickly distance fades into the haze
+    const OBJECT_SCALE = 1.5; // models are drawn half again larger than life, so they read well
+    const FAR_LOD = 450; // beyond this the ground is painted every other pixel
+    const DETAIL_NEAR = 260; // fine ground detail fades out by this distance
+    const TREE_RANGE = 11; // forest squares drawn each way (40 m squares)
+    // The sun: low in the south-west sky, behind and to the left when flying north, so
+    // things are lit from the front, shadows fall ahead, and the light is warm.
+    const SUN = (() => {
+        const x = -0.5, y = 0.45, z = -0.74, l = Math.hypot(x, y, z);
+        return { x: x / l, y: y / l, z: z / l };
+    })();
+    // Shadow direction per metre of height (away from the sun, along the ground).
+    const SHADOW_X = -SUN.x / SUN.y, SHADOW_Z = -SUN.z / SUN.y;
+    // Colours (red, green, blue).
+    const ZENITH = [78, 152, 222];
+    const HORIZON = [246, 226, 206];
+    const HAZE = [236, 226, 212];
+    const HAZE_PACKED = (0xff000000 | (212 << 16) | (226 << 8) | 236) >>> 0;
+    // Camera placement for each view: how far behind the plane, how high, how far it looks down.
     const VIEWS = {
-        chase: { back: CAM_BACK, up: CAM_UP, tilt: TILT, range: RANGE },
-        top: { back: 4, up: 110, tilt: 1.35, range: 26 },
-        cockpit: { back: -1.5, up: 1.4, tilt: 0.02, range: RANGE },
+        chase: { back: CAM_BACK, up: CAM_UP, tilt: TILT },
+        top: { back: 4, up: 110, tilt: 1.35 },
+        cockpit: { back: -1.5, up: 1.4, tilt: 0.02 },
     };
     function makeCam(g) {
         const p = g.plane;
@@ -2242,297 +2691,1196 @@ var PA;
         const px = p.X - hx * v.back;
         const py = p.h + v.up;
         const pz = p.Z - hz * v.back;
-        // Tilt the view down, then roll it with the bank (not in the top view, which stays level).
-        const tilt = v.tilt;
-        const bankUsed = g.settings.view === 'top' ? 0 : p.bank;
-        const ct = Math.cos(tilt), st = Math.sin(tilt);
+        // Look down by the view's tilt, then roll with part of the bank (a right bank rolls the
+        // camera right, so the land tips the other way). The top view stays level.
+        const roll = g.settings.view === 'top' ? 0 : -ROLL_FOLLOW * p.bank;
+        const ct = Math.cos(v.tilt), st = Math.sin(v.tilt);
         const fx = hx * ct, fy = -st, fz = hz * ct;
         const u0x = hx * st, u0y = ct, u0z = hz * st;
-        const cb = Math.cos(bankUsed), sb = Math.sin(bankUsed);
+        const cb = Math.cos(roll), sb = Math.sin(roll);
         const rx = rhx * cb + u0x * sb, ry = u0y * sb, rz = rhz * cb + u0z * sb;
         const ux = u0x * cb - rhx * sb, uy = u0y * cb, uz = u0z * cb - rhz * sb;
-        return { px, py, pz, rx, ry, rz, ux, uy, uz, fx, fy, fz };
+        return { px, py, pz, rx, ry, rz, ux, uy, uz, fx, fy, fz, roll, yaw: p.yaw };
     }
     // World point → screen point and depth, or null if it is behind the camera.
-    // With clampDepth, points just behind the camera are pulled to the near plane.
-    function project(c, X, h, Z, clampDepth = false) {
+    function project(c, X, h, Z) {
         const dx = X - c.px, dy = h - c.py, dz = Z - c.pz;
-        let zc = dx * c.fx + dy * c.fy + dz * c.fz;
-        if (zc < 1) {
-            if (!clampDepth)
-                return null;
-            zc = 1;
-        }
+        const zc = dx * c.fx + dy * c.fy + dz * c.fz;
+        if (zc < 1)
+            return null;
         const xc = dx * c.rx + dy * c.ry + dz * c.rz;
         const yc = dx * c.ux + dy * c.uy + dz * c.uz;
         return [PA.W / 2 + (FOCAL * xc) / zc, PA.H / 2 - (FOCAL * yc) / zc, zc];
     }
-    function mix(a, b, t) {
-        const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
-        const ch = (s) => Math.round(s);
-        const r = ch(((pa >> 16) & 255) * (1 - t) + ((pb >> 16) & 255) * t);
-        const gg = ch(((pa >> 8) & 255) * (1 - t) + ((pb >> 8) & 255) * t);
-        const bb = ch((pa & 255) * (1 - t) + (pb & 255) * t);
-        return '#' + ((1 << 24) | (r << 16) | (gg << 8) | bb).toString(16).slice(1);
-    }
-    function sky(ctx) {
-        const grad = ctx.createLinearGradient(0, 0, 0, PA.H);
-        grad.addColorStop(0, PA.COL.skyTop);
-        grad.addColorStop(0.6, PA.COL.skyBottom);
-        grad.addColorStop(1, PA.COL.skyBottom);
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, PA.W, PA.H);
-        ctx.fillStyle = PA.COL.sun;
-        ctx.beginPath();
-        ctx.arc(330, 34, 14, 0, Math.PI * 2);
-        ctx.fill();
-    }
-    // Clouds high in the air: soft puffs at fixed places in the world, drifting slowly.
-    function clouds(ctx, g, c) {
-        const i0 = Math.floor(c.px / 300) - 4, i1 = i0 + 9;
-        const j0 = Math.floor(c.pz / 300) - 4, j1 = j0 + 9;
-        const drift = g.time * 4;
-        ctx.fillStyle = 'rgba(255,253,250,0.85)';
-        for (let i = i0; i <= i1; i++) {
-            for (let j = j0; j <= j1; j++) {
-                if (PA.cellNoise(i, j, 23) < 0.45)
-                    continue;
-                const X = i * 300 + PA.cellNoise(i, j, 29) * 240 + drift;
-                const Z = j * 300 + PA.cellNoise(i, j, 31) * 240;
-                const h = 140 + PA.cellNoise(i, j, 37) * 60;
-                const p = project(c, X, h, Z);
-                if (!p)
-                    continue;
-                const r = (46 * FOCAL) / p[2];
-                if (r < 2)
-                    continue;
-                ctx.beginPath();
-                ctx.ellipse(p[0], p[1], r * 1.6, r * 0.7, 0, 0, Math.PI * 2);
-                ctx.fill();
-            }
+    // ---- 1. Sky and ground, pixel by pixel ----------------------------------------------
+    // The slow-changing fields (wild land, region, a little variation) are kept on an 8 m grid
+    // around the camera, so each pixel reads four stored corners instead of working them out.
+    const GRID = 8, GN = 512, GMASK = 511;
+    const gTagX = new Int32Array(GN * GN).fill(0x7fffffff);
+    const gTagZ = new Int32Array(GN * GN);
+    const gWild = new Float32Array(GN * GN);
+    const gRegion = new Float32Array(GN * GN);
+    const gVar = new Float32Array(GN * GN);
+    function gridCell(ix, iz) {
+        const k = (ix & GMASK) + ((iz & GMASK) << 9);
+        if (gTagX[k] !== ix || gTagZ[k] !== iz) {
+            gTagX[k] = ix;
+            gTagZ[k] = iz;
+            const X = ix * GRID, Z = iz * GRID;
+            gWild[k] = PA.wildValue(X, Z);
+            gRegion[k] = PA.regionValue(X, Z);
+            gVar[k] = PA.hash2(ix, iz);
         }
+        return k;
     }
-    // Ground: squares of the world, far ones first, each faded toward the sky.
-    function ground(ctx, g, c) {
-        const range = VIEWS[g.settings.view].range;
-        const ci = Math.round(c.px / CELL), cj = Math.round(c.pz / CELL);
-        const cells = [];
-        for (let i = ci - range; i < ci + range; i++) {
-            for (let j = cj - range; j < cj + range; j++) {
-                const corners = [];
-                for (const [a, b] of [[i, j], [i + 1, j], [i + 1, j + 1], [i, j + 1]]) {
-                    const p = project(c, a * CELL, PA.groundAt(a * CELL, b * CELL), b * CELL, true);
-                    if (p)
-                        corners.push(p);
+    // The coast, stored every 8 m of Z.
+    const cTag = new Int32Array(4096).fill(0x7fffffff);
+    const cVal = new Float32Array(4096);
+    function coastAt(Z) {
+        const iz = Math.floor(Z / 8), f = Z / 8 - iz;
+        const k0 = iz & 4095, k1 = (iz + 1) & 4095;
+        if (cTag[k0] !== iz) {
+            cTag[k0] = iz;
+            cVal[k0] = PA.coastX(iz * 8);
+        }
+        if (cTag[k1] !== iz + 1) {
+            cTag[k1] = iz + 1;
+            cVal[k1] = PA.coastX((iz + 1) * 8);
+        }
+        return cVal[k0] + (cVal[k1] - cVal[k0]) * f;
+    }
+    // Haze by distance, worked out once (every 4 m up to 8 km).
+    const FOG_LUT = (() => {
+        const t = new Float32Array(2001);
+        for (let i = 0; i <= 2000; i++)
+            t[i] = 1 - Math.exp(-(i * 4) / FOG);
+        return t;
+    })();
+    function fogAt(dist) {
+        const i = dist * 0.25;
+        return i >= 2000 ? FOG_LUT[2000] : FOG_LUT[i | 0];
+    }
+    function pack(r, g, b) {
+        return (0xff000000 | ((b & 255) << 16) | ((g & 255) << 8) | (r & 255)) >>> 0;
+    }
+    // The fields at one point, smoothly between the stored grid corners.
+    let fWild = 0, fRegion = 0, fVar = 0;
+    function readFields(X, Z) {
+        const gx = X / GRID, gz = Z / GRID;
+        const ix = Math.floor(gx), iz = Math.floor(gz);
+        const tx = gx - ix, tz = gz - iz;
+        const a = gridCell(ix, iz);
+        const b = gTagX[(a & ~GMASK) | ((ix + 1) & GMASK)] === ix + 1 && gTagZ[(a & ~GMASK) | ((ix + 1) & GMASK)] === iz ? (a & ~GMASK) | ((ix + 1) & GMASK) : gridCell(ix + 1, iz);
+        const c = gridCell(ix, iz + 1);
+        const d = gTagX[(c & ~GMASK) | ((ix + 1) & GMASK)] === ix + 1 && gTagZ[(c & ~GMASK) | ((ix + 1) & GMASK)] === iz + 1 ? (c & ~GMASK) | ((ix + 1) & GMASK) : gridCell(ix + 1, iz + 1);
+        const w00 = (1 - tx) * (1 - tz), w10 = tx * (1 - tz), w01 = (1 - tx) * tz, w11 = tx * tz;
+        fWild = gWild[a] * w00 + gWild[b] * w10 + gWild[c] * w01 + gWild[d] * w11;
+        fRegion = gRegion[a] * w00 + gRegion[b] * w10 + gRegion[c] * w01 + gRegion[d] * w11;
+        fVar = gVar[a] * w00 + gVar[b] * w10 + gVar[c] * w01 + gVar[d] * w11;
+    }
+    function mod(a, n) {
+        return a - Math.floor(a / n) * n;
+    }
+    // The ground's colour at (X, Z), seen along the unit ray (dx, dy, dz) from distance dist.
+    function groundColor(X, Z, dist, dx, dy, dz, t) {
+        const fog = fogAt(dist);
+        if (fog > 0.985)
+            return HAZE_PACKED;
+        const near = Math.max(0, 1 - dist / DETAIL_NEAR);
+        let r = 0, g = 0, b = 0;
+        let water = false;
+        const coast = coastAt(Z);
+        const seaD = X - coast;
+        if (seaD > -24) {
+            // The coast: a sand beach, then surf, shallows and the deep sea.
+            if (seaD < 0) {
+                r = 238;
+                g = 222;
+                b = 172;
+            }
+            else {
+                water = true;
+                const deep = Math.min(1, seaD / 90);
+                r = 112 - 62 * deep;
+                g = 200 - 62 * deep;
+                b = 228 - 22 * deep;
+                if (seaD < 5 && Math.sin(t * 2.2 + Z * 0.08 + seaD * 0.9) > -0.2) {
+                    r = 248;
+                    g = 250;
+                    b = 246;
+                    water = false;
                 }
-                if (corners.length < 4)
-                    continue;
-                const depth = (corners[0][2] + corners[2][2]) / 2;
-                const cx = (i + 0.5) * CELL, cz = (j + 0.5) * CELL;
-                const biome = PA.biomeAt(cx, cz);
-                const light = ((i + j) & 1) === 0;
-                const base = biome === 'sea' ? (light ? '#9fd3ea' : '#8cc6e2')
-                    : biome === 'lake' ? (light ? '#86c9e6' : '#74bddf')
-                        : biome === 'farm' ? (light ? '#cfe3a2' : '#e6d9a0')
-                            : biome === 'town' ? (light ? '#cfd3d8' : '#bcc2c9')
-                                : biome === 'forest' ? (light ? '#a6d69a' : '#93c888')
-                                    : (light ? PA.COL.ground : PA.COL.groundDark);
-                cells.push({
-                    pts: corners.map(p => [p[0], p[1]]),
-                    depth,
-                    color: mix(base, PA.COL.skyBottom, Math.min(1, depth / FOG_FAR)),
-                });
             }
         }
-        cells.sort((a, b) => b.depth - a.depth);
-        for (const cell of cells) {
-            ctx.fillStyle = cell.color;
-            ctx.beginPath();
-            ctx.moveTo(cell.pts[0][0], cell.pts[0][1]);
-            for (let k = 1; k < 4; k++)
-                ctx.lineTo(cell.pts[k][0], cell.pts[k][1]);
-            ctx.closePath();
-            ctx.fill();
+        else {
+            readFields(X, Z);
+            const roadD = Math.abs(X - PA.ROAD_X), railD = Math.abs(X - PA.RAIL_X);
+            if (roadD < PA.ROAD_W + 1.6) {
+                if (roadD > PA.ROAD_W) {
+                    r = 196;
+                    g = 184;
+                    b = 160;
+                }
+                else {
+                    r = 116;
+                    g = 121;
+                    b = 130;
+                    if (roadD > PA.ROAD_W - 1.2 && roadD < PA.ROAD_W - 0.6) {
+                        r = 236;
+                        g = 236;
+                        b = 230;
+                    }
+                    if (roadD < 0.35 && mod(Z, 16) < 8) {
+                        r = 244;
+                        g = 214;
+                        b = 112;
+                    }
+                }
+            }
+            else if (railD < 2.4) {
+                r = 172;
+                g = 162;
+                b = 146;
+                if (railD < 1.8 && mod(Z, 1.5) < 0.55) {
+                    r = 118;
+                    g = 90;
+                    b = 68;
+                }
+                if (railD > 0.62 && railD < 0.86) {
+                    r = 88;
+                    g = 94;
+                    b = 100;
+                }
+            }
+            else if (fWild > PA.LAKE_LEVEL && roadD > 30 && railD > 20) {
+                water = true;
+                const deep = Math.min(1, (fWild - PA.LAKE_LEVEL) / 0.06);
+                r = 104 - 40 * deep;
+                g = 196 - 50 * deep;
+                b = 222 - 10 * deep;
+                if (fWild < PA.LAKE_LEVEL + 0.006 && Math.sin(t * 2 + X * 0.21 + Z * 0.17) > 0) {
+                    r = 246;
+                    g = 249;
+                    b = 244;
+                    water = false;
+                }
+            }
+            else if (fWild > PA.LAKE_LEVEL - 0.018 && roadD > 30 && railD > 20) {
+                r = 236;
+                g = 220;
+                b = 168; // lake shore sand
+            }
+            else if (fWild > PA.FOREST_LEVEL && roadD > 16 && railD > 10) {
+                // Forest floor: deep green, mottled.
+                const m = 0.88 + 0.24 * fVar;
+                r = 112 * m;
+                g = 170 * m;
+                b = 92 * m;
+            }
+            else if (fRegion < 0.42) {
+                // Farm fields: patches on a tilted grid, each its own crop, sown in rows, with hedges.
+                const pu = (X * 0.94 + Z * 0.34) / 70, pv = (Z * 0.94 - X * 0.34) / 46;
+                const iu = Math.floor(pu), iv = Math.floor(pv);
+                const fu = pu - iu, fv = pv - iv;
+                const crop = PA.hash2(iu + 977, iv - 311);
+                if (crop < 0.24) {
+                    r = 236;
+                    g = 208;
+                    b = 118;
+                } // wheat
+                else if (crop < 0.46) {
+                    r = 150;
+                    g = 206;
+                    b = 104;
+                } // green crop
+                else if (crop < 0.62) {
+                    r = 182;
+                    g = 134;
+                    b = 92;
+                } // ploughed earth
+                else if (crop < 0.8) {
+                    r = 170;
+                    g = 216;
+                    b = 128;
+                } // meadow
+                else if (crop < 0.9) {
+                    r = 244;
+                    g = 214;
+                    b = 86;
+                } // sunflowers
+                else {
+                    r = 186;
+                    g = 166;
+                    b = 222;
+                } // lavender
+                if (near > 0 && mod(fu * 26, 1) < 0.45) {
+                    r *= 0.9;
+                    g *= 0.9;
+                    b *= 0.9;
+                }
+                if (fu < 0.03 || fv < 0.045) {
+                    r = 92;
+                    g = 150;
+                    b = 84;
+                } // hedges
+                const far = Math.min(1, Math.max(0, (dist - 380) / 320)); // far away: an even field colour
+                r += (186 - r) * far;
+                g += (196 - g) * far;
+                b += (120 - b) * far;
+            }
+            else if (fRegion > 0.66) {
+                // Town: streets every 36 m, pavements, and lots of paving, gardens or car parks.
+                const lx = mod(X, 36), lz = mod(Z, 36);
+                if (lx < 5 || lz < 5) {
+                    r = 128;
+                    g = 132;
+                    b = 140;
+                    if ((lx < 5 && Math.abs(lx - 2.5) < 0.25 && mod(Z, 8) < 4) || (lz < 5 && Math.abs(lz - 2.5) < 0.25 && mod(X, 8) < 4)) {
+                        r = 236;
+                        g = 236;
+                        b = 228;
+                    }
+                }
+                else if (lx < 6.4 || lz < 6.4) {
+                    r = 210;
+                    g = 204;
+                    b = 194;
+                }
+                else {
+                    const lot = PA.hash2(Math.floor(X / 36) + 401, Math.floor(Z / 36) - 77);
+                    if (lot < 0.45) {
+                        r = 214;
+                        g = 206;
+                        b = 192;
+                    }
+                    else if (lot < 0.8) {
+                        r = 150;
+                        g = 202;
+                        b = 118;
+                    }
+                    else {
+                        r = 172;
+                        g = 172;
+                        b = 178;
+                    }
+                }
+                const far = Math.min(1, Math.max(0, (dist - 380) / 320));
+                r += (180 - r) * far;
+                g += (180 - g) * far;
+                b += (172 - b) * far;
+            }
+            else {
+                // Open grass, gently varied.
+                const m = 0.9 + 0.2 * fVar;
+                r = 150 * m;
+                g = 206 * m;
+                b = 112 * m;
+            }
+            // Fine speckle near the camera (grass blades, gravel, crops).
+            if (near > 0 && !water) {
+                const s = (PA.hash2(Math.floor(X * 0.8), Math.floor(Z * 0.8)) - 0.5) * 0.14 * near;
+                r *= 1 + s;
+                g *= 1 + s;
+                b *= 1 + s;
+            }
         }
+        if (water) {
+            // Waves, the sky reflected at a low angle, and the sun glittering on the water.
+            const wave = Math.sin(X * 0.11 + t * 1.3) * Math.sin(Z * 0.09 - t * 0.9) * 0.5 + Math.sin((X + Z) * 0.05 + t * 0.7) * 0.5;
+            const k = 1 + wave * 0.06;
+            r *= k;
+            g *= k;
+            b *= k;
+            const q = 1 + dy, q2 = q * q, fres = q2 * q2 * q;
+            r += (HORIZON[0] - r) * fres * 0.7;
+            g += (HORIZON[1] - g) * fres * 0.7;
+            b += (HORIZON[2] - b) * fres * 0.7;
+            const refl = dx * SUN.x - dy * SUN.y + dz * SUN.z;
+            if (refl > 0.94) {
+                const u = (refl - 0.94) / 0.06, u2 = u * u;
+                const glint = u2 * u2 * u2 * (0.5 + 0.5 * Math.sin(X * 1.7 + Z * 1.3 + t * 6));
+                r += 255 * glint;
+                g += 245 * glint;
+                b += 220 * glint;
+            }
+        }
+        else if (dist < 900) {
+            // Cloud shadows drifting across the land.
+            const cs = PA.noise2((X + t * 6) / 340, Z / 340);
+            if (cs > 0.56) {
+                const s = 1 - Math.min(1, (cs - 0.56) / 0.12) * 0.2;
+                r *= s;
+                g *= s;
+                b *= s;
+            }
+        }
+        r += (HAZE[0] - r) * fog;
+        g += (HAZE[1] - g) * fog;
+        b += (HAZE[2] - b) * fog;
+        return pack(Math.min(255, r), Math.min(255, g), Math.min(255, b));
     }
-    // The main road: a grey band with a dashed white centre stripe, drawn in world space.
-    function road(ctx, g, c) {
-        const z0 = Math.floor(c.pz / 25) * 25 - 50;
-        const z1 = c.pz + 900;
-        const edge = (X, z) => {
-            const p = project(c, X, PA.groundAt(PA.ROAD_X, z) + 0.05, z, true);
-            return p ? [p[0], p[1]] : null;
+    // The sky along the unit ray: a gradient, a glow round the sun, the sun itself, far mountains.
+    function skyColor(dx, dy, dz) {
+        const k = Math.min(1, Math.max(0, dy / 0.55));
+        const s = k * k * (3 - 2 * k);
+        let r = HORIZON[0] + (ZENITH[0] - HORIZON[0]) * s;
+        let g = HORIZON[1] + (ZENITH[1] - HORIZON[1]) * s;
+        let b = HORIZON[2] + (ZENITH[2] - HORIZON[2]) * s;
+        const sun = dx * SUN.x + dy * SUN.y + dz * SUN.z;
+        if (sun > 0.3) {
+            const s2 = sun * sun, s6 = s2 * s2 * s2, s12 = s6 * s6, s48 = s12 * s12 * s12 * s12;
+            const wide = s6 * 0.22, glow = s48 * 0.55;
+            r += (255 - r) * (wide + glow);
+            g += (236 - g) * (wide + glow);
+            b += (196 - b) * (wide + glow) * 0.7;
+            if (sun > 0.9993) {
+                r = 255;
+                g = 252;
+                b = 236;
+            }
+        }
+        if (dy < 0.08) {
+            // Mountain ridges far away on the horizon: a pale far ridge, a bluer near one.
+            const az = Math.atan2(dx, dz);
+            const far = 0.032 + 0.014 * Math.sin(3 * az + 1.3) + 0.01 * Math.sin(7 * az + 0.4) + 0.005 * Math.sin(17 * az + 2);
+            const nearR = 0.016 + 0.01 * Math.sin(5 * az + 2.2) + 0.007 * Math.sin(11 * az + 1) + 0.003 * Math.sin(29 * az);
+            if (dy < nearR) {
+                r = 150;
+                g = 172;
+                b = 186;
+            }
+            else if (dy < far) {
+                if (dy > far - 0.006) {
+                    r = 232;
+                    g = 238;
+                    b = 244;
+                } // snow on the peaks
+                else {
+                    r = 182;
+                    g = 198;
+                    b = 214;
+                }
+            }
+            else {
+                return pack(r, g, b);
+            }
+            const hz = 0.45;
+            r += (HAZE[0] - r) * hz;
+            g += (HAZE[1] - g) * hz;
+            b += (HAZE[2] - b) * hz;
+        }
+        return pack(r, g, b);
+    }
+    let bg = null;
+    let bg32 = new Uint32Array(0);
+    let halfGround = false; // set when a device is too slow: the ground is painted every other column
+    function paintBackground(ctx, g, c) {
+        if (!bg) {
+            bg = ctx.createImageData(PA.W, PA.H);
+            bg32 = new Uint32Array(bg.data.buffer);
+        }
+        const t = g.time;
+        const camY = Math.max(1, c.py);
+        const sunScreen = project(c, c.px + SUN.x * 8000, c.py + SUN.y * 8000, c.pz + SUN.z * 8000);
+        for (let y = 0; y < PA.H; y++) {
+            const by = (PA.H / 2 - (y + 0.5)) / FOCAL;
+            const r0x = c.fx + by * c.ux, r0y = c.fy + by * c.uy, r0z = c.fz + by * c.uz;
+            let prev = 0;
+            const row = y * PA.W;
+            for (let x = 0; x < PA.W; x++) {
+                const ax = (x + 0.5 - PA.W / 2) / FOCAL;
+                const dx = r0x + ax * c.rx, dy = r0y + ax * c.ry, dz = r0z + ax * c.rz;
+                let col;
+                if (dy < -0.0004) {
+                    const len = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                    const tt = -camY / dy;
+                    const dist = tt * len;
+                    if ((x & 1) === 1 && (halfGround || dist > FAR_LOD)) {
+                        bg32[row + x] = prev;
+                        continue;
+                    }
+                    col = groundColor(c.px + tt * dx, c.pz + tt * dz, dist, dx / len, dy / len, dz / len, t);
+                }
+                else {
+                    // The open sky is smooth: work out one pixel in four, except near the horizon and the sun.
+                    const nearSun = sunScreen !== null && Math.abs(x - sunScreen[0]) < 70 && Math.abs(y - sunScreen[1]) < 70;
+                    if (dy > 0.1 && !nearSun && ((x & 1) === 1 || (y & 1) === 1)) {
+                        bg32[row + x] = (x & 1) === 1 ? prev : bg32[row - PA.W + x];
+                        prev = bg32[row + x];
+                        continue;
+                    }
+                    const len = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                    col = skyColor(dx / len, dy / len, dz / len);
+                }
+                bg32[row + x] = col;
+                prev = col;
+            }
+        }
+        ctx.putImageData(bg, 0, 0);
+    }
+    // ---- Soft textures, made once -------------------------------------------------------
+    function softDisc(size, stops) {
+        const cv = document.createElement('canvas');
+        cv.width = cv.height = size;
+        const x = cv.getContext('2d');
+        if (!x)
+            return cv;
+        const grad = x.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+        for (const [o, col] of stops)
+            grad.addColorStop(o, col);
+        x.fillStyle = grad;
+        x.fillRect(0, 0, size, size);
+        return cv;
+    }
+    let TEX = null;
+    function cloudTexture(seed) {
+        const cv = document.createElement('canvas');
+        cv.width = 160;
+        cv.height = 80;
+        const x = cv.getContext('2d');
+        if (!x)
+            return cv;
+        const rnd = PA.random(seed);
+        const blobs = [];
+        for (let i = 0; i < 9; i++)
+            blobs.push([30 + rnd() * 100, 34 + rnd() * 18, 14 + rnd() * 16]);
+        // Shaded underside first, then the lit tops.
+        for (const [bx, by, br] of blobs) {
+            const g1 = x.createRadialGradient(bx, by + 6, 0, bx, by + 6, br);
+            g1.addColorStop(0, 'rgba(206,214,228,0.9)');
+            g1.addColorStop(1, 'rgba(206,214,228,0)');
+            x.fillStyle = g1;
+            x.fillRect(0, 0, 160, 80);
+        }
+        for (const [bx, by, br] of blobs) {
+            const g2 = x.createRadialGradient(bx - 3, by - 4, 0, bx - 3, by - 4, br * 0.9);
+            g2.addColorStop(0, 'rgba(255,255,255,0.95)');
+            g2.addColorStop(0.6, 'rgba(255,252,246,0.7)');
+            g2.addColorStop(1, 'rgba(255,252,246,0)');
+            x.fillStyle = g2;
+            x.fillRect(0, 0, 160, 80);
+        }
+        return cv;
+    }
+    function textures() {
+        if (TEX)
+            return TEX;
+        const vig = document.createElement('canvas');
+        vig.width = PA.W;
+        vig.height = PA.H;
+        const vx = vig.getContext('2d');
+        if (vx) {
+            const grad = vx.createRadialGradient(PA.W / 2, PA.H / 2, PA.H * 0.35, PA.W / 2, PA.H / 2, PA.W * 0.62);
+            grad.addColorStop(0, 'rgba(20,24,40,0)');
+            grad.addColorStop(1, 'rgba(20,24,40,0.32)');
+            vx.fillStyle = grad;
+            vx.fillRect(0, 0, PA.W, PA.H);
+        }
+        TEX = {
+            mist: softDisc(64, [[0, 'rgba(255,255,255,0.85)'], [0.5, 'rgba(255,255,255,0.35)'], [1, 'rgba(255,255,255,0)']]),
+            glow: softDisc(64, [[0, 'rgba(255,255,255,1)'], [0.25, 'rgba(255,240,200,0.6)'], [1, 'rgba(255,200,120,0)']]),
+            fire: softDisc(64, [[0, 'rgba(255,255,230,1)'], [0.3, 'rgba(255,200,90,0.9)'], [0.65, 'rgba(240,96,40,0.5)'], [1, 'rgba(200,40,20,0)']]),
+            smoke: softDisc(64, [[0, 'rgba(120,118,124,0.75)'], [0.55, 'rgba(140,138,146,0.35)'], [1, 'rgba(150,150,156,0)']]),
+            dust: softDisc(64, [[0, 'rgba(214,196,160,0.7)'], [1, 'rgba(214,196,160,0)']]),
+            shadow: softDisc(64, [[0, 'rgba(24,30,46,0.45)'], [0.6, 'rgba(24,30,46,0.25)'], [1, 'rgba(24,30,46,0)']]),
+            clouds: [cloudTexture(3), cloudTexture(11), cloudTexture(29), cloudTexture(47)],
+            vignette: vig,
         };
-        ctx.fillStyle = '#8a8f99';
-        for (let z = z0; z < z1; z += 25) {
-            const a = edge(PA.ROAD_X - PA.ROAD_W, z), b = edge(PA.ROAD_X + PA.ROAD_W, z);
-            const c2 = edge(PA.ROAD_X + PA.ROAD_W, z + 25), d = edge(PA.ROAD_X - PA.ROAD_W, z + 25);
-            if (!a || !b || !c2 || !d)
-                continue;
-            ctx.beginPath();
-            ctx.moveTo(a[0], a[1]);
-            ctx.lineTo(b[0], b[1]);
-            ctx.lineTo(c2[0], c2[1]);
-            ctx.lineTo(d[0], d[1]);
-            ctx.closePath();
-            ctx.fill();
-        }
-        // Stripes: a white dash every 50 m along the centre.
-        ctx.fillStyle = '#fffdfa';
-        for (let z = z0; z < z1; z += 50) {
-            const a = edge(PA.ROAD_X - 0.6, z + 6), b = edge(PA.ROAD_X + 0.6, z + 6);
-            const c2 = edge(PA.ROAD_X + 0.6, z + 26), d = edge(PA.ROAD_X - 0.6, z + 26);
-            if (!a || !b || !c2 || !d)
-                continue;
-            ctx.beginPath();
-            ctx.moveTo(a[0], a[1]);
-            ctx.lineTo(b[0], b[1]);
-            ctx.lineTo(c2[0], c2[1]);
-            ctx.lineTo(d[0], d[1]);
-            ctx.closePath();
-            ctx.fill();
-        }
+        return TEX;
     }
-    // Which way a thing faces, in the ground plane (0 = east, the way the sprites face).
-    function facingOf(t) {
-        if (t.faction === 'enemy' && t.vH !== undefined)
-            return Math.atan2(Math.cos(t.vH), Math.sin(t.vH));
-        if (t.vZ !== undefined && t.vZ !== 0)
-            return t.vZ > 0 ? Math.PI / 2 : -Math.PI / 2;
-        return 0;
+    // A model's footprint as a soft dark shape (for its shadow on the ground).
+    const silhouettes = {};
+    function silhouette(name) {
+        if (silhouettes[name])
+            return silhouettes[name];
+        const m = PA.model(name);
+        const cv = document.createElement('canvas');
+        cv.width = m.w;
+        cv.height = m.l;
+        const x = cv.getContext('2d');
+        if (x) {
+            for (const s of m.slices)
+                if (s)
+                    x.drawImage(s, 0, 0);
+            x.globalCompositeOperation = 'source-in';
+            x.fillStyle = 'rgb(24,30,46)';
+            x.fillRect(0, 0, m.w, m.l);
+        }
+        silhouettes[name] = cv;
+        return cv;
     }
-    function collect(g, c) {
-        const things = [];
-        const range = VIEWS[g.settings.view].range;
-        // Trees: a few in each forest square near the camera.
-        const ci = Math.round(c.px / CELL), cj = Math.round(c.pz / CELL);
-        const tree = PA.stackedSprite('tree', 4, 1);
-        for (let i = ci - range; i < ci + range; i++) {
-            for (let j = cj - range; j < cj + range; j++) {
-                const cx0 = i * CELL, cz0 = j * CELL;
-                if (PA.biomeAt(cx0 + CELL / 2, cz0 + CELL / 2) !== 'forest')
+    // ---- 2. Clouds ----------------------------------------------------------------------
+    function clouds(ctx, g, c) {
+        const tex = textures();
+        const cell = 420;
+        const i0 = Math.floor(c.px / cell) - 5, j0 = Math.floor(c.pz / cell) - 5;
+        const list = [];
+        for (let i = i0; i <= i0 + 10; i++) {
+            for (let j = j0; j <= j0 + 10; j++) {
+                if (PA.cellNoise(i, j, 23) < 0.42)
                     continue;
-                for (let k = 0; k < 4; k++) {
-                    const X = cx0 + PA.cellNoise(i, j, 41 + k) * CELL;
-                    const Z = cz0 + PA.cellNoise(i, j, 47 + k) * CELL;
-                    const p = project(c, X, PA.groundAt(X, Z), Z);
-                    if (p)
-                        things.push({ zc: p[2], img: tree, X, base: PA.groundAt(X, Z), Z, facing: 0, flip: false });
-                }
+                const X = i * cell + PA.cellNoise(i, j, 29) * 300 + g.time * 4;
+                const Z = j * cell + PA.cellNoise(i, j, 31) * 300;
+                const h = 190 + PA.cellNoise(i, j, 37) * 90;
+                const p = project(c, X, h, Z);
+                if (!p || p[2] < 80)
+                    continue;
+                list.push([p[0], p[1], p[2], 100 + PA.cellNoise(i, j, 41) * 90, Math.floor(PA.cellNoise(i, j, 43) * 4)]);
             }
         }
+        list.sort((a, b) => b[2] - a[2]);
+        for (const [x, y, zc, size, v] of list) {
+            const w = (size * FOCAL) / zc;
+            if (w < 4)
+                continue;
+            ctx.globalAlpha = Math.max(0, 1 - (1 - Math.exp(-zc / (FOG * 1.6))) * 0.9);
+            ctx.drawImage(tex.clouds[v], x - w / 2, y - w / 4, w, w / 2);
+        }
+        ctx.globalAlpha = 1;
+    }
+    // Which model a target uses, and which way it faces.
+    function modelOf(t) {
+        if (t.kind === 'city')
+            return ['city', 'city1', 'city2'][Math.floor(PA.hash2(Math.round(t.X), Math.round(t.Z)) * 3) % 3];
+        return t.kind;
+    }
+    function yawOf(t) {
+        if (t.faction === 'enemy' && t.vH !== undefined)
+            return t.vH;
+        if (t.faction === 'ally' && t.orbit)
+            return Math.atan2(-Math.sin(t.orbit.ang), Math.cos(t.orbit.ang));
+        if (t.vZ !== undefined && t.vZ !== 0)
+            return t.vZ > 0 ? 0 : Math.PI;
+        if (t.kind === 'rail')
+            return 0;
+        const h = PA.hash2(Math.round(t.X * 3), Math.round(t.Z * 3));
+        if (t.kind === 'ship')
+            return h < 0.5 ? 0 : Math.PI;
+        return Math.floor(h * 4) * (Math.PI / 2) + (h - 0.5) * 0.2;
+    }
+    // Everything to stack this frame: targets, trees in the forests, houses in the towns.
+    function collect(g, c) {
+        const out = [];
+        const add = (name, X, base, Z, yaw, air, t, age) => {
+            const dx = X - c.px, dz = Z - c.pz;
+            const zc = dx * c.fx + (base - c.py) * c.fy + dz * c.fz;
+            if (zc < 2 || zc > FOG * 1.6)
+                return;
+            out.push({ name, X, Z, base, yaw, zc, air, phase: PA.hash2(Math.round(X * 7), Math.round(Z * 7)) * 6.28, t, age });
+        };
+        const p = g.plane;
         for (const t of g.mission.targets) {
             if (!t.alive)
                 continue;
-            const p = project(c, t.X, PA.altOf(t), t.Z);
-            if (!p)
-                continue;
-            if (p[2] > FOG_FAR * 1.5)
-                continue;
-            // Fighters and allies are stacked like the plane; ground things are single sprites for now.
-            const air = t.h !== undefined;
-            // Every object is stacked. Air things stack finely; ground things stack deeper.
-            const img = air ? PA.stackedSprite(t.kind, 4, 1) : PA.stackedSprite(t.kind, 4, 2);
-            things.push({ zc: p[2], img, X: t.X, base: PA.altOf(t), Z: t.Z, facing: facingOf(t), flip: false });
+            let yaw = yawOf(t);
+            // Flak guns and SAM launchers swing round to face the plane when it is near.
+            if ((t.kind === 'flak' || t.kind === 'sam') && Math.hypot(p.X - t.X, p.Z - t.Z) < 900)
+                yaw = Math.atan2(p.X - t.X, p.Z - t.Z);
+            add(modelOf(t), t.X, PA.altOf(t), t.Z, yaw, t.h !== undefined, t);
         }
-        things.sort((a, b) => b.zc - a.zc);
-        return things;
+        for (const w of g.wrecks)
+            add('wreck', w.X, 0, w.Z, w.X * 0.37, false, undefined, w.age);
+        for (const b of g.bases)
+            add('flagpole', b.X, 0, b.Z, 0, false);
+        const CELL = 40;
+        const ci = Math.floor(c.px / CELL), cj = Math.floor(c.pz / CELL);
+        for (let i = ci - TREE_RANGE; i <= ci + TREE_RANGE; i++) {
+            for (let j = cj - TREE_RANGE; j <= cj + TREE_RANGE; j++) {
+                const cx = (i + 0.5) * CELL, cz = (j + 0.5) * CELL;
+                if ((cx - c.px) * c.fx + (cz - c.pz) * c.fz < -CELL)
+                    continue; // behind the camera
+                const biome = PA.biomeAt(cx, cz);
+                if (biome === 'forest') {
+                    const close = Math.hypot(cx - c.px, cz - c.pz) < 220;
+                    for (let k = 0; k < (close ? 4 : 3); k++) {
+                        const X = i * CELL + PA.cellNoise(i, j, 41 + k) * CELL, Z = j * CELL + PA.cellNoise(i, j, 47 + k) * CELL;
+                        if (!PA.isForest(X, Z))
+                            continue;
+                        const v = PA.cellNoise(i, j, 53 + k);
+                        const name = v < 0.5 ? 'tree0' : v < 0.75 ? 'tree1' : v < 0.85 ? 'tree2' : v < 0.93 ? 'tree3' : 'tree4';
+                        add(name, X, 0, Z, v * 6.28, false);
+                    }
+                }
+                else if (biome === 'town' && PA.cellNoise(i, j, 61) < 0.45) {
+                    const v = PA.cellNoise(i, j, 67);
+                    const name = v < 0.4 ? 'house1' : v < 0.7 ? 'house2' : v < 0.85 ? 'city1' : 'city';
+                    add(name, cx + 4, 0, cz + 4, Math.floor(v * 4) * (Math.PI / 2), false);
+                }
+                else if (biome === 'farm' && PA.cellNoise(i, j, 89) < 0.035) {
+                    add('windmill', cx - 6, 0, cz + 3, PA.cellNoise(i, j, 91) * 6.28, false);
+                }
+                else if (biome === 'farm' && PA.cellNoise(i, j, 71) < 0.05) {
+                    add(PA.cellNoise(i, j, 73) < 0.5 ? 'farm' : 'barn', cx, 0, cz, PA.cellNoise(i, j, 79) * 6.28, false);
+                }
+                else if ((biome === 'army' || biome === 'farm') && PA.cellNoise(i, j, 83) < 0.08) {
+                    add('tree4', cx + 7, 0, cz - 5, 0, false);
+                }
+            }
+        }
+        out.sort((a, b) => b.zc - a.zc);
+        PA.renderStats.things = out.length;
+        return out;
     }
-    // Draws one sprite standing at (X, base, Z), larger the closer it is.
-    // The sprite is mirrored when the camera sees its front, so things change as you pass them.
-    function billboard(ctx, c, img, X, Z, base, facing = 0) {
+    function fogAlpha(zc) {
+        return Math.max(0, 1 - (1 - Math.exp(-zc / FOG)) * 0.9);
+    }
+    // The pose of a model standing at (X, base, Z), seen from the camera.
+    function poseOf(c, m, X, base, Z, yaw) {
         const p = project(c, X, base, Z);
         if (!p)
-            return;
-        const [sx, sy, zc] = p;
-        const toCam = Math.atan2(c.px - X, c.pz - Z);
-        const seesFront = Math.cos(toCam - facing) > 0;
-        // Size by distance: true perspective, plus a boost when close (up to three times
-        // larger inside 220 m), and a floor so anything far off still shows as a few pixels.
-        const near = Math.max(0, Math.min(1, (NEAR_BOOST_M - zc) / NEAR_BOOST_M));
-        let k = ((FOCAL * PX_PER_M) / zc) * (1 + 2 * near);
-        k = Math.max(k, MIN_PX / img.height);
-        k = Math.min(k, MAX_PX / img.height);
-        const w = Math.max(1, Math.round(img.width * k));
-        const h = Math.max(1, Math.round(img.height * k));
-        if (seesFront) {
-            ctx.save();
-            ctx.translate(Math.round(sx), 0);
-            ctx.scale(-1, 1);
-            ctx.drawImage(img, Math.round(-w / 2), Math.round(sy - h), w, h);
-            ctx.restore();
-        }
-        else {
-            ctx.drawImage(img, Math.round(sx - w / 2), Math.round(sy - h), w, h);
-        }
+            return null;
+        const horiz = Math.hypot(X - c.px, Z - c.pz);
+        const elev = Math.atan2(c.py - (base + m.h * m.size * 0.5), horiz);
+        return { sx: p[0], sy: p[1], px: (FOCAL * m.size * OBJECT_SCALE) / p[2], yaw: yaw - c.yaw, elev, roll: c.roll };
     }
-    function shots(ctx, c, list, color, size) {
-        ctx.fillStyle = color;
-        for (const s of list) {
-            const p = project(c, s.X, s.h, s.Z);
-            if (p)
-                ctx.fillRect(Math.round(p[0]), Math.round(p[1]), size, size);
+    // A shadow the shape of the model, laid on the ground away from the sun.
+    function drawShadow(ctx, c, name, X, base, Z, yaw) {
+        const m = PA.model(name);
+        const lift = base + m.h * m.size * OBJECT_SCALE * 0.35;
+        const sx = X + SHADOW_X * lift, sz = Z + SHADOW_Z * lift;
+        const pose = poseOf(c, m, sx, 0, sz, yaw);
+        if (!pose)
+            return;
+        pose.elev = Math.atan2(c.py, Math.hypot(sx - c.px, sz - c.pz));
+        const flat = { w: m.w, l: m.l, h: 1, size: m.size, slices: [silhouette(name)], top: 0, avg: 'rgba(24,30,46,0.3)' };
+        const zc = (FOCAL * m.size * OBJECT_SCALE) / Math.max(0.001, pose.px);
+        ctx.globalAlpha = (base > 2 ? 0.16 : 0.26) * fogAlpha(zc);
+        PA.drawModel(ctx, flat, pose);
+        ctx.globalAlpha = 1;
+    }
+    function objects(ctx, g, c) {
+        var _a, _b;
+        const things = collect(g, c);
+        for (const th of things)
+            drawShadow(ctx, c, th.name, th.X, th.base, th.Z, th.yaw);
+        const time = g.time;
+        const p = g.plane;
+        for (const th of things) {
+            const m = PA.model(th.name);
+            const ship = th.name === 'ship';
+            const base = ship ? th.base + Math.sin(time * 0.9 + th.phase) * 0.25 : th.base;
+            const pose = poseOf(c, m, th.X, base, th.Z, th.yaw);
+            if (!pose)
+                continue;
+            const alpha = fogAlpha(th.zc);
+            ctx.globalAlpha = alpha;
+            if (th.name.startsWith('tree'))
+                pose.sway = Math.sin(time * 1.3 + th.phase) * pose.px * 0.8;
+            if (ship)
+                pose.roll += Math.sin(time * 0.7 + th.phase) * 0.04;
+            if (th.air && th.t)
+                pose.roll += bankOf(th.t, pose.yaw);
+            if (th.name.startsWith('tree'))
+                PA.drawModelCached(ctx, m, th.name, { ...pose, yaw: th.yaw }); // a tree looks the same from every side
+            else
+                PA.drawModel(ctx, m, pose);
+            if (pose.px < 0.5)
+                continue;
+            if (th.name === 'tank_mbt' || th.name === 'tank_light') {
+                // The turret turns to track the plane when it is near.
+                const mbt = th.name === 'tank_mbt';
+                const tm = PA.model(mbt ? 'turret_mbt' : 'turret_light');
+                const [tx, ty] = PA.modelToScreen(m, pose, mbt ? 7 : 6, mbt ? 14 : 11, mbt ? 4 : 3);
+                const near = Math.hypot(p.X - th.X, p.Z - th.Z) < 900;
+                const aim = near ? Math.atan2(p.X - th.X, p.Z - th.Z) : th.yaw;
+                PA.drawModel(ctx, tm, { ...pose, sx: tx, sy: ty, yaw: aim - c.yaw });
+            }
+            else if (th.name === 'sam') {
+                // The radar dish spins on its mast.
+                const [dx, dy] = PA.modelToScreen(m, pose, 11.5, 4, 9);
+                PA.drawModel(ctx, PA.model('samdish'), { ...pose, sx: dx, sy: dy, yaw: time * 2.2 + th.phase - c.yaw });
+            }
+            else if (th.name === 'farm' || th.name === 'house1' || th.name === 'house2') {
+                const [hx, hy] = PA.modelToScreen(m, pose, 12, 5, 13);
+                chimneySmoke(ctx, hx, hy, pose.px, time + th.phase, alpha, (PA.WIND.X * c.rx + PA.WIND.Z * c.rz) / Math.hypot(PA.WIND.X, PA.WIND.Z));
+            }
+            else if (th.name === 'windmill') {
+                const [wx, wy] = PA.modelToScreen(m, pose, 5, 2, 19);
+                sails(ctx, wx, wy, pose.px, time * 1.4 + th.phase, pose.roll, alpha);
+            }
+            else if (th.name === 'wreck' && ((_a = th.age) !== null && _a !== void 0 ? _a : 99) < 22) {
+                // Embers flicker in the wreck while it burns.
+                const [ex, ey] = PA.modelToScreen(m, pose, 7, 7, 2);
+                const f = 0.6 + 0.4 * Math.sin(time * 13 + th.phase) * Math.sin(time * 7.3 + th.phase * 2);
+                ctx.globalAlpha = alpha * f * (1 - ((_b = th.age) !== null && _b !== void 0 ? _b : 0) / 22);
+                glow(ctx, ex, ey, pose.px * 9);
+                ctx.globalAlpha = alpha;
+            }
+            else if (th.name === 'flagpole') {
+                const [fx, fy] = PA.modelToScreen(m, pose, 2, 2, 28.5);
+                flag(ctx, c, fx, fy, pose.px, time + th.phase, pose.roll);
+            }
+            else if (th.air) {
+                // Fighters and allies show their exhaust as a small glow.
+                const [ex, ey] = PA.modelToScreen(m, pose, m.w / 2, m.l - 1, 3);
+                glow(ctx, ex, ey, 4 + pose.px * 3);
+            }
         }
+        ctx.globalAlpha = 1;
+    }
+    // A fighter banks into its turn: worked out from how fast its heading changes.
+    const lastYaw = new WeakMap();
+    const bankNow = new WeakMap();
+    let bankClock = 0;
+    function bankOf(t, yawRel) {
+        var _a, _b, _c;
+        const now = performance.now();
+        const dt = Math.min(0.1, Math.max(0.001, (now - bankClock) / 1000));
+        bankClock = now;
+        const yaw = t.faction === 'ally' && t.orbit ? Math.atan2(-Math.sin(t.orbit.ang), Math.cos(t.orbit.ang)) : ((_a = t.vH) !== null && _a !== void 0 ? _a : 0);
+        const prev = (_b = lastYaw.get(t)) !== null && _b !== void 0 ? _b : yaw;
+        lastYaw.set(t, yaw);
+        let d = yaw - prev;
+        while (d > Math.PI)
+            d -= 2 * Math.PI;
+        while (d < -Math.PI)
+            d += 2 * Math.PI;
+        const want = Math.max(-0.9, Math.min(0.9, (d / dt) * 0.9));
+        const was = (_c = bankNow.get(t)) !== null && _c !== void 0 ? _c : 0;
+        const b = was + (want - was) * Math.min(1, dt * 4);
+        bankNow.set(t, b);
+        // Seen from the front, a right bank turns the other way on screen.
+        return Math.cos(yawRel) >= 0 ? b : -b;
+    }
+    // Smoke curling up from a chimney: three puffs that rise, grow and fade, over and over.
+    function chimneySmoke(ctx, x, y, px, t, alpha, lean) {
+        const tex = textures();
+        for (let k = 0; k < 3; k++) {
+            const a = (t * 0.35 + k / 3) % 1;
+            const r = px * (1.5 + a * 4);
+            ctx.globalAlpha = alpha * (1 - a) * 0.55;
+            ctx.drawImage(tex.mist, x - r + (Math.sin(t + k) * 1.5 + lean * 9) * px * a, y - r - a * px * 14, r * 2, r * 2);
+        }
+        ctx.globalAlpha = alpha;
+    }
+    // A flag streaming out with the wind: two bands that ripple in a travelling wave.
+    function flag(ctx, c, x, y, px, t, roll) {
+        const wind = Math.hypot(PA.WIND.X, PA.WIND.Z);
+        const side = (PA.WIND.X * c.rx + PA.WIND.Z * c.rz) / wind; // how much the wind blows across the screen
+        const dir = side >= 0 ? 1 : -1;
+        const L = 13 * px * Math.max(0.3, Math.abs(side));
+        const Hh = 8 * px;
+        const N = 7;
+        const top = [], mid = [], bot = [];
+        for (let i = 0; i <= N; i++) {
+            const u = i / N;
+            const wave = Math.sin(t * 6 - u * 5) * px * 1.6 * u;
+            const fx = dir * u * L, sag = u * px * 1.2;
+            top.push([fx, wave + sag]);
+            mid.push([fx, Hh / 2 + wave + sag * 1.4]);
+            bot.push([fx, Hh + wave * 0.9 + sag * 1.8]);
+        }
+        const cr = Math.cos(roll), sr = Math.sin(roll);
+        ctx.setTransform(cr, sr, -sr, cr, x, y);
+        const band = (a, b, col) => {
+            ctx.fillStyle = col;
+            ctx.beginPath();
+            ctx.moveTo(a[0][0], a[0][1]);
+            for (const q of a)
+                ctx.lineTo(q[0], q[1]);
+            for (let i = b.length - 1; i >= 0; i--)
+                ctx.lineTo(b[i][0], b[i][1]);
+            ctx.closePath();
+            ctx.fill();
+        };
+        band(top, mid, '#ef7f6a');
+        band(mid, bot, '#fff4d6');
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+    // A windmill's four sails, turning in the breeze.
+    function sails(ctx, x, y, px, angle, roll, alpha) {
+        const len = px * 9;
+        ctx.globalAlpha = alpha;
+        for (let k = 0; k < 4; k++) {
+            const a = angle + roll + k * (Math.PI / 2);
+            const ex = x + Math.cos(a) * len, ey = y + Math.sin(a) * len;
+            ctx.strokeStyle = '#6b4a32';
+            ctx.lineWidth = Math.max(1, px * 0.5);
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(ex, ey);
+            ctx.stroke();
+            // The canvas on the outer part of each sail.
+            const sx = x + Math.cos(a) * len * 0.3, sy = y + Math.sin(a) * len * 0.3;
+            ctx.strokeStyle = '#f7f2e8';
+            ctx.lineWidth = Math.max(1, px * 1.6);
+            ctx.beginPath();
+            ctx.moveTo(sx, sy);
+            ctx.lineTo(ex, ey);
+            ctx.stroke();
+        }
+        ctx.fillStyle = '#6b4a32';
+        ctx.fillRect(Math.round(x - px * 0.6), Math.round(y - px * 0.6), Math.max(1, px * 1.2), Math.max(1, px * 1.2));
+    }
+    // Flocks of birds flapping across the sky in a V.
+    function birds(ctx, g, c) {
+        const cell = 700;
+        const ci = Math.floor(c.px / cell), cj = Math.floor(c.pz / cell);
+        ctx.strokeStyle = 'rgba(52,56,72,0.85)';
+        for (let i = ci - 3; i <= ci + 3; i++) {
+            for (let j = cj - 3; j <= cj + 3; j++) {
+                if (PA.cellNoise(i, j, 97) < 0.5)
+                    continue;
+                const dir = PA.cellNoise(i, j, 101) * 6.28, sp = 9;
+                const travel = ((g.time * sp + PA.cellNoise(i, j, 103) * 1400) % 1400) - 700;
+                const bx = i * cell + PA.cellNoise(i, j, 107) * cell + Math.sin(dir) * travel;
+                const bz = j * cell + PA.cellNoise(i, j, 109) * cell + Math.cos(dir) * travel;
+                const bh = 55 + PA.cellNoise(i, j, 113) * 55;
+                const n = 5 + Math.floor(PA.cellNoise(i, j, 127) * 5);
+                for (let k = 0; k < n; k++) {
+                    const rank = Math.ceil(k / 2), side = k % 2 ? 1 : -1;
+                    const X = bx - Math.sin(dir) * rank * 3 + Math.cos(dir) * side * rank * 3;
+                    const Z = bz - Math.cos(dir) * rank * 3 - Math.sin(dir) * side * rank * 3;
+                    const q = project(c, X, bh, Z);
+                    if (!q)
+                        continue;
+                    const size = (0.9 * FOCAL) / q[2];
+                    if (size < 0.7)
+                        continue;
+                    const flap = Math.sin(g.time * 9 + k * 1.7 + i) * size * 0.7;
+                    ctx.globalAlpha = fogAlpha(q[2]);
+                    ctx.lineWidth = Math.max(1, size * 0.35);
+                    ctx.beginPath();
+                    ctx.moveTo(q[0] - size, q[1] - flap);
+                    ctx.lineTo(q[0], q[1]);
+                    ctx.lineTo(q[0] + size, q[1] - flap);
+                    ctx.stroke();
+                }
+            }
+        }
+        ctx.globalAlpha = 1;
+    }
+    // ---- 4. Effects ---------------------------------------------------------------------
+    // An additive glow centred at (x, y).
+    function glow(ctx, x, y, r) {
+        const tex = textures();
+        const prev = ctx.globalCompositeOperation;
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.drawImage(tex.glow, x - r, y - r, r * 2, r * 2);
+        ctx.globalCompositeOperation = prev;
+    }
+    function puffs(ctx, g, c) {
+        const tex = textures();
+        // Smoke and dust first (normal blending), fire and sparks after (adding light).
+        for (const pass of [0, 1]) {
+            ctx.globalCompositeOperation = pass === 0 ? 'source-over' : 'lighter';
+            for (const p of g.puffs) {
+                const kind = p.kind || 'fire';
+                const isLight = kind === 'fire' || kind === 'spark';
+                if ((pass === 1) !== isLight)
+                    continue;
+                const q = project(c, p.X, p.h, p.Z);
+                if (!q)
+                    continue;
+                const life = Math.max(0, p.life / p.max);
+                const age = 1 - life;
+                let size = (p.size * FOCAL) / q[2];
+                let img = tex.fire;
+                let alpha = life;
+                if (kind === 'smoke') {
+                    img = tex.smoke;
+                    size *= 1 + age * 2.2;
+                    alpha = Math.min(1, life * 1.4) * 0.8;
+                }
+                else if (kind === 'dust') {
+                    img = tex.dust;
+                    size *= 1 + age * 1.5;
+                    alpha = life * 0.8;
+                }
+                else if (kind === 'spark') {
+                    img = tex.glow;
+                    size = Math.max(2, size * 0.6);
+                }
+                else {
+                    size *= 0.8 + age * 0.8;
+                }
+                if (size < 0.8)
+                    continue;
+                ctx.globalAlpha = Math.min(1, alpha) * fogAlpha(q[2]);
+                ctx.drawImage(img, q[0] - size, q[1] - size, size * 2, size * 2);
+            }
+        }
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 1;
+    }
+    // Bullets are tracers: a bright streak along their path.
+    function tracers(ctx, c, list, color, width) {
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.strokeStyle = color;
+        ctx.lineCap = 'round';
+        for (const s of list) {
+            const a = project(c, s.X, s.h, s.Z);
+            const b = project(c, s.X - s.vX * 0.025, s.h - s.vY * 0.025, s.Z - s.vZ * 0.025);
+            if (!a || !b)
+                continue;
+            ctx.lineWidth = Math.max(1, (width * FOCAL) / a[2]);
+            ctx.beginPath();
+            ctx.moveTo(b[0], b[1]);
+            ctx.lineTo(a[0], a[1]);
+            ctx.stroke();
+        }
+        ctx.globalCompositeOperation = 'source-over';
     }
     function missiles(ctx, g, c) {
         for (const m of g.missiles) {
             const p = project(c, m.X, m.h, m.Z);
             if (!p)
                 continue;
-            // A short trail behind the missile, then the head.
-            const tail = project(c, m.X - m.vX * 0.05, m.h - m.vY * 0.05, m.Z - m.vZ * 0.05);
-            if (tail) {
-                ctx.strokeStyle = PA.COL.shell;
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(tail[0], tail[1]);
-                ctx.lineTo(p[0], p[1]);
-                ctx.stroke();
-            }
-            ctx.fillStyle = '#ffffff';
+            glow(ctx, p[0], p[1], Math.max(3, 900 / p[2]));
+            ctx.fillStyle = m.enemy ? '#ff5a5a' : '#ffffff';
             ctx.fillRect(Math.round(p[0]) - 1, Math.round(p[1]) - 1, 3, 3);
         }
-    }
-    function puffs(ctx, g, c) {
-        for (const p of g.puffs) {
-            const k = Math.max(0, p.life / p.max);
-            const q = project(c, p.X, p.h, p.Z);
-            if (!q)
-                continue;
-            ctx.globalAlpha = Math.min(1, k * 1.4);
-            ctx.fillStyle = p.color;
-            const s = Math.max(1, Math.round((p.size * (0.5 + k) * FOCAL) / (q[2] * 0.6)));
-            ctx.fillRect(Math.round(q[0]), Math.round(q[1]), s, s);
+        for (const d of g.decoys) {
+            const p = project(c, d.X, d.h, d.Z);
+            if (p)
+                glow(ctx, p[0], p[1], Math.max(3, 1200 / p[2]));
         }
-        ctx.globalAlpha = 1;
     }
+    // Glider rings: glowing hoops standing across the heading.
     function rings(ctx, g, c) {
-        // A ring stands across the heading (level right, then up), so the plane flies through it.
         const rhx = Math.cos(g.plane.yaw), rhz = -Math.sin(g.plane.yaw);
         for (const ring of g.mission.hoops) {
             const pts = [];
-            for (let a = 0; a < 24; a++) {
-                const t = (a / 24) * Math.PI * 2;
+            let depth = 0;
+            for (let a = 0; a < 32; a++) {
+                const t = (a / 32) * Math.PI * 2;
                 const p = project(c, ring.X + rhx * Math.cos(t) * ring.r, ring.h + Math.sin(t) * ring.r, ring.Z + rhz * Math.cos(t) * ring.r);
-                if (p)
-                    pts.push([p[0], p[1]]);
+                if (!p)
+                    break;
+                pts.push([p[0], p[1]]);
+                depth = p[2];
             }
-            if (pts.length < 24)
+            if (pts.length < 32)
                 continue;
-            ctx.beginPath();
-            ctx.moveTo(pts[0][0], pts[0][1]);
-            for (let k = 1; k < pts.length; k++)
-                ctx.lineTo(pts[k][0], pts[k][1]);
-            ctx.closePath();
-            ctx.lineWidth = 4;
-            ctx.strokeStyle = PA.INK;
+            const w = Math.max(1.5, 2.2 * FOCAL / depth);
+            const path = () => {
+                ctx.beginPath();
+                ctx.moveTo(pts[0][0], pts[0][1]);
+                for (let k = 1; k < pts.length; k++)
+                    ctx.lineTo(pts[k][0], pts[k][1]);
+                ctx.closePath();
+            };
+            ctx.globalAlpha = fogAlpha(depth);
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.lineWidth = w * 3;
+            ctx.strokeStyle = ring.passed ? 'rgba(120,230,150,0.25)' : 'rgba(255,170,120,0.3)';
+            path();
             ctx.stroke();
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = ring.passed ? PA.COL.hoopDone : PA.COL.hoop;
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.lineWidth = w;
+            ctx.strokeStyle = ring.passed ? '#7fe0a0' : '#ffb08a';
+            path();
             ctx.stroke();
+            ctx.lineWidth = Math.max(1, w * 0.35);
+            ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+            path();
+            ctx.stroke();
+            ctx.globalAlpha = 1;
         }
     }
-    // Ring of the lock and the collapsing warning ring are drawn in screen space.
+    const streams = [];
+    let streamClock = 0;
+    const ribbons = [[], []];
+    const RIBBON_LIFE = 0.5;
+    const CURVE = 260; // screen pixels the trail drifts per radian of turn (for a point a quarter second old)
+    let lastPlaneYaw = null;
+    // The older a point, the further behind the plane it is, so the more a turn swings it out:
+    // the drift grows with age, and the trail bends into a curve.
+    function driftTrails(dx, dy) {
+        for (const s of streams) {
+            const k = (s.max - s.life) * 4;
+            s.x += dx * k;
+            s.y += dy * k;
+        }
+        for (const r of ribbons)
+            for (const q of r) {
+                const k = (RIBBON_LIFE - q.life) * 4;
+                q.x += dx * k;
+                q.y += dy * k;
+            }
+    }
+    function updateRibbons(dt) {
+        for (const r of ribbons) {
+            for (const q of r) {
+                q.x += q.vx * dt;
+                q.y += q.vy * dt;
+                q.life -= dt;
+            }
+            while (r.length && r[0].life <= 0)
+                r.shift();
+        }
+    }
+    function drawRibbons(ctx) {
+        ctx.lineWidth = 1.3;
+        ctx.lineCap = 'round';
+        for (const r of ribbons) {
+            for (let i = 1; i < r.length; i++) {
+                const q = r[i], o = r[i - 1];
+                ctx.strokeStyle = `rgba(255,255,255,${(q.a * q.life / RIBBON_LIFE).toFixed(3)})`;
+                ctx.beginPath();
+                ctx.moveTo(o.x, o.y);
+                ctx.lineTo(q.x, q.y);
+                ctx.stroke();
+            }
+        }
+    }
+    function updateStreams(dt) {
+        for (const s of streams) {
+            s.x += s.vx * dt;
+            s.y += s.vy * dt;
+            s.r += s.grow * dt;
+            s.life -= dt;
+        }
+        for (let k = streams.length - 1; k >= 0; k--)
+            if (streams[k].life <= 0)
+                streams.splice(k, 1);
+    }
+    function drawStreams(ctx) {
+        const tex = textures();
+        for (const s of streams) {
+            ctx.globalAlpha = Math.max(0, s.alpha * (s.life / s.max));
+            ctx.drawImage(tex.mist, s.x - s.r, s.y - s.r, s.r * 2, s.r * 2);
+        }
+        ctx.globalAlpha = 1;
+    }
+    // The plane sits in the same place on the screen; the world moves past it. It is a voxel
+    // model too, a quarter to a third of the screen wide as the turn tightens, banked with the
+    // part of the roll the camera does not take, with glowing engines, a muzzle flash when the
+    // gun fires, smoke where it was hit, and a blink after a loss.
+    function plane(ctx, g, c) {
+        const p = g.plane;
+        const glider = g.settings.mode === 'glider';
+        const name = glider ? 'glider' : 'plane';
+        const m = PA.model(name);
+        const v = VIEWS[g.settings.view];
+        // Its shadow, the shape of the plane, on the ground.
+        drawShadow(ctx, c, name, p.X, p.h, p.Z, p.yaw);
+        if (g.phase === 'crashed' && Math.floor(g.blink * 8) % 2 === 0)
+            return;
+        const tight = Math.min(1, Math.abs(p.bank) / PA.AIR.bankMax);
+        // Seen from a little higher than the camera really is, so the plane's shape reads.
+        const viewElev = g.settings.view === 'top' ? 1.5 : 0.52;
+        const pose = {
+            sx: PA.W / 2,
+            sy: PA.H * PLANE_SCREEN_Y,
+            px: (PA.W * (0.25 + 0.08 * tight)) / m.w,
+            yaw: 0,
+            elev: Math.max(0.25, Math.min(1.5, viewElev - p.pitch * 0.4)),
+            roll: g.settings.view === 'top' ? p.bank : p.bank * (1 - ROLL_FOLLOW),
+        };
+        PA.drawModel(ctx, m, pose);
+        // Streams: the air rushes back past the plane, from nose to tail on the screen.
+        const now = performance.now();
+        const dt = Math.min(0.05, Math.max(0, (now - streamClock) / 1000));
+        streamClock = now;
+        if (!g.paused) {
+            updateStreams(dt);
+            updateRibbons(dt);
+            // As the plane turns, the air it left behind slides out of the turn on the screen.
+            let dYaw = lastPlaneYaw === null ? 0 : p.yaw - lastPlaneYaw;
+            while (dYaw > Math.PI)
+                dYaw -= 2 * Math.PI;
+            while (dYaw < -Math.PI)
+                dYaw += 2 * Math.PI;
+            lastPlaneYaw = p.yaw;
+            {
+                const [lx, ly] = PA.modelToScreen(m, pose, 0, m.l / 2, 3);
+                const [rx, ry] = PA.modelToScreen(m, pose, m.w, m.l / 2, 3);
+                const ll = Math.hypot(rx - lx, ry - ly) || 1;
+                const k = -dYaw * CURVE / ll;
+                if (Math.abs(dYaw) < 0.2)
+                    driftTrails((rx - lx) * k, (ry - ly) * k);
+            }
+            if (g.phase === 'flying') {
+                const [nx, ny] = PA.modelToScreen(m, pose, m.w / 2, 0, 3);
+                const [bx2, by2] = PA.modelToScreen(m, pose, m.w / 2, m.l, 3);
+                const bl = Math.hypot(bx2 - nx, by2 - ny) || 1;
+                const backX = (bx2 - nx) / bl, backY = (by2 - ny) / bl;
+                // Vapour from both wing tips in a tight turn.
+                if (tight > 0.4) {
+                    const tips = glider ? [[0.5, 28, 4.5], [m.w - 0.5, 28, 4.5]] : [[1.5, 14.5, 3.5], [34.5, 14.5, 3.5]];
+                    const n = tight > 0.7 ? 3 : 2;
+                    tips.forEach(([tx, ty, tz], side) => {
+                        const [sx, sy] = PA.modelToScreen(m, pose, tx, ty, tz);
+                        for (let k = 0; k < n; k++) {
+                            const sp = 120 + Math.random() * 60;
+                            streams.push({ x: sx + (Math.random() - 0.5) * 2, y: sy + (Math.random() - 0.5) * 2, vx: backX * sp, vy: backY * sp, life: 0.6, max: 0.6, r: 1.2, grow: 9, alpha: 0.4 + 0.4 * tight });
+                        }
+                        const r = ribbons[side];
+                        const fresh = { x: sx, y: sy, vx: backX * 150, vy: backY * 150, life: RIBBON_LIFE, a: 0.6 * tight };
+                        // After a gap, start a new line instead of joining it to the old one.
+                        if (r.length && r[r.length - 1].life < RIBBON_LIFE - 0.1)
+                            r.push({ ...fresh, a: 0 });
+                        r.push(fresh);
+                    });
+                }
+                // Heat from the engines: a soft shimmer behind each, stronger with the boost.
+                if (!glider) {
+                    const boost = g.held.boost;
+                    for (const ex of [13.5, 22.5]) {
+                        if (!boost && Math.random() > 0.35)
+                            continue;
+                        const [sx, sy] = PA.modelToScreen(m, pose, ex, 26.5, 6.8);
+                        const sp = 90 + Math.random() * 40;
+                        streams.push({ x: sx, y: sy, vx: backX * sp + (Math.random() - 0.5) * 10, vy: backY * sp, life: boost ? 0.6 : 0.35, max: boost ? 0.6 : 0.35, r: 2, grow: boost ? 16 : 9, alpha: boost ? 0.35 : 0.18 });
+                    }
+                }
+            }
+        }
+        drawStreams(ctx);
+        drawRibbons(ctx);
+        const tex = textures();
+        if (!glider) {
+            // Engine glow, bigger with the boost.
+            const boost = g.held.boost && g.phase === 'flying';
+            for (const ex of [13.5, 22.5]) {
+                const [x, y] = PA.modelToScreen(m, pose, ex, 26, 6.8);
+                const r = (boost ? 7 : 3.5) + Math.random() * 1.5;
+                ctx.globalCompositeOperation = 'lighter';
+                ctx.drawImage(tex.fire, x - r, y - r, r * 2, r * 2);
+                if (boost)
+                    ctx.drawImage(tex.fire, x - r * 0.7, y + r * 0.4, r * 1.4, r * 2.4);
+                ctx.globalCompositeOperation = 'source-over';
+            }
+            // Muzzle flash at the nose while the gun fires.
+            if (g.held.fire && g.ammo >= 1 && g.fireCool > 0.03) {
+                const [x, y] = PA.modelToScreen(m, pose, 18, 0, 3);
+                glow(ctx, x, y, 8 + Math.random() * 6);
+            }
+        }
+        // Damage: smoke rising from the wing where each hit landed.
+        for (const mk of g.marks) {
+            const [x, y] = PA.modelToScreen(m, pose, m.w / 2 + mk.x * 1.5, m.l * 0.45, 4);
+            for (let k = 0; k < 3; k++) {
+                const a = (mk.age * 1.6 + k / 3) % 1;
+                const r = 4 + a * 10;
+                ctx.globalAlpha = (1 - a) * 0.7;
+                ctx.drawImage(tex.smoke, x - r + a * 4, y - r + a * 10, r * 2, r * 2);
+            }
+        }
+        ctx.globalAlpha = 1;
+    }
+    // ---- Screen overlays ----------------------------------------------------------------
+    // A lens flare when the sun is in front of the camera.
+    function lensFlare(ctx, c) {
+        const s = project(c, c.px + SUN.x * 8000, c.py + SUN.y * 8000, c.pz + SUN.z * 8000);
+        if (!s || s[0] < -40 || s[0] > PA.W + 40 || s[1] < -40 || s[1] > PA.H + 40)
+            return;
+        ctx.globalAlpha = 0.6;
+        glow(ctx, s[0], s[1], 36);
+        ctx.globalAlpha = 1;
+        const cx = PA.W / 2, cy = PA.H / 2;
+        const steps = [[0.4, 8, 'rgba(255,220,160,0.12)'], [0.7, 5, 'rgba(180,220,255,0.12)'], [1.3, 13, 'rgba(255,190,220,0.09)']];
+        ctx.globalCompositeOperation = 'lighter';
+        for (const [k, r, col] of steps) {
+            const x = s[0] + (cx - s[0]) * k, y = s[1] + (cy - s[1]) * k;
+            ctx.fillStyle = col;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalCompositeOperation = 'source-over';
+    }
     function lockRing(ctx, g, c) {
         const t = g.lock.target;
         if (!t || g.lock.progress <= 0)
@@ -2540,8 +3888,8 @@ var PA;
         const q = project(c, t.X, PA.altOf(t), t.Z);
         if (!q)
             return;
-        const r = 26 - g.lock.progress * 14;
-        ctx.strokeStyle = PA.INK;
+        const r = 30 - g.lock.progress * 16;
+        ctx.strokeStyle = 'rgba(20,24,40,0.7)';
         ctx.lineWidth = 4;
         ctx.beginPath();
         ctx.arc(q[0], q[1], r, 0, Math.PI * 2);
@@ -2552,122 +3900,19 @@ var PA;
         ctx.arc(q[0], q[1], r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * g.lock.progress);
         ctx.stroke();
     }
-    // The tag: a ring around the plane that collapses as the enemy missile closes in.
+    // The tag: a ring round the plane that closes in as the enemy missile nears.
     function warnRing(ctx, g) {
         if (!g.tagged)
             return;
         const flash = Math.floor(g.time * 8) % 2 === 0;
         const k = Math.max(0, Math.min(1, g.tagDist / 900));
-        const r = 18 + k * 70;
-        ctx.strokeStyle = flash ? '#ff3b3b' : PA.INK;
+        const r = 22 + k * 84;
+        ctx.strokeStyle = flash ? '#ff3b3b' : 'rgba(20,24,40,0.8)';
         ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.arc(PA.W / 2, PA.H * PLANE_SCREEN_Y, r, 0, Math.PI * 2);
         ctx.stroke();
     }
-    // Enemy missiles: a red streak with a bright head.
-    function enemyMissiles(ctx, g, c) {
-        for (const m of g.missiles) {
-            if (!m.enemy)
-                continue;
-            const p = project(c, m.X, m.h, m.Z);
-            if (!p)
-                continue;
-            const tail = project(c, m.X - m.vX * 0.08, m.h - m.vY * 0.08, m.Z - m.vZ * 0.08);
-            if (tail) {
-                ctx.strokeStyle = '#ff6b6b';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.moveTo(tail[0], tail[1]);
-                ctx.lineTo(p[0], p[1]);
-                ctx.stroke();
-            }
-            ctx.fillStyle = '#fffdfa';
-            ctx.fillRect(Math.round(p[0]) - 2, Math.round(p[1]) - 2, 4, 4);
-        }
-    }
-    function wisps(ctx, g, c) {
-        for (const w of g.wisps) {
-            const q = project(c, w.X, w.h, w.Z);
-            if (!q)
-                continue;
-            const k = Math.max(0, w.life / w.max);
-            ctx.globalAlpha = Math.min(0.9, k * 1.2);
-            ctx.fillStyle = w.color;
-            const r = Math.max(1, (w.size * (1.2 - k) * FOCAL) / (q[2] * 0.9));
-            ctx.beginPath();
-            ctx.arc(q[0], q[1], r, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.globalAlpha = 1;
-    }
-    // The plane is always in the same place on the screen; the world moves past it.
-    // It grows from a quarter to a third of the screen width as the turn tightens, blinks
-    // after a loss, shows smoke on the wings where it has been hit, and trails flame when boosting.
-    function plane(ctx, g, c) {
-        const p = g.plane;
-        const shadow = project(c, p.X, PA.groundAt(p.X, p.Z), p.Z);
-        if (shadow) {
-            const rx = Math.max(3, Math.min(14, 26 - p.h * 0.2));
-            ctx.fillStyle = 'rgba(47,45,61,0.22)';
-            ctx.beginPath();
-            ctx.ellipse(shadow[0], shadow[1], rx, 3, 0, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        const blinkOff = g.phase === 'crashed' && Math.floor(g.blink * 8) % 2 === 0;
-        const sx = PA.W / 2, sy = PA.H * PLANE_SCREEN_Y;
-        const glider = g.settings.mode === 'glider';
-        const tight = Math.min(1, Math.abs(p.bank) / PA.AIR.bankMax);
-        // The jet is drawn at its own detail, at one of four crisp sizes (25% to 33% of the width).
-        // The paper glider is drawn at its own size.
-        const plane2 = glider ? null : PA.planeSprite(tight);
-        const img = plane2 ? plane2.img : PA.sprite('glider');
-        const scale = plane2 ? plane2.k : 1.5;
-        ctx.save();
-        ctx.translate(sx, sy);
-        ctx.rotate(p.bank);
-        if (!blinkOff) {
-            const dw = img.width, dh = img.height;
-            // Flame from the engines when boosting: two flickering tongues.
-            if (g.held.boost && g.phase === 'flying' && !glider) {
-                // The engine exhausts sit at design x 25 and 42, y 35 (centre 33, 20).
-                for (const ex of [24.5, 43.5]) {
-                    const len = (8 + Math.random() * 6) * scale / 2;
-                    const x0 = (ex - 33) * scale, y0 = 35 * scale - 20 * scale;
-                    ctx.fillStyle = '#ffb02e';
-                    ctx.beginPath();
-                    ctx.moveTo(x0 - 2, y0);
-                    ctx.lineTo(x0 + 2, y0);
-                    ctx.lineTo(x0, y0 + len);
-                    ctx.closePath();
-                    ctx.fill();
-                    ctx.fillStyle = '#fff1b8';
-                    ctx.beginPath();
-                    ctx.moveTo(x0 - 1, y0);
-                    ctx.lineTo(x0 + 1, y0);
-                    ctx.lineTo(x0, y0 + len * 0.5);
-                    ctx.closePath();
-                    ctx.fill();
-                }
-            }
-            ctx.drawImage(img, -Math.round(dw / 2), -Math.round(dh / 2));
-        }
-        // Damage: a cloud of smoke on each wing, slowly lifting.
-        for (const m of g.marks) {
-            const rise = Math.min(6, m.age * 2);
-            const r = 2.5 + Math.sin(m.age * 3) * 0.6;
-            ctx.fillStyle = 'rgba(255,253,250,0.85)';
-            ctx.beginPath();
-            ctx.arc(m.x * scale, (m.y - rise * 0.2) * scale, r * scale, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = 'rgba(120,120,130,0.6)';
-            ctx.beginPath();
-            ctx.arc(m.x * scale + 2, (m.y - rise * 0.2 - 1) * scale, r * scale * 0.6, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.restore();
-    }
-    // Arrows for the four forces, from the plane. Drawn on the screen, not in the world.
     function arrow(ctx, x, y, vx, vy, color, label) {
         const len = Math.hypot(vx, vy);
         if (len < 2)
@@ -2693,42 +3938,45 @@ var PA;
         ctx.lineTo(ex - 7 * Math.cos(a + 0.45), ey + 7 * Math.sin(a + 0.45));
         ctx.closePath();
         ctx.fill();
-        ctx.font = 'bold 9px system-ui, sans-serif';
+        ctx.font = 'bold 10px system-ui, sans-serif';
         ctx.fillStyle = PA.INK;
         ctx.fillText(label, ex + 4, ey + 3);
     }
     function forces(ctx, g) {
         const p = g.plane;
-        const x = PA.W / 2, y = PA.H * PLANE_SCREEN_Y - 10;
-        const k = 1.6;
+        const x = PA.W / 2, y = PA.H * PLANE_SCREEN_Y - 12;
+        const k = 1.9;
         arrow(ctx, x, y, 0, p.lift[1] * k, PA.COL.lift, 'lift');
         arrow(ctx, x, y, 0, p.weight[1] * k, PA.COL.weight, 'weight');
         arrow(ctx, x, y, 0, p.thrust[1] * k, PA.COL.thrust, 'thrust');
         arrow(ctx, x, y, p.drag[0] * k, 0, PA.COL.drag, 'drag');
     }
-    // The cockpit: canopy struts and a dark instrument panel along the bottom.
+    // The cockpit: canopy struts and an instrument panel along the bottom.
     function cockpit(ctx, g) {
         const panelTop = PA.H * 0.84;
-        ctx.fillStyle = '#3b3950';
+        const grad = ctx.createLinearGradient(0, panelTop, 0, PA.H);
+        grad.addColorStop(0, '#45435a');
+        grad.addColorStop(1, '#2a2938');
+        ctx.fillStyle = grad;
         ctx.fillRect(0, panelTop, PA.W, PA.H - panelTop);
-        ctx.fillStyle = '#5b5876';
+        ctx.fillStyle = 'rgba(255,255,255,0.12)';
         ctx.fillRect(0, panelTop, PA.W, 2);
-        const gx = PA.W / 2, gy = panelTop + 14;
+        const gx = PA.W / 2, gy = panelTop + 16;
         ctx.strokeStyle = '#fffdfa';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(gx, gy, 9, 0, Math.PI * 2);
+        ctx.arc(gx, gy, 10, 0, Math.PI * 2);
         ctx.stroke();
         ctx.save();
         ctx.translate(gx, gy);
         ctx.rotate(-g.plane.bank);
         ctx.beginPath();
-        ctx.moveTo(-9, 0);
-        ctx.lineTo(9, 0);
+        ctx.moveTo(-10, 0);
+        ctx.lineTo(10, 0);
         ctx.stroke();
         ctx.restore();
-        ctx.strokeStyle = '#2f2d3d';
-        ctx.lineWidth = 6;
+        ctx.strokeStyle = '#2a2938';
+        ctx.lineWidth = 8;
         ctx.beginPath();
         ctx.moveTo(0, panelTop);
         ctx.lineTo(PA.W * 0.22, 0);
@@ -2738,31 +3986,45 @@ var PA;
         ctx.lineTo(PA.W * 0.78, 0);
         ctx.stroke();
     }
+    // How long each stage took on the last frame, in milliseconds (for tuning).
+    PA.renderStats = { background: 0, objects: 0, total: 0, things: 0 };
     function render(ctx, g) {
+        const t0 = performance.now();
+        PA.cacheFrame();
         ctx.imageSmoothingEnabled = false;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
         const c = makeCam(g);
-        sky(ctx);
+        paintBackground(ctx, g, c);
+        const t1 = performance.now();
         clouds(ctx, g, c);
-        ground(ctx, g, c);
-        road(ctx, g, c);
+        objects(ctx, g, c);
+        birds(ctx, g, c);
+        const t2 = performance.now();
         if (g.settings.view !== 'cockpit' && g.mission.mode === 'glider')
             rings(ctx, g, c);
-        for (const th of collect(g, c))
-            billboard(ctx, c, th.img, th.X, th.Z, th.base, th.facing);
-        shots(ctx, c, g.shots, PA.COL.bullet, 2);
-        shots(ctx, c, g.shells, PA.COL.shell, 2);
+        tracers(ctx, c, g.shots, 'rgba(255,236,150,0.95)', 0.35);
+        tracers(ctx, c, g.shells, 'rgba(255,150,90,0.9)', 0.5);
         missiles(ctx, g, c);
-        enemyMissiles(ctx, g, c);
-        wisps(ctx, g, c);
         puffs(ctx, g, c);
         lockRing(ctx, g, c);
         if (g.settings.view !== 'cockpit')
             plane(ctx, g, c);
+        lensFlare(ctx, c);
         warnRing(ctx, g);
         if (g.settings.view === 'cockpit')
             cockpit(ctx, g);
         if (g.settings.forces)
             forces(ctx, g);
+        ctx.drawImage(textures().vignette, 0, 0);
+        const t3 = performance.now();
+        PA.renderStats.background = PA.renderStats.background * 0.9 + (t1 - t0) * 0.1;
+        // A slow device paints the ground every other column; a fast one goes back to every pixel.
+        if (!halfGround && PA.renderStats.background > 15)
+            halfGround = true;
+        else if (halfGround && PA.renderStats.background < 6)
+            halfGround = false;
+        PA.renderStats.objects = PA.renderStats.objects * 0.9 + (t2 - t1) * 0.1;
+        PA.renderStats.total = PA.renderStats.total * 0.9 + (t3 - t0) * 0.1;
     }
     PA.render = render;
 })(PA || (PA = {}));
@@ -3229,7 +4491,7 @@ var PA;
         $('missionBody').textContent = 'Destroy ' + g.objectiveGoal + ' ground targets. Arrows on the radar point to them.';
         $('objective').textContent = g.resupplied > 0
             ? 'Mission complete! Everything restocked.'
-            : g.settings.mode === 'glider' ? 'Fly through the rings.'
+            : g.settings.mode === 'glider' ? ''
                 : 'Mission ' + g.missionNumber + ': destroy ' + left + ' more ground target' + (left === 1 ? '' : 's');
         const cool = Math.ceil(g.resupplyCool);
         $('reloadBtn').toggleAttribute('disabled', g.felix || cool > 0);

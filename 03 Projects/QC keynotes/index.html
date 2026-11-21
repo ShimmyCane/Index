@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QC keynotes</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --paper: #fbf8f1; --ink: #2b2a33; --muted: #6b6878; --line: #2b2a33; --card: #ffffff; --accent: #e7dcc4;
+    --green: #bfe8d2; --yellow: #fff0a8; --red: #ffd0cb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --paper: #1f1e25; --ink: #f1eee6; --muted: #aaa6b6; --line: #f1eee6; --card: #2a2930; --accent: #3a3742; --green: #2f6b4a; --yellow: #7a6a1c; --red: #7a3029; }
+  }
+  :root[data-theme="dark"] { --paper: #1f1e25; --ink: #f1eee6; --muted: #aaa6b6; --line: #f1eee6; --card: #2a2930; --accent: #3a3742; --green: #2f6b4a; --yellow: #7a6a1c; --red: #7a3029; }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; min-height: 100vh; padding-bottom: 120px; }
+  main { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+  h1 { font-size: 28px; margin: 28px 0 6px; }
+  h2 { font-size: 18px; margin: 0; }
+  .lede { color: var(--muted); margin: 0 0 14px; max-width: 70ch; }
+  .pill { display: inline-block; font-size: 13px; border: 2px solid var(--line); border-radius: 999px; padding: 2px 10px; background: var(--card); }
+  .offline { background: var(--accent); }
+  .intro { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; margin: 14px 0 22px; padding: 0; list-style: none; }
+  .intro li { background: var(--card); border: 2px solid var(--line); border-radius: 12px; padding: 8px 12px; font-size: 14px; }
+  .intro b { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--line); margin-right: 6px; font-size: 13px; }
+
+  details.step { background: var(--card); border: 2px solid var(--line); border-radius: 14px; box-shadow: 0 3px 0 var(--line); margin-bottom: 16px; }
+  details.step > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 10px 14px; font-weight: 700; }
+  details.step > summary::-webkit-details-marker { display: none; }
+  details.step > summary::before { content: "▸"; width: 14px; }
+  details.step[open] > summary::before { content: "▾"; }
+  .num { flex: 0 0 32px; height: 32px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; font-weight: 700; background: var(--paper); }
+  .tag { margin-left: auto; font-size: 13px; font-weight: 400; color: var(--muted); text-align: right; }
+  .body { padding: 0 16px 16px; border-top: 2px dashed var(--accent); padding-top: 14px; }
+
+  .hint { color: var(--muted); font-size: 13px; margin: 4px 0; }
+  .field { display: grid; gap: 4px; margin: 12px 0; }
+  .field > label, .lbl { font-weight: 700; font-size: 15px; }
+  input[type=text], input[type=number], textarea, select { width: 100%; font: inherit; color: var(--ink); background: var(--paper); border: 2px solid var(--line); border-radius: 10px; padding: 8px 10px; min-height: 46px; }
+  textarea { min-height: 76px; resize: vertical; }
+  .check { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+  .check input { width: 22px; height: 22px; }
+  .scopeRow { display: grid; grid-template-columns: minmax(200px, 1fr) minmax(200px, 1fr); gap: 8px; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--accent); }
+  .checkRow { display: grid; grid-template-columns: 1fr 140px; gap: 10px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--accent); }
+  .checkName { font-weight: 700; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+  .btn { min-height: 48px; padding: 0 16px; border: 2px solid var(--line); border-radius: 12px; background: var(--card); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; box-shadow: 0 3px 0 var(--line); display: inline-flex; align-items: center; justify-content: center; }
+  .btn:disabled { opacity: .5; cursor: default; box-shadow: none; }
+  .btn.primary { background: var(--green); }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; align-items: center; }
+  .seg { display: flex; gap: 8px; flex-wrap: wrap; }
+  .seg button { flex: 1 1 110px; min-height: 48px; border: 2px solid var(--line); border-radius: 12px; background: var(--paper); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; }
+  .seg button.on { background: var(--green); }
+  .mini { min-width: 48px; min-height: 48px; border: 2px solid var(--line); border-radius: 12px; background: var(--paper); color: var(--ink); font: inherit; cursor: pointer; }
+  .note { border: 2px dashed var(--line); border-radius: 12px; padding: 10px 12px; color: var(--muted); font-size: 14px; margin: 10px 0; }
+  .howto { background: var(--paper); border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: 14px; margin: 12px 0; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+  .chip { border: 2px solid var(--line); border-radius: 12px; padding: 6px 12px; font-weight: 700; min-width: 110px; }
+  .chip.g { background: var(--green); } .chip.y { background: var(--yellow); } .chip.r { background: var(--red); }
+  .dot { display: inline-block; width: 14px; height: 14px; border-radius: 4px; border: 2px solid var(--line); vertical-align: -2px; margin-right: 6px; }
+  .dot.green { background: #2e9e57; } .dot.yellow { background: #f2c419; } .dot.red { background: #d93a2a; }
+
+  .stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; margin-top: 12px; }
+  .split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 14px; align-items: start; }
+  @media (max-width: 760px) { .split { grid-template-columns: minmax(0, 1fr); } .scopeRow { grid-template-columns: 1fr; } }
+  .tableWrap { max-height: 460px; overflow: auto; border: 2px solid var(--line); border-radius: 12px; background: var(--paper); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--accent); vertical-align: top; }
+  th { position: sticky; top: 0; background: var(--card); }
+  tr.pick { outline: 3px solid var(--ink); outline-offset: -3px; }
+  tr[data-id] { cursor: pointer; }
+  .previewWrap { border: 2px solid var(--line); border-radius: 12px; background: #fff; overflow: auto; max-height: 720px; padding: 6px; }
+  .previewWrap canvas { display: block; margin: 0 auto; max-width: none; }
+  .pageNav { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .pageNav select { width: auto; min-width: 140px; }
+  .muted { color: var(--muted); }
+
+  .gear { position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); width: 64px; height: 64px; border-radius: 50%; font-size: 30px; z-index: 30; background: var(--accent); border: 2px solid var(--line); box-shadow: 0 4px 0 var(--line); cursor: pointer; }
+  .drawer { position: fixed; right: 18px; bottom: 96px; width: min(380px, 92vw); max-height: 70vh; overflow-y: auto; z-index: 40; background: var(--card); color: var(--ink); border: 2px solid var(--line); border-radius: 16px; box-shadow: 0 6px 0 var(--line); padding: 14px; }
+  .drawerHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .drawer .setting { padding: 10px 0; border-bottom: 1px solid var(--accent); }
+  .drawer .setting:last-child { border-bottom: 0; }
+  .errorsPanel { position: fixed; left: 16px; right: 100px; bottom: 16px; max-height: 30vh; overflow: auto; z-index: 25; background: var(--red); color: var(--ink); border: 2px solid var(--line); border-radius: 14px; padding: 8px 12px; font: 13px/1.4 ui-monospace, Menlo, monospace; white-space: pre-wrap; }
+
+  .noteItem { list-style: none; border: 2px solid var(--line); border-radius: 12px; padding: 8px 10px; margin: 8px 0; background: var(--paper); }
+  .noteItem.done { opacity: .6; }
+  .noteText { margin: 4px 0; white-space: pre-wrap; }
+  .wide { width: 100%; margin-top: 4px; }
+  textarea.small { min-height: 60px; }
+  details.ruleDraft { border: 2px solid var(--line); border-radius: 12px; margin: 8px 0; background: var(--paper); }
+  details.ruleDraft > summary { list-style: none; cursor: pointer; padding: 8px 12px; min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 700; }
+  details.ruleDraft > summary::-webkit-details-marker { display: none; }
+  .ruleBody { padding: 0 12px 12px; }
+  .ruleBody input[type=text], .ruleBody textarea { margin-bottom: 6px; }
+  .ruleName { flex: 1; }
+  .pill:empty { display: none; }
+  .hg { background: #bfe8d2; border-radius: 3px; padding: 0 2px; }
+  .wy { text-decoration: underline; text-decoration-color: #f2c419; text-decoration-thickness: 3px; }
+  .wr { text-decoration: underline; text-decoration-color: #d93a2a; text-decoration-thickness: 3px; }
+  .topRight { position: fixed; top: 12px; right: 16px; z-index: 20; min-height: 44px; }
+  @media print { .gear, .drawer, .errorsPanel, .btn, .seg, .row, .field input[type=file] { display: none !important; } body { padding-bottom: 0; background: #fff; color: #000; } details.step { box-shadow: none; } }
+</style>
+</head>
+<body>
+<button type="button" class="btn primary topRight" id="loadSample" aria-describedby="sampleMsg">Load sample</button>
+<main>
+  <h1>QC keynotes</h1>
+  <p class="hint" id="sampleMsg" role="status" style="margin-top:-2px"></p>
+  <p class="lede">A first pass over keynotes and general notes on an architectural drawing set. The page checks each keynote against your keynote guideline and marks it green (matches), yellow (questionable) or red (breaks a rule). You then export a marked-up PDF whose marks you can still edit.</p>
+  <p><span class="pill offline">🔒 Offline only: the guideline and the drawings stay in this browser. Nothing is uploaded.</span></p>
+
+  <ol class="intro" aria-label="Next steps">
+    <li><b>1</b>Define the keynote guideline</li>
+    <li><b>2</b>Upload a PDF drawing set</li>
+    <li><b>3</b>Scan and mark green, yellow, red</li>
+    <li><b>4</b>Export the marked-up PDF</li>
+  </ol>
+
+  <!-- STEP 1 -->
+  <details class="step" id="step1" open>
+    <summary><span class="num">1</span><span>Define the keynote guideline</span><span class="tag" id="tag1"></span></summary>
+    <div class="body">
+      <p class="hint">Type the guideline in. Every field is a rule the scan can test. Leave a field empty when it does not apply. The grey examples are generic, not a standard.</p>
+
+      <div class="field"><label for="gName">Guideline name</label>
+        <input type="text" id="gName" placeholder="e.g. Restroom and accessibility keynotes, v1"></div>
+
+      <div class="field"><span class="lbl">Cloud storage for this guideline</span>
+        <div class="seg" id="cloudSeg">
+          <button type="button" data-v="local">Keep local and secure</button>
+          <button type="button" data-v="cloud">Safe to cloud</button>
+        </div>
+        <span class="hint">Default: keep local and secure. Choose safe to cloud only for guidelines with no firm or client content. Guidelines are never sent to the database in this version; the choice is recorded in the saved file for later.</span></div>
+
+      <div class="field"><span class="lbl">Scopes and their scope words</span>
+        <span class="hint">Tick the scopes this guideline covers. Scope words are the words an entry must use for that scope (comma separated). A keynote with none of the selected scope words is yellow.</span>
+        <div id="scopeRows"></div></div>
+
+      <div class="field"><span class="lbl">Keynote rows</span>
+        <div class="grid2">
+          <div><label for="types">Keynote types (comma separated)</label><input type="text" id="types" placeholder="Demo, New"></div>
+          <div><label for="digMin">Fewest digits in the number</label><input type="number" id="digMin" min="1" max="3" value="1"></div>
+          <div><label for="digMax">Most digits in the number</label><input type="number" id="digMax" min="1" max="3" value="3"></div>
+        </div>
+        <span class="hint">Each keynote row is: type, then the keynote text. Numbers and CSI codes are optional and are not checked by default, because numbering differs from drawing to drawing. The phrasing is what is checked.</span></div>
+      <div class="field"><label for="verbs">Approved opening verbs (comma separated)</label><input type="text" id="verbs" placeholder="REMOVE, INSTALL, PROVIDE"></div>
+
+      <div class="field"><span class="lbl">Wording</span>
+        <div class="grid2">
+          <div><label for="maxWords">Most words in an entry</label><input type="number" id="maxWords" min="1" value="100"></div>
+          <div><label for="fireWords">Rating words for a FIRE keynote</label><input type="text" id="fireWords" placeholder="HR, HOUR"></div>
+          <div><label for="similarity">Closeness to an approved phrase (%)</label><input type="number" id="similarity" min="50" max="100" value="80"></div>
+        </div>
+        <label class="check"><input type="checkbox" id="upperCase" checked> Upper case required</label></div>
+
+      <div class="field"><label for="approved">Approved phrases (one per line)</label>
+        <textarea id="approved" placeholder="REMOVE EXISTING CERAMIC WALL TILE AT RESTROOM WALLS&#10;INSTALL NEW GRAB BAR, 36 INCH LONG"></textarea>
+        <span class="hint">Exact matches are green. Close ones are yellow and show the closest phrase. Anything else is yellow when the check below is on. Leave empty to skip this.</span></div>
+
+      <div class="field"><span class="lbl">Rules (drafts until approved)</span>
+        <span class="hint">Each rule has a colour, a short description and a full narrative. A draft rule does not run in the scan. Tick Approved to apply it.</span>
+        <div id="checkRows"></div></div>
+
+      <div class="field"><label for="syntaxDemo">Demolition keynote syntax (notes for people)</label>
+        <textarea id="syntaxDemo" placeholder="e.g. Prefix D, number, then the words in upper case, placed next to the item."></textarea></div>
+      <div class="field"><label for="syntaxNew">New work keynote syntax (notes for people)</label>
+        <textarea id="syntaxNew" placeholder="e.g. Prefix N, number, then the words in upper case."></textarea></div>
+      <div class="field"><label for="examples">Examples</label>
+        <textarea id="examples" placeholder="✔ D3 REMOVE EXISTING TILE&#10;✖ d-3 remove tile"></textarea></div>
+
+      <div class="note">General notes: stub. Which note blocks to check and how an unlisted note is coloured will be built later.</div>
+
+      <div class="row">
+        <button type="button" class="btn" id="saveG">Save in this browser</button>
+        <button type="button" class="btn" id="exportG">Export guideline file</button>
+        <label class="btn" for="importG">Import guideline file</label>
+        <input type="file" id="importG" accept="application/json,.json" hidden>
+        <button type="button" class="btn" id="clearG">Clear the form</button>
+      </div>
+      <p class="hint" id="saveMsg" role="status"></p>
+    </div>
+  </details>
+
+  <!-- STEP 2 -->
+  <details class="step" id="step2">
+    <summary><span class="num">2</span><span>Upload a PDF drawing set (it is read straight away)</span><span class="tag" id="tag2">no file yet</span></summary>
+    <div class="body">
+      <p class="hint">Use a vector PDF, where the text can be selected. Scanned pages cannot be read in this version and are marked yellow.</p>
+      <div class="row">
+        <label class="btn primary" for="pdfIn">Choose a PDF</label>
+        <input type="file" id="pdfIn" accept="application/pdf,.pdf" hidden>
+        <span id="fileInfo" class="muted"></span>
+      </div>
+      <p class="note">The file is read in this browser only. It is not uploaded, not saved, and not committed to the repository.</p>
+    </div>
+  </details>
+
+  <!-- STEP 3 -->
+  <details class="step" id="step3">
+    <summary><span class="num">3</span><span>The drawing: keynotes at full strength, the rest faded</span><span class="tag" id="tag3">waiting for a PDF</span></summary>
+    <div class="body">
+      <div class="row">
+        <button type="button" class="btn" id="scanBtn" disabled>Scan again</button>
+        <span class="muted" id="scanInfo"></span>
+      </div>
+
+      <div class="chips" id="chips" hidden>
+        <div class="chip g" id="cG">Green: 0</div>
+        <div class="chip y" id="cY">Yellow: 0</div>
+        <div class="chip r" id="cR">Red: 0</div>
+        <div class="chip" id="cC">Undefined callouts: 0</div>
+      </div>
+      <div class="howto" id="howto" hidden></div>
+
+      <div class="stack" id="results" hidden>
+        <div>
+          <div class="pageNav">
+            <label for="pageSel">Page</label>
+            <select id="pageSel"></select>
+            <span class="muted" id="pageInfo"></span>
+          </div>
+          <div class="previewWrap"><canvas id="preview" aria-label="Drawing preview with marks"></canvas></div>
+        </div>
+        <div>
+          <div class="tableWrap">
+            <table aria-label="Findings">
+              <thead><tr><th>Mark</th><th>Page</th><th>Keynote</th><th>Why</th></tr></thead>
+              <tbody id="findBody"></tbody>
+            </table>
+          </div>
+          <p class="hint">Click a row to see it on the sheet. Green highlight: the phrase is exactly an approved phrase. Red underline: a word breaks a rule. Yellow underline: a word differs from the nearest approved phrase.</p>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- STEP 4 -->
+  <details class="step" id="step4">
+    <summary><span class="num">4</span><span>Export the marked-up PDF</span><span class="tag" id="tag4">after a scan</span></summary>
+    <div class="body">
+      <p class="hint">The export keeps the drawing as it is. Each mark is a separate annotation: green and yellow highlights on keynote entries, red boxes on undefined callouts, and yellow boxes on unreadable pages. Open it in Acrobat, Bluebeam or any viewer and the marks can be moved, changed or deleted.</p>
+      <div class="row">
+        <button type="button" class="btn primary" id="exportBtn" disabled>Download marked-up PDF</button>
+        <button type="button" class="btn" id="csvBtn" disabled>Download findings list (CSV)</button>
+        <span class="muted" id="exportInfo"></span>
+      </div>
+      <div class="howto">How to check the export: open it, search for a keynote code (the text is still there), then click a mark. Its comment says why it was coloured.</div>
+    </div>
+  </details>
+
+  <p class="hint" style="margin-top:24px">Nothing you load is saved or sent. Notes for improvement are in ⚙️.</p>
+</main>
+
+<!-- ⚙️ SETTINGS -->
+<button class="gear" id="gear" aria-label="Settings" aria-expanded="false" aria-controls="drawer">⚙️</button>
+<aside class="drawer" id="drawer" hidden aria-label="Settings">
+  <div class="drawerHead"><h2>Settings</h2><button class="mini" id="closeDrawer" aria-label="Close settings">✖</button></div>
+  <p class="hint">Saved in this browser.</p>
+
+  <div class="setting">
+    <span class="lbl">Strictness</span>
+    <p class="hint">Relaxed and standard keep yellow as yellow. Strict makes every yellow red, for a final check.</p>
+    <div class="seg" data-key="strictness">
+      <button type="button" data-v="relaxed">Relaxed</button>
+      <button type="button" data-v="standard">Standard</button>
+      <button type="button" data-v="strict">Strict</button>
+    </div>
+  </div>
+
+  <div class="setting">
+    <span class="lbl">Export</span>
+    <label class="check"><input type="checkbox" id="optFindings"> Also download the findings list (CSV) with the PDF</label>
+    <label class="check"><input type="checkbox" id="optComments"> Add a comment to each mark</label>
+    <p class="hint">The comment gives the colour and the reason for each mark.</p>
+  </div>
+
+  <div class="setting">
+    <span class="lbl">Display</span>
+    <label class="check"><input type="checkbox" id="optDark"> Dark mode</label>
+  </div>
+
+
+  <div class="setting">
+    <span class="lbl">Notes for improvement</span>
+    <p class="hint">Say what to change. Each note is saved on this device with the part of the page it is about and the time.</p>
+    <label for="noteItem" class="hint">About</label>
+    <select id="noteItem">
+      <option>General</option><option>Step 1: guideline</option><option>Step 2: upload</option>
+      <option>Step 3: scan</option><option>Step 4: export</option><option>Settings</option>
+    </select>
+    <textarea id="noteText" class="small" aria-label="Note" placeholder="What should change?"></textarea>
+    <div class="row"><button type="button" class="btn primary" id="noteSave">Save note</button>
+      <button type="button" class="btn" id="noteCopy">Copy all notes</button></div>
+    <p class="hint" id="noteCount"></p>
+    <ul id="noteList" style="padding:0;margin:0"></ul>
+  </div>
+
+  <div class="setting">
+    <span class="lbl">Architecture database</span>
+    <p class="hint">Only notes and their done or reopened status go there, and only after you sign in. Guidelines and drawings are never sent.</p>
+    <div id="dbSignInBox">
+      <label for="dbEmail" class="hint">Email</label><input type="text" id="dbEmail" autocomplete="username">
+      <label for="dbPassword" class="hint">Password (not stored)</label><input type="password" id="dbPassword" autocomplete="current-password">
+      <div class="row"><button type="button" class="btn" id="dbSignIn">Sign in</button></div>
+    </div>
+    <div id="dbSignedIn" hidden>
+      <div class="row"><button type="button" class="btn" id="dbSync">Sync notes now</button>
+        <button type="button" class="btn" id="dbSignOut">Sign out</button></div>
+    </div>
+    <div class="row"><button type="button" class="btn" id="dbCheck">Check database</button></div>
+    <ul id="dbCheckOut" class="hint"></ul>
+    <p class="hint" id="dbStatus" role="status"></p>
+  </div>
+
+  <div class="setting">
+    <label class="check"><input type="checkbox" id="showErrors"> Show errors</label>
+    <p class="hint">Errors appear at the bottom of the page. Off by default.</p>
+  </div>
+
+  <div class="setting">
+    <span class="lbl">About</span>
+    <p class="hint">QC keynotes 0.2.0. Track B, studio design. Libraries are stored in this folder (vendor), not loaded from the internet.</p>
+  </div>
+</aside>
+<div id="errorsPanel" class="errorsPanel" hidden></div>
+
+<script src="vendor/pdf.min.js"></script>
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/core.js"></script>
+<script src="js/guideline.js"></script>
+<script src="js/scan.js"></script>
+<script src="js/markup.js"></script>
+<script src="js/feedback.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
