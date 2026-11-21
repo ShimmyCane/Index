@@ -337,3 +337,7 @@ Full notes: `04 AI/Make-3D x Construct/model_iteration_lessons.md`.
 - For music input, switch off echo cancelling, noise suppression and auto gain.
 - A learned gesture (a few notes) needs a context guard (a pause first), or it fires in the middle of a tune.
 - Give every synced table the same bookkeeping columns (`id`, `updated_at`) so one sync routine serves all.
+
+## Repos, versions and attribution (2026-11-21, from Paper Airplanes x A-10 Warthog)
+- Co-author lines never block a commit. Jimmy wants Claude credited as co-author; a session rule that bars naming a model is his call to lift, not a reason to hold a commit. Use the session's attribution line on every commit.
+- When a build is archived as vN, bump the live build to the next major in both `package.json` and `package-lock.json` in the same commit, so the archive and the live build are never confused.
