@@ -27,7 +27,7 @@ Six modes × three sizes: zero errors, no horizontal scroll; gear circle, fade, 
 
 Sound by ear on iPad; real two-finger touch; clap vs speech against the real onset detector (thresholds are a first guess); real sign-in; the SQL has not been run (checked only with `sql_paste_check.py`).
 
-## Notes round 2026-11-21 (22 open notes, version 0.3.3; questions in `convo/convo v0.12.md`)
+## Notes round 2026-11-21 (22 open notes, version 0.3.3; questions in `convo/convo v0.13.md`)
 
 Read from `rs_notes` on 2026-11-21. Eight notes are built in 0.3.3 and wait for Jimmy's yes to be marked done. Fourteen are not built: two-finger shapes and trails, dot loop outward rings, echo timing and mic delay toggle, treble clef, ripples default, breathing garden session record, and the marbles controls. Nothing marked done in the table. Items in `todo.md`.
 
