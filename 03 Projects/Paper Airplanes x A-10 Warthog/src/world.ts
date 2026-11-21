@@ -17,6 +17,8 @@ namespace PA {
   export const SEA_X = 1300;   // the coast runs north near here; east of it is the sea
   export const ROAD_X = -120;  // the main road runs north along this line
   export const ROAD_W = 7;     // half its width, metres
+  // One gentle wind for the whole world (metres a second): smoke and flags lean with it.
+  export const WIND = { X: 2.2, Z: -1.2 };
   export const RAIL_X = -320;  // the railway runs north along this line
 
   // The ground is flat (the land is shaped by colour, not height), so every object sits

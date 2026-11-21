@@ -119,3 +119,10 @@ Flight: plane (A-10 jet / paper glider), steering (drag / joystick), new flight.
 - **Wing tip vapour** spawns on the screen at the drawn wing tips and blows back nose to tail; a thin line is fixed to each tip. Engine heat behind the engines.
 - **Animations:** turrets, flak and SAMs turn to the plane; the radar dish spins; chimneys smoke; windmills turn; birds fly in a V; fighters bank; trees sway; ships bob.
 - **Stack cache** (`voxel.ts` `drawModelCached`): big trees are drawn once per size and viewing angle into pooled canvases, then turned and leaned for roll and sway.
+
+## Round 11 (0.11): curved trail, mood
+
+- **Curved vapour:** a ribbon fixed to each wing tip; older points swing further out of the turn.
+- **Burning wrecks:** destroyed ground targets leave a charred wreck that burns, smokes and goes out (`WRECK_LIFE` 50 s).
+- **Wind** (`WIND` in `world.ts`) leans wreck smoke, chimney smoke and flags the same way.
+- **Flags** wave at every base.

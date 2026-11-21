@@ -464,6 +464,7 @@ namespace PA {
     air: boolean;
     phase: number;         // a fixed random number, so each tree sways and each sail turns in its own time
     t?: Target;            // the target, when it is one
+    age?: number;          // a wreck: seconds since it was destroyed
   }
 
   // Which model a target uses, and which way it faces.
@@ -485,11 +486,11 @@ namespace PA {
   // Everything to stack this frame: targets, trees in the forests, houses in the towns.
   function collect(g: Game, c: Cam): Thing[] {
     const out: Thing[] = [];
-    const add = (name: string, X: number, base: number, Z: number, yaw: number, air: boolean, t?: Target) => {
+    const add = (name: string, X: number, base: number, Z: number, yaw: number, air: boolean, t?: Target, age?: number) => {
       const dx = X - c.px, dz = Z - c.pz;
       const zc = dx * c.fx + (base - c.py) * c.fy + dz * c.fz;
       if (zc < 2 || zc > FOG * 1.6) return;
-      out.push({ name, X, Z, base, yaw, zc, air, phase: hash2(Math.round(X * 7), Math.round(Z * 7)) * 6.28, t });
+      out.push({ name, X, Z, base, yaw, zc, air, phase: hash2(Math.round(X * 7), Math.round(Z * 7)) * 6.28, t, age });
     };
     const p = g.plane;
     for (const t of g.mission.targets) {
@@ -499,6 +500,8 @@ namespace PA {
       if ((t.kind === 'flak' || t.kind === 'sam') && Math.hypot(p.X - t.X, p.Z - t.Z) < 900) yaw = Math.atan2(p.X - t.X, p.Z - t.Z);
       add(modelOf(t), t.X, altOf(t), t.Z, yaw, t.h !== undefined, t);
     }
+    for (const w of g.wrecks) add('wreck', w.X, 0, w.Z, w.X * 0.37, false, undefined, w.age);
+    for (const b of g.bases) add('flagpole', b.X, 0, b.Z, 0, false);
     const CELL = 40;
     const ci = Math.floor(c.px / CELL), cj = Math.floor(c.pz / CELL);
     for (let i = ci - TREE_RANGE; i <= ci + TREE_RANGE; i++) {
@@ -595,10 +598,20 @@ namespace PA {
         drawModel(ctx, model('samdish'), { ...pose, sx: dx, sy: dy, yaw: time * 2.2 + th.phase - c.yaw });
       } else if (th.name === 'farm' || th.name === 'house1' || th.name === 'house2') {
         const [hx, hy] = modelToScreen(m, pose, 12, 5, 13);
-        chimneySmoke(ctx, hx, hy, pose.px, time + th.phase, alpha);
+        chimneySmoke(ctx, hx, hy, pose.px, time + th.phase, alpha, (WIND.X * c.rx + WIND.Z * c.rz) / Math.hypot(WIND.X, WIND.Z));
       } else if (th.name === 'windmill') {
         const [wx, wy] = modelToScreen(m, pose, 5, 2, 19);
         sails(ctx, wx, wy, pose.px, time * 1.4 + th.phase, pose.roll, alpha);
+      } else if (th.name === 'wreck' && (th.age ?? 99) < 22) {
+        // Embers flicker in the wreck while it burns.
+        const [ex, ey] = modelToScreen(m, pose, 7, 7, 2);
+        const f = 0.6 + 0.4 * Math.sin(time * 13 + th.phase) * Math.sin(time * 7.3 + th.phase * 2);
+        ctx.globalAlpha = alpha * f * (1 - (th.age ?? 0) / 22);
+        glow(ctx, ex, ey, pose.px * 9);
+        ctx.globalAlpha = alpha;
+      } else if (th.name === 'flagpole') {
+        const [fx, fy] = modelToScreen(m, pose, 2, 2, 28.5);
+        flag(ctx, c, fx, fy, pose.px, time + th.phase, pose.roll);
       } else if (th.air) {
         // Fighters and allies show their exhaust as a small glow.
         const [ex, ey] = modelToScreen(m, pose, m.w / 2, m.l - 1, 3);
@@ -631,15 +644,48 @@ namespace PA {
   }
 
   // Smoke curling up from a chimney: three puffs that rise, grow and fade, over and over.
-  function chimneySmoke(ctx: CanvasRenderingContext2D, x: number, y: number, px: number, t: number, alpha: number): void {
+  function chimneySmoke(ctx: CanvasRenderingContext2D, x: number, y: number, px: number, t: number, alpha: number, lean: number): void {
     const tex = textures();
     for (let k = 0; k < 3; k++) {
       const a = (t * 0.35 + k / 3) % 1;
       const r = px * (1.5 + a * 4);
       ctx.globalAlpha = alpha * (1 - a) * 0.55;
-      ctx.drawImage(tex.mist, x - r + Math.sin(t + k) * px * 2 * a, y - r - a * px * 14, r * 2, r * 2);
+      ctx.drawImage(tex.mist, x - r + (Math.sin(t + k) * 1.5 + lean * 9) * px * a, y - r - a * px * 14, r * 2, r * 2);
     }
     ctx.globalAlpha = alpha;
+  }
+
+  // A flag streaming out with the wind: two bands that ripple in a travelling wave.
+  function flag(ctx: CanvasRenderingContext2D, c: Cam, x: number, y: number, px: number, t: number, roll: number): void {
+    const wind = Math.hypot(WIND.X, WIND.Z);
+    const side = (WIND.X * c.rx + WIND.Z * c.rz) / wind;      // how much the wind blows across the screen
+    const dir = side >= 0 ? 1 : -1;
+    const L = 13 * px * Math.max(0.3, Math.abs(side));
+    const Hh = 8 * px;
+    const N = 7;
+    const top: [number, number][] = [], mid: [number, number][] = [], bot: [number, number][] = [];
+    for (let i = 0; i <= N; i++) {
+      const u = i / N;
+      const wave = Math.sin(t * 6 - u * 5) * px * 1.6 * u;
+      const fx = dir * u * L, sag = u * px * 1.2;
+      top.push([fx, wave + sag]);
+      mid.push([fx, Hh / 2 + wave + sag * 1.4]);
+      bot.push([fx, Hh + wave * 0.9 + sag * 1.8]);
+    }
+    const cr = Math.cos(roll), sr = Math.sin(roll);
+    ctx.setTransform(cr, sr, -sr, cr, x, y);
+    const band = (a: [number, number][], b: [number, number][], col: string) => {
+      ctx.fillStyle = col;
+      ctx.beginPath();
+      ctx.moveTo(a[0][0], a[0][1]);
+      for (const q of a) ctx.lineTo(q[0], q[1]);
+      for (let i = b.length - 1; i >= 0; i--) ctx.lineTo(b[i][0], b[i][1]);
+      ctx.closePath();
+      ctx.fill();
+    };
+    band(top, mid, '#ef7f6a');
+    band(mid, bot, '#fff4d6');
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
   // A windmill's four sails, turning in the breeze.
@@ -813,7 +859,39 @@ namespace PA {
   const streams: Stream[] = [];
   let streamClock = 0;
 
-  const tipLines: [number, number, number, number, number][] = [];   // wing tip, backward direction, turn tightness
+  // A ribbon of vapour fixed to each wing tip: points that blow back and drift out of the turn,
+  // so the trail bends the way the plane has come.
+  interface RibbonPoint { x: number; y: number; vx: number; vy: number; life: number; a: number; }
+  const ribbons: RibbonPoint[][] = [[], []];
+  const RIBBON_LIFE = 0.5;
+  const CURVE = 260;          // screen pixels the trail drifts per radian of turn (for a point a quarter second old)
+  let lastPlaneYaw: number | null = null;
+  // The older a point, the further behind the plane it is, so the more a turn swings it out:
+  // the drift grows with age, and the trail bends into a curve.
+  function driftTrails(dx: number, dy: number): void {
+    for (const s of streams) { const k = (s.max - s.life) * 4; s.x += dx * k; s.y += dy * k; }
+    for (const r of ribbons) for (const q of r) { const k = (RIBBON_LIFE - q.life) * 4; q.x += dx * k; q.y += dy * k; }
+  }
+  function updateRibbons(dt: number): void {
+    for (const r of ribbons) {
+      for (const q of r) { q.x += q.vx * dt; q.y += q.vy * dt; q.life -= dt; }
+      while (r.length && r[0].life <= 0) r.shift();
+    }
+  }
+  function drawRibbons(ctx: CanvasRenderingContext2D): void {
+    ctx.lineWidth = 1.3;
+    ctx.lineCap = 'round';
+    for (const r of ribbons) {
+      for (let i = 1; i < r.length; i++) {
+        const q = r[i], o = r[i - 1];
+        ctx.strokeStyle = `rgba(255,255,255,${(q.a * q.life / RIBBON_LIFE).toFixed(3)})`;
+        ctx.beginPath();
+        ctx.moveTo(o.x, o.y);
+        ctx.lineTo(q.x, q.y);
+        ctx.stroke();
+      }
+    }
+  }
   function updateStreams(dt: number): void {
     for (const s of streams) {
       s.x += s.vx * dt;
@@ -867,6 +945,19 @@ namespace PA {
     streamClock = now;
     if (!g.paused) {
       updateStreams(dt);
+      updateRibbons(dt);
+      // As the plane turns, the air it left behind slides out of the turn on the screen.
+      let dYaw = lastPlaneYaw === null ? 0 : p.yaw - lastPlaneYaw;
+      while (dYaw > Math.PI) dYaw -= 2 * Math.PI;
+      while (dYaw < -Math.PI) dYaw += 2 * Math.PI;
+      lastPlaneYaw = p.yaw;
+      {
+        const [lx, ly] = modelToScreen(m, pose, 0, m.l / 2, 3);
+        const [rx, ry] = modelToScreen(m, pose, m.w, m.l / 2, 3);
+        const ll = Math.hypot(rx - lx, ry - ly) || 1;
+        const k = -dYaw * CURVE / ll;
+        if (Math.abs(dYaw) < 0.2) driftTrails((rx - lx) * k, (ry - ly) * k);
+      }
       if (g.phase === 'flying') {
         const [nx, ny] = modelToScreen(m, pose, m.w / 2, 0, 3);
         const [bx2, by2] = modelToScreen(m, pose, m.w / 2, m.l, 3);
@@ -876,14 +967,18 @@ namespace PA {
         if (tight > 0.4) {
           const tips: [number, number, number][] = glider ? [[0.5, 28, 4.5], [m.w - 0.5, 28, 4.5]] : [[1.5, 14.5, 3.5], [34.5, 14.5, 3.5]];
           const n = tight > 0.7 ? 3 : 2;
-          for (const [tx, ty, tz] of tips) {
+          tips.forEach(([tx, ty, tz], side) => {
             const [sx, sy] = modelToScreen(m, pose, tx, ty, tz);
             for (let k = 0; k < n; k++) {
               const sp = 120 + Math.random() * 60;
               streams.push({ x: sx + (Math.random() - 0.5) * 2, y: sy + (Math.random() - 0.5) * 2, vx: backX * sp, vy: backY * sp, life: 0.6, max: 0.6, r: 1.2, grow: 9, alpha: 0.4 + 0.4 * tight });
             }
-            tipLines.push([sx, sy, backX, backY, tight]);
-          }
+            const r = ribbons[side];
+            const fresh = { x: sx, y: sy, vx: backX * 150, vy: backY * 150, life: RIBBON_LIFE, a: 0.6 * tight };
+            // After a gap, start a new line instead of joining it to the old one.
+            if (r.length && r[r.length - 1].life < RIBBON_LIFE - 0.1) r.push({ ...fresh, a: 0 });
+            r.push(fresh);
+          });
         }
         // Heat from the engines: a soft shimmer behind each, stronger with the boost.
         if (!glider) {
@@ -898,20 +993,7 @@ namespace PA {
       }
     }
     drawStreams(ctx);
-    // A thin bright line of vapour fixed to each wing tip, fading behind it.
-    for (const [sx, sy, bx, by, t] of tipLines) {
-      const len = 14 + 26 * t;
-      const grad = ctx.createLinearGradient(sx, sy, sx + bx * len, sy + by * len);
-      grad.addColorStop(0, `rgba(255,255,255,${0.55 * t})`);
-      grad.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.strokeStyle = grad;
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.moveTo(sx, sy);
-      ctx.lineTo(sx + bx * len, sy + by * len);
-      ctx.stroke();
-    }
-    tipLines.length = 0;
+    drawRibbons(ctx);
 
     const tex = textures();
     if (!glider) {

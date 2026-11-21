@@ -189,6 +189,27 @@ namespace PA {
     return v;
   }
 
+  // What is left of something destroyed: charred, broken blocks with a few glowing embers.
+  function wreck(): Voxels {
+    const v = new Voxels(14, 14, 5, 0.5);
+    v.ellipsoid(7, 7, 0, 6.5, 6, 1.2, 0x2f2a28);                 // scorched patch
+    v.box(3, 4, 1, 9, 9, 3, 0x3b3735);                           // the hull, burnt out
+    v.box(6, 2, 1, 11, 6, 2, 0x4a4542);
+    v.box(4, 9, 1, 7, 12, 4, 0x332f2d);                          // a broken piece standing up
+    v.box(9, 8, 1, 12, 10, 2, 0x55504c);
+    v.paint((x, y, z, c) => ((x * 7 + y * 13 + z * 5) % 11 === 0 ? 0xe8742c : (x + y) % 3 === 0 ? c - 0x080808 : c));
+    return v;
+  }
+
+  // A flag pole at each base. The flag itself is drawn waving in the wind.
+  function flagpole(): Voxels {
+    const v = new Voxels(4, 4, 30, 0.5);
+    v.box(0, 0, 0, 4, 4, 1, 0x9aa0a6);                           // base
+    v.box(1, 1, 1, 3, 3, 29, 0xd8dde2);                          // pole
+    v.box(1, 1, 29, 3, 3, 30, 0xf2c94c);                         // gold top
+    return v;
+  }
+
   // A windmill on the farms: a white tower with a red cap. Its sails are drawn turning.
   function windmill(): Voxels {
     const v = new Voxels(10, 10, 22, 0.7);
@@ -352,6 +373,8 @@ namespace PA {
     turret_light: turretLight,
     samdish: samDish,
     windmill,
+    wreck,
+    flagpole,
     apc,
     truck: () => truck(0xe07b53, 0xc9b07e),
     fuel: fuelTruck,

@@ -41,3 +41,9 @@
 - **Profile both the stress case and normal play.** A stack cache halved a dense forest but slowed normal flight, because it kept creating canvases. Reuse fixed-size canvases from a pool, cap new entries per frame, and only cache what is expensive to draw.
 - **Things that look the same from every side can be cached by size and viewing angle only.** Roll and sway then become a turn and a shear of one image.
 - **Check where a test click lands.** A drag started at the right edge hit the CHAFF button, so the "turn" screenshot showed level flight.
+
+## 2026-11-21 (round 11, curved trail, mood)
+
+- **A constant sideways drift makes a straight trail, not a curve.** Make the drift grow with each point's age, as a point further behind a turning plane swings further.
+- **Mood comes from consequence and one shared wind.** Burning wrecks show what the player did; one wind for smoke and flags ties the scene together.
+- **Bridge gaps in ribbons.** When a ribbon trail restarts, insert an invisible point so it does not join the old end with a straight line.

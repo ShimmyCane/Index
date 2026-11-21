@@ -65,6 +65,8 @@ namespace PA {
     friendly?: boolean;   // an ally's bullet: it only hits enemies
   }
 
+  const WRECK_LIFE = 50;     // seconds a wreck burns and smokes
+
   export interface Puff {
     X: number;
     Z: number;
@@ -198,6 +200,8 @@ namespace PA {
     missiles: Missile[] = [];
     decoys: Decoy[] = [];
     puffs: Puff[] = [];
+    wrecks: { X: number; Z: number; size: number; age: number }[] = [];   // burning remains
+    bases: { X: number; Z: number }[] = [];                                 // where each base's flag stands
     marks: Mark[] = [];
     warned = false;
     held: Held = { fire: false, boost: false, missile: false };
@@ -241,6 +245,8 @@ namespace PA {
       this.missileCool = 0;
       this.reloadTimer = 0;
       this.waveTimer = 8;
+      this.wrecks = [];
+      this.bases = [];
       this.nextBaseZ = BASE_SPACING;
       this.enemyMissileCool = 6;
       this.allyTimers = [];
@@ -290,6 +296,7 @@ namespace PA {
       if (this.paused) return;
       const dt = Math.min(dtIn, 1 / 30);
       this.updatePuffs(dt);
+      this.burnWrecks(dt);
       this.updateMarks(dt);
       this.blink = Math.max(0, this.blink - dt);
       this.resupplied = Math.max(0, this.resupplied - dt);
@@ -570,6 +577,8 @@ namespace PA {
     private spawnBase(z: number): void {
       const X = (this.rand() - 0.5) * 600;
       const m = this.mission.targets;
+      this.bases.push({ X: X + 22, Z: z - 2 });
+      if (this.bases.length > 8) this.bases.shift();
       m.push(target('city', X, z, this.rand), target('city', X + 10, z + 7, this.rand), target('city', X - 9, z + 10, this.rand));
       m.push(target('sam', X + 14, z - 6, this.rand), target('flak', X - 14, z - 8, this.rand), target('flak', X + 6, z + 16, this.rand));
       for (let i = 0; i < 2; i++) {
@@ -923,6 +932,11 @@ namespace PA {
       // The mission objective counts ground places and vehicles (not ships, rail, or the air).
       if (isObjective(t)) this.objectiveDone++;
       this.explode(t.X, tg + 1, t.Z, KINDS[t.kind].height > 5 ? 26 : 16);
+      // Ground targets leave a wreck that burns and smokes for a while.
+      if (t.h === undefined && t.kind !== 'ship') {
+        this.wrecks.push({ X: t.X, Z: t.Z, size: KINDS[t.kind].height > 5 ? 1.6 : 1, age: 0 });
+        if (this.wrecks.length > 14) this.wrecks.shift();
+      }
       this.onSound('boom');
     }
 
@@ -1082,12 +1096,40 @@ namespace PA {
     }
 
     // Smoke rises and slows; fire slows; sparks and dust fall.
+    // A wreck burns for a while, then only smokes, then goes out. Its smoke drifts with the wind.
+    private burnWrecks(dt: number): void {
+      const p = this.plane;
+      for (const w of this.wrecks) {
+        w.age += dt;
+        if (w.age > WRECK_LIFE || this.puffs.length > 640) continue;
+        if (Math.hypot(w.X - p.X, w.Z - p.Z) > 1600) continue;
+        const left = 1 - w.age / WRECK_LIFE;
+        if (this.rand() < dt * 7 * left) {
+          const g = 0.16 + this.rand() * 0.1;
+          const shade = Math.round(g * 255).toString(16).padStart(2, '0');
+          this.puffs.push({
+            X: w.X + (this.rand() - 0.5) * 3, Z: w.Z + (this.rand() - 0.5) * 3, h: 1.5,
+            vX: WIND.X * 0.5, vY: 3 + this.rand() * 2, vZ: WIND.Z * 0.5,
+            life: 5, max: 5, color: '#' + shade + shade + shade, size: (2.2 + this.rand()) * w.size, kind: 'smoke',
+          });
+        }
+        if (w.age < WRECK_LIFE * 0.45 && this.rand() < dt * 9) {
+          this.puffs.push({
+            X: w.X + (this.rand() - 0.5) * 3 * w.size, Z: w.Z + (this.rand() - 0.5) * 3 * w.size, h: 0.8,
+            vX: 0, vY: 2.5 + this.rand() * 2, vZ: 0,
+            life: 0.6, max: 0.6, color: this.rand() < 0.5 ? '#ffb347' : '#ff7a3c', size: 1.2 * w.size, kind: 'fire',
+          });
+        }
+      }
+      this.wrecks = this.wrecks.filter(w => w.age < WRECK_LIFE + 20);
+    }
+
     private updatePuffs(dt: number): void {
       for (const p of this.puffs) {
         if (p.kind === 'smoke') {
           p.vY += 1.5 * dt;
           const drag = Math.max(0, 1 - 1.5 * dt);
-          p.vX *= drag; p.vZ *= drag;
+          p.vX = WIND.X + (p.vX - WIND.X) * drag; p.vZ = WIND.Z + (p.vZ - WIND.Z) * drag;
         } else if (p.kind === 'fire') {
           const drag = Math.max(0, 1 - 3 * dt);
           p.vX *= drag; p.vZ *= drag; p.vY *= drag;

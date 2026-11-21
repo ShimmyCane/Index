@@ -91,3 +91,9 @@ A browser 2.5D pixel-art flight game, built small enough to read, so Jimmy can s
 - Speed: big trees use `drawModelCached` (`voxel.ts`): a pooled cache of whole stacks by tree, heading quarter, viewing angle and size. Forest about twice as fast; normal flight unchanged.
 - Checks: 58 (`npm test`); browser screenshots of a hard turn and a banked forest.
 - Not verified on an iPad.
+
+## Round 11 (convo v0.18): curved trail, mood
+
+- Vapour is a ribbon per tip (`ribbons` in `render.ts`) plus puffs; both drift out of the turn by `CURVE`, growing with age, so the trail curves.
+- Mood: burning wrecks (`Game.wrecks`, `burnWrecks`, model `wreck`, ember glow), one `WIND` in `world.ts` (smoke and flags), flags at bases (`Game.bases`, model `flagpole`, `flag()` in `render.ts`).
+- Merged at Jimmy's request.

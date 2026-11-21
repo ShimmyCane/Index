@@ -52,6 +52,8 @@ var PA;
     PA.SEA_X = 1300; // the coast runs north near here; east of it is the sea
     PA.ROAD_X = -120; // the main road runs north along this line
     PA.ROAD_W = 7; // half its width, metres
+    // One gentle wind for the whole world (metres a second): smoke and flags lean with it.
+    PA.WIND = { X: 2.2, Z: -1.2 };
     PA.RAIL_X = -320; // the railway runs north along this line
     // The ground is flat (the land is shaped by colour, not height), so every object sits
     // exactly on what is drawn. The sea is at the same level.
@@ -791,6 +793,25 @@ var PA;
         v.set(3, 1, 2, 0x8e979d);
         return v;
     }
+    // What is left of something destroyed: charred, broken blocks with a few glowing embers.
+    function wreck() {
+        const v = new PA.Voxels(14, 14, 5, 0.5);
+        v.ellipsoid(7, 7, 0, 6.5, 6, 1.2, 0x2f2a28); // scorched patch
+        v.box(3, 4, 1, 9, 9, 3, 0x3b3735); // the hull, burnt out
+        v.box(6, 2, 1, 11, 6, 2, 0x4a4542);
+        v.box(4, 9, 1, 7, 12, 4, 0x332f2d); // a broken piece standing up
+        v.box(9, 8, 1, 12, 10, 2, 0x55504c);
+        v.paint((x, y, z, c) => ((x * 7 + y * 13 + z * 5) % 11 === 0 ? 0xe8742c : (x + y) % 3 === 0 ? c - 0x080808 : c));
+        return v;
+    }
+    // A flag pole at each base. The flag itself is drawn waving in the wind.
+    function flagpole() {
+        const v = new PA.Voxels(4, 4, 30, 0.5);
+        v.box(0, 0, 0, 4, 4, 1, 0x9aa0a6); // base
+        v.box(1, 1, 1, 3, 3, 29, 0xd8dde2); // pole
+        v.box(1, 1, 29, 3, 3, 30, 0xf2c94c); // gold top
+        return v;
+    }
     // A windmill on the farms: a white tower with a red cap. Its sails are drawn turning.
     function windmill() {
         const v = new PA.Voxels(10, 10, 22, 0.7);
@@ -951,6 +972,8 @@ var PA;
         turret_light: turretLight,
         samdish: samDish,
         windmill,
+        wreck,
+        flagpole,
         apc,
         truck: () => truck(0xe07b53, 0xc9b07e),
         fuel: fuelTruck,
@@ -1530,6 +1553,7 @@ var PA;
 // warns of them, and a tight turn or chaff can break them off.
 var PA;
 (function (PA) {
+    const WRECK_LIFE = 50; // seconds a wreck burns and smokes
     PA.MISSILE_MAX = 6;
     PA.AMMO_MAX = 240;
     PA.CHAFF_MAX = 4;
@@ -1617,6 +1641,8 @@ var PA;
             this.missiles = [];
             this.decoys = [];
             this.puffs = [];
+            this.wrecks = []; // burning remains
+            this.bases = []; // where each base's flag stands
             this.marks = [];
             this.warned = false;
             this.held = { fire: false, boost: false, missile: false };
@@ -1657,6 +1683,8 @@ var PA;
             this.missileCool = 0;
             this.reloadTimer = 0;
             this.waveTimer = 8;
+            this.wrecks = [];
+            this.bases = [];
             this.nextBaseZ = BASE_SPACING;
             this.enemyMissileCool = 6;
             this.allyTimers = [];
@@ -1709,6 +1737,7 @@ var PA;
                 return;
             const dt = Math.min(dtIn, 1 / 30);
             this.updatePuffs(dt);
+            this.burnWrecks(dt);
             this.updateMarks(dt);
             this.blink = Math.max(0, this.blink - dt);
             this.resupplied = Math.max(0, this.resupplied - dt);
@@ -2010,6 +2039,9 @@ var PA;
         spawnBase(z) {
             const X = (this.rand() - 0.5) * 600;
             const m = this.mission.targets;
+            this.bases.push({ X: X + 22, Z: z - 2 });
+            if (this.bases.length > 8)
+                this.bases.shift();
             m.push(PA.target('city', X, z, this.rand), PA.target('city', X + 10, z + 7, this.rand), PA.target('city', X - 9, z + 10, this.rand));
             m.push(PA.target('sam', X + 14, z - 6, this.rand), PA.target('flak', X - 14, z - 8, this.rand), PA.target('flak', X + 6, z + 16, this.rand));
             for (let i = 0; i < 2; i++) {
@@ -2372,6 +2404,12 @@ var PA;
             if (PA.isObjective(t))
                 this.objectiveDone++;
             this.explode(t.X, tg + 1, t.Z, PA.KINDS[t.kind].height > 5 ? 26 : 16);
+            // Ground targets leave a wreck that burns and smokes for a while.
+            if (t.h === undefined && t.kind !== 'ship') {
+                this.wrecks.push({ X: t.X, Z: t.Z, size: PA.KINDS[t.kind].height > 5 ? 1.6 : 1, age: 0 });
+                if (this.wrecks.length > 14)
+                    this.wrecks.shift();
+            }
             this.onSound('boom');
         }
         updateShots(dt) {
@@ -2534,13 +2572,42 @@ var PA;
             }
         }
         // Smoke rises and slows; fire slows; sparks and dust fall.
+        // A wreck burns for a while, then only smokes, then goes out. Its smoke drifts with the wind.
+        burnWrecks(dt) {
+            const p = this.plane;
+            for (const w of this.wrecks) {
+                w.age += dt;
+                if (w.age > WRECK_LIFE || this.puffs.length > 640)
+                    continue;
+                if (Math.hypot(w.X - p.X, w.Z - p.Z) > 1600)
+                    continue;
+                const left = 1 - w.age / WRECK_LIFE;
+                if (this.rand() < dt * 7 * left) {
+                    const g = 0.16 + this.rand() * 0.1;
+                    const shade = Math.round(g * 255).toString(16).padStart(2, '0');
+                    this.puffs.push({
+                        X: w.X + (this.rand() - 0.5) * 3, Z: w.Z + (this.rand() - 0.5) * 3, h: 1.5,
+                        vX: PA.WIND.X * 0.5, vY: 3 + this.rand() * 2, vZ: PA.WIND.Z * 0.5,
+                        life: 5, max: 5, color: '#' + shade + shade + shade, size: (2.2 + this.rand()) * w.size, kind: 'smoke',
+                    });
+                }
+                if (w.age < WRECK_LIFE * 0.45 && this.rand() < dt * 9) {
+                    this.puffs.push({
+                        X: w.X + (this.rand() - 0.5) * 3 * w.size, Z: w.Z + (this.rand() - 0.5) * 3 * w.size, h: 0.8,
+                        vX: 0, vY: 2.5 + this.rand() * 2, vZ: 0,
+                        life: 0.6, max: 0.6, color: this.rand() < 0.5 ? '#ffb347' : '#ff7a3c', size: 1.2 * w.size, kind: 'fire',
+                    });
+                }
+            }
+            this.wrecks = this.wrecks.filter(w => w.age < WRECK_LIFE + 20);
+        }
         updatePuffs(dt) {
             for (const p of this.puffs) {
                 if (p.kind === 'smoke') {
                     p.vY += 1.5 * dt;
                     const drag = Math.max(0, 1 - 1.5 * dt);
-                    p.vX *= drag;
-                    p.vZ *= drag;
+                    p.vX = PA.WIND.X + (p.vX - PA.WIND.X) * drag;
+                    p.vZ = PA.WIND.Z + (p.vZ - PA.WIND.Z) * drag;
                 }
                 else if (p.kind === 'fire') {
                     const drag = Math.max(0, 1 - 3 * dt);
@@ -3194,12 +3261,12 @@ var PA;
     // Everything to stack this frame: targets, trees in the forests, houses in the towns.
     function collect(g, c) {
         const out = [];
-        const add = (name, X, base, Z, yaw, air, t) => {
+        const add = (name, X, base, Z, yaw, air, t, age) => {
             const dx = X - c.px, dz = Z - c.pz;
             const zc = dx * c.fx + (base - c.py) * c.fy + dz * c.fz;
             if (zc < 2 || zc > FOG * 1.6)
                 return;
-            out.push({ name, X, Z, base, yaw, zc, air, phase: PA.hash2(Math.round(X * 7), Math.round(Z * 7)) * 6.28, t });
+            out.push({ name, X, Z, base, yaw, zc, air, phase: PA.hash2(Math.round(X * 7), Math.round(Z * 7)) * 6.28, t, age });
         };
         const p = g.plane;
         for (const t of g.mission.targets) {
@@ -3211,6 +3278,10 @@ var PA;
                 yaw = Math.atan2(p.X - t.X, p.Z - t.Z);
             add(modelOf(t), t.X, PA.altOf(t), t.Z, yaw, t.h !== undefined, t);
         }
+        for (const w of g.wrecks)
+            add('wreck', w.X, 0, w.Z, w.X * 0.37, false, undefined, w.age);
+        for (const b of g.bases)
+            add('flagpole', b.X, 0, b.Z, 0, false);
         const CELL = 40;
         const ci = Math.floor(c.px / CELL), cj = Math.floor(c.pz / CELL);
         for (let i = ci - TREE_RANGE; i <= ci + TREE_RANGE; i++) {
@@ -3278,6 +3349,7 @@ var PA;
         ctx.globalAlpha = 1;
     }
     function objects(ctx, g, c) {
+        var _a, _b;
         const things = collect(g, c);
         for (const th of things)
             drawShadow(ctx, c, th.name, th.X, th.base, th.Z, th.yaw);
@@ -3320,11 +3392,23 @@ var PA;
             }
             else if (th.name === 'farm' || th.name === 'house1' || th.name === 'house2') {
                 const [hx, hy] = PA.modelToScreen(m, pose, 12, 5, 13);
-                chimneySmoke(ctx, hx, hy, pose.px, time + th.phase, alpha);
+                chimneySmoke(ctx, hx, hy, pose.px, time + th.phase, alpha, (PA.WIND.X * c.rx + PA.WIND.Z * c.rz) / Math.hypot(PA.WIND.X, PA.WIND.Z));
             }
             else if (th.name === 'windmill') {
                 const [wx, wy] = PA.modelToScreen(m, pose, 5, 2, 19);
                 sails(ctx, wx, wy, pose.px, time * 1.4 + th.phase, pose.roll, alpha);
+            }
+            else if (th.name === 'wreck' && ((_a = th.age) !== null && _a !== void 0 ? _a : 99) < 22) {
+                // Embers flicker in the wreck while it burns.
+                const [ex, ey] = PA.modelToScreen(m, pose, 7, 7, 2);
+                const f = 0.6 + 0.4 * Math.sin(time * 13 + th.phase) * Math.sin(time * 7.3 + th.phase * 2);
+                ctx.globalAlpha = alpha * f * (1 - ((_b = th.age) !== null && _b !== void 0 ? _b : 0) / 22);
+                glow(ctx, ex, ey, pose.px * 9);
+                ctx.globalAlpha = alpha;
+            }
+            else if (th.name === 'flagpole') {
+                const [fx, fy] = PA.modelToScreen(m, pose, 2, 2, 28.5);
+                flag(ctx, c, fx, fy, pose.px, time + th.phase, pose.roll);
             }
             else if (th.air) {
                 // Fighters and allies show their exhaust as a small glow.
@@ -3359,15 +3443,49 @@ var PA;
         return Math.cos(yawRel) >= 0 ? b : -b;
     }
     // Smoke curling up from a chimney: three puffs that rise, grow and fade, over and over.
-    function chimneySmoke(ctx, x, y, px, t, alpha) {
+    function chimneySmoke(ctx, x, y, px, t, alpha, lean) {
         const tex = textures();
         for (let k = 0; k < 3; k++) {
             const a = (t * 0.35 + k / 3) % 1;
             const r = px * (1.5 + a * 4);
             ctx.globalAlpha = alpha * (1 - a) * 0.55;
-            ctx.drawImage(tex.mist, x - r + Math.sin(t + k) * px * 2 * a, y - r - a * px * 14, r * 2, r * 2);
+            ctx.drawImage(tex.mist, x - r + (Math.sin(t + k) * 1.5 + lean * 9) * px * a, y - r - a * px * 14, r * 2, r * 2);
         }
         ctx.globalAlpha = alpha;
+    }
+    // A flag streaming out with the wind: two bands that ripple in a travelling wave.
+    function flag(ctx, c, x, y, px, t, roll) {
+        const wind = Math.hypot(PA.WIND.X, PA.WIND.Z);
+        const side = (PA.WIND.X * c.rx + PA.WIND.Z * c.rz) / wind; // how much the wind blows across the screen
+        const dir = side >= 0 ? 1 : -1;
+        const L = 13 * px * Math.max(0.3, Math.abs(side));
+        const Hh = 8 * px;
+        const N = 7;
+        const top = [], mid = [], bot = [];
+        for (let i = 0; i <= N; i++) {
+            const u = i / N;
+            const wave = Math.sin(t * 6 - u * 5) * px * 1.6 * u;
+            const fx = dir * u * L, sag = u * px * 1.2;
+            top.push([fx, wave + sag]);
+            mid.push([fx, Hh / 2 + wave + sag * 1.4]);
+            bot.push([fx, Hh + wave * 0.9 + sag * 1.8]);
+        }
+        const cr = Math.cos(roll), sr = Math.sin(roll);
+        ctx.setTransform(cr, sr, -sr, cr, x, y);
+        const band = (a, b, col) => {
+            ctx.fillStyle = col;
+            ctx.beginPath();
+            ctx.moveTo(a[0][0], a[0][1]);
+            for (const q of a)
+                ctx.lineTo(q[0], q[1]);
+            for (let i = b.length - 1; i >= 0; i--)
+                ctx.lineTo(b[i][0], b[i][1]);
+            ctx.closePath();
+            ctx.fill();
+        };
+        band(top, mid, '#ef7f6a');
+        band(mid, bot, '#fff4d6');
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
     // A windmill's four sails, turning in the breeze.
     function sails(ctx, x, y, px, angle, roll, alpha) {
@@ -3562,7 +3680,50 @@ var PA;
     }
     const streams = [];
     let streamClock = 0;
-    const tipLines = []; // wing tip, backward direction, turn tightness
+    const ribbons = [[], []];
+    const RIBBON_LIFE = 0.5;
+    const CURVE = 260; // screen pixels the trail drifts per radian of turn (for a point a quarter second old)
+    let lastPlaneYaw = null;
+    // The older a point, the further behind the plane it is, so the more a turn swings it out:
+    // the drift grows with age, and the trail bends into a curve.
+    function driftTrails(dx, dy) {
+        for (const s of streams) {
+            const k = (s.max - s.life) * 4;
+            s.x += dx * k;
+            s.y += dy * k;
+        }
+        for (const r of ribbons)
+            for (const q of r) {
+                const k = (RIBBON_LIFE - q.life) * 4;
+                q.x += dx * k;
+                q.y += dy * k;
+            }
+    }
+    function updateRibbons(dt) {
+        for (const r of ribbons) {
+            for (const q of r) {
+                q.x += q.vx * dt;
+                q.y += q.vy * dt;
+                q.life -= dt;
+            }
+            while (r.length && r[0].life <= 0)
+                r.shift();
+        }
+    }
+    function drawRibbons(ctx) {
+        ctx.lineWidth = 1.3;
+        ctx.lineCap = 'round';
+        for (const r of ribbons) {
+            for (let i = 1; i < r.length; i++) {
+                const q = r[i], o = r[i - 1];
+                ctx.strokeStyle = `rgba(255,255,255,${(q.a * q.life / RIBBON_LIFE).toFixed(3)})`;
+                ctx.beginPath();
+                ctx.moveTo(o.x, o.y);
+                ctx.lineTo(q.x, q.y);
+                ctx.stroke();
+            }
+        }
+    }
     function updateStreams(dt) {
         for (const s of streams) {
             s.x += s.vx * dt;
@@ -3614,6 +3775,22 @@ var PA;
         streamClock = now;
         if (!g.paused) {
             updateStreams(dt);
+            updateRibbons(dt);
+            // As the plane turns, the air it left behind slides out of the turn on the screen.
+            let dYaw = lastPlaneYaw === null ? 0 : p.yaw - lastPlaneYaw;
+            while (dYaw > Math.PI)
+                dYaw -= 2 * Math.PI;
+            while (dYaw < -Math.PI)
+                dYaw += 2 * Math.PI;
+            lastPlaneYaw = p.yaw;
+            {
+                const [lx, ly] = PA.modelToScreen(m, pose, 0, m.l / 2, 3);
+                const [rx, ry] = PA.modelToScreen(m, pose, m.w, m.l / 2, 3);
+                const ll = Math.hypot(rx - lx, ry - ly) || 1;
+                const k = -dYaw * CURVE / ll;
+                if (Math.abs(dYaw) < 0.2)
+                    driftTrails((rx - lx) * k, (ry - ly) * k);
+            }
             if (g.phase === 'flying') {
                 const [nx, ny] = PA.modelToScreen(m, pose, m.w / 2, 0, 3);
                 const [bx2, by2] = PA.modelToScreen(m, pose, m.w / 2, m.l, 3);
@@ -3623,14 +3800,19 @@ var PA;
                 if (tight > 0.4) {
                     const tips = glider ? [[0.5, 28, 4.5], [m.w - 0.5, 28, 4.5]] : [[1.5, 14.5, 3.5], [34.5, 14.5, 3.5]];
                     const n = tight > 0.7 ? 3 : 2;
-                    for (const [tx, ty, tz] of tips) {
+                    tips.forEach(([tx, ty, tz], side) => {
                         const [sx, sy] = PA.modelToScreen(m, pose, tx, ty, tz);
                         for (let k = 0; k < n; k++) {
                             const sp = 120 + Math.random() * 60;
                             streams.push({ x: sx + (Math.random() - 0.5) * 2, y: sy + (Math.random() - 0.5) * 2, vx: backX * sp, vy: backY * sp, life: 0.6, max: 0.6, r: 1.2, grow: 9, alpha: 0.4 + 0.4 * tight });
                         }
-                        tipLines.push([sx, sy, backX, backY, tight]);
-                    }
+                        const r = ribbons[side];
+                        const fresh = { x: sx, y: sy, vx: backX * 150, vy: backY * 150, life: RIBBON_LIFE, a: 0.6 * tight };
+                        // After a gap, start a new line instead of joining it to the old one.
+                        if (r.length && r[r.length - 1].life < RIBBON_LIFE - 0.1)
+                            r.push({ ...fresh, a: 0 });
+                        r.push(fresh);
+                    });
                 }
                 // Heat from the engines: a soft shimmer behind each, stronger with the boost.
                 if (!glider) {
@@ -3646,20 +3828,7 @@ var PA;
             }
         }
         drawStreams(ctx);
-        // A thin bright line of vapour fixed to each wing tip, fading behind it.
-        for (const [sx, sy, bx, by, t] of tipLines) {
-            const len = 14 + 26 * t;
-            const grad = ctx.createLinearGradient(sx, sy, sx + bx * len, sy + by * len);
-            grad.addColorStop(0, `rgba(255,255,255,${0.55 * t})`);
-            grad.addColorStop(1, 'rgba(255,255,255,0)');
-            ctx.strokeStyle = grad;
-            ctx.lineWidth = 1.2;
-            ctx.beginPath();
-            ctx.moveTo(sx, sy);
-            ctx.lineTo(sx + bx * len, sy + by * len);
-            ctx.stroke();
-        }
-        tipLines.length = 0;
+        drawRibbons(ctx);
         const tex = textures();
         if (!glider) {
             // Engine glow, bigger with the boost.
