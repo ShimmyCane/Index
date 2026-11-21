@@ -4,9 +4,11 @@
   'use strict';
   var h = PC.h, drawer, gear, panelState = PC.store.get('panels', {});
   var PAGES = [
-    { id: 'index', href: 'index.html', icon: '🎹', label: 'Record' },
+    { id: 'home', href: 'index.html', icon: '🏠', label: 'Home' },
+    { id: 'record', href: 'record.html', icon: '🎹', label: 'Record' },
     { id: 'player', href: 'player.html', icon: '🎧', label: 'Listen' },
     { id: 'library', href: 'library.html', icon: '📚', label: 'Library' },
+    { id: 'browse', href: 'browse.html', icon: '🗂️', label: 'Browse' },
     { id: 'compose', href: 'compose.html', icon: '🎛️', label: 'Compose' }
   ];
 
@@ -52,8 +54,9 @@
     return h('div', { 'class': 'row' }, [h('span', { text: label }), inp, out]);
   }
   function text(key, label, hint) {
-    var inp = h('input', { type: 'text', value: PC.settings[key], 'class': 'txt' });
-    inp.addEventListener('change', function () { PC.set(key, inp.value.trim()); });
+    var inp = h('input', { type: 'text', value: key === 'guestName' ? PC.store.get('guestName', '') : PC.settings[key], 'class': 'txt' });
+    inp.addEventListener('change', function () {
+      if (key === 'guestName') { PC.store.set('guestName', inp.value.trim().slice(0, 20)); PC.emit('setting', 'player'); } else PC.set(key, inp.value.trim()); });
     return h('div', {}, [h('div', { 'class': 'row' }, [h('span', {}, [label, hint ? h('small', { text: hint }) : null])]), inp]);
   }
 
@@ -126,6 +129,7 @@
   }
 
   var CHANGELOG = [
+    '0.2.0 · a take keeps 2 s of pause; Ways to start and start notes; stop phrases add "stop" and "I\'m done"; delete with a recycle bin; one session per day; Browse and Home pages; one button for who is playing; Compose quick bar and pinch zoom.',
     '0.1.0 · first build: listening circle, voice and big-button start, count-in choices, pause and stop-note endings, trimmed takes saved on the device and synced; library, listening page, four-layer composer.'
   ];
 
@@ -164,6 +168,7 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') open(false); });
     paintErr(); pill();
     Notes.setContext({ page: location.pathname.split('/').pop() || 'index.html' });
+    if (cfg.page !== 'home') PC.store.set('lastPage', cfg.page);
   }
   window.Chrome = { init: init, seg: seg, check: check, range: range, text: text, panel: panel, open: open, PAGES: PAGES };
 })();

@@ -1,6 +1,10 @@
 # Athena's Piano Companion — brief
 
-**State (2026-11-20):** MVP 0.1.0 built in one round from Jimmy's answers (convo v0.1). Headless-tested; not tried on a real iPad or piano. SQL written, not applied.
+**State (2026-11-21):** 0.2.0 built from the first seven real notes and Jimmy's answers (convo v0.3, v0.4). 0.1.0 was used on a real iPad (the notes show it). 0.2.0 is headless-tested only. SQL 001 applied; SQL 002 (recycle bin, sessions, delete rights) written with test and verify, **not applied**. Notes not marked done yet (waiting for Jimmy).
+
+**0.2.0 changes:** trim keeps 2 s of pause (setting 1 to 3 s); Ways to start panel and learned start notes; stop phrases add "stop" and "I'm done" (migrated); soft delete with recycle bin, undo bar (5 min), 30-day purge when signed in; sessions = one day, Take N restarts each day; Browse page; Home page (`index.html`), Record at `record.html`, 🏠 on every page; player button cycles five names; Compose quick bar and pinch zoom. Sync keeps working before 002 is applied (new columns are left out).
+
+**Earlier state (2026-11-20):** MVP 0.1.0 built in one round from Jimmy's answers (convo v0.1). Headless-tested.
 
 **What it is:** hands-free recording companion for free piano play (Track A). Record page, Library (edit), Listen (albums, artists, ratings, playlists), Compose (four layers).
 

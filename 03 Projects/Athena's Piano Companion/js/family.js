@@ -78,13 +78,14 @@
       return call('POST', '/storage/v1/object/' + BUCKET + '/' + path, {
         raw: blob, headers: { 'Content-Type': blob.type || 'audio/wav', 'x-upsert': 'true' }, timeout: 120000 });
     },
+    remove: function (path) { return call('DELETE', '/storage/v1/object/' + BUCKET + '/' + path, { timeout: 30000 }); },
     download: function (path) {
       return call('GET', '/storage/v1/object/authenticated/' + BUCKET + '/' + path, { blob: true, timeout: 120000 });
     },
     // Ask each table and the bucket whether they answer; used by the database check in the gear panel.
     check: async function () {
       if (!session) return 'This device only. Sign in to check the family database.';
-      var tables = ['pc_takes', 'pc_playlists', 'pc_playlist_items', 'pc_projects', 'pc_notes'], out = [];
+      var tables = ['pc_takes', 'pc_sessions', 'pc_playlists', 'pc_playlist_items', 'pc_projects', 'pc_notes'], out = [];
       for (var i = 0; i < tables.length; i++) {
         try { await this.rest('GET', tables[i], 'select=id&limit=1'); out.push('✅ ' + tables[i]); }
         catch (e) { out.push('❌ ' + tables[i] + ': ' + e.message); PC.err('Database check ' + tables[i], e); }
@@ -92,7 +93,7 @@
       try { await call('POST', '/storage/v1/object/list/' + BUCKET, { body: { prefix: '', limit: 1 } }); out.push('✅ bucket ' + BUCKET); }
       catch (e) { out.push('❌ bucket ' + BUCKET + ': ' + e.message); PC.err('Database check bucket', e); }
       return out.join('\n') + (out.some(function (l) { return l[0] === '❌'; })
-        ? '\nAn empty or failed table usually means the SQL in supabase/ has not been pasted yet.' : '');
+        ? '\nA failed table usually means its SQL in supabase/ has not been pasted yet (001, then 002).' : '');
     }
   };
 })();

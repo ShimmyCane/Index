@@ -60,3 +60,11 @@ body.drawerOpen .strip { z-index: 5; }
   .quick { gap: 6px; }
   .recPage .pill { position: fixed; top: calc(max(10px, env(safe-area-inset-top)) + 58px); right: 10px; }
 }
+/* player button, undo bar */
+.playerBtn { display: flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 16px 0 10px; border: 3px solid var(--ink); border-radius: 26px; background: var(--peach); box-shadow: 0 3px 0 var(--ink); font: 700 18px inherit; font-family: inherit; color: var(--ink); cursor: pointer; }
+.playerBtn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+.playerBtn .pIcon { font-size: 26px; } .playerBtn small { font-size: 11px; opacity: .65; font-weight: 600; }
+.undoBar { position: fixed; left: 12px; right: 96px; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 45; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 14px; border: 3px solid var(--ink); border-radius: 18px; background: var(--sun); box-shadow: 0 4px 0 var(--ink); font-weight: 700; }
+.undoBar span { flex: 1; min-width: 180px; }
+.undoBar[hidden] { display: none !important; }
+body.playPage .undoBar { bottom: 160px; }

@@ -127,7 +127,7 @@
     })(i);
   }
   async function load() {
-    takes = await Store.all('takes'); lists = await Store.all('playlists'); items = await Store.all('items');
+    takes = Store.live(await Store.all('takes')); lists = await Store.all('playlists'); items = await Store.all('items');
     var cur = queue[idx]; paintView(); if (cur) { idx = queue.findIndex(function (t) { return t.id === cur.id; }); paintTracks(); }
   }
 

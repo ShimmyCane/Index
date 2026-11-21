@@ -39,12 +39,12 @@
       h('div', { 'class': 'meta' }, [stars(t, function () { save(t); }), h('span', { text: PC.fmt((t.duration_ms || 0) / 1000) }),
         h('span', { text: new Date(t.taken_at).toLocaleString() }), h('span', { text: Math.round((t.size_bytes || 0) / 1024) + ' KB' }),
         h('span', { text: t.source === 'composer' ? '🎛️ composed' : '🎹 recorded' }),
-        h('span', { text: t._up ? '☁️ in the family database' : '💾 this device only' }), dl])])]);
+        h('span', { text: t._up ? '☁️ in the family database' : '💾 this device only' }), dl, h('button', { 'class': 'btn small', type: 'button', text: '🗑 Delete', onclick: function () { Bin.remove(t); } })])])]);
   }
   function paintPlay() { document.querySelectorAll('.trow .play').forEach(function (b) { var on = b.dataset.id === playingId; b.classList.toggle('on', on); b.textContent = on ? '■' : '▶'; }); }
 
   async function render() {
-    takes = (await Store.all('takes')).sort(function (a, b) { return a.taken_at < b.taken_at ? 1 : -1; });
+    takes = Store.live(await Store.all('takes')).sort(function (a, b) { return a.taken_at < b.taken_at ? 1 : -1; });
     var q = document.getElementById('q').value.trim().toLowerCase(), fp = document.getElementById('fPlayer').value,
       fr = Number(document.getElementById('fRating').value), fs = document.getElementById('fSource').value;
     var sel = document.getElementById('fPlayer'), names = {}; takes.forEach(function (t) { names[t.player] = 1; });
@@ -67,6 +67,7 @@
     Chrome.init({ page: 'library', desc: 'The library shows every take. Change names, artists, albums, ratings and descriptions here; they are copied to the family database so other pages can use them.', sections: [] });
     ['q', 'fPlayer', 'fRating', 'fSource'].forEach(function (id) { document.getElementById(id).addEventListener('input', render); });
     var busy = false;
+    PC.on('bin', render);
     PC.on('store', function (c) { if (c === 'pulled' && !document.activeElement.closest('.trow')) render(); });
     PC.on('playing', function (on) { if (!on) { playingId = null; paintPlay(); } });
     Store.idleWhen(function () { return PC.isPlaying() || !!document.activeElement.closest('.trow'); });

@@ -8,8 +8,8 @@ Track: A. Family play
 - AI notes: `04 AI/Athena's Piano Companion/brief.md` and `lessons.md`
 - Shared conventions: root `CLAUDE.md` (public repo, privacy)
 
-How to run: `python3 -m http.server` in this folder, open `index.html` (localhost or https; the microphone needs it). No build.
-Code map: `js/app.js` (settings, errors, WAV, helpers), `family.js` (sign-in, tables, bucket), `store.js` (IndexedDB + sync), `chrome.js` (⚙️ gear and shared panels), `notes.js`, `cues.js` (count-in sounds), `listen.js` (microphone, onsets, pitch, stop-note match), `trim.js` (pure), `voice.js`, `strip.js` + `recorder.js` (index), `library.js`, `player.js`, `mixer.js` (pure) + `compose.js`.
+How to run: `python3 -m http.server` in this folder, open `index.html` (Home; Record is `record.html`) (localhost or https; the microphone needs it). No build.
+Code map: `js/app.js` (settings, errors, WAV, helpers), `family.js` (sign-in, tables, bucket), `store.js` (IndexedDB + sync), `chrome.js` (⚙️ gear and shared panels), `notes.js`, `cues.js` (count-in sounds), `listen.js` (microphone, onsets, pitch, stop-note match), `trim.js` (pure), `voice.js`, `strip.js` + `recorder.js` (record), `players.js` (who is playing), `bin.js` (delete and recycle bin), `home.js`, `browse.js`, `library.js`, `player.js`, `mixer.js` (pure) + `compose.js`.
 Check: headless Chromium; stub `Listen.start` and feed made-up sound with `Listen.feed(Float32Array)` (audio-clock timing, no waiting); `node` can load `js/trim.js` and `js/mixer.js` directly. Keep test scripts out of the repo.
 
 Project rules:
@@ -17,4 +17,5 @@ Project rules:
 - Microphone audio is processed in the page; takes are stored on the device and the private bucket `pc-takes` only. Never committed.
 - Web Audio synthesis for cues; no audio files in the repo.
 - Every voice command has a touch alternative.
-- Supabase: Family project, tables `pc_*` and bucket `pc-takes`, publishable key only. SQL in `supabase/` (run `test_001_pc`, then `001_pc_family`, then `verify_001_pc` by hand). Nothing is applied until Jimmy pastes it.
+- Supabase: Family project, tables `pc_*` and bucket `pc-takes`, publishable key only. SQL in `supabase/` (for each number: `test_`, then the numbered file, then `verify_`, by hand). 001 is applied; 002 (recycle bin, sessions) is written and not applied. Nothing is applied until Jimmy pastes it.
+- A take is never removed at once: delete marks `deleted_at`; the 30-day purge removes it.

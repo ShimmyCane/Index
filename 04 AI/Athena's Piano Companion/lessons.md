@@ -11,3 +11,7 @@
 - 2026-11-21: **Dictated notes carry slips** ("paddle" for panel, "shouldn't" for should, "for" for "four"). Read for intent, say the reading in the convo, and let Jimmy correct it.
 - 2026-11-21: **The first real notes arrived within hours of the first build:** seven notes, mostly about ending takes cleanly, deleting, and who is playing. Real use finds the missing delete and home page at once; ship the notes box with the first build every time.
 - 2026-11-21: A "no delete" safety choice (takes undeletable) was reversed by the owner within a day. Prefer soft delete with a recycle bin from the start.
+- 2026-11-21: **Ship code that survives a database that is one migration behind.** The app drops the new columns and skips the new table when the database says they do not exist, so syncing keeps working until the owner pastes the SQL.
+- 2026-11-21: "Trim the tail" meant two different things (the fade, or the quiet). The owner's answer: measure the pause from where the music ends and keep only 2 s of it. Define "the music ends" by a share of the take's own peak, not a fixed low threshold, or a piano's slow fade counts as music.
+- 2026-11-21: A re-render on every saved edit steals the cursor from a text box. Re-render lists on explicit events (delete, restore, sync) and not on the save of an edit.
+- 2026-11-21: Test pinch and drag with synthetic pointer events and `try/catch` around `setPointerCapture`; a synthetic pointer id is not capturable.

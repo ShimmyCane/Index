@@ -2,7 +2,7 @@
 // No build step. Every page loads this first.
 (function () {
   'use strict';
-  var PC = window.PC = { version: '0.1.0' };
+  var PC = window.PC = { version: '0.2.0' };
 
   // ---- events
   var handlers = {};
@@ -22,13 +22,25 @@
     stopPause: 1, stopNote: 1, stopVoice: 1,
     voice: 1,
     startPhrases: "let's record, please record, start recording, start",
-    stopPhrases: 'stop recording, stop recording please',
+    stopPhrases: "stop recording, stop recording please, stop, I'm done",
+    startNote: 0,            // start by playing the learned start notes
+    tailSec: 2,              // seconds of pause kept at the end of a take
     album: '',
     volume: 80,
     showErrors: 0
   };
   PC.settings = Object.assign({}, DEFAULTS);
   try { PC.settings = Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem('pc.settings') || '{}')); } catch (e) { /* blocked */ }
+  // Phrase lists saved by an older version get the newer phrases added once.
+  (function () {
+    try {
+      if (!localStorage.getItem('pc.mig.stop2')) {
+        var have = PC.settings.stopPhrases.split(',').map(function (x) { return x.trim().toLowerCase(); });
+        ['stop', "i'm done"].forEach(function (ph) { if (have.indexOf(ph) < 0) PC.settings.stopPhrases += ', ' + (ph === "i'm done" ? "I'm done" : ph); });
+        localStorage.setItem('pc.settings', JSON.stringify(PC.settings)); localStorage.setItem('pc.mig.stop2', '1');
+      }
+    } catch (e) { /* blocked */ }
+  })();
   PC.save = function () { try { localStorage.setItem('pc.settings', JSON.stringify(PC.settings)); } catch (e) { /* blocked */ } };
   PC.set = function (key, value) { PC.settings[key] = value; PC.save(); PC.emit('setting', key, value); };
   PC.store = {                                   // small per-device values (stop gesture, last page...)
@@ -69,6 +81,12 @@
     [].concat(kids || []).forEach(function (c) { if (c != null) el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
     return el;
   };
+  // The people who play, in the order the button cycles through them.
+  PC.PLAYERS = ['Athena', 'Felix', 'Ying', 'Jimmy', 'Guest'];
+  PC.ICONS = { Athena: '🎹', Felix: '🎸', Ying: '🎵', Jimmy: '🎺', Guest: '👋' };
+  // A session is one day of playing: the first take of a new day is take 1 again.
+  PC.sessionId = function (d) { d = d instanceof Date ? d : new Date(d); return 's-' + d.getFullYear() + '-' + PC.pad(d.getMonth() + 1) + '-' + PC.pad(d.getDate()); };
+  PC.sessionOf = function (t) { return t.session_id || PC.sessionId(t.taken_at); };
   PC.colorFor = function (n) { return 'hsl(' + ((n * 47 + 20) % 360) + ' 72% 82%)'; };   // pastel, never harsh
 
   // ---- audio context (iPad: create or resume it only inside a tap)
