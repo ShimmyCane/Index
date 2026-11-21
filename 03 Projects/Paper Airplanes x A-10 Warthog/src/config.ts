@@ -4,8 +4,8 @@ namespace PA {
 
   // Internal resolution. The canvas is small on purpose: every pixel is a
   // "pixel-art pixel", and the page scales it up with no smoothing.
-  export const W = 400;
-  export const H = 225;
+  export const W = 480;
+  export const H = 270;
 
   // Side view, 2.5D: screen pixels per metre, across and up.
   export const PPM_X = 2;

@@ -9,7 +9,6 @@ const ctx = { console, Math, Date };
 vm.createContext(ctx);
 vm.runInContext(code, ctx);
 const PA = vm.runInContext('PA', ctx);
-PA.PAINT = vm.runInContext('PA.PAINT', ctx);
 
 let failures = 0;
 function check(name, ok, detail) {
@@ -225,7 +224,17 @@ const still = { pitch: 0, yaw: 0, throttle: 0 };
 // 14. The world: every kind of thing has a sprite painted for it, and the sea is at the east.
 {
   const names = Object.keys(PA.KINDS);
-  check('assets: every kind has a painter', names.every(k => PA.PAINT[k]), 'kinds: ' + names.length);
+  const counts = names.map(k => { const v = PA.MODEL_BUILDERS[k](); let n = 0; for (const c of v.data) if (c) n++; return n; });
+  check('models: every kind has a 3-D voxel model with real content', counts.every(n => n > 40), 'kinds: ' + names.length + ', smallest ' + Math.min(...counts) + ' voxels');
+  const extra = ['plane', 'glider', 'tree0', 'tree1', 'tree2', 'tree3', 'tree4', 'house1', 'house2', 'city1', 'city2'];
+  check('models: the plane, the glider, trees and town buildings all build', extra.every(k => PA.MODEL_BUILDERS[k] && PA.MODEL_BUILDERS[k]().data.some(c => c)));
+  check('world: the ground is flat, so objects sit on what is drawn', PA.groundAt(123, 456) === 0 && PA.groundAt(-900, 4000) === 0);
+  let lakes = 0, forests = 0, farms = 0, towns = 0;
+  for (let x = -1200; x < 1200; x += 40) for (let z = 0; z < 4000; z += 40) {
+    const b = PA.biomeAt(x, z);
+    if (b === 'lake') lakes++; else if (b === 'forest') forests++; else if (b === 'farm') farms++; else if (b === 'town') towns++;
+  }
+  check('world: lakes, forests, farms and towns all appear', lakes > 0 && forests > 0 && farms > 0 && towns > 0, 'lakes ' + lakes + ', forests ' + forests + ', farms ' + farms + ', towns ' + towns);
   check('world: the sea is at the east', PA.biomeAt(PA.SEA_X + 200, 0) === 'sea' && PA.groundAt(PA.SEA_X + 200, 0) === 0);
 }
 

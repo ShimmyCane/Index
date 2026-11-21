@@ -104,3 +104,12 @@ Flight: plane (A-10 jet / paper glider), steering (drag / joystick), new flight.
 - **Tag:** an enemy missile shows TAGGED, beeps faster as it closes, and a red ring collapses. A hard turn (held ~0.6 s) breaks its lock.
 - **Graphics:** stacked-slice plane (four slices), 25–33% of the screen by turn tightness, wisps at the wing tips, a boost flame, dust near the ground, a cloud trail.
 - **Not yet:** moving ships; better sprites; loop; second missile slot; a mission loading screen.
+
+## Round 9 (0.9): a modern 2.5D look
+
+- **Sprite stacking, for real:** every object is a voxel model (`src/assets/models.ts`), baked into layers and drawn stacked and turned to the camera (`src/voxel.ts`). The flat sprites (`src/sprites.ts`, `src/assets/*` painters) are removed.
+- **Per-pixel land and sky** (`src/render.ts`): fields, towns, roads, rails, lakes, forests, coast and sea with reflections and glitter, cloud shadows, haze, a sun and mountain ridges. A field cache on an 8 m grid keeps it fast.
+- **Light:** a low sun behind-left; shadows the shape of each object; fire, smoke and sparks; missile trails; tracers; lens flare; vignette.
+- **Camera roll** follows 40% of the bank, the right way round.
+- **Resolution** 480×270; the ground is flat (`groundAt` is 0).
+- **Speed:** about 11–13 ms a frame in headless Chromium; slow devices drop to every other ground column on their own.

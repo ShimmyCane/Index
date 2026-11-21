@@ -14,21 +14,17 @@ namespace PA {
     };
   }
 
-  export const SEA_X = 1300;   // east of this is the sea
+  export const SEA_X = 1300;   // the coast runs north near here; east of it is the sea
   export const ROAD_X = -120;  // the main road runs north along this line
   export const ROAD_W = 7;     // half its width, metres
+  export const RAIL_X = -320;  // the railway runs north along this line
 
-  // Height of the ground in metres at ground position (X, Z). The sea is at zero.
-  export function groundAt(X: number, Z: number): number {
-    if (X > SEA_X) return 0;
-    return Math.max(0, 4 + 3.5 * Math.sin(X / 210) + 1.5 * Math.sin(Z / 61 + 2));
+  // The ground is flat (the land is shaped by colour, not height), so every object sits
+  // exactly on what is drawn. The sea is at the same level.
+  export function groundAt(_X: number, _Z: number): number {
+    return 0;
   }
 
-  export function isSea(X: number): boolean {
-    return X > SEA_X;
-  }
-
-  // What the ground looks like: farm fields, town, army land, or the sea.
   // A repeatable pseudo-random number from a cell (so the same place always looks the same).
   export function cellNoise(i: number, j: number, salt: number): number {
     let h = (i * 374761393 + j * 668265263 + salt * 2246822519) | 0;
@@ -36,27 +32,62 @@ namespace PA {
     return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
   }
 
-  // Lakes: some 200 m cells on land are water.
-  export function isLake(X: number, Z: number): boolean {
-    if (X > SEA_X) return false;
-    const i = Math.floor(X / 200), j = Math.floor(Z / 200);
-    return cellNoise(i, j, 7) > 0.86 && Math.abs(X - ROAD_X) > 30;
+  // Integer hash of a grid point, 0 up to 1.
+  export function hash2(ix: number, iz: number): number {
+    let h = (ix * 374761393 + iz * 668265263) | 0;
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
   }
 
-  // Forest: some cells of farm and army land have trees.
+  // Smooth value noise, 0 up to 1: the same place always gives the same value.
+  export function noise2(x: number, z: number): number {
+    const ix = Math.floor(x), iz = Math.floor(z);
+    const fx = x - ix, fz = z - iz;
+    const ux = fx * fx * (3 - 2 * fx), uz = fz * fz * (3 - 2 * fz);
+    const a = hash2(ix, iz), b = hash2(ix + 1, iz), c = hash2(ix, iz + 1), d = hash2(ix + 1, iz + 1);
+    return a + (b - a) * ux + (c - a) * uz + (a - b - c + d) * ux * uz;
+  }
+
+  // The coastline wanders a little east and west as it runs north.
+  export function coastX(Z: number): number {
+    return SEA_X - 45 + 90 * noise2(Z / 380, 13.7);
+  }
+
+  export function isSea(X: number, Z = 0): boolean {
+    return X > coastX(Z);
+  }
+
+  // One field shapes both lakes and forests: lakes at its peaks, forests on the slopes round them.
+  export function wildValue(X: number, Z: number): number {
+    return noise2(X / 300 + 31.1, Z / 300 - 7.3) * 0.72 + noise2(X / 90 + 3.7, Z / 90 + 1.9) * 0.28;
+  }
+
+  // The kind of country: farms where it is low, towns where it is high, open grass between.
+  export function regionValue(X: number, Z: number): number {
+    return noise2(X / 900 + 50.5, Z / 900 - 20.25);
+  }
+
+  export const LAKE_LEVEL = 0.74;      // wildValue above this is a lake
+  export const FOREST_LEVEL = 0.6;     // between this and the lake level is forest
+
+  export function isLake(X: number, Z: number): boolean {
+    if (isSea(X, Z) || Math.abs(X - ROAD_X) < 30 || Math.abs(X - RAIL_X) < 20) return false;
+    return wildValue(X, Z) > LAKE_LEVEL;
+  }
+
   export function isForest(X: number, Z: number): boolean {
-    const i = Math.floor(X / 120), j = Math.floor(Z / 120);
-    return cellNoise(i, j, 11) > 0.7 && Math.abs(X - ROAD_X) > 14;
+    if (isSea(X, Z) || Math.abs(X - ROAD_X) < 16 || Math.abs(X - RAIL_X) < 10) return false;
+    const w = wildValue(X, Z);
+    return w > FOREST_LEVEL && w < LAKE_LEVEL - 0.02;
   }
 
   export function biomeAt(X: number, Z: number): 'sea' | 'lake' | 'farm' | 'town' | 'army' | 'forest' {
-    if (X > SEA_X) return 'sea';
+    if (isSea(X, Z)) return 'sea';
     if (isLake(X, Z)) return 'lake';
     if (isForest(X, Z)) return 'forest';
-    const cell = Math.floor((X + 900) / 320) + Math.floor(Z / 260) * 3;
-    const k = ((cell % 4) + 4) % 4;
-    if (k === 0) return 'farm';
-    if (k === 1) return 'town';
+    const r = regionValue(X, Z);
+    if (r < 0.42) return 'farm';
+    if (r > 0.66) return 'town';
     return 'army';
   }
 
@@ -193,7 +224,7 @@ namespace PA {
         out.push(target('flak', SEA_X - 30, Z, rand));
       } else {
         // Railway: wagons on the line.
-        const X = -320;
+        const X = RAIL_X;
         out.push(target('rail', X, Z, rand));
         out.push(target('rail', X, Z + 6, rand));
         out.push(target('barracks', X + 40, Z + 12, rand));

@@ -77,3 +77,9 @@ A browser 2.5D pixel-art flight game, built small enough to read, so Jimmy can s
 
 - Fixed: the settings open with one tap in the upper-right corner. The gun leads moving targets and allows for the plane's speed and the bullet's drop. "Planes nearby" counts flying aircraft only.
 - Checks: 52 (exit 0, five runs); browser taps at two sizes.
+
+## Round 9 (convo v0.16): graphics
+
+- Rebuilt the look: voxel models with true sprite stacking for every object; the land and sky painted per pixel; shadows of each object's shape; richer effects; the camera roll fixed (it rolled the wrong way); 480×270.
+- Checks: 58 (`npm test`); browser: no page errors; about 11–13 ms a frame headless.
+- Not verified on an iPad (speed and look).

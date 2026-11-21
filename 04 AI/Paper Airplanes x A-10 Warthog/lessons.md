@@ -24,3 +24,12 @@
 - **Test for the mechanic, not the random outcome.** The ally test failed twice for reasons in the fighter's altitude, not the gun. Trace the frames before changing the code.
 - **Felix mode is for seeing things.** Radar markers should be bigger and clearer there.
 - **A tap command in a shell can hide a failure.** Read the exit code of the test run itself, not of the pipe after it.
+
+## 2026-11-21 (round 9, graphics)
+
+- **True sprite stacking needs voxel models,** not 2-D sprites with a darker copy underneath. Bake each layer once; draw each layer with one setTransform (yaw, squash by the viewing angle, roll) and drawImage.
+- **Clearing voxels needs its own call.** Writing colour 0 left black voxels (black wing tips, a black tank front). Use `cut()`.
+- **A per-pixel ground is affordable at 480×270** with a field cache, a haze lookup table, no `pow` in the loop, a 2×2 sky away from the horizon, and every other column far away.
+- **Size the cache to the view.** A 2 km cache under a 3 km view made near and far cells evict each other every frame.
+- **Check the camera roll's sign.** A right bank must tip the land to the left.
+- **Put the sun behind the player** when shadows should be seen: they then fall ahead and objects are lit from the front.

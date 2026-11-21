@@ -75,7 +75,8 @@ namespace PA {
     life: number;
     max: number;
     color: string;
-    size: number;
+    size: number;          // metres
+    kind?: 'fire' | 'smoke' | 'spark' | 'dust';
   }
 
   // A mark where the plane was hit: x and y in plane units (x across, y up from the centre).
@@ -421,7 +422,7 @@ namespace PA {
       this.puffs.push({
         X: p.X + (this.rand() - 0.5) * 10, Z: p.Z + (this.rand() - 0.5) * 10, h: groundAt(p.X, p.Z) + 0.5,
         vX: (this.rand() - 0.5) * 6, vY: 2 + this.rand() * 3, vZ: (this.rand() - 0.5) * 6,
-        life: 0.6, max: 0.6, color: '#e6dcc0', size: 2 + this.rand() * 2,
+        life: 0.6, max: 0.6, color: '#e6dcc0', size: 2 + this.rand() * 2, kind: 'dust',
       });
     }
 
@@ -722,6 +723,7 @@ namespace PA {
         m.X += m.vX * dt;
         m.Z += m.vZ * dt;
         m.h += m.vY * dt;
+        this.trail(m.X, m.h, m.Z);
         if (target && target.alive) {
           const info = KINDS[target.kind];
           const tg = altOf(target);
@@ -779,6 +781,7 @@ namespace PA {
         m.X += m.vX * dt;
         m.Z += m.vZ * dt;
         m.h += m.vY * dt;
+        this.trail(m.X, m.h, m.Z);
         const dp = Math.hypot(m.X - p.X, m.h - p.h, m.Z - p.Z);
         // A decoy caught it: it bursts there.
         const hitDecoy = this.decoys.find(d => Math.hypot(m.X - d.X, m.h - d.h, m.Z - d.Z) < 8);
@@ -1073,18 +1076,38 @@ namespace PA {
       }
     }
 
+    // An explosion: a fireball that flares and fades, smoke that rolls up and spreads, and sparks.
     private explode(X: number, h: number, Z: number, n: number): void {
-      const colors = ['#ffb02e', '#ff9e8a', '#ffe08a', '#ffd9c7'];
-      for (let i = 0; i < n; i++) {
-        const a = this.rand() * Math.PI * 2;
-        const sp = 8 + this.rand() * 26;
+      const fire = Math.max(3, Math.round(n * 0.5)), smoke = Math.max(3, Math.round(n * 0.45)), sparks = Math.round(n * 0.4);
+      for (let i = 0; i < fire; i++) {
+        const a = this.rand() * Math.PI * 2, sp = 3 + this.rand() * 10;
         this.puffs.push({
-          X, h, Z,
-          vX: Math.cos(a) * sp, vY: Math.sin(a) * sp * 0.6 + 6, vZ: Math.sin(a) * sp,
-          life: 0.5 + this.rand() * 0.6, max: 1.1,
-          color: colors[i % colors.length], size: 2 + this.rand() * 3,
+          X, h, Z, vX: Math.cos(a) * sp, vY: 2 + this.rand() * 6, vZ: Math.sin(a) * sp,
+          life: 0.35 + this.rand() * 0.35, max: 0.7, color: '#ffb02e', size: 2.5 + this.rand() * 3, kind: 'fire',
         });
       }
+      for (let i = 0; i < smoke; i++) {
+        const a = this.rand() * Math.PI * 2, sp = 1 + this.rand() * 4;
+        this.puffs.push({
+          X, h, Z, vX: Math.cos(a) * sp, vY: 2 + this.rand() * 3, vZ: Math.sin(a) * sp,
+          life: 1.4 + this.rand() * 1.2, max: 2.6, color: '#777777', size: 2.5 + this.rand() * 2.5, kind: 'smoke',
+        });
+      }
+      for (let i = 0; i < sparks; i++) {
+        const a = this.rand() * Math.PI * 2, sp = 14 + this.rand() * 22;
+        this.puffs.push({
+          X, h, Z, vX: Math.cos(a) * sp, vY: 6 + this.rand() * 14, vZ: Math.sin(a) * sp,
+          life: 0.4 + this.rand() * 0.4, max: 0.8, color: '#fff1b8', size: 0.6, kind: 'spark',
+        });
+      }
+      if (this.puffs.length > 700) this.puffs.splice(0, this.puffs.length - 700);
+    }
+
+    // A thin smoke trail behind a missile.
+    private trail(X: number, h: number, Z: number): void {
+      this.puffs.push({
+        X, h, Z, vX: 0, vY: 0.6, vZ: 0, life: 1.1, max: 1.1, color: '#cccccc', size: 0.9, kind: 'smoke',
+      });
     }
 
     private dust(X: number, h: number, Z: number): void {
@@ -1092,14 +1115,24 @@ namespace PA {
         this.puffs.push({
           X, h, Z,
           vX: (this.rand() - 0.5) * 10, vY: 4 + this.rand() * 4, vZ: (this.rand() - 0.5) * 10,
-          life: 0.4, max: 0.4, color: '#e6e0c8', size: 2,
+          life: 0.4, max: 0.4, color: '#e6e0c8', size: 1.2, kind: 'dust',
         });
       }
     }
 
+    // Smoke rises and slows; fire slows; sparks and dust fall.
     private updatePuffs(dt: number): void {
       for (const p of this.puffs) {
-        p.vY -= GRAVITY * 0.5 * dt;
+        if (p.kind === 'smoke') {
+          p.vY += 1.5 * dt;
+          const drag = Math.max(0, 1 - 1.5 * dt);
+          p.vX *= drag; p.vZ *= drag;
+        } else if (p.kind === 'fire') {
+          const drag = Math.max(0, 1 - 3 * dt);
+          p.vX *= drag; p.vZ *= drag; p.vY *= drag;
+        } else {
+          p.vY -= GRAVITY * 0.5 * dt;
+        }
         p.X += p.vX * dt;
         p.Z += p.vZ * dt;
         p.h += p.vY * dt;
@@ -1113,7 +1146,7 @@ namespace PA {
     return {
       X, h, Z,
       vX: (rand() - 0.5) * 14, vY: 2 + rand() * 6, vZ: (rand() - 0.5) * 14,
-      life: 0.9, max: 0.9, color: '#fff1b8', size: 2,
+      life: 0.9, max: 0.9, color: '#fff1b8', size: 0.8, kind: 'spark',
     };
   }
 
