@@ -332,7 +332,7 @@ namespace PA {
     $('missionBody').textContent = 'Destroy ' + g.objectiveGoal + ' ground targets. Arrows on the radar point to them.';
     $('objective').textContent = g.resupplied > 0
       ? 'Mission complete! Everything restocked.'
-      : g.settings.mode === 'glider' ? 'Fly through the rings.'
+      : g.settings.mode === 'glider' ? ''
       : 'Mission ' + g.missionNumber + ': destroy ' + left + ' more ground target' + (left === 1 ? '' : 's');
     const cool = Math.ceil(g.resupplyCool);
     $('reloadBtn').toggleAttribute('disabled', g.felix || cool > 0);

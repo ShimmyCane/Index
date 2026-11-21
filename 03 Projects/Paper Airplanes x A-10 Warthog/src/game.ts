@@ -65,6 +65,8 @@ namespace PA {
     friendly?: boolean;   // an ally's bullet: it only hits enemies
   }
 
+  const WRECK_LIFE = 50;     // seconds a wreck burns and smokes
+
   export interface Puff {
     X: number;
     Z: number;
@@ -75,7 +77,8 @@ namespace PA {
     life: number;
     max: number;
     color: string;
-    size: number;
+    size: number;          // metres
+    kind?: 'fire' | 'smoke' | 'spark' | 'dust';
   }
 
   // A mark where the plane was hit: x and y in plane units (x across, y up from the centre).
@@ -146,7 +149,6 @@ namespace PA {
   const FIGHTER_FIRE_RANGE = 380;
   const SHELL_WARN_RANGE = 300;
   const FRIEND_RESPAWN = 40;
-  const WISP_LIFE = 1.4;
   const ATTACK_RANGE = 700;      // a fighter starts its attack run inside this distance
   const BREAK_RANGE = 180;       // and breaks off this close, or after BREAK_AFTER seconds
   const BREAK_AFTER = 3;
@@ -198,8 +200,9 @@ namespace PA {
     missiles: Missile[] = [];
     decoys: Decoy[] = [];
     puffs: Puff[] = [];
+    wrecks: { X: number; Z: number; size: number; age: number }[] = [];   // burning remains
+    bases: { X: number; Z: number }[] = [];                                 // where each base's flag stands
     marks: Mark[] = [];
-    wisps: Puff[] = [];
     warned = false;
     held: Held = { fire: false, boost: false, missile: false };
     axes: Axes = { yaw: 0, pitch: 0 };
@@ -242,6 +245,8 @@ namespace PA {
       this.missileCool = 0;
       this.reloadTimer = 0;
       this.waveTimer = 8;
+      this.wrecks = [];
+      this.bases = [];
       this.nextBaseZ = BASE_SPACING;
       this.enemyMissileCool = 6;
       this.allyTimers = [];
@@ -260,7 +265,6 @@ namespace PA {
       this.decoys = [];
       this.puffs = [];
       this.marks = [];
-      this.wisps = [];
     }
 
     // A reload from ⚙️ (normal mode only): the gun and missiles come back, with a cooldown.
@@ -292,8 +296,8 @@ namespace PA {
       if (this.paused) return;
       const dt = Math.min(dtIn, 1 / 30);
       this.updatePuffs(dt);
+      this.burnWrecks(dt);
       this.updateMarks(dt);
-      this.updateWisps(dt);
       this.blink = Math.max(0, this.blink - dt);
       this.resupplied = Math.max(0, this.resupplied - dt);
       this.missionCard = Math.max(0, this.missionCard - dt);
@@ -347,7 +351,6 @@ namespace PA {
         this.updateTag(dt);
         this.updateObjective();
         this.keepTargets();
-        this.emitWisps(dt);
         this.emitDust();
         if (this.hull <= 0 && !this.felix && this.settings.invincible !== 1) this.crash();
       } else {
@@ -389,30 +392,6 @@ namespace PA {
       for (const m of this.marks) m.age += dt;
     }
 
-    // Wisps stream from the wing tips in a tight turn; clouds come from the boost.
-    private emitWisps(dt: number): void {
-      const p = this.plane;
-      const tight = Math.abs(p.bank) / AIR.bankMax;
-      if (tight < 0.5 || this.phase !== 'flying') return;
-      const count = Math.floor(tight * 5 * dt * 30) + (this.rand() < tight * dt * 6 ? 1 : 0);
-      const cosY = Math.cos(p.yaw), sinY = Math.sin(p.yaw);
-      for (let i = 0; i < count; i++) {
-        const side = this.rand() < 0.5 ? -1 : 1;
-        const span = 8;
-        this.wisps.push({
-          X: p.X + cosY * side * span, Z: p.Z - sinY * side * span, h: p.h,
-          vX: 0, vY: 1, vZ: 0, life: WISP_LIFE, max: WISP_LIFE, color: '#ffffff', size: 2 + this.rand() * 2,
-        });
-      }
-      if (this.held.boost && this.rand() < 0.4) {
-        this.wisps.push({
-          X: p.X - Math.sin(p.yaw) * 10, Z: p.Z - Math.cos(p.yaw) * 10, h: p.h - 1,
-          vX: (this.rand() - 0.5) * 2, vY: 1.5, vZ: (this.rand() - 0.5) * 2,
-          life: 1.2, max: 1.2, color: '#fffdfa', size: 4 + this.rand() * 3,
-        });
-      }
-    }
-
     // Dust is kicked up when the plane is low and moving fast.
     private emitDust(): void {
       const p = this.plane;
@@ -421,18 +400,8 @@ namespace PA {
       this.puffs.push({
         X: p.X + (this.rand() - 0.5) * 10, Z: p.Z + (this.rand() - 0.5) * 10, h: groundAt(p.X, p.Z) + 0.5,
         vX: (this.rand() - 0.5) * 6, vY: 2 + this.rand() * 3, vZ: (this.rand() - 0.5) * 6,
-        life: 0.6, max: 0.6, color: '#e6dcc0', size: 2 + this.rand() * 2,
+        life: 0.6, max: 0.6, color: '#e6dcc0', size: 2 + this.rand() * 2, kind: 'dust',
       });
-    }
-
-    private updateWisps(dt: number): void {
-      for (const w of this.wisps) {
-        w.life -= dt;
-        w.X += w.vX * dt;
-        w.Z += w.vZ * dt;
-        w.h += w.vY * dt;
-      }
-      this.wisps = this.wisps.filter(w => w.life > 0);
     }
 
     private updateReload(dt: number): void {
@@ -608,6 +577,8 @@ namespace PA {
     private spawnBase(z: number): void {
       const X = (this.rand() - 0.5) * 600;
       const m = this.mission.targets;
+      this.bases.push({ X: X + 22, Z: z - 2 });
+      if (this.bases.length > 8) this.bases.shift();
       m.push(target('city', X, z, this.rand), target('city', X + 10, z + 7, this.rand), target('city', X - 9, z + 10, this.rand));
       m.push(target('sam', X + 14, z - 6, this.rand), target('flak', X - 14, z - 8, this.rand), target('flak', X + 6, z + 16, this.rand));
       for (let i = 0; i < 2; i++) {
@@ -722,6 +693,7 @@ namespace PA {
         m.X += m.vX * dt;
         m.Z += m.vZ * dt;
         m.h += m.vY * dt;
+        this.trail(m.X, m.h, m.Z);
         if (target && target.alive) {
           const info = KINDS[target.kind];
           const tg = altOf(target);
@@ -779,6 +751,7 @@ namespace PA {
         m.X += m.vX * dt;
         m.Z += m.vZ * dt;
         m.h += m.vY * dt;
+        this.trail(m.X, m.h, m.Z);
         const dp = Math.hypot(m.X - p.X, m.h - p.h, m.Z - p.Z);
         // A decoy caught it: it bursts there.
         const hitDecoy = this.decoys.find(d => Math.hypot(m.X - d.X, m.h - d.h, m.Z - d.Z) < 8);
@@ -959,6 +932,11 @@ namespace PA {
       // The mission objective counts ground places and vehicles (not ships, rail, or the air).
       if (isObjective(t)) this.objectiveDone++;
       this.explode(t.X, tg + 1, t.Z, KINDS[t.kind].height > 5 ? 26 : 16);
+      // Ground targets leave a wreck that burns and smokes for a while.
+      if (t.h === undefined && t.kind !== 'ship') {
+        this.wrecks.push({ X: t.X, Z: t.Z, size: KINDS[t.kind].height > 5 ? 1.6 : 1, age: 0 });
+        if (this.wrecks.length > 14) this.wrecks.shift();
+      }
       this.onSound('boom');
     }
 
@@ -1073,18 +1051,38 @@ namespace PA {
       }
     }
 
+    // An explosion: a fireball that flares and fades, smoke that rolls up and spreads, and sparks.
     private explode(X: number, h: number, Z: number, n: number): void {
-      const colors = ['#ffb02e', '#ff9e8a', '#ffe08a', '#ffd9c7'];
-      for (let i = 0; i < n; i++) {
-        const a = this.rand() * Math.PI * 2;
-        const sp = 8 + this.rand() * 26;
+      const fire = Math.max(3, Math.round(n * 0.5)), smoke = Math.max(3, Math.round(n * 0.45)), sparks = Math.round(n * 0.4);
+      for (let i = 0; i < fire; i++) {
+        const a = this.rand() * Math.PI * 2, sp = 3 + this.rand() * 10;
         this.puffs.push({
-          X, h, Z,
-          vX: Math.cos(a) * sp, vY: Math.sin(a) * sp * 0.6 + 6, vZ: Math.sin(a) * sp,
-          life: 0.5 + this.rand() * 0.6, max: 1.1,
-          color: colors[i % colors.length], size: 2 + this.rand() * 3,
+          X, h, Z, vX: Math.cos(a) * sp, vY: 2 + this.rand() * 6, vZ: Math.sin(a) * sp,
+          life: 0.35 + this.rand() * 0.35, max: 0.7, color: '#ffb02e', size: 2.5 + this.rand() * 3, kind: 'fire',
         });
       }
+      for (let i = 0; i < smoke; i++) {
+        const a = this.rand() * Math.PI * 2, sp = 1 + this.rand() * 4;
+        this.puffs.push({
+          X, h, Z, vX: Math.cos(a) * sp, vY: 2 + this.rand() * 3, vZ: Math.sin(a) * sp,
+          life: 1.4 + this.rand() * 1.2, max: 2.6, color: '#777777', size: 2.5 + this.rand() * 2.5, kind: 'smoke',
+        });
+      }
+      for (let i = 0; i < sparks; i++) {
+        const a = this.rand() * Math.PI * 2, sp = 14 + this.rand() * 22;
+        this.puffs.push({
+          X, h, Z, vX: Math.cos(a) * sp, vY: 6 + this.rand() * 14, vZ: Math.sin(a) * sp,
+          life: 0.4 + this.rand() * 0.4, max: 0.8, color: '#fff1b8', size: 0.6, kind: 'spark',
+        });
+      }
+      if (this.puffs.length > 700) this.puffs.splice(0, this.puffs.length - 700);
+    }
+
+    // A thin smoke trail behind a missile.
+    private trail(X: number, h: number, Z: number): void {
+      this.puffs.push({
+        X, h, Z, vX: 0, vY: 0.6, vZ: 0, life: 1.1, max: 1.1, color: '#cccccc', size: 0.9, kind: 'smoke',
+      });
     }
 
     private dust(X: number, h: number, Z: number): void {
@@ -1092,14 +1090,52 @@ namespace PA {
         this.puffs.push({
           X, h, Z,
           vX: (this.rand() - 0.5) * 10, vY: 4 + this.rand() * 4, vZ: (this.rand() - 0.5) * 10,
-          life: 0.4, max: 0.4, color: '#e6e0c8', size: 2,
+          life: 0.4, max: 0.4, color: '#e6e0c8', size: 1.2, kind: 'dust',
         });
       }
     }
 
+    // Smoke rises and slows; fire slows; sparks and dust fall.
+    // A wreck burns for a while, then only smokes, then goes out. Its smoke drifts with the wind.
+    private burnWrecks(dt: number): void {
+      const p = this.plane;
+      for (const w of this.wrecks) {
+        w.age += dt;
+        if (w.age > WRECK_LIFE || this.puffs.length > 640) continue;
+        if (Math.hypot(w.X - p.X, w.Z - p.Z) > 1600) continue;
+        const left = 1 - w.age / WRECK_LIFE;
+        if (this.rand() < dt * 7 * left) {
+          const g = 0.16 + this.rand() * 0.1;
+          const shade = Math.round(g * 255).toString(16).padStart(2, '0');
+          this.puffs.push({
+            X: w.X + (this.rand() - 0.5) * 3, Z: w.Z + (this.rand() - 0.5) * 3, h: 1.5,
+            vX: WIND.X * 0.5, vY: 3 + this.rand() * 2, vZ: WIND.Z * 0.5,
+            life: 5, max: 5, color: '#' + shade + shade + shade, size: (2.2 + this.rand()) * w.size, kind: 'smoke',
+          });
+        }
+        if (w.age < WRECK_LIFE * 0.45 && this.rand() < dt * 9) {
+          this.puffs.push({
+            X: w.X + (this.rand() - 0.5) * 3 * w.size, Z: w.Z + (this.rand() - 0.5) * 3 * w.size, h: 0.8,
+            vX: 0, vY: 2.5 + this.rand() * 2, vZ: 0,
+            life: 0.6, max: 0.6, color: this.rand() < 0.5 ? '#ffb347' : '#ff7a3c', size: 1.2 * w.size, kind: 'fire',
+          });
+        }
+      }
+      this.wrecks = this.wrecks.filter(w => w.age < WRECK_LIFE + 20);
+    }
+
     private updatePuffs(dt: number): void {
       for (const p of this.puffs) {
-        p.vY -= GRAVITY * 0.5 * dt;
+        if (p.kind === 'smoke') {
+          p.vY += 1.5 * dt;
+          const drag = Math.max(0, 1 - 1.5 * dt);
+          p.vX = WIND.X + (p.vX - WIND.X) * drag; p.vZ = WIND.Z + (p.vZ - WIND.Z) * drag;
+        } else if (p.kind === 'fire') {
+          const drag = Math.max(0, 1 - 3 * dt);
+          p.vX *= drag; p.vZ *= drag; p.vY *= drag;
+        } else {
+          p.vY -= GRAVITY * 0.5 * dt;
+        }
         p.X += p.vX * dt;
         p.Z += p.vZ * dt;
         p.h += p.vY * dt;
@@ -1113,7 +1149,7 @@ namespace PA {
     return {
       X, h, Z,
       vX: (rand() - 0.5) * 14, vY: 2 + rand() * 6, vZ: (rand() - 0.5) * 14,
-      life: 0.9, max: 0.9, color: '#fff1b8', size: 2,
+      life: 0.9, max: 0.9, color: '#fff1b8', size: 0.8, kind: 'spark',
     };
   }
 

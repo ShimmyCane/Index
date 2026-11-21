@@ -104,3 +104,25 @@ Flight: plane (A-10 jet / paper glider), steering (drag / joystick), new flight.
 - **Tag:** an enemy missile shows TAGGED, beeps faster as it closes, and a red ring collapses. A hard turn (held ~0.6 s) breaks its lock.
 - **Graphics:** stacked-slice plane (four slices), 25–33% of the screen by turn tightness, wisps at the wing tips, a boost flame, dust near the ground, a cloud trail.
 - **Not yet:** moving ships; better sprites; loop; second missile slot; a mission loading screen.
+
+## Round 9 (0.9): a modern 2.5D look
+
+- **Sprite stacking, for real:** every object is a voxel model (`src/assets/models.ts`), baked into layers and drawn stacked and turned to the camera (`src/voxel.ts`). The flat sprites (`src/sprites.ts`, `src/assets/*` painters) are removed.
+- **Per-pixel land and sky** (`src/render.ts`): fields, towns, roads, rails, lakes, forests, coast and sea with reflections and glitter, cloud shadows, haze, a sun and mountain ridges. A field cache on an 8 m grid keeps it fast.
+- **Light:** a low sun behind-left; shadows the shape of each object; fire, smoke and sparks; missile trails; tracers; lens flare; vignette.
+- **Camera roll** follows 40% of the bank, the right way round.
+- **Resolution** 480×270; the ground is flat (`groundAt` is 0).
+- **Speed:** about 11–13 ms a frame in headless Chromium; slow devices drop to every other ground column on their own.
+
+## Round 10 (0.10): vapour and animations
+
+- **Wing tip vapour** spawns on the screen at the drawn wing tips and blows back nose to tail; a thin line is fixed to each tip. Engine heat behind the engines.
+- **Animations:** turrets, flak and SAMs turn to the plane; the radar dish spins; chimneys smoke; windmills turn; birds fly in a V; fighters bank; trees sway; ships bob.
+- **Stack cache** (`voxel.ts` `drawModelCached`): big trees are drawn once per size and viewing angle into pooled canvases, then turned and leaned for roll and sway.
+
+## Round 11 (0.11): curved trail, mood
+
+- **Curved vapour:** a ribbon fixed to each wing tip; older points swing further out of the turn.
+- **Burning wrecks:** destroyed ground targets leave a charred wreck that burns, smokes and goes out (`WRECK_LIFE` 50 s).
+- **Wind** (`WIND` in `world.ts`) leans wreck smoke, chimney smoke and flags the same way.
+- **Flags** wave at every base.
