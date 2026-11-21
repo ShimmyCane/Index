@@ -8,3 +8,6 @@
 - 2026-11-20: **A voice stop leaks into the take.** Cut back to the last quiet gap before the words; fall back to 2 s.
 - 2026-11-20: Playwright's mouse coordinates are viewport-relative; scroll the page to the top and re-measure before dragging on a canvas (a click on a list item had scrolled it away).
 - 2026-11-20: A table that a pull replaces must carry `updated_at` on every synced table (the playlist-items table first had only `added_at`, and the shared sync code failed). Give every synced table the same columns.
+- 2026-11-21: **Dictated notes carry slips** ("paddle" for panel, "shouldn't" for should, "for" for "four"). Read for intent, say the reading in the convo, and let Jimmy correct it.
+- 2026-11-21: **The first real notes arrived within hours of the first build:** seven notes, mostly about ending takes cleanly, deleting, and who is playing. Real use finds the missing delete and home page at once; ship the notes box with the first build every time.
+- 2026-11-21: A "no delete" safety choice (takes undeletable) was reversed by the owner within a day. Prefer soft delete with a recycle bin from the start.
