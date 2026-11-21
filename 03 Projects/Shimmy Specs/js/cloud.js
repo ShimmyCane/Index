@@ -42,7 +42,7 @@
   }
 
   function settings() {
-    return SS.store ? SS.store.settings() : { databaseManagement: true, autoSave: true, keepNames: '' };
+    return SS.store ? SS.store.settings() : { databaseManagement: true };
   }
 
   // One RPC call. Errors from Postgres come back as { message }.
@@ -221,8 +221,8 @@
     // Debounced: called by store.save() after every change. Only when auto save is on.
     schedule: function (project) {
       if (!configured() || !session()) return;
-      var s = settings();
-      if (s.databaseManagement === false || s.autoSave === false) return;
+      var cur = SS.store && SS.store.current;
+      if (settings().databaseManagement === false || (cur && cur.autoSave === false)) return;
       pending = project;
       if (timer) root.clearTimeout(timer);
       timer = root.setTimeout(function () {

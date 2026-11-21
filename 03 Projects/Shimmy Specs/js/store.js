@@ -28,11 +28,10 @@
     }
   }
 
+  // Device settings. Anything linked to a project (auto save, keep list, notes, keynotes, decisions…) lives in the project.
   var DEFAULT_SETTINGS = {
     name: '', theme: 'auto', showNotes: false, showErrors: false,
-    databaseManagement: true,  // shows the Database page and allows cloud sync
-    autoSave: true,            // saves each change to the account (needs databaseManagement and a sign-in)
-    keepNames: ''              // comma-separated project names that "Delete everything" keeps
+    databaseManagement: true   // shows the Database page and allows cloud sync
   };
 
   function newId() {
@@ -55,6 +54,8 @@
       keynotes: [],
       textDump: '',
       textNotes: [],
+      autoSave: true,      // save this project to the account as it changes
+      keepNames: '',       // comma-separated names of cloud projects that "Delete everything" keeps
       keywordHits: [],
       decisions: [],
       flags: [],
@@ -217,6 +218,13 @@
     deleteNote: function (id) {
       this.current.textNotes = (this.current.textNotes || []).filter(function (n) { return n.id !== id; });
       this.touch();
+    },
+
+    // Project-linked settings (autoSave, keepNames) are stored in the project and sync with it.
+    setProjectField: function (key, value) {
+      if (!this.current) return;
+      this.current[key] = value;
+      this.save();
     },
 
     setSection: function (number, status, reason) {

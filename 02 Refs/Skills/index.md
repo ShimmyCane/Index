@@ -27,6 +27,7 @@ Skills:
 
 - game_controls: One control scheme for kids' games on an iPad: drag relative to the centre by default, an optional lower-left joystick, lower-right action buttons, ⚙️ moved to the upper right and faded. Use for any game that flies, drives, moves or aims.
 - remix: Builds a nursery version of a linked website or GitHub repo, combines it with another repo or set of ideas, checks the licence, and records what was read and reused. Seed named "A x B".
+- pm_check: Project Management Check. Reads every text dump and saved note in a Shimmy Specs project and updates the PPD, schedule, cost estimate, risk log, open items and next steps, assumptions and other PM tools. Outputs stay in the project's `private/pm/` folder; no invented prices or dates.
 
 Claude Code:
 - These files are the source of truth. Each one has a thin wrapper in `.claude/skills/<name-with-hyphens>/SKILL.md`, so it can be run as `/start-project`, `/ai-consolidate`, etc.

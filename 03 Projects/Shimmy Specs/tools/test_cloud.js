@@ -209,5 +209,15 @@ async function test(name, fn) {
     assert.strictEqual(p.cloudId, newId);
   });
 
+  await test('auto save is per project: a project with auto save off is never sent', async () => {
+    calls.length = 0;
+    fakeFetch(() => ({ status: 200, body: null }));
+    SS.store.current = { id: 'off', name: 'Off', autoSave: false };
+    cloud.schedule(SS.store.current);
+    await new Promise((r) => setTimeout(r, 2300));
+    assert.strictEqual(calls.filter((c) => c.url.endsWith('ss_save_project')).length, 0);
+    SS.store.current = null;
+  });
+
   console.log(`\n${passed} cloud checks passed${process.exitCode ? ', some FAILED' : ''}`);
 })();
