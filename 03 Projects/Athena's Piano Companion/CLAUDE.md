@@ -17,5 +17,5 @@ Project rules:
 - Microphone audio is processed in the page; takes are stored on the device and the private bucket `pc-takes` only. Never committed.
 - Web Audio synthesis for cues; no audio files in the repo.
 - Every voice command has a touch alternative.
-- Supabase: Family project, tables `pc_*` and bucket `pc-takes`, publishable key only. SQL in `supabase/` (for each number: `test_`, then the numbered file, then `verify_`, by hand). 001 is applied; 002 (recycle bin, sessions) is written and not applied. Nothing is applied until Jimmy pastes it.
+- Supabase: Family project, tables `pc_*` and bucket `pc-takes`, publishable key only. SQL in `supabase/` (for each number: `test_`, then the numbered file, then `verify_`, by hand). 001 and 002 are applied (002 checked read-only 2026-11-22: `pc_sessions`, `deleted_at` and `session_id` present).
 - A take is never removed at once: delete marks `deleted_at`; the 30-day purge removes it.

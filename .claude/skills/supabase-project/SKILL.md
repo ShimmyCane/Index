@@ -4,10 +4,10 @@ description: "Set up or change a Supabase project for a nursery app: inspect the
 argument-hint: "<project name>"
 ---
 
-The source of truth for this skill is `02 Refs/Skills/supabase_project.md`, which Jimmy maintains by hand.
+The source of truth for this skill is `04 AI/Skills/supabase_project.md`, which Claude keeps as a working copy for incremental improvement (moved 2026-11-22).
 
-1. Read `02 Refs/Skills/supabase_project.md` in full.
+1. Read `04 AI/Skills/supabase_project.md` in full.
 2. Follow it exactly, applying the conventions in the root `CLAUDE.md` and `04 AI/Supabase/brief.md`.
 3. Arguments passed to this skill: $ARGUMENTS
 
-Do not edit `02 Refs/Skills/supabase_project.md` unless Jimmy asks.
+Edit the 04 AI copy when improving the skill. The 02 Refs file is a stub.

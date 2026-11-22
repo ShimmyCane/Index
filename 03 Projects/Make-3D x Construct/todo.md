@@ -11,7 +11,7 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - [x] People: lofted torso, head, neck, limbs, feet, skirts with a banded pattern; approximate general facial features (eyes, brows, nose, mouth, ears); no hair detail, no portraits.
 - [x] Lighting: image-based room light, key, fill, soft shadows.
 - [x] Homepage (`index.html`), studio (`studio.html`), library on this device, cloud client (`m3dxc_scenes`), sign-in with an existing account only, Supabase library vendored with its licence.
-- [x] `supabase/002_m3dxc_scenes.sql` written with its rolled-back test; NOT applied (Jimmy copies it).
+- [x] `supabase/002_m3dxc_scenes.sql` written with its rolled-back test; applied (checked read-only 2026-11-22).
 - [ ] Sign-in and cloud save tested live (needs a code from email).
 - [ ] Device test on an iPad.
 - [ ] Jimmy: skin tone (convo v0.7 Q1), lighting references (Q2), next density step (Q3).
@@ -83,7 +83,7 @@ Status key: `[ ]` open · `[~]` in progress · `[x]` done · `[?]` waiting on Ji
 - [x] Research folder: `research/plains-diorama.md` with sources and open questions.
 - [x] Nursery home page tile (one `<li>`, in the same change).
 - [x] Headless smoke test: loads with no console errors at 1280 and 390 px; no horizontal scroll; edit saves and re-checks.
-- [~] Database: `supabase/001_m3dxc_certainty.sql` written with its rolled-back test. NOT applied (waiting on Jimmy).
+- [~] Database: `supabase/001_m3dxc_certainty.sql` written with its rolled-back test. applied (checked read-only 2026-11-22).
 - [ ] Device test on an iPad (touch, pinch, the drawer, the bottom errors).
 - [x] `summarize_code` page for `index.html` (`index_summary.html`).
 - [x] Round scoring in the page (0–3 per criterion); the stop rule needs scores.

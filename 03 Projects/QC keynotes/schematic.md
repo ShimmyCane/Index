@@ -1,6 +1,6 @@
 # QC keynotes — schematic
 
-Status: all four steps built (v0.2.0), notes for improvement built (database table not yet pasted). Tested headless on synthetic data (`test/smoke.js`). Not yet tested on a real iPad or on a real drawing set. Questions answered in `convo/convo v0.1.md`; next questions in `convo/convo v0.2.md`.
+Status: all four steps built (v0.2.0), notes for improvement built (database table `qk_notes` applied, checked read-only 2026-11-22). Tested headless on synthetic data (`test/smoke.js`). Not yet tested on a real iPad or on a real drawing set. Questions answered in `convo/convo v0.1.md`; next questions in `convo/convo v0.2.md`.
 
 Track: **B. Studio design** (dense but orderly, collapsible panels, precise labels).
 
@@ -45,7 +45,7 @@ A first-pass QC tool for keynotes and general notes on architectural drawing set
 
 ## Notes and database (convo v0.2, Q4)
 - ⚙️ "Notes for improvement": saved on the device with the part of the page and the time; done/reopen.
-- ⚙️ "Architecture database": sign-in (password not stored; renewal token kept until sign-out), sync, check. Table `qk_notes` (prefix `qk_`), owner only, through `platform_is_owner()`. SQL in `supabase/` (test, 001, verify). Not pasted yet.
+- ⚙️ "Architecture database": sign-in (password not stored; renewal token kept until sign-out), sync, check. Table `qk_notes` (prefix `qk_`), owner only, through `platform_is_owner()`. SQL in `supabase/` (test, 001, verify). Applied (checked read-only 2026-11-22).
 - Guidelines and drawings are never sent to the database, even when marked safe to cloud.
 
 ## Reference

@@ -22,7 +22,7 @@ Source: `pc_notes` (live). Note ids are in `convo/convo v0.3.md`. Nothing below 
 - [x] **A home page** and a way back to it from every page (note 5). Needs an answer on which file is home (Q5).
 - [x] **Compose: quick actions on a picked clip** (note 6): split, delete and duplicate right at the clip; two-finger pinch to zoom the timeline.
 - [x] **Players** (notes 7): Athena, Felix, Ying, Jimmy, Guest, chosen by tapping through them in that order, one control instead of the chips. Needs an answer on what "account" means (Q6).
-- [x] Database change for the above: `supabase/002_pc_bin_sessions.sql` written with its test and verify; **not applied** (Jimmy pastes). Was:  (a new numbered SQL file, with its test): `deleted_at` on takes, a sessions table, `session_id` on takes, delete rights for the 30-day purge. Written only after the answers.
+- [x] Database change for the above: `supabase/002_pc_bin_sessions.sql` written with its test and verify; **applied** (checked read-only 2026-11-22). Was:  (a new numbered SQL file, with its test): `deleted_at` on takes, a sessions table, `session_id` on takes, delete rights for the 30-day purge. Written only after the answers.
 - [ ] Jimmy: paste `test_002_pc`, `002_pc_bin_sessions`, `verify_002_pc`; paste the verify result back
 - [ ] Jimmy: confirm which notes are done, then mark them in `pc_notes`
 

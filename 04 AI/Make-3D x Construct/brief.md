@@ -1,6 +1,6 @@
 # Make-3D x Construct — Brief
 
-**Status (2026-11-18):** MVP 0.3 built (388-part camp scene, two-panel layout, fixed drawer) and checked headless (not device-tested). The sample is now a Southern Cheyenne camp move, as a draft for consultation (not for display). Round 3 questions in `03 Projects/Make-3D x Construct/convo/convo v0.3.md`.
+**Status (2026-11-22):** V2 built (round 7: home, studio, library, cloud, lofted horses and people; see `convo/convo v0.7.md`). Before it: MVP 0.3 built (388-part camp scene, two-panel layout, fixed drawer) and checked headless (not device-tested). The sample is now a Southern Cheyenne camp move, as a draft for consultation (not for display). Round 3 questions in `03 Projects/Make-3D x Construct/convo/convo v0.3.md`.
 
 ## Goal
 
@@ -49,5 +49,5 @@ A new version of Make 3D (`ShimmyCane/Make-3D`), built with Construct's working 
 
 - Archived V1 (`archive/Oklahoma diorama V1/`, commit f8d87b8). Closed PR #195 unmerged. A tag could not be pushed (proxy refuses tags).
 - Gate removed. Lofted meshes for horses and people (`js/core/loft.js`, 7 tests). Faces: approximate general features, no portraits (Jimmy's decision, round 6).
-- Home (`index.html`), studio (`studio.html`), library on this device, cloud client for `m3dxc_scenes` (owner only, sign-in by email code to existing accounts). SQL not applied.
+- Home (`index.html`), studio (`studio.html`), library on this device, cloud client for `m3dxc_scenes` (owner only, sign-in by email code to existing accounts). SQL applied (checked read-only 2026-11-22).
 - Not tested live: the cloud sign-in and save (needs a code from email). Not tested on an iPad.

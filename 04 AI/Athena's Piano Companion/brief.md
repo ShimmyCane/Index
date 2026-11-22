@@ -1,6 +1,6 @@
 # Athena's Piano Companion — brief
 
-**State (2026-11-21):** 0.2.0 built from the first seven real notes and Jimmy's answers (convo v0.3, v0.4). 0.1.0 was used on a real iPad (the notes show it). 0.2.0 is headless-tested only. SQL 001 applied; SQL 002 (recycle bin, sessions, delete rights) written with test and verify, **not applied**. Notes not marked done yet (waiting for Jimmy).
+**State (2026-11-21):** 0.2.0 built from the first seven real notes and Jimmy's answers (convo v0.3, v0.4). 0.1.0 was used on a real iPad (the notes show it). 0.2.0 is headless-tested only. SQL 001 applied; SQL 002 (recycle bin, sessions, delete rights) applied (checked read-only 2026-11-22). Notes not marked done yet (waiting for Jimmy).
 
 **Round 3 (2026-11-21):** two new notes read (convo v0.5, todo round 3): the 3-2-1 tick is heard by the microphone and cancels the pause (bug, found in `js/recorder.js`), and "sometimes it stops by itself, is there a soft reset". Also a note from `record.html` carried version 0.1.0, so a browser cache served an old script. Three more notes the same evening (convo v0.6): a live card while recording, a red position line while a card plays, and "wait 3 to 4 s of quiet, then a silent 3-2-1" (replaces the 2 s into a 5 s pause rule). These came from version 0.2.0, so the new build loads on the iPad. Nothing built; waiting for Jimmy's go and answers.
 
