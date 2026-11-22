@@ -1,5 +1,3 @@
-Review the MAIN_CODE_FILE (html)
+# summarize_code: moved
 
-Create a MAIN_CODE_FILE_summary.html that graphically explains what's going on. In it, it should have a table of contents (where each major section of the code is by line number), and a description of what they do.
-
-Then it should look at the adjacent files (css, js) and identify variables that work with the main file. Define them, clarify what they do, explain how they can be tweaked.
+This skill moved on 2026-11-22 to `04 AI/Skills/summarize_code.md`, where Claude keeps the working copy for incremental improvement. Read and edit that file. This stub stays so the old path still points to it.

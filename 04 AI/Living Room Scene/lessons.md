@@ -1,5 +1,7 @@
 # Living Room Scene: lessons learned
 
+> Project removed from the nursery on 2026-11-22 at Jimmy's request. Its code, renders and version log are in git history (last commit 2026-11-09). These lessons are kept: this was one of the first prompts that led to the AR and vision work with Claude.
+
 ## 2026-11-02: Process for building a scene from a photo (logged at the outset)
 
 Process agreed with Jimmy before the first build:

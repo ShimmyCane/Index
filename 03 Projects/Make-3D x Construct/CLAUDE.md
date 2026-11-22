@@ -7,7 +7,7 @@ Purpose: a new version of Make 3D (`ShimmyCane/Make-3D`, graduated) built with C
 - To-do and ledger: `todo.md`
 - Story and research (draft, for consultation): `exhibit/story.json`, `research/plains-diorama.md`
 - Consultation: `research/consultation-plan.md` (the tribes' answers go in `private/`, which is not committed)
-- Database SQL (NOT applied): `supabase/002_m3dxc_scenes.sql` (the scene library; the earlier `001_m3dxc_certainty.sql` is superseded by the scenes table)
+- Database SQL (applied, checked read-only 2026-11-22): `supabase/002_m3dxc_scenes.sql` (the scene library; the earlier `001_m3dxc_certainty.sql` is superseded by the scenes table)
 - Archived V1: `archive/Oklahoma diorama V1/`
 - AI notes: `04 AI/Make-3D x Construct/brief.md`, `lessons.md`
 - Summary of the page (summarize-code): `index_summary.html`

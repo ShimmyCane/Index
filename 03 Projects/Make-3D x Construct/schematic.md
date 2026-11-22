@@ -101,7 +101,7 @@ A new version of Make 3D, built with the working method Construct uses. Make 3D 
 - **Viewer** (`js/viewer/viewer.js`): three.js r160, Z up, certainty colour (provenance view), drag, pinch, wheel, tap to select, four fixed views for a packet.
 - **Page** (`index.html`, `js/app.js`, `css/app.css`): Model, Certainty, Flags, Ledger and rounds, Selected part; ⚙️ drawer with Show errors, How rounds work, Notes for improvement, Database check, About and credits (bottom). Errors shown at the bottom only when Show errors is on.
 - **Sample** (`tools/diorama_scene.js` → `samples/plains-diorama/`): 32 objects, 6 open flags, placeholders marked. Research in `research/plains-diorama.md`.
-- **Database** (`supabase/001_m3dxc_certainty.sql`): written and test SQL, **not applied**.
+- **Database** (`supabase/001_m3dxc_certainty.sql`): applied (checked read-only 2026-11-22; table `m3dxc_certainty` present in the Architecture project).
 - **Tests:** 18 model tests, 14 rounds tests, 1 sample test: all pass.
 
 Not built yet: the cloud save to `m3dxc_certainty`; the model critic; the Show errors and round scoring in the page beyond the rules; the summary page (`summarize_code`) for `index.html`; any device test.
@@ -113,7 +113,7 @@ Not built yet: the cloud save to `m3dxc_certainty`; the model critic; the Show e
 - **Consultation:** a flag kind of its own. Open consultation flags block display (header pill and ⚙️ → Display check). Closing one needs a note: role, date, outcome. Plan in `research/consultation-plan.md`.
 - **Reviews in ⚙️:** six switches, each with who does it: your verdict, your scores, an AI critic, an AI fact-check, the consultation gate, and the close note. AI reviews are copy and paste; replies are validated first.
 - **Summary page:** `index_summary.html`.
-- **Database:** `supabase/001_m3dxc_certainty.sql`, not applied. Jimmy copies it by hand after the merge.
+- **Database:** `supabase/001_m3dxc_certainty.sql`, applied (checked read-only 2026-11-22).
 
 ## 10. Round 4 (2026-11-18): drawer, panels, scene, story
 
@@ -154,7 +154,7 @@ See `convo/convo v0.3.md`.
 ## 14. V2 (round 7, 2026-11-18): home, studio, library, cloud, lofted meshes
 
 - **Pages:** `index.html` (home: every model in the project, each linked; the review note; library on this device; cloud sign-in) and `studio.html` (the 3-D app). `models.html` is deprecated and removed: its list is in the home page.
-- **Cloud:** the Architecture project (same as Make 3D). One table, `m3dxc_scenes`, owner only. SQL in `supabase/002_m3dxc_scenes.sql`, not applied.
+- **Cloud:** the Architecture project (same as Make 3D). One table, `m3dxc_scenes`, owner only. SQL in `supabase/002_m3dxc_scenes.sql`, applied (checked read-only 2026-11-22).
 - **Sign-in:** an email code to an existing account only. Publishable key in the browser; no secret in the repo.
 - **Library:** on this device, by model_id. The studio saves to the library or, when signed in, to the cloud.
 - **Meshes:** loft parts (smooth surfaces through joints) for the horses and the people. Faces: approximate general features, no portraits.

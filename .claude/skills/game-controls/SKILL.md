@@ -4,10 +4,10 @@ description: "One control scheme for kids' games on an iPad: drag relative to th
 argument-hint: "<game name>"
 ---
 
-The source of truth for this skill is `02 Refs/Skills/game_controls.md`, which Jimmy maintains by hand.
+The source of truth for this skill is `04 AI/Skills/game_controls.md`, which Claude keeps as a working copy for incremental improvement (moved 2026-11-22).
 
-1. Read `02 Refs/Skills/game_controls.md` in full.
+1. Read `04 AI/Skills/game_controls.md` in full.
 2. Follow it exactly, applying the conventions in the root `CLAUDE.md` and `settings-gear`.
 3. Arguments passed to this skill: $ARGUMENTS
 
-Do not edit `02 Refs/Skills/game_controls.md` unless Jimmy asks.
+Edit the 04 AI copy when improving the skill. The 02 Refs file is a stub.

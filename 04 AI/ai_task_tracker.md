@@ -35,3 +35,7 @@ Shared list of open work across the nursery. Project to-do lists stay in each pr
 
 - **Athena's world, Bar Glide, Chinese Character Sudoku, Voice, What to Cook:** graduated to their own repos (`ShimmyCane/Athena-s-world`, `Bar-Glide`, `Chinese-Character-Sudoku`, `Voice`, `What-to-Cook`) and removed from the nursery on 2026-11-10. Their to-dos live there.
 - **Shimmy Specs, Adventure:** see their `todo.md` files.
+
+## Recurring: nursery AI review (added 2026-11-22)
+
+- [ ] **Re-run the nursery AI review monthly** (`04 AI/nursery_review_<date>.md`, a new dated file each run, never overwrite). Not scheduled yet: the scheduling request was denied by the permission classifier on 2026-11-22. Set it up once permission allows, or run it by hand on the 1st. Steps: re-read each project's schematic, brief and lessons; check the live SQL read-only; note what changed; add one line to `04 ai_schematic.md`; push to a branch and open a draft PR.

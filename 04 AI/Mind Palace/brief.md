@@ -2,7 +2,7 @@
 
 **Goal.** A memory palace to walk through, for Felix and Jimmy: memories as recognisable objects in rooms in worlds; search and walk there; practise recall; move, connect and grow. Track A (to confirm, convo v0.1 question 1).
 
-**State (2026-11-17): MVP 0.1.0**, on a draft PR, not merged.
+**State (2026-11-22): 0.3.1** (fog radius doubled; lantern and fireflies added), headless-tested, not yet tried on an iPad. Earlier: MVP 0.1.0 on a draft PR (2026-11-17).
 
 **Architecture.** Plain HTML/CSS/JS, classic scripts, three.js r128 vendored. Three layers: `model.js` (database, repair, undo, search, practice; no DOM) → `layout.js` (scene description, routes; no DOM) → `view.js` + `objects.js` (three.js). `app.js` is the page. Device storage (`localStorage`). A node's topic (`parent_id`) and room (`place_id`) are separate.
 

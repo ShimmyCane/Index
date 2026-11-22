@@ -1,7 +1,7 @@
 # Athena's Piano Companion — schematic
 
 **Track: A. Family play** (confirmed, `convo/convo v0.1.md` question 1)
-**Status: 0.2.0 (2026-11-21). 0.1.0 was tried on a real iPad (the notes show it); 0.2.0 is headless-tested only. SQL 001 applied; SQL 002 written, not applied.** Answers: `convo/convo v0.1.md`, `v0.3.md`. Build notes: `convo/convo v0.2.md`, `v0.4.md`.
+**Status: 0.2.0 (2026-11-21). 0.1.0 was tried on a real iPad (the notes show it); 0.2.0 is headless-tested only. SQL 001 and 002 applied (002 checked read-only 2026-11-22).** Answers: `convo/convo v0.1.md`, `v0.3.md`. Build notes: `convo/convo v0.2.md`, `v0.4.md`.
 
 ## Purpose
 
