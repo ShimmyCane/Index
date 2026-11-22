@@ -341,3 +341,10 @@ Full notes: `04 AI/Make-3D x Construct/model_iteration_lessons.md`.
 ## Repos, versions and attribution (2026-11-21, from Paper Airplanes x A-10 Warthog)
 - Co-author lines never block a commit. Jimmy wants Claude credited as co-author; a session rule that bars naming a model is his call to lift, not a reason to hold a commit. Use the session's attribution line on every commit.
 - When a build is archived as vN, bump the live build to the next major in both `package.json` and `package-lock.json` in the same commit, so the archive and the live build are never confused.
+
+## From the nursery review (2026-11-22, seven Nursery-section projects)
+- **Test the rendered page, not only the engine.** A project's engine tests passed while its viewer was blank, because the render was never called after the model loaded. A headless screenshot after each change catches this. _(Make-3D x Construct)_
+- **A rule that never fires is not a test.** Build a case with known inputs whose result must hit the rule (for example, a score that must land on exactly 75%). Without it, a warning can be wired wrong and still pass. _(Drafting)_
+- **Refuse, do not half-apply.** Replay an edit before saving it. A refused edit shows its fix hint and changes nothing. Treat AI replies as untrusted until ids and scores are checked. _(Make-3D x Construct)_
+- **Give each project one status line, tied to the version file.** Schematic, brief and index drifted apart within days on three projects. Update the status line in the same commit as the version bump. _(Make-3D x Construct, Mind Palace)_
+- **For music, turn off echo cancellation, noise suppression and auto gain** in `getUserMedia`. They distort piano notes. The count-in also leaks into a recording through the speaker, so keep the last beat short. _(Athena's Piano Companion)_

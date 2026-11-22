@@ -6,6 +6,7 @@ Layout:
 - lessons_pool.md — consolidated lessons learned across seed projects, grouped by topic. Read first.
 - ai_task_tracker.md — shared list of open work across projects, and open PRs waiting on a decision.
 - project_review_2026-11-03.md — review of all six projects: promotion readiness, privacy flags, open items for Jimmy.
+- nursery_review_2026-11-22.md — metadata for the seven Nursery-section AI projects, general lessons, and a comparison with ten linked skill repos.
 - patterns.md — reusable patterns and template candidates.
 - Personal Preferences/jimmy_preferences.md — design and workflow preferences. Auto-loaded through the root `CLAUDE.md`.
 - Supabase/ — conventions for Supabase projects: `brief.md` (rules and state), `lessons.md` (generic lessons), `lessons_learned_log.md` (dated log, incl. the 2026-11-06 browser key refusal and its reproduction), `supabase_registry_template.sql` (app-table registry). Skill: `/supabase-project`.
