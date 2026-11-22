@@ -25,7 +25,7 @@ Common structure across all six: `CLAUDE.md` pointer, `schematic.md`, `convo/` (
 ## 2. What the audit found
 
 1. **Device testing is the real gap.** Five of the six projects are "headless-tested, not device-tested." Athena's 0.1.0 was the only one used on an iPad, and that test found real faults: a browser cache served an old script, the microphone heard the count-in and the piano, and the stop phrase leaked into the take. Headless checks missed all of them.
-2. **No nursery SQL is pending.** My first pass said four projects had SQL not applied. That was wrong: the schematics were stale. The read-only check shows Make-3D x Construct's two tables, Athena's 002 objects (`pc_sessions`, `deleted_at`, `session_id`) and QC keynotes' `qk_notes` (7 rows) are all live, and Jimmy confirmed he had pasted them. Still open: Mind Palace's family sync is planned and not written, and Drafting has no SQL in the repo. Generate Clouds (`gc_notes`) is not applied, but it is outside the Nursery section.
+2. **No nursery SQL is pending.** My first pass said four projects had SQL not applied. That was wrong: the schematics were stale. The read-only check shows Make-3D x Construct's two tables, Athena's 002 objects (`pc_sessions`, `deleted_at`, `session_id`) and QC keynotes' `qk_notes` (7 rows) are all live, and Jimmy confirmed he had pasted them. Still open: Mind Palace's family sync is planned and not written, and Drafting has no SQL in the repo. Generate Clouds' `gc_notes` is live (28 rows, Architecture project); an earlier line in the Supabase brief said not applied, and a later line in the same brief corrects it.
 3. **Status drift.** Make-3D x Construct and Mind Palace had several version strings each. Resolved on 2026-11-22: the latest version in the folder applies (no separate graduated repo for either), so they are V2 and 0.3.1, and their briefs and the AI index now match. The other projects still need a status line checked against their version files.
 4. **Archive copy.** `Make-3D x Construct/archive/Oklahoma diorama V1/` is kept, at Jimmy's request. It breaks the root "no copy folders" rule, so the schematic should say why it is there.
 5. **Living Room Scene removed** from the nursery, the home page tile, and the folder (in git history). `04 AI/Living Room Scene/lessons.md` is kept.
@@ -87,63 +87,135 @@ Changes to `02 Refs/Skills/smoke_test.md` (adding a contrast check and the six c
 
 ## 6. Open items
 
-1. **All tiles on `index.html`.** Links for all 48 are now in §7. Reading the 42 repos' contents still needs `add_repo` (read access) because they are outside this repo's GitHub scope. Want me to attach them and review each, or only the ones you name?
-2. **Device test:** which project gets an iPad check first? Athena's 0.2.0 has three open notes waiting for your go.
-3. **Smoke-test changes:** the contrast and control-state steps are in the working copy `04 AI/Skills/smoke_test.md`. Nothing has been run against a real page yet; the first run should be on one Nursery project.
+1. **All tiles reviewed.** The 41 separate repos were read (shallow anonymous clones in `/home/user/shimmycane/`; nothing pushed or changed). Shimmy Specs is a folder in this repo. Results are in §8 and §9.
+2. **Device test:** not needed for now (per Jimmy, 2026-11-22).
+3. **Smoke-test changes:** the contrast and control-state steps are in the working copy `04 AI/Skills/smoke_test.md`. Nothing has been run against a real page yet.
+4. **Family project, `approve_allowance_withdrawal`:** it only checks that someone is signed in, so any signed-in user can approve a withdrawal and write a transaction. Restrict it to the owner or parent. This is a database change, so it needs your go-ahead.
+5. **Architecture auth:** leaked-password protection is off, and sign-ups are open (see §9). Turn on the first; decide on the second.
+6. **Allowances SQL:** the repo's SQL creates `children`, `parents`, `transactions` and `withdrawal_requests`, none of which are live. The Family project has `allowance_*` tables instead. Confirm which SQL is current.
+7. **Privacy check in public repos:** `speech-therapy` states a child's age, `learning-kangaroo` names children with grade levels, `map-photos` mentions a campus walk, `proposal_drafter` may hold studio client material, and `adventure` holds family story content (the 2026-11-03 review asked whether it belongs in a private repo).
+8. **Stale schematics:** several say "not applied" or give an old status (§8). Fix them in each repo, which needs a push to that repo; I have read access only.
 
 ---
 
 ## 7. Links to every tile on index.html
 
-Repo links are `github.com/ShimmyCane/<name>`. Nursery and folder-only tiles link to their folder in this repo on `main`. The live page is the GitHub Pages address from the tile. Rows marked "not checked" have a repo name taken from the Pages address; the repo was not opened to confirm it.
+Repo links are `github.com/ShimmyCane/<name>`. Nursery and folder-only tiles link to their folder in this repo on `main`. The live page is the GitHub Pages address from the tile. All 41 repo names were confirmed by a clone on 2026-11-22.
 
 | Section | Project | Repo | Live page | Note |
 |---|---|---|---|---|
-| Games | Snake Cube | <https://github.com/ShimmyCane/Snake-Cube> | <https://shimmycane.github.io/Snake-Cube/> | Repo name derived from the Pages address; not checked |
-| Games | Felix Checkers | <https://github.com/ShimmyCane/Felix-Checkers> | <https://shimmycane.github.io/Felix-Checkers/> | Repo name derived from the Pages address; not checked |
-| Games | Moment | <https://github.com/ShimmyCane/Moment> | <https://shimmycane.github.io/Moment/> | Repo name derived from the Pages address; not checked |
+| Games | Snake Cube | <https://github.com/ShimmyCane/Snake-Cube> | <https://shimmycane.github.io/Snake-Cube/> | |
+| Games | Felix Checkers | <https://github.com/ShimmyCane/Felix-Checkers> | <https://shimmycane.github.io/Felix-Checkers/> | |
+| Games | Moment | <https://github.com/ShimmyCane/Moment> | <https://shimmycane.github.io/Moment/> | |
 | Games | Expansion Wars | <https://github.com/ShimmyCane/Expansion-Wars> | <https://shimmycane.github.io/Expansion-Wars/> |  |
 | Games | Fishes | <https://github.com/ShimmyCane/Fishes> | <https://shimmycane.github.io/Fishes/> |  |
 | Games | Felix Maze | <https://github.com/ShimmyCane/Felix-Maze> | <https://shimmycane.github.io/Felix-Maze/> |  |
 | Games | Athena's World | <https://github.com/ShimmyCane/Athena-s-world> | <https://shimmycane.github.io/Athena-s-world/> |  |
 | Games | Ole Bar Glide | <https://github.com/ShimmyCane/Bar-Glide> | <https://shimmycane.github.io/Bar-Glide/> |  |
-| Games | Adventure | <https://github.com/ShimmyCane/Adventure> | <https://shimmycane.github.io/Adventure/> | Repo name derived from the Pages address; not checked |
-| Games | Felix Gear Wars | <https://github.com/ShimmyCane/Felix-Gear-Wars> | <https://shimmycane.github.io/Felix-Gear-Wars/> | Repo name derived from the Pages address; not checked |
-| Games | Paper Airplanes x A-10 Warthog | <https://github.com/ShimmyCane/Paper-Airplanes-x-A-10-Warthog> | <https://shimmycane.github.io/Paper-Airplanes-x-A-10-Warthog/> | Repo name derived from the Pages address; not checked |
-| Games | StoryTime | <https://github.com/ShimmyCane/StoryTime> | <https://shimmycane.github.io/StoryTime/> | Repo name derived from the Pages address; not checked |
+| Games | Adventure | <https://github.com/ShimmyCane/Adventure> | <https://shimmycane.github.io/Adventure/> | |
+| Games | Felix Gear Wars | <https://github.com/ShimmyCane/Felix-Gear-Wars> | <https://shimmycane.github.io/Felix-Gear-Wars/> | |
+| Games | Paper Airplanes x A-10 Warthog | <https://github.com/ShimmyCane/Paper-Airplanes-x-A-10-Warthog> | <https://shimmycane.github.io/Paper-Airplanes-x-A-10-Warthog/> | |
+| Games | StoryTime | <https://github.com/ShimmyCane/StoryTime> | <https://shimmycane.github.io/StoryTime/> | |
 | Games | Rhythm Sticks | <https://github.com/ShimmyCane/Rhythm-Sticks> | <https://shimmycane.github.io/Rhythm-Sticks/> |  |
-| Games | Generate Clouds | <https://github.com/ShimmyCane/Generate-Clouds> | <https://shimmycane.github.io/Generate-Clouds/> | Repo name derived from the Pages address; not checked |
-| Learning | Test Bank | <https://github.com/ShimmyCane/Test-Bank> | <https://shimmycane.github.io/Test-Bank/> | Repo name derived from the Pages address; not checked |
-| Learning | Multiply | <https://github.com/ShimmyCane/Multiply> | <https://shimmycane.github.io/Multiply/> | Repo name derived from the Pages address; not checked |
-| Learning | Roman Numerals | <https://github.com/ShimmyCane/Roman-Numerals> | <https://shimmycane.github.io/Roman-Numerals/> | Repo name derived from the Pages address; not checked |
-| Learning | Exponents | <https://github.com/ShimmyCane/Exponents> | <https://shimmycane.github.io/Exponents/> | Repo name derived from the Pages address; not checked |
-| Learning | Primes | <https://github.com/ShimmyCane/Primes> | <https://shimmycane.github.io/Primes/> | Repo name derived from the Pages address; not checked |
-| Learning | Coins | <https://github.com/ShimmyCane/Coins> | <https://shimmycane.github.io/Coins/> | Repo name derived from the Pages address; not checked |
-| Learning | Row Boat | <https://github.com/ShimmyCane/Row-Boat> | <https://shimmycane.github.io/Row-Boat/> | Repo name derived from the Pages address; not checked |
-| Learning | Speech Therapy | <https://github.com/ShimmyCane/Speech-Therapy> | <https://shimmycane.github.io/Speech-Therapy/> | Repo name derived from the Pages address; not checked |
+| Games | Generate Clouds | <https://github.com/ShimmyCane/Generate-Clouds> | <https://shimmycane.github.io/Generate-Clouds/> | |
+| Learning | Test Bank | <https://github.com/ShimmyCane/Test-Bank> | <https://shimmycane.github.io/Test-Bank/> | |
+| Learning | Multiply | <https://github.com/ShimmyCane/Multiply> | <https://shimmycane.github.io/Multiply/> | |
+| Learning | Roman Numerals | <https://github.com/ShimmyCane/Roman-Numerals> | <https://shimmycane.github.io/Roman-Numerals/> | |
+| Learning | Exponents | <https://github.com/ShimmyCane/Exponents> | <https://shimmycane.github.io/Exponents/> | |
+| Learning | Primes | <https://github.com/ShimmyCane/Primes> | <https://shimmycane.github.io/Primes/> | |
+| Learning | Coins | <https://github.com/ShimmyCane/Coins> | <https://shimmycane.github.io/Coins/> | |
+| Learning | Row Boat | <https://github.com/ShimmyCane/Row-Boat> | <https://shimmycane.github.io/Row-Boat/> | |
+| Learning | Speech Therapy | <https://github.com/ShimmyCane/Speech-Therapy> | <https://shimmycane.github.io/Speech-Therapy/> | |
 | Learning | Chinese Character Sudoku | <https://github.com/ShimmyCane/Chinese-Character-Sudoku> | <https://shimmycane.github.io/Chinese-Character-Sudoku/> |  |
 | Learning | Voice | <https://github.com/ShimmyCane/Voice> | <https://shimmycane.github.io/Voice/> |  |
-| Learning | Learning to Draw | <https://github.com/ShimmyCane/Learning-to-Draw> | <https://shimmycane.github.io/Learning-to-Draw/> | Repo name derived from the Pages address; not checked |
-| Learning | Learning Kangaroo | <https://github.com/ShimmyCane/Learning-Kangaroo> | <https://shimmycane.github.io/Learning-Kangaroo/> | Repo name derived from the Pages address; not checked |
-| Learning | Chinese Character Strokes | <https://github.com/ShimmyCane/Chinese-Character-Strokes> | <https://shimmycane.github.io/Chinese-Character-Strokes/> | Repo name derived from the Pages address; not checked |
-| Family | Family Habits | <https://github.com/ShimmyCane/Family-Habits> | <https://shimmycane.github.io/Family-Habits/> | Repo name derived from the Pages address; not checked |
-| Family | Allowances | <https://github.com/ShimmyCane/Allowances> | <https://shimmycane.github.io/Allowances/> | Repo name derived from the Pages address; not checked |
-| Family | How Far Is It? | <https://github.com/ShimmyCane/How-Far-Is-It> | <https://shimmycane.github.io/How-Far-Is-It/> | Repo name derived from the Pages address; not checked |
+| Learning | Learning to Draw | <https://github.com/ShimmyCane/Learning-to-Draw> | <https://shimmycane.github.io/Learning-to-Draw/> | |
+| Learning | Learning Kangaroo | <https://github.com/ShimmyCane/Learning-Kangaroo> | <https://shimmycane.github.io/Learning-Kangaroo/> | |
+| Learning | Chinese Character Strokes | <https://github.com/ShimmyCane/Chinese-Character-Strokes> | <https://shimmycane.github.io/Chinese-Character-Strokes/> | |
+| Family | Family Habits | <https://github.com/ShimmyCane/Family-Habits> | <https://shimmycane.github.io/Family-Habits/> | |
+| Family | Allowances | <https://github.com/ShimmyCane/Allowances> | <https://shimmycane.github.io/Allowances/> | |
+| Family | How Far Is It? | <https://github.com/ShimmyCane/How-Far-Is-It> | <https://shimmycane.github.io/How-Far-Is-It/> | |
 | Family | What to Cook | <https://github.com/ShimmyCane/What-to-Cook> | <https://shimmycane.github.io/What-to-Cook/> |  |
-| Family | Better Parenting | <https://github.com/ShimmyCane/Better-Parenting> | <https://shimmycane.github.io/Better-Parenting/> | Repo name derived from the Pages address; not checked |
-| Family | Our Family Compass | <https://github.com/ShimmyCane/Our-Family-Compass> | <https://shimmycane.github.io/Our-Family-Compass/> | Repo name derived from the Pages address; not checked |
-| Architecture | Detail Library | <https://github.com/ShimmyCane/Detail-Library> | <https://shimmycane.github.io/Detail-Library/> | Repo name derived from the Pages address; not checked |
-| Architecture | Quick Detail | <https://github.com/ShimmyCane/Quick-Detail> | <https://shimmycane.github.io/Quick-Detail/> | Repo name derived from the Pages address; not checked |
-| Architecture | Proposal Drafter | <https://github.com/ShimmyCane/Proposal_Drafter> | <https://shimmycane.github.io/Proposal_Drafter/> | Repo name derived from the Pages address; not checked |
+| Family | Better Parenting | <https://github.com/ShimmyCane/Better-Parenting> | <https://shimmycane.github.io/Better-Parenting/> | |
+| Family | Our Family Compass | <https://github.com/ShimmyCane/Our-Family-Compass> | <https://shimmycane.github.io/Our-Family-Compass/> | |
+| Architecture | Detail Library | <https://github.com/ShimmyCane/Detail-Library> | <https://shimmycane.github.io/Detail-Library/> | |
+| Architecture | Quick Detail | <https://github.com/ShimmyCane/Quick-Detail> | <https://shimmycane.github.io/Quick-Detail/> | |
+| Architecture | Proposal Drafter | <https://github.com/ShimmyCane/Proposal_Drafter> | <https://shimmycane.github.io/Proposal_Drafter/> | |
 | Architecture | Shimmy Specs | <https://github.com/ShimmyCane/Index/tree/main/03%20Projects/Shimmy%20Specs> | <https://shimmycane.github.io/Index/03%20Projects/Shimmy%20Specs/> | Folder in this repo; not a Nursery tile |
 | Architecture | Growth | <https://github.com/ShimmyCane/Growth> | <https://shimmycane.github.io/Growth/> |  |
 | Architecture | Make 3D | <https://github.com/ShimmyCane/Make-3D> | <https://shimmycane.github.io/Make-3D/> |  |
 | Architecture | Increment Viewer | <https://github.com/ShimmyCane/Increment-Viewer> | <https://shimmycane.github.io/Increment-Viewer/> |  |
-| Architecture | Critique Detail | <https://github.com/ShimmyCane/Critique-Detail> | <https://shimmycane.github.io/Critique-Detail/> | Repo name derived from the Pages address; not checked |
-| Architecture | Map Photos | <https://github.com/ShimmyCane/Map-Photos> | <https://shimmycane.github.io/Map-Photos/> | Repo name derived from the Pages address; not checked |
+| Architecture | Critique Detail | <https://github.com/ShimmyCane/Critique-Detail> | <https://shimmycane.github.io/Critique-Detail/> | |
+| Architecture | Map Photos | <https://github.com/ShimmyCane/Map-Photos> | <https://shimmycane.github.io/Map-Photos/> | |
 | Nursery | Drafting | <https://github.com/ShimmyCane/Index/tree/main/03%20Projects/Drafting> | <https://shimmycane.github.io/Index/03%20Projects/Drafting/> | Nursery folder (no repo of its own yet) |
 | Nursery | Make 3D x Construct | <https://github.com/ShimmyCane/Index/tree/main/03%20Projects/Make-3D%20x%20Construct> | <https://shimmycane.github.io/Index/03%20Projects/Make-3D%20x%20Construct/> | Nursery folder (no repo of its own yet) |
 | Nursery | Mind Palace | <https://github.com/ShimmyCane/Index/tree/main/03%20Projects/Mind%20Palace> | <https://shimmycane.github.io/Index/03%20Projects/Mind%20Palace/> | Nursery folder (no repo of its own yet) |
 | Nursery | Salmon Leap | <https://github.com/ShimmyCane/Index/tree/main/03%20Projects/Salmon%20Leap> | <https://shimmycane.github.io/Index/03%20Projects/Salmon%20Leap/> | Nursery folder (no repo of its own yet) |
 | Nursery | Athena's Piano Companion | <https://github.com/ShimmyCane/Index/tree/main/03%20Projects/Athena%27s%20Piano%20Companion> | <https://shimmycane.github.io/Index/03%20Projects/Athena%27s%20Piano%20Companion/> | Nursery folder (no repo of its own yet) |
 | Nursery | QC keynotes | <https://github.com/ShimmyCane/Index/tree/main/03%20Projects/QC%20keynotes> | <https://shimmycane.github.io/Index/03%20Projects/QC%20keynotes/> | Nursery folder (no repo of its own yet) |
+
+
+---
+
+## 8. All tiles: metadata (41 repos plus Shimmy Specs)
+
+From shallow clones of each repo (default branch, read on 2026-11-22). "Live" means the table exists in the Family or Architecture project (read-only check). Status is what each repo states; "not stated" means it has no schematic status line. The Nursery six are in §1.
+
+| Section | Project | Repo | Last commit | Status (as stated) | Purpose | Files | Database (SQL, live check) | Tests / convo | Flags |
+|---|---|---|---|---|---|---|---|---|---|
+| Games | Snake Cube | [snake-cube](https://github.com/ShimmyCane/snake-cube) | 2026-11-21 | Version 4.1.0 (page title); no schematic | Felix's snake-cube puzzle with a map builder | 65 files; process, lessons and map-builder pages | None in repo; uses Family `snake_maps` and `snake_highscores` (live) | 8 test files; no convo | — |
+| Games | Felix Checkers | [felix-checkers](https://github.com/ShimmyCane/felix-checkers) | 2026-11-03 | Idea (schematic is the first prompt) | Checkers in the browser; later, chess pieces on light squares with new rules | 15 files | None | No convo | Schematic is a prompt, not a design |
+| Games | Moment | [moment](https://github.com/ShimmyCane/moment) | 2026-11-08 | Not stated | Family-play companion: short Mario-Party-style moments for downtime | 30 files; index, game and end pages | 9 SQL files; 6 of 7 tables live; `project_notes` **not live** | No convo | Table not applied |
+| Games | Expansion Wars | [expansion-wars](https://github.com/ShimmyCane/expansion-wars) | 2026-11-09 | MVP, not device-tested | iPad strategy game: maps, replays, worlds | 155 files | 8 SQL files; all 4 tables live (`xw_*`) | 7 tests; 21 convo | — |
+| Games | Fishes | [fishes](https://github.com/ShimmyCane/fishes) | 2026-11-21 | MVP, not device-tested | Fish game with AI notes | 34 files | 4 SQL files; tables live | 6 convo | — |
+| Games | Felix Maze | [felix-maze](https://github.com/ShimmyCane/felix-maze) | 2026-11-09 | Bank restarted in batch 10; not printed or tried | Solution-first maze puzzles, printable sheets | 79 files | 2 SQL files; `fmz_flags` live; `fmz_mazes`, `fmz_characters`, `fmz_doodles` **not live** | 5 convo | Three tables not applied |
+| Games | Athena's World | [athena-s-world](https://github.com/ShimmyCane/athena-s-world) | 2026-11-09 | V2 (2.2.0); partly tested on iPad (2.0.0) | 3-D home-decor world for Athena | 29 files | 3 SQL files; `athena_saves`, `athena_notes` live | 10 convo | — |
+| Games | Ole Bar Glide | [bar-glide](https://github.com/ShimmyCane/bar-glide) | 2026-11-21 | Not stated (Track A) | Late-night saloon glide game with a pastel-day option | 26 files | 3 SQL files; `bglide_scores`, `bglide_notes` live | 5 convo | — |
+| Games | Adventure | [adventure](https://github.com/ShimmyCane/adventure) | 2026-11-18 | MVP and world tools; not tried on iPad | Family story game with a nightly AI storyteller | 71 files | 6 SQL files; 8 `adv_*` tables live | 5 convo | Family story content in a public repo |
+| Games | Felix Gear Wars | [felix-gear-wars](https://github.com/ShimmyCane/felix-gear-wars) | 2026-11-21 | MVP 0.6.0, headless-tested | Gear-powered lane defence game | 111 files | 3 SQL files; `fgw_notes` live | 6 convo | — |
+| Games | Paper Airplanes × A-10 Warthog | [paper-airplanes-x-a-10-warthog](https://github.com/ShimmyCane/paper-airplanes-x-a-10-warthog) | 2026-11-21 | MVP 0.7 (round 6) | Flight game with missions and a paper-plane mode | 141 files | 6 SQL files; `pa_flights` live | 22 convo | — |
+| Games | StoryTime | [storytime](https://github.com/ShimmyCane/storytime) | 2026-10-25 | Not stated | Story spinner, narration and recording, levels K to G6 | 32 files | 2 SQL files; `storytime_*` live | 1 convo | — |
+| Games | Rhythm Sticks | [rhythm-sticks](https://github.com/ShimmyCane/rhythm-sticks) | 2026-11-21 | MVP 0.3.1, not device-tested | Wordless rhythm toy | 44 files | 3 SQL files; `rs_notes` live | 14 convo | — |
+| Games | Generate Clouds | [generate-clouds](https://github.com/ShimmyCane/generate-clouds) | 2026-11-21 | MVP 0.6.1 | 3-D sky from real weather, time-lapse, panoramas | 52 files | 4 SQL files; `gc_notes` live in Architecture (28 rows) | 18 convo | Owner-only policy; see §9 |
+| Learning | Test Bank | [test-bank](https://github.com/ShimmyCane/test-bank) | 2026-10-19 | Not stated | Modular quiz app; questions as JSON, knowledge map kept apart | 83 files | None | No convo | — |
+| Learning | Multiply | [multiply](https://github.com/ShimmyCane/multiply) | 2026-10-26 | Not stated | Addition and multiplication practice | 3 files | None | No convo | Small |
+| Learning | Roman Numerals | [roman-numerals](https://github.com/ShimmyCane/roman-numerals) | 2026-11-10 | MVP, revised after first look (convo v0.5) | Letters, quiz, build and break, add and subtract, fix it | 35 files | None | 1 test; 17 convo | — |
+| Learning | Exponents | [exponents](https://github.com/ShimmyCane/exponents) | 2026-10-27 | Not stated | Exponent visualizer (number line, up-arrow) | 5 files | None | No convo | Small |
+| Learning | Primes | [primes](https://github.com/ShimmyCane/primes) | 2026-10-10 | Not stated; schematic is a prompt | Factor-tree visualizer | 5 files | None | No convo | — |
+| Learning | Coins | [coins](https://github.com/ShimmyCane/coins) | 2026-10-08 | Not stated | Coin combinations | 130 files | None | No convo | — |
+| Learning | Row Boat | [row-boat](https://github.com/ShimmyCane/row-boat) | 2026-10-24 | Not stated | River-crossing puzzle, scenarios, solver test | 9 files | None | 1 test | — |
+| Learning | Speech Therapy | [speech-therapy](https://github.com/ShimmyCane/speech-therapy) | 2026-11-21 | Schematic v0.2 says "No code yet"; repo has 36 files | Speech practice for one child: S sounds in English and Mandarin | 36 files | 2 SQL files; 12 tables live | No convo | Stale schematic; child's age in schematic (privacy) |
+| Learning | Chinese Character Sudoku | [chinese-character-sudoku](https://github.com/ShimmyCane/chinese-character-sudoku) | 2026-11-12 | MVP, three games; not on iPad | Sudoku with Chinese characters | 26 files | None | No convo | — |
+| Learning | Voice | [voice](https://github.com/ShimmyCane/voice) | 2026-11-10 | MVP 0.5.1, not device-tested | Shelf of family stories narrated in three languages | 137 files | None | 7 convo | — |
+| Learning | Learning to Draw | [learning-to-draw](https://github.com/ShimmyCane/learning-to-draw) | 2026-11-12 | Round 1: template and 50 sheets; not printed | Drawing worksheets with review pages | 53 files | 2 SQL files; `ltd_reviews` live | No convo | — |
+| Learning | Learning Kangaroo | [learning-kangaroo](https://github.com/ShimmyCane/learning-kangaroo) | 2026-11-12 | Round 2: 12 worksheets, 48 questions | Worksheets that check, print and record results | 32 files | 2 SQL files; `lkg_reviews` live | 1 convo | Schematic names children and grade levels (privacy) |
+| Learning | Chinese Character Strokes | [chinese-character-strokes](https://github.com/ShimmyCane/chinese-character-strokes) | 2026-11-18 | MVP 0.1.0; not device-tested by a child | Stroke-writing game for worksheet characters | 27 files | 3 SQL files; tables live | 3 convo | — |
+| Family | Family Habits | [family-habits](https://github.com/ShimmyCane/family-habits) | 2026-11-09 | Not stated | Family habit tracker | 17 files | 10 SQL files; 10 of 11 tables live; `week_task_snapshots` **not live** | No convo | Table not applied |
+| Family | Allowances | [allowances](https://github.com/ShimmyCane/allowances) | 2026-11-02 | Not stated | Allowance tracker | 8 files | Repo SQL creates `children`, `parents`, `transactions`, `withdrawal_requests`: **none live**; Family has `allowance_*` tables instead | No convo | SQL does not match the live project |
+| Family | How Far Is It? | [how-far-is-it](https://github.com/ShimmyCane/how-far-is-it) | 2026-10-10 | Not stated | Distance comparison between locations | 30 files | None | No convo | — |
+| Family | What to Cook | [what-to-cook](https://github.com/ShimmyCane/what-to-cook) | 2026-11-12 | MVP-1 on device; pantry v0.2.0 | Pantry, use-soon cards, meal ideas | 44 files | 7 SQL files; 15 tables live | 9 convo | Schematic says not applied; it is live |
+| Family | Better Parenting | [better-parenting](https://github.com/ShimmyCane/better-parenting) | 2026-11-18 | MVP 0.1.0, headless-tested | Parenting scenarios and practice | 17 files | 3 SQL files; `bp_*` live (0 rows) | 1 convo | Schematic says not applied; it is live |
+| Family | Our Family Compass | [our-family-compass](https://github.com/ShimmyCane/our-family-compass) | 2026-11-18 | MVP 0.2.0, headless-tested | Family compass: rooms, sample pieces, dated thoughts | 17 files | 3 SQL files; `ofc_*` live | 2 convo | Schematic says not applied; it is live |
+| Architecture | Detail Library | [detail-library](https://github.com/ShimmyCane/detail-library) | 2026-11-12 | Not stated; schematic is a pasted chat reply | Detail database: images as the source, tags for retrieval | 248 files | No SQL in repo; uses Architecture project (3 references) | No convo | Schematic is not a design; no SQL for what it uses |
+| Architecture | Quick Detail (Wall Sketch) | [quick-detail](https://github.com/ShimmyCane/quick-detail) | 2026-11-07 | Not stated | Sketching app for construction details, in real inches | 371 files | 1 SQL file; 5 `sketch_*` tables live | 16 tests | — |
+| Architecture | Proposal Drafter | [proposal_drafter](https://github.com/ShimmyCane/proposal_drafter) | 2026-10-25 | Schematic V1.02 | S+Y Studio proposal tools | 71 files | None (one Supabase reference) | No convo | Check for client material in a public repo |
+| Architecture | Shimmy Specs | Folder in this repo: `03 Projects/Shimmy Specs/` | — | MVP built (framework); not device- or publish-tested | Spec-writing process app | Folder: schematic, convo, supabase, knowledge notes | 3 SQL files; 6 `ss_*` tables live | Convo v0.3 | Advisor items in §9 |
+| Architecture | Growth | [growth](https://github.com/ShimmyCane/growth) | 2026-11-03 | MVP, planning mode | Describe a world, then watch time pass | 56 files | 1 SQL file; `grw_worlds`, `grw_world_versions` **not live** | 2 convo; 3 tests | Tables not applied |
+| Architecture | Make 3D | [make-3d](https://github.com/ShimmyCane/make-3d) | 2026-11-17 | Schematic says "idea, round 2" (2026-11-02): stale; repo is MVP 0.x | 3-D test models built in increments | 844 files | 3 SQL files; `m3d_*` live | 7 convo; 25 tests | Stale schematic; 844 files, check for vendored data |
+| Architecture | Increment Viewer | [increment-viewer](https://github.com/ShimmyCane/increment-viewer) | 2026-11-12 | Database-backed; read only | Viewer for a series of increments | 73 files | No SQL; reads Supabase tables | No convo | — |
+| Architecture | Critique Detail | [critique-detail](https://github.com/ShimmyCane/critique-detail) | 2026-11-18 | MVP 0.2.0, round 2 | Written review of one architectural detail | 103 files | 7 SQL files; 7 `dc_*` tables live | 2 convo | — |
+| Architecture | Map Photos | [map-photos](https://github.com/ShimmyCane/map-photos) | 2026-11-21 | Not stated | Photos placed on a map | 49 files | None | 1 convo | Schematic mentions a campus walk (location, privacy) |
+
+## 9. Security and data findings (read-only advisors, 2026-11-22)
+
+**Architecture project** (sign-ups open, per the Supabase brief):
+- Leaked-password protection is **off**. Turn it on.
+- `platform_is_owner()` can be called by anonymous users (SECURITY DEFINER). It returns owner status only, so the risk is low. Revoke anonymous execute if nothing needs it.
+- Shimmy Specs' `ss_*` functions (sign-in, list, load, save, delete) can be called anonymously with a token. Each one needs to reject a bad or expired token. That was not tested in this pass.
+- The `ss_*` tables have RLS on and no policies. That is by design (access only through those functions), but confirm no grants are open to anonymous or signed-in users.
+
+**Family project:**
+- `approve_allowance_withdrawal` checks only that the caller is signed in (`auth.uid() is not null`). Any signed-in user can approve a withdrawal and create a transaction. **Fix before relying on it:** check for the owner or parent role.
+- `storytime_ai_key` has RLS on and no policies, which is right for a secret. Confirm no grant exposes it.
+- Leaked-password protection is off here too.
+
+**Repo-level privacy items** are listed in §6, item 7. Nothing was changed in any repo.
