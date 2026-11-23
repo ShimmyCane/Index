@@ -15,4 +15,8 @@ Why these six moved: they are the most used across the nursery (count of mention
 
 Skills that stay as source in `02 Refs/Skills/` (edit only when Jimmy asks): start_project, ipad_website, privacy_check, bake_cache, ai_json_loop, project_track, feedback_notes, simplify_code, ai_consolidate, claude_review_project, fix_puzzles, graduate_project, make_3d, consider_actions, update_story, gather_story_lessons_learned, remix, pm_check, update_lessons_learned. Full list: `02 Refs/Skills/index.md`.
 
-No new skills were created in this round. Add one here only when Jimmy asks.
+New skills (2026-11-23):
+- access_requests (`04 AI/Skills/access_requests.md`, wrapper `/access-requests`): ask-for-access flow without open sign-up; roles.
+- monthly_checkup (`04 AI/Skills/monthly_checkup.md`, wrapper `/monthly-checkup`): the monthly run in plain words. Report: `01 Planning/monthly_checkup_2026-11-23.md`.
+
+Add a new skill here only when Jimmy asks.
