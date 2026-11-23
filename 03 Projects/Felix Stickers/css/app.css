@@ -70,10 +70,10 @@ input, textarea { -webkit-user-select: text; user-select: text; touch-action: ma
   content: ''; position: absolute; left: -10%; right: -10%; bottom: -18%; height: 46%;
   background: var(--sage-deep); border-top: var(--line); border-radius: 50% 50% 0 0;
 }
-#creature {
-  position: absolute; left: 50%; bottom: 2%; transform: translateX(-50%);
-  height: 92%; width: auto; max-width: 92%; aspect-ratio: 300 / 360;
-  pointer-events: none;
+/* A dashed body outline: the spot where the peeled body goes. Not a drawn creature. */
+#spot {
+  position: absolute; left: 50%; bottom: 3%; transform: translateX(-50%);
+  height: 86%; width: auto; aspect-ratio: 1; opacity: .5; pointer-events: none;
 }
 /* Placed stickers sit above the sheet card; only the stickers take touches,
    so the empty play area never blocks the card. */

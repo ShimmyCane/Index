@@ -177,11 +177,19 @@
       setTimeout(function () { node.classList.remove('nudge'); }, 300);
       return;
     }
+    var before = snapshot();
+    // bring the grabbed sticker to the front, so a feature lands on top of the body
+    if (state.placed[state.placed.length - 1] !== item) {
+      state.placed.splice(state.placed.indexOf(item), 1);
+      state.placed.push(item);
+      renderStage();
+      node = elFor(uid);
+    }
     gesture = {
       kind: 'move', uid: uid, pids: [e.pointerId], start: pt,
-      origX: item.x, origY: item.y, moved: false, fromPeel: false, before: snapshot()
+      origX: item.x, origY: item.y, moved: false, fromPeel: false, before: before
     };
-    node.classList.add('dragging');
+    if (node) node.classList.add('dragging');
   }
 
   function detachFromSheet(pt) {

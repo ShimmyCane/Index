@@ -51,7 +51,7 @@ For the first build, the page processor is replaced by hand-made assets (a JSON 
 |---|---|
 | Top | Title "Felix Stickers – [sheet name, 3+ words]" (convo Q1, Q4, Q11), then the ⚙️ settings button, then the Undo button next to it. Undo is on by default; a toggle in ⚙️ hides it. |
 | Play area | Background + creature. Free placement, overlap allowed. Takes most of the screen. |
-| Sheet card | One sheet: a main sticker in the middle and eight smaller ones around it (within Jimmy's 5–10). All on one card in the play area's lower left, with a faint stack behind it. Peel any sticker; an empty dashed space stays where it was. Reset puts them back. (convo v0.2) |
+| Sheet card | One sheet: a plain main body in the middle (no face, no limbs drawn in) and eight smaller features around it: eyes, mouths, horns, wings, hats, bows (within Jimmy's 5–10). Peel any piece and place it on the body; features go on top. An empty dashed space stays where a piece was peeled. Reset puts them back. (convo v0.2, v0.3) |
 | Save | "Save My Creature" (large purple button) and My Creations, on the bottom bar (convo Q6a). |
 | ⚙️ | Lower right, fades after a while, shows on a circle stroke (convo Q8). Undo toggle, Reset (with "Are you sure?"), Notes for improvement, errors (opt-in), the home-screen note, database check later. |
 
@@ -107,6 +107,10 @@ Not in the first build. When notes or creations must persist across devices, pla
 ## Files (planned)
 
 `index.html` (page, creature drawn inline as SVG), `css/app.css` (palette, gesture lock, sheet card, gear, panels), `js/sheet.js` (the sheet), `js/app.js` (engine: peel, move, two-finger rotate, press, undo, save, notes, errors, gear), `schematic.md`, `CLAUDE.md`, `convo/`.
+
+## Round 3 change (Jimmy, convo v0.3)
+
+The main sticker is a plain body. Eyes, noses, mouths and the rest are small features on the sheet, peeled onto the body. The pre-drawn creature with its face is gone; the stage shows a dashed outline where the body goes. A grabbed sticker comes to the front.
 
 ## Round 2 change (2026-11-23, Jimmy)
 
