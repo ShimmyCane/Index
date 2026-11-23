@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project review 2026-11-23</title>
+<style>
+:root { --paper:#fdf8ef; --ink:#2b2b2b; --sage:#d6e8d4; --peach:#ffd9c4; --mint:#d3f0e6; --coral:#ffb3a7; --vanilla:#fff4d6; --line:#3a3a3a; --shadow:#3a3a3a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --paper:#1f2224; --ink:#f2efe8; --sage:#2f4a3c; --peach:#4a3426; --mint:#263f39; --coral:#5a3530; --vanilla:#3a3424; --line:#c9c4b8; --shadow:#000; } }
+:root[data-theme="dark"] { --paper:#1f2224; --ink:#f2efe8; --sage:#2f4a3c; --peach:#4a3426; --mint:#263f39; --coral:#5a3530; --vanilla:#3a3424; --line:#c9c4b8; --shadow:#000; }
+* { box-sizing: border-box; }
+body { margin:0; background: var(--paper); color: var(--ink); font: 16px/1.55 "Quicksand", "Segoe UI", system-ui, sans-serif; }
+header.top { background: var(--vanilla); border-bottom: 3px solid var(--line); padding: 18px 16px; position: sticky; top:0; z-index:5; }
+header.top h1 { margin:0 0 6px; font-size: 1.5rem; }
+header.top p { margin:0; font-size:.95rem; }
+.gearlink { display:inline-flex; align-items:center; gap:8px; margin-top:10px; padding:12px 18px; min-height:48px; border:2.5px solid var(--line); border-radius:14px 18px 16px 14px; background: var(--peach); color: var(--ink); text-decoration:none; font-weight:700; box-shadow: 0 4px 0 var(--shadow); }
+.layout { display:grid; grid-template-columns: minmax(0,280px) minmax(0,1fr); gap:24px; max-width:1280px; margin:0 auto; padding:20px 16px 120px; }
+main { min-width:0; }
+nav.toc { position:sticky; top:170px; align-self:start; max-height: calc(100vh - 190px); overflow:auto; border:2.5px solid var(--line); border-radius:16px; background: var(--sage); padding:14px; box-shadow: 0 4px 0 var(--shadow); }
+nav.toc h2 { font-size:1rem; margin:0 0 8px; }
+nav.toc ul { list-style:none; padding:0; margin:0; }
+nav.toc li { margin:4px 0; font-size:.9rem; }
+nav.toc li.l1 { font-weight:700; margin-top:8px; }
+nav.toc li.l2 { padding-left:10px; }
+nav.toc a { color: var(--ink); text-decoration:none; }
+h1,h2,h3 { line-height:1.25; }
+h2 { margin-top:2.2em; padding:10px 14px; border:2.5px solid var(--line); border-radius:14px 18px 14px 16px; background: var(--mint); box-shadow: 0 4px 0 var(--shadow); font-size:1.25rem; }
+h3 { margin-top:1.6em; font-size:1.05rem; }
+.tablewrap { overflow-x:auto; border:2.5px solid var(--line); border-radius:14px; background:#fff; margin:12px 0 18px; box-shadow: 0 4px 0 var(--shadow); }
+:root[data-theme="dark"] .tablewrap { background:#2a2e30; }
+table { border-collapse:collapse; width:100%; font-size:.88rem; min-width:640px; }
+th, td { border-bottom:1px solid #bbb; padding:8px 10px; vertical-align:top; text-align:left; }
+th { background: var(--peach); }
+code { background: var(--vanilla); padding:1px 5px; border-radius:6px; font-size:.88em; word-break: break-word; }
+a { color:#1d5c8a; }
+:root[data-theme="dark"] a { color:#9fd0f5; }
+hr { border:0; border-top:2.5px dashed var(--line); margin:28px 0; }
+ul, ol { padding-left:1.3em; }
+li { margin:4px 0; }
+.checklist { list-style:none; padding:0; }
+.checklist li { background: var(--vanilla); border:2px solid var(--line); border-radius:12px; padding:10px 12px; margin:8px 0; }
+.checklist input { transform: scale(1.4); margin-right:8px; }
+.callout { border:2.5px solid var(--line); border-radius:16px; background: var(--coral); padding:12px 16px; box-shadow: 0 4px 0 var(--shadow); margin:16px 0; }
+.callout p { margin:4px 0; }
+footer { max-width:1280px; margin:0 auto; padding:0 16px 40px; font-size:.85rem; opacity:.8; }
+@media (max-width: 860px) { .layout { grid-template-columns: minmax(0,1fr); } nav.toc { position:static; max-height:none; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Project review, all tiles, 2026-11-23</h1>
+  <p>For Jimmy's review. All 48 tiles on the home page, the lessons, the security and privacy flags, and today's checkup. Read-only; nothing in any other repo was changed.</p>
+  <a class="gearlink" href="../index.html#gear">&#9881; Home page: the settings button is the gear at the lower right</a>
+</header>
+<div class="layout">
+  <nav class="toc" aria-label="Contents">
+    <h2>Contents</h2>
+    <ul>
+<li class="l1"><a href="#s1">Project review, all tiles, 2026-11-23</a></li>
+<li class="l2"><a href="#s2">Today's changes (2026-11-23)</a></li>
+<li class="l1"><a href="#s3">Nursery AI projects: metadata, lessons, and a best-practice comparison (2026-11-22)</a></li>
+<li class="l2"><a href="#s4">1. Metadata per project</a></li>
+<li class="l2"><a href="#s5">2. What the audit found</a></li>
+<li class="l2"><a href="#s6">3. General lessons learned</a></li>
+<li class="l2"><a href="#s7">4. Comparison with the ten linked repos</a></li>
+<li class="l2"><a href="#s8">5. Decisions and changes from Jimmy's answers (2026-11-22)</a></li>
+<li class="l2"><a href="#s9">6. Open items</a></li>
+<li class="l2"><a href="#s10">7. Links to every tile on index.html</a></li>
+<li class="l2"><a href="#s11">8. All tiles: metadata (41 repos plus Shimmy Specs)</a></li>
+<li class="l2"><a href="#s12">9. Security and data findings (read-only advisors, 2026-11-22)</a></li>
+<li class="l2"><a href="#s13">What was done this run</a></li>
+<li class="l2"><a href="#s14">🚩 Flags (must be fixed; literal flags)</a></li>
+<li class="l2"><a href="#s15">Vet list (not critical; revisit later)</a></li>
+<li class="l2"><a href="#s16">Status fixes needed in other repos (not pushed yet)</a></li>
+<li class="l2"><a href="#s17">How the repo updates will work (plain words)</a></li>
+<li class="l2"><a href="#s18">Skill candidates (step 5)</a></li>
+<li class="l2"><a href="#s19">Lessons logs (step 6)</a></li>
+<li class="l2"><a href="#s20">Waiting for Jimmy</a></li>
+    </ul>
+  </nav>
+  <main>
+    <div class="callout">
+      <p><strong>How to use this page.</strong> Start with today's changes, then the flags. Each item below is literal: 🚩 SECURITY or 🚩 PRIVACY. Tick the checklist as you decide; the ticks are not saved.</p>
+      <p>Earlier page (2026-11-22): <a href="nursery_review_2026-11-22.html">nursery review</a>. Home page settings: the gear in <a href="../index.html#gear">index.html</a>.</p>
+    </div>
+<h1 id="s1">Project review, all tiles, 2026-11-23</h1>
+<p>Covers the nursery review and all 48 tiles on <code>index.html</code> (the Nursery six, plus 42 linked projects), with today's monthly checkup.</p>
+<h2 id="s2">Today's changes (2026-11-23)</h2>
+<ul>
+<li><strong>Access, not open sign-up (Architecture):</strong> a request list (<code>access_requests</code>) and a "Thank you, the admin will get back to you" reply. Test passed 4 of 4 (rolled back). Not pasted yet.</li>
+<li><strong>Account roles (Family):</strong> owner, parent, kid, guest. Withdrawal approval for owner or parent only. Test written; the live test did not finish. Not pasted.</li>
+<li><strong>Monthly checkup</strong> set up as a skill (<code>/monthly-checkup</code>), with this first report.</li>
+<li><strong>Skills:</strong> new <code>access-requests</code> and <code>monthly-checkup</code> skills added to the skills index.</li>
+<li><strong>Home ⚙️ panel:</strong> links to the 2026-11-22 review.</li>
+</ul>
+<h1 id="s3">Nursery AI projects: metadata, lessons, and a best-practice comparison (2026-11-22)</h1>
+<p>Scope: the six projects in the <strong>Nursery</strong> section of <code>index.html</code> after Living Room Scene was removed on 2026-11-22 at Jimmy's request (its lessons are kept). Method: each project's <code>schematic.md</code>, <code>CLAUDE.md</code>, <code>04 AI/&lt;Project&gt;/brief.md</code> and <code>lessons.md</code>, the convo and git history, the SQL checked read-only against the Supabase Architecture and Family projects, and the READMEs of the ten linked repos (default branch, read on 2026-11-22). Nothing was run, installed, or changed in the projects beyond the corrections listed in §5.</p>
+<p><strong>Not covered yet:</strong> Jimmy asked for every repo on <code>index.html</code> (48 tiles; 42 are outside the Nursery). Those repos are outside this repo's GitHub scope, so they need <code>add_repo</code> access or Jimmy's go-ahead. See §6.</p>
+<p>Status key (from <code>03 projects_schematic.md</code>): idea → MVP → device-tested → in use → graduated → retired.</p>
+<hr>
+<h2 id="s4">1. Metadata per project</h2>
+<div class="tablewrap"><table><thead><tr><th>Project</th><th>Track</th><th>Status (current, per schematic)</th><th>Purpose, in one line</th><th>Structure</th><th>Database</th><th>Checks in repo</th><th>Convo / commits</th><th>Device-tested?</th></tr></thead><tbody>
+<tr><td><strong>Drafting</strong></td><td>B</td><td>MVP 0.2 (2026-11-18)</td><td>Makes DXF blocks, <code>.LIN</code> line types and <code>.PAT</code> hatches for AutoCAD and Revit from library details, with a legibility linter and a DXF viewer</td><td>Plain JS, one page <code>index.html</code>, <code>js/</code> (writer, reader, linter, pipeline), <code>samples/</code> (synthetic), <code>tests/</code></td><td>Architecture DB planned, owner only; no SQL in repo</td><td>19 Node tests; ezdxf audit clean; headless at iPad and phone widths</td><td>4 convo, 4 commits</td><td>No. Not opened in AutoCAD or Revit</td></tr>
+<tr><td><strong>Make-3D x Construct</strong></td><td>B</td><td><strong>V2</strong> (round 7, 2026-11-18). Latest in the folder; no separate repo applies</td><td>A Southern Cheyenne camp move in the 1870s, built with Construct's method (checks with fix hints, certainty per fact, flags, defect ledger). Draft only; display waits for consultation</td><td><code>index.html</code>, <code>studio.html</code>, <code>index_summary.html</code>, <code>js/core</code> (model, rounds, review, loft), <code>js/library</code>, <code>js/cloud</code>, <code>js/viewer</code>, vendored three.js and supabase.js, <code>samples/</code>, <code>worlds/</code>, <code>exhibit/</code>, <code>tests/</code> (6 files), <code>tools/</code>, <code>research/</code>, <code>archive/</code> (an earlier copy, kept at Jimmy's request)</td><td><code>m3dxc_certainty</code> and <code>m3dxc_scenes</code> <strong>applied</strong> (checked 2026-11-22)</td><td>43 Node tests (brief; the AI index says 33)</td><td>7 convo, 10 commits</td><td>No</td></tr>
+<tr><td><strong>Mind Palace</strong></td><td>A</td><td><strong>0.3.1</strong> (2026-11-18). Latest in the folder; no separate repo applies</td><td>A memory palace to walk through, one per family member: memories as objects in rooms, search, two kinds of recall practice, a Gaussian-splat view</td><td><code>index.html</code> (Build page), <code>splat.html</code>, <code>css/</code>, <code>js/</code> (three layers: <code>model.js</code> database, <code>layout.js</code> scene, <code>view.js</code> renderer), <code>build.html</code>, <code>godot/</code> (written, never run), <code>tools/</code></td><td>Device storage only; family sync planned, nothing written</td><td>54 headless checks at phone and tablet widths</td><td>5 convo, 6 commits</td><td>No. Not yet tried on an iPad</td></tr>
+<tr><td><strong>Salmon Leap</strong></td><td>B</td><td>V1 to V5 built; V10 and V15 planned</td><td>A bronze statue of a leaping Atlantic salmon, built in five cumulative versions</td><td><code>index.html</code>, <code>js/core</code> (loft, model), <code>js/viewer</code>, <code>tools/</code> (parts, build), <code>samples/</code> (five versions), <code>research/</code>, <code>tests/test_versions.js</code></td><td>None</td><td>Part-count audit per version; no dropped parts</td><td>2 convo, 2 commits</td><td>No</td></tr>
+<tr><td><strong>Athena's Piano Companion</strong></td><td>A</td><td>0.2.0 (2026-11-21); 0.1.0 used on an iPad</td><td>A hands-free recorder for free piano play: voice or tap start and stop, library, browse with a recycle bin, four-layer compose</td><td>Six pages (<code>index</code>, <code>record</code>, <code>player</code>, <code>library</code>, <code>browse</code>, <code>compose</code>), five CSS files, 19 JS files</td><td>SQL 001 and 002 <strong>applied</strong> (002 checked 2026-11-22)</td><td>Headless tests; SQL test and verify files</td><td>6 convo, 6 commits</td><td>Partly. 0.1.0 on a real iPad; 0.2.0 headless only</td></tr>
+<tr><td><strong>QC keynotes</strong></td><td>B</td><td>v0.2.0, four steps built; notes box built</td><td>First-pass check of keynote notes against a guideline (green, yellow, red), with a marked-up PDF export and a CSV</td><td><code>index.html</code>, <code>js/</code> (core, guideline, scan, markup, feedback, config), vendored pdf.js 3.11.174 and pdf-lib 1.17.1, <code>test/</code> (smoke test and synthetic generator), <code>samples/</code></td><td><code>qk_notes</code> <strong>applied</strong> (checked 2026-11-22; 7 rows)</td><td><code>test/smoke.js</code> headless on synthetic data: 4 green, 5 yellow, 4 red</td><td>4 convo, 8 commits</td><td>No. No real drawing set yet</td></tr>
+</tbody></table></div>
+<p>Common structure across all six: <code>CLAUDE.md</code> pointer, <code>schematic.md</code>, <code>convo/</code> (one file per round), a brief and lessons in <code>04 AI/</code>, plain HTML, CSS and JS with no build step, vendored libraries, synthetic samples, and Node tests. Migrations are numbered (<code>001_</code>, <code>002_</code>), and two projects also have <code>test_</code> and <code>verify_</code> files beside them.</p>
+<hr>
+<h2 id="s5">2. What the audit found</h2>
+<ol>
+<li><strong>Device testing is the real gap.</strong> Five of the six projects are "headless-tested, not device-tested." Athena's 0.1.0 was the only one used on an iPad, and that test found real faults: a browser cache served an old script, the microphone heard the count-in and the piano, and the stop phrase leaked into the take. Headless checks missed all of them.</li>
+<li><strong>No nursery SQL is pending.</strong> My first pass said four projects had SQL not applied. That was wrong: the schematics were stale. The read-only check shows Make-3D x Construct's two tables, Athena's 002 objects (<code>pc_sessions</code>, <code>deleted_at</code>, <code>session_id</code>) and QC keynotes' <code>qk_notes</code> (7 rows) are all live, and Jimmy confirmed he had pasted them. Still open: Mind Palace's family sync is planned and not written, and Drafting has no SQL in the repo. Generate Clouds' <code>gc_notes</code> is live (28 rows, Architecture project); an earlier line in the Supabase brief said not applied, and a later line in the same brief corrects it.</li>
+<li><strong>Status drift.</strong> Make-3D x Construct and Mind Palace had several version strings each. Resolved on 2026-11-22: the latest version in the folder applies (no separate graduated repo for either), so they are V2 and 0.3.1, and their briefs and the AI index now match. The other projects still need a status line checked against their version files.</li>
+<li><strong>Archive copy.</strong> <code>Make-3D x Construct/archive/Oklahoma diorama V1/</code> is kept, at Jimmy's request. It breaks the root "no copy folders" rule, so the schematic should say why it is there.</li>
+<li><strong>Living Room Scene removed</strong> from the nursery, the home page tile, and the folder (in git history). <code>04 AI/Living Room Scene/lessons.md</code> is kept.</li>
+<li><strong>Privacy.</strong> Convo files are public. The QC keynotes and Drafting schematics say client drawings are never committed. Keep that rule and check the convo files before any graduation.</li>
+</ol>
+<hr>
+<h2 id="s6">3. General lessons learned</h2>
+<p>Each lesson is marked <strong>new</strong> (not yet in <code>04 AI/lessons_pool.md</code>) or <strong>in pool</strong> (already there, cited).</p>
+<ol>
+<li><strong>Test the rendered page, not only the engine.</strong> Make-3D x Construct's 43 engine tests passed while the viewer was blank: the render was never called after the model loaded. A headless screenshot after each change caught it. *(New as a general rule; the project lesson is in <code>Make-3D x Construct/lessons.md</code>.)*</li>
+<li><strong>A rule that never fires is not a test.</strong> Drafting's 80% warning passed for a while with no warning reaching it. A constructed case with known deductions (exactly 75%) was the only real proof. *(New.)*</li>
+<li><strong>Refuse, do not half-apply.</strong> Make-3D x Construct replays every edit before it is saved. A refused edit shows its fix hint and changes nothing. AI replies are checked against known ids before anything is applied. *(New as a pool entry.)*</li>
+<li><strong>Keep the verified and judgment split in every brief.</strong> Each brief lists what was checked and what was not. This is the best habit in the set. *(In pool §1, item 3.)*</li>
+<li><strong>One status line per project, tied to the version file.</strong> Drift like the cases above happens within days. *(New.)*</li>
+<li><strong>Render, compare, keep every version.</strong> Living Room Scene and Salmon Leap both build a new file per version, never overwrite, and check each render against the reference. Salmon Leap's test checks that no part is dropped between versions. *(In pool: "Model iteration".)*</li>
+<li><strong>Keep an "applied / written / not applied" line for every migration</strong> in the schematic, and never edit an applied file. *(In pool §6 and item 18. Extend it with the fallback each page uses while the SQL is not applied.)*</li>
+<li><strong>Sound for music: turn off echo cancellation, noise suppression and auto gain</strong> in <code>getUserMedia</code>. They distort piano notes. The count-in leaks into the take through the speaker. *(New.)*</li>
+<li><strong>Cache-bust when a device runs an old build.</strong> Athena's iPad ran a cached script. *(In pool §8, item 3. Add a visible version stamp on each page so a tester can see which build is running.)*</li>
+<li><strong>Check the dark mode and text contrast before shipping.</strong> *(In pool item 20. No project currently runs a contrast check; see §4.)*</li>
+</ol>
+<hr>
+<h2 id="s7">4. Comparison with the ten linked repos</h2>
+<p>Evidence note: this comes from the READMEs only. None was installed or run. The benchmark figures are self-reported by each repo, and several say their sample is small. The star counts are from the list you gave.</p>
+<div class="tablewrap"><table><thead><tr><th>Repo (stars)</th><th>What it does</th><th>Evidence, as the repo states it</th><th>Relevance to the seven</th><th>Verdict</th></tr></thead><tbody>
+<tr><td><strong>codeswithroh/tastemaker</strong> (562)</td><td>Generates a palette per project and checks every pairing with a WCAG contrast matrix. Reads colours from reference pixels. Keeps a decisions log.</td><td>The contrast maths is a computation. Taste is labelled as judgment, not proof.</td><td>High for pastel kids' UIs, where low contrast is the common fault. None of the seven runs a contrast check.</td><td><strong>Adopt the contrast check</strong> (a small script or a smoke-test line). Skip the generator.</td></tr>
+<tr><td><strong>dembrandt/dembrandt-skills</strong> (197)</td><td>45 UX and design-system skills. Lists six control states (rest, hover, active, focus, disabled, loading). Pulls tokens from a live site.</td><td>Skills are instructions; no measurements given.</td><td>Medium. Our smoke test checks touch and layout, not control states.</td><td><strong>Consider</strong> the six-state checklist. Skip the 45-skill install and the live-site extraction.</td></tr>
+<tr><td><strong>fatihaydost/brand-identity-skill</strong> (424)</td><td>Builds logo, type and palette from one brief. Gates (contrast, licence, glyph coverage, file validity) stop the set; warnings are labelled as heuristics.</td><td>"The agent designs; the scripts measure."</td><td>Low to medium. Relevant only to future family look and kit work.</td><td><strong>Consider</strong> the gate-versus-warning split. Skip the skill.</td></tr>
+<tr><td><strong>bitjaru/styleseed</strong> (1,023)</td><td>74 craft rules and 22 workflows. Render, score, revise loop.</td><td>Self-reported: +5.3 points over 120 rendered cells. Rules alone were inconsistent (Codex +1.6, Claude Code −3.7). The author lists component-context tests and human evaluation as next steps, not done.</td><td>High in principle. It supports our render-and-check loop, which we already use.</td><td><strong>Adopt the principle</strong> (enforce, then re-check). Skip the 22-workflow install; it overlaps our process.</td></tr>
+<tr><td><strong>AThevon/genjutsu</strong> (826)</td><td>Skills for animation, site building, and a static design and motion audit.</td><td>The author says tests are small (one brief, two to six runs) and graded by their own model.</td><td>Low to medium. Could check Salmon Leap and Athena's Compose motion.</td><td><strong>Consider</strong> a trial of the static audit on one page. Do not rely on its benchmarks.</td></tr>
+<tr><td><strong>charlie947/motion-graphics-skills</strong> (756)</td><td>15 skills for launch videos, animated charts and reels, written as code.</td><td>Not stated.</td><td>Low. Our outputs are interactive pages, not video.</td><td><strong>Skip</strong> for now.</td></tr>
+<tr><td><strong>Moh4696/open-3d-skills</strong> (451)</td><td>three.js scenes, exploded views, cursor rigs, <code>site-check</code>, <code>frame-capture</code>. Some skills need an image or video generation service.</td><td>Not stated.</td><td>Medium for Make-3D x Construct and Salmon Leap: exploded views show internal parts; frame capture checks loops.</td><td><strong>Consider</strong> the exploded-view and frame-capture ideas. Skip the image-generation skills (keys, cost, privacy).</td></tr>
+<tr><td><strong>cloveric/claude-drawing-skill</strong> (333)</td><td>Draws with code (numpy, Pillow) and no image model. 83 styles.</td><td>Not stated.</td><td>Low. Our illustration stack is SVG and three.js, and this makes raster PNG.</td><td><strong>Skip.</strong> Its "no image model" stance matches ours.</td></tr>
+<tr><td><strong>camilleroux/genart-skill</strong> (168)</td><td>Generative art practice: hash-seeded determinism, trait tables, checks that a sketch repeats.</td><td>Honest about limits: it claims only same-machine reproducibility, not cross-machine.</td><td>Medium. Our generated samples (Drafting, Make-3D) and puzzle seeds elsewhere.</td><td><strong>Adopt the honesty rule:</strong> say which determinism is verified. Skip the art-specific parts.</td></tr>
+<tr><td><strong>isas1/forever-ai-components</strong> (141, yours)</td><td>600+ single-file animated components. <code>agents.json</code> and <code>llms.txt</code> for coding agents. Quality gates: touch-only components need a fallback, mobile needs a light performance tier, <code>needs-review</code> is excluded.</td><td>Structure and gates are documented.</td><td>High for iPad work. The gates match our rules (touch fallback, performance on phones).</td><td><strong>Adopt the gates</strong> as a smoke-test checklist. <strong>Consider</strong> <code>llms.txt</code> at each public project root so agents find the schematic.</td></tr>
+</tbody></table></div>
+<p><strong>Do these bring benefits?</strong> Yes, in three cheap places: a WCAG contrast check (tastemaker), the six control states (dembrandt), and the iPad and mobile gates (forever-ai-components). The larger suites (45 skills, 22 workflows, 74 rules) mostly repeat what we already do: render, check, state what is verified. Their numbers are self-reported and small, so treat them as hypotheses to test on one of our pages, not as proof. The biggest improvement available is still device testing (§2, item 1), which none of these repos replaces.</p>
+<p>Changes to <code>02 Refs/Skills/smoke_test.md</code> (adding a contrast check and the six control states) are Jimmy's to make, since <code>02 Refs/</code> is edited only when he asks.</p>
+<hr>
+<h2 id="s8">5. Decisions and changes from Jimmy's answers (2026-11-22)</h2>
+<ol>
+<li><strong>Archive kept</strong> (<code>Make-3D x Construct/archive/</code>).</li>
+<li><strong>Versions:</strong> the latest version in the folder applies when there is no separate repo. Make-3D x Construct is V2; Mind Palace is 0.3.1. Briefs and the AI index updated.</li>
+<li><strong>Living Room Scene removed:</strong> tile removed from <code>index.html</code>, folder deleted (in git history), <code>lessons.md</code> kept with a note, <code>brief.md</code> deleted (its version log is in git history). Both schematics updated.</li>
+<li><strong>SQL:</strong> checked read-only against the live projects; all nursery SQL is applied. Stale "not applied" lines fixed in the schematics, CLAUDE.md, todo and briefs. Convo files left as history.</li>
+<li><strong>Skills:</strong> six most-used skills moved to <code>04 AI/Skills/</code>, with an index there: smoke_test (now with a WCAG contrast check and a six-state control check), summarize_code, supabase_project, supabase_link, game_controls, settings_gear. <code>02 Refs/Skills/</code> keeps a stub for each. Wrappers and the root <code>CLAUDE.md</code> now point to the working copies. No new skills were created.</li>
+<li><strong>Monthly re-run:</strong> added to <code>04 AI/ai_task_tracker.md</code> as a to-do. <strong>Not scheduled</strong>, because the scheduling request was denied.</li>
+<li><strong>Commit language:</strong> Jimmy is fine with the model name in commit trailers, so future commits use <code>Co-Authored-By: Claude Haiku 5.5</code>. The earlier commit (<code>f00d0f9</code>) keeps its generic trailer.</li>
+</ol>
+<hr>
+<h2 id="s9">6. Open items</h2>
+<ol>
+<li><strong>All tiles reviewed.</strong> The 41 separate repos were read (shallow anonymous clones in <code>/home/user/shimmycane/</code>; nothing pushed or changed). Shimmy Specs is a folder in this repo. Results are in §8 and §9.</li>
+<li><strong>Device test:</strong> not needed for now (per Jimmy, 2026-11-22).</li>
+<li><strong>Smoke-test changes:</strong> the contrast and control-state steps are in the working copy <code>04 AI/Skills/smoke_test.md</code>. Nothing has been run against a real page yet.</li>
+<li><strong>Family project, <code>approve_allowance_withdrawal</code>:</strong> it only checks that someone is signed in, so any signed-in user can approve a withdrawal and write a transaction. Restrict it to the owner or parent. This is a database change, so it needs your go-ahead.</li>
+<li><strong>Architecture auth:</strong> leaked-password protection is off, and sign-ups are open (see §9). Turn on the first; decide on the second.</li>
+<li><strong>Allowances SQL:</strong> the repo's SQL creates <code>children</code>, <code>parents</code>, <code>transactions</code> and <code>withdrawal_requests</code>, none of which are live. The Family project has <code>allowance_*</code> tables instead. Confirm which SQL is current.</li>
+<li><strong>Privacy check in public repos:</strong> <code>speech-therapy</code> states a child's age, <code>learning-kangaroo</code> names children with grade levels, <code>map-photos</code> mentions a campus walk, <code>proposal_drafter</code> may hold studio client material, and <code>adventure</code> holds family story content (the 2026-11-03 review asked whether it belongs in a private repo).</li>
+<li><strong>Stale schematics:</strong> several say "not applied" or give an old status (§8). Fix them in each repo, which needs a push to that repo; I have read access only.</li>
+</ol>
+<hr>
+<h2 id="s10">7. Links to every tile on index.html</h2>
+<p>Repo links are <code>github.com/ShimmyCane/&lt;name&gt;</code>. Nursery and folder-only tiles link to their folder in this repo on <code>main</code>. The live page is the GitHub Pages address from the tile. All 41 repo names were confirmed by a clone on 2026-11-22.</p>
+<div class="tablewrap"><table><thead><tr><th>Section</th><th>Project</th><th>Repo</th><th>Live page</th><th>Note</th></tr></thead><tbody>
+<tr><td>Games</td><td>Snake Cube</td><td><a href="https://github.com/ShimmyCane/Snake-Cube">https://github.com/ShimmyCane/Snake-Cube</a></td><td><a href="https://shimmycane.github.io/Snake-Cube/">https://shimmycane.github.io/Snake-Cube/</a></td><td></td></tr>
+<tr><td>Games</td><td>Felix Checkers</td><td><a href="https://github.com/ShimmyCane/Felix-Checkers">https://github.com/ShimmyCane/Felix-Checkers</a></td><td><a href="https://shimmycane.github.io/Felix-Checkers/">https://shimmycane.github.io/Felix-Checkers/</a></td><td></td></tr>
+<tr><td>Games</td><td>Moment</td><td><a href="https://github.com/ShimmyCane/Moment">https://github.com/ShimmyCane/Moment</a></td><td><a href="https://shimmycane.github.io/Moment/">https://shimmycane.github.io/Moment/</a></td><td></td></tr>
+<tr><td>Games</td><td>Expansion Wars</td><td><a href="https://github.com/ShimmyCane/Expansion-Wars">https://github.com/ShimmyCane/Expansion-Wars</a></td><td><a href="https://shimmycane.github.io/Expansion-Wars/">https://shimmycane.github.io/Expansion-Wars/</a></td><td></td></tr>
+<tr><td>Games</td><td>Fishes</td><td><a href="https://github.com/ShimmyCane/Fishes">https://github.com/ShimmyCane/Fishes</a></td><td><a href="https://shimmycane.github.io/Fishes/">https://shimmycane.github.io/Fishes/</a></td><td></td></tr>
+<tr><td>Games</td><td>Felix Maze</td><td><a href="https://github.com/ShimmyCane/Felix-Maze">https://github.com/ShimmyCane/Felix-Maze</a></td><td><a href="https://shimmycane.github.io/Felix-Maze/">https://shimmycane.github.io/Felix-Maze/</a></td><td></td></tr>
+<tr><td>Games</td><td>Athena's World</td><td><a href="https://github.com/ShimmyCane/Athena-s-world">https://github.com/ShimmyCane/Athena-s-world</a></td><td><a href="https://shimmycane.github.io/Athena-s-world/">https://shimmycane.github.io/Athena-s-world/</a></td><td></td></tr>
+<tr><td>Games</td><td>Ole Bar Glide</td><td><a href="https://github.com/ShimmyCane/Bar-Glide">https://github.com/ShimmyCane/Bar-Glide</a></td><td><a href="https://shimmycane.github.io/Bar-Glide/">https://shimmycane.github.io/Bar-Glide/</a></td><td></td></tr>
+<tr><td>Games</td><td>Adventure</td><td><a href="https://github.com/ShimmyCane/Adventure">https://github.com/ShimmyCane/Adventure</a></td><td><a href="https://shimmycane.github.io/Adventure/">https://shimmycane.github.io/Adventure/</a></td><td></td></tr>
+<tr><td>Games</td><td>Felix Gear Wars</td><td><a href="https://github.com/ShimmyCane/Felix-Gear-Wars">https://github.com/ShimmyCane/Felix-Gear-Wars</a></td><td><a href="https://shimmycane.github.io/Felix-Gear-Wars/">https://shimmycane.github.io/Felix-Gear-Wars/</a></td><td></td></tr>
+<tr><td>Games</td><td>Paper Airplanes x A-10 Warthog</td><td><a href="https://github.com/ShimmyCane/Paper-Airplanes-x-A-10-Warthog">https://github.com/ShimmyCane/Paper-Airplanes-x-A-10-Warthog</a></td><td><a href="https://shimmycane.github.io/Paper-Airplanes-x-A-10-Warthog/">https://shimmycane.github.io/Paper-Airplanes-x-A-10-Warthog/</a></td><td></td></tr>
+<tr><td>Games</td><td>StoryTime</td><td><a href="https://github.com/ShimmyCane/StoryTime">https://github.com/ShimmyCane/StoryTime</a></td><td><a href="https://shimmycane.github.io/StoryTime/">https://shimmycane.github.io/StoryTime/</a></td><td></td></tr>
+<tr><td>Games</td><td>Rhythm Sticks</td><td><a href="https://github.com/ShimmyCane/Rhythm-Sticks">https://github.com/ShimmyCane/Rhythm-Sticks</a></td><td><a href="https://shimmycane.github.io/Rhythm-Sticks/">https://shimmycane.github.io/Rhythm-Sticks/</a></td><td></td></tr>
+<tr><td>Games</td><td>Generate Clouds</td><td><a href="https://github.com/ShimmyCane/Generate-Clouds">https://github.com/ShimmyCane/Generate-Clouds</a></td><td><a href="https://shimmycane.github.io/Generate-Clouds/">https://shimmycane.github.io/Generate-Clouds/</a></td><td></td></tr>
+<tr><td>Learning</td><td>Test Bank</td><td><a href="https://github.com/ShimmyCane/Test-Bank">https://github.com/ShimmyCane/Test-Bank</a></td><td><a href="https://shimmycane.github.io/Test-Bank/">https://shimmycane.github.io/Test-Bank/</a></td><td></td></tr>
+<tr><td>Learning</td><td>Multiply</td><td><a href="https://github.com/ShimmyCane/Multiply">https://github.com/ShimmyCane/Multiply</a></td><td><a href="https://shimmycane.github.io/Multiply/">https://shimmycane.github.io/Multiply/</a></td><td></td></tr>
+<tr><td>Learning</td><td>Roman Numerals</td><td><a href="https://github.com/ShimmyCane/Roman-Numerals">https://github.com/ShimmyCane/Roman-Numerals</a></td><td><a href="https://shimmycane.github.io/Roman-Numerals/">https://shimmycane.github.io/Roman-Numerals/</a></td><td></td></tr>
+<tr><td>Learning</td><td>Exponents</td><td><a href="https://github.com/ShimmyCane/Exponents">https://github.com/ShimmyCane/Exponents</a></td><td><a href="https://shimmycane.github.io/Exponents/">https://shimmycane.github.io/Exponents/</a></td><td></td></tr>
+<tr><td>Learning</td><td>Primes</td><td><a href="https://github.com/ShimmyCane/Primes">https://github.com/ShimmyCane/Primes</a></td><td><a href="https://shimmycane.github.io/Primes/">https://shimmycane.github.io/Primes/</a></td><td></td></tr>
+<tr><td>Learning</td><td>Coins</td><td><a href="https://github.com/ShimmyCane/Coins">https://github.com/ShimmyCane/Coins</a></td><td><a href="https://shimmycane.github.io/Coins/">https://shimmycane.github.io/Coins/</a></td><td></td></tr>
+<tr><td>Learning</td><td>Row Boat</td><td><a href="https://github.com/ShimmyCane/Row-Boat">https://github.com/ShimmyCane/Row-Boat</a></td><td><a href="https://shimmycane.github.io/Row-Boat/">https://shimmycane.github.io/Row-Boat/</a></td><td></td></tr>
+<tr><td>Learning</td><td>Speech Therapy</td><td><a href="https://github.com/ShimmyCane/Speech-Therapy">https://github.com/ShimmyCane/Speech-Therapy</a></td><td><a href="https://shimmycane.github.io/Speech-Therapy/">https://shimmycane.github.io/Speech-Therapy/</a></td><td></td></tr>
+<tr><td>Learning</td><td>Chinese Character Sudoku</td><td><a href="https://github.com/ShimmyCane/Chinese-Character-Sudoku">https://github.com/ShimmyCane/Chinese-Character-Sudoku</a></td><td><a href="https://shimmycane.github.io/Chinese-Character-Sudoku/">https://shimmycane.github.io/Chinese-Character-Sudoku/</a></td><td></td></tr>
+<tr><td>Learning</td><td>Voice</td><td><a href="https://github.com/ShimmyCane/Voice">https://github.com/ShimmyCane/Voice</a></td><td><a href="https://shimmycane.github.io/Voice/">https://shimmycane.github.io/Voice/</a></td><td></td></tr>
+<tr><td>Learning</td><td>Learning to Draw</td><td><a href="https://github.com/ShimmyCane/Learning-to-Draw">https://github.com/ShimmyCane/Learning-to-Draw</a></td><td><a href="https://shimmycane.github.io/Learning-to-Draw/">https://shimmycane.github.io/Learning-to-Draw/</a></td><td></td></tr>
+<tr><td>Learning</td><td>Learning Kangaroo</td><td><a href="https://github.com/ShimmyCane/Learning-Kangaroo">https://github.com/ShimmyCane/Learning-Kangaroo</a></td><td><a href="https://shimmycane.github.io/Learning-Kangaroo/">https://shimmycane.github.io/Learning-Kangaroo/</a></td><td></td></tr>
+<tr><td>Learning</td><td>Chinese Character Strokes</td><td><a href="https://github.com/ShimmyCane/Chinese-Character-Strokes">https://github.com/ShimmyCane/Chinese-Character-Strokes</a></td><td><a href="https://shimmycane.github.io/Chinese-Character-Strokes/">https://shimmycane.github.io/Chinese-Character-Strokes/</a></td><td></td></tr>
+<tr><td>Family</td><td>Family Habits</td><td><a href="https://github.com/ShimmyCane/Family-Habits">https://github.com/ShimmyCane/Family-Habits</a></td><td><a href="https://shimmycane.github.io/Family-Habits/">https://shimmycane.github.io/Family-Habits/</a></td><td></td></tr>
+<tr><td>Family</td><td>Allowances</td><td><a href="https://github.com/ShimmyCane/Allowances">https://github.com/ShimmyCane/Allowances</a></td><td><a href="https://shimmycane.github.io/Allowances/">https://shimmycane.github.io/Allowances/</a></td><td></td></tr>
+<tr><td>Family</td><td>How Far Is It?</td><td><a href="https://github.com/ShimmyCane/How-Far-Is-It">https://github.com/ShimmyCane/How-Far-Is-It</a></td><td><a href="https://shimmycane.github.io/How-Far-Is-It/">https://shimmycane.github.io/How-Far-Is-It/</a></td><td></td></tr>
+<tr><td>Family</td><td>What to Cook</td><td><a href="https://github.com/ShimmyCane/What-to-Cook">https://github.com/ShimmyCane/What-to-Cook</a></td><td><a href="https://shimmycane.github.io/What-to-Cook/">https://shimmycane.github.io/What-to-Cook/</a></td><td></td></tr>
+<tr><td>Family</td><td>Better Parenting</td><td><a href="https://github.com/ShimmyCane/Better-Parenting">https://github.com/ShimmyCane/Better-Parenting</a></td><td><a href="https://shimmycane.github.io/Better-Parenting/">https://shimmycane.github.io/Better-Parenting/</a></td><td></td></tr>
+<tr><td>Family</td><td>Our Family Compass</td><td><a href="https://github.com/ShimmyCane/Our-Family-Compass">https://github.com/ShimmyCane/Our-Family-Compass</a></td><td><a href="https://shimmycane.github.io/Our-Family-Compass/">https://shimmycane.github.io/Our-Family-Compass/</a></td><td></td></tr>
+<tr><td>Architecture</td><td>Detail Library</td><td><a href="https://github.com/ShimmyCane/Detail-Library">https://github.com/ShimmyCane/Detail-Library</a></td><td><a href="https://shimmycane.github.io/Detail-Library/">https://shimmycane.github.io/Detail-Library/</a></td><td></td></tr>
+<tr><td>Architecture</td><td>Quick Detail</td><td><a href="https://github.com/ShimmyCane/Quick-Detail">https://github.com/ShimmyCane/Quick-Detail</a></td><td><a href="https://shimmycane.github.io/Quick-Detail/">https://shimmycane.github.io/Quick-Detail/</a></td><td></td></tr>
+<tr><td>Architecture</td><td>Proposal Drafter</td><td><a href="https://github.com/ShimmyCane/Proposal_Drafter">https://github.com/ShimmyCane/Proposal_Drafter</a></td><td><a href="https://shimmycane.github.io/Proposal_Drafter/">https://shimmycane.github.io/Proposal_Drafter/</a></td><td></td></tr>
+<tr><td>Architecture</td><td>Shimmy Specs</td><td><a href="https://github.com/ShimmyCane/Index/tree/main/03%20Projects/Shimmy%20Specs">https://github.com/ShimmyCane/Index/tree/main/03%20Projects/Shimmy%20Specs</a></td><td><a href="https://shimmycane.github.io/Index/03%20Projects/Shimmy%20Specs/">https://shimmycane.github.io/Index/03%20Projects/Shimmy%20Specs/</a></td><td>Folder in this repo; not a Nursery tile</td></tr>
+<tr><td>Architecture</td><td>Growth</td><td><a href="https://github.com/ShimmyCane/Growth">https://github.com/ShimmyCane/Growth</a></td><td><a href="https://shimmycane.github.io/Growth/">https://shimmycane.github.io/Growth/</a></td><td></td></tr>
+<tr><td>Architecture</td><td>Make 3D</td><td><a href="https://github.com/ShimmyCane/Make-3D">https://github.com/ShimmyCane/Make-3D</a></td><td><a href="https://shimmycane.github.io/Make-3D/">https://shimmycane.github.io/Make-3D/</a></td><td></td></tr>
+<tr><td>Architecture</td><td>Increment Viewer</td><td><a href="https://github.com/ShimmyCane/Increment-Viewer">https://github.com/ShimmyCane/Increment-Viewer</a></td><td><a href="https://shimmycane.github.io/Increment-Viewer/">https://shimmycane.github.io/Increment-Viewer/</a></td><td></td></tr>
+<tr><td>Architecture</td><td>Critique Detail</td><td><a href="https://github.com/ShimmyCane/Critique-Detail">https://github.com/ShimmyCane/Critique-Detail</a></td><td><a href="https://shimmycane.github.io/Critique-Detail/">https://shimmycane.github.io/Critique-Detail/</a></td><td></td></tr>
+<tr><td>Architecture</td><td>Map Photos</td><td><a href="https://github.com/ShimmyCane/Map-Photos">https://github.com/ShimmyCane/Map-Photos</a></td><td><a href="https://shimmycane.github.io/Map-Photos/">https://shimmycane.github.io/Map-Photos/</a></td><td></td></tr>
+<tr><td>Nursery</td><td>Drafting</td><td><a href="https://github.com/ShimmyCane/Index/tree/main/03%20Projects/Drafting">https://github.com/ShimmyCane/Index/tree/main/03%20Projects/Drafting</a></td><td><a href="https://shimmycane.github.io/Index/03%20Projects/Drafting/">https://shimmycane.github.io/Index/03%20Projects/Drafting/</a></td><td>Nursery folder (no repo of its own yet)</td></tr>
+<tr><td>Nursery</td><td>Make 3D x Construct</td><td><a href="https://github.com/ShimmyCane/Index/tree/main/03%20Projects/Make-3D%20x%20Construct">https://github.com/ShimmyCane/Index/tree/main/03%20Projects/Make-3D%20x%20Construct</a></td><td><a href="https://shimmycane.github.io/Index/03%20Projects/Make-3D%20x%20Construct/">https://shimmycane.github.io/Index/03%20Projects/Make-3D%20x%20Construct/</a></td><td>Nursery folder (no repo of its own yet)</td></tr>
+<tr><td>Nursery</td><td>Mind Palace</td><td><a href="https://github.com/ShimmyCane/Index/tree/main/03%20Projects/Mind%20Palace">https://github.com/ShimmyCane/Index/tree/main/03%20Projects/Mind%20Palace</a></td><td><a href="https://shimmycane.github.io/Index/03%20Projects/Mind%20Palace/">https://shimmycane.github.io/Index/03%20Projects/Mind%20Palace/</a></td><td>Nursery folder (no repo of its own yet)</td></tr>
+<tr><td>Nursery</td><td>Salmon Leap</td><td><a href="https://github.com/ShimmyCane/Index/tree/main/03%20Projects/Salmon%20Leap">https://github.com/ShimmyCane/Index/tree/main/03%20Projects/Salmon%20Leap</a></td><td><a href="https://shimmycane.github.io/Index/03%20Projects/Salmon%20Leap/">https://shimmycane.github.io/Index/03%20Projects/Salmon%20Leap/</a></td><td>Nursery folder (no repo of its own yet)</td></tr>
+<tr><td>Nursery</td><td>Athena's Piano Companion</td><td><a href="https://github.com/ShimmyCane/Index/tree/main/03%20Projects/Athena%27s%20Piano%20Companion">https://github.com/ShimmyCane/Index/tree/main/03%20Projects/Athena%27s%20Piano%20Companion</a></td><td><a href="https://shimmycane.github.io/Index/03%20Projects/Athena%27s%20Piano%20Companion/">https://shimmycane.github.io/Index/03%20Projects/Athena%27s%20Piano%20Companion/</a></td><td>Nursery folder (no repo of its own yet)</td></tr>
+<tr><td>Nursery</td><td>QC keynotes</td><td><a href="https://github.com/ShimmyCane/Index/tree/main/03%20Projects/QC%20keynotes">https://github.com/ShimmyCane/Index/tree/main/03%20Projects/QC%20keynotes</a></td><td><a href="https://shimmycane.github.io/Index/03%20Projects/QC%20keynotes/">https://shimmycane.github.io/Index/03%20Projects/QC%20keynotes/</a></td><td>Nursery folder (no repo of its own yet)</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="s11">8. All tiles: metadata (41 repos plus Shimmy Specs)</h2>
+<p>From shallow clones of each repo (default branch, read on 2026-11-22). "Live" means the table exists in the Family or Architecture project (read-only check). Status is what each repo states; "not stated" means it has no schematic status line. The Nursery six are in §1.</p>
+<div class="tablewrap"><table><thead><tr><th>Section</th><th>Project</th><th>Repo</th><th>Last commit</th><th>Status (as stated)</th><th>Purpose</th><th>Files</th><th>Database (SQL, live check)</th><th>Tests / convo</th><th>Flags</th></tr></thead><tbody>
+<tr><td>Games</td><td>Snake Cube</td><td><a href="https://github.com/ShimmyCane/snake-cube">snake-cube</a></td><td>2026-11-21</td><td>Version 4.1.0 (page title); no schematic</td><td>Felix's snake-cube puzzle with a map builder</td><td>65 files; process, lessons and map-builder pages</td><td>None in repo; uses Family <code>snake_maps</code> and <code>snake_highscores</code> (live)</td><td>8 test files; no convo</td><td>—</td></tr>
+<tr><td>Games</td><td>Felix Checkers</td><td><a href="https://github.com/ShimmyCane/felix-checkers">felix-checkers</a></td><td>2026-11-03</td><td>Idea (schematic is the first prompt)</td><td>Checkers in the browser; later, chess pieces on light squares with new rules</td><td>15 files</td><td>None</td><td>No convo</td><td>Schematic is a prompt, not a design</td></tr>
+<tr><td>Games</td><td>Moment</td><td><a href="https://github.com/ShimmyCane/moment">moment</a></td><td>2026-11-08</td><td>Not stated</td><td>Family-play companion: short Mario-Party-style moments for downtime</td><td>30 files; index, game and end pages</td><td>9 SQL files; 6 of 7 tables live; <code>project_notes</code> <strong>not live</strong></td><td>No convo</td><td>Table not applied</td></tr>
+<tr><td>Games</td><td>Expansion Wars</td><td><a href="https://github.com/ShimmyCane/expansion-wars">expansion-wars</a></td><td>2026-11-09</td><td>MVP, not device-tested</td><td>iPad strategy game: maps, replays, worlds</td><td>155 files</td><td>8 SQL files; all 4 tables live (<code>xw_*</code>)</td><td>7 tests; 21 convo</td><td>—</td></tr>
+<tr><td>Games</td><td>Fishes</td><td><a href="https://github.com/ShimmyCane/fishes">fishes</a></td><td>2026-11-21</td><td>MVP, not device-tested</td><td>Fish game with AI notes</td><td>34 files</td><td>4 SQL files; tables live</td><td>6 convo</td><td>—</td></tr>
+<tr><td>Games</td><td>Felix Maze</td><td><a href="https://github.com/ShimmyCane/felix-maze">felix-maze</a></td><td>2026-11-09</td><td>Bank restarted in batch 10; not printed or tried</td><td>Solution-first maze puzzles, printable sheets</td><td>79 files</td><td>2 SQL files; <code>fmz_flags</code> live; <code>fmz_mazes</code>, <code>fmz_characters</code>, <code>fmz_doodles</code> <strong>not live</strong></td><td>5 convo</td><td>Three tables not applied</td></tr>
+<tr><td>Games</td><td>Athena's World</td><td><a href="https://github.com/ShimmyCane/athena-s-world">athena-s-world</a></td><td>2026-11-09</td><td>V2 (2.2.0); partly tested on iPad (2.0.0)</td><td>3-D home-decor world for Athena</td><td>29 files</td><td>3 SQL files; <code>athena_saves</code>, <code>athena_notes</code> live</td><td>10 convo</td><td>—</td></tr>
+<tr><td>Games</td><td>Ole Bar Glide</td><td><a href="https://github.com/ShimmyCane/bar-glide">bar-glide</a></td><td>2026-11-21</td><td>Not stated (Track A)</td><td>Late-night saloon glide game with a pastel-day option</td><td>26 files</td><td>3 SQL files; <code>bglide_scores</code>, <code>bglide_notes</code> live</td><td>5 convo</td><td>—</td></tr>
+<tr><td>Games</td><td>Adventure</td><td><a href="https://github.com/ShimmyCane/adventure">adventure</a></td><td>2026-11-18</td><td>MVP and world tools; not tried on iPad</td><td>Family story game with a nightly AI storyteller</td><td>71 files</td><td>6 SQL files; 8 <code>adv_*</code> tables live</td><td>5 convo</td><td>Family story content in a public repo</td></tr>
+<tr><td>Games</td><td>Felix Gear Wars</td><td><a href="https://github.com/ShimmyCane/felix-gear-wars">felix-gear-wars</a></td><td>2026-11-21</td><td>MVP 0.6.0, headless-tested</td><td>Gear-powered lane defence game</td><td>111 files</td><td>3 SQL files; <code>fgw_notes</code> live</td><td>6 convo</td><td>—</td></tr>
+<tr><td>Games</td><td>Paper Airplanes × A-10 Warthog</td><td><a href="https://github.com/ShimmyCane/paper-airplanes-x-a-10-warthog">paper-airplanes-x-a-10-warthog</a></td><td>2026-11-21</td><td>MVP 0.7 (round 6)</td><td>Flight game with missions and a paper-plane mode</td><td>141 files</td><td>6 SQL files; <code>pa_flights</code> live</td><td>22 convo</td><td>—</td></tr>
+<tr><td>Games</td><td>StoryTime</td><td><a href="https://github.com/ShimmyCane/storytime">storytime</a></td><td>2026-10-25</td><td>Not stated</td><td>Story spinner, narration and recording, levels K to G6</td><td>32 files</td><td>2 SQL files; <code>storytime_*</code> live</td><td>1 convo</td><td>—</td></tr>
+<tr><td>Games</td><td>Rhythm Sticks</td><td><a href="https://github.com/ShimmyCane/rhythm-sticks">rhythm-sticks</a></td><td>2026-11-21</td><td>MVP 0.3.1, not device-tested</td><td>Wordless rhythm toy</td><td>44 files</td><td>3 SQL files; <code>rs_notes</code> live</td><td>14 convo</td><td>—</td></tr>
+<tr><td>Games</td><td>Generate Clouds</td><td><a href="https://github.com/ShimmyCane/generate-clouds">generate-clouds</a></td><td>2026-11-21</td><td>MVP 0.6.1</td><td>3-D sky from real weather, time-lapse, panoramas</td><td>52 files</td><td>4 SQL files; <code>gc_notes</code> live in Architecture (28 rows)</td><td>18 convo</td><td>Owner-only policy; see §9</td></tr>
+<tr><td>Learning</td><td>Test Bank</td><td><a href="https://github.com/ShimmyCane/test-bank">test-bank</a></td><td>2026-10-19</td><td>Not stated</td><td>Modular quiz app; questions as JSON, knowledge map kept apart</td><td>83 files</td><td>None</td><td>No convo</td><td>—</td></tr>
+<tr><td>Learning</td><td>Multiply</td><td><a href="https://github.com/ShimmyCane/multiply">multiply</a></td><td>2026-10-26</td><td>Not stated</td><td>Addition and multiplication practice</td><td>3 files</td><td>None</td><td>No convo</td><td>Small</td></tr>
+<tr><td>Learning</td><td>Roman Numerals</td><td><a href="https://github.com/ShimmyCane/roman-numerals">roman-numerals</a></td><td>2026-11-10</td><td>MVP, revised after first look (convo v0.5)</td><td>Letters, quiz, build and break, add and subtract, fix it</td><td>35 files</td><td>None</td><td>1 test; 17 convo</td><td>—</td></tr>
+<tr><td>Learning</td><td>Exponents</td><td><a href="https://github.com/ShimmyCane/exponents">exponents</a></td><td>2026-10-27</td><td>Not stated</td><td>Exponent visualizer (number line, up-arrow)</td><td>5 files</td><td>None</td><td>No convo</td><td>Small</td></tr>
+<tr><td>Learning</td><td>Primes</td><td><a href="https://github.com/ShimmyCane/primes">primes</a></td><td>2026-10-10</td><td>Not stated; schematic is a prompt</td><td>Factor-tree visualizer</td><td>5 files</td><td>None</td><td>No convo</td><td>—</td></tr>
+<tr><td>Learning</td><td>Coins</td><td><a href="https://github.com/ShimmyCane/coins">coins</a></td><td>2026-10-08</td><td>Not stated</td><td>Coin combinations</td><td>130 files</td><td>None</td><td>No convo</td><td>—</td></tr>
+<tr><td>Learning</td><td>Row Boat</td><td><a href="https://github.com/ShimmyCane/row-boat">row-boat</a></td><td>2026-10-24</td><td>Not stated</td><td>River-crossing puzzle, scenarios, solver test</td><td>9 files</td><td>None</td><td>1 test</td><td>—</td></tr>
+<tr><td>Learning</td><td>Speech Therapy</td><td><a href="https://github.com/ShimmyCane/speech-therapy">speech-therapy</a></td><td>2026-11-21</td><td>Schematic v0.2 says "No code yet"; repo has 36 files</td><td>Speech practice for one child: S sounds in English and Mandarin</td><td>36 files</td><td>2 SQL files; 12 tables live</td><td>No convo</td><td>Stale schematic; child's age in schematic (privacy)</td></tr>
+<tr><td>Learning</td><td>Chinese Character Sudoku</td><td><a href="https://github.com/ShimmyCane/chinese-character-sudoku">chinese-character-sudoku</a></td><td>2026-11-12</td><td>MVP, three games; not on iPad</td><td>Sudoku with Chinese characters</td><td>26 files</td><td>None</td><td>No convo</td><td>—</td></tr>
+<tr><td>Learning</td><td>Voice</td><td><a href="https://github.com/ShimmyCane/voice">voice</a></td><td>2026-11-10</td><td>MVP 0.5.1, not device-tested</td><td>Shelf of family stories narrated in three languages</td><td>137 files</td><td>None</td><td>7 convo</td><td>—</td></tr>
+<tr><td>Learning</td><td>Learning to Draw</td><td><a href="https://github.com/ShimmyCane/learning-to-draw">learning-to-draw</a></td><td>2026-11-12</td><td>Round 1: template and 50 sheets; not printed</td><td>Drawing worksheets with review pages</td><td>53 files</td><td>2 SQL files; <code>ltd_reviews</code> live</td><td>No convo</td><td>—</td></tr>
+<tr><td>Learning</td><td>Learning Kangaroo</td><td><a href="https://github.com/ShimmyCane/learning-kangaroo">learning-kangaroo</a></td><td>2026-11-12</td><td>Round 2: 12 worksheets, 48 questions</td><td>Worksheets that check, print and record results</td><td>32 files</td><td>2 SQL files; <code>lkg_reviews</code> live</td><td>1 convo</td><td>Schematic names children and grade levels (privacy)</td></tr>
+<tr><td>Learning</td><td>Chinese Character Strokes</td><td><a href="https://github.com/ShimmyCane/chinese-character-strokes">chinese-character-strokes</a></td><td>2026-11-18</td><td>MVP 0.1.0; not device-tested by a child</td><td>Stroke-writing game for worksheet characters</td><td>27 files</td><td>3 SQL files; tables live</td><td>3 convo</td><td>—</td></tr>
+<tr><td>Family</td><td>Family Habits</td><td><a href="https://github.com/ShimmyCane/family-habits">family-habits</a></td><td>2026-11-09</td><td>Not stated</td><td>Family habit tracker</td><td>17 files</td><td>10 SQL files; 10 of 11 tables live; <code>week_task_snapshots</code> <strong>not live</strong></td><td>No convo</td><td>Table not applied</td></tr>
+<tr><td>Family</td><td>Allowances</td><td><a href="https://github.com/ShimmyCane/allowances">allowances</a></td><td>2026-11-02</td><td>Not stated</td><td>Allowance tracker</td><td>8 files</td><td>Repo SQL creates <code>children</code>, <code>parents</code>, <code>transactions</code>, <code>withdrawal_requests</code>: <strong>none live</strong>; Family has <code>allowance_*</code> tables instead</td><td>No convo</td><td>SQL does not match the live project</td></tr>
+<tr><td>Family</td><td>How Far Is It?</td><td><a href="https://github.com/ShimmyCane/how-far-is-it">how-far-is-it</a></td><td>2026-10-10</td><td>Not stated</td><td>Distance comparison between locations</td><td>30 files</td><td>None</td><td>No convo</td><td>—</td></tr>
+<tr><td>Family</td><td>What to Cook</td><td><a href="https://github.com/ShimmyCane/what-to-cook">what-to-cook</a></td><td>2026-11-12</td><td>MVP-1 on device; pantry v0.2.0</td><td>Pantry, use-soon cards, meal ideas</td><td>44 files</td><td>7 SQL files; 15 tables live</td><td>9 convo</td><td>Schematic says not applied; it is live</td></tr>
+<tr><td>Family</td><td>Better Parenting</td><td><a href="https://github.com/ShimmyCane/better-parenting">better-parenting</a></td><td>2026-11-18</td><td>MVP 0.1.0, headless-tested</td><td>Parenting scenarios and practice</td><td>17 files</td><td>3 SQL files; <code>bp_*</code> live (0 rows)</td><td>1 convo</td><td>Schematic says not applied; it is live</td></tr>
+<tr><td>Family</td><td>Our Family Compass</td><td><a href="https://github.com/ShimmyCane/our-family-compass">our-family-compass</a></td><td>2026-11-18</td><td>MVP 0.2.0, headless-tested</td><td>Family compass: rooms, sample pieces, dated thoughts</td><td>17 files</td><td>3 SQL files; <code>ofc_*</code> live</td><td>2 convo</td><td>Schematic says not applied; it is live</td></tr>
+<tr><td>Architecture</td><td>Detail Library</td><td><a href="https://github.com/ShimmyCane/detail-library">detail-library</a></td><td>2026-11-12</td><td>Not stated; schematic is a pasted chat reply</td><td>Detail database: images as the source, tags for retrieval</td><td>248 files</td><td>No SQL in repo; uses Architecture project (3 references)</td><td>No convo</td><td>Schematic is not a design; no SQL for what it uses</td></tr>
+<tr><td>Architecture</td><td>Quick Detail (Wall Sketch)</td><td><a href="https://github.com/ShimmyCane/quick-detail">quick-detail</a></td><td>2026-11-07</td><td>Not stated</td><td>Sketching app for construction details, in real inches</td><td>371 files</td><td>1 SQL file; 5 <code>sketch_*</code> tables live</td><td>16 tests</td><td>—</td></tr>
+<tr><td>Architecture</td><td>Proposal Drafter</td><td><a href="https://github.com/ShimmyCane/proposal_drafter">proposal_drafter</a></td><td>2026-10-25</td><td>Schematic V1.02</td><td>S+Y Studio proposal tools</td><td>71 files</td><td>None (one Supabase reference)</td><td>No convo</td><td>Check for client material in a public repo</td></tr>
+<tr><td>Architecture</td><td>Shimmy Specs</td><td>Folder in this repo: <code>03 Projects/Shimmy Specs/</code></td><td>—</td><td>MVP built (framework); not device- or publish-tested</td><td>Spec-writing process app</td><td>Folder: schematic, convo, supabase, knowledge notes</td><td>3 SQL files; 6 <code>ss_*</code> tables live</td><td>Convo v0.3</td><td>Advisor items in §9</td></tr>
+<tr><td>Architecture</td><td>Growth</td><td><a href="https://github.com/ShimmyCane/growth">growth</a></td><td>2026-11-03</td><td>MVP, planning mode</td><td>Describe a world, then watch time pass</td><td>56 files</td><td>1 SQL file; <code>grw_worlds</code>, <code>grw_world_versions</code> <strong>not live</strong></td><td>2 convo; 3 tests</td><td>Tables not applied</td></tr>
+<tr><td>Architecture</td><td>Make 3D</td><td><a href="https://github.com/ShimmyCane/make-3d">make-3d</a></td><td>2026-11-17</td><td>Schematic says "idea, round 2" (2026-11-02): stale; repo is MVP 0.x</td><td>3-D test models built in increments</td><td>844 files</td><td>3 SQL files; <code>m3d_*</code> live</td><td>7 convo; 25 tests</td><td>Stale schematic; 844 files, check for vendored data</td></tr>
+<tr><td>Architecture</td><td>Increment Viewer</td><td><a href="https://github.com/ShimmyCane/increment-viewer">increment-viewer</a></td><td>2026-11-12</td><td>Database-backed; read only</td><td>Viewer for a series of increments</td><td>73 files</td><td>No SQL; reads Supabase tables</td><td>No convo</td><td>—</td></tr>
+<tr><td>Architecture</td><td>Critique Detail</td><td><a href="https://github.com/ShimmyCane/critique-detail">critique-detail</a></td><td>2026-11-18</td><td>MVP 0.2.0, round 2</td><td>Written review of one architectural detail</td><td>103 files</td><td>7 SQL files; 7 <code>dc_*</code> tables live</td><td>2 convo</td><td>—</td></tr>
+<tr><td>Architecture</td><td>Map Photos</td><td><a href="https://github.com/ShimmyCane/map-photos">map-photos</a></td><td>2026-11-21</td><td>Not stated</td><td>Photos placed on a map</td><td>49 files</td><td>None</td><td>1 convo</td><td>Schematic mentions a campus walk (location, privacy)</td></tr>
+</tbody></table></div>
+<h2 id="s12">9. Security and data findings (read-only advisors, 2026-11-22)</h2>
+<p><strong>Architecture project</strong> (sign-ups open, per the Supabase brief):</p>
+<ul>
+<li>Leaked-password protection is <strong>off</strong>. Turn it on.</li>
+<li><code>platform_is_owner()</code> can be called by anonymous users (SECURITY DEFINER). It returns owner status only, so the risk is low. Revoke anonymous execute if nothing needs it.</li>
+<li>Shimmy Specs' <code>ss_*</code> functions (sign-in, list, load, save, delete) can be called anonymously with a token. Each one needs to reject a bad or expired token. That was not tested in this pass.</li>
+<li>The <code>ss_*</code> tables have RLS on and no policies. That is by design (access only through those functions), but confirm no grants are open to anonymous or signed-in users.</li>
+</ul>
+<p><strong>Family project:</strong></p>
+<ul>
+<li><code>approve_allowance_withdrawal</code> checks only that the caller is signed in (<code>auth.uid() is not null</code>). Any signed-in user can approve a withdrawal and create a transaction. <strong>Fix before relying on it:</strong> check for the owner or parent role.</li>
+<li><code>storytime_ai_key</code> has RLS on and no policies, which is right for a secret. Confirm no grant exposes it.</li>
+<li>Leaked-password protection is off here too.</li>
+</ul>
+<p><strong>Repo-level privacy items</strong> are listed in §6, item 7. Nothing was changed in any repo.</p>
+<hr>
+<p>This is the first run of the monthly checkup. The steps are in <code>04 AI/Skills/monthly_checkup.md</code>. It is written in plain words so anyone can follow it.</p>
+<h2 id="s13">What was done this run</h2>
+<ul>
+<li>Architecture: a plan to close sign-up and use a request list instead. Table and test written. Test passed (4 of 4), rolled back.</li>
+<li>Family: a plan to give accounts roles, and to limit withdrawal approval to owner or parent. Table and test written. <strong>The live test did not finish</strong> (the Supabase server asked a question and nobody answered before the time limit). Nothing was pasted into the database.</li>
+<li>Statuses in this repo (Index) brought in line with the live database.</li>
+<li>Lessons pool: new items placed in their topics; the review-flow rule added to the preferences.</li>
+<li>Skills working copies refreshed, and one new skill added (access requests).</li>
+</ul>
+<h2 id="s14">🚩 Flags (must be fixed; literal flags)</h2>
+<ol>
+<li>🚩 SECURITY, Architecture: sign-up is open. Turn it off in the dashboard (see <code>04 AI/Supabase/access/README.md</code>, step 1). Then paste the request table.</li>
+<li>🚩 SECURITY, Family: <code>approve_allowance_withdrawal</code> lets any signed-in account approve. Fix is in <code>04 AI/Supabase/access/family_001_roles.sql</code>. Test first (not yet passed), then paste.</li>
+<li>🚩 SECURITY, Architecture and Family: leaked-password protection is off. Turn it on in the dashboard.</li>
+<li>🚩 SECURITY, Shimmy Specs (Architecture): sign-in and save functions can be called without an account, with a token. Each must refuse a bad token. Not tested yet.</li>
+<li>🚩 PRIVACY, speech-therapy: schematic states a child's age and daily time. Public repo. Remove or make general.</li>
+<li>🚩 PRIVACY, learning-kangaroo: schematic names children with grade levels. Public repo. Keep first names only; make the levels general.</li>
+<li>🚩 PRIVACY, map-photos: schematic mentions a campus walk. Check for school or location detail.</li>
+<li>🚩 PRIVACY, proposal_drafter: may hold studio client material. Check and remove anything that identifies a client.</li>
+<li>🚩 PRIVACY, adventure: family story content in a public repo. Decide: keep it public with first names only, or move it to the private repo.</li>
+</ol>
+<h2 id="s15">Vet list (not critical; revisit later)</h2>
+<ul>
+<li><code>platform_is_owner()</code> can be called by anonymous users. Low risk. Revoke anonymous execute when convenient.</li>
+<li>Family sign-up setting: check it too (the advisors did not flag it).</li>
+<li><code>storytime_ai_key</code> (Family): confirm no grant exposes it. RLS is on with no policies, which is right for a secret.</li>
+<li>Allowances: repo SQL does not match the live Family tables. Decide which is current.</li>
+<li>Tables not live: Felix Maze (three), Growth (two), Moment (one: <code>project_notes</code>), Family Habits (one: <code>week_task_snapshots</code>).</li>
+<li>Make 3D: 844 files in the repo. Check for vendored or generated data that should not be committed.</li>
+<li>Stale statuses in repos (see the list below). Needs a push to each repo.</li>
+<li>Several repos have no schematic status (Coins, Exponents, Multiply, How Far Is It, Allowances, Family Habits, Snake Cube, Felix Checkers). Give each a short plain summary.</li>
+<li>Monthly re-run scheduling: still not set up (permission denied earlier). Run this checkup by hand until it is.</li>
+</ul>
+<h2 id="s16">Status fixes needed in other repos (not pushed yet)</h2>
+<p>Each needs its own push and merge, one at a time, after Jimmy's go-ahead for each batch.</p>
+<ul>
+<li>What to Cook: schematic says SQL not applied; 15 tables are live.</li>
+<li>Better Parenting: schematic says not applied; <code>bp_*</code> tables are live.</li>
+<li>Our Family Compass: schematic says not applied; <code>ofc_*</code> tables are live.</li>
+<li>Make 3D: schematic says "idea, round 2"; repo is at MVP 0.x.</li>
+<li>Speech Therapy: schematic says "No code yet"; repo has 36 files.</li>
+</ul>
+<h2 id="s17">How the repo updates will work (plain words)</h2>
+<p>Think of each repo as a box with a label on it. The label says what is inside and how far along it is. Right now some labels are old. For each old label:</p>
+<ol>
+<li>Open a copy of the box (clone it).</li>
+<li>Fix the label so it matches what is really inside.</li>
+<li>Put the box back with a note saying what changed (a pull request).</li>
+<li>Look at it on the Pages site, then press merge.</li>
+</ol>
+<p>Only the label changes. Nothing inside the box is moved or thrown away. One box at a time, and each one waits for your go-ahead.</p>
+<h2 id="s18">Skill candidates (step 5)</h2>
+<ul>
+<li><strong>Access requests</strong> (new, done today): <code>04 AI/Skills/access_requests.md</code>. Promote into any app with sign-in.</li>
+<li><strong>Security advisor check</strong> (added to <code>supabase_project</code>, 2026-11-23). Already promoted.</li>
+<li><strong>Plain repo summary</strong> (for the repos with no schematic status): candidate. Needs a short template.</li>
+<li><strong>Pages check after merge</strong> (added to <code>smoke_test</code>). Already promoted.</li>
+</ul>
+<h2 id="s19">Lessons logs (step 6)</h2>
+<ul>
+<li>Index: <code>04 AI/lessons_pool.md</code>, <code>04 AI/Supabase/lessons.md</code>. Up to date.</li>
+<li>Each linked repo: most have no lessons log of their own. Plan: a short <code>lessons.md</code> in each repo, added when that repo is next updated. Not started.</li>
+</ul>
+<h2 id="s20">Waiting for Jimmy</h2>
+<ol>
+<li>Turn off sign-up and leaked-password protection (dashboard, both projects).</li>
+<li>Go-ahead to paste the Architecture request table (after the dashboard step).</li>
+<li>Test or re-run the Family roles test (the live test timed out), then go-ahead to paste it.</li>
+<li>Decide on the 🚩 PRIVACY items for the public repos.</li>
+<li>Go-ahead for the first batch of repo status fixes.</li>
+</ol>
+    <h2 id="checklist">Decisions checklist</h2>
+    <ul class="checklist">
+<li><label><input type="checkbox"> Archive copy in Make-3D x Construct: kept (decided)</label></li>
+<li><label><input type="checkbox"> Latest version in folder applies where no separate repo (decided)</label></li>
+<li><label><input type="checkbox"> 🚩 SECURITY: turn off open sign-up in Architecture (dashboard)</label></li>
+<li><label><input type="checkbox"> 🚩 SECURITY: turn on leaked-password protection in both projects (dashboard)</label></li>
+<li><label><input type="checkbox"> 🚩 SECURITY: paste the Architecture access-request table (after dashboard step)</label></li>
+<li><label><input type="checkbox"> 🚩 SECURITY: re-run the Family roles test, then paste it</label></li>
+<li><label><input type="checkbox"> 🚩 SECURITY: Shimmy Specs sign-in and save functions: test that bad tokens are refused</label></li>
+<li><label><input type="checkbox"> 🚩 PRIVACY: speech-therapy (child's age and daily time)</label></li>
+<li><label><input type="checkbox"> 🚩 PRIVACY: learning-kangaroo (children's names and grade levels)</label></li>
+<li><label><input type="checkbox"> 🚩 PRIVACY: map-photos (campus walk), proposal_drafter (client material)</label></li>
+<li><label><input type="checkbox"> 🚩 PRIVACY: adventure (family story content: keep public or move private?)</label></li>
+<li><label><input type="checkbox"> Allowances: confirm which SQL is current</label></li>
+<li><label><input type="checkbox"> Repo status fixes: first batch go-ahead (What to Cook, Better Parenting, Our Family Compass, Make 3D, Speech Therapy)</label></li>
+<li><label><input type="checkbox"> Plain summaries for repos with no schematic status (batch go-ahead)</label></li>
+<li><label><input type="checkbox"> Lessons log per linked repo (later)</label></li>
+<li><label><input type="checkbox"> Monthly checkup scheduling (permission needed)</label></li>
+    </ul>
+  </main>
+</div>
+<footer>Generated 2026-11-23 from the review (<code>04 AI/nursery_review_2026-11-22.md</code>) and the first monthly checkup (<code>01 Planning/monthly_checkup_2026-11-23.md</code>). Source is also on PR #225 and #227 (merged).</footer>
+</body>
+</html>
