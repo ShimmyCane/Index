@@ -51,7 +51,7 @@ For the first build, the page processor is replaced by hand-made assets (a JSON 
 |---|---|
 | Top | Title "Felix Stickers – [sheet name, 3+ words]" (convo Q1, Q4, Q11), then the ⚙️ settings button, then the Undo button next to it. Undo is on by default; a toggle in ⚙️ hides it. |
 | Play area | Background + creature. Free placement, overlap allowed. Takes most of the screen. |
-| Sheet card | One sheet: a plain main body in the middle (no face, no limbs drawn in) and eight smaller features around it: eyes, mouths, horns, wings, hats, bows (within Jimmy's 5–10). Peel any piece and place it on the body; features go on top. An empty dashed space stays where a piece was peeled. Reset puts them back. (convo v0.2, v0.3) |
+| Sheet | Walking Through the Woods, shown as the reference picture itself (same layout, same pixels), fitted to the play area. Each piece sits on its box in the picture. Peel a piece (its cutout is used only when peeled) and paste it back onto the body, on the same sheet; a peeled piece leaves a white empty space. Reset puts them back. (convo v0.6–v0.8) |
 | Save | "Save My Creature" (large purple button) and My Creations, on the bottom bar (convo Q6a). |
 | ⚙️ | Lower right, fades after a while, shows on a circle stroke (convo Q8). Undo toggle, Reset (with "Are you sure?"), Notes for improvement, errors (opt-in), the home-screen note, database check later. |
 
@@ -108,9 +108,29 @@ Not in the first build. When notes or creations must persist across devices, pla
 
 `index.html` (page, creature drawn inline as SVG), `css/app.css` (palette, gesture lock, sheet card, gear, panels), `js/sheet.js` (the sheet), `js/app.js` (engine: peel, move, two-finger rotate, press, undo, save, notes, errors, gear), `schematic.md`, `CLAUDE.md`, `convo/`.
 
+## Round 9 change (Jimmy, convo v0.9)
+
+The art is AI-generated and free to use, so it is committed in `art/`. The ⚙️ panel credits ChatGPT (pictures) and Claude (framework).
+
+## Round 8 change (Jimmy, convo v0.8)
+
+The sheet looks exactly like the reference picture, not a grid of cutouts. Cutouts are used only when a piece is peeled.
+
+## Round 6 change (Jimmy, convo v0.6)
+
+New sheet: Walking Through the Woods (replaces the Little Monster Tea Party sheet). Plain sage body; eight woods features.
+
+## Round 5 change (Jimmy, convo v0.5)
+
+The features are the elements identified on the reference sheet, redrawn as lookalike cutouts (not traced; the reference stays out of the repo). Ten features, within Jimmy's 5–10. The body starts on the sheet.
+
+## Round 4 change (Jimmy, convo v0.4)
+
+One sticker sheet, no bank. The whole play area is the sheet: peel a feature and paste it back onto the body on the same sheet.
+
 ## Round 3 change (Jimmy, convo v0.3)
 
-The main sticker is a plain body. Eyes, noses, mouths and the rest are small features on the sheet, peeled onto the body. The pre-drawn creature with its face is gone; the stage shows a dashed outline where the body goes. A grabbed sticker comes to the front.
+The main sticker is a plain body. Eyes, noses, mouths and the rest are small features on the sheet, peeled onto the body. The pre-drawn creature with its face is gone. A grabbed sticker comes to the front. (The dashed outline was removed in round 4.)
 
 ## Round 2 change (2026-11-23, Jimmy)
 

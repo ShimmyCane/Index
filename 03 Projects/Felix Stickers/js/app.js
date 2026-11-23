@@ -110,27 +110,39 @@
       n.dataset.uid = item.uid;
       n.setAttribute('role', 'button');
       n.setAttribute('aria-label', 'Sticker: ' + s.label + (item.committed ? ', stuck' : ', tap to stick'));
-      n.innerHTML = '<div class="stk">' + s.svg + '</div>';
+      n.innerHTML = '<div class="stk">' + artFor(s) + '</div>';
       placeStyle(n, item);
       host.appendChild(n);
     });
   }
-  // The sheet: one main sticker and small ones, all on the same card.
-  // A peeled sticker leaves an empty dashed space, as on a real sheet.
+  // The sheet is the reference picture itself. Each piece sits on its box in the picture;
+  // a peeled piece leaves its spot empty, so the sheet shows the same picture with holes.
   function renderTray() {
     var card = $('#sheetCard');
     card.innerHTML = '';
+    var page = el('div', 'sheetPage');
+    var base = window.FS_NATIVE_BASE;
+    if (base) page.appendChild(el('img', 'base', null)).src = base;
+    var W = SHEET.ref.w, H = SHEET.ref.h;
     SHEET.stickers.concat([SHEET.main]).forEach(function (s) {
       var gone = state.used.indexOf(s.id) !== -1;
       var n = el('div', 'slot' + (s.id === SHEET.main.id ? ' main' : '') + (gone ? ' empty' : ''));
       n.dataset.sid = s.id;
-      n.style.left = s.slot.x + '%';
-      n.style.top = s.slot.y + '%';
-      n.style.width = s.slot.size + '%';
+      n.style.left = (s.box.x / W * 100) + '%';
+      n.style.top = (s.box.y / H * 100) + '%';
+      n.style.width = (s.box.w / W * 100) + '%';
+      n.style.height = (s.box.h / H * 100) + '%';
       n.setAttribute('aria-label', gone ? 'Empty space: ' + s.label : 'Sticker: ' + s.label + '. Pull a corner to peel it.');
-      if (!gone) n.innerHTML = '<div class="stk">' + s.svg + '</div>';
-      card.appendChild(n);
+      if (!gone) n.innerHTML = '<div class="stk">' + artFor(s) + '</div>';
+      page.appendChild(n);
     });
+    card.appendChild(page);
+  }
+
+  // Native art when provided (private/native.js, local only); otherwise the SVG in sheet.js.
+  function artFor(s) {
+    var src = window.FS_NATIVE_ART && window.FS_NATIVE_ART[s.id];
+    return src ? '<img class="art" src="' + src + '" alt="" draggable="false">' : s.svg;
   }
 
   // A small random tilt, so every placed sticker looks hand-stuck.

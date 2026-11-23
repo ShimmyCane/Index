@@ -70,11 +70,6 @@ input, textarea { -webkit-user-select: text; user-select: text; touch-action: ma
   content: ''; position: absolute; left: -10%; right: -10%; bottom: -18%; height: 46%;
   background: var(--sage-deep); border-top: var(--line); border-radius: 50% 50% 0 0;
 }
-/* A dashed body outline: the spot where the peeled body goes. Not a drawn creature. */
-#spot {
-  position: absolute; left: 50%; bottom: 3%; transform: translateX(-50%);
-  height: 86%; width: auto; aspect-ratio: 1; opacity: .5; pointer-events: none;
-}
 /* Placed stickers sit above the sheet card; only the stickers take touches,
    so the empty play area never blocks the card. */
 #placed { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
@@ -98,35 +93,39 @@ input, textarea { -webkit-user-select: text; user-select: text; touch-action: ma
 @keyframes wiggle { 0%,100% { filter: none; } 50% { filter: brightness(1.06); } }
 @keyframes pop { 0% { scale: .6; } 70% { scale: 1.08; } 100% { scale: 1; } }
 
-/* Sticker sheet: one card with a main sticker and small ones on it, in the play area */
+/* The sticker sheet is the reference picture itself, fitted to the play area. */
 #sheetCard {
-  position: absolute; left: 3%; bottom: 4%; z-index: 5;
-  width: clamp(180px, 28vw, 300px); aspect-ratio: 1;
-  background: var(--paper); border: var(--line); border-radius: 18px;
-  box-shadow: 0 6px 0 var(--ink);
+  position: absolute; inset: 0; z-index: 1;
+  container-type: size;
+  background: var(--paper);
+  display: flex; align-items: center; justify-content: center;
   touch-action: none;
 }
-/* a faint stack of sheets behind the card */
-#sheetCard::after {
-  content: ''; position: absolute; inset: 0; z-index: -1; border-radius: 18px;
-  background: var(--paper); border: var(--line); transform: translate(7px, 7px) rotate(3deg);
+.sheetPage {
+  position: relative;
+  width: min(100cqw, calc(100cqh * 1312 / 1199));
+  aspect-ratio: 1312 / 1199;
+  background: #fff;
+  box-shadow: 0 6px 0 rgba(47,59,74,.18);
 }
+.sheetPage > img.base { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+/* a piece sits on its box in the picture; a peeled piece leaves its spot empty (white) */
 .slot {
-  position: absolute; aspect-ratio: 1; transform: translate(-50%, -50%);
-  border-radius: 16px; cursor: grab; transition: transform .12s ease, opacity .2s ease;
+  position: absolute; cursor: grab; border-radius: 6px;
+  transition: transform .12s ease;
 }
-.slot .stk { width: 100%; height: 100%; padding: 10%; }
-.slot.main .stk { padding: 6%; }
-.slot.lifting { transform: translate(-50%, -50%) scale(1.08) rotate(-5deg); }
+.slot .stk { width: 100%; height: 100%; padding: 0; background: none; border: 0; box-shadow: none; }
+.slot .stk svg { width: 100%; height: 100%; }
+.stk:has(img.art) { background: none; border: 0; box-shadow: none; padding: 0; }
+.stk img.art { width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none; }
+.slot.lifting { transform: scale(1.04) rotate(-3deg); }
 .slot.lifting::after {
-  /* the peel curl: a white corner lifting off the sticker */
-  content: ''; position: absolute; top: -2px; right: -2px; width: 34%; height: 34%;
+  /* the peel curl: a white corner lifting off the piece */
+  content: ''; position: absolute; top: -2px; right: -2px; width: 30%; height: 30%;
   background: linear-gradient(225deg, #fff 50%, #e7e1d3 50%);
   border-bottom-left-radius: 60%; box-shadow: -2px 2px 0 rgba(47,59,74,.25);
 }
-/* an empty space where a sticker was peeled: a dashed outline, like a real sheet */
-.slot.empty { border: 3px dashed var(--ink); opacity: .45; cursor: default; }
-.slot.empty .stk { display: none; }
+.slot.empty { visibility: hidden; }
 
 /* Bottom bar */
 #bottom {
@@ -179,6 +178,7 @@ textarea {
 .toggle { display: flex; align-items: center; gap: 10px; min-height: 48px; font-size: 18px; font-weight: 700; }
 .toggle input { width: 26px; height: 26px; accent-color: #a48cf0; }
 .hint { margin: 6px 0; font-size: 16px; line-height: 1.4; }
+.disclaimer { margin: 14px 4px 4px; text-align: center; font-size: 15px; opacity: .75; }
 .list { list-style: none; padding: 0; margin: 8px 0 0; }
 .list li {
   border: 2.5px solid var(--ink); border-radius: 14px; background: #fff;
