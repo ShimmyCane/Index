@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Three proposed checks: test page</title>
+<style>
+:root { --paper:#fdf8ef; --ink:#2b2b2b; --sage:#d6e8d4; --peach:#ffd9c4; --mint:#d3f0e6; --coral:#ffb3a7; --vanilla:#fff4d6; --line:#3a3a3a; --shadow:#3a3a3a; }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.55 "Quicksand","Segoe UI",system-ui,sans-serif; }
+.wrap { max-width:1100px; margin:0 auto; padding:16px 16px 120px; }
+h1 { font-size:1.6rem; margin:8px 0; }
+h2 { margin-top:2em; padding:10px 14px; border:2.5px solid var(--line); border-radius:14px 18px 14px 16px; background:var(--mint); box-shadow:0 4px 0 var(--shadow); font-size:1.2rem; }
+h3 { font-size:1.02rem; margin:1.2em 0 .4em; }
+.card { border:2.5px solid var(--line); border-radius:14px; background:#fff; padding:12px 14px; box-shadow:0 4px 0 var(--shadow); margin:12px 0; }
+.note { font-size:.92rem; }
+.callout { border:2.5px solid var(--line); border-radius:16px; background:var(--coral); padding:12px 16px; box-shadow:0 4px 0 var(--shadow); }
+.tablewrap { overflow-x:auto; border:2.5px solid var(--line); border-radius:14px; background:#fff; box-shadow:0 4px 0 var(--shadow); margin:10px 0; }
+table { border-collapse:collapse; width:100%; min-width:620px; font-size:.9rem; }
+th, td { border-bottom:1px solid #bbb; padding:7px 9px; text-align:left; vertical-align:top; }
+th { background:var(--peach); }
+.ok { color:#14623a; font-weight:700; } .bad { color:#9b1c1c; font-weight:700; } .na { color:#666; }
+.swatch { display:inline-block; padding:4px 8px; border-radius:8px; border:1px solid #888; min-width:150px; text-align:center; }
+.toggle { display:inline-flex; align-items:center; gap:10px; min-height:48px; padding:10px 14px; border:2.5px solid var(--line); border-radius:14px; background:var(--vanilla); box-shadow:0 4px 0 var(--shadow); font-weight:700; cursor:pointer; }
+.toggle input { transform:scale(1.5); }
+.summary { font-size:1.05rem; font-weight:700; }
+.checklist { list-style:none; padding:0; }
+.checklist li { background:var(--vanilla); border:2px solid var(--line); border-radius:12px; padding:10px 12px; margin:8px 0; }
+.checklist input { transform:scale(1.4); margin-right:8px; }
+
+/* sample app: the thing being checked. "as built" has faults; the fixed mode removes them. */
+.sample { width:360px; max-width:100%; border:2.5px dashed var(--line); border-radius:14px; background:var(--vanilla); padding:12px; color:var(--ink); }
+.sample .btn { display:inline-block; margin:6px 6px 6px 0; padding:8px 14px; min-height:48px; border:2px solid var(--line); border-radius:12px; background:var(--peach); color:var(--ink); font:inherit; font-weight:700; cursor:pointer; }
+.sample .btn.primary { background:var(--sage); }
+.sample .btn.danger { background:var(--coral); }
+.sample .btn.small { min-height:34px; padding:4px 10px; font-size:.9rem; }
+.sample .btn:hover, .sample .btn.is-hover { background:#fff; }
+.sample .btn:active, .sample .btn.is-active { transform:translateY(2px); }
+.sample .btn:focus-visible, .sample .btn.is-focus { outline:3px solid #1d5c8a; outline-offset:2px; }
+.sample .btn.is-loading { background:#bdbdbd; }
+.sample .btn[aria-disabled="true"], .sample .btn:disabled { opacity:.5; }
+.sample .btn.no-focus-ring, .sample .btn.no-focus-ring:focus-visible, .sample .btn.no-focus-ring.is-focus { outline:none; }
+.sample .grey { color:#8a8a8a; margin:6px 0; }
+.sample .drag { border:2px solid var(--line); border-radius:12px; background:#fff; padding:14px; margin:8px 0; touch-action:none; }
+.sample .fly { display:none; }
+.sample.fixed .fly { display:inline-block; }
+.sample .scroller { margin:8px 0; }
+.sample .scroller table { min-width:520px; font-size:.85rem; background:#fff; }
+.sample .scroller.contained { overflow-x:auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Three proposed checks: test page</h1>
+  <p>This page tests the three changes I'd suggest, against the checks we use today. It runs both on one small sample app, with its faults left in. Try the switch below, then tick the ones you want built.</p>
+  <div class="callout">
+    <p><strong>Where the improvement shows.</strong> Today's check looks for JavaScript errors, sideways scrolling and whether controls respond. It does not look at colour contrast, the six control states, or touch size and fallbacks. So the sample below passes today's check except for the sideways scroll, but still has problems the proposals would catch.</p>
+    <p><strong>Important:</strong> the sideways-scroll result for today's check depends on the window width. Open this page on a phone (390 px wide) to see that check fail. On a desktop it passes.</p>
+  </div>
+
+  <h2>1. Result summary</h2>
+  <div class="card">
+    <label class="toggle"><input type="checkbox" id="fixToggle"> Apply the sample fixes (see what passes)</label>
+    <p class="summary" id="summary">Running checks...</p>
+    <p class="note">"Problems found" counts failed items on the sample. "Not checked" means today's check does not look at that thing at all. The numbers measure this sample only. They show how much each check catches, not how much it improves a real app.</p>
+    <div class="tablewrap">
+      <table id="resultTable">
+        <thead><tr><th>Check</th><th>What it catches</th><th>Today's smoke test</th><th>With the three proposals</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2>2. The sample app (faults left in)</h2>
+  <div class="card">
+    <p class="note">This is what gets checked. Buttons, a grey note, a drag-only panel with no button alternative, and a wide table. Switch on "Apply the sample fixes" above to see the same sample with the faults repaired.</p>
+    <div class="sample" id="sample">
+      <p class="grey" id="greyNote">Grey note: a small hint for the child.</p>
+      <button class="btn primary" id="btnSave">Save</button>
+      <button class="btn no-focus-ring" id="btnNext">Next</button>
+      <button class="btn danger" id="btnDelete" aria-disabled="true">Delete</button>
+      <button class="btn small" id="btnUndo">Undo</button>
+      <div class="drag" id="drag">Drag to fly. (No button alternative.)
+        <button class="btn fly" id="flyBtn" type="button">Fly</button>
+      </div>
+      <div class="scroller" id="scroller">
+        <table><thead><tr><th>Name</th><th>Score</th><th>Level</th><th>Stars</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>Sample</td><td>10</td><td>2</td><td>3</td><td>A row that is wide on purpose</td></tr></tbody></table>
+      </div>
+      <p class="note">Clicks on Delete so far: <span id="clicks">0</span></p>
+    </div>
+    <p class="note">Try it: click Delete in the "as built" sample. The count goes up, so a disabled-looking button still works.</p>
+  </div>
+
+  <h2>3. Contrast: colour pairs from the palette</h2>
+  <div class="card">
+    <p class="note">The WCAG rule: normal text needs 4.5:1, large text (24 px, or 18.66 px bold) needs 3:1. Today's smoke test does not check this. The proposal computes the ratio for every pair.</p>
+    <div class="tablewrap"><table id="contrastTable">
+      <thead><tr><th>Pair</th><th>Sample</th><th>Ratio</th><th>Needed</th><th>Result</th><th>Suggested text colour</th></tr></thead>
+      <tbody></tbody></table></div>
+  </div>
+
+  <h2>4. The three proposals, in plain words</h2>
+  <div class="card">
+    <h3>A. Contrast check (from tastemaker)</h3>
+    <p><strong>What:</strong> for each piece of text, read its colour and the colour behind it, compute the ratio, and fail anything under the rule. Run it in light and dark mode.</p>
+    <p><strong>Where:</strong> a new step 9 in the smoke test. Suggested fix shown in table 3.</p>
+    <p><strong>Cost:</strong> a few seconds per page. <strong>Risk:</strong> a text colour that passes can still look poor; it is a check, not taste.</p>
+    <h3>B. Six control states (from dembrandt)</h3>
+    <p><strong>What:</strong> every main button must look different in rest, hover, focus, active, disabled and loading. A button that looks disabled must not respond to clicks.</p>
+    <p><strong>Where:</strong> a new step 10 in the smoke test.</p>
+    <p><strong>Cost:</strong> a short extra pass per page. <strong>Risk:</strong> hover does not exist on a touch screen, so hover is only judged on desktop.</p>
+    <h3>C. Touch and phone gates (from forever-ai-components)</h3>
+    <p><strong>What:</strong> three gates. Every tap target is at least 48 px tall. Every drag-only control has a button alternative. Nothing scrolls sideways inside a panel at phone width.</p>
+    <p><strong>Where:</strong> a new gate section in the smoke test, next to step 3 (touch).</p>
+    <p><strong>Cost:</strong> small. <strong>Risk:</strong> a drag-only control in a game may be fine with a keyboard instead; say so in the page rather than failing it.</p>
+  </div>
+
+  <h2>5. Choose what to build</h2>
+  <div class="card">
+    <p class="note">Tick the ones you want. The ticks are not saved; tell me which ones.</p>
+    <ul class="checklist">
+      <li><label><input type="checkbox"> A. Contrast check</label></li>
+      <li><label><input type="checkbox"> B. Six control states</label></li>
+      <li><label><input type="checkbox"> C. Touch and phone gates</label></li>
+    </ul>
+  </div>
+</div>
+
+<script>
+(function () {
+  // ---------- colour maths (WCAG 2.x) ----------
+  function hex2rgb(h){ h=h.replace('#',''); return [0,2,4].map(i=>parseInt(h.substr(i,2),16)); }
+  function lin(c){ c/=255; return c<=0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055,2.4); }
+  function lum(h){ const [r,g,b]=hex2rgb(h); return 0.2126*lin(r)+0.7152*lin(g)+0.0722*lin(b); }
+  function ratio(a,b){ const x=lum(a), y=lum(b); return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05); }
+  function mixToBlack(h,t){ return '#' + hex2rgb(h).map(c=>Math.round(c*(1-t)).toString(16).padStart(2,'0')).join(''); }
+  function suggest(fg,bg,need){ for(let t=0;t<=1.0001;t+=0.02){ const c=mixToBlack(fg,t); if(ratio(c,bg)>=need) return c; } return '#000000'; }
+  function rgbToHex(str){ const m=str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/); if(!m) return null; if(m[4]!==undefined && parseFloat(m[4])===0) return null; return '#'+[1,2,3].map(i=>(+m[i]).toString(16).padStart(2,'0')).join(''); }
+  function bgOf(el){ let e=el; while(e){ const h=rgbToHex(getComputedStyle(e).backgroundColor); if(h) return h; e=e.parentElement; } return '#ffffff'; }
+
+  // palette pairs: reference only (what the proposal would compute for the palette)
+  const pairs = [
+    ['Ink on vanilla','#2b2b2b','#fff4d6','normal'],
+    ['Ink on sage','#2b2b2b','#d6e8d4','normal'],
+    ['Ink on peach','#2b2b2b','#ffd9c4','normal'],
+    ['Ink on mint','#2b2b2b','#d3f0e6','normal'],
+    ['Ink on coral','#2b2b2b','#ffb3a7','normal'],
+    ['Grey hint on vanilla','#8a8a8a','#fff4d6','normal'],
+    ['Grey hint on mint','#9aa0a6','#d3f0e6','normal'],
+    ['White label on mint','#ffffff','#d3f0e6','normal'],
+    ['White label on peach','#ffffff','#ffd9c4','normal'],
+    ['White label on coral (large, bold)','#ffffff','#ffb3a7','large'],
+    ['Link blue on vanilla','#1d5c8a','#fff4d6','normal'],
+    ['Ink on sea green title (large)','#2b2b2b','#8fbf8a','large'],
+  ];
+  const need = k => k==='large' ? 3 : 4.5;
+
+  const sample = document.getElementById('sample');
+  const btnSave = document.getElementById('btnSave');
+  const btnNext = document.getElementById('btnNext');
+  const btnDelete = document.getElementById('btnDelete');
+  const btnUndo = document.getElementById('btnUndo');
+  const scroller = document.getElementById('scroller');
+  const drag = document.getElementById('drag');
+  const flyBtn = document.getElementById('flyBtn');
+  const greyNote = document.getElementById('greyNote');
+  const clicksEl = document.getElementById('clicks');
+  const fixToggle = document.getElementById('fixToggle');
+  let clicks = 0;
+  let errorCount = 0;
+  window.addEventListener('error', () => { errorCount++; });
+  btnDelete.addEventListener('click', () => { clicks++; clicksEl.textContent = clicks; });
+
+  // "as built" has faults; "fixed" removes them
+  function applyMode(fixed){
+    sample.classList.toggle('fixed', fixed);
+    btnNext.classList.toggle('no-focus-ring', !fixed);
+    if (fixed) {
+      btnDelete.setAttribute('disabled',''); btnDelete.removeAttribute('aria-disabled');
+      scroller.classList.add('contained');
+      greyNote.style.color = suggest('#8a8a8a','#fff4d6',4.5);
+      btnUndo.style.color = suggest('#9aa0a6','#d3f0e6',4.5);
+      btnUndo.style.background = '#d3f0e6';
+      btnUndo.style.minHeight = '48px';
+    } else {
+      btnDelete.removeAttribute('disabled'); btnDelete.setAttribute('aria-disabled','true');
+      scroller.classList.remove('contained');
+      greyNote.style.color = '#8a8a8a';
+      btnUndo.style.color = '#9aa0a6';
+      btnUndo.style.background = '#d3f0e6';
+      btnUndo.style.minHeight = '';
+    }
+  }
+
+  // today's smoke test: errors on load, sideways scroll of the page at this width, clicks register
+  function checkToday(){
+    return {
+      errorsFail: errorCount > 0,
+      scrollFail: document.documentElement.scrollWidth > window.innerWidth,
+    };
+  }
+
+  // proposal A: contrast of the sample's own text against what sits behind it
+  function checkSampleContrast(){
+    return [greyNote, btnSave, btnNext, btnDelete, btnUndo].map(el => {
+      const fg = rgbToHex(getComputedStyle(el).color) || '#000000';
+      const bg = bgOf(el);
+      const r = ratio(fg, bg), n = 4.5, pass = r >= n;
+      return { name: el.id === 'greyNote' ? 'Grey note' : el.textContent.trim(), fg, bg, r, pass };
+    });
+  }
+
+  // proposal B: six control states, and a disabled-looking control must not respond
+  function stateSig(el){
+    const cs = getComputedStyle(el);
+    return [cs.backgroundColor, cs.borderColor, cs.boxShadow, cs.outlineStyle, cs.outlineColor, cs.outlineWidth, cs.transform, cs.opacity].join('|');
+  }
+  function checkStates(){
+    const out = [];
+    [['Save', btnSave], ['Next', btnNext], ['Delete', btnDelete]].forEach(([name, el]) => {
+      ['is-hover','is-focus','is-active','is-loading'].forEach(c => el.classList.remove(c));
+      const rest = stateSig(el);
+      const flags = [];
+      ['is-hover','is-focus','is-active','is-loading'].forEach(c => {
+        el.classList.add(c);
+        const same = stateSig(el) === rest;
+        el.classList.remove(c);
+        if (same) flags.push(c.replace('is-','') + ' looks the same as rest');
+      });
+      const looksDisabled = el.hasAttribute('disabled') || el.getAttribute('aria-disabled') === 'true';
+      if (looksDisabled) {
+        const before = clicks;
+        el.click();
+        if (clicks > before) flags.push('looks disabled but still responds to clicks');
+        clicks = before; clicksEl.textContent = clicks;
+      }
+      out.push({ name, flags });
+    });
+    return out;
+  }
+
+  // proposal C: tap targets, drag-only controls, sideways scroll inside a panel
+  function checkTouch(){
+    const targets = [btnSave, btnNext, btnDelete, btnUndo];
+    const small = targets.filter(b => b.getBoundingClientRect().height < 48).map(b => b.textContent.trim());
+    const hasFallback = flyBtn.offsetParent !== null;
+    const sideways = scroller.scrollWidth > scroller.clientWidth + 1 && getComputedStyle(scroller).overflowX === 'visible';
+    return { small, hasFallback, sideways };
+  }
+
+  const pill = (ok, label) => `<span class="${ok ? 'ok' : 'bad'}">${label}</span>`;
+  function render(){
+    applyMode(fixToggle.checked);
+    const today = checkToday();
+    const sc = checkSampleContrast();
+    const st = checkStates();
+    const touch = checkTouch();
+
+    // reference palette table
+    document.querySelector('#contrastTable tbody').innerHTML = pairs.map(([name,fg,bg,size]) => {
+      const r = ratio(fg,bg), n = need(size), pass = r >= n;
+      const fix = pass ? null : suggest(fg,bg,n);
+      return `<tr><td>${name}</td><td><span class="swatch" style="background:${bg};color:${fg}">Sample text</span></td><td>${r.toFixed(2)}:1</td><td>${n}:1</td><td>${pill(pass, pass ? 'PASS' : 'FAIL')}</td><td>${fix ? `<span class="swatch" style="background:${bg};color:${fix}">${fix}</span>` : '<span class="na">no change</span>'}</td></tr>`;
+    }).join('');
+
+    const contrastFails = sc.filter(c => !c.pass);
+    const stateFlags = st.reduce((n, r) => n + r.flags.length, 0);
+    const stateDetail = st.filter(r => r.flags.length).map(r => `${r.name}: ${r.flags.join('; ')}`).join(' | ');
+    const fallbackFail = !touch.hasFallback;
+
+    const rows = [
+      ['Page errors on load', 'JavaScript errors while the page runs', pill(!today.errorsFail, today.errorsFail ? 'FAIL' : 'PASS'), pill(!today.errorsFail, today.errorsFail ? 'FAIL' : 'PASS')],
+      ['Sideways scroll of the page', 'the page moves left and right', pill(!today.scrollFail, today.scrollFail ? 'FAIL' : 'PASS') + ' <span class="na">(depends on width; run at 390 px to see a fail)</span>', pill(!touch.sideways, touch.sideways ? 'FAIL: a panel scrolls sideways' : 'PASS')],
+      ['Contrast of the sample text (A)', 'text that is hard to read on its colour', '<span class="na">not checked</span>', contrastFails.length ? pill(false, `FAIL: ${contrastFails.map(c=>c.name).join(', ')}`) : pill(true, 'PASS')],
+      ['Six control states (B)', 'a button that looks the same in a state, or looks disabled but works', '<span class="na">not checked</span>', stateFlags ? pill(false, `FAIL: ${stateDetail}`) : pill(true, 'PASS')],
+      ['Tap targets 48 px (C)', 'buttons too small for a finger', '<span class="na">not checked</span>', touch.small.length ? pill(false, `FAIL: ${touch.small.join(', ')}`) : pill(true, 'PASS')],
+      ['Drag-only control has a button (C)', 'a control only a drag can use', '<span class="na">not checked</span>', fallbackFail ? pill(false, 'FAIL: no button alternative') : pill(true, 'PASS')],
+    ];
+    document.querySelector('#resultTable tbody').innerHTML = rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('');
+
+    const todayFound = (today.errorsFail ? 1 : 0) + (today.scrollFail ? 1 : 0);
+    const proposalFound = (touch.sideways ? 1 : 0) + contrastFails.length + stateFlags + touch.small.length + (fallbackFail ? 1 : 0);
+    document.getElementById('summary').textContent =
+      `Today's checks find ${todayFound} problem(s) on this sample. With the three proposals they find ${proposalFound}. ` +
+      (proposalFound === 0 ? 'Nothing left to find in this mode.' : `That is ${proposalFound - todayFound} more problem(s) than today's checks, in this mode.`);
+  }
+
+  fixToggle.addEventListener('change', render);
+  window.addEventListener('resize', render);
+  render();
+})();
+</script>
+</body>
+</html>
