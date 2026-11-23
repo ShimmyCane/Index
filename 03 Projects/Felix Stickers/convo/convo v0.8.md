@@ -22,4 +22,4 @@
 ## Question for Jimmy
 
 - The public build still needs the licence answer from convo v0.7 before the reference picture can be published. Until then the public sheet is the lookalike layout.
-  - Answer:
+  - Answer: **Yes.** The public build now shows the reference picture (see convo v0.9).

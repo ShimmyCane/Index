@@ -16,4 +16,4 @@
 ## Question for Jimmy
 
 - For the public GitHub Pages build, may the native cutouts (from the reference) be published? If yes, confirm the licence or permission and I'll commit them. If no, the public build stays on the lookalikes.
-  - Answer:
+  - Answer: **Yes. The licence is settled: the art is AI-generated and free to use (see convo v0.9).**
