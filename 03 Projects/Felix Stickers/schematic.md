@@ -51,7 +51,7 @@ For the first build, the page processor is replaced by hand-made assets (a JSON 
 |---|---|
 | Top | Title "Felix Stickers – [sheet name, 3+ words]" (convo Q1, Q4, Q11), then the ⚙️ settings button, then the Undo button next to it. Undo is on by default; a toggle in ⚙️ hides it. |
 | Play area | Background + creature. Free placement, overlap allowed. Takes most of the screen. |
-| Sheet | The whole play area is one sticker sheet (no bank, no separate card). A plain body in the middle and eight features around it on the same sheet. Peel a piece and paste it back onto the body, also on the sheet; an empty dashed space stays where it came from. Reset puts them back. (convo v0.2–v0.4) |
+| Sheet | The whole play area is one sticker sheet (no bank, no separate card). A plain body on the sheet (in the middle) and ten features around it: the parts identified on the "Create Your Monster" reference, redrawn as lookalike cutouts (eyes, mouths, wings, horns, a balloon, a flower). Peel a piece and paste it back onto the body, on the same sheet; an empty dashed space stays where it came from. Reset puts them back. (convo v0.2–v0.5) |
 | Save | "Save My Creature" (large purple button) and My Creations, on the bottom bar (convo Q6a). |
 | ⚙️ | Lower right, fades after a while, shows on a circle stroke (convo Q8). Undo toggle, Reset (with "Are you sure?"), Notes for improvement, errors (opt-in), the home-screen note, database check later. |
 
@@ -107,6 +107,10 @@ Not in the first build. When notes or creations must persist across devices, pla
 ## Files (planned)
 
 `index.html` (page, creature drawn inline as SVG), `css/app.css` (palette, gesture lock, sheet card, gear, panels), `js/sheet.js` (the sheet), `js/app.js` (engine: peel, move, two-finger rotate, press, undo, save, notes, errors, gear), `schematic.md`, `CLAUDE.md`, `convo/`.
+
+## Round 5 change (Jimmy, convo v0.5)
+
+The features are the elements identified on the reference sheet, redrawn as lookalike cutouts (not traced; the reference stays out of the repo). Ten features, within Jimmy's 5–10. The body starts on the sheet.
 
 ## Round 4 change (Jimmy, convo v0.4)
 
