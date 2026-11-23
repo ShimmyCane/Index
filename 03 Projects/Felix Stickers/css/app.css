@@ -86,7 +86,7 @@ input, textarea { -webkit-user-select: text; user-select: text; touch-action: ma
   padding: 9%; box-shadow: 0 6px 0 rgba(47,59,74,.22);
 }
 .stk svg { width: 100%; height: 100%; display: block; overflow: visible; }
-.ps.floating .stk { box-shadow: 0 14px 0 rgba(47,59,74,.22), 0 0 0 4px var(--sun); }
+.ps.floating .stk { box-shadow: 0 14px 0 rgba(47,59,74,.22); }
 .ps.committed .stk { box-shadow: 0 3px 0 var(--ink); }
 .ps.turning .stk, .ps.nudge { animation: wiggle .3s ease; }
 .ps.popped { animation: pop .25s ease; }
@@ -118,14 +118,23 @@ input, textarea { -webkit-user-select: text; user-select: text; touch-action: ma
 .slot .stk svg { width: 100%; height: 100%; }
 .stk:has(img.art) { background: none; border: 0; box-shadow: none; padding: 0; }
 .stk img.art { width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none; }
-.slot.lifting { transform: scale(1.04) rotate(-3deg); }
-.slot.lifting::after {
-  /* the peel curl: a white corner lifting off the piece */
-  content: ''; position: absolute; top: -2px; right: -2px; width: 30%; height: 30%;
-  background: linear-gradient(225deg, #fff 50%, #e7e1d3 50%);
-  border-bottom-left-radius: 60%; box-shadow: -2px 2px 0 rgba(47,59,74,.25);
-}
+.slot.lifting { transform: scale(1.02); }
+
 .slot.empty { visibility: hidden; }
+/* peel curl: the flap is a copy of the piece; the base is clipped to what is still stuck */
+.slot .flap { position: absolute; inset: 0; pointer-events: none; }
+.slot .flap .stk { width: 100%; height: 100%; padding: 0; background: none; border: 0; box-shadow: none; }
+.slot .flap .stk img.art, .slot .flap .stk svg { width: 100%; height: 100%; }
+.slot .flap.back { background: #fffdf8; border-radius: 10px; }
+.slot .flap.back .stk { visibility: hidden; }
+.slot.settle .stk, .slot.settle .flap { transition: clip-path .22s ease, transform .22s ease; }
+/* a sticker that has just been pressed down onto the sheet */
+.ps.stick { animation: stick .32s ease; }
+@keyframes stick {
+  0% { scale: 1.14; }
+  60% { scale: .96; }
+  100% { scale: 1; }
+}
 
 /* Bottom bar */
 #bottom {

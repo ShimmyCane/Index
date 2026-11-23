@@ -7,7 +7,8 @@
   var SHEET = window.FS_SHEET;
   var KEYS = { prefs: 'fs.prefs.v1', creations: 'fs.creations.v1', notes: 'fs.notes.v1' };
   var MAX_UNDO = 50;
-  var PEEL_PULL = 26;   // px a finger must pull a sticker before it lifts off the sheet
+  var PEEL_PULL = 0.9;  // a sticker comes away after the finger pulls 90% of its own (shorter) size
+  var PEEL_TURN = 180;  // degrees the lifted flap turns over while it is pulled
   var TAP_SLOP = 8;     // px a press may wander and still count as a press
 
   var stickerById = {};
@@ -158,7 +159,9 @@
     pointers.set(e.pointerId, pt);
     var sid = tile.dataset.sid;
     setLast(stickerById[sid].label);
-    gesture = { kind: 'peel', pid: e.pointerId, sid: sid, start: pt, before: snapshot(), tile: tile, detached: false };
+    var box = tile.getBoundingClientRect();
+    gesture = { kind: 'peel', pid: e.pointerId, sid: sid, start: pt, before: snapshot(), tile: tile, detached: false,
+      pull: PEEL_PULL * Math.min(box.width, box.height) };
     tile.classList.add('lifting');
   }
 
@@ -204,8 +207,79 @@
     if (node) node.classList.add('dragging');
   }
 
+  /* ---- peel curl: while the piece is pulled, the pulled part folds back like paper ----
+     p = how far it is pulled (0..1). Axis and sign come from the pull direction. The
+     base keeps the rest of the piece; a flap with the pulled part turns over its fold line. */
+  function curl(tile, dx, dy, p) {
+    if (p <= 0) return uncurl(tile);
+    var base = tile.querySelector('.stk');
+    var flap = tile.querySelector('.flap');
+    if (!flap) {
+      flap = el('div', 'flap');
+      flap.innerHTML = '<div class="stk">' + base.innerHTML + '</div>';
+      tile.appendChild(flap);
+    }
+    tile.classList.remove('settle');
+    var horiz = Math.abs(dx) >= Math.abs(dy);
+    var sign = horiz ? (dx >= 0 ? 1 : -1) : (dy >= 0 ? 1 : -1);
+    var P = clamp(p, 0, 1), R = 1 - P;
+    var turn = P * PEEL_TURN, c = Math.cos(turn * Math.PI / 180);
+    var pct = function (v) { return (v * 100).toFixed(2) + '%'; };
+    var baseClip, flapClip, origin, scale;
+    if (horiz && sign > 0) {       // pulled right: right part lifts
+      baseClip = 'inset(0 ' + pct(P) + ' 0 0)';
+      flapClip = 'inset(0 0 0 ' + pct(R) + ')';
+      origin = pct(R) + ' 50%'; scale = 'scaleX(' + c.toFixed(3) + ')';
+    } else if (horiz) {            // pulled left
+      baseClip = 'inset(0 0 0 ' + pct(P) + ')';
+      flapClip = 'inset(0 ' + pct(R) + ' 0 0)';
+      origin = pct(P) + ' 50%'; scale = 'scaleX(' + c.toFixed(3) + ')';
+    } else if (sign > 0) {         // pulled down: bottom part lifts
+      baseClip = 'inset(0 0 ' + pct(P) + ' 0)';
+      flapClip = 'inset(' + pct(R) + ' 0 0 0)';
+      origin = '50% ' + pct(R); scale = 'scaleY(' + c.toFixed(3) + ')';
+    } else {                       // pulled up: top part lifts
+      baseClip = 'inset(' + pct(P) + ' 0 0 0)';
+      flapClip = 'inset(0 0 ' + pct(R) + ' 0)';
+      origin = '50% ' + pct(P); scale = 'scaleY(' + c.toFixed(3) + ')';
+    }
+    base.style.clipPath = baseClip;
+    flap.style.clipPath = flapClip;
+    flap.style.transformOrigin = origin;
+    flap.style.transform = scale;
+    flap.classList.toggle('back', turn > 90);     // past the fold line we see the back of the sticker
+    flap.style.filter = 'drop-shadow(0 ' + (2 + 8 * P).toFixed(1) + 'px ' + (3 + 6 * P).toFixed(1) + 'px rgba(47,59,74,.28))';
+  }
+
+  // Let go before the piece comes away: it springs back flat.
+  function uncurl(tile) {
+    var flap = tile.querySelector('.flap');
+    if (!flap) return;
+    tile.classList.add('settle');
+    var base = tile.querySelector('.stk');
+    base.style.clipPath = 'inset(0 0 0 0)';
+    flap.style.clipPath = 'inset(0 100% 0 0)';
+    flap.style.filter = 'none';
+    setTimeout(function () {
+      if (tile.parentNode) { flap.remove(); base.style.clipPath = ''; tile.classList.remove('settle'); }
+    }, 230);
+  }
+
+  // True when the point is over the empty spot this sticker came from on the sheet.
+  function overSpot(pt, sid) {
+    var spot = document.querySelector('.slot[data-sid="' + sid + '"]');
+    if (!spot) return false;
+    var b = spot.getBoundingClientRect();
+    return pt.x >= b.left && pt.x <= b.right && pt.y >= b.top && pt.y <= b.bottom;
+  }
+
   function detachFromSheet(pt) {
-    var p = toPercent(pt);
+    // the piece comes away where the finger has pulled it, so it does not jump
+    var r = gesture.tile.getBoundingClientRect();
+    var p = toPercent({
+      x: r.left + r.width / 2 + (pt.x - gesture.start.x),
+      y: r.top + r.height / 2 + (pt.y - gesture.start.y)
+    });
     var item = { uid: nextUid++, stickerId: gesture.sid, x: p.x, y: p.y, rot: playfulAngle(), committed: false };
     state.placed.push(item);
     if (state.used.indexOf(gesture.sid) === -1) state.used.push(gesture.sid);
@@ -222,8 +296,6 @@
     gesture.moved = true;
     gesture.fromPeel = true;
     gesture.detached = true;
-    var t = document.querySelector('.slot.lifting');
-    if (t) t.classList.remove('lifting');
   }
 
   function onMove(e) {
@@ -235,7 +307,9 @@
 
     if (gesture.kind === 'peel') {
       if (e.pointerId !== gesture.pid) return;
-      if (dist(gesture.start, pt) < PEEL_PULL) return;
+      var d = dist(gesture.start, pt);
+      curl(gesture.tile, pt.x - gesture.start.x, pt.y - gesture.start.y, Math.min(1, d / gesture.pull));
+      if (d < gesture.pull) return;
       detachFromSheet(pt);
     }
 
@@ -260,9 +334,11 @@
   function onUp(e) {
     var wasDown = pointers.delete(e.pointerId);
     if (!gesture || !wasDown) return;
+    var pt = { x: e.clientX, y: e.clientY };
 
     if (gesture.kind === 'peel' && e.pointerId === gesture.pid) {
-      // pressed the sheet and let go before it lifted: nothing happens
+      // let go before it came away: it springs back onto the sheet
+      uncurl(gesture.tile);
       var t = document.querySelector('.slot.lifting');
       if (t) t.classList.remove('lifting');
       gesture = null;
@@ -282,13 +358,17 @@
       var item = findItem(gesture.uid);
       var n = elFor(item.uid);
       if (n) n.classList.remove('dragging', 'popped');
-      if (!gesture.moved && !gesture.fromPeel && !item.committed) {
-        // a press on a floating sticker sticks it for this session
+      var pressed = !gesture.moved && !gesture.fromPeel;      // a press on a floating sticker
+      var backOn = gesture.moved && overSpot(pt, item.stickerId); // dragged back onto its own spot
+      if (!item.committed && (pressed || backOn)) {
+        // it sticks down
         item.committed = true;
         pushUndo(gesture.before);
         renderStage();
+        var m = elFor(item.uid);
+        if (m) m.classList.add('stick');
         setLast(stickerById[item.stickerId].label + ' (stuck)');
-      } else if (gesture.moved) {
+      } else if (gesture.moved || gesture.fromPeel) {
         pushUndo(gesture.before);
       }
       gesture = null;
