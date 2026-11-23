@@ -1,0 +1,214 @@
+:root {
+  --vanilla: #fff6e9;
+  --sage: #cfe6c4;
+  --sage-deep: #9fcb92;
+  --peach: #ffd0b5;
+  --mint: #cfeee0;
+  --coral: #ff9e8a;
+  --sun: #ffd84d;
+  --ink: #2f3b4a;
+  --paper: #fffdf8;
+  --line: 3px solid var(--ink);
+  --shadow: 0 4px 0 var(--ink);
+  --r: 18px;
+}
+
+* { box-sizing: border-box; }
+
+/* Gesture lock: the play area owns every touch; no zoom, no pull-to-refresh. */
+html, body {
+  margin: 0; height: 100%; overflow: hidden;
+  touch-action: none; overscroll-behavior: none;
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
+  font-family: 'Quicksand', system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  background: var(--vanilla);
+}
+body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; padding-top: env(safe-area-inset-top); }
+input, textarea { -webkit-user-select: text; user-select: text; touch-action: manipulation; font: inherit; }
+.allow-scroll { touch-action: pan-y; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+/* Top bar */
+#top {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px; min-height: 64px;
+  background: var(--paper); border-bottom: var(--line);
+}
+#title { flex: 1; margin: 0; font-size: clamp(16px, 2.6vw, 24px); line-height: 1.15; font-weight: 700; }
+.topbtns { display: flex; gap: 10px; align-items: center; }
+
+/* Buttons: big touch targets, offset shadow */
+.btn {
+  min-height: 52px; min-width: 52px; padding: 0 18px;
+  border: var(--line); border-radius: 16px; background: var(--paper);
+  color: var(--ink); font: 700 18px 'Quicksand', system-ui, sans-serif;
+  box-shadow: var(--shadow); cursor: pointer;
+  transition: transform .08s ease, box-shadow .08s ease;
+}
+.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+.btn:disabled { opacity: .45; }
+.btn.round { border-radius: 50%; width: 52px; padding: 0; background: var(--sun); }
+.btn.pill { border-radius: 999px; }
+.btn.small { min-height: 44px; font-size: 16px; }
+.btn.wide { width: 100%; margin-top: 8px; }
+.btn.save {
+  background: #a48cf0; color: #fff; font-size: 20px; padding: 0 26px; min-height: 60px;
+}
+
+/* Play area */
+#stage {
+  position: relative; flex: 1; min-height: 0; overflow: hidden;
+}
+#backdrop {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle, rgba(47,59,74,.08) 2px, transparent 2.5px) 0 0 / 34px 34px,
+    linear-gradient(180deg, #fff6e9 0%, #dff3ea 60%, var(--sage) 60%, var(--sage) 100%);
+}
+#backdrop::after {
+  content: ''; position: absolute; left: -10%; right: -10%; bottom: -18%; height: 46%;
+  background: var(--sage-deep); border-top: var(--line); border-radius: 50% 50% 0 0;
+}
+#creature {
+  position: absolute; left: 50%; bottom: 2%; transform: translateX(-50%);
+  height: 92%; width: auto; max-width: 92%; aspect-ratio: 300 / 360;
+  pointer-events: none;
+}
+/* Placed stickers sit above the sheet card; only the stickers take touches,
+   so the empty play area never blocks the card. */
+#placed { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+
+/* Stickers */
+.ps {
+  position: absolute; width: 19%; aspect-ratio: 1; pointer-events: auto;
+  transform-origin: 50% 50%; touch-action: none; cursor: grab;
+  transition: box-shadow .15s ease;
+}
+.ps .stk { width: 100%; height: 100%; }
+.stk {
+  background: var(--paper); border: var(--line); border-radius: 22%;
+  padding: 9%; box-shadow: 0 6px 0 rgba(47,59,74,.22);
+}
+.stk svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.ps.floating .stk { box-shadow: 0 14px 0 rgba(47,59,74,.22), 0 0 0 4px var(--sun); }
+.ps.committed .stk { box-shadow: 0 3px 0 var(--ink); }
+.ps.turning .stk, .ps.nudge { animation: wiggle .3s ease; }
+.ps.popped { animation: pop .25s ease; }
+@keyframes wiggle { 0%,100% { filter: none; } 50% { filter: brightness(1.06); } }
+@keyframes pop { 0% { scale: .6; } 70% { scale: 1.08; } 100% { scale: 1; } }
+
+/* Sticker sheet: one sticker at a time, on a card in the play area (no row or bank) */
+#sheetCard {
+  position: absolute; left: 3.5%; bottom: 4%; z-index: 5;
+  width: clamp(104px, 17vmin, 160px); aspect-ratio: 1;
+  background: var(--paper); border: var(--line); border-radius: 18px;
+  box-shadow: 0 6px 0 var(--ink);
+  touch-action: none; cursor: grab;
+}
+/* a faint stack of sheets behind the card */
+#sheetCard::after {
+  content: ''; position: absolute; inset: 0; z-index: -1; border-radius: 18px;
+  background: var(--paper); border: var(--line); transform: translate(7px, 7px) rotate(3deg);
+}
+.tile {
+  position: absolute; inset: 6px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: grab; transition: transform .12s ease, opacity .2s ease;
+}
+.tile .stk { width: 100%; height: 100%; padding: 10%; }
+.tile.lifting { transform: scale(1.08) rotate(-5deg); }
+.tile.lifting::after {
+  /* the peel curl: a white corner lifting off the sticker */
+  content: ''; position: absolute; top: -2px; right: -2px; width: 34%; height: 34%;
+  background: linear-gradient(225deg, #fff 50%, #e7e1d3 50%);
+  border-bottom-left-radius: 60%; box-shadow: -2px 2px 0 rgba(47,59,74,.25);
+}
+.tile.popin { animation: popin .45s ease; }
+@keyframes popin {
+  0% { transform: scale(.6) rotate(-10deg); opacity: 0; }
+  70% { transform: scale(1.06) rotate(3deg); opacity: 1; }
+  100% { transform: none; }
+}
+.tile.used { border: 3px dashed var(--ink); opacity: .5; cursor: default; }
+
+/* Bottom bar */
+#bottom {
+  display: flex; gap: 12px; align-items: center; justify-content: space-between;
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+  background: var(--paper); border-top: var(--line);
+}
+
+/* ⚙️ gear: lower right, shown by a circle stroke, fades after a while */
+.gear {
+  position: fixed; right: 14px; bottom: calc(92px + env(safe-area-inset-bottom));
+  width: 60px; height: 60px; border-radius: 50%;
+  border: var(--line); background: var(--sun); box-shadow: var(--shadow);
+  font-size: 26px; cursor: pointer; z-index: 20;
+  opacity: 0; transition: opacity .6s ease, box-shadow .6s ease;
+  pointer-events: none;
+}
+.gear.show { opacity: 1; pointer-events: auto; }
+.gear.show { box-shadow: var(--shadow), 0 0 0 6px rgba(255,216,77,.45); }
+
+/* Sheets (settings, My Creations) */
+.sheet {
+  position: fixed; inset: 0; z-index: 30;
+  background: rgba(47,59,74,.28); display: flex; align-items: flex-end; justify-content: center;
+}
+.sheet[hidden] { display: none; }
+.sheetInner {
+  width: min(680px, 100%); max-height: 84vh; padding: 14px 16px 22px;
+  background: var(--paper); border: var(--line); border-radius: 24px 24px 0 0;
+}
+.sheetHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 20px; }
+
+/* Collapsible panels */
+.panel { border: var(--line); border-radius: var(--r); background: var(--vanilla); margin: 10px 0; overflow: hidden; }
+.panelHead {
+  width: 100%; min-height: 52px; display: flex; align-items: center; gap: 10px; padding: 0 14px;
+  border: 0; background: var(--peach); font: 700 18px 'Quicksand', system-ui, sans-serif; color: var(--ink);
+  cursor: pointer; text-align: left;
+}
+.panelTitle { flex: 1; }
+.panelBody { padding: 10px 14px 14px; }
+.panel[data-collapsed="true"] .panelBody { display: none; }
+.panel[data-collapsed="true"] .panelMark { transform: rotate(-90deg); }
+.panelMark { display: inline-block; transition: transform .15s ease; }
+
+textarea {
+  width: 100%; min-height: 84px; padding: 10px; border: 2.5px solid var(--ink); border-radius: 14px;
+  background: #fff; resize: vertical;
+}
+.toggle { display: flex; align-items: center; gap: 10px; min-height: 48px; font-size: 18px; font-weight: 700; }
+.toggle input { width: 26px; height: 26px; accent-color: #a48cf0; }
+.hint { margin: 6px 0; font-size: 16px; line-height: 1.4; }
+.list { list-style: none; padding: 0; margin: 8px 0 0; }
+.list li {
+  border: 2.5px solid var(--ink); border-radius: 14px; background: #fff;
+  padding: 10px 12px; margin-bottom: 8px; font-size: 16px;
+}
+.list .meta { font-size: 14px; opacity: .75; }
+.list .row { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+
+/* Toast and errors (errors only when opted in in ⚙️) */
+#toast {
+  position: fixed; left: 50%; top: 80px; transform: translate(-50%, -20px); opacity: 0;
+  background: var(--ink); color: #fff; padding: 12px 18px; border-radius: 999px;
+  font-size: 18px; font-weight: 700; transition: opacity .25s ease, transform .25s ease; pointer-events: none; z-index: 40;
+}
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+#errorBar {
+  position: fixed; left: 12px; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom));
+  background: #ffe1d8; border: var(--line); border-radius: 14px; padding: 10px 14px;
+  font-size: 16px; z-index: 50; cursor: pointer;
+}
+#errorBar[hidden] { display: none; }
+
+[hidden] { display: none !important; }
+
+/* Phones: the play area stays large; the card and bars keep their size */
+@media (orientation: portrait) {
+  .ps { width: 24%; }
+  .btn.save { font-size: 17px; padding: 0 16px; }
+}

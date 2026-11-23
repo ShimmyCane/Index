@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Felix Stickers">
+  <meta name="theme-color" content="#fff6e9">
+  <title>Felix Stickers – Little Monster Tea Party</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <header id="top">
+    <h1 id="title">Felix Stickers – Little Monster Tea Party</h1>
+    <div class="topbtns">
+      <button id="btnSettingsTop" class="btn round" type="button" aria-label="Settings">⚙️</button>
+      <button id="btnUndo" class="btn pill undo" type="button" aria-label="Undo">↶ Undo</button>
+    </div>
+  </header>
+
+  <main id="stage" aria-label="Play area">
+    <div id="backdrop" aria-hidden="true"></div>
+    <svg id="creature" viewBox="0 0 300 360" aria-label="Felix the monster" role="img">
+      <ellipse cx="150" cy="342" rx="96" ry="14" fill="#2f3b4a" opacity=".16"/>
+      <g stroke="#2f3b4a" stroke-width="4" stroke-linejoin="round">
+        <ellipse cx="112" cy="326" rx="28" ry="14" fill="#ffd84d"/>
+        <ellipse cx="188" cy="326" rx="28" ry="14" fill="#ffd84d"/>
+        <path d="M62 128 Q40 74 74 40 Q82 78 96 112 Z" fill="#ffb02e"/>
+        <path d="M238 128 Q260 74 226 40 Q218 78 204 112 Z" fill="#ffb02e"/>
+        <path d="M70 216 Q44 200 46 252 Q52 272 74 262 Z" fill="#9fd8e8"/>
+        <path d="M230 216 Q256 200 254 252 Q248 272 226 262 Z" fill="#9fd8e8"/>
+        <ellipse cx="150" cy="212" rx="102" ry="112" fill="#9fd8e8"/>
+        <ellipse cx="150" cy="236" rx="62" ry="64" fill="#e4f6fb" stroke="none"/>
+        <ellipse cx="96" cy="196" rx="13" ry="8" fill="#ff8fa3" opacity=".7" stroke="none"/>
+        <ellipse cx="204" cy="196" rx="13" ry="8" fill="#ff8fa3" opacity=".7" stroke="none"/>
+        <circle cx="118" cy="150" r="30" fill="#fff"/>
+        <circle cx="182" cy="150" r="30" fill="#fff"/>
+        <circle cx="124" cy="156" r="13" fill="#2f3b4a" stroke="none"/>
+        <circle cx="188" cy="156" r="13" fill="#2f3b4a" stroke="none"/>
+        <circle cx="128" cy="151" r="4" fill="#fff" stroke="none"/>
+        <circle cx="192" cy="151" r="4" fill="#fff" stroke="none"/>
+        <path d="M106 200 Q150 256 194 200 Z" fill="#c2415d"/>
+        <path d="M114 202 h10 v9 h-10 Z M128 202 h10 v10 h-10 Z M142 202 h10 v10 h-10 Z M156 202 h10 v10 h-10 Z M170 202 h10 v9 h-10 Z" fill="#fff" stroke-width="2"/>
+      </g>
+    </svg>
+    <div id="placed" aria-label="Stickers on the creature"></div>
+    <div id="sheetCard" aria-label="Sticker sheet"></div>
+  </main>
+
+  <footer id="bottom">
+    <button id="btnMy" class="btn pill" type="button">📁 My Creations</button>
+    <button id="btnSave" class="btn save" type="button">⭐ Save My Creature</button>
+  </footer>
+
+  <button id="gear" class="gear" type="button" aria-label="Settings" aria-controls="drawer">⚙️</button>
+
+  <div id="drawer" class="sheet" hidden role="dialog" aria-label="Settings">
+    <div class="sheetInner allow-scroll">
+      <div class="sheetHead">
+        <strong>⚙️ Settings</strong>
+        <button id="btnClose" class="btn pill small" type="button">Close ✕</button>
+      </div>
+
+      <section class="panel" data-panel="options" data-open="true">
+        <button class="panelHead" type="button" aria-expanded="true"><span class="panelIcon">🎛️</span><span class="panelTitle">Options</span><span class="panelMark">▾</span></button>
+        <div class="panelBody">
+          <label class="toggle"><input id="tgUndo" type="checkbox" checked> Show the Undo button</label>
+          <label class="toggle"><input id="tgErrors" type="checkbox"> Show errors at the bottom</label>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="reset" data-open="false">
+        <button class="panelHead" type="button" aria-expanded="false"><span class="panelIcon">🔄</span><span class="panelTitle">Start again</span><span class="panelMark">▾</span></button>
+        <div class="panelBody">
+          <p class="hint">Takes every sticker off the creature and puts them all back on the sheet. Undo can bring them back.</p>
+          <button id="btnReset" class="btn pill wide" type="button">Reset the sheet</button>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="notes" data-open="false">
+        <button class="panelHead" type="button" aria-expanded="false"><span class="panelIcon">📝</span><span class="panelTitle">Notes for improvement</span><span class="panelMark">▾</span></button>
+        <div class="panelBody">
+          <p class="hint">Tell us what could be better. Your note is saved with what you last touched, and stays on this device.</p>
+          <textarea id="noteText" rows="3" maxlength="500" placeholder="For example: the peel is too slow"></textarea>
+          <button id="btnNote" class="btn pill wide" type="button">Save note</button>
+          <ul id="noteList" class="list"></ul>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="home" data-open="false">
+        <button class="panelHead" type="button" aria-expanded="false"><span class="panelIcon">📱</span><span class="panelTitle">Full screen on iPad</span><span class="panelMark">▾</span></button>
+        <div class="panelBody">
+          <p class="hint">Tap Share, then “Add to Home Screen”. The page then opens full screen, and the edge swipe is less likely to go back.</p>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="info" data-open="false">
+        <button class="panelHead" type="button" aria-expanded="false"><span class="panelIcon">ℹ️</span><span class="panelTitle">Info</span><span class="panelMark">▾</span></button>
+        <div class="panelBody">
+          <p class="hint">Version <span id="ver"></span> · Device storage: <span id="storeState">checking</span> · Errors this visit: <span id="errCount">0</span></p>
+          <ul id="errList" class="list"></ul>
+          <p class="hint"><strong>0.1.0</strong> (first build): one sheet, peel, drag, twist and press; undo; save on this device; notes; errors opt-in.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="mine" class="sheet" hidden role="dialog" aria-label="My Creations">
+    <div class="sheetInner allow-scroll">
+      <div class="sheetHead">
+        <strong>📁 My Creations</strong>
+        <button id="btnMineClose" class="btn pill small" type="button">Close ✕</button>
+      </div>
+      <ul id="creationList" class="list"></ul>
+    </div>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="errorBar" hidden role="alert" tabindex="0"></div>
+
+  <script src="js/sheet.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
