@@ -49,11 +49,11 @@ For the first build, the page processor is replaced by hand-made assets (a JSON 
 
 | Area | Contents |
 |---|---|
-| Top | Title (Q1), small. Nothing else; no Reset or Settings up here, they sit in ⚙️. |
+| Top | Title "Felix Stickers – [sheet name, 3+ words]" (convo Q1, Q4, Q11), then the ⚙️ settings button, then the Undo button next to it. Undo is on by default; a toggle in ⚙️ hides it. |
 | Play area | Background + creature. Free placement, overlap allowed. Takes most of the screen. |
-| Tray | Stickers on a sheet. Scroll, peel, drag from the sheet. An empty space stays where a sticker was taken. |
-| Bottom bar | Undo · Save My Creature (large purple button) · My Creations. |
-| ⚙️ | Lower right. Reset, sound-free options, Notes for improvement, errors (opt-in), database check later. |
+| Tray | One sheet of stickers, no tabs (convo Q4). Scroll, peel, drag from the sheet. An empty space stays where a sticker was taken. |
+| Save | "Save My Creature" (large purple button) and My Creations, on the bottom bar (convo Q6a). |
+| ⚙️ | Lower right, fades after a while, shows on a circle stroke (convo Q8). Undo toggle, Reset (with "Are you sure?"), Notes for improvement, errors (opt-in), the home-screen note, database check later. |
 
 Track A rules: few words, icons with short labels, large touch targets (48–68px), warm pastel palette (vanilla, sage, peach, mint, coral), 2.5–3.5px dark lines, offset shadows.
 
@@ -115,3 +115,4 @@ See `convo/convo v0.1.md`. Nothing is built until those are answered.
 ## Changes
 
 - 2026-11-23: schematic written from the concept. Status idea.
+- 2026-11-23: round 1 answers recorded in `convo v0.1.md`. Single sheet, title with sheet name, settings and undo at the top. Open: convo Q10 (whether the uploaded sheets may appear on a public page) and Q11 (who names each sheet). No build yet.
