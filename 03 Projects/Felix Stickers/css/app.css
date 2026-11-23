@@ -108,6 +108,9 @@ input, textarea { -webkit-user-select: text; user-select: text; touch-action: ma
   border-radius: 16px; cursor: grab; transition: transform .12s ease, opacity .2s ease;
 }
 .slot .stk { width: 100%; height: 100%; padding: 10%; }
+/* native cutouts carry their own sticker edge: no card behind them */
+.stk:has(img.art) { background: none; border: 0; box-shadow: none; padding: 0; }
+.stk img.art { width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none; }
 .slot.main .stk { padding: 6%; }
 .slot.lifting { transform: translate(-50%, -50%) scale(1.08) rotate(-5deg); }
 .slot.lifting::after {

@@ -110,7 +110,7 @@
       n.dataset.uid = item.uid;
       n.setAttribute('role', 'button');
       n.setAttribute('aria-label', 'Sticker: ' + s.label + (item.committed ? ', stuck' : ', tap to stick'));
-      n.innerHTML = '<div class="stk">' + s.svg + '</div>';
+      n.innerHTML = '<div class="stk">' + artFor(s) + '</div>';
       placeStyle(n, item);
       host.appendChild(n);
     });
@@ -128,9 +128,15 @@
       n.style.top = s.slot.y + '%';
       n.style.width = s.slot.size + 'cqmin';
       n.setAttribute('aria-label', gone ? 'Empty space: ' + s.label : 'Sticker: ' + s.label + '. Pull a corner to peel it.');
-      if (!gone) n.innerHTML = '<div class="stk">' + s.svg + '</div>';
+      if (!gone) n.innerHTML = '<div class="stk">' + artFor(s) + '</div>';
       card.appendChild(n);
     });
+  }
+
+  // Native art when provided (private/native.js, local only); otherwise the SVG in sheet.js.
+  function artFor(s) {
+    var src = window.FS_NATIVE_ART && window.FS_NATIVE_ART[s.id];
+    return src ? '<img class="art" src="' + src + '" alt="" draggable="false">' : s.svg;
   }
 
   // A small random tilt, so every placed sticker looks hand-stuck.
