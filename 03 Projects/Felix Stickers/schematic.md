@@ -51,7 +51,7 @@ For the first build, the page processor is replaced by hand-made assets (a JSON 
 |---|---|
 | Top | Title "Felix Stickers – [sheet name, 3+ words]" (convo Q1, Q4, Q11), then the ⚙️ settings button, then the Undo button next to it. Undo is on by default; a toggle in ⚙️ hides it. |
 | Play area | Background + creature. Free placement, overlap allowed. Takes most of the screen. |
-| Sheet | Walking Through the Woods (convo v0.6). The whole play area is one sticker sheet (no bank, no separate card): a plain sage body in the middle and eight woods features around it (eyes, nose, smile, mushroom cap, leaves, bow, flower, acorn backpack), redrawn as lookalike cutouts from the reference. Peel a piece and paste it back onto the body, on the same sheet; an empty dashed space stays where it came from. Reset puts them back. |
+| Sheet | Walking Through the Woods, shown as the reference picture itself (same layout, same pixels), fitted to the play area. Each piece sits on its box in the picture. Peel a piece (its cutout is used only when peeled) and paste it back onto the body, on the same sheet; a peeled piece leaves a white empty space. Reset puts them back. (convo v0.6–v0.8) |
 | Save | "Save My Creature" (large purple button) and My Creations, on the bottom bar (convo Q6a). |
 | ⚙️ | Lower right, fades after a while, shows on a circle stroke (convo Q8). Undo toggle, Reset (with "Are you sure?"), Notes for improvement, errors (opt-in), the home-screen note, database check later. |
 
@@ -107,6 +107,10 @@ Not in the first build. When notes or creations must persist across devices, pla
 ## Files (planned)
 
 `index.html` (page, creature drawn inline as SVG), `css/app.css` (palette, gesture lock, sheet card, gear, panels), `js/sheet.js` (the sheet), `js/app.js` (engine: peel, move, two-finger rotate, press, undo, save, notes, errors, gear), `schematic.md`, `CLAUDE.md`, `convo/`.
+
+## Round 8 change (Jimmy, convo v0.8)
+
+The sheet looks exactly like the reference picture, not a grid of cutouts. Cutouts are used only when a piece is peeled.
 
 ## Round 6 change (Jimmy, convo v0.6)
 

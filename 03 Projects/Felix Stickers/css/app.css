@@ -93,35 +93,39 @@ input, textarea { -webkit-user-select: text; user-select: text; touch-action: ma
 @keyframes wiggle { 0%,100% { filter: none; } 50% { filter: brightness(1.06); } }
 @keyframes pop { 0% { scale: .6; } 70% { scale: 1.08; } 100% { scale: 1; } }
 
-/* The sticker sheet IS the play area: one sheet, no bank, no separate card.
-   Stickers are peeled off it and pasted back on it. */
+/* The sticker sheet is the reference picture itself, fitted to the play area. */
 #sheetCard {
   position: absolute; inset: 0; z-index: 1;
   container-type: size;
-  background-color: var(--paper);
-  background-image: radial-gradient(circle, rgba(47,59,74,.10) 2px, transparent 2.5px);
-  background-size: 34px 34px;
+  background: var(--paper);
+  display: flex; align-items: center; justify-content: center;
   touch-action: none;
 }
-.slot {
-  position: absolute; aspect-ratio: 1; transform: translate(-50%, -50%);
-  border-radius: 16px; cursor: grab; transition: transform .12s ease, opacity .2s ease;
+.sheetPage {
+  position: relative;
+  width: min(100cqw, calc(100cqh * 1312 / 1199));
+  aspect-ratio: 1312 / 1199;
+  background: #fff;
+  box-shadow: 0 6px 0 rgba(47,59,74,.18);
 }
-.slot .stk { width: 100%; height: 100%; padding: 10%; }
-/* native cutouts carry their own sticker edge: no card behind them */
+.sheetPage > img.base { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+/* a piece sits on its box in the picture; a peeled piece leaves its spot empty (white) */
+.slot {
+  position: absolute; cursor: grab; border-radius: 6px;
+  transition: transform .12s ease;
+}
+.slot .stk { width: 100%; height: 100%; padding: 0; background: none; border: 0; box-shadow: none; }
+.slot .stk svg { width: 100%; height: 100%; }
 .stk:has(img.art) { background: none; border: 0; box-shadow: none; padding: 0; }
 .stk img.art { width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none; }
-.slot.main .stk { padding: 6%; }
-.slot.lifting { transform: translate(-50%, -50%) scale(1.08) rotate(-5deg); }
+.slot.lifting { transform: scale(1.04) rotate(-3deg); }
 .slot.lifting::after {
-  /* the peel curl: a white corner lifting off the sticker */
-  content: ''; position: absolute; top: -2px; right: -2px; width: 34%; height: 34%;
+  /* the peel curl: a white corner lifting off the piece */
+  content: ''; position: absolute; top: -2px; right: -2px; width: 30%; height: 30%;
   background: linear-gradient(225deg, #fff 50%, #e7e1d3 50%);
   border-bottom-left-radius: 60%; box-shadow: -2px 2px 0 rgba(47,59,74,.25);
 }
-/* an empty space where a sticker was peeled: a dashed outline, like a real sheet */
-.slot.empty { border: 3px dashed var(--ink); opacity: .45; cursor: default; }
-.slot.empty .stk { display: none; }
+.slot.empty { visibility: hidden; }
 
 /* Bottom bar */
 #bottom {
