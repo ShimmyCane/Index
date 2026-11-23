@@ -11,7 +11,6 @@
   --line: 3px solid var(--ink);
   --shadow: 0 4px 0 var(--ink);
   --r: 18px;
-  --tray: clamp(170px, 30vh, 280px);
 }
 
 * { box-sizing: border-box; }
@@ -76,11 +75,13 @@ input, textarea { -webkit-user-select: text; user-select: text; touch-action: ma
   height: 92%; width: auto; max-width: 92%; aspect-ratio: 300 / 360;
   pointer-events: none;
 }
-#placed { position: absolute; inset: 0; }
+/* Placed stickers sit above the sheet card; only the stickers take touches,
+   so the empty play area never blocks the card. */
+#placed { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
 
 /* Stickers */
 .ps {
-  position: absolute; width: 19%; aspect-ratio: 1;
+  position: absolute; width: 19%; aspect-ratio: 1; pointer-events: auto;
   transform-origin: 50% 50%; touch-action: none; cursor: grab;
   transition: box-shadow .15s ease;
 }
@@ -97,22 +98,25 @@ input, textarea { -webkit-user-select: text; user-select: text; touch-action: ma
 @keyframes wiggle { 0%,100% { filter: none; } 50% { filter: brightness(1.06); } }
 @keyframes pop { 0% { scale: .6; } 70% { scale: 1.08; } 100% { scale: 1; } }
 
-/* Sticker sheet (tray) */
-#tray {
-  display: grid; gap: 8px; padding: 10px 12px;
-  height: var(--tray);
-  grid-template-columns: repeat(10, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  background: var(--paper); border-top: var(--line);
-  touch-action: none; overflow: hidden;
+/* Sticker sheet: one sticker at a time, on a card in the play area (no row or bank) */
+#sheetCard {
+  position: absolute; left: 3.5%; bottom: 4%; z-index: 5;
+  width: clamp(104px, 17vmin, 160px); aspect-ratio: 1;
+  background: var(--paper); border: var(--line); border-radius: 18px;
+  box-shadow: 0 6px 0 var(--ink);
+  touch-action: none; cursor: grab;
+}
+/* a faint stack of sheets behind the card */
+#sheetCard::after {
+  content: ''; position: absolute; inset: 0; z-index: -1; border-radius: 18px;
+  background: var(--paper); border: var(--line); transform: translate(7px, 7px) rotate(3deg);
 }
 .tile {
-  position: relative; border-radius: 16px; padding: 4px;
+  position: absolute; inset: 6px; border-radius: 14px;
   display: flex; align-items: center; justify-content: center;
   cursor: grab; transition: transform .12s ease, opacity .2s ease;
-  border: 2px dashed transparent;
 }
-.tile .stk { width: 100%; height: 100%; padding: 8%; }
+.tile .stk { width: 100%; height: 100%; padding: 10%; }
 .tile.lifting { transform: scale(1.08) rotate(-5deg); }
 .tile.lifting::after {
   /* the peel curl: a white corner lifting off the sticker */
@@ -120,8 +124,13 @@ input, textarea { -webkit-user-select: text; user-select: text; touch-action: ma
   background: linear-gradient(225deg, #fff 50%, #e7e1d3 50%);
   border-bottom-left-radius: 60%; box-shadow: -2px 2px 0 rgba(47,59,74,.25);
 }
-.tile.used { opacity: .28; border-color: var(--ink); cursor: default; }
-.tile.used .stk { box-shadow: none; }
+.tile.popin { animation: popin .45s ease; }
+@keyframes popin {
+  0% { transform: scale(.6) rotate(-10deg); opacity: 0; }
+  70% { transform: scale(1.06) rotate(3deg); opacity: 1; }
+  100% { transform: none; }
+}
+.tile.used { border: 3px dashed var(--ink); opacity: .5; cursor: default; }
 
 /* Bottom bar */
 #bottom {
@@ -132,7 +141,7 @@ input, textarea { -webkit-user-select: text; user-select: text; touch-action: ma
 
 /* ⚙️ gear: lower right, shown by a circle stroke, fades after a while */
 .gear {
-  position: fixed; right: 14px; bottom: calc(var(--tray) + 92px + env(safe-area-inset-bottom));
+  position: fixed; right: 14px; bottom: calc(92px + env(safe-area-inset-bottom));
   width: 60px; height: 60px; border-radius: 50%;
   border: var(--line); background: var(--sun); box-shadow: var(--shadow);
   font-size: 26px; cursor: pointer; z-index: 20;
@@ -198,10 +207,8 @@ textarea {
 
 [hidden] { display: none !important; }
 
-/* Phones: the sheet gets two rows of five, the play area stays large */
+/* Phones: the play area stays large; the card and bars keep their size */
 @media (orientation: portrait) {
-  :root { --tray: clamp(220px, 40vh, 360px); }
-  #tray { grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(4, 1fr); }
   .ps { width: 24%; }
   .btn.save { font-size: 17px; padding: 0 16px; }
 }

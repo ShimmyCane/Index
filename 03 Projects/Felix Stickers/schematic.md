@@ -5,7 +5,7 @@
 
 ## Purpose
 
-A warm, tactile sticker playground for young children on an iPad. One central creature, a sticker tray, and free placement: peel a sticker from the sheet, drag it, twist it, press it down. It should feel like playing with real stickers, not like dragging pictures around.
+A warm, tactile sticker playground for young children on an iPad. One central creature, a single sticker at a time, placed playfully: peel it from the sheet card, drag it, twist it, press it down. It should feel like playing with real stickers, not like dragging pictures around.
 
 The first build tests one question only: **does peel → move → rotate → press feel magical, or like dragging images?**
 
@@ -13,7 +13,7 @@ The first build tests one question only: **does peel → move → rotate → pre
 
 In:
 - One full-screen page with one creature (drawn in SVG; see `convo v0.1.md` Q3).
-- About 20 stickers in one tray, scrollable.
+- About 20 stickers, one at a time on the sheet card (round 2: no row or bank).
 - Peel, drag, two-finger rotate, press to stick. Overlap allowed.
 - Undo (kid-friendly, no penalty) and Reset (in ⚙️).
 - A simple Save: the composition is kept on the device and listed in My Creations (Q6).
@@ -51,7 +51,7 @@ For the first build, the page processor is replaced by hand-made assets (a JSON 
 |---|---|
 | Top | Title "Felix Stickers – [sheet name, 3+ words]" (convo Q1, Q4, Q11), then the ⚙️ settings button, then the Undo button next to it. Undo is on by default; a toggle in ⚙️ hides it. |
 | Play area | Background + creature. Free placement, overlap allowed. Takes most of the screen. |
-| Tray | One sheet of stickers, no tabs (convo Q4). Scroll, peel, drag from the sheet. An empty space stays where a sticker was taken. |
+| Sheet card | One sticker at a time, on a card in the play area's lower left, with a faint stack behind it. No row or bank of stickers. Pull a corner to peel it; the next sticker slides up. When the sheet is empty the card is an empty dashed outline. Reset brings them back. |
 | Save | "Save My Creature" (large purple button) and My Creations, on the bottom bar (convo Q6a). |
 | ⚙️ | Lower right, fades after a while, shows on a circle stroke (convo Q8). Undo toggle, Reset (with "Are you sure?"), Notes for improvement, errors (opt-in), the home-screen note, database check later. |
 
@@ -76,7 +76,7 @@ Track A rules: few words, icons with short labels, large touch targets (48–68p
 ## Gesture lock (iPad)
 
 The tactile play must not be taken over by the browser. The page:
-- sets `touch-action: none` on the play area and tray, and `overscroll-behavior: none` on the page;
+- sets `touch-action: none` on the play area and sheet card, and `overscroll-behavior: none` on the page;
 - uses a viewport with `user-scalable=no` and `maximum-scale=1`;
 - blocks `gesturestart`, `gesturechange`, `gestureend` (iOS pinch zoom), double-tap zoom, long-press callouts, text selection, the context menu and pull-to-refresh;
 - runs as a Home Screen app (`apple-mobile-web-app-capable`), which removes most of Safari's chrome.
@@ -106,13 +106,17 @@ Not in the first build. When notes or creations must persist across devices, pla
 
 ## Files (planned)
 
-`index.html` (page, creature drawn inline as SVG), `css/app.css` (palette, gesture lock, tray, gear, panels), `js/sheet.js` (the sheet), `js/app.js` (engine: peel, move, two-finger rotate, press, undo, save, notes, errors, gear), `schematic.md`, `CLAUDE.md`, `convo/`.
+`index.html` (page, creature drawn inline as SVG), `css/app.css` (palette, gesture lock, sheet card, gear, panels), `js/sheet.js` (the sheet), `js/app.js` (engine: peel, move, two-finger rotate, press, undo, save, notes, errors, gear), `schematic.md`, `CLAUDE.md`, `convo/`.
+
+## Round 2 change (2026-11-23, Jimmy)
+
+No row of stickers. Each sticker is a single sticker, placed playfully. The bottom sheet bank is gone; one card in the play area shows the next sticker. See `convo/convo v0.2.md`.
 
 ## Build notes (0.1.0)
 
-- Peel: a pull of 26px lifts a tile off the sheet; the sticker follows the finger. A release floats it; a tap commits it. A used tile stays on the sheet, faded.
+- Peel: a pull of 26px lifts the card's sticker; it follows the finger. A release floats it, at a playful random tilt of up to 12°; a tap commits it. The next sticker then pops up on the card.
 - Undo: snapshots of the whole composition (last 50), so every action, including Reset and opening a creation, can be undone.
-- Gear: lower right, above the tray; shown on load and when the corner is touched; fades after 2.5s. The top-bar settings button opens the same panel.
+- Gear: lower right; shown on load and when the corner is touched; fades after 2.5s. The top-bar settings button opens the same panel.
 - Storage: localStorage in a try/catch; the page shows "blocked" in ⚙️ Info and still plays.
 - Gesture lock: touchmove, pinch, double-tap and the context menu are cancelled outside the panels; `touch-action: none` on the play area and sheet.
 - Tests: headless Chromium at iPad landscape, iPad portrait and phone; no JS errors, no horizontal scroll, peel/press/undo/save/notes all pass. Not yet on a real iPad. Shared AI notes in `04 AI/Felix Stickers/`.

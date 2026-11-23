@@ -115,18 +115,27 @@
       host.appendChild(n);
     });
   }
+  // The sheet shows one sticker at a time: the next one not yet placed.
   function renderTray() {
-    var tray = $('#tray');
-    tray.innerHTML = '';
-    SHEET.stickers.forEach(function (s) {
-      var used = state.used.indexOf(s.id) !== -1;
-      var t = el('div', 'tile' + (used ? ' used' : ''));
-      t.dataset.sid = s.id;
-      t.setAttribute('aria-label', (used ? 'Used: ' : 'Sticker: ') + s.label);
-      t.innerHTML = '<div class="stk">' + s.svg + '</div>';
-      tray.appendChild(t);
-    });
+    var card = $('#sheetCard');
+    card.innerHTML = '';
+    var next = null;
+    for (var i = 0; i < SHEET.stickers.length; i++) {
+      if (state.used.indexOf(SHEET.stickers[i].id) === -1) { next = SHEET.stickers[i]; break; }
+    }
+    var t = el('div', 'tile' + (next ? ' popin' : ' used'));
+    if (next) {
+      t.dataset.sid = next.id;
+      t.setAttribute('aria-label', 'Sticker: ' + next.label + '. Pull a corner to peel it.');
+      t.innerHTML = '<div class="stk">' + next.svg + '</div>';
+    } else {
+      t.setAttribute('aria-label', 'Sheet is empty. Reset brings the stickers back.');
+    }
+    card.appendChild(t);
   }
+
+  // A small random tilt, so every placed sticker looks hand-stuck.
+  function playfulAngle() { return Math.round((Math.random() * 24 - 12) * 10) / 10; }
 
   /* ---------- gestures: peel, move, rotate, press ---------- */
   function onTrayDown(e) {
@@ -178,7 +187,7 @@
 
   function detachFromSheet(pt) {
     var p = toPercent(pt);
-    var item = { uid: nextUid++, stickerId: gesture.sid, x: p.x, y: p.y, rot: 0, committed: false };
+    var item = { uid: nextUid++, stickerId: gesture.sid, x: p.x, y: p.y, rot: playfulAngle(), committed: false };
     state.placed.push(item);
     if (state.used.indexOf(gesture.sid) === -1) state.used.push(gesture.sid);
     renderStage();
@@ -442,7 +451,7 @@
     document.addEventListener('contextmenu', function (e) { e.preventDefault(); });
     document.addEventListener('dblclick', function (e) { e.preventDefault(); });
 
-    $('#tray').addEventListener('pointerdown', onTrayDown);
+    $('#sheetCard').addEventListener('pointerdown', onTrayDown);
     $('#placed').addEventListener('pointerdown', onPlacedDown);
     window.addEventListener('pointermove', onMove, { passive: false });
     window.addEventListener('pointerup', onUp);
