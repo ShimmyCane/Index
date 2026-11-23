@@ -150,3 +150,9 @@ Run in a headless browser (Chromium at `/opt/pw-browsers/chromium` with `--no-sa
 - Felix Maze: ⚙️ with the sweet-spot faces, answer key (JPEG), sync, errors, print hidden. `js/common.js` `init()`.
 - Make 3D: ⚙️ with axis, ground, display and units settings; footer padding; narrow-screen order.
 - Chinese Character Sudoku: game switcher in ⚙️ (hash links), segmented settings, data-driven rows, side sheet, lower-left button.
+
+## Page links in the drawer (added 2026-11-23)
+- Put page links under their own heading, after the option buttons, so they read as part of the panel.
+- Style each link like the option buttons (same padding, border, radius and weight), so it does not look like a separate control.
+- Encode spaces in the path (`01%20Planning/page.html`) and check the target exists before the change is merged.
+- Keep the Show errors toggle last, as before, so a link never sits between an option and its error control.

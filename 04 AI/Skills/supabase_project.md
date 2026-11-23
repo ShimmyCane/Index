@@ -30,3 +30,11 @@ Rules
 - Manual requests are accepted. Jimmy may run the SQL himself in the Supabase SQL editor when the tools are unavailable. Migrations must be safe to re-run (`create table if not exists`, `drop policy if exists`, `on conflict do nothing`), so a manual run after a failed tool call is fine.
 - Never ask Jimmy to run SQL that has not been written to a file in the repo first.
 - Keep the full SQL in the repo. The migration history alone is not enough.
+
+## Security check after each change (added 2026-11-23, from the nursery review)
+1. Run the security advisor on the project and read every flagged function, not only the count.
+2. For a security-definer function, read its body. `auth.uid() is not null` only proves someone is signed in. Check the owner or role for anything that changes data, for example approving a withdrawal or writing a transaction.
+3. Check which roles can execute each function (`anon`, `authenticated`). Revoke what nothing needs.
+4. Tables with RLS on and no policies are correct only if they are reached through named functions and have no grants. Confirm the grants, not only the policies.
+5. Check two account settings, not only the database: leaked-password protection, and whether sign-ups are open. Report both, and do not change them without the owner's go-ahead.
+6. A function that takes a token must refuse a bad, expired or another user's token. Test the refusals in a rolled-back transaction, as in the existing steps.

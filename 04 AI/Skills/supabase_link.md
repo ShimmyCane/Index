@@ -51,3 +51,8 @@ Lessons this comes from
 - Create tables with RLS enabled in the same step, and revoke anon grants (Supabase lessons 9 and 10).
 - Empty results with no error usually mean row-level security (Allowances, Supabase lesson 2).
 - Keep the full SQL in the repo, because the migration history can end up incomplete (Supabase lessons 8).
+
+## Check the live tables before saying "applied" (added 2026-11-23)
+- Schematic and brief status lines drift. On 2026-11-22 four schematics said "not applied" for tables that were live, and one said "applied" for a table that was not.
+- Before writing "applied" or "not applied", list the live tables for the project (read-only) and compare the names in the SQL files. Report the result with the date.
+- For a repo that uses tables from a shared project, check the project named in the SQL, not the one in the repo's notes.

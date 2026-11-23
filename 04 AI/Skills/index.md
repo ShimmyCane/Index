@@ -1,6 +1,6 @@
 # Skills index (working copies)
 
-Updated 2026-11-22. Purpose: the skills Claude improves in place, for Jimmy to tweak the major ones. Each file here is the working copy. Its `02 Refs/Skills/<name>.md` is a stub that points here, and its `.claude/skills/<name>/SKILL.md` wrapper reads this file.
+Updated 2026-11-23 (refreshed: smoke_test, settings_gear, supabase_project, supabase_link; summarize_code and game_controls unchanged this round). Purpose: the skills Claude improves in place, for Jimmy to tweak the major ones. Each file here is the working copy. Its `02 Refs/Skills/<name>.md` is a stub that points here, and its `.claude/skills/<name>/SKILL.md` wrapper reads this file.
 
 Why these six moved: they are the most used across the nursery (count of mentions in `03 Projects/`, `04 AI/` and root `CLAUDE.md`, 2026-11-22: summarize_code 12, supabase_project 9, supabase_link 6, game_controls 5, smoke_test 5, settings_gear 4). They need incremental improvement as pages change.
 
