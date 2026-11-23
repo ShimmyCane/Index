@@ -86,7 +86,7 @@ input, textarea { -webkit-user-select: text; user-select: text; touch-action: ma
   padding: 9%; box-shadow: 0 6px 0 rgba(47,59,74,.22);
 }
 .stk svg { width: 100%; height: 100%; display: block; overflow: visible; }
-.ps.floating .stk { box-shadow: 0 14px 0 rgba(47,59,74,.22), 0 0 0 4px var(--sun); }
+.ps.floating .stk { box-shadow: 0 14px 0 rgba(47,59,74,.22); }
 .ps.committed .stk { box-shadow: 0 3px 0 var(--ink); }
 .ps.turning .stk, .ps.nudge { animation: wiggle .3s ease; }
 .ps.popped { animation: pop .25s ease; }

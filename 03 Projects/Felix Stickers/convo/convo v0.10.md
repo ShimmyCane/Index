@@ -22,6 +22,6 @@
 ## Questions
 
 1. Is the 56 px pull about right? Too far, or too short?
-   - Answer:
+   - Answer: **A sticker comes away after the finger pulls 90% of its own size.** Built as 90% of the piece's shorter side on screen.
 2. Should dropping a floating piece on the body stick it too (not only its own spot)?
-   - Answer:
+   - Answer: **Not sure: merge and I'll see.** Also: once a piece is dropped there must be no yellow rectangle around it. Built: the yellow ring is removed from floating pieces.

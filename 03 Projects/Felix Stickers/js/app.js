@@ -7,7 +7,7 @@
   var SHEET = window.FS_SHEET;
   var KEYS = { prefs: 'fs.prefs.v1', creations: 'fs.creations.v1', notes: 'fs.notes.v1' };
   var MAX_UNDO = 50;
-  var PEEL_PULL = 56;   // px a finger pulls a sticker before it comes away from the sheet
+  var PEEL_PULL = 0.9;  // a sticker comes away after the finger pulls 90% of its own (shorter) size
   var PEEL_TURN = 180;  // degrees the lifted flap turns over while it is pulled
   var TAP_SLOP = 8;     // px a press may wander and still count as a press
 
@@ -159,7 +159,9 @@
     pointers.set(e.pointerId, pt);
     var sid = tile.dataset.sid;
     setLast(stickerById[sid].label);
-    gesture = { kind: 'peel', pid: e.pointerId, sid: sid, start: pt, before: snapshot(), tile: tile, detached: false };
+    var box = tile.getBoundingClientRect();
+    gesture = { kind: 'peel', pid: e.pointerId, sid: sid, start: pt, before: snapshot(), tile: tile, detached: false,
+      pull: PEEL_PULL * Math.min(box.width, box.height) };
     tile.classList.add('lifting');
   }
 
@@ -306,8 +308,8 @@
     if (gesture.kind === 'peel') {
       if (e.pointerId !== gesture.pid) return;
       var d = dist(gesture.start, pt);
-      curl(gesture.tile, pt.x - gesture.start.x, pt.y - gesture.start.y, Math.min(1, d / PEEL_PULL));
-      if (d < PEEL_PULL) return;
+      curl(gesture.tile, pt.x - gesture.start.x, pt.y - gesture.start.y, Math.min(1, d / gesture.pull));
+      if (d < gesture.pull) return;
       detachFromSheet(pt);
     }
 
