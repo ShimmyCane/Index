@@ -52,3 +52,8 @@ Rules
 - Zero console errors is the bar. A try/catch that hides an error is a bug to report, not a pass (Fishes: an NPC draw error was hidden for a while).
 - Never call a visual change done without looking at the screenshot.
 - Keep test scripts out of the project unless the project keeps a `tests/` folder for them; then add the script there and say so.
+
+## Added 2026-11-23 (from the planning review page)
+- **Wide tables in a grid column.** A table inside a grid column makes the column grow, so the whole page scrolls sideways at phone width even though the table's own wrapper scrolls. Check step 2 catches it: if `scrollWidth` is larger than `innerWidth`, look for a grid column without `minmax(0, 1fr)`.
+- **After a merge, repeat the phone check on the live Pages address once**, not only on the local file. The live page is what Jimmy reviews.
+- **Links in the ⚙️ drawer:** open the drawer, read the link's `href`, and confirm the target file exists. A link to a page can pass the file check and still fail to open from the drawer if the path has spaces (encode them as `%20`).

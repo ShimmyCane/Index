@@ -112,3 +112,7 @@
 ## 10. Notes in the family table (2026-11-21, Rhythm Sticks)
 * **After a build, mark every note from that round done.** He reopens any that are still a problem. This replaces waiting for a per-note yes. Update only the ids that were read, read the rows back, and say what was marked. Questions and unbuilt ideas stay in the convo, so a done mark loses nothing.
 
+## 11. Review flow (2026-11-22)
+* **Small changes merge straight away.** Jimmy reviews on the GitHub Pages site, so each small change is committed, put in a PR and merged, and the live page shows it. Offline work in VS Code does not need a merge per step.
+* **Review pages are linked from the home page ⚙️ panel** under a Planning heading, so they are one click from the home page.
+
