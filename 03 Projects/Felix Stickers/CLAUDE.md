@@ -11,7 +11,7 @@ Track: A. Family play (proposed; confirm in `convo/convo v0.1.md`)
 
 How to run: open `index.html` (no server or build). Test on an iPad or in a headless browser at iPad sizes.
 
-Code map: `index.html` (page and inline creature SVG), `css/app.css` (palette, gesture lock, tray, gear, panels), `js/sheet.js` (the sheet: name, one main sticker and eight small SVG stickers with slot positions; edit or swap art here), `js/app.js` (engine, one IIFE). Smoke test lives outside the repo (headless Chromium, file://).
+Code map: `index.html` (page and inline creature SVG), `css/app.css` (palette, gesture lock, the sheet, gear, panels), `js/sheet.js` (the sheet: name, one plain body and eight features with slot positions; edit or swap art here), `js/app.js` (engine, one IIFE). Smoke test lives outside the repo (headless Chromium, file://).
 
 Track: A. Family play. Version 0.1.0.
 

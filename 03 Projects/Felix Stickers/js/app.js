@@ -126,7 +126,7 @@
       n.dataset.sid = s.id;
       n.style.left = s.slot.x + '%';
       n.style.top = s.slot.y + '%';
-      n.style.width = s.slot.size + '%';
+      n.style.width = s.slot.size + 'cqmin';
       n.setAttribute('aria-label', gone ? 'Empty space: ' + s.label : 'Sticker: ' + s.label + '. Pull a corner to peel it.');
       if (!gone) n.innerHTML = '<div class="stk">' + s.svg + '</div>';
       card.appendChild(n);

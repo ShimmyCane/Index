@@ -70,11 +70,6 @@ input, textarea { -webkit-user-select: text; user-select: text; touch-action: ma
   content: ''; position: absolute; left: -10%; right: -10%; bottom: -18%; height: 46%;
   background: var(--sage-deep); border-top: var(--line); border-radius: 50% 50% 0 0;
 }
-/* A dashed body outline: the spot where the peeled body goes. Not a drawn creature. */
-#spot {
-  position: absolute; left: 50%; bottom: 3%; transform: translateX(-50%);
-  height: 86%; width: auto; aspect-ratio: 1; opacity: .5; pointer-events: none;
-}
 /* Placed stickers sit above the sheet card; only the stickers take touches,
    so the empty play area never blocks the card. */
 #placed { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
@@ -98,18 +93,15 @@ input, textarea { -webkit-user-select: text; user-select: text; touch-action: ma
 @keyframes wiggle { 0%,100% { filter: none; } 50% { filter: brightness(1.06); } }
 @keyframes pop { 0% { scale: .6; } 70% { scale: 1.08; } 100% { scale: 1; } }
 
-/* Sticker sheet: one card with a main sticker and small ones on it, in the play area */
+/* The sticker sheet IS the play area: one sheet, no bank, no separate card.
+   Stickers are peeled off it and pasted back on it. */
 #sheetCard {
-  position: absolute; left: 3%; bottom: 4%; z-index: 5;
-  width: clamp(180px, 28vw, 300px); aspect-ratio: 1;
-  background: var(--paper); border: var(--line); border-radius: 18px;
-  box-shadow: 0 6px 0 var(--ink);
+  position: absolute; inset: 0; z-index: 1;
+  container-type: size;
+  background-color: var(--paper);
+  background-image: radial-gradient(circle, rgba(47,59,74,.10) 2px, transparent 2.5px);
+  background-size: 34px 34px;
   touch-action: none;
-}
-/* a faint stack of sheets behind the card */
-#sheetCard::after {
-  content: ''; position: absolute; inset: 0; z-index: -1; border-radius: 18px;
-  background: var(--paper); border: var(--line); transform: translate(7px, 7px) rotate(3deg);
 }
 .slot {
   position: absolute; aspect-ratio: 1; transform: translate(-50%, -50%);

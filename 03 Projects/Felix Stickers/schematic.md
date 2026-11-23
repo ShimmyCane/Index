@@ -51,7 +51,7 @@ For the first build, the page processor is replaced by hand-made assets (a JSON 
 |---|---|
 | Top | Title "Felix Stickers – [sheet name, 3+ words]" (convo Q1, Q4, Q11), then the ⚙️ settings button, then the Undo button next to it. Undo is on by default; a toggle in ⚙️ hides it. |
 | Play area | Background + creature. Free placement, overlap allowed. Takes most of the screen. |
-| Sheet card | One sheet: a plain main body in the middle (no face, no limbs drawn in) and eight smaller features around it: eyes, mouths, horns, wings, hats, bows (within Jimmy's 5–10). Peel any piece and place it on the body; features go on top. An empty dashed space stays where a piece was peeled. Reset puts them back. (convo v0.2, v0.3) |
+| Sheet | The whole play area is one sticker sheet (no bank, no separate card). A plain body in the middle and eight features around it on the same sheet. Peel a piece and paste it back onto the body, also on the sheet; an empty dashed space stays where it came from. Reset puts them back. (convo v0.2–v0.4) |
 | Save | "Save My Creature" (large purple button) and My Creations, on the bottom bar (convo Q6a). |
 | ⚙️ | Lower right, fades after a while, shows on a circle stroke (convo Q8). Undo toggle, Reset (with "Are you sure?"), Notes for improvement, errors (opt-in), the home-screen note, database check later. |
 
@@ -108,9 +108,13 @@ Not in the first build. When notes or creations must persist across devices, pla
 
 `index.html` (page, creature drawn inline as SVG), `css/app.css` (palette, gesture lock, sheet card, gear, panels), `js/sheet.js` (the sheet), `js/app.js` (engine: peel, move, two-finger rotate, press, undo, save, notes, errors, gear), `schematic.md`, `CLAUDE.md`, `convo/`.
 
+## Round 4 change (Jimmy, convo v0.4)
+
+One sticker sheet, no bank. The whole play area is the sheet: peel a feature and paste it back onto the body on the same sheet.
+
 ## Round 3 change (Jimmy, convo v0.3)
 
-The main sticker is a plain body. Eyes, noses, mouths and the rest are small features on the sheet, peeled onto the body. The pre-drawn creature with its face is gone; the stage shows a dashed outline where the body goes. A grabbed sticker comes to the front.
+The main sticker is a plain body. Eyes, noses, mouths and the rest are small features on the sheet, peeled onto the body. The pre-drawn creature with its face is gone. A grabbed sticker comes to the front. (The dashed outline was removed in round 4.)
 
 ## Round 2 change (2026-11-23, Jimmy)
 
