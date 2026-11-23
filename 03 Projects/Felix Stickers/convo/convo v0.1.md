@@ -66,7 +66,7 @@ Answer inline under each number. Recommended answers are marked; "go with the re
     - (a) One name per sheet, written in the sheet's data file, so each sheet can have its own name *(recommended)*
     - (b) One fixed name for the first build
     - (c) Other:
-    - Answer:
+    - Answer: **(a), each sheet has its own name** in its data file, using the title convention from question 4: three or more words after "Felix Stickers –". Test sheets from the ChatGPT prompt also carry their **Test#** id (Claude's reading; to confirm).
 
 ## Notes
 
