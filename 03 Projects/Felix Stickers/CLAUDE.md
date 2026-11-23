@@ -11,6 +11,10 @@ Track: A. Family play (proposed; confirm in `convo/convo v0.1.md`)
 
 How to run: open `index.html` (no server or build). Test on an iPad or in a headless browser at iPad sizes.
 
+Code map: `index.html` (page and inline creature SVG), `css/app.css` (palette, gesture lock, tray, gear, panels), `js/sheet.js` (the sheet: name and 20 SVG stickers; edit or swap art here), `js/app.js` (engine, one IIFE). Smoke test lives outside the repo (headless Chromium, file://).
+
+Track: A. Family play. Version 0.1.0.
+
 Project rules:
 - Public repo. Do not commit the sticker-sheet photos or other people's artwork (the reference images are for planning only; use hand-made or Jimmy-owned art).
 - No accounts, no sound, no database in the first build.

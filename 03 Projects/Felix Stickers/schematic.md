@@ -1,7 +1,7 @@
 # Felix Stickers — schematic
 
 **Track: A. Family play** (proposed, to confirm in `convo/convo v0.1.md` Q2)
-**Status: idea** (round 1 questions open in `convo/convo v0.1.md`; no build yet). Written 2026-11-23 from Jimmy's concept ("Creature Lab – Sticker Playground") and three reference images.
+**Status: MVP 0.1.0** (built 2026-11-23 after round 1 answers; headless-tested at three sizes, not yet device-tested). Answers in `convo/convo v0.1.md`. Written 2026-11-23 from Jimmy's concept ("Creature Lab – Sticker Playground") and three reference images.
 
 ## Purpose
 
@@ -87,7 +87,7 @@ The tactile play must not be taken over by the browser. The page:
 
 Three systems, kept apart:
 
-**A. Content** — background, creature, sticker images, masks, sizes, metadata. Files in `assets/`, one JSON manifest (`stickers.json`). Read-only.
+**A. Content** — background, creature, sticker images, masks, sizes, metadata. One sheet in `js/sheet.js` (a classic script, so it works from file:// and offline): the sheet name and 20 hand-drawn SVG stickers, each with a label. Read-only.
 
 **B. Game state** — available stickers (per sheet), placed stickers (id, x, y, rotation, scale, z-order), undo history (last 50 actions), saved composition. Held in memory; saved creations in device storage (localStorage, in a try/catch; the page works if storage is blocked).
 
@@ -106,7 +106,16 @@ Not in the first build. When notes or creations must persist across devices, pla
 
 ## Files (planned)
 
-`index.html`, `css/`, `js/` (engine, gestures, tray, save, gear, notes), `assets/` (creature, stickers, background), `stickers.json`, `schematic.md`, `CLAUDE.md`, `convo/`. Shared AI notes in `04 AI/Felix Stickers/`.
+`index.html` (page, creature drawn inline as SVG), `css/app.css` (palette, gesture lock, tray, gear, panels), `js/sheet.js` (the sheet), `js/app.js` (engine: peel, move, two-finger rotate, press, undo, save, notes, errors, gear), `schematic.md`, `CLAUDE.md`, `convo/`.
+
+## Build notes (0.1.0)
+
+- Peel: a pull of 26px lifts a tile off the sheet; the sticker follows the finger. A release floats it; a tap commits it. A used tile stays on the sheet, faded.
+- Undo: snapshots of the whole composition (last 50), so every action, including Reset and opening a creation, can be undone.
+- Gear: lower right, above the tray; shown on load and when the corner is touched; fades after 2.5s. The top-bar settings button opens the same panel.
+- Storage: localStorage in a try/catch; the page shows "blocked" in ⚙️ Info and still plays.
+- Gesture lock: touchmove, pinch, double-tap and the context menu are cancelled outside the panels; `touch-action: none` on the play area and sheet.
+- Tests: headless Chromium at iPad landscape, iPad portrait and phone; no JS errors, no horizontal scroll, peel/press/undo/save/notes all pass. Not yet on a real iPad. Shared AI notes in `04 AI/Felix Stickers/`.
 
 ## Open questions
 
