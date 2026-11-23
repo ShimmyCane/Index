@@ -51,7 +51,7 @@ For the first build, the page processor is replaced by hand-made assets (a JSON 
 |---|---|
 | Top | Title "Felix Stickers – [sheet name, 3+ words]" (convo Q1, Q4, Q11), then the ⚙️ settings button, then the Undo button next to it. Undo is on by default; a toggle in ⚙️ hides it. |
 | Play area | Background + creature. Free placement, overlap allowed. Takes most of the screen. |
-| Sheet card | One sticker at a time, on a card in the play area's lower left, with a faint stack behind it. No row or bank of stickers. Pull a corner to peel it; the next sticker slides up. When the sheet is empty the card is an empty dashed outline. Reset brings them back. |
+| Sheet card | One sheet: a plain main body in the middle (no face, no limbs drawn in) and eight smaller features around it: eyes, mouths, horns, wings, hats, bows (within Jimmy's 5–10). Peel any piece and place it on the body; features go on top. An empty dashed space stays where a piece was peeled. Reset puts them back. (convo v0.2, v0.3) |
 | Save | "Save My Creature" (large purple button) and My Creations, on the bottom bar (convo Q6a). |
 | ⚙️ | Lower right, fades after a while, shows on a circle stroke (convo Q8). Undo toggle, Reset (with "Are you sure?"), Notes for improvement, errors (opt-in), the home-screen note, database check later. |
 
@@ -108,13 +108,17 @@ Not in the first build. When notes or creations must persist across devices, pla
 
 `index.html` (page, creature drawn inline as SVG), `css/app.css` (palette, gesture lock, sheet card, gear, panels), `js/sheet.js` (the sheet), `js/app.js` (engine: peel, move, two-finger rotate, press, undo, save, notes, errors, gear), `schematic.md`, `CLAUDE.md`, `convo/`.
 
+## Round 3 change (Jimmy, convo v0.3)
+
+The main sticker is a plain body. Eyes, noses, mouths and the rest are small features on the sheet, peeled onto the body. The pre-drawn creature with its face is gone; the stage shows a dashed outline where the body goes. A grabbed sticker comes to the front.
+
 ## Round 2 change (2026-11-23, Jimmy)
 
-No row of stickers. Each sticker is a single sticker, placed playfully. The bottom sheet bank is gone; one card in the play area shows the next sticker. See `convo/convo v0.2.md`.
+No row or bank of stickers below. Each sheet is one sheet: a main sticker and 5–10 smaller ones, on one card in the play area. Peeled stickers land playfully tilted; an empty space stays on the sheet. See `convo/convo v0.2.md`.
 
 ## Build notes (0.1.0)
 
-- Peel: a pull of 26px lifts the card's sticker; it follows the finger. A release floats it, at a playful random tilt of up to 12°; a tap commits it. The next sticker then pops up on the card.
+- Peel: a pull of 26px lifts any sticker on the sheet; it follows the finger. A release floats it, at a playful random tilt of up to 12°; a tap commits it. The space it leaves stays empty on the sheet.
 - Undo: snapshots of the whole composition (last 50), so every action, including Reset and opening a creation, can be undone.
 - Gear: lower right; shown on load and when the corner is touched; fades after 2.5s. The top-bar settings button opens the same panel.
 - Storage: localStorage in a try/catch; the page shows "blocked" in ⚙️ Info and still plays.

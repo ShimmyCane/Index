@@ -70,10 +70,10 @@ input, textarea { -webkit-user-select: text; user-select: text; touch-action: ma
   content: ''; position: absolute; left: -10%; right: -10%; bottom: -18%; height: 46%;
   background: var(--sage-deep); border-top: var(--line); border-radius: 50% 50% 0 0;
 }
-#creature {
-  position: absolute; left: 50%; bottom: 2%; transform: translateX(-50%);
-  height: 92%; width: auto; max-width: 92%; aspect-ratio: 300 / 360;
-  pointer-events: none;
+/* A dashed body outline: the spot where the peeled body goes. Not a drawn creature. */
+#spot {
+  position: absolute; left: 50%; bottom: 3%; transform: translateX(-50%);
+  height: 86%; width: auto; aspect-ratio: 1; opacity: .5; pointer-events: none;
 }
 /* Placed stickers sit above the sheet card; only the stickers take touches,
    so the empty play area never blocks the card. */
@@ -98,39 +98,35 @@ input, textarea { -webkit-user-select: text; user-select: text; touch-action: ma
 @keyframes wiggle { 0%,100% { filter: none; } 50% { filter: brightness(1.06); } }
 @keyframes pop { 0% { scale: .6; } 70% { scale: 1.08; } 100% { scale: 1; } }
 
-/* Sticker sheet: one sticker at a time, on a card in the play area (no row or bank) */
+/* Sticker sheet: one card with a main sticker and small ones on it, in the play area */
 #sheetCard {
-  position: absolute; left: 3.5%; bottom: 4%; z-index: 5;
-  width: clamp(104px, 17vmin, 160px); aspect-ratio: 1;
+  position: absolute; left: 3%; bottom: 4%; z-index: 5;
+  width: clamp(180px, 28vw, 300px); aspect-ratio: 1;
   background: var(--paper); border: var(--line); border-radius: 18px;
   box-shadow: 0 6px 0 var(--ink);
-  touch-action: none; cursor: grab;
+  touch-action: none;
 }
 /* a faint stack of sheets behind the card */
 #sheetCard::after {
   content: ''; position: absolute; inset: 0; z-index: -1; border-radius: 18px;
   background: var(--paper); border: var(--line); transform: translate(7px, 7px) rotate(3deg);
 }
-.tile {
-  position: absolute; inset: 6px; border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: grab; transition: transform .12s ease, opacity .2s ease;
+.slot {
+  position: absolute; aspect-ratio: 1; transform: translate(-50%, -50%);
+  border-radius: 16px; cursor: grab; transition: transform .12s ease, opacity .2s ease;
 }
-.tile .stk { width: 100%; height: 100%; padding: 10%; }
-.tile.lifting { transform: scale(1.08) rotate(-5deg); }
-.tile.lifting::after {
+.slot .stk { width: 100%; height: 100%; padding: 10%; }
+.slot.main .stk { padding: 6%; }
+.slot.lifting { transform: translate(-50%, -50%) scale(1.08) rotate(-5deg); }
+.slot.lifting::after {
   /* the peel curl: a white corner lifting off the sticker */
   content: ''; position: absolute; top: -2px; right: -2px; width: 34%; height: 34%;
   background: linear-gradient(225deg, #fff 50%, #e7e1d3 50%);
   border-bottom-left-radius: 60%; box-shadow: -2px 2px 0 rgba(47,59,74,.25);
 }
-.tile.popin { animation: popin .45s ease; }
-@keyframes popin {
-  0% { transform: scale(.6) rotate(-10deg); opacity: 0; }
-  70% { transform: scale(1.06) rotate(3deg); opacity: 1; }
-  100% { transform: none; }
-}
-.tile.used { border: 3px dashed var(--ink); opacity: .5; cursor: default; }
+/* an empty space where a sticker was peeled: a dashed outline, like a real sheet */
+.slot.empty { border: 3px dashed var(--ink); opacity: .45; cursor: default; }
+.slot.empty .stk { display: none; }
 
 /* Bottom bar */
 #bottom {
