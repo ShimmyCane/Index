@@ -3,7 +3,8 @@ Claude's working folder for the Index nursery. It holds the consolidated lessons
 
 Layout:
 - 04 ai_schematic.md — this file.
-- Skills/ — working copies of the most-used skills, with `index.md`. Their `02 Refs` files are stubs.
+- Skills/ — working copies of the most-used skills, with `index.md`. Their `02 Refs` files are stubs. New 2026-11-23: `access_requests.md`, `monthly_checkup.md`.
+- Supabase/access/ — request-only access and roles: plain README, Architecture request table and test, Family roles and test (Family test not yet passed).
 - lessons_pool.md — consolidated lessons learned across seed projects, grouped by topic. Read first.
 - ai_task_tracker.md — shared list of open work across projects, and open PRs waiting on a decision.
 - project_review_2026-11-03.md — review of all six projects: promotion readiness, privacy flags, open items for Jimmy.

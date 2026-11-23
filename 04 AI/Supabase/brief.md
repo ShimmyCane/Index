@@ -1,5 +1,11 @@
 # Supabase — AI Brief
 
+## Access plan (2026-11-23)
+- Architecture: sign-up to be closed in the dashboard. `access_requests` table and `request_access()` written; test passed 4 of 4 (rolled back). Not pasted yet.
+- Family: `family_user_roles` (owner, parent, kid, guest), and withdrawal approval limited to owner or parent. Written. The live test timed out (a server question was not answered). Not pasted.
+- Both: leaked-password protection to be turned on in the dashboard. See `04 AI/Supabase/access/README.md`.
+
+
 **Updated:** 2026-10-26
 **What it is:** the nursery's convention for Supabase projects, plus a small registry that makes "which app uses which table?" answerable from inside the database.
 **Skill:** `02 Refs/Skills/supabase_project.md` (run as `/supabase-project`).

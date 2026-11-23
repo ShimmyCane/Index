@@ -38,4 +38,5 @@ Shared list of open work across the nursery. Project to-do lists stay in each pr
 
 ## Recurring: nursery AI review (added 2026-11-22)
 
+- [ ] **Run the monthly checkup** (`04 AI/Skills/monthly_checkup.md`, `/monthly-checkup`). First run written 2026-11-23 (`01 Planning/monthly_checkup_2026-11-23.md`). Scheduling still not set up.
 - [ ] **Re-run the nursery AI review monthly** (`04 AI/nursery_review_<date>.md`, a new dated file each run, never overwrite). Not scheduled yet: the scheduling request was denied by the permission classifier on 2026-11-22. Set it up once permission allows, or run it by hand on the 1st. Steps: re-read each project's schematic, brief and lessons; check the live SQL read-only; note what changed; add one line to `04 ai_schematic.md`; push to a branch and open a draft PR.
