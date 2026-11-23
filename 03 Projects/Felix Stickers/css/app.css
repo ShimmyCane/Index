@@ -178,6 +178,7 @@ textarea {
 .toggle { display: flex; align-items: center; gap: 10px; min-height: 48px; font-size: 18px; font-weight: 700; }
 .toggle input { width: 26px; height: 26px; accent-color: #a48cf0; }
 .hint { margin: 6px 0; font-size: 16px; line-height: 1.4; }
+.disclaimer { margin: 14px 4px 4px; text-align: center; font-size: 15px; opacity: .75; }
 .list { list-style: none; padding: 0; margin: 8px 0 0; }
 .list li {
   border: 2.5px solid var(--ink); border-radius: 14px; background: #fff;

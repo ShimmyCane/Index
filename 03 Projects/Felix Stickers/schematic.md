@@ -108,6 +108,10 @@ Not in the first build. When notes or creations must persist across devices, pla
 
 `index.html` (page, creature drawn inline as SVG), `css/app.css` (palette, gesture lock, sheet card, gear, panels), `js/sheet.js` (the sheet), `js/app.js` (engine: peel, move, two-finger rotate, press, undo, save, notes, errors, gear), `schematic.md`, `CLAUDE.md`, `convo/`.
 
+## Round 9 change (Jimmy, convo v0.9)
+
+The art is AI-generated and free to use, so it is committed in `art/`. The ⚙️ panel credits ChatGPT (pictures) and Claude (framework).
+
 ## Round 8 change (Jimmy, convo v0.8)
 
 The sheet looks exactly like the reference picture, not a grid of cutouts. Cutouts are used only when a piece is peeled.

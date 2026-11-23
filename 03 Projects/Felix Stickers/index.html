@@ -81,9 +81,11 @@
         <div class="panelBody">
           <p class="hint">Version <span id="ver"></span> · Device storage: <span id="storeState">checking</span> · Errors this visit: <span id="errCount">0</span></p>
           <ul id="errList" class="list"></ul>
-          <p class="hint"><strong>0.1.0</strong> (first build): one sheet, peel, drag, twist and press; undo; save on this device; notes; errors opt-in.</p>
+          <p class="hint"><strong>0.4.2</strong>: the sheet is the picture; peel and paste; undo; save on this device; notes; errors opt-in.</p>
         </div>
       </section>
+
+      <p class="disclaimer">Pictures generated with ChatGPT · Framework built with Claude</p>
     </div>
   </div>
 
@@ -101,7 +103,7 @@
   <div id="errorBar" hidden role="alert" tabindex="0"></div>
 
   <script src="js/sheet.js"></script>
-  <script src="private/native.js" onerror="void 0"></script>
+  <script src="js/native.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
