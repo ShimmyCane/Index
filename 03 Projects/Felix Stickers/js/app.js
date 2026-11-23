@@ -11,7 +11,7 @@
   var TAP_SLOP = 8;     // px a press may wander and still count as a press
 
   var stickerById = {};
-  SHEET.stickers.forEach(function (s) { stickerById[s.id] = s; });
+  SHEET.stickers.concat([SHEET.main]).forEach(function (s) { stickerById[s.id] = s; });
 
   function $(sel, root) { return (root || document).querySelector(sel); }
   function el(tag, cls, html) {
@@ -115,23 +115,22 @@
       host.appendChild(n);
     });
   }
-  // The sheet shows one sticker at a time: the next one not yet placed.
+  // The sheet: one main sticker and small ones, all on the same card.
+  // A peeled sticker leaves an empty dashed space, as on a real sheet.
   function renderTray() {
     var card = $('#sheetCard');
     card.innerHTML = '';
-    var next = null;
-    for (var i = 0; i < SHEET.stickers.length; i++) {
-      if (state.used.indexOf(SHEET.stickers[i].id) === -1) { next = SHEET.stickers[i]; break; }
-    }
-    var t = el('div', 'tile' + (next ? ' popin' : ' used'));
-    if (next) {
-      t.dataset.sid = next.id;
-      t.setAttribute('aria-label', 'Sticker: ' + next.label + '. Pull a corner to peel it.');
-      t.innerHTML = '<div class="stk">' + next.svg + '</div>';
-    } else {
-      t.setAttribute('aria-label', 'Sheet is empty. Reset brings the stickers back.');
-    }
-    card.appendChild(t);
+    SHEET.stickers.concat([SHEET.main]).forEach(function (s) {
+      var gone = state.used.indexOf(s.id) !== -1;
+      var n = el('div', 'slot' + (s.id === SHEET.main.id ? ' main' : '') + (gone ? ' empty' : ''));
+      n.dataset.sid = s.id;
+      n.style.left = s.slot.x + '%';
+      n.style.top = s.slot.y + '%';
+      n.style.width = s.slot.size + '%';
+      n.setAttribute('aria-label', gone ? 'Empty space: ' + s.label : 'Sticker: ' + s.label + '. Pull a corner to peel it.');
+      if (!gone) n.innerHTML = '<div class="stk">' + s.svg + '</div>';
+      card.appendChild(n);
+    });
   }
 
   // A small random tilt, so every placed sticker looks hand-stuck.
@@ -139,8 +138,8 @@
 
   /* ---------- gestures: peel, move, rotate, press ---------- */
   function onTrayDown(e) {
-    var tile = e.target.closest && e.target.closest('.tile');
-    if (!tile || tile.classList.contains('used')) return;
+    var tile = e.target.closest && e.target.closest('.slot');
+    if (!tile || tile.classList.contains('empty')) return;
     e.preventDefault();
     if (gesture) return;
     var pt = { x: e.clientX, y: e.clientY };
@@ -203,7 +202,7 @@
     gesture.moved = true;
     gesture.fromPeel = true;
     gesture.detached = true;
-    var t = document.querySelector('.tile.lifting');
+    var t = document.querySelector('.slot.lifting');
     if (t) t.classList.remove('lifting');
   }
 
@@ -244,7 +243,7 @@
 
     if (gesture.kind === 'peel' && e.pointerId === gesture.pid) {
       // pressed the sheet and let go before it lifted: nothing happens
-      var t = document.querySelector('.tile.lifting');
+      var t = document.querySelector('.slot.lifting');
       if (t) t.classList.remove('lifting');
       gesture = null;
       return;

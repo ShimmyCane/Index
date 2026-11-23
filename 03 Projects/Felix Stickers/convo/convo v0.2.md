@@ -14,6 +14,15 @@
 - A peeled sticker lands with a small random tilt (up to 12°), so each one looks hand-stuck.
 - When the sheet is empty, the card is an empty dashed outline. Reset brings the stickers back.
 
-## Claude's reading (to confirm)
+## Jimmy's answer (correction)
 
-"A single sticker" was read as one sticker shown at a time, not one sticker per sheet. If Jimmy meant one large sticker in the scene per sheet, or stickers placed without any card, say so and the card can change.
+> Nope, one single sticker sheet will have a main sticker and 5-10 smaller ones.
+
+So one sheet = one main sticker + 5–10 smaller ones, all on the same sheet. The one-at-a-time card was wrong and is replaced.
+
+## What changed (0.2.1)
+
+- The sheet is one card in the play area (lower left) with the main sticker large in the middle and eight smaller ones around it (within the 5–10 range).
+- Peel any sticker from the sheet. Where it was, an empty dashed space stays, as on a real sheet.
+- Peeled stickers land with a playful random tilt, as before. Reset puts them back.
+- Sheet data: `js/sheet.js` (main sticker = a teapot; the eight small ones are cupcake, flower, heart, star, cloud, bow tie, balloon, shades). Slots are set as percentages of the card.
