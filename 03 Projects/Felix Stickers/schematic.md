@@ -115,4 +115,4 @@ See `convo/convo v0.1.md`. Nothing is built until those are answered.
 ## Changes
 
 - 2026-11-23: schematic written from the concept. Status idea.
-- 2026-11-23: round 1 answers recorded in `convo v0.1.md`. Single sheet, title with sheet name, settings and undo at the top. Open: convo Q10 (whether the uploaded sheets may appear on a public page) and Q11 (who names each sheet). No build yet.
+- 2026-11-23: round 1 answers recorded in `convo v0.1.md`. Single sheet, title with sheet name, settings and undo at the top. Open: convo Q11 (who names each sheet). Q10 answered: the uploaded sheets are for testing only, never published. Later: a core prompt for ChatGPT that turns an idea into a sticker sheet; its test outputs are named Test# (not built yet). No build yet.

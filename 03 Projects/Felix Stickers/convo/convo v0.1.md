@@ -59,7 +59,8 @@ Answer inline under each number. Recommended answers are marked; "go with the re
     - (a) Use them only on your own device for testing; they are not committed or published, and the public build uses lookalike art I draw *(recommended)*
     - (b) Publish them on the public page anyway; you confirm the licence or permission first
     - (c) Other:
-    - Answer:
+    - Answer: **(a), only for testing.** The uploaded sheets stay on Jimmy's device for tests. They are not committed, not published and not in the public build. The public build uses lookalike art.
+    - Later (new request, 2026-11-23): a core prompt Jimmy can paste into ChatGPT with an idea, to produce a sticker-sheet concept for testing. Its test outputs are named **Test#** (reading: Test1, Test2, … each one a test sheet made from the core prompt). Not built yet; the prompt will be written in a later round. Claude's reading to confirm: "Test#" names the test outputs, not the prompt itself.
 
 11. **Sheet names for the title.** The title reads "Felix Stickers – [sticker sheet name, 3 or more words]".
     - (a) One name per sheet, written in the sheet's data file, so each sheet can have its own name *(recommended)*
