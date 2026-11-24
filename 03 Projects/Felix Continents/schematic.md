@@ -94,3 +94,12 @@ Yes. ⚙️ in the lower right holds the options and extensions. Errors appear a
 
 - See the questions in `convo/convo v0.1.md`.
 - Home page tile: not yet. It goes on the Nursery list in the same change as the first page that opens (step 9 of `start_project.md`).
+
+## Decisions from convo v0.2 (answered 2026-11-24)
+
+- **V2:** a piece let go within 3° of its place snaps to it, with a ✓ (done). The dashed outline of today's map is off by default; ⚙️ can turn it on (done).
+- **V3 human history:** about 8 regions with a few dates each, hand-sketched and marked "approximate". Spread is shown as shaded areas that grow, with a dot at each city or capital (go with the recommendations).
+- **V4 countries:** milestones 2000, 1200, 100, 1300 and 1800, plus Greek, Mayan, Incan, African kingdoms, Indonesian and Aleutian. A "country" can be a group, tribe or collective, not a modern state name. Tapping an area zooms in with a short story card.
+- **V5 random worlds:** sliders stay in ⚙️. The "made-up world" sentence stays on screen (done). Jimmy also asked for a hex code: meaning not yet confirmed.
+- **Maps and events (planned, not built):** show Rodinia once a source is chosen. Future animations: the Moon-forming impact, tectonic shifts, volcanic eruptions, and ice ages.
+- **Family login and notes:** done. `fc_notes` is live in the Family project: row-level security on, 3 policies, 1 registry row, nothing unregistered (read-only check, 2026-11-24).
