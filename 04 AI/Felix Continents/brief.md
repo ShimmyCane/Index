@@ -1,7 +1,7 @@
 # Felix Continents — brief
 
 **Updated:** 2026-11-24
-**Status:** Planning round 1. Folders, schematic, pointer `CLAUDE.md` and questions in `03 Projects/Felix Continents/convo/convo v0.1.md` exist. Nothing is built. No page yet, so no tile on the Nursery list.
+**Status:** V1 first build 0.1.0 is in `03 Projects/Felix Continents/index.html`, headless-tested in Chromium (no console errors at 1180×820 and 390×844; note save and reload persist; moment changes and tap names work). Not yet on an iPad. Nursery tile added.
 
 ## Current state
 
@@ -17,12 +17,12 @@
 
 ## Verified vs. unverified
 
-- Verified: nothing yet (no code).
-- Unverified: map data sources and licences; the past positions; the climate model; the three.js version to pin.
+- Verified (headless Chromium, three.js 0.170.0 served locally): page loads from file:// with zero JS errors; today's continents, climate colours and mountains show; Pangaea and dinosaur moments render; tapping the globe names the plate or feature; notes save and survive reload; the globe resizes when the time bar appears.
+- Unverified: a real iPad (touch, performance, the 3-D frame rate); the CDN load itself from GitHub Pages (the sandbox cannot reach unpkg, so the CDN path was not exercised, only the same file served locally); the map outlines (hand sketches); the climate model's realism; the moment rotations.
 
 ## Next steps
 
-1. Jimmy answers convo v0.1.
-2. Confirm map data source and licence (before committing any data file).
-3. Build the first increment: the spinning globe, today's continents, ⚙️ with feedback notes, and the time slider with the first moment.
-4. Smoke test (`smoke-test`), then add the Nursery tile in the same change.
+1. Jimmy reviews the Pages link and tweaks the answers in convo v0.1.
+2. Pick the map sources and licences; replace the sketch outlines (`js/data.js`).
+3. Add Rodinia once a source is chosen.
+4. Then V2 (draggable continents), per `schematic.md`.

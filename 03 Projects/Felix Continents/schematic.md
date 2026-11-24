@@ -1,7 +1,7 @@
 # Felix Continents — schematic
 
 **Track:** A. Family play (Felix learns about continents by turning a globe; the family plays it, the grown-ups set it up).
-**Status:** Planning, round 1 (2026-11-24). No page yet. Questions in `convo/convo v0.1.md`. Nothing is built until those are answered.
+**Status:** V1 first build 0.1.0 (2026-11-24). `index.html` with the spinning globe, today's continents, the ⚙️ Time travel slider with five moments, climate colours, and notes for improvement. Headless-tested in Chromium, not yet on an iPad. Answers from `convo/convo v0.1.md` (proposals taken as recommended; two deviations recorded there: no Rodinia, and hand-drawn sketch outlines).
 
 ## Idea
 
@@ -48,16 +48,17 @@ Only V1 is in scope for the first build. Later versions are kept here so the V1 
 - ⚙️ (lower right, the same as every app) opens the drawer: Time travel switch, moment list, speed, autoplay, labels, climate, notes for improvement, errors (bottom, opt-in).
 - The slider sits under the globe only when Time travel is on. Its moments snap; it does not move in a straight line.
 
-## Moments (V1 plan, to be confirmed)
+## Moments (V1 as built)
 
-Each moment is a set of positions for the continents, the mountains, the volcanoes and the sea level, with a short animated move from the moment before. Proposed list (a convo question):
+Each moment is a set of plate positions (a move and a turn from today's place), with the mountains, the volcanoes and the sea level for that time. Built in `js/data.js`:
 
 1. Today
-2. The last ice age (about 20,000 years ago): lower sea, bigger ice
-3. The end of the dinosaurs (about 66 million years ago): volcanoes in India (Deccan traps) and the land bridges
-4. Pangaea breaking up (about 175 million years ago)
-5. Pangaea whole (about 250 million years ago)
-6. Rodinia (about 750 million years ago), an older supercontinent
+2. The last ice age (about 20,000 years ago): the sea is lower, a sandy shelf appears, and ice covers the north
+3. The end of the dinosaurs (about 66 million years ago): India is further south, and the Deccan traps volcanoes show
+4. Pangaea starts to break (about 175 million years ago)
+5. Pangaea (about 250 million years ago)
+
+Rodinia (about 750 million years ago) is not in V1: there is no checked source for its shapes yet. It comes with the source choice.
 
 Loops: an animation always loops and closes on itself (`jimmy_preferences.md` §2c). Each moment plays twice, then pauses and waits for ▶.
 
@@ -69,14 +70,14 @@ Loops: an animation always loops and closes on itself (`jimmy_preferences.md` §
 
 ## Data
 
-- **Today:** continent outlines from an open-licence world dataset, stored in the repo as a small JSON file. Licence to be checked before it is committed.
-- **Past positions:** approximate outlines from published reconstructions. Source and licence are open (convo question). Every moment carries its source note.
+- **Today and past:** the outlines are rough sketches drawn by hand (nine plates, about 30 points each), in `js/data.js`. They are not from a checked source. The page's About panel says so.
+- **Next:** choose an open-licence source for today's coastlines and a published reconstruction for the past, check the licence, then replace the sketches. Each moment gets its source note.
 - All data loads with the three-tier offline pattern where it comes from a remote source: live, then cached, then the bundled JSON. In V1 everything is bundled, so the page works offline from `file://` once built.
 
 ## Stack
 
 - Plain HTML, CSS and vanilla JavaScript. No build step, no Node server (`CLAUDE.md`).
-- three.js from cdnjs, one exact version at least two weeks old (named when built).
+- three.js 0.170.0 as an ES module from unpkg (`https://unpkg.com/three@0.170.0/build/three.module.js`). The module code sits inline in `index.html`, so the page still opens from `file://`. `js/data.js` is a classic script.
 - Web Audio for any sound (optional; not in V1 unless asked).
 
 ## Feedback notes (planned; built in the first increment)
