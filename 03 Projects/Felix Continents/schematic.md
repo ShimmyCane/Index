@@ -1,7 +1,7 @@
 # Felix Continents — schematic
 
 **Track:** A. Family play (Felix learns about continents by turning a globe; the family plays it, the grown-ups set it up).
-**Status:** Round 2 (2026-11-24): V1 timeline runs Pangaea → today; V2 (drag the continents) and V3 (random worlds) built as pages; Family login and `fc_notes` SQL written, not pasted. V2.5 and V2.8/2.9 not built (questions in `convo/convo v0.2.md`). Earlier: V1 first build 0.1.0 (2026-11-24). `index.html` with the spinning globe, today's continents, the ⚙️ Time travel slider with five moments, climate colours, and notes for improvement. Headless-tested in Chromium, not yet on an iPad. Answers from `convo/convo v0.1.md` (proposals taken as recommended; two deviations recorded there: no Rodinia, and hand-drawn sketch outlines).
+**Status:** Round 2 (2026-11-24): V1 timeline runs Pangaea → today; V2 (drag the continents) and V5 (random worlds) built as pages; Family login and `fc_notes` SQL written, not pasted. V3 (human history) and V4 (countries) not built (questions in `convo/convo v0.2.md`). Earlier: V1 first build 0.1.0 (2026-11-24). `index.html` with the spinning globe, today's continents, the ⚙️ Time travel slider with five moments, climate colours, and notes for improvement. Headless-tested in Chromium, not yet on an iPad. Answers from `convo/convo v0.1.md` (proposals taken as recommended; two deviations recorded there: no Rodinia, and hand-drawn sketch outlines).
 
 ## Idea
 
@@ -15,9 +15,9 @@ Teaching aim: each moment says what happened, in plain words, with its date and 
 |---|---|
 | **V1** | Spinning globe. Today's continents. ⚙️ **Time travel** switch shows a slider with named moments. Each moment animates: drift, mountains, volcanoes, sea level. A simple climate on the land (deserts, wet forests, woodland, grassland, ice) that follows from latitude, wind and mountains. |
 | **V2** | Drag a continent on the globe to fit it against its neighbours (a puzzle). |
-| **V2.5** | Human settlement animated on the timeline: spread, maps, early civilisations, dynasties, conflicts. |
-| **V2.8 / V2.9** | Countries over time. Zoom into a country. Milestones to snap to (modern, medieval, Roman, Asian dynasties). Civilisations grow one nation or people at a time. |
-| **V3** | Random worlds: sliders (in ⚙️ or a panel) and a Generate button. Animate the random world over eons; civilisations grow and spread. |
+| **V3** | Human settlement animated on the timeline: spread, maps, early civilisations, dynasties, conflicts. |
+| **V4** | Countries over time. Zoom into a country. Milestones to snap to (modern, medieval, Roman, Asian dynasties). Civilisations grow one nation or people at a time. |
+| **V5** | Random worlds: sliders (in ⚙️ or a panel) and a Generate button. Animate the random world over eons; civilisations grow and spread. |
 
 Only V1 is in scope for the first build. Later versions are kept here so the V1 data fits them.
 

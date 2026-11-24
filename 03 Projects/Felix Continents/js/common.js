@@ -1,5 +1,5 @@
 /* Felix Continents common parts (classic script): settings, errors, notes, Family sign-in.
- * Used by index.html, v2.html and v3.html. The page works without the Family database:
+ * Used by index.html, v2.html and v5.html. The page works without the Family database:
  * notes always stay on this device, and are also sent to the family table when signed in. */
 (function () {
   var DB = { url: 'https://twvqvutrcobedvuhnzxq.supabase.co', key: 'sb_publishable_eqUo8HEdEB1hMQM4CpSVqA_9i6b0qCo' };
