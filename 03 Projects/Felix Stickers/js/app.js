@@ -132,7 +132,8 @@
     var W = SHEET.ref.w, H = SHEET.ref.h;
     SHEET.stickers.concat([SHEET.main]).forEach(function (s) {
       var gone = state.used.indexOf(s.id) !== -1;
-      var n = el('div', 'slot' + (s.id === SHEET.main.id ? ' main' : '') + (gone ? ' empty' : ''));
+      var n = el('div', 'slot' + (s.id === SHEET.main.id ? ' main' : '') + (gone ? ' empty' : '') +
+        (gone && lift && lift.sid === s.id ? ' lifted' : ''));
       n.dataset.sid = s.id;
       n.style.left = (s.box.x / W * 100) + '%';
       n.style.top = (s.box.y / H * 100) + '%';
@@ -142,6 +143,7 @@
       if (!gone) n.innerHTML = '<div class="stk">' + artFor(s) + '</div>';
       page.appendChild(n);
     });
+    if (lift && lift.canvas && lift.canvas.parentNode) page.appendChild(lift.canvas);
     card.appendChild(page);
   }
 
@@ -157,19 +159,17 @@
 
   /* ---------- gestures: peel, move, rotate, press ---------- */
   function onTrayDown(e) {
-    var tile = e.target.closest && e.target.closest('.slot');
-    if (!tile || tile.classList.contains('empty')) return;
     e.preventDefault();
     if (gesture) return;
+    if (lift && lift.phase !== 'lifting') return liftPress(e);
+    var tile = e.target.closest && e.target.closest('.slot');
+    if (!tile || tile.classList.contains('empty') || lift) return;
     var pt = { x: e.clientX, y: e.clientY };
     pointers.set(e.pointerId, pt);
     var sid = tile.dataset.sid;
     setLast(stickerById[sid].label);
-    var box = tile.getBoundingClientRect();
-    gesture = { kind: 'peel', pid: e.pointerId, sid: sid, start: pt, before: snapshot(), tile: tile, detached: false,
-      pull: PEEL_PULL * Math.min(box.width, box.height),
-      grab: { x: pt.x - box.left, y: pt.y - box.top }, size: { w: box.width, h: box.height } };
-    tile.classList.add('lifting');
+    gesture = { kind: 'peel', pid: e.pointerId, sid: sid, start: pt, pagePress: pageOf(pt),
+      before: snapshot(), tile: tile };
   }
 
   function onPlacedDown(e) {
@@ -247,27 +247,39 @@
        S + R .. 2S      the peeled part, back side up, lying ahead of the roll
        t > 2S           stuck, unchanged */
   // The piece is drawn once into the drag's frame, then read back as pixels.
+  // The picture point (x, y) in its own box, mapped to the sheet: it turns by phi about the pivot.
+  function mapPic(L, x, y) {
+    var c = Math.cos(L.phi), sn = Math.sin(L.phi);
+    var qx = L.Box0.x + x - L.Ta.x, qy = L.Box0.y + y - L.Ta.y;
+    return { x: L.Pv.x + c * qx - sn * qy, y: L.Pv.y + sn * qx + c * qy };
+  }
+
+  // The picture is drawn once into the drag's frame (t along the drag from the pivot, a across it),
+  // then read back as pixels.
   function buildFrame(st) {
     var d = st.dpr;
     var ux = st.u.x, uy = st.u.y, nx = -uy, ny = ux;
+    function tOf(x, y) {
+      var P = mapPic(st, x, y);
+      var X = P.x - st.gp.x, Y = P.y - st.gp.y;
+      return { t: X * ux + Y * uy, a: X * nx + Y * ny };
+    }
     var corners = [[0, 0], [st.W, 0], [st.W, st.H], [0, st.H]];
     var tA = Infinity, tB = -Infinity, aA = Infinity, aB = -Infinity;
     corners.forEach(function (c) {
-      var X = st.ox + c[0] - st.gp.x, Y = st.oy + c[1] - st.gp.y;
-      var t = X * ux + Y * uy, a = X * nx + Y * ny;
-      tA = Math.min(tA, t); tB = Math.max(tB, t); aA = Math.min(aA, a); aB = Math.max(aB, a);
+      var r = tOf(c[0], c[1]);
+      tA = Math.min(tA, r.t); tB = Math.max(tB, r.t); aA = Math.min(aA, r.a); aB = Math.max(aB, r.a);
     });
     tA = Math.floor(tA) - 2; aA = Math.floor(aA) - 2;
     var wO = Math.ceil(tB - tA) + 4, hO = Math.ceil(aB - aA) + 4;
     var O = document.createElement('canvas');
     O.width = Math.round(wO * d); O.height = Math.round(hO * d);
     var oc = O.getContext('2d');
-    var C1 = (st.ox - st.gp.x) * ux + (st.oy - st.gp.y) * uy - tA;
-    var C2 = (st.ox - st.gp.x) * nx + (st.oy - st.gp.y) * ny - aA;
-    oc.setTransform(d * ux, d * nx, d * uy, d * ny, d * C1, d * C2);
+    var o = tOf(0, 0), ex = tOf(1, 0), ey = tOf(0, 1);
+    oc.setTransform(d * (ex.t - o.t), d * (ex.a - o.a), d * (ey.t - o.t), d * (ey.a - o.a),
+      d * (o.t - tA), d * (o.a - aA));
     oc.drawImage(st.src, 0, 0, st.W, st.H);
     var px = oc.getImageData(0, 0, O.width, O.height);
-    // the box on the sheet that the peel can reach (the frame's corners, back in page space)
     st.frame = { data: px.data, wD: O.width, hD: O.height, d: d, tA: tA, tB: tB, aA: aA, aB: aB };
   }
 
@@ -334,6 +346,11 @@
         } else if (t <= 2 * S) {
           kind = 1;
           ts = 2 * S - t;                                     // the lifted part, seen from its back
+          // it is curled, not flat: darker where it leaves the roll, lighter toward its free end,
+          // with a soft sheen across the curve
+          var q = Math.min(1, Math.max(0, (t - S - R) / Math.max(1, S - R)));
+          shade = 0.72 + 0.28 * smooth(q);
+          hi = 0.10 * Math.exp(-Math.pow(q - 0.45, 2) / 0.04);
         }
         if (kind === 2) { out[o + 3] = 0; continue; }
         sampleFrame(F, ts - F.tA, a - F.aA, px);
@@ -346,54 +363,213 @@
           out[o + 3] = px[3];
         } else {
           // vellum: the picture shows through a paper tint, fully opaque
-          var k = 0.45;
-          out[o] = px[0] * (1 - k) + 255 * k;
-          out[o + 1] = px[1] * (1 - k) + 252 * k;
-          out[o + 2] = px[2] * (1 - k) + 244 * k;
-          out[o + 3] = 230;                                   // 90% opaque: the sheet shows faintly through
+          var k = 0.7;
+          out[o] = Math.min(255, (px[0] * (1 - k) + 255 * k) * shade + 255 * hi);
+          out[o + 1] = Math.min(255, (px[1] * (1 - k) + 252 * k) * shade + 255 * hi);
+          out[o + 2] = Math.min(255, (px[2] * (1 - k) + 244 * k) * shade + 255 * hi);
+          out[o + 3] = 255;                                   // solid: the back is white, with only a faint picture
         }
       }
     }
     ctx.putImageData(img, Math.round(F.bx0 * dpr), Math.round(F.by0 * dpr));
-  }
-
-  // The picture rolls from the press point along the drag, whatever its direction.
-  function curl(tile, sid, g, sz, u, S) {
-    if (S <= 0.5) return uncurl(tile);
-    var img = cutoutImage(window.FS_NATIVE_PLACED && window.FS_NATIVE_PLACED[sid]);
-    if (!img) return;
-    var page = tile.parentNode;
-    var base = tile.querySelector('.stk');
-    var canvas = page.querySelector('canvas.peel');
-    var dpr = window.devicePixelRatio || 1;
-    var PW = page.clientWidth, PH = page.clientHeight;
-    if (!canvas) {
-      canvas = document.createElement('canvas');
-      canvas.className = 'peel';
-      page.appendChild(canvas);
+    if (st.ghost) {
+      // dashed footprint where the sticker will sit flat if it is applied here
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = 'rgba(47,59,74,.7)';
+      (st.edge || []).forEach(function (q) {
+        var P = mapPic(st, q[0] * st.W, q[1] * st.H);
+        ctx.fillRect(P.x - 0.7, P.y - 0.7, 1.4, 1.4);
+      });
     }
-    canvas.width = Math.round(PW * dpr);
-    canvas.height = Math.round(PH * dpr);
-    base.style.visibility = 'hidden';
-    tile.classList.remove('settle');
-    var ox = tile.offsetLeft, oy = tile.offsetTop;
-    peelState = {
-      tile: tile, canvas: canvas, src: img, u: u, S: S,
-      gp: { x: ox + g.x, y: oy + g.y }, ox: ox, oy: oy, W: sz.w, H: sz.h,
-      R: Math.max(3, 0.08 * Math.min(sz.w, sz.h)), frame: null,
-      PW: PW, PH: PH, dpr: Math.min(dpr, 1.5)
-    };
-    drawPeel(peelState);
   }
 
-  // Let go before the piece comes away: it goes back flat.
-  function uncurl(tile) {
-    var page = tile.parentNode;
-    var canvas = page && page.querySelector('canvas.peel');
-    if (canvas) canvas.remove();
-    var base = tile.querySelector('.stk');
-    if (base) base.style.visibility = '';
-    if (peelState && peelState.tile === tile) peelState = null;
+  /* ---- lift (see convo v0.15) ----
+     phase 'lifting': the finger peels from the sticker's edge; the roll follows the finger.
+     phase 'held':    released; the sticker is lifted but not shown (its hole is dashed).
+     phase 'carry':   a touch on the sheet brings it back, its roll under the finger, until release.
+     phase 'placeable': released after carrying; the next touch applies it: the roll is rolled
+                      back toward the edge, and it sticks when the finger passes that edge. */
+  var lift = null;
+  var edgeCache = {};
+  // the sticker's own outline: boundary pixels of its picture, thinned into dashes; in box fractions
+  function edgePoints(img) {
+    var key = img.src;
+    if (edgeCache[key]) return edgeCache[key];
+    var w = img.naturalWidth, h = img.naturalHeight;
+    var c = document.createElement('canvas'); c.width = w; c.height = h;
+    var cx = c.getContext('2d'); cx.drawImage(img, 0, 0);
+    var d = cx.getImageData(0, 0, w, h).data, pts = [];
+    function op(x, y) { return x >= 0 && y >= 0 && x < w && y < h && d[(y * w + x) * 4 + 3] > 110; }
+    for (var y = 0; y < h; y += 2) for (var x = 0; x < w; x += 2) {
+      if (!op(x, y)) continue;
+      if (!op(x - 2, y) || !op(x + 2, y) || !op(x, y - 2) || !op(x, y + 2)) {
+        if (((x + y) / 2) % 3 === 0) pts.push([x / w, y / h]);
+      }
+    }
+    edgeCache[key] = pts;
+    return pts;
+  }
+
+  function pageOf(pt) {
+    var r = $('.sheetPage').getBoundingClientRect();
+    return { x: pt.x - r.left, y: pt.y - r.top };
+  }
+  function liftCanvas(L) {
+    if (L.canvas && L.canvas.parentNode) return L.canvas;
+    var page = $('.sheetPage');
+    var dpr = window.devicePixelRatio || 1;
+    var c = document.createElement('canvas');
+    c.className = 'peel';
+    c.width = Math.round(page.clientWidth * dpr);
+    c.height = Math.round(page.clientHeight * dpr);
+    page.appendChild(c);
+    L.canvas = c; L.PW = page.clientWidth; L.PH = page.clientHeight;
+    return c;
+  }
+  function liftDraw(L) {
+    liftCanvas(L);
+    L.gp = { x: L.Pv.x, y: L.Pv.y };
+    L.frame = null;
+    drawPeel(L);
+  }
+  function liftHide(L) {
+    if (L.canvas) { L.canvas.remove(); }
+  }
+  function liftClear() {
+    if (lift) liftHide(lift);
+    lift = null;
+  }
+  function liftLen(L) {
+    // how far the picture reaches along the drag from the pivot
+    var m = 0;
+    [[0, 0], [L.W, 0], [L.W, L.H], [0, L.H]].forEach(function (c) {
+      var P = mapPic(L, c[0], c[1]);
+      m = Math.max(m, (P.x - L.Pv.x) * L.u.x + (P.y - L.Pv.y) * L.u.y);
+    });
+    return m;
+  }
+
+  function startLift(gesture, f) {
+    // called once the finger has moved a little from the tray: the edge is the sticker's back edge
+    var img = cutoutImage(window.FS_NATIVE_PLACED && window.FS_NATIVE_PLACED[gesture.sid]);
+    if (!img) return null;
+    var page = $('.sheetPage');
+    var tile = gesture.tile;
+    var ox = tile.offsetLeft, oy = tile.offsetTop;
+    var W = tile.offsetWidth, H = tile.offsetHeight;
+    var u = { x: f.x - gesture.pagePress.x, y: f.y - gesture.pagePress.y };
+    var du = Math.hypot(u.x, u.y) || 1; u = { x: u.x / du, y: u.y / du };
+    // the back edge of the picture, along the drag: the peel starts there
+    var t0 = Infinity;
+    [[0, 0], [W, 0], [W, H], [0, H]].forEach(function (c) {
+      t0 = Math.min(t0, (ox + c[0]) * u.x + (oy + c[1]) * u.y);
+    });
+    var pp = gesture.pagePress;
+    var E = { x: pp.x - ((pp.x * u.x + pp.y * u.y) - t0) * u.x, y: pp.y - ((pp.x * u.x + pp.y * u.y) - t0) * u.y };
+    var L = {
+      sid: gesture.sid, src: img, W: W, H: H, Box0: { x: ox, y: oy }, Ta: E, Pv: E, phi: 0,
+      uL: u, u: u, S: 0, R: Math.max(3, 0.08 * Math.min(W, H)), phase: 'lifting',
+      before: gesture.before, canvas: null, frame: null, ghost: false,
+      PW: page.clientWidth, PH: page.clientHeight, dpr: Math.min(window.devicePixelRatio || 1, 1.5)
+    };
+    L.len = liftLen(L);
+    L.edge = edgePoints(img);
+    if (state.used.indexOf(gesture.sid) === -1) state.used.push(gesture.sid);
+    renderTray();
+    return L;
+  }
+
+  function updatePeel(L, f) {
+    // the roll sits at the finger; the sticker's edge stays where the peel started
+    var d = { x: f.x - L.Pv.x, y: f.y - L.Pv.y };
+    var r = Math.hypot(d.x, d.y);
+    if (r > 4) L.u = { x: d.x / r, y: d.y / r };
+    L.len = liftLen(L);
+    L.S = clamp(r, 0, L.len);
+    liftDraw(L);
+  }
+
+  function liftPress(e) {
+    // a touch on the sheet while a sticker is held: carry it, or apply it
+    var pt = { x: e.clientX, y: e.clientY };
+    var f = pageOf(pt);
+    if (lift.phase === 'held') {
+      var tip = { x: lift.Pv.x + lift.S * lift.u.x, y: lift.Pv.y + lift.S * lift.u.y };
+      // the curl comes up under the finger
+      gesture = { kind: 'carry', pid: e.pointerId, o: { x: 0, y: 0 }, last: f };
+      lift.phase = 'carry';
+      lift.ghost = true;
+      moveCarry(f);
+    } else if (lift.phase === 'placeable') {
+      var tipA = { x: lift.Pv.x + lift.S * lift.u.x, y: lift.Pv.y + lift.S * lift.u.y };
+      gesture = { kind: 'apply', pid: e.pointerId, E: { x: lift.Pv.x, y: lift.Pv.y },
+        o: { x: f.x - tipA.x, y: f.y - tipA.y } };
+      lift.phase = 'apply';
+      lift.ghost = true;
+      liftDraw(lift);
+    }
+    pointers.set(e.pointerId, pt);
+  }
+
+  function moveCarry(f) {
+    var tip = { x: f.x - gesture.o.x, y: f.y - gesture.o.y };
+    lift.Pv = { x: tip.x - lift.S * lift.u.x, y: tip.y - lift.S * lift.u.y };
+    liftDraw(lift);
+  }
+
+  function moveApply(f) {
+    var tip = { x: f.x - gesture.o.x, y: f.y - gesture.o.y };
+    var E = gesture.E;
+    var d = { x: tip.x - E.x, y: tip.y - E.y };
+    var r = Math.hypot(d.x, d.y);
+    var past = d.x * lift.uL.x + d.y * lift.uL.y <= 0;
+    if (past) {
+      // past the edge: the rest of the sticker unrolls onto the sheet, then it stays
+      lift.Pv = E;
+      lift.u = lift.lastU || lift.uL;
+      lift.phi = lift.lastPhi || 0;
+      lift.S = clamp(lift.lastS || 0, 0, lift.len || 0);
+      gesture = null;
+      return unrollToStick(lift);
+    }
+    var uNew = r > 3 ? { x: d.x / r, y: d.y / r } : lift.uL;
+    lift.Pv = E;
+    lift.u = uNew;
+    lift.phi = Math.atan2(uNew.y, uNew.x) - Math.atan2(lift.uL.y, lift.uL.x);
+    lift.len = liftLen(lift);
+    lift.S = clamp(r, 0, lift.len);
+    lift.lastU = uNew; lift.lastPhi = lift.phi; lift.lastS = lift.S;
+    liftDraw(lift);
+  }
+
+  function unrollToStick(L) {
+    if (L.unrolling) return;
+    L.unrolling = true;
+    var from = L.S, t0 = performance.now(), dur = 320;
+    function step(now) {
+      var k = Math.min(1, (now - t0) / dur);
+      L.S = from * (1 - smooth(k));
+      liftDraw(L);
+      if (k < 1) requestAnimationFrame(step); else stickLift();
+    }
+    requestAnimationFrame(step);
+  }
+
+  function stickLift() {
+    var L = lift;
+    var c = mapPic(L, L.W / 2, L.H / 2);
+    var sheet = $('.sheetPage').getBoundingClientRect();
+    var p = toPercent({ x: sheet.left + c.x, y: sheet.top + c.y });
+    var item = { uid: nextUid++, stickerId: L.sid, x: p.x, y: p.y, rot: L.phi * 180 / Math.PI, committed: true };
+    liftClear();
+    state.placed.push(item);
+    gesture = null;
+    renderStage();
+    var n = elFor(item.uid);
+    if (n) n.classList.add('stick');
+    pushUndo(L.before);
+    renderTray();
+    setLast(stickerById[item.stickerId].label + ' (stuck)');
   }
 
   // True when the point is over the empty spot this sticker came from on the sheet.
@@ -402,33 +578,6 @@
     if (!spot) return false;
     var b = spot.getBoundingClientRect();
     return pt.x >= b.left && pt.x <= b.right && pt.y >= b.top && pt.y <= b.bottom;
-  }
-
-  function detachFromSheet(pt) {
-    // the piece comes away where the finger has pulled it, so it does not jump
-    var r = gesture.tile.getBoundingClientRect();
-    var p = toPercent({
-      x: r.left + r.width / 2 + (pt.x - gesture.start.x),
-      y: r.top + r.height / 2 + (pt.y - gesture.start.y)
-    });
-    var item = { uid: nextUid++, stickerId: gesture.sid, x: p.x, y: p.y, rot: playfulAngle(), committed: false };
-    item.ang = gesture.u ? Math.atan2(gesture.u.y, gesture.u.x) * 180 / Math.PI : 0;
-    peelState = null;
-    state.placed.push(item);
-    if (state.used.indexOf(gesture.sid) === -1) state.used.push(gesture.sid);
-    renderStage();
-    renderTray();
-    var n = elFor(item.uid);
-    if (n) { n.classList.add('dragging', 'popped'); }
-    gesture.kind = 'move';
-    gesture.uid = item.uid;
-    gesture.pids = [gesture.pid];
-    gesture.start = pt;
-    gesture.origX = item.x;
-    gesture.origY = item.y;
-    gesture.moved = true;
-    gesture.fromPeel = true;
-    gesture.detached = true;
   }
 
   function onMove(e) {
@@ -440,14 +589,17 @@
 
     if (gesture.kind === 'peel') {
       if (e.pointerId !== gesture.pid) return;
-      var dx = pt.x - gesture.start.x, dy = pt.y - gesture.start.y;
-      var dd = Math.hypot(dx, dy);                 // progress along the drag, any direction
-      var uu = dd > 0.5 ? { x: dx / dd, y: dy / dd } : { x: 1, y: 0 };
-      gesture.u = uu;
-      curl(gesture.tile, gesture.sid, gesture.grab, gesture.size, uu, Math.min(dd, gesture.pull));
-      if (dd < gesture.pull) return;
-      detachFromSheet(pt);
+      var f = pageOf(pt);
+      if (!lift) {
+        if (dist(gesture.start, pt) < 6) return;
+        lift = startLift(gesture, f);
+        if (!lift) return;
+      }
+      updatePeel(lift, f);
+      return;
     }
+    if (gesture.kind === 'carry' && gesture.pid === e.pointerId) { moveCarry(pageOf(pt)); return; }
+    if (gesture.kind === 'apply' && gesture.pid === e.pointerId) { moveApply(pageOf(pt)); return; }
 
     if (gesture.kind === 'move' && gesture.pids.indexOf(e.pointerId) !== -1) {
       var item = findItem(gesture.uid);
@@ -473,10 +625,31 @@
     var pt = { x: e.clientX, y: e.clientY };
 
     if (gesture.kind === 'peel' && e.pointerId === gesture.pid) {
-      // let go before it came away: it springs back onto the sheet
-      uncurl(gesture.tile);
-      var t = document.querySelector('.slot.lifting');
-      if (t) t.classList.remove('lifting');
+      if (lift && lift.phase === 'lifting') {
+        if (lift.S >= 8) {
+          // let go: the sticker stays lifted, out of sight, until the next touch
+          lift.phase = 'held';
+          liftHide(lift);
+        } else {
+          // only a touch: nothing was lifted
+          var before = lift.before;
+          liftClear();
+          state.used = before.used;
+          renderTray();
+        }
+      }
+      gesture = null;
+      return;
+    }
+    if (gesture.kind === 'carry' && gesture.pid === e.pointerId) {
+      lift.phase = 'placeable';
+      lift.ghost = false;
+      liftHide(lift);
+      gesture = null;
+      return;
+    }
+    if (gesture.kind === 'apply' && gesture.pid === e.pointerId) {
+      if (lift) { lift.phase = 'placeable'; lift.ghost = false; liftHide(lift); }
       gesture = null;
       return;
     }
@@ -513,6 +686,7 @@
 
   /* ---------- actions ---------- */
   function resetSheet() {
+    liftClear();
     pushUndo(snapshot());
     state = { placed: [], used: [] };
     render();
