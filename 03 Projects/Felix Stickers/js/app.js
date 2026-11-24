@@ -246,8 +246,9 @@
        S - R .. S + R   the roll: the picture curls round it, shaded, edges faded
        S + R .. 2S      the peeled part, back side up, lying ahead of the roll
        t > 2S           stuck, unchanged */
+  // The piece is drawn once into the drag's frame, then read back as pixels.
   function buildFrame(st) {
-    var dpr = window.devicePixelRatio || 1;
+    var d = st.dpr;
     var ux = st.u.x, uy = st.u.y, nx = -uy, ny = ux;
     var corners = [[0, 0], [st.W, 0], [st.W, st.H], [0, st.H]];
     var tA = Infinity, tB = -Infinity, aA = Infinity, aB = -Infinity;
@@ -259,59 +260,93 @@
     tA = Math.floor(tA) - 2; aA = Math.floor(aA) - 2;
     var wO = Math.ceil(tB - tA) + 4, hO = Math.ceil(aB - aA) + 4;
     var O = document.createElement('canvas');
-    O.width = Math.round(wO * dpr); O.height = Math.round(hO * dpr);
+    O.width = Math.round(wO * d); O.height = Math.round(hO * d);
     var oc = O.getContext('2d');
     var C1 = (st.ox - st.gp.x) * ux + (st.oy - st.gp.y) * uy - tA;
     var C2 = (st.ox - st.gp.x) * nx + (st.oy - st.gp.y) * ny - aA;
-    oc.setTransform(dpr * ux, dpr * nx, dpr * uy, dpr * ny, dpr * C1, dpr * C2);
+    oc.setTransform(d * ux, d * nx, d * uy, d * ny, d * C1, d * C2);
     oc.drawImage(st.src, 0, 0, st.W, st.H);
-    st.frame = { O: O, tA: tA, tB: tB, aA: aA, aB: aB, dpr: dpr, hO: hO };
+    var px = oc.getImageData(0, 0, O.width, O.height);
+    // the box on the sheet that the peel can reach (the frame's corners, back in page space)
+    var bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
+    [[tA, aA], [tB, aA], [tB, aB], [tA, aB]].forEach(function (q) {
+      var X = st.gp.x + q[0] * ux + q[1] * nx, Y = st.gp.y + q[0] * uy + q[1] * ny;
+      bx0 = Math.min(bx0, X); by0 = Math.min(by0, Y); bx1 = Math.max(bx1, X); by1 = Math.max(by1, Y);
+    });
+    bx0 = Math.max(0, Math.floor(bx0)); by0 = Math.max(0, Math.floor(by0));
+    bx1 = Math.min(st.PW, Math.ceil(bx1)); by1 = Math.min(st.PH, Math.ceil(by1));
+    st.frame = { data: px.data, wD: O.width, hD: O.height, d: d, tA: tA, tB: tB, aA: aA, aB: aB,
+      bx0: bx0, by0: by0, bw: Math.max(1, bx1 - bx0), bh: Math.max(1, by1 - by0) };
   }
 
+  // Sample the drag-frame picture at (x, y) in CSS px of the frame; returns [r,g,b,a].
+  function sampleFrame(F, x, y, out) {
+    var fx = x * F.d - 0.5, fy = y * F.d - 0.5;
+    if (fx < 0 || fy < 0 || fx >= F.wD - 1 || fy >= F.hD - 1) { out[3] = 0; return; }
+    var x0 = Math.floor(fx), y0 = Math.floor(fy), wx = fx - x0, wy = fy - y0;
+    var i00 = (y0 * F.wD + x0) * 4, i10 = i00 + 4, i01 = i00 + F.wD * 4, i11 = i01 + 4;
+    var d = F.data, w00 = (1 - wx) * (1 - wy), w10 = wx * (1 - wy), w01 = (1 - wx) * wy, w11 = wx * wy;
+    var A = d[i00 + 3] * w00 + d[i10 + 3] * w10 + d[i01 + 3] * w01 + d[i11 + 3] * w11;
+    if (A < 1) { out[3] = 0; return; }
+    for (var c = 0; c < 3; c++) {
+      out[c] = (d[i00 + c] * d[i00 + 3] * w00 + d[i10 + c] * d[i10 + 3] * w10 + d[i01 + c] * d[i01 + 3] * w01 + d[i11 + c] * d[i11 + 3] * w11) / A;
+    }
+    out[3] = A;
+  }
+
+  /* Per pixel, so nothing is drawn in strips and no seams can show. The drag frame:
+     t runs along the drag from the press point, a across it.
+       t < 0            stuck, unchanged
+       t < S - R        peeled away: a hole on the sheet
+       S - R .. S + R   the roll: the picture curls round it; edges faded
+       S + R .. 2S      the peeled part, back side up, lying ahead of the roll
+       t > 2S           stuck, unchanged */
   function drawPeel(st) {
     if (!st.frame) buildFrame(st);
-    var F = st.frame, dpr = F.dpr;
+    var F = st.frame;
     var ctx = st.canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, st.canvas.width, st.canvas.height);
-    // paint in the drag frame: t along the drag, a across it, origin at the press point
-    // page = press point + t * u + a * n, with n = (-uy, ux)
-    ctx.setTransform(dpr * st.u.x, dpr * st.u.y, -dpr * st.u.y, dpr * st.u.x, dpr * st.gp.x, dpr * st.gp.y);
-    var S = st.S, R = st.R, paperBase = [240, 232, 218];
-    var h = F.hO;
-    for (var k = 0; k < F.tB - F.tA; k++) {
-      var td = F.tA + k + 0.5;
-      var kind = null, ts = td, shade = 1, alpha = 1;
-      if (td < S - R) {
-        if (td < 0) kind = 'pic'; else continue;            // stuck behind the press / a hole
-      } else if (td <= S + R) {
-        var ph = Math.acos(Math.max(-1, Math.min(1, (S - td) / R)));
-        kind = 'pic'; ts = S - R + ph / Math.PI * 2 * R;
-        shade = 0.7 + 0.3 * Math.sin(ph);                 // lighter over the top of the curl
-        alpha = Math.min(1, Math.sin(ph) * 1.6);          // soft edges, no hard crease
-      } else if (td <= 2 * S) {
-        kind = 'back';
-        var edge = Math.min(1, (td - S - R) / Math.max(1, R));   // soft start to the back
-        alpha = smooth(edge * 1.4);
-        shade = 0.9 + 0.08 * edge;
-      } else {
-        kind = 'pic'; ts = td;                            // still stuck
-      }
-      ctx.globalAlpha = alpha;
-      if (kind === 'pic') {
-        var sx = (ts - F.tA) * dpr;
-        if (sx < 0 || sx >= F.O.width) continue;
-        ctx.drawImage(F.O, sx, 0, dpr, F.O.height, td - 0.5, F.aA, 1, h);
-        if (shade < 1) {
-          ctx.fillStyle = 'rgba(70,45,30,' + (1 - shade).toFixed(3) + ')';
-          ctx.fillRect(td - 0.5, F.aA, 1, h);
+    var img = ctx.createImageData(Math.round(F.bw * dpr), Math.round(F.bh * dpr));
+    var out = img.data, sc = dpr;
+    var ux = st.u.x, uy = st.u.y, gx = st.gp.x, gy = st.gp.y;
+    var S = st.S, R = st.R, px = [0, 0, 0, 0];
+    var paper = [240, 232, 218];
+    for (var j = 0; j < img.height; j++) {
+      var Y = F.by0 + (j + 0.5) / sc;
+      for (var i = 0; i < img.width; i++) {
+        var X = F.bx0 + (i + 0.5) / sc;
+        var rx = X - gx, ry = Y - gy;
+        var t = rx * ux + ry * uy, a = -rx * uy + ry * ux;
+        var o = (j * img.width + i) * 4;
+        var kind = 0, ts = t, shade = 1, alpha = 1;      // kind 0: picture, 1: back, 2: nothing
+        if (t < S - R) {
+          if (t >= 0) kind = 2;                          // peeled away: a hole
+        } else if (t <= S + R) {
+          var ph = Math.acos(Math.max(-1, Math.min(1, (S - t) / R)));
+          ts = S - R + ph / Math.PI * 2 * R;
+          shade = 0.7 + 0.3 * Math.sin(ph);
+          alpha = Math.min(1, Math.sin(ph) * 1.6);
+        } else if (t <= 2 * S) {
+          kind = 1;
+          var edge = Math.min(1, (t - S - R) / Math.max(1, R));
+          alpha = smooth(edge * 1.4);
+          shade = 0.9 + 0.08 * edge;
         }
-      } else {
-        ctx.fillStyle = 'rgb(' + Math.round(paperBase[0] * shade) + ',' + Math.round(paperBase[1] * shade) + ',' + Math.round(paperBase[2] * shade) + ')';
-        ctx.fillRect(td - 0.5, F.aA, 1, h);
+        if (kind === 2) { out[o + 3] = 0; continue; }
+        if (kind === 0) {
+          sampleFrame(F, ts - F.tA, a - F.aA, px);
+          if (px[3] <= 0) { out[o + 3] = 0; continue; }
+          out[o] = px[0] * shade; out[o + 1] = px[1] * shade; out[o + 2] = px[2] * shade;
+          out[o + 3] = px[3] * alpha;
+        } else {
+          out[o] = paper[0] * shade; out[o + 1] = paper[1] * shade; out[o + 2] = paper[2] * shade;
+          out[o + 3] = 255 * alpha;
+        }
       }
     }
-    ctx.globalAlpha = 1;
+    ctx.putImageData(img, Math.round(F.bx0 * dpr), Math.round(F.by0 * dpr));
   }
 
   // The picture rolls from the press point along the drag, whatever its direction.
@@ -337,7 +372,8 @@
     peelState = {
       tile: tile, canvas: canvas, src: img, u: u, S: S,
       gp: { x: ox + g.x, y: oy + g.y }, ox: ox, oy: oy, W: sz.w, H: sz.h,
-      R: Math.max(3, 0.08 * Math.min(sz.w, sz.h)), frame: null
+      R: Math.max(3, 0.08 * Math.min(sz.w, sz.h)), frame: null,
+      PW: PW, PH: PH, dpr: Math.min(dpr, 1.5)
     };
     drawPeel(peelState);
   }

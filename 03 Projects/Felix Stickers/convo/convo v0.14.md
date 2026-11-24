@@ -14,6 +14,10 @@
 - **Roll edges:** the edges between hole, roll and back are faded, not hard. Still a first pass: the boundaries are softer but not yet a smooth gradient.
 - **Drop-down:** plays the pick-up in reverse with a turn into place (rotation). Rolls along the pick-up direction (stored at pick-up).
 
+## Round 14 follow-up
+
+- Jimmy: the roll showed artifacts (seams between strips). Fixed by rendering the peel per pixel, so nothing is drawn in strips. Peel canvas capped at 1.5x for speed.
+
 ## Limits (honest)
 
 - The drop animation scales about the piece's centre. It does not yet start from the exact last pick-up point; that needs the roll drawn on the placed piece.
