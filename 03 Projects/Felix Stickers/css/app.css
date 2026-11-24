@@ -143,6 +143,23 @@ canvas.peel { position: absolute; left: 0; top: 0; width: 100%; height: 100%; po
   background: var(--paper); border-top: var(--line);
 }
 
+/* sheet pager: ◀ n / N ▶ in the bottom bar (hidden when there is only one sheet) */
+.pager { display: flex; align-items: center; gap: 8px; }
+.pager[hidden] { display: none; }
+.pager .btn.small { width: 48px; height: 48px; font-size: 20px; }
+#pagerPos { font-weight: 700; min-width: 48px; text-align: center; white-space: nowrap; }
+/* phones: the three bottom controls share one row without wrapping */
+.lbl-short { display: none; }
+@media (max-width: 520px) {
+  .lbl-long { display: none; }
+  .lbl-short { display: inline; }
+  #bottom { gap: 6px; padding-left: 8px; padding-right: 8px; }
+  #bottom .btn { font-size: 14px; white-space: nowrap; padding-left: 10px; padding-right: 10px; }
+  .pager { gap: 4px; }
+  .pager .btn.small { width: 40px; height: 40px; font-size: 16px; }
+  #pagerPos { min-width: 34px; font-size: 13px; }
+}
+
 /* ⚙️ gear: lower right, shown by a circle stroke, fades after a while */
 .gear {
   position: fixed; right: 14px; bottom: calc(92px + env(safe-area-inset-bottom));

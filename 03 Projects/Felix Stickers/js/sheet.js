@@ -7,6 +7,7 @@
 window.FS_SHEET = {
   ref: { w: 1312, h: 1199 },
   id: 'sheet-woods-01',
+  key: 'woods',
   name: 'Walking Through the Woods',
   main: {
     id: 'body', label: 'Plain body',

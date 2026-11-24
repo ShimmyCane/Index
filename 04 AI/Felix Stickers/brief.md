@@ -15,4 +15,5 @@ Key decisions:
 - 2026-11-25: test sheet "Thanksgiving Table Test 1" (private, in `private/thanksgiving/`, opened with `?sheet=thanksgiving`). Its 12 features are above the 5–10 rule, by Jimmy's request. The sheet's art is in its own `native` block; `mainFirst` draws the body under the features.
 - Peel is blocked on file://: Chromium will not read the cut-out's pixels there. Test over HTTP (a local server).
 - `/make-sticker <name>` adds one sticker from a picture (`02 Refs/Skills/make_sticker.md`); cutting uses `02 Refs/Skills/scripts/sticker_cut.py`.
+- 2026-11-25: bottom-bar sheet pager (◀ n / N ▶), shown when more than one sheet is loaded; top ⚙️ removed. Sticker pack page waits for more than 20 stickers.
 Next: device test on a real iPad (peel feel, two-finger twist, edge swipe), then the ChatGPT core prompt round.

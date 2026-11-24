@@ -164,5 +164,6 @@ See `convo/convo v0.1.md`. Nothing is built until those are answered.
 ## Changes
 
 - 2026-11-23: schematic written from the concept. Status idea.
+- 2026-11-25: bottom bar gets ◀ n / N ▶ to leaf through the sheets (each sheet keeps its own stickers and undo; a held sticker blocks the switch with a short note). The ⚙️ button in the top bar is removed; the lower-right gear stays. A sticker pack page is planned for when there are more than 20 stickers; not built yet.
 - 2026-11-25: Thanksgiving Table Test 1 added as a private test sheet (see Test sheets). `/make-sticker` skill added. Sheet art now comes from the sheet's own data. `js/sheet_select.js` added.
 - 2026-11-23: round 1 answers recorded in `convo v0.1.md`. Single sheet, title with sheet name, settings and undo at the top. Q11 answered: each sheet has its own name (3+ words) in its data file; test sheets also carry a Test# id. Q10 answered: the uploaded sheets are for testing only, never published. Later: a core prompt for ChatGPT that turns an idea into a sticker sheet; its test outputs are named Test# (not built yet). No build yet.

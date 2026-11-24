@@ -4,7 +4,13 @@
   'use strict';
 
   var VERSION = '0.1.0';
-  var SHEET = window.FS_SHEET;
+  // All sheets on the page: Woods, plus any test sheets that were loaded (see js/sheet_select.js).
+  var SHEETS = [window.FS_SHEET].concat(window.FS_EXTRA_SHEETS || []);
+  var startKey = '';
+  try { startKey = (new URLSearchParams(window.location.search).get('sheet') || '').toLowerCase(); } catch (e) { startKey = ''; }
+  var sheetIdx = Math.max(0, SHEETS.findIndex(function (s) { return s.key === startKey; }));
+  var SHEET = SHEETS[sheetIdx];
+  var sheetMemo = {};   // per sheet key: its placed stickers and undo history, kept while you leaf through
   var KEYS = { prefs: 'fs.prefs.v1', creations: 'fs.creations.v1', notes: 'fs.notes.v1' };
   var MAX_UNDO = 50;
   var PEEL_PULL = 0.9;  // a sticker comes away after the finger pulls 90% of its own (shorter) size
@@ -12,7 +18,11 @@
   var TAP_SLOP = 8;     // px a press may wander and still count as a press
 
   var stickerById = {};
-  SHEET.stickers.concat([SHEET.main]).forEach(function (s) { stickerById[s.id] = s; });
+  function indexStickers() {
+    stickerById = {};
+    SHEET.stickers.concat([SHEET.main]).forEach(function (s) { stickerById[s.id] = s; });
+  }
+  indexStickers();
 
   function $(sel, root) { return (root || document).querySelector(sel); }
   function el(tag, cls, html) {
@@ -895,7 +905,8 @@
     $('#btnMy').addEventListener('click', function () { renderCreations(); openSheet('#mine'); });
     $('#btnMineClose').addEventListener('click', function () { closeSheet('#mine'); });
     $('#gear').addEventListener('click', function () { openSheet('#drawer'); });
-    $('#btnSettingsTop').addEventListener('click', function () { openSheet('#drawer'); });
+    $('#btnPrev').addEventListener('click', function () { goSheet((sheetIdx - 1 + SHEETS.length) % SHEETS.length); });
+    $('#btnNext').addEventListener('click', function () { goSheet((sheetIdx + 1) % SHEETS.length); });
     $('#btnClose').addEventListener('click', function () { closeSheet('#drawer'); });
 
     $('#tgUndo').addEventListener('change', function (e) {
@@ -934,11 +945,36 @@
     st.style.setProperty('--pageW', Math.round(w) + 'px');
   }
 
+  // Leaf through the sheets. Each sheet keeps its own stickers and undo history.
+  function updatePager() {
+    var pager = $('#pager');
+    pager.hidden = SHEETS.length < 2;
+    $('#pagerPos').textContent = (sheetIdx + 1) + ' / ' + SHEETS.length;
+  }
+  function goSheet(i) {
+    if (i === sheetIdx || i < 0 || i >= SHEETS.length) return;
+    if (gesture || lift) { toast('Put the sticker down first'); return; }
+    sheetMemo[SHEET.key] = { state: state, undo: undoStack };
+    sheetIdx = i;
+    SHEET = SHEETS[i];
+    var memo = sheetMemo[SHEET.key];
+    state = memo ? memo.state : { placed: [], used: [] };
+    undoStack = memo ? memo.undo : [];
+    indexStickers();
+    $('#title').textContent = 'Felix Stickers – ' + SHEET.name;
+    document.title = 'Felix Stickers – ' + SHEET.name;
+    sizePage();
+    render();
+    updateUndo();
+    updatePager();
+  }
+
   function start() {
     sizePage();
     window.addEventListener('resize', sizePage);
     $('#title').textContent = 'Felix Stickers – ' + SHEET.name;
     document.title = 'Felix Stickers – ' + SHEET.name;
+    updatePager();
     $('#ver').textContent = VERSION;
     $('#storeState').textContent = storeOK ? 'working' : 'blocked (play still works)';
     setupPanels();
