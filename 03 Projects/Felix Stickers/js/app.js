@@ -375,15 +375,11 @@
     if (st.ghost) {
       // dashed footprint where the sticker will sit flat if it is applied here
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.setLineDash([6, 5]);
-      ctx.strokeStyle = 'rgba(47,59,74,.6)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      [[0, 0], [st.W, 0], [st.W, st.H], [0, st.H]].forEach(function (c, i) {
-        var P = mapPic(st, c[0], c[1]);
-        if (i === 0) ctx.moveTo(P.x, P.y); else ctx.lineTo(P.x, P.y);
+      ctx.fillStyle = 'rgba(47,59,74,.7)';
+      (st.edge || []).forEach(function (q) {
+        var P = mapPic(st, q[0] * st.W, q[1] * st.H);
+        ctx.fillRect(P.x - 0.7, P.y - 0.7, 1.4, 1.4);
       });
-      ctx.closePath(); ctx.stroke(); ctx.setLineDash([]);
     }
   }
 
@@ -394,6 +390,25 @@
      phase 'placeable': released after carrying; the next touch applies it: the roll is rolled
                       back toward the edge, and it sticks when the finger passes that edge. */
   var lift = null;
+  var edgeCache = {};
+  // the sticker's own outline: boundary pixels of its picture, thinned into dashes; in box fractions
+  function edgePoints(img) {
+    var key = img.src;
+    if (edgeCache[key]) return edgeCache[key];
+    var w = img.naturalWidth, h = img.naturalHeight;
+    var c = document.createElement('canvas'); c.width = w; c.height = h;
+    var cx = c.getContext('2d'); cx.drawImage(img, 0, 0);
+    var d = cx.getImageData(0, 0, w, h).data, pts = [];
+    function op(x, y) { return x >= 0 && y >= 0 && x < w && y < h && d[(y * w + x) * 4 + 3] > 110; }
+    for (var y = 0; y < h; y += 2) for (var x = 0; x < w; x += 2) {
+      if (!op(x, y)) continue;
+      if (!op(x - 2, y) || !op(x + 2, y) || !op(x, y - 2) || !op(x, y + 2)) {
+        if (((x + y) / 2) % 3 === 0) pts.push([x / w, y / h]);
+      }
+    }
+    edgeCache[key] = pts;
+    return pts;
+  }
 
   function pageOf(pt) {
     var r = $('.sheetPage').getBoundingClientRect();
@@ -458,6 +473,7 @@
       PW: page.clientWidth, PH: page.clientHeight, dpr: Math.min(window.devicePixelRatio || 1, 1.5)
     };
     L.len = liftLen(L);
+    L.edge = edgePoints(img);
     if (state.used.indexOf(gesture.sid) === -1) state.used.push(gesture.sid);
     renderTray();
     return L;
@@ -479,10 +495,11 @@
     var f = pageOf(pt);
     if (lift.phase === 'held') {
       var tip = { x: lift.Pv.x + lift.S * lift.u.x, y: lift.Pv.y + lift.S * lift.u.y };
-      gesture = { kind: 'carry', pid: e.pointerId, o: { x: f.x - tip.x, y: f.y - tip.y }, last: f };
+      // the curl comes up under the finger
+      gesture = { kind: 'carry', pid: e.pointerId, o: { x: 0, y: 0 }, last: f };
       lift.phase = 'carry';
       lift.ghost = true;
-      liftDraw(lift);
+      moveCarry(f);
     } else if (lift.phase === 'placeable') {
       var tipA = { x: lift.Pv.x + lift.S * lift.u.x, y: lift.Pv.y + lift.S * lift.u.y };
       gesture = { kind: 'apply', pid: e.pointerId, E: { x: lift.Pv.x, y: lift.Pv.y },
