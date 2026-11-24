@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Felix Continents V2</title>
+<style>
+  :root { --ink:#2f2d3d; --paper:#fffdf7; --sun:#ffe9a8; --mint:#bfe8d2; --bg:#fff6e6; }
+  [hidden] { display: none !important; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { height: 100vh; height: 100dvh; display: flex; flex-direction: column; background: var(--bg); color: var(--ink);
+    font-family: system-ui, -apple-system, sans-serif; overflow: hidden; }
+  h1 { font-size: 20px; margin: 0; }
+  .top { padding: 12px 16px 0; display: flex; align-items: center; gap: 10px; }
+  .card { margin: 8px 14px 0; background: var(--paper); border: 3px solid var(--ink); border-radius: 18px;
+    padding: 10px 14px; box-shadow: 0 4px 0 var(--ink); }
+  .when { font-weight: 700; font-size: 15px; color: #6b5b95; }
+  .name { font-size: 24px; font-weight: 800; line-height: 1.15; }
+  .sentence { margin: 4px 0 0; font-size: 17px; line-height: 1.35; }
+  .touch { margin: 6px 0 0; font-size: 15px; min-height: 1.2em; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+  .big { min-height: 52px; min-width: 120px; border: 3px solid var(--ink); border-radius: 16px; background: #fff; color: #2f2d3d;
+    font: 700 18px system-ui, sans-serif; cursor: pointer; padding: 0 12px; }
+  .big:active { transform: translateY(2px); }
+  #stage { flex: 1; min-height: 0; position: relative; margin: 8px 14px 12px; }
+  #globe { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+  .gear { position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); width: 68px; height: 68px;
+    border-radius: 50%; font-size: 32px; z-index: 30; background: var(--sun); border: 3px solid var(--ink);
+    box-shadow: 0 4px 0 var(--ink); cursor: pointer; }
+  .drawer { position: fixed; right: 18px; bottom: 100px; width: min(380px, 92vw); max-height: 70vh; overflow-y: auto;
+    z-index: 40; background: var(--paper); color: var(--ink); border: 3px solid var(--ink); border-radius: 20px;
+    box-shadow: 0 6px 0 var(--ink); padding: 14px; }
+  .drawerHead { display: flex; align-items: center; justify-content: space-between; }
+  .mini { min-width: 48px; min-height: 48px; border: 3px solid var(--ink); border-radius: 14px; background: #fff; font-size: 18px; cursor: pointer; }
+  .drawer p { margin: 6px 0 10px; font-size: 15px; line-height: 1.35; }
+  .setting { padding: 8px 0; }
+  .setting > label { display: block; font-weight: 800; margin-bottom: 6px; }
+  .seg { display: flex; gap: 8px; }
+  .seg button { flex: 1; min-height: 52px; border: 3px solid var(--ink); border-radius: 16px; background: #fff; color: #2f2d3d;
+    font-size: 18px; font-weight: 700; cursor: pointer; }
+  .seg button.on { background: var(--mint); color: #2f2d3d; }
+  .toggle { display: flex; align-items: center; gap: 10px; min-height: 48px; font-weight: 700; }
+  .toggle input { width: 24px; height: 24px; }
+  details { margin-top: 10px; border: 3px solid var(--ink); border-radius: 16px; padding: 8px 12px; background: #fff; color: #2f2d3d; }
+  summary { min-height: 44px; display: flex; align-items: center; font-weight: 800; font-size: 17px; cursor: pointer; }
+  details p, details li { font-size: 14px; line-height: 1.4; }
+  details a { display: flex; align-items: center; min-height: 48px; padding: 0 12px; margin: 6px 0; border: 3px solid var(--ink);
+    border-radius: 16px; background: var(--mint); color: #2f2d3d; font-weight: 700; text-decoration: none; }
+  .notesRow { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
+  .notesRow button, .notesRow select, .famRow button { min-height: 44px; border: 2px solid var(--ink); border-radius: 12px; background: #fff; font-size: 15px; padding: 0 10px; }
+  .famRow { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
+  .famRow input { min-height: 44px; flex: 1 1 140px; border: 2px solid var(--ink); border-radius: 12px; padding: 0 10px; font-size: 16px; }
+  #noteText { width: 100%; font-size: 16px; border: 2px solid var(--ink); border-radius: 12px; padding: 8px; }
+  #noteList { padding-left: 18px; margin: 6px 0 0; }
+  #noteList li { margin-bottom: 6px; white-space: pre-wrap; }
+  .errorsPanel { position: fixed; left: 16px; right: 100px; bottom: 16px; max-height: 30vh; overflow: auto; z-index: 25;
+    background: #fff0ee; color: #2f2d3d; border: 3px solid var(--ink); border-radius: 16px; padding: 8px 12px;
+    font: 14px monospace; white-space: pre-wrap; }
+  @media print { .gear, .drawer, .errorsPanel { display: none !important; } }
+</style>
+</head>
+<body>
+<header class="top"><h1>🧩 Felix Continents · V2</h1></header>
+
+<section class="card" aria-live="polite">
+  <div class="when">Version 2</div>
+  <div class="name">Drag the continents</div>
+  <p class="sentence">Drag a continent on the globe to move it. Drag the ocean to turn the globe. Can you fit them back into today's places?</p>
+  <div class="row">
+    <p class="touch" id="touchOut" style="margin:0">Touch a continent to pick it up.</p>
+    <button class="big" id="resetBtn" type="button">↺ Reset</button>
+  </div>
+  <p class="touch" id="counter"></p>
+</section>
+
+<main id="stage"><canvas id="globe" aria-label="Globe with continents you can drag"></canvas></main>
+
+<button class="gear" id="gear" type="button" aria-label="Settings" aria-expanded="false" aria-controls="drawer">⚙️</button>
+
+<aside class="drawer" id="drawer" hidden>
+  <div class="drawerHead"><h2 style="margin:0;font-size:20px">Settings</h2><button class="mini" id="closeDrawer" type="button" aria-label="Close">✖</button></div>
+  <p>Your moved continents are kept on this device, so you can come back to them.</p>
+
+  <div class="setting"><label>Spin by itself</label>
+    <div class="seg" data-key="spin"><button type="button" data-v="1">On</button><button type="button" data-v="0">Off</button></div></div>
+  <div class="setting"><label>Show today's outline</label>
+    <div class="seg" data-key="ghost"><button type="button" data-v="1">On</button><button type="button" data-v="0">Off</button></div></div>
+
+  <details>
+    <summary>🧭 Other versions</summary>
+    <a href="index.html">V1: the globe and its moments</a>
+    <a href="v3.html">V3: make a random world</a>
+    <p>V2.5 (people and their spread) and V2.8 / V2.9 (countries over time) are not built yet.</p>
+  </details>
+
+  <details>
+    <summary>👨‍👩‍👧 Family login</summary>
+    <div id="famForm">
+      <div class="famRow"><input id="famEmail" type="email" autocomplete="username" placeholder="Email"></div>
+      <div class="famRow"><input id="famPass" type="password" autocomplete="current-password" placeholder="Password"></div>
+      <div class="famRow"><button id="famSignIn" type="button">Sign in</button></div>
+    </div>
+    <div id="famOut" hidden>
+      <div class="famRow"><button id="famSignOut" type="button">Sign out</button></div>
+    </div>
+    <div class="famRow"><button id="famCheck" type="button">Check database</button></div>
+    <p id="famStatus"></p>
+    <p id="dbCheck"></p>
+  </details>
+
+  <details>
+    <summary>📝 Notes for improvement</summary>
+    <textarea id="noteText" rows="3" placeholder="What would make this better?"></textarea>
+    <div class="notesRow">
+      <button id="noteSave" type="button">Save note</button>
+      <button id="noteCopy" type="button">Copy notes</button>
+      <select id="noteFilter" aria-label="Show notes"><option value="open">Open</option><option value="all">All</option></select>
+    </div>
+    <ul id="noteList"></ul>
+  </details>
+
+  <details>
+    <summary>About this page</summary>
+    <p>Version 0.2.0. The continent shapes are rough sketches drawn by hand. Today's outline is the answer to the puzzle, so it is only a guide.</p>
+    <p>Built with three.js 0.170.0 (MIT licence).</p>
+  </details>
+
+  <div class="setting" style="margin-top:10px"><label class="toggle"><input type="checkbox" id="showErrors"> Show errors</label></div>
+</aside>
+<div id="errorsPanel" class="errorsPanel" hidden></div>
+
+<script src="js/data.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/common.js"></script>
+<script type="module">
+import * as THREE from 'https://unpkg.com/three@0.170.0/build/three.module.js';
+
+const FC = window.FC, E = window.FCEngine;
+const PLATES = FC.plates, FEATURES = FC.features;
+const geo = E.makeGeo(PLATES);
+const $ = id => document.getElementById(id);
+const OFFKEY = 'felixContinents.v2.offsets';
+const ZERO = [0, 0, 0];
+
+const app = FCCommon.init({
+  settingsKey: 'felixContinents.v2.settings',
+  defaults: { spin: 0, ghost: 1, showErrors: 0 },
+  startItem: 'puzzle', startLabel: 'Puzzle (V2)',
+  onSetting: () => { dirty = true; }
+});
+const S = app.S;
+
+/* the piece positions: [dLon, dLat, spin] per plate, zero = today's place */
+let off = {};
+PLATES.forEach(p => { off[p.id] = ZERO.slice(); });
+try {
+  const saved = JSON.parse(localStorage.getItem(OFFKEY) || 'null');
+  if (saved) PLATES.forEach(p => { if (saved[p.id]) off[p.id] = saved[p.id]; });
+} catch (e) { /* storage blocked: start in today's places */ }
+function saveOff() { try { localStorage.setItem(OFFKEY, JSON.stringify(off)); } catch (e) {} }
+function placed(id) { const o = off[id]; return Math.abs(o[0]) < 3 && Math.abs(o[1]) < 3 && Math.abs(o[2]) < 3; }
+let moved = false;   // becomes true after the first drag, so the page does not praise an unmoved map
+function updateCounter() {
+  const n = PLATES.filter(p => placed(p.id)).length;
+  if (n === PLATES.length) $('counter').textContent = moved
+    ? 'Well done: all ' + n + ' continents are back in today\'s places.'
+    : 'All ' + n + ' continents are in today\'s places. Drag one away, then bring it back.';
+  else $('counter').textContent = n + ' of ' + PLATES.length + ' continents are in today\'s places.';
+}
+
+/* drawing */
+let dirty = true;
+const cv = document.createElement('canvas'); cv.width = 2048; cv.height = 1024;
+const ctx = cv.getContext('2d');
+function paint() {
+  ctx.fillStyle = E.OCEAN; ctx.fillRect(0, 0, 2048, 1024);
+  E.drawPlates(ctx, geo, off, true);
+  E.drawFeatures(ctx, geo, FEATURES, 0, off);
+  if (S.ghost) {
+    ctx.save();
+    ctx.setLineDash([22, 16]); ctx.lineWidth = 4; ctx.strokeStyle = '#8e7cc3';
+    PLATES.forEach(p => {
+      const pts = geo.plateTransformed(p, ZERO);
+      [-360, 0, 360].forEach(k => {
+        ctx.beginPath();
+        pts.forEach((q, i) => { const xy = E.toPx(q[0] + k, q[1]); if (i) ctx.lineTo(xy[0], xy[1]); else ctx.moveTo(xy[0], xy[1]); });
+        ctx.closePath(); ctx.stroke();
+      });
+    });
+    ctx.restore();
+  }
+}
+
+/* the globe */
+let renderer, scene, camera, group, sphere, tex, stageEl, canvasEl, raycaster;
+const pointer = { down: false, x: 0, y: 0, moved: 0, mode: null, plate: null, lon: 0, lat: 0, off0: null };
+let spinHint = 0;
+function resize() {
+  const w = stageEl.clientWidth, h = stageEl.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / Math.max(1, h);
+  camera.position.z = camera.aspect < 0.9 ? 4.6 : 3.6;
+  camera.updateProjectionMatrix();
+  dirty = true;
+}
+function hitLonLat(clientX, clientY) {
+  const rect = canvasEl.getBoundingClientRect();
+  const ndc = new THREE.Vector2(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
+  raycaster.setFromCamera(ndc, camera);
+  const hits = raycaster.intersectObject(sphere, false);
+  if (!hits.length) return null;
+  const p = sphere.worldToLocal(hits[0].point.clone()).normalize();
+  const lat = Math.asin(Math.max(-1, Math.min(1, p.y))) * 180 / Math.PI;
+  let lon = Math.atan2(p.z, -p.x) * 180 / Math.PI - 180;
+  if (lon < -180) lon += 360;
+  return [lon, lat];
+}
+function initGlobe() {
+  stageEl = $('stage'); canvasEl = $('globe');
+  renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setClearColor(0xfff6e6, 1);
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+  group = new THREE.Group(); group.rotation.x = 0.25; group.rotation.y = -Math.PI / 3; scene.add(group);   // start facing the Atlantic
+  scene.add(new THREE.AmbientLight(0xffffff, 1.1));
+  const sun = new THREE.DirectionalLight(0xffffff, 1.2); sun.position.set(3, 2, 4); scene.add(sun);
+  tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  sphere = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 64), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9, metalness: 0 }));
+  group.add(sphere);
+  group.add(new THREE.Mesh(new THREE.SphereGeometry(1.06, 64, 48), new THREE.MeshBasicMaterial({ color: 0xbfe9ff, transparent: true, opacity: 0.2, side: THREE.BackSide })));
+  raycaster = new THREE.Raycaster();
+  resize();
+  window.addEventListener('resize', resize);
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(stageEl);
+  canvasEl.addEventListener('pointerdown', e => {
+    pointer.down = true; pointer.x = e.clientX; pointer.y = e.clientY; pointer.moved = 0;
+    const hit = hitLonLat(e.clientX, e.clientY);
+    const plate = hit ? geo.plateAt(hit[0], hit[1], off) : null;
+    if (plate) {
+      pointer.mode = 'plate'; pointer.plate = plate; pointer.lon = hit[0]; pointer.lat = hit[1];
+      pointer.off0 = off[plate.id].slice();
+      $('touchOut').textContent = 'Moving: ' + plate.name;
+    } else { pointer.mode = 'globe'; }
+    canvasEl.setPointerCapture(e.pointerId);
+  });
+  canvasEl.addEventListener('pointermove', e => {
+    if (!pointer.down) return;
+    const dx = e.clientX - pointer.x, dy = e.clientY - pointer.y;
+    pointer.x = e.clientX; pointer.y = e.clientY; pointer.moved += Math.abs(dx) + Math.abs(dy);
+    if (pointer.mode === 'plate') {
+      const hit = hitLonLat(e.clientX, e.clientY);
+      if (!hit) return;
+      const dLon = E.dlon(hit[0], pointer.lon), dLat = hit[1] - pointer.lat;
+      off[pointer.plate.id] = [pointer.off0[0] + dLon, pointer.off0[1] + dLat, pointer.off0[2]];
+      moved = true; dirty = true; updateCounter();
+    } else if (pointer.mode === 'globe' && pointer.moved > 6) {
+      group.rotation.y += dx * 0.005;
+      group.rotation.x = Math.max(-1.2, Math.min(1.2, group.rotation.x + dy * 0.004));
+    }
+  });
+  const endPointer = () => {
+    if (pointer.mode === 'plate') {
+      saveOff();
+      if (pointer.moved <= 6) $('touchOut').textContent = 'You touched: ' + pointer.plate.name;
+      else $('touchOut').textContent = placed(pointer.plate.id) ? pointer.plate.name + ' is back in place.' : 'Moved: ' + pointer.plate.name;
+    }
+    pointer.down = false; pointer.mode = null; pointer.plate = null;
+  };
+  canvasEl.addEventListener('pointerup', endPointer);
+  canvasEl.addEventListener('pointercancel', endPointer);
+}
+$('resetBtn').addEventListener('click', () => {
+  PLATES.forEach(p => { off[p.id] = ZERO.slice(); });
+  saveOff(); dirty = true; updateCounter();
+  $('touchOut').textContent = 'All continents are back at the start.';
+});
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  if (S.spin && pointer.mode !== 'globe') group.rotation.y += dt * 0.12;
+  if (dirty) { paint(); tex.needsUpdate = true; dirty = false; }
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+try {
+  initGlobe();
+  updateCounter();
+  requestAnimationFrame(frame);
+} catch (err) {
+  app.logError('Could not start the globe: ' + (err && err.message ? err.message : err));
+  $('touchOut').textContent = 'The globe could not start on this device. Open ⚙️ and turn on Show errors.';
+}
+</script>
+</body>
+</html>

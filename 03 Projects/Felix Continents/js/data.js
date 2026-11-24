@@ -1,6 +1,7 @@
 /* Felix Continents: map data (classic script, works from file://).
  * Outlines are rough sketches of today's coastlines, drawn by hand as [longitude, latitude] pairs.
  * Moment offsets move each plate from today's place: [dLon, dLat, spin] in degrees.
+ * Moments run oldest first, so the time slider goes from the past (left) to today (right).
  * Positions and dates are approximate. See the About section on the page. */
 (function () {
   var plates = [
@@ -15,21 +16,21 @@
     { id: 'AN', name: 'Antarctica', poly: [[-180,-72],[-120,-74],[-60,-65],[-45,-75],[0,-72],[60,-67],[90,-67],[120,-70],[160,-72],[180,-72],[180,-90],[-180,-90]] }
   ];
 
-  /* Offsets per moment (index matches moments). Missing plate = no move. */
+  /* Oldest first. Offsets per moment (missing plate = no move). */
   var moments = [
-    { id: 'now', name: 'Today', short: 'Now', age: 0, when: 'now',
-      sentence: 'These are the continents as they are today.', sea: 0, ice: false, plates: {} },
-    { id: 'ice', name: 'The last ice age', short: 'Ice age', age: 0.02, when: 'about 20,000 years ago',
-      sentence: 'Ice covered much of the north. The sea was lower, so some seabed became dry land.', sea: -2, ice: true, plates: {} },
-    { id: 'dino', name: 'The end of the dinosaurs', short: 'Dinosaurs', age: 66, when: 'about 66 million years ago',
-      sentence: 'India was still an island drifting north, and lava poured out where the Deccan traps are now.', sea: 1, ice: false,
-      plates: { IN: [-4, -20, 0], SA: [-4, -2, 0] } },
+    { id: 'pangaea', name: 'Pangaea', short: 'Pangaea', age: 250, when: 'about 250 million years ago',
+      sentence: 'Nearly all the land was joined into one supercontinent, so the middle was far from any sea and very dry.', sea: 0, ice: false,
+      plates: { NA: [55, -5, -20], GL: [45, 8, -20], EU: [-45, -5, 10], SA: [35, -5, 10], AF: [-10, 0, 5], MA: [-10, 0, 5], IN: [-30, -35, 10], AU: [-40, -14, 0], AN: [-30, 8, 0] } },
     { id: 'break', name: 'Pangaea starts to break', short: 'Breaking', age: 175, when: 'about 175 million years ago',
       sentence: 'The big land is splitting apart. The Atlantic Ocean is only just beginning to open.', sea: 2, ice: false,
       plates: { NA: [25, 5, -6], GL: [20, 8, -6], EU: [-20, 0, 0], SA: [20, -2, 0], AF: [-5, 0, 0], MA: [-5, 0, 0], IN: [-30, -22, 0], AU: [-35, -10, 0], AN: [-5, 5, 0] } },
-    { id: 'pangaea', name: 'Pangaea', short: 'Pangaea', age: 250, when: 'about 250 million years ago',
-      sentence: 'Nearly all the land was joined into one supercontinent, so the middle was far from any sea and very dry.', sea: 0, ice: false,
-      plates: { NA: [55, -5, -20], GL: [45, 8, -20], EU: [-45, -5, 10], SA: [35, -5, 10], AF: [-10, 0, 5], MA: [-10, 0, 5], IN: [-30, -35, 10], AU: [-40, -14, 0], AN: [-30, 8, 0] } }
+    { id: 'dino', name: 'The end of the dinosaurs', short: 'Dinosaurs', age: 66, when: 'about 66 million years ago',
+      sentence: 'India was still an island drifting north, and lava poured out where the Deccan traps are now.', sea: 1, ice: false,
+      plates: { IN: [-4, -20, 0], SA: [-4, -2, 0] } },
+    { id: 'ice', name: 'The last ice age', short: 'Ice age', age: 0.02, when: 'about 20,000 years ago',
+      sentence: 'Ice covered much of the north. The sea was lower, so some seabed became dry land.', sea: -2, ice: true, plates: {} },
+    { id: 'now', name: 'Today', short: 'Now', age: 0, when: 'now',
+      sentence: 'These are the continents as they are today.', sea: 0, ice: false, plates: {} }
   ];
 
   /* Mountains and volcanoes sit on a plate (today's place). They show when age is between to and from. */

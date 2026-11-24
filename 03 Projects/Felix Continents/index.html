@@ -6,8 +6,6 @@
 <title>Felix Continents</title>
 <style>
   :root { --ink:#2f2d3d; --paper:#fffdf7; --sun:#ffe9a8; --mint:#bfe8d2; --bg:#fff6e6; }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --paper:#2a2838; --ink:#f4f1ff; --bg:#1d1b29; --sun:#6b5b2e; --mint:#2f5a48; } }
-  :root[data-theme="dark"] { --paper:#2a2838; --ink:#f4f1ff; --bg:#1d1b29; --sun:#6b5b2e; --mint:#2f5a48; }
   [hidden] { display: none !important; }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; }
@@ -54,8 +52,12 @@
   details { margin-top: 10px; border: 3px solid var(--ink); border-radius: 16px; padding: 8px 12px; background: #fff; color: #2f2d3d; }
   summary { min-height: 44px; display: flex; align-items: center; font-weight: 800; font-size: 17px; cursor: pointer; }
   details p, details li { font-size: 14px; line-height: 1.4; }
+  details a { display: flex; align-items: center; min-height: 48px; padding: 0 12px; margin: 6px 0; border: 3px solid var(--ink);
+    border-radius: 16px; background: var(--mint); color: #2f2d3d; font-weight: 700; text-decoration: none; }
   .notesRow { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
-  .notesRow button, .notesRow select { min-height: 44px; border: 2px solid var(--ink); border-radius: 12px; background: #fff; font-size: 15px; padding: 0 10px; }
+  .notesRow button, .notesRow select, .famRow button { min-height: 44px; border: 2px solid var(--ink); border-radius: 12px; background: #fff; font-size: 15px; padding: 0 10px; }
+  .famRow { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
+  .famRow input { min-height: 44px; flex: 1 1 140px; border: 2px solid var(--ink); border-radius: 12px; padding: 0 10px; font-size: 16px; }
   #noteText { width: 100%; font-size: 16px; border: 2px solid var(--ink); border-radius: 12px; padding: 8px; }
   #noteList { padding-left: 18px; margin: 6px 0 0; }
   #noteList li { margin-bottom: 6px; white-space: pre-wrap; }
@@ -80,10 +82,10 @@
 
 <section class="timebar" id="timebar" hidden>
   <div class="tbtns">
-    <button class="big" id="btnNow" type="button">⏮ Now</button>
+    <button class="big" id="btnNow" type="button">⏮ Today</button>
     <button class="big" id="btnPlay" type="button">▶ Play</button>
   </div>
-  <input type="range" id="slider" min="0" max="4" step="1" value="0" aria-label="Time: move to a moment">
+  <input type="range" id="slider" min="0" max="4" step="1" value="4" aria-label="Time: from the past (left) to today (right)">
   <div class="ticks" id="ticks"></div>
 </section>
 
@@ -91,7 +93,7 @@
 
 <aside class="drawer" id="drawer" hidden>
   <div class="drawerHead"><h2 style="margin:0;font-size:20px">Settings</h2><button class="mini" id="closeDrawer" type="button" aria-label="Close">✖</button></div>
-  <p>Drag the globe to spin it. Turn on Time travel to step back through the moments.</p>
+  <p>Drag the globe to spin it. Turn on Time travel to step from the past (left) to today (right).</p>
 
   <div class="setting"><label>Time travel</label>
     <div class="seg" data-key="time"><button type="button" data-v="1">On</button><button type="button" data-v="0">Off</button></div></div>
@@ -99,6 +101,28 @@
     <div class="seg" data-key="spin"><button type="button" data-v="1">On</button><button type="button" data-v="0">Off</button></div></div>
   <div class="setting"><label>Climate colours</label>
     <div class="seg" data-key="climate"><button type="button" data-v="1">On</button><button type="button" data-v="0">Off</button></div></div>
+
+  <details>
+    <summary>🧭 Planning: other versions</summary>
+    <a href="v2.html">V2: drag the continents to fit them together</a>
+    <a href="v3.html">V3: make a random world</a>
+    <p>V2.5 (people and their spread) and V2.8 / V2.9 (countries over time) are not built yet. See the schematic.</p>
+  </details>
+
+  <details>
+    <summary>👨‍👩‍👧 Family login</summary>
+    <div id="famForm">
+      <div class="famRow"><input id="famEmail" type="email" autocomplete="username" placeholder="Email"></div>
+      <div class="famRow"><input id="famPass" type="password" autocomplete="current-password" placeholder="Password"></div>
+      <div class="famRow"><button id="famSignIn" type="button">Sign in</button></div>
+    </div>
+    <div id="famOut" hidden>
+      <div class="famRow"><button id="famSignOut" type="button">Sign out</button></div>
+    </div>
+    <div class="famRow"><button id="famCheck" type="button">Check database</button></div>
+    <p id="famStatus"></p>
+    <p id="dbCheck"></p>
+  </details>
 
   <details>
     <summary>📝 Notes for improvement</summary>
@@ -113,8 +137,7 @@
 
   <details>
     <summary>About this page</summary>
-    <p>Version 0.1.0 (first build, planning answers from convo v0.1 taken as proposed).</p>
-    <p>The continent shapes are rough sketches drawn by hand, not checked against a published reconstruction. Dates and positions are approximate.</p>
+    <p>Version 0.2.0. The continent shapes are rough sketches drawn by hand, not checked against a published reconstruction. Dates and positions are approximate.</p>
     <p>The climate is a simple model: latitude, distance from the sea, and mountains that catch wet winds. It is not a weather forecast.</p>
     <p>Built with three.js 0.170.0 (MIT licence).</p>
   </details>
@@ -124,106 +147,32 @@
 <div id="errorsPanel" class="errorsPanel" hidden></div>
 
 <script src="js/data.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/common.js"></script>
 <script type="module">
 import * as THREE from 'https://unpkg.com/three@0.170.0/build/three.module.js';
 
-const FC = window.FC;
+const FC = window.FC, E = window.FCEngine;
 const PLATES = FC.plates, MOMENTS = FC.moments, FEATURES = FC.features;
-const COLS = 180, ROWS = 90;             // climate grid: 2 degrees per cell
+const NOW = MOMENTS.length - 1;          // today is the last moment (the slider runs past to today)
 const ANIM_SECONDS = 3.2;
-const SHELF = 1, ICE = 2, TUNDRA = 3, WOOD = 4, WET = 5, GRASS = 6, DESERT = 7, ALPINE = 8;
-const COL = { 0: '#a9dcec', 1: '#f2e2b3', 2: '#f7fbff', 3: '#d9e4d0', 4: '#9cc79a', 5: '#5fae83',
-  6: '#d7e9a0', 7: '#f5d28c', 8: '#cbbde8', 9: '#cfe3a6' };
-const OCEAN = COL[0], LAND = COL[9], INK = '#2f2d3d';
-const LEGEND = [[DESERT, '🏜️ Desert'], [GRASS, '🌾 Grassland'], [WOOD, '🌲 Woodland'], [WET, '🌴 Wet forest'],
-  [TUNDRA, '🥶 Tundra'], [ICE, '🧊 Ice'], [ALPINE, '⛰️ Mountains']];
+const geo = E.makeGeo(PLATES);
+const $ = id => document.getElementById(id);
 
-/* ---------- settings (saved on the device, in a try/catch) ---------- */
-const SKEY = 'felixContinents.settings';
-const DEFAULTS = { time: 0, spin: 1, climate: 1, showErrors: 0 };
-let S = { ...DEFAULTS };
-try { S = { ...DEFAULTS, ...JSON.parse(localStorage.getItem(SKEY) || '{}') }; } catch (e) { S = { ...DEFAULTS }; }
-const saveSettings = () => { try { localStorage.setItem(SKEY, JSON.stringify(S)); } catch (e) {} };
-
-/* ---------- errors (opt-in, bottom) ---------- */
-const errors = [];
-const errBox = document.getElementById('errorsPanel');
-function renderErrors() {
-  errBox.hidden = !S.showErrors;
-  errBox.textContent = errors.length ? errors.join('\n') : 'No problems so far.';
-}
-function logError(msg) { errors.push(new Date().toLocaleTimeString() + '  ' + msg); renderErrors(); }
-window.addEventListener('error', e => logError(e.message));
-
-/* ---------- notes for improvement (device first) ---------- */
-const NKEY = 'felixContinents.notes', NVER = '0.1.0';
-let notes = [];
-try { notes = JSON.parse(localStorage.getItem(NKEY) || '[]'); } catch (e) { notes = []; }
-const nsave = () => { try { localStorage.setItem(NKEY, JSON.stringify(notes)); } catch (e) {} };
-let where = { page: 'index.html', item: 'now', label: 'Today' };
-function nrender() {
-  const f = document.getElementById('noteFilter').value, list = document.getElementById('noteList');
-  list.textContent = '';
-  notes.filter(n => f === 'all' || n.status === 'open')
-    .sort((a, b) => (a.at < b.at ? 1 : -1))
-    .forEach(n => {
-      const li = document.createElement('li');
-      li.textContent = (n.status === 'done' ? '✅ ' : '📝 ') + (n.where && n.where.label ? n.where.label + ' · ' : '') +
-        new Date(n.at).toLocaleString() + '\n' + n.text;
-      list.appendChild(li);
-    });
-}
-function addNote() {
-  const box = document.getElementById('noteText'), text = box.value.trim();
-  if (!text) return;
-  notes.push({ id: 'n-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-    at: new Date().toISOString(), status: 'open', text, where: { ...where }, version: NVER });
-  box.value = ''; nsave(); nrender();
-}
-
-/* ---------- geometry helpers (degrees, lon/lat) ---------- */
-const cen = {};
-PLATES.forEach(p => {
-  let sx = 0, sy = 0;
-  p.poly.forEach(q => { sx += q[0]; sy += q[1]; });
-  cen[p.id] = [sx / p.poly.length, sy / p.poly.length];
+const app = FCCommon.init({
+  settingsKey: 'felixContinents.settings',
+  defaults: { time: 0, spin: 1, climate: 1, showErrors: 0 },
+  startItem: 'now', startLabel: 'Today',
+  onSetting: () => applySettings()
 });
-function xf(id, lon, lat, off) {
-  const c = cen[id], a = off[2] * Math.PI / 180, dx = lon - c[0], dy = lat - c[1];
-  return [c[0] + dx * Math.cos(a) - dy * Math.sin(a) + off[0], c[1] + dx * Math.sin(a) + dy * Math.cos(a) + off[1]];
-}
-function plateTransformed(p, off) { return p.poly.map(q => xf(p.id, q[0], q[1], off)); }
-function bbox(pts) {
-  let a = 1e9, b = -1e9, c = 1e9, d = -1e9;
-  pts.forEach(p => { a = Math.min(a, p[0]); b = Math.max(b, p[0]); c = Math.min(c, p[1]); d = Math.max(d, p[1]); });
-  return [a, b, c, d];
-}
-function pip(x, y, pts) {
-  let inside = false;
-  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
-    const xi = pts[i][0], yi = pts[i][1], xj = pts[j][0], yj = pts[j][1];
-    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
-  }
-  return inside;
-}
-function insidePlate(lon, lat, pts, bb) {
-  for (const k of [0, -360, 360]) {
-    const x = lon + k;
-    if (x < bb[0] || x > bb[1] || lat < bb[2] || lat > bb[3]) continue;
-    if (pip(x, lat, pts)) return true;
-  }
-  return false;
-}
-const dlon = (a, b) => ((a - b + 540) % 360) - 180;
-const toPx = (lon, lat) => [(lon + 180) / 360 * 2048, (90 - lat) / 180 * 1024];
+const S = app.S;
 
-/* ---------- state: from moment A to moment B, s runs 0..1 ---------- */
-const st = { A: 0, B: 0, s: 1 };
-let anim = null;      // { legs: [{ to, t, start }] }
-let dirty = true;
-let dragging = false;
+/* state: from moment A to moment B, s runs 0..1 */
+const st = { A: NOW, B: NOW, s: 1 };
+let anim = null, dirty = true, dragging = false, focusTarget = null;
 const smooth = t => t * t * (3 - 2 * t);
-function displayedIdx() { return anim && st.s < 0.5 ? st.A : st.B; }
+const displayedIdx = () => (anim && st.s < 0.5 ? st.A : st.B);
+function offsetsFor(idx) { const out = {}; PLATES.forEach(p => { out[p.id] = MOMENTS[idx].plates[p.id] || [0, 0, 0]; }); return out; }
 function offsetsAt(s) {
   const out = {};
   PLATES.forEach(p => {
@@ -232,198 +181,66 @@ function offsetsAt(s) {
   });
   return out;
 }
-function offsetsFor(idx) {
-  const out = {};
-  PLATES.forEach(p => { out[p.id] = MOMENTS[idx].plates[p.id] || [0, 0, 0]; });
-  return out;
-}
-
-/* ---------- climate and sea (computed once per moment, cached) ---------- */
 const worldCache = {};
-function bfs(sources) {
-  const d = new Int16Array(ROWS * COLS).fill(-1), q = [];
-  for (let i = 0; i < sources.length; i++) if (sources[i]) { d[i] = 0; q.push(i); }
-  for (let h = 0; h < q.length; h++) {
-    const i = q[h], r = (i / COLS) | 0, c = i % COLS;
-    const nb = [];
-    if (r > 0) nb.push(i - COLS);
-    if (r < ROWS - 1) nb.push(i + COLS);
-    nb.push(r * COLS + ((c + 1) % COLS), r * COLS + ((c + COLS - 1) % COLS));
-    for (const j of nb) if (d[j] < 0) { d[j] = d[i] + 1; q.push(j); }
-  }
-  return d;
-}
-function computeWorld(idx) {
-  const m = MOMENTS[idx], off = offsetsFor(idx);
-  const tp = PLATES.map(p => { const pts = plateTransformed(p, off[p.id]); return { pts, bb: bbox(pts) }; });
-  // 1 = land, 0 = sea
-  let land = new Uint8Array(ROWS * COLS);
-  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-    const lon = -179 + 2 * c, lat = 89 - 2 * r;
-    for (const t of tp) if (insidePlate(lon, lat, t.pts, t.bb)) { land[r * COLS + c] = 1; break; }
-  }
-  // sea level: negative exposes a shelf (2), positive floods the coast
-  const shelf = new Uint8Array(ROWS * COLS);
-  if (m.sea < 0) {
-    const dl = bfs(land);
-    for (let i = 0; i < land.length; i++) if (!land[i] && dl[i] >= 0 && dl[i] <= -m.sea) shelf[i] = 1;
-  } else if (m.sea > 0) {
-    const dsea = bfs(land.map(v => (v ? 0 : 1)));
-    for (let i = 0; i < land.length; i++) if (land[i] && dsea[i] >= 0 && dsea[i] <= m.sea) land[i] = 0;
-  }
-  const seaSources = new Uint8Array(ROWS * COLS);
-  for (let i = 0; i < land.length; i++) seaSources[i] = (!land[i] && !shelf[i]) ? 1 : 0;
-  const dOcean = bfs(seaSources);
-  // mountains (visible for this moment's age), which catch the wet winds
-  const mtn = new Uint8Array(ROWS * COLS), near = new Uint8Array(ROWS * COLS);
-  FEATURES.forEach(f => {
-    if (f.kind !== 'mountain' || !(f.to <= m.age && m.age <= f.from)) return;
-    const p = xf(f.plate, f.lon, f.lat, off[f.plate]);
-    const c = Math.floor((p[0] + 180) / 2), r = Math.floor((90 - p[1]) / 2);
-    if (r < 0 || r >= ROWS) return;
-    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
-      const rr = r + dr; if (rr < 0 || rr >= ROWS) continue;
-      near[rr * COLS + ((c + dc + COLS) % COLS)] = 1;
-    }
-    mtn[r * COLS + c] = 1;
-  });
-  const codes = new Uint8Array(ROWS * COLS);
-  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-    const i = r * COLS + c;
-    if (!land[i] && !shelf[i]) { codes[i] = 0; continue; }
-    if (shelf[i]) { codes[i] = SHELF; continue; }
-    const lat = 89 - 2 * r, a = Math.abs(lat);
-    let wind = false, lee = false;
-    for (let k = 1; k <= 4; k++) {
-      for (let dr = -1; dr <= 1; dr++) {
-        const rr = r + dr; if (rr < 0 || rr >= ROWS) continue;
-        if (mtn[rr * COLS + ((c - k + COLS) % COLS)]) wind = true;
-        if (mtn[rr * COLS + ((c + k) % COLS)]) lee = true;
-      }
-    }
-    const inland = dOcean[i];
-    if (m.ice && a >= 50) codes[i] = ICE;
-    else if (a >= 72) codes[i] = ICE;
-    else if (m.ice && a >= 40) codes[i] = TUNDRA;
-    else if (a >= 60) codes[i] = TUNDRA;
-    else if (near[i] && a >= 25) codes[i] = ALPINE;
-    else if (a < 12) codes[i] = (inland > 10 && !wind) ? WOOD : WET;
-    else if (a < 33) codes[i] = (lee || (inland > 8 && !wind)) ? DESERT : (wind ? WET : GRASS);
-    else codes[i] = wind ? WET : (lee ? GRASS : (inland > 10 ? GRASS : WOOD));
-  }
-  return { codes };
-}
 function getWorld(idx) {
-  if (!worldCache[idx]) worldCache[idx] = computeWorld(idx);
+  if (!worldCache[idx]) worldCache[idx] = E.computeWorld(geo, FEATURES, offsetsFor(idx), MOMENTS[idx]);
   return worldCache[idx];
 }
 
-/* ---------- drawing into the globe texture ---------- */
-const cv = document.createElement('canvas');
-cv.width = 2048; cv.height = 1024;
+/* drawing into the globe texture */
+const cv = document.createElement('canvas'); cv.width = 2048; cv.height = 1024;
 const ctx = cv.getContext('2d');
-function polyPath(pts, k) {
-  ctx.beginPath();
-  pts.forEach((p, i) => { const [x, y] = toPx(p[0] + k, p[1]); if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); });
-  ctx.closePath();
-}
-function drawGrid(codes) {
-  ctx.fillStyle = OCEAN; ctx.fillRect(0, 0, 2048, 1024);
-  const cw = 2048 / COLS, ch = 1024 / ROWS;
-  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-    let code = codes[r * COLS + c];
-    if (!code) continue;
-    if (!S.climate && code !== SHELF) code = 9;
-    ctx.fillStyle = COL[code];
-    ctx.fillRect(c * cw, r * ch, cw + 0.6, ch + 0.6);
-  }
-}
-function drawPlates(off, fillIt) {
-  ctx.lineJoin = 'round'; ctx.lineWidth = 5; ctx.strokeStyle = INK;
-  PLATES.forEach(p => {
-    const pts = plateTransformed(p, off[p.id]);
-    for (const k of [-360, 0, 360]) {
-      polyPath(pts, k);
-      if (fillIt) { ctx.fillStyle = LAND; ctx.fill(); }
-      ctx.stroke();
-    }
-  });
-}
-function drawFeatures(idx, off) {
-  const age = MOMENTS[idx].age;
-  FEATURES.forEach(f => {
-    if (!(f.to <= age && age <= f.from)) return;
-    const p = xf(f.plate, f.lon, f.lat, off[f.plate]);
-    for (const k of [-360, 0, 360]) {
-      const [x, y] = toPx(p[0] + k, p[1]);
-      if (x < -40 || x > 2088) continue;
-      ctx.lineWidth = 4; ctx.strokeStyle = INK;
-      if (f.kind === 'volcano') {
-        ctx.beginPath(); ctx.arc(x, y, 13, 0, Math.PI * 2); ctx.fillStyle = '#ff8a65'; ctx.fill(); ctx.stroke();
-      } else {
-        ctx.beginPath(); ctx.moveTo(x, y - 24); ctx.lineTo(x + 22, y + 14); ctx.lineTo(x - 22, y + 14); ctx.closePath();
-        ctx.fillStyle = '#8e7cc3'; ctx.fill(); ctx.stroke();
-      }
-    }
-  });
-}
 function paint() {
   if (!anim) {
-    const w = getWorld(st.B), off = offsetsFor(st.B);
-    drawGrid(w.codes);
-    drawPlates(off, false);
-    drawFeatures(st.B, off);
+    const off = offsetsFor(st.B);
+    E.drawGrid(ctx, getWorld(st.B).codes, !!S.climate);
+    E.drawPlates(ctx, geo, off, false);
+    E.drawFeatures(ctx, geo, FEATURES, MOMENTS[st.B].age, off);
   } else {
     const off = offsetsAt(st.s);
-    ctx.fillStyle = OCEAN; ctx.fillRect(0, 0, 2048, 1024);
-    drawPlates(off, true);
-    drawFeatures(displayedIdx(), off);
+    ctx.fillStyle = E.OCEAN; ctx.fillRect(0, 0, 2048, 1024);
+    E.drawPlates(ctx, geo, off, true);
+    E.drawFeatures(ctx, geo, FEATURES, MOMENTS[displayedIdx()].age, off);
   }
 }
 
-/* ---------- moments, card, slider ---------- */
-const $ = id => document.getElementById(id);
+/* card, slider, moves */
 function setCard(idx) {
   const m = MOMENTS[idx];
   $('when').textContent = m.age === 0 ? 'now' : m.when;
   $('momName').textContent = m.name;
   $('momSentence').textContent = m.sentence;
-  where = { page: 'index.html', item: m.id, label: m.name };
+  app.setContext({ item: m.id, label: m.name });
   $('legend').hidden = !S.climate;
   $('slider').value = String(idx);
+}
+function focusOn(idx) {
+  const off = offsetsFor(idx);
+  let x = 0, y = 0;
+  ['NA', 'SA', 'AF', 'EU', 'IN', 'AU'].forEach(id => {
+    const c = geo.xf(id, geo.cen[id][0], geo.cen[id][1], off[id]), r = c[0] * Math.PI / 180;
+    x += Math.cos(r); y += Math.sin(r);
+  });
+  const L = Math.atan2(y, x) * 180 / Math.PI;
+  focusTarget = -(L + 90) * Math.PI / 180;   // rotation.y that puts longitude L in front
 }
 function goTo(i) {
   if (!S.time) return;
   if (!anim && i === st.B && st.s === 1) return;
   st.A = displayedIdx(); st.B = i; st.s = 0;
   anim = { legs: [{ to: 1, t: 0, start: 0 }] };
-  focusOn(i);
-  setCard(i); dirty = true;
+  focusOn(i); setCard(i); dirty = true;
 }
 function play() {
   if (!S.time) return;
   st.A = displayedIdx(); st.s = 0;
   anim = { legs: [{ to: 1, t: 0, start: 0 }, { to: 0, t: 0, start: 0 }, { to: 1, t: 0, start: 0 }] };
-  focusOn(st.B);
-  setCard(st.B); dirty = true;
-}
-/* turn the globe so the middle of the big continents faces the viewer */
-let focusTarget = null;
-function focusOn(idx) {
-  const off = offsetsFor(idx);
-  let x = 0, y = 0;
-  ['NA', 'SA', 'AF', 'EU', 'IN', 'AU'].forEach(id => {
-    const c = xf(id, cen[id][0], cen[id][1], off[id]), r = c[0] * Math.PI / 180;
-    x += Math.cos(r); y += Math.sin(r);
-  });
-  const L = Math.atan2(y, x) * 180 / Math.PI;
-  focusTarget = -(L + 90) * Math.PI / 180;   // rotation.y that puts longitude L in front
+  focusOn(st.B); setCard(st.B); dirty = true;
 }
 function stepAnim(dt) {
   const leg = anim.legs[0];
   leg.t += dt / ANIM_SECONDS;
-  const t = Math.min(1, leg.t);
-  st.s = leg.start + (leg.to - leg.start) * smooth(t);
+  st.s = leg.start + (leg.to - leg.start) * smooth(Math.min(1, leg.t));
   if (leg.t >= 1) {
     st.s = leg.to;
     anim.legs.shift();
@@ -432,51 +249,23 @@ function stepAnim(dt) {
   }
 }
 const ticksBox = $('ticks');
-MOMENTS.forEach((m, i) => {
-  const s = document.createElement('span'); s.textContent = m.short; ticksBox.appendChild(s);
-});
+MOMENTS.forEach(m => { const s = document.createElement('span'); s.textContent = m.short; ticksBox.appendChild(s); });
 $('slider').addEventListener('input', e => goTo(+e.target.value));
-$('btnNow').addEventListener('click', () => goTo(0));
+$('btnNow').addEventListener('click', () => goTo(NOW));
 $('btnPlay').addEventListener('click', play);
-// legend
-$('legend').innerHTML = LEGEND.map(([c, t]) => `<span><i style="background:${COL[c]}"></i>${t}</span>`).join('');
+$('legend').innerHTML = E.LEGEND.map(([c, t]) => `<span><i style="background:${E.COL[c]}"></i>${t}</span>`).join('');
 
-/* ---------- settings drawer ---------- */
-const gear = $('gear'), drawer = $('drawer');
 function applySettings() {
   $('timebar').hidden = !S.time;
-  if (!S.time) { anim = null; st.A = 0; st.B = 0; st.s = 1; setCard(0); }
+  if (!S.time) { anim = null; st.A = NOW; st.B = NOW; st.s = 1; setCard(NOW); }
   $('legend').hidden = !S.climate;
   if (renderer) resize();
   dirty = true;
 }
-function renderSettings() {
-  document.querySelectorAll('.seg').forEach(seg => {
-    const v = String(S[seg.dataset.key]);
-    seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
-  });
-  $('showErrors').checked = !!S.showErrors;
-  renderErrors();
-}
-const setOpen = open => { drawer.hidden = !open; gear.setAttribute('aria-expanded', String(open)); };
-gear.addEventListener('click', () => setOpen(drawer.hidden));
-$('closeDrawer').addEventListener('click', () => setOpen(false));
-document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
-  const key = b.parentElement.dataset.key;
-  S[key] = +b.dataset.v;
-  saveSettings(); renderSettings(); applySettings();
-}));
-$('showErrors').addEventListener('change', e => { S.showErrors = e.target.checked ? 1 : 0; saveSettings(); renderErrors(); });
-$('noteSave').addEventListener('click', addNote);
-$('noteFilter').addEventListener('change', nrender);
-$('noteCopy').addEventListener('click', () => {
-  const out = JSON.stringify(notes, null, 2);
-  if (navigator.clipboard) navigator.clipboard.writeText(out).catch(() => {});
-  else window.prompt('Copy the notes:', out);
-});
-nrender();
+const gear = $('gear');
+void gear;
 
-/* ---------- three.js globe ---------- */
+/* the globe */
 let renderer, scene, camera, group, sphere, tex, stageEl, canvasEl, raycaster;
 const pointer = { down: false, x: 0, y: 0, moved: 0 };
 function resize() {
@@ -492,16 +281,13 @@ function nameAt(lon, lat) {
   let best = null, bd = 7;
   FEATURES.forEach(f => {
     if (!(f.to <= age && age <= f.from)) return;
-    const p = xf(f.plate, f.lon, f.lat, off[f.plate]);
-    const d = Math.hypot(dlon(p[0], lon), p[1] - lat);
+    const p = geo.xf(f.plate, f.lon, f.lat, off[f.plate] || [0, 0, 0]);
+    const d = Math.hypot(E.dlon(p[0], lon), p[1] - lat);
     if (d < bd) { bd = d; best = f; }
   });
   if (best) return best.name + (best.kind === 'volcano' ? ' (volcano)' : ' (mountains)');
-  for (const p of PLATES) {
-    const pts = plateTransformed(p, off[p.id]);
-    if (insidePlate(lon, lat, pts, bbox(pts))) return p.name;
-  }
-  return 'the ocean';
+  const p = geo.plateAt(lon, lat, off);
+  return p ? p.name : 'the ocean';
 }
 function tapAt(clientX, clientY) {
   const rect = canvasEl.getBoundingClientRect();
@@ -525,11 +311,8 @@ function initGlobe() {
   group = new THREE.Group(); group.rotation.x = 0.25; scene.add(group);
   scene.add(new THREE.AmbientLight(0xffffff, 1.1));
   const sun = new THREE.DirectionalLight(0xffffff, 1.2); sun.position.set(3, 2, 4); scene.add(sun);
-  tex = new THREE.CanvasTexture(cv);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 8;
-  sphere = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 64),
-    new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9, metalness: 0 }));
+  tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  sphere = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 64), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9, metalness: 0 }));
   group.add(sphere);
   group.add(new THREE.Mesh(new THREE.SphereGeometry(1.06, 64, 48),
     new THREE.MeshBasicMaterial({ color: 0xbfe9ff, transparent: true, opacity: 0.2, side: THREE.BackSide })));
@@ -556,7 +339,6 @@ function initGlobe() {
   canvasEl.addEventListener('pointerup', endPointer);
   canvasEl.addEventListener('pointercancel', () => { pointer.down = false; dragging = false; });
 }
-
 let last = performance.now();
 function frame(now) {
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
@@ -571,18 +353,15 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 
-/* ---------- start ---------- */
 try {
   initGlobe();
   applySettings();
-  renderSettings();
-  setCard(st.B);
-  focusOn(0);
+  setCard(NOW);
+  focusOn(NOW);
   requestAnimationFrame(frame);
 } catch (err) {
-  logError('Could not start the globe: ' + (err && err.message ? err.message : err));
+  app.logError('Could not start the globe: ' + (err && err.message ? err.message : err));
   $('touchOut').textContent = 'The globe could not start on this device. Open ⚙️ and turn on Show errors.';
-  renderSettings();
 }
 </script>
 </body>
