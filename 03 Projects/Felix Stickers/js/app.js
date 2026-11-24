@@ -363,11 +363,11 @@
           out[o + 3] = px[3];
         } else {
           // vellum: the picture shows through a paper tint, fully opaque
-          var k = 0.3;
+          var k = 0.7;
           out[o] = Math.min(255, (px[0] * (1 - k) + 255 * k) * shade + 255 * hi);
           out[o + 1] = Math.min(255, (px[1] * (1 - k) + 252 * k) * shade + 255 * hi);
           out[o + 2] = Math.min(255, (px[2] * (1 - k) + 244 * k) * shade + 255 * hi);
-          out[o + 3] = 243;                                   // about 95% opaque: the picture shows faintly through
+          out[o + 3] = 255;                                   // solid: the back is white, with only a faint picture
         }
       }
     }
