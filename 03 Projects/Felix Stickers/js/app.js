@@ -132,7 +132,8 @@
     var W = SHEET.ref.w, H = SHEET.ref.h;
     SHEET.stickers.concat([SHEET.main]).forEach(function (s) {
       var gone = state.used.indexOf(s.id) !== -1;
-      var n = el('div', 'slot' + (s.id === SHEET.main.id ? ' main' : '') + (gone ? ' empty' : ''));
+      var n = el('div', 'slot' + (s.id === SHEET.main.id ? ' main' : '') + (gone ? ' empty' : '') +
+        (gone && lift && lift.sid === s.id ? ' lifted' : ''));
       n.dataset.sid = s.id;
       n.style.left = (s.box.x / W * 100) + '%';
       n.style.top = (s.box.y / H * 100) + '%';
@@ -357,11 +358,11 @@
           out[o + 3] = px[3];
         } else {
           // vellum: the picture shows through a paper tint, fully opaque
-          var k = 0.45;
+          var k = 0.3;
           out[o] = px[0] * (1 - k) + 255 * k;
           out[o + 1] = px[1] * (1 - k) + 252 * k;
           out[o + 2] = px[2] * (1 - k) + 244 * k;
-          out[o + 3] = 230;                                   // 90% opaque: the sheet shows faintly through
+          out[o + 3] = 243;                                   // about 95% opaque: the picture shows faintly through
         }
       }
     }
@@ -501,12 +502,13 @@
     var r = Math.hypot(d.x, d.y);
     var past = d.x * lift.uL.x + d.y * lift.uL.y <= 0;
     if (past) {
-      // past the edge the sticker is laid down and it stays, turned as it was just before the edge
+      // past the edge: the rest of the sticker unrolls onto the sheet, then it stays
       lift.Pv = E;
       lift.u = lift.lastU || lift.uL;
       lift.phi = lift.lastPhi || 0;
       lift.S = clamp(lift.lastS || 0, 0, lift.len || 0);
-      return stickLift();
+      gesture = null;
+      return unrollToStick(lift);
     }
     var uNew = r > 3 ? { x: d.x / r, y: d.y / r } : lift.uL;
     lift.Pv = E;
@@ -516,6 +518,19 @@
     lift.S = clamp(r, 0, lift.len);
     lift.lastU = uNew; lift.lastPhi = lift.phi; lift.lastS = lift.S;
     liftDraw(lift);
+  }
+
+  function unrollToStick(L) {
+    if (L.unrolling) return;
+    L.unrolling = true;
+    var from = L.S, t0 = performance.now(), dur = 320;
+    function step(now) {
+      var k = Math.min(1, (now - t0) / dur);
+      L.S = from * (1 - smooth(k));
+      liftDraw(L);
+      if (k < 1) requestAnimationFrame(step); else stickLift();
+    }
+    requestAnimationFrame(step);
   }
 
   function stickLift() {
