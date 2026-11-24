@@ -7,6 +7,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Felix Stickers">
   <meta name="theme-color" content="#fff6e9">
+  <link rel="icon" href="data:,">
   <title>Felix Stickers – Little Monster Tea Party</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +18,6 @@
   <header id="top">
     <h1 id="title">Felix Stickers – Little Monster Tea Party</h1>
     <div class="topbtns">
-      <button id="btnSettingsTop" class="btn round" type="button" aria-label="Settings">⚙️</button>
       <button id="btnUndo" class="btn pill undo" type="button" aria-label="Undo">↶ Undo</button>
     </div>
   </header>
@@ -30,8 +30,13 @@
   </main>
 
   <footer id="bottom">
-    <button id="btnMy" class="btn pill" type="button">📁 My Creations</button>
-    <button id="btnSave" class="btn save" type="button">⭐ Save My Creature</button>
+    <button id="btnMy" class="btn pill" type="button"><span class="lbl-long">📁 My Creations</span><span class="lbl-short">📁 Mine</span></button>
+    <div id="pager" class="pager" hidden>
+      <button id="btnPrev" class="btn round small" type="button" aria-label="Previous sheet">◀</button>
+      <span id="pagerPos" aria-live="polite">1 / 1</span>
+      <button id="btnNext" class="btn round small" type="button" aria-label="Next sheet">▶</button>
+    </div>
+    <button id="btnSave" class="btn save" type="button"><span class="lbl-long">⭐ Save My Creature</span><span class="lbl-short">⭐ Save</span></button>
   </footer>
 
   <button id="gear" class="gear" type="button" aria-label="Settings" aria-controls="drawer">⚙️</button>
