@@ -1,6 +1,6 @@
 /* Felix Continents engine (classic script, no three.js here).
  * Geometry in degrees (lon, lat). Plates move by offsets [dLon, dLat, spin].
- * Used by index.html (V1), v2.html (draggable plates) and v3.html (random worlds). */
+ * Used by index.html (V1), v2.html (draggable plates) and v5.html (random worlds). */
 (function () {
   var COLS = 180, ROWS = 90;               // climate grid: 2 degrees per cell
   var SHELF = 1, ICE = 2, TUNDRA = 3, WOOD = 4, WET = 5, GRASS = 6, DESERT = 7, ALPINE = 8, PLAIN = 9;

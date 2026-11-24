@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Felix Continents V3</title>
+<title>Felix Continents V5</title>
 <style>
   :root { --ink:#2f2d3d; --paper:#fffdf7; --sun:#ffe9a8; --mint:#bfe8d2; --bg:#fff6e6; }
   [hidden] { display: none !important; }
@@ -69,7 +69,7 @@
 </style>
 </head>
 <body>
-<header class="top"><h1>🎲 Felix Continents · V3</h1></header>
+<header class="top"><h1>🎲 Felix Continents · V5</h1></header>
 
 <section class="card" aria-live="polite">
   <div class="when" id="when">now</div>
@@ -111,7 +111,7 @@
     <summary>🧭 Other versions</summary>
     <a href="index.html">V1: the globe and its moments</a>
     <a href="v2.html">V2: drag the continents</a>
-    <p>V2.5 (people and their spread) and V2.8 / V2.9 (countries over time) are not built yet.</p>
+    <p>V3 (people and their spread) and V4 (countries over time) are not built yet.</p>
   </details>
 
   <details>
@@ -163,7 +163,7 @@ const ANIM_SECONDS = 8;
 const app = FCCommon.init({
   settingsKey: 'felixContinents.v3.settings',
   defaults: { spin: 1, climate: 1, showErrors: 0 },
-  startItem: 'random-world', startLabel: 'Random world (V3)',
+  startItem: 'random-world', startLabel: 'Random world (V5)',
   onSetting: () => { dirty = true; }
 });
 const S = app.S;

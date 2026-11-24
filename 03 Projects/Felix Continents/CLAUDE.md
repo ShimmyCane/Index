@@ -4,7 +4,7 @@ Purpose: a 3-D globe in three.js that Felix can spin, with today's continents an
 
 Track: A. Family play
 
-- Design: `schematic.md` (versions V1 to V3, moments, climate, data)
+- Design: `schematic.md` (versions V1 to V5, moments, climate, data)
 - Q&A history: `convo/` (never compact; start a new version instead)
 - AI notes: `04 AI/Felix Continents/brief.md` and `lessons.md`
 - Shared conventions: root `CLAUDE.md` (public repo, privacy)
