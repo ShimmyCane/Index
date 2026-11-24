@@ -127,10 +127,12 @@
     var card = $('#sheetCard');
     card.innerHTML = '';
     var page = el('div', 'sheetPage');
-    var base = window.FS_NATIVE_BASE;
+    var base = nat().base;
     if (base) page.appendChild(el('img', 'base', null)).src = base;
     var W = SHEET.ref.w, H = SHEET.ref.h;
-    SHEET.stickers.concat([SHEET.main]).forEach(function (s) {
+    // Sheets may draw the main body first (mainFirst), so features sit on top of it.
+    var order = SHEET.mainFirst ? [SHEET.main].concat(SHEET.stickers) : SHEET.stickers.concat([SHEET.main]);
+    order.forEach(function (s) {
       var gone = state.used.indexOf(s.id) !== -1;
       var n = el('div', 'slot' + (s.id === SHEET.main.id ? ' main' : '') + (gone ? ' empty' : '') +
         (gone && lift && lift.sid === s.id ? ' lifted' : ''));
@@ -147,9 +149,14 @@
     card.appendChild(page);
   }
 
-  // Native art when provided (private/native.js, local only); otherwise the SVG in sheet.js.
+  // Art for the current sheet: its own `native` block when it has one (test sheets in private/),
+  // otherwise the Woods art in js/native.js.
+  function nat() {
+    return SHEET.native || { base: window.FS_NATIVE_BASE, art: window.FS_NATIVE_ART, placed: window.FS_NATIVE_PLACED };
+  }
+  // Native art when provided; otherwise the SVG in sheet.js.
   function artFor(s, placed) {
-    var map = placed ? window.FS_NATIVE_PLACED : window.FS_NATIVE_ART;
+    var map = placed ? nat().placed : nat().art;
     var src = map && map[s.id];
     return src ? '<img class="art" src="' + src + '" alt="" draggable="false">' : s.svg;
   }
@@ -452,7 +459,7 @@
 
   function startLift(gesture, f) {
     // called once the finger has moved a little from the tray: the edge is the sticker's back edge
-    var img = cutoutImage(window.FS_NATIVE_PLACED && window.FS_NATIVE_PLACED[gesture.sid]);
+    var img = cutoutImage(nat().placed && nat().placed[gesture.sid]);
     if (!img) return null;
     var page = $('.sheetPage');
     var tile = gesture.tile;

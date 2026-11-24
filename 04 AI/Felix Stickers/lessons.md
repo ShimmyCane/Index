@@ -7,6 +7,14 @@
 - A plain pointer test (Playwright mouse) catches the peel → float → tap-to-commit → undo path; it does not prove the feel, which needs a real iPad.
 - Two places for settings (top button and gear) came from two answers in the convo; they open the same panel. Ask Jimmy before adding a third.
 
+## 2026-11-25, test sheet from an uploaded picture (round 18)
+
+- Check where the peel's pixels come from before blaming the gesture. On file:// the cut-out cannot be read, so the peel fails with no error; the same page over HTTP lifts. A sheet that "does nothing" on file:// is this.
+- A sheet's art must be in its own data. The app read only the Woods art map, so a second sheet looked empty until the `native` block (base, art and placed) was added. Test every map a sheet needs: base, art and placed.
+- Cut a picture by flood fill from the edge: light pixels connected to the border are background (the cream halo), and light areas enclosed by the outline stay. A plate's cream centre survives; a halo does not. Read the overlay before naming pieces.
+- A free-spot search on a sheet's background must also skip the existing boxes: the sheet's stickers are erased to white, so white alone is not free.
+- The put-down step (drag the held piece back past the origin edge) did not register in headless mouse tests on either sheet, including the Woods baseline. Treat it as unverified until Jimmy tries it on an iPad.
+
 ## 2026-11-24 to 2026-11-25, lift, hold, carry, apply (rounds 15-17)
 
 - Build the test before the feel. A headless run in 5 px steps catches state bugs (stuck at the wrong edge, a canvas left behind, a sticker that never sticks). Judge the motion from a GIF, not from numbers or a contact sheet.

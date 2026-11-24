@@ -108,6 +108,18 @@ Not in the first build. When notes or creations must persist across devices, pla
 
 `index.html` (page, creature drawn inline as SVG), `css/app.css` (palette, gesture lock, sheet card, gear, panels), `js/sheet.js` (the sheet), `js/app.js` (engine: peel, move, two-finger rotate, press, undo, save, notes, errors, gear), `schematic.md`, `CLAUDE.md`, `convo/`.
 
+## Test sheets (round 18, 2026-11-25)
+
+A test sheet is one uploaded picture cut into a sheet. It is for Jimmy's device only (convo v0.1 Q10), so its files live in a git-ignored `private/<sheet>/` folder and the public page never asks for them.
+
+- **Thanksgiving Table Test 1**: `private/thanksgiving/`. A gingham tablecloth as the main body, and 12 features: two plates, a roast turkey, a pumpkin pie, a glass of juice, an autumn bouquet, a cornucopia, a knife, a fork, a napkin, a pilgrim hat and a maple leaf. This is 12 features, above the 5–10 rule above, because Jimmy asked to use what is on the picture. The tablecloth is drawn under the features (`mainFirst`), so a feature on its edge can still be tapped.
+- **Open it**: `index.html?sheet=thanksgiving`. `js/sheet_select.js` loads `private/thanksgiving/sheet.js` only when that address is used. Without it, the page is the Woods sheet, as before.
+- **Files**: `base.png` (the picture with every piece painted white), `pieces/pNN.png` (one transparent cut-out per piece), `pieces.json`, `overlay.png` (boxes to check by eye), `sheet.js` (the sheet data, with a `native` block for its art).
+- **Cut by**: `02 Refs/Skills/scripts/sticker_cut.py`. Add a sticker with `/make-sticker <Sticker Name>` (`02 Refs/Skills/make_sticker.md`).
+- **Peel needs HTTP.** On a `file://` page Chromium blocks the pixel read a peel uses, so the peel does nothing. Serve the project folder from a local server, for example `python3 -m http.server 8765` in `03 Projects/Felix Stickers/`, and open `http://<computer>:8765/index.html?sheet=thanksgiving`. An iPad on the same Wi-Fi can open the same address. The Pages site does not carry `private/`.
+
+App changes this round: sheets can carry their own art (`sheet.native`), and a sheet can draw its main body first (`mainFirst`). Woods is unchanged.
+
 ## Round 9 change (Jimmy, convo v0.9)
 
 The art is AI-generated and free to use, so it is committed in `art/`. The ⚙️ panel credits ChatGPT (pictures) and Claude (framework).
@@ -152,4 +164,5 @@ See `convo/convo v0.1.md`. Nothing is built until those are answered.
 ## Changes
 
 - 2026-11-23: schematic written from the concept. Status idea.
+- 2026-11-25: Thanksgiving Table Test 1 added as a private test sheet (see Test sheets). `/make-sticker` skill added. Sheet art now comes from the sheet's own data. `js/sheet_select.js` added.
 - 2026-11-23: round 1 answers recorded in `convo v0.1.md`. Single sheet, title with sheet name, settings and undo at the top. Q11 answered: each sheet has its own name (3+ words) in its data file; test sheets also carry a Test# id. Q10 answered: the uploaded sheets are for testing only, never published. Later: a core prompt for ChatGPT that turns an idea into a sticker sheet; its test outputs are named Test# (not built yet). No build yet.
