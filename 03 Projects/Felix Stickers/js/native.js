@@ -13,3 +13,9 @@ window.FS_NATIVE_ART = {
   bow: 'art/part08.png',
   flower: 'art/part09.png'
 };
+
+// Placed stickers use the same pictures without the cream edge (the sheet keeps it).
+window.FS_NATIVE_PLACED = {};
+Object.keys(window.FS_NATIVE_ART).forEach(function (id) {
+  window.FS_NATIVE_PLACED[id] = window.FS_NATIVE_ART[id].replace('art/', 'art/placed/');
+});

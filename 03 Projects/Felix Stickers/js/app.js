@@ -110,8 +110,11 @@
       var n = el('div', 'ps ' + (item.committed ? 'committed' : 'floating'));
       n.dataset.uid = item.uid;
       n.setAttribute('role', 'button');
+      var art = stickerById[item.stickerId].box;   // same size as on the sheet
+      n.style.width = 'calc(var(--pageW, 300px) * ' + (art.w / SHEET.ref.w) + ')';
+      n.style.height = 'calc(var(--pageW, 300px) * ' + (art.h / SHEET.ref.w) + ')';
       n.setAttribute('aria-label', 'Sticker: ' + s.label + (item.committed ? ', stuck' : ', tap to stick'));
-      n.innerHTML = '<div class="stk">' + artFor(s) + '</div>';
+      n.innerHTML = '<div class="stk">' + artFor(s, true) + '</div>';
       placeStyle(n, item);
       host.appendChild(n);
     });
@@ -141,8 +144,9 @@
   }
 
   // Native art when provided (private/native.js, local only); otherwise the SVG in sheet.js.
-  function artFor(s) {
-    var src = window.FS_NATIVE_ART && window.FS_NATIVE_ART[s.id];
+  function artFor(s, placed) {
+    var map = placed ? window.FS_NATIVE_PLACED : window.FS_NATIVE_ART;
+    var src = map && map[s.id];
     return src ? '<img class="art" src="' + src + '" alt="" draggable="false">' : s.svg;
   }
 
@@ -161,7 +165,8 @@
     setLast(stickerById[sid].label);
     var box = tile.getBoundingClientRect();
     gesture = { kind: 'peel', pid: e.pointerId, sid: sid, start: pt, before: snapshot(), tile: tile, detached: false,
-      pull: PEEL_PULL * Math.min(box.width, box.height) };
+      pull: PEEL_PULL * Math.min(box.width, box.height),
+      grab: { x: pt.x - box.left, y: pt.y - box.top }, size: { w: box.width, h: box.height } };
     tile.classList.add('lifting');
   }
 
@@ -207,11 +212,30 @@
     if (node) node.classList.add('dragging');
   }
 
-  /* ---- peel curl: while the piece is pulled, the pulled part folds back like paper ----
-     p = how far it is pulled (0..1). Axis and sign come from the pull direction. The
-     base keeps the rest of the piece; a flap with the pulled part turns over its fold line. */
-  function curl(tile, dx, dy, p) {
-    if (p <= 0) return uncurl(tile);
+  /* ---- peel: the sticker folds back from the point it was clicked, along the drag ----
+     g = the click point (tile px), u = unit drag direction, k = cos(fold angle).
+     The part beyond g in the drag direction turns over the fold line through g:
+     its size across the drag shrinks by cos(angle). Base keeps the rest. */
+  function clipPoly(pts, nx, ny, c) {
+    // keep the part of polygon pts where nx*x + ny*y + c >= 0 (Sutherland-Hodgman, one edge)
+    var out = [];
+    for (var i = 0; i < pts.length; i++) {
+      var A = pts[i], B = pts[(i + 1) % pts.length];
+      var fa = nx * A[0] + ny * A[1] + c, fb = nx * B[0] + ny * B[1] + c;
+      if (fa >= 0) out.push(A);
+      if ((fa >= 0) !== (fb >= 0)) {
+        var t = fa / (fa - fb);
+        out.push([A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t]);
+      }
+    }
+    return out;
+  }
+  function polyCss(pts) {
+    return 'polygon(' + pts.map(function (q) { return q[0].toFixed(1) + 'px ' + q[1].toFixed(1) + 'px'; }).join(',') + ')';
+  }
+
+  function curl(g, sz, u, p, tile) {
+    if (p <= 0 || !u) return uncurl(tile);
     var base = tile.querySelector('.stk');
     var flap = tile.querySelector('.flap');
     if (!flap) {
@@ -220,35 +244,20 @@
       tile.appendChild(flap);
     }
     tile.classList.remove('settle');
-    var horiz = Math.abs(dx) >= Math.abs(dy);
-    var sign = horiz ? (dx >= 0 ? 1 : -1) : (dy >= 0 ? 1 : -1);
-    var P = clamp(p, 0, 1), R = 1 - P;
-    var turn = P * PEEL_TURN, c = Math.cos(turn * Math.PI / 180);
-    var pct = function (v) { return (v * 100).toFixed(2) + '%'; };
-    var baseClip, flapClip, origin, scale;
-    if (horiz && sign > 0) {       // pulled right: right part lifts
-      baseClip = 'inset(0 ' + pct(P) + ' 0 0)';
-      flapClip = 'inset(0 0 0 ' + pct(R) + ')';
-      origin = pct(R) + ' 50%'; scale = 'scaleX(' + c.toFixed(3) + ')';
-    } else if (horiz) {            // pulled left
-      baseClip = 'inset(0 0 0 ' + pct(P) + ')';
-      flapClip = 'inset(0 ' + pct(R) + ' 0 0)';
-      origin = pct(P) + ' 50%'; scale = 'scaleX(' + c.toFixed(3) + ')';
-    } else if (sign > 0) {         // pulled down: bottom part lifts
-      baseClip = 'inset(0 0 ' + pct(P) + ' 0)';
-      flapClip = 'inset(' + pct(R) + ' 0 0 0)';
-      origin = '50% ' + pct(R); scale = 'scaleY(' + c.toFixed(3) + ')';
-    } else {                       // pulled up: top part lifts
-      baseClip = 'inset(' + pct(P) + ' 0 0 0)';
-      flapClip = 'inset(0 0 ' + pct(R) + ' 0)';
-      origin = '50% ' + pct(P); scale = 'scaleY(' + c.toFixed(3) + ')';
-    }
-    base.style.clipPath = baseClip;
-    flap.style.clipPath = flapClip;
-    flap.style.transformOrigin = origin;
-    flap.style.transform = scale;
-    flap.classList.toggle('back', turn > 90);     // past the fold line we see the back of the sticker
-    flap.style.filter = 'drop-shadow(0 ' + (2 + 8 * P).toFixed(1) + 'px ' + (3 + 6 * P).toFixed(1) + 'px rgba(47,59,74,.28))';
+    var ux = u.x, uy = u.y;
+    var k = Math.cos(clamp(p, 0, 1) * Math.PI);          // 1 flat, 0 edge-on, -1 folded over
+    var box = [[0, 0], [sz.w, 0], [sz.w, sz.h], [0, sz.h]];
+    // the part beyond the click point, along the drag, is the one that lifts
+    var lifted = clipPoly(box, ux, uy, -(ux * g.x + uy * g.y));
+    var rest = clipPoly(box, -ux, -uy, ux * g.x + uy * g.y);
+    base.style.clipPath = polyCss(rest);
+    flap.style.clipPath = polyCss(lifted);
+    flap.style.transformOrigin = g.x.toFixed(1) + 'px ' + g.y.toFixed(1) + 'px';
+    // fold about the line through g (direction n = (-uy, ux)): along-drag size scales by k
+    var a = uy * uy + k * ux * ux, d = ux * ux + k * uy * uy, c = (k - 1) * ux * uy;
+    flap.style.transform = 'matrix(' + a.toFixed(4) + ',' + c.toFixed(4) + ',' + c.toFixed(4) + ',' + d.toFixed(4) + ',0,0)';
+    flap.classList.toggle('back', k < 0);               // folded past edge-on: the back shows
+    flap.style.filter = 'none';
   }
 
   // Let go before the piece comes away: it springs back flat.
@@ -257,11 +266,11 @@
     if (!flap) return;
     tile.classList.add('settle');
     var base = tile.querySelector('.stk');
-    base.style.clipPath = 'inset(0 0 0 0)';
-    flap.style.clipPath = 'inset(0 100% 0 0)';
-    flap.style.filter = 'none';
+    base.style.clipPath = '';
+    flap.style.transform = 'none';
+    flap.style.clipPath = 'polygon(0px 0px,0px 0px,0px 0px)';
     setTimeout(function () {
-      if (tile.parentNode) { flap.remove(); base.style.clipPath = ''; tile.classList.remove('settle'); }
+      if (tile.parentNode) { flap.remove(); tile.classList.remove('settle'); }
     }, 230);
   }
 
@@ -308,7 +317,8 @@
     if (gesture.kind === 'peel') {
       if (e.pointerId !== gesture.pid) return;
       var d = dist(gesture.start, pt);
-      curl(gesture.tile, pt.x - gesture.start.x, pt.y - gesture.start.y, Math.min(1, d / gesture.pull));
+      var u = d > 2 ? { x: (pt.x - gesture.start.x) / d, y: (pt.y - gesture.start.y) / d } : null;
+      curl(gesture.grab, gesture.size, u, Math.min(1, d / gesture.pull), gesture.tile);
       if (d < gesture.pull) return;
       detachFromSheet(pt);
     }
@@ -598,7 +608,16 @@
     window.addEventListener('unhandledrejection', function (e) { reportError('Promise: ' + (e.reason && e.reason.message || e.reason)); });
   }
 
+  // The sheet picture's width on screen; placed stickers are sized from it.
+  function sizePage() {
+    var st = $('#stage');
+    var w = Math.min(st.clientWidth, st.clientHeight * SHEET.ref.w / SHEET.ref.h);
+    st.style.setProperty('--pageW', Math.round(w) + 'px');
+  }
+
   function start() {
+    sizePage();
+    window.addEventListener('resize', sizePage);
     $('#title').textContent = 'Felix Stickers – ' + SHEET.name;
     document.title = 'Felix Stickers – ' + SHEET.name;
     $('#ver').textContent = VERSION;

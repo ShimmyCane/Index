@@ -76,18 +76,15 @@ input, textarea { -webkit-user-select: text; user-select: text; touch-action: ma
 
 /* Stickers */
 .ps {
-  position: absolute; width: 19%; aspect-ratio: 1; pointer-events: auto;
+  position: absolute; pointer-events: auto;
   transform-origin: 50% 50%; touch-action: none; cursor: grab;
-  transition: box-shadow .15s ease;
 }
-.ps .stk { width: 100%; height: 100%; }
+.ps .stk { width: 100%; height: 100%; padding: 0; background: none; border: 0; box-shadow: none; }
 .stk {
   background: var(--paper); border: var(--line); border-radius: 22%;
   padding: 9%; box-shadow: 0 6px 0 rgba(47,59,74,.22);
 }
 .stk svg { width: 100%; height: 100%; display: block; overflow: visible; }
-.ps.floating .stk { box-shadow: 0 14px 0 rgba(47,59,74,.22); }
-.ps.committed .stk { box-shadow: 0 3px 0 var(--ink); }
 .ps.turning .stk, .ps.nudge { animation: wiggle .3s ease; }
 .ps.popped { animation: pop .25s ease; }
 @keyframes wiggle { 0%,100% { filter: none; } 50% { filter: brightness(1.06); } }
@@ -125,15 +122,15 @@ input, textarea { -webkit-user-select: text; user-select: text; touch-action: ma
 .slot .flap { position: absolute; inset: 0; pointer-events: none; }
 .slot .flap .stk { width: 100%; height: 100%; padding: 0; background: none; border: 0; box-shadow: none; }
 .slot .flap .stk img.art, .slot .flap .stk svg { width: 100%; height: 100%; }
-.slot .flap.back { background: #fffdf8; border-radius: 10px; }
+.slot .flap.back { background: #fffdf8; }
 .slot .flap.back .stk { visibility: hidden; }
 .slot.settle .stk, .slot.settle .flap { transition: clip-path .22s ease, transform .22s ease; }
 /* a sticker that has just been pressed down onto the sheet */
-.ps.stick { animation: stick .32s ease; }
-@keyframes stick {
-  0% { scale: 1.14; }
-  60% { scale: .96; }
-  100% { scale: 1; }
+/* applied in reverse: the piece lays back down from its folded state, the peel run backwards */
+.ps.stick { animation: unfold .3s ease-out; }
+@keyframes unfold {
+  0% { scale: 1 .2; }
+  100% { scale: 1 1; }
 }
 
 /* Bottom bar */
@@ -214,6 +211,5 @@ textarea {
 
 /* Phones: the play area stays large; the card and bars keep their size */
 @media (orientation: portrait) {
-  .ps { width: 24%; }
   .btn.save { font-size: 17px; padding: 0 16px; }
 }
