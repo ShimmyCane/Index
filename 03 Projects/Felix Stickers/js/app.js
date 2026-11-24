@@ -346,6 +346,11 @@
         } else if (t <= 2 * S) {
           kind = 1;
           ts = 2 * S - t;                                     // the lifted part, seen from its back
+          // it is curled, not flat: darker where it leaves the roll, lighter toward its free end,
+          // with a soft sheen across the curve
+          var q = Math.min(1, Math.max(0, (t - S - R) / Math.max(1, S - R)));
+          shade = 0.72 + 0.28 * smooth(q);
+          hi = 0.10 * Math.exp(-Math.pow(q - 0.45, 2) / 0.04);
         }
         if (kind === 2) { out[o + 3] = 0; continue; }
         sampleFrame(F, ts - F.tA, a - F.aA, px);
@@ -359,9 +364,9 @@
         } else {
           // vellum: the picture shows through a paper tint, fully opaque
           var k = 0.3;
-          out[o] = px[0] * (1 - k) + 255 * k;
-          out[o + 1] = px[1] * (1 - k) + 252 * k;
-          out[o + 2] = px[2] * (1 - k) + 244 * k;
+          out[o] = Math.min(255, (px[0] * (1 - k) + 255 * k) * shade + 255 * hi);
+          out[o + 1] = Math.min(255, (px[1] * (1 - k) + 252 * k) * shade + 255 * hi);
+          out[o + 2] = Math.min(255, (px[2] * (1 - k) + 244 * k) * shade + 255 * hi);
           out[o + 3] = 243;                                   // about 95% opaque: the picture shows faintly through
         }
       }
