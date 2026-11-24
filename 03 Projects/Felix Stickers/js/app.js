@@ -499,14 +499,22 @@
     var E = gesture.E;
     var d = { x: tip.x - E.x, y: tip.y - E.y };
     var r = Math.hypot(d.x, d.y);
+    var past = d.x * lift.uL.x + d.y * lift.uL.y <= 0;
+    if (past) {
+      // past the edge the sticker is laid down and it stays, turned as it was just before the edge
+      lift.Pv = E;
+      lift.u = lift.lastU || lift.uL;
+      lift.phi = lift.lastPhi || 0;
+      lift.S = clamp(lift.lastS || 0, 0, lift.len || 0);
+      return stickLift();
+    }
     var uNew = r > 3 ? { x: d.x / r, y: d.y / r } : lift.uL;
     lift.Pv = E;
     lift.u = uNew;
     lift.phi = Math.atan2(uNew.y, uNew.x) - Math.atan2(lift.uL.y, lift.uL.x);
     lift.len = liftLen(lift);
     lift.S = clamp(r, 0, lift.len);
-    // past the edge the sticker is laid down and it stays
-    if (d.x * lift.uL.x + d.y * lift.uL.y <= 0) return stickLift();
+    lift.lastU = uNew; lift.lastPhi = lift.phi; lift.lastS = lift.S;
     liftDraw(lift);
   }
 
