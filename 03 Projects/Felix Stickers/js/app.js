@@ -350,7 +350,7 @@
           out[o] = px[0] * (1 - k) + 255 * k;
           out[o + 1] = px[1] * (1 - k) + 252 * k;
           out[o + 2] = px[2] * (1 - k) + 244 * k;
-          out[o + 3] = 255;                                   // opaque: no see-through patches
+          out[o + 3] = 230;                                   // 90% opaque: the sheet shows faintly through
         }
       }
     }

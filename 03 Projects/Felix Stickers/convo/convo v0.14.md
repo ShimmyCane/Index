@@ -34,9 +34,9 @@
 ## Questions
 
 3. When a piece is peeled, what should the hole look like: the sheet's own white, the cream of the page, or the picture of the sheet underneath?
-   - Answer:
+   - Answer: **Cream of the page.** Built.
 4. The lifted part: should it be opaque with the picture showing through (as now), or a plain paper back?
-   - Answer:
+   - Answer: **90% opaque, with the picture showing through.** Built.
 
 1. Is the roll edge soft enough now, or should the boundary blend further?
    - Answer:
