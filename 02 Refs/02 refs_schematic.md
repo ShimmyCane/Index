@@ -3,6 +3,7 @@ This folder tracks preferences, references, sources and other human-based logic.
 
 Schematic:
 - 02 refs_schematic.md — this schematic/index file for the references folder.
+- Skills/anim_gif.md — headless GIF of a motion (see Skills/scripts/anim_capture.js and frames_to_gif.py). Wrapper: `.claude/skills/anim-gif/`.
 - Skills/ — skills we work on together. These files are the source of truth; `.claude/skills/<name>/SKILL.md` wrappers make them runnable in Claude Code as `/name`. See `Skills/index.md`.
 - Workflow/new project workflow.md — how to approach website, architectural and family projects.
 - (future) Templates/ — reusable templates extracted from seed projects. Candidates are tracked in `04 AI/patterns.md`.
