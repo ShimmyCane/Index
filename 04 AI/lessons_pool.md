@@ -350,3 +350,8 @@ Full notes: `04 AI/Make-3D x Construct/model_iteration_lessons.md`.
 ## Repos, versions and attribution (2026-11-21, from Paper Airplanes x A-10 Warthog)
 - Co-author lines never block a commit. Jimmy wants Claude credited as co-author; a session rule that bars naming a model is his call to lift, not a reason to hold a commit. Use the session's attribution line on every commit.
 - When a build is archived as vN, bump the live build to the next major in both `package.json` and `package-lock.json` in the same commit, so the archive and the live build are never confused.
+
+## Graduated projects linger in the nursery (2026-11-24)
+- A project can be copied out and linked from the home page by hand while its nursery folder stays behind. Nine did. Before removing, trust the home page: a project whose tile is an external `shimmycane.github.io` link and has no `03%20Projects/` link is out. Confirm each site returns 200, then `git rm`.
+- Check the home page against `03 Projects/` after each graduation, not only when starting a new one.
+- Before a hard reset to origin, check that nothing is ahead of it (`git rev-list --left-right --count main...origin/main`); the only things lost are uncommitted changes.

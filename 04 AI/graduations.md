@@ -22,6 +22,22 @@ Recorded 2026-11-10 from git history, the home page and the registry. Steps 3–
 
 Not checked for these: whether each repo has a README and a stand-alone `CLAUDE.md` (step 2). Check when next working in one.
 
+## Removed from the nursery 2026-11-24
+
+Nine projects had already been copied out and linked from the home page by hand, but their nursery folders were still here. Removed after checking the home-page link and that each Pages site returns 200. Repo names read from the home page links; registry and README steps not re-checked.
+
+| Project | Repo | Home page |
+|---|---|---|
+| Adventure | `ShimmyCane/Adventure` | Pages link |
+| Better Parenting | `ShimmyCane/Better-Parenting` | Pages link |
+| Critique Detail | `ShimmyCane/Critique-Detail` | Pages link |
+| Felix Gear Wars | `ShimmyCane/Felix-Gear-Wars` | Pages link |
+| Generate Clouds | `ShimmyCane/Generate-Clouds` | Pages link |
+| Our Family Compass | `ShimmyCane/Our-Family-Compass` | Pages link |
+| Paper Airplanes x A-10 Warthog | `ShimmyCane/Paper-Airplanes-x-A-10-Warthog` | Pages link |
+| Rhythm Sticks | `ShimmyCane/Rhythm-Sticks` | Pages link |
+| 中文笔画 | `ShimmyCane/Chinese-Character-Strokes` | Pages link |
+
 ## Next graduations
 
 (Add a checklist section here when `/graduate-project` starts one.)
