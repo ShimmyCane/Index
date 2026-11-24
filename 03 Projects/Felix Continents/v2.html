@@ -145,7 +145,7 @@ const ZERO = [0, 0, 0];
 
 const app = FCCommon.init({
   settingsKey: 'felixContinents.v2.settings',
-  defaults: { spin: 0, ghost: 1, showErrors: 0 },
+  defaults: { spin: 0, ghost: 0, showErrors: 0 },   // no dashed outline by default (convo v0.2, Q6)
   startItem: 'puzzle', startLabel: 'Puzzle (V2)',
   onSetting: () => { dirty = true; }
 });
@@ -262,9 +262,17 @@ function initGlobe() {
   });
   const endPointer = () => {
     if (pointer.mode === 'plate') {
+      // snap: a piece let go within 3 degrees of today's place goes exactly to it, with a tick (convo v0.2, Q5)
+      if (pointer.moved > 6 && placed(pointer.plate.id)) {
+        off[pointer.plate.id] = ZERO.slice();
+        dirty = true; updateCounter();
+        $('touchOut').textContent = '✓ ' + pointer.plate.name + ' is in place.';
+      } else if (pointer.moved <= 6) {
+        $('touchOut').textContent = 'You touched: ' + pointer.plate.name;
+      } else {
+        $('touchOut').textContent = 'Moved: ' + pointer.plate.name;
+      }
       saveOff();
-      if (pointer.moved <= 6) $('touchOut').textContent = 'You touched: ' + pointer.plate.name;
-      else $('touchOut').textContent = placed(pointer.plate.id) ? pointer.plate.name + ' is back in place.' : 'Moved: ' + pointer.plate.name;
     }
     pointer.down = false; pointer.mode = null; pointer.plate = null;
   };
