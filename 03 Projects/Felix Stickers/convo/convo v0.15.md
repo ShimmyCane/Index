@@ -21,11 +21,17 @@ Stages:
 4. **Settle:** once the finger passes the origin edge, the piece lies flat and stays.
 5. **Ghost:** a dashed outline of the piece's old place stays while it is held; a second dashed outline marks where it would land.
 
+## Answers (Jimmy, 2026-11-24)
+
+- Lifted, it follows the finger only while the finger is down. Release and it disappears from view; touch down on it again and it follows until release. Press and release are the only events. Right-click is not used.
+- Dashed lines: they follow the curl to show where it will be placed. They are guides for placing it, not a separate piece.
+- Sticking needs the finger to drag it all the way back to the far edge. Until then it is still lifted and can be rolled back again; undo means rolling it back in parts.
+
 ## Questions
 
 1. Once lifted, does the piece follow the finger all the time (until the second click), or only while the finger is down?
-   - Answer:
+   - Answer: **Only while the finger is down.** Lift it and it does not show. Touch down on it again and it follows the finger until you lift. Press and release are the two events; no right-click.
 2. Dashed outlines: the old place only, or also a dashed outline where it would land under the finger?
-   - Answer:
+   - Answer: **Both are useful, but mainly the dashed lines go where the curl goes.** They show where the piece will be, so you can place it; they are guides, not a separate piece.
 3. On the second click, must the finger move back to the edge to lay it down, or can you lay it down at any point along the way?
-   - Answer:
+   - Answer: **To stick, the finger must drag it all the way back to the far edge.** Until then it is still lifted: you can roll it back again, and undo by rolling it back in parts.
