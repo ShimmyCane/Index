@@ -34,4 +34,5 @@ Claude Code:
 - When adding a skill here, also add its wrapper (or ask Claude to).
 - simulate_decay: Builds a physics-based model of an object that changes over increments (folds, tears, damp, mould, dirt, burns), from research and a story, with a 3-D page and Increment Viewer review. Asks questions first.
 
+- `make_sticker.md` (`/make-sticker <Sticker Name>`): adds one sticker to a Felix Stickers sheet from a picture: cut with `scripts/sticker_cut.py`, a free spot on the sheet, registration, and an HTTP test. Test art stays in the project's `private/` folder.
 - `anim_gif.md` (`/anim-gif`): headless GIF of a drag-based motion, from `scripts/anim_capture.js` and `scripts/frames_to_gif.py`.
