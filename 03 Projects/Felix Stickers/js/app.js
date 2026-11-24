@@ -268,15 +268,7 @@
     oc.drawImage(st.src, 0, 0, st.W, st.H);
     var px = oc.getImageData(0, 0, O.width, O.height);
     // the box on the sheet that the peel can reach (the frame's corners, back in page space)
-    var bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
-    [[tA, aA], [tB, aA], [tB, aB], [tA, aB]].forEach(function (q) {
-      var X = st.gp.x + q[0] * ux + q[1] * nx, Y = st.gp.y + q[0] * uy + q[1] * ny;
-      bx0 = Math.min(bx0, X); by0 = Math.min(by0, Y); bx1 = Math.max(bx1, X); by1 = Math.max(by1, Y);
-    });
-    bx0 = Math.max(0, Math.floor(bx0)); by0 = Math.max(0, Math.floor(by0));
-    bx1 = Math.min(st.PW, Math.ceil(bx1)); by1 = Math.min(st.PH, Math.ceil(by1));
-    st.frame = { data: px.data, wD: O.width, hD: O.height, d: d, tA: tA, tB: tB, aA: aA, aB: aB,
-      bx0: bx0, by0: by0, bw: Math.max(1, bx1 - bx0), bh: Math.max(1, by1 - by0) };
+    st.frame = { data: px.data, wD: O.width, hD: O.height, d: d, tA: tA, tB: tB, aA: aA, aB: aB };
   }
 
   // Sample the drag-frame picture at (x, y) in CSS px of the frame; returns [r,g,b,a].
@@ -304,6 +296,17 @@
   function drawPeel(st) {
     if (!st.frame) buildFrame(st);
     var F = st.frame;
+    // the area the peel can reach this frame: from the piece's back to where the lifted part ends
+    var ux0 = st.u.x, uy0 = st.u.y, nx0 = -uy0, ny0 = ux0;
+    var tEnd = Math.max(F.tB, 2 * st.S + st.R + 2), tStart = Math.min(F.tA, 0) - 2;
+    var bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
+    [[tStart, F.aA], [tEnd, F.aA], [tEnd, F.aB], [tStart, F.aB]].forEach(function (q) {
+      var X = st.gp.x + q[0] * ux0 + q[1] * nx0, Y = st.gp.y + q[0] * uy0 + q[1] * ny0;
+      bx0 = Math.min(bx0, X); by0 = Math.min(by0, Y); bx1 = Math.max(bx1, X); by1 = Math.max(by1, Y);
+    });
+    bx0 = Math.max(0, Math.floor(bx0)); by0 = Math.max(0, Math.floor(by0));
+    bx1 = Math.min(st.PW, Math.ceil(bx1)); by1 = Math.min(st.PH, Math.ceil(by1));
+    F.bx0 = bx0; F.by0 = by0; F.bw = Math.max(1, bx1 - bx0); F.bh = Math.max(1, by1 - by0);
     var ctx = st.canvas.getContext('2d');
     var dpr = window.devicePixelRatio || 1;
     ctx.setTransform(1, 0, 0, 1, 0, 0);

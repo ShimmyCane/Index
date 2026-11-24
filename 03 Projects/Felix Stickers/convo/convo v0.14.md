@@ -22,12 +22,21 @@
 
 - Jimmy: still white and transparent patches. The lifted part is now opaque: the picture shows through a paper tint, like vellum peeled. The roll is opaque with a soft highlight. Jimmy: transparency is fine to drop.
 
+## Round 14 follow-up 3
+
+- Jimmy: a band of solid white and a band of nothing. Found: the render area stopped at the piece's far edge, so the lifted part was cut off (fixed). The hole where the piece was shows the sheet's white, which is not the cream of the page. Question below.
+
 ## Limits (honest)
 
 - The drop animation scales about the piece's centre. It does not yet start from the exact last pick-up point; that needs the roll drawn on the placed piece.
 - Edges still show some banding on a real iPad; not device-tested.
 
 ## Questions
+
+3. When a piece is peeled, what should the hole look like: the sheet's own white, the cream of the page, or the picture of the sheet underneath?
+   - Answer:
+4. The lifted part: should it be opaque with the picture showing through (as now), or a plain paper back?
+   - Answer:
 
 1. Is the roll edge soft enough now, or should the boundary blend further?
    - Answer:
