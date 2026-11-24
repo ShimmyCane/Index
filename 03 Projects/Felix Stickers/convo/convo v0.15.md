@@ -27,6 +27,14 @@ Stages:
 - Dashed lines: they follow the curl to show where it will be placed. They are guides for placing it, not a separate piece.
 - Sticking needs the finger to drag it all the way back to the far edge. Until then it is still lifted and can be rolled back again; undo means rolling it back in parts.
 
+## Build (0.7.0)
+
+- Peel starts at the sticker's back edge, along the drag; the roll sits at the finger.
+- Release: the sticker stays lifted but is not shown; its hole is dashed.
+- Touch on the sheet: carried, its roll under the finger, with a dashed footprint where it would land.
+- Release: the next touch applies it. The roll is rolled back toward the edge, and the sticker rotates with the roll's angle. It sticks when the finger passes the edge.
+- Headless: lift, hold, carry and apply run in 5px steps with no errors; the sticker sticks after the finger passes the edge.
+
 ## Questions
 
 1. Once lifted, does the piece follow the finger all the time (until the second click), or only while the finger is down?
