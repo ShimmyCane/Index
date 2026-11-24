@@ -113,6 +113,8 @@
       var art = stickerById[item.stickerId].box;   // same size as on the sheet
       n.style.width = 'calc(var(--pageW, 300px) * ' + (art.w / SHEET.ref.w) + ')';
       n.style.height = 'calc(var(--pageW, 300px) * ' + (art.h / SHEET.ref.w) + ')';
+      n.style.setProperty('--rot', item.rot + 'deg');
+      n.style.setProperty('--ang', (item.ang || 0) + 'deg');
       n.setAttribute('aria-label', 'Sticker: ' + s.label + (item.committed ? ', stuck' : ', tap to stick'));
       n.innerHTML = '<div class="stk">' + artFor(s, true) + '</div>';
       placeStyle(n, item);
@@ -234,56 +236,129 @@
     return im.complete && im.naturalWidth ? im : null;
   }
 
-  // The peel is drawn on a canvas the size of the whole sheet, so a peeled part can lie
-  // beyond its own box, on the sheet, as it would on paper.
-  function drawPeel(st) {
-    var ctx = st.canvas.getContext('2d');
-    var dpr = window.devicePixelRatio || 1;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, st.PW, st.PH);
-    var horiz = st.axis === 'x';
-    var lenPage = horiz ? st.PW : st.PH;
-    var lenTile = horiz ? st.W : st.H, acrossTile = horiz ? st.H : st.W;
-    var nat = horiz ? st.src.naturalWidth : st.src.naturalHeight;
-    var natAcross = horiz ? st.src.naturalHeight : st.src.naturalWidth;
-    var sw = nat / lenTile;
-    var off = horiz ? st.ox : st.oy, offAcross = horiz ? st.oy : st.ox;
-    var gPage = off + st.g, sg = st.sgn, S = st.S, R = st.R;
-    for (var c = 0; c < lenPage; c++) {
-      var td = sg * (c + 0.5 - gPage);      // distance along the drag from the click
-      var kind = null, ts = 0, shade = 1;
-      if (td < S - R) {
-        if (td < 0) { kind = 'pic'; ts = td; }      // still stuck, behind the click
-        else continue;                              // peeled away: a hole
-      } else if (td <= S + R) {
-        var ph = Math.acos(Math.max(-1, Math.min(1, (S - td) / R)));
-        kind = 'pic'; ts = S - R + ph / Math.PI * 2 * R;
-        shade = 0.72 + 0.28 * Math.sin(ph);        // a soft curl, lighter at the top
-      } else if (td <= 2 * S) {
-        kind = 'back'; shade = 0.9 + 0.08 * Math.min(1, (td - S - R) / Math.max(1, R));
-      } else {
-        kind = 'pic'; ts = td;                      // still stuck
-      }
-      if (kind === 'pic') {
-        var sc = Math.floor(st.g + sg * ts);
-        if (sc < 0 || sc >= lenTile) continue;
-        if (horiz) ctx.drawImage(st.src, sc * sw, 0, sw, natAcross, c, offAcross, 1, acrossTile);
-        else ctx.drawImage(st.src, 0, sc * sw, natAcross, sw, offAcross, c, acrossTile, 1);
-        if (shade < 1) {
-          ctx.fillStyle = 'rgba(70,45,30,' + (1 - shade).toFixed(3) + ')';
-        }
-      } else {
-        // back of the sticker: a warm paper tone, a little darker near the curl
-        ctx.fillStyle = 'rgb(' + Math.round(240 * shade) + ',' + Math.round(232 * shade) + ',' + Math.round(218 * shade) + ')';
-      }
-      if (kind === 'back' || shade < 1) {
-        if (horiz) ctx.fillRect(c, offAcross, 1, acrossTile); else ctx.fillRect(offAcross, c, acrossTile, 1);
-      }
-    }
+  function smooth(x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
+
+  /* The peel works in the drag's own frame: t runs along the drag from the press point,
+     a runs across it. The piece is first drawn into that frame (canvas O), then the sheet is
+     painted one t-column at a time, so the roll can run in any direction.
+       t < 0            stuck, unchanged
+       t < S - R        peeled away: a hole on the sheet
+       S - R .. S + R   the roll: the picture curls round it, shaded, edges faded
+       S + R .. 2S      the peeled part, back side up, lying ahead of the roll
+       t > 2S           stuck, unchanged */
+  // The piece is drawn once into the drag's frame, then read back as pixels.
+  function buildFrame(st) {
+    var d = st.dpr;
+    var ux = st.u.x, uy = st.u.y, nx = -uy, ny = ux;
+    var corners = [[0, 0], [st.W, 0], [st.W, st.H], [0, st.H]];
+    var tA = Infinity, tB = -Infinity, aA = Infinity, aB = -Infinity;
+    corners.forEach(function (c) {
+      var X = st.ox + c[0] - st.gp.x, Y = st.oy + c[1] - st.gp.y;
+      var t = X * ux + Y * uy, a = X * nx + Y * ny;
+      tA = Math.min(tA, t); tB = Math.max(tB, t); aA = Math.min(aA, a); aB = Math.max(aB, a);
+    });
+    tA = Math.floor(tA) - 2; aA = Math.floor(aA) - 2;
+    var wO = Math.ceil(tB - tA) + 4, hO = Math.ceil(aB - aA) + 4;
+    var O = document.createElement('canvas');
+    O.width = Math.round(wO * d); O.height = Math.round(hO * d);
+    var oc = O.getContext('2d');
+    var C1 = (st.ox - st.gp.x) * ux + (st.oy - st.gp.y) * uy - tA;
+    var C2 = (st.ox - st.gp.x) * nx + (st.oy - st.gp.y) * ny - aA;
+    oc.setTransform(d * ux, d * nx, d * uy, d * ny, d * C1, d * C2);
+    oc.drawImage(st.src, 0, 0, st.W, st.H);
+    var px = oc.getImageData(0, 0, O.width, O.height);
+    // the box on the sheet that the peel can reach (the frame's corners, back in page space)
+    st.frame = { data: px.data, wD: O.width, hD: O.height, d: d, tA: tA, tB: tB, aA: aA, aB: aB };
   }
 
-  // The sticker's picture rolls round the curl; the sheet keeps the hole where it was.
-  function curl(tile, sid, g, sz, axis, sgn, S) {
+  // Sample the drag-frame picture at (x, y) in CSS px of the frame; returns [r,g,b,a].
+  function sampleFrame(F, x, y, out) {
+    var fx = x * F.d - 0.5, fy = y * F.d - 0.5;
+    if (fx < 0 || fy < 0 || fx >= F.wD - 1 || fy >= F.hD - 1) { out[3] = 0; return; }
+    var x0 = Math.floor(fx), y0 = Math.floor(fy), wx = fx - x0, wy = fy - y0;
+    var i00 = (y0 * F.wD + x0) * 4, i10 = i00 + 4, i01 = i00 + F.wD * 4, i11 = i01 + 4;
+    var d = F.data, w00 = (1 - wx) * (1 - wy), w10 = wx * (1 - wy), w01 = (1 - wx) * wy, w11 = wx * wy;
+    var A = d[i00 + 3] * w00 + d[i10 + 3] * w10 + d[i01 + 3] * w01 + d[i11 + 3] * w11;
+    if (A < 1) { out[3] = 0; return; }
+    for (var c = 0; c < 3; c++) {
+      out[c] = (d[i00 + c] * d[i00 + 3] * w00 + d[i10 + c] * d[i10 + 3] * w10 + d[i01 + c] * d[i01 + 3] * w01 + d[i11 + c] * d[i11 + 3] * w11) / A;
+    }
+    out[3] = A;
+  }
+
+  /* Per pixel, so nothing is drawn in strips and no seams can show. The drag frame:
+     t runs along the drag from the press point, a across it.
+       t < 0            stuck, unchanged
+       t < S - R        peeled away: a hole on the sheet
+       S - R .. S + R   the roll: the picture curls round it; edges faded
+       S + R .. 2S      the peeled part, back side up, lying ahead of the roll
+       t > 2S           stuck, unchanged */
+  function drawPeel(st) {
+    if (!st.frame) buildFrame(st);
+    var F = st.frame;
+    // the area the peel can reach this frame: from the piece's back to where the lifted part ends
+    var ux0 = st.u.x, uy0 = st.u.y, nx0 = -uy0, ny0 = ux0;
+    var tEnd = Math.max(F.tB, 2 * st.S + st.R + 2), tStart = Math.min(F.tA, 0) - 2;
+    var bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
+    [[tStart, F.aA], [tEnd, F.aA], [tEnd, F.aB], [tStart, F.aB]].forEach(function (q) {
+      var X = st.gp.x + q[0] * ux0 + q[1] * nx0, Y = st.gp.y + q[0] * uy0 + q[1] * ny0;
+      bx0 = Math.min(bx0, X); by0 = Math.min(by0, Y); bx1 = Math.max(bx1, X); by1 = Math.max(by1, Y);
+    });
+    bx0 = Math.max(0, Math.floor(bx0)); by0 = Math.max(0, Math.floor(by0));
+    bx1 = Math.min(st.PW, Math.ceil(bx1)); by1 = Math.min(st.PH, Math.ceil(by1));
+    F.bx0 = bx0; F.by0 = by0; F.bw = Math.max(1, bx1 - bx0); F.bh = Math.max(1, by1 - by0);
+    var ctx = st.canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, st.canvas.width, st.canvas.height);
+    var img = ctx.createImageData(Math.round(F.bw * dpr), Math.round(F.bh * dpr));
+    var out = img.data, sc = dpr;
+    var ux = st.u.x, uy = st.u.y, gx = st.gp.x, gy = st.gp.y;
+    var S = st.S, R = st.R, px = [0, 0, 0, 0];
+    var paper = [240, 232, 218];
+    for (var j = 0; j < img.height; j++) {
+      var Y = F.by0 + (j + 0.5) / sc;
+      for (var i = 0; i < img.width; i++) {
+        var X = F.bx0 + (i + 0.5) / sc;
+        var rx = X - gx, ry = Y - gy;
+        var t = rx * ux + ry * uy, a = -rx * uy + ry * ux;
+        var o = (j * img.width + i) * 4;
+        var kind = 0, ts = t, shade = 1, alpha = 1, hi = 0;   // kind 0: picture, 1: lifted (vellum), 2: nothing
+        if (t < S - R) {
+          if (t >= 0) kind = 2;                              // peeled away: a hole
+        } else if (t <= S + R) {
+          var ph = Math.acos(Math.max(-1, Math.min(1, (S - t) / R)));
+          ts = S - R + ph / Math.PI * 2 * R;                  // the picture curls round the roll
+          shade = 0.5 + 0.5 * Math.sin(ph);                   // darker at the sides of the curl
+          hi = 0.16 * Math.exp(-Math.pow(ph - Math.PI / 2, 2) / 0.18);   // a soft highlight on top
+        } else if (t <= 2 * S) {
+          kind = 1;
+          ts = 2 * S - t;                                     // the lifted part, seen from its back
+        }
+        if (kind === 2) { out[o + 3] = 0; continue; }
+        sampleFrame(F, ts - F.tA, a - F.aA, px);
+        if (px[3] <= 0) { out[o + 3] = 0; continue; }
+        if (kind === 0) {
+          // the curl: opaque, shaded, with a soft highlight
+          out[o] = Math.min(255, px[0] * shade + 255 * hi);
+          out[o + 1] = Math.min(255, px[1] * shade + 255 * hi);
+          out[o + 2] = Math.min(255, px[2] * shade + 255 * hi);
+          out[o + 3] = px[3];
+        } else {
+          // vellum: the picture shows through a paper tint, fully opaque
+          var k = 0.45;
+          out[o] = px[0] * (1 - k) + 255 * k;
+          out[o + 1] = px[1] * (1 - k) + 252 * k;
+          out[o + 2] = px[2] * (1 - k) + 244 * k;
+          out[o + 3] = 230;                                   // 90% opaque: the sheet shows faintly through
+        }
+      }
+    }
+    ctx.putImageData(img, Math.round(F.bx0 * dpr), Math.round(F.by0 * dpr));
+  }
+
+  // The picture rolls from the press point along the drag, whatever its direction.
+  function curl(tile, sid, g, sz, u, S) {
     if (S <= 0.5) return uncurl(tile);
     var img = cutoutImage(window.FS_NATIVE_PLACED && window.FS_NATIVE_PLACED[sid]);
     if (!img) return;
@@ -301,10 +376,12 @@
     canvas.height = Math.round(PH * dpr);
     base.style.visibility = 'hidden';
     tile.classList.remove('settle');
+    var ox = tile.offsetLeft, oy = tile.offsetTop;
     peelState = {
-      tile: tile, canvas: canvas, src: img, axis: axis, sgn: sgn, S: S,
-      g: axis === 'x' ? g.x : g.y, ox: tile.offsetLeft, oy: tile.offsetTop,
-      W: sz.w, H: sz.h, PW: PW, PH: PH, R: Math.max(3, 0.08 * Math.min(sz.w, sz.h))
+      tile: tile, canvas: canvas, src: img, u: u, S: S,
+      gp: { x: ox + g.x, y: oy + g.y }, ox: ox, oy: oy, W: sz.w, H: sz.h,
+      R: Math.max(3, 0.08 * Math.min(sz.w, sz.h)), frame: null,
+      PW: PW, PH: PH, dpr: Math.min(dpr, 1.5)
     };
     drawPeel(peelState);
   }
@@ -335,6 +412,7 @@
       y: r.top + r.height / 2 + (pt.y - gesture.start.y)
     });
     var item = { uid: nextUid++, stickerId: gesture.sid, x: p.x, y: p.y, rot: playfulAngle(), committed: false };
+    item.ang = gesture.u ? Math.atan2(gesture.u.y, gesture.u.x) * 180 / Math.PI : 0;
     peelState = null;
     state.placed.push(item);
     if (state.used.indexOf(gesture.sid) === -1) state.used.push(gesture.sid);
@@ -363,10 +441,10 @@
     if (gesture.kind === 'peel') {
       if (e.pointerId !== gesture.pid) return;
       var dx = pt.x - gesture.start.x, dy = pt.y - gesture.start.y;
-      var horiz = Math.abs(dx) >= Math.abs(dy);
-      var sgn = (horiz ? dx : dy) >= 0 ? 1 : -1;
-      var dd = Math.abs(horiz ? dx : dy);          // progress along the dominant drag axis
-      curl(gesture.tile, gesture.sid, gesture.grab, gesture.size, horiz ? 'x' : 'y', sgn, Math.min(dd, gesture.pull));
+      var dd = Math.hypot(dx, dy);                 // progress along the drag, any direction
+      var uu = dd > 0.5 ? { x: dx / dd, y: dy / dd } : { x: 1, y: 0 };
+      gesture.u = uu;
+      curl(gesture.tile, gesture.sid, gesture.grab, gesture.size, uu, Math.min(dd, gesture.pull));
       if (dd < gesture.pull) return;
       detachFromSheet(pt);
     }
