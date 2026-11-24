@@ -212,66 +212,111 @@
     if (node) node.classList.add('dragging');
   }
 
-  /* ---- peel: the sticker folds back from the point it was clicked, along the drag ----
-     g = the click point (tile px), u = unit drag direction, k = cos(fold angle).
-     The part beyond g in the drag direction turns over the fold line through g:
-     its size across the drag shrinks by cos(angle). Base keeps the rest. */
-  function clipPoly(pts, nx, ny, c) {
-    // keep the part of polygon pts where nx*x + ny*y + c >= 0 (Sutherland-Hodgman, one edge)
-    var out = [];
-    for (var i = 0; i < pts.length; i++) {
-      var A = pts[i], B = pts[(i + 1) % pts.length];
-      var fa = nx * A[0] + ny * A[1] + c, fb = nx * B[0] + ny * B[1] + c;
-      if (fa >= 0) out.push(A);
-      if ((fa >= 0) !== (fb >= 0)) {
-        var t = fa / (fa - fb);
-        out.push([A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t]);
+  /* ---- peel: a soft roll starts at the click and travels down the drag direction ----
+     Along the drag (t = distance from the click, + in the drag direction, S = roll centre):
+       t < 0            stuck, unchanged
+       t < S - R        already peeled: a hole on the sheet (it has moved)
+       S - R .. S + R   the roll: the picture curls round it (soft, shaded, not a crease)
+       S + R .. 2S      the peeled part, back side up, lying over the sheet ahead of the roll
+       t > 2S           stuck, unchanged
+     The sticker is drawn column by column (or row by row) into a canvas over its own spot. */
+  var imgCache = {};
+  var peelState = null;
+  function cutoutImage(src) {
+    if (!src) return null;
+    var im = imgCache[src];
+    if (!im) {
+      im = new Image();
+      im.onload = function () { if (peelState) drawPeel(peelState); };
+      im.src = src;
+      imgCache[src] = im;
+    }
+    return im.complete && im.naturalWidth ? im : null;
+  }
+
+  // The peel is drawn on a canvas the size of the whole sheet, so a peeled part can lie
+  // beyond its own box, on the sheet, as it would on paper.
+  function drawPeel(st) {
+    var ctx = st.canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, st.PW, st.PH);
+    var horiz = st.axis === 'x';
+    var lenPage = horiz ? st.PW : st.PH;
+    var lenTile = horiz ? st.W : st.H, acrossTile = horiz ? st.H : st.W;
+    var nat = horiz ? st.src.naturalWidth : st.src.naturalHeight;
+    var natAcross = horiz ? st.src.naturalHeight : st.src.naturalWidth;
+    var sw = nat / lenTile;
+    var off = horiz ? st.ox : st.oy, offAcross = horiz ? st.oy : st.ox;
+    var gPage = off + st.g, sg = st.sgn, S = st.S, R = st.R;
+    for (var c = 0; c < lenPage; c++) {
+      var td = sg * (c + 0.5 - gPage);      // distance along the drag from the click
+      var kind = null, ts = 0, shade = 1;
+      if (td < S - R) {
+        if (td < 0) { kind = 'pic'; ts = td; }      // still stuck, behind the click
+        else continue;                              // peeled away: a hole
+      } else if (td <= S + R) {
+        var ph = Math.acos(Math.max(-1, Math.min(1, (S - td) / R)));
+        kind = 'pic'; ts = S - R + ph / Math.PI * 2 * R;
+        shade = 0.72 + 0.28 * Math.sin(ph);        // a soft curl, lighter at the top
+      } else if (td <= 2 * S) {
+        kind = 'back'; shade = 0.9 + 0.08 * Math.min(1, (td - S - R) / Math.max(1, R));
+      } else {
+        kind = 'pic'; ts = td;                      // still stuck
+      }
+      if (kind === 'pic') {
+        var sc = Math.floor(st.g + sg * ts);
+        if (sc < 0 || sc >= lenTile) continue;
+        if (horiz) ctx.drawImage(st.src, sc * sw, 0, sw, natAcross, c, offAcross, 1, acrossTile);
+        else ctx.drawImage(st.src, 0, sc * sw, natAcross, sw, offAcross, c, acrossTile, 1);
+        if (shade < 1) {
+          ctx.fillStyle = 'rgba(70,45,30,' + (1 - shade).toFixed(3) + ')';
+        }
+      } else {
+        // back of the sticker: a warm paper tone, a little darker near the curl
+        ctx.fillStyle = 'rgb(' + Math.round(240 * shade) + ',' + Math.round(232 * shade) + ',' + Math.round(218 * shade) + ')';
+      }
+      if (kind === 'back' || shade < 1) {
+        if (horiz) ctx.fillRect(c, offAcross, 1, acrossTile); else ctx.fillRect(offAcross, c, acrossTile, 1);
       }
     }
-    return out;
-  }
-  function polyCss(pts) {
-    return 'polygon(' + pts.map(function (q) { return q[0].toFixed(1) + 'px ' + q[1].toFixed(1) + 'px'; }).join(',') + ')';
   }
 
-  function curl(g, sz, u, p, tile) {
-    if (p <= 0 || !u) return uncurl(tile);
+  // The sticker's picture rolls round the curl; the sheet keeps the hole where it was.
+  function curl(tile, sid, g, sz, axis, sgn, S) {
+    if (S <= 0.5) return uncurl(tile);
+    var img = cutoutImage(window.FS_NATIVE_PLACED && window.FS_NATIVE_PLACED[sid]);
+    if (!img) return;
+    var page = tile.parentNode;
     var base = tile.querySelector('.stk');
-    var flap = tile.querySelector('.flap');
-    if (!flap) {
-      flap = el('div', 'flap');
-      flap.innerHTML = '<div class="stk">' + base.innerHTML + '</div>';
-      tile.appendChild(flap);
+    var canvas = page.querySelector('canvas.peel');
+    var dpr = window.devicePixelRatio || 1;
+    var PW = page.clientWidth, PH = page.clientHeight;
+    if (!canvas) {
+      canvas = document.createElement('canvas');
+      canvas.className = 'peel';
+      page.appendChild(canvas);
     }
+    canvas.width = Math.round(PW * dpr);
+    canvas.height = Math.round(PH * dpr);
+    base.style.visibility = 'hidden';
     tile.classList.remove('settle');
-    var ux = u.x, uy = u.y;
-    var k = Math.cos(clamp(p, 0, 1) * Math.PI);          // 1 flat, 0 edge-on, -1 folded over
-    var box = [[0, 0], [sz.w, 0], [sz.w, sz.h], [0, sz.h]];
-    // the part beyond the click point, along the drag, is the one that lifts
-    var lifted = clipPoly(box, ux, uy, -(ux * g.x + uy * g.y));
-    var rest = clipPoly(box, -ux, -uy, ux * g.x + uy * g.y);
-    base.style.clipPath = polyCss(rest);
-    flap.style.clipPath = polyCss(lifted);
-    flap.style.transformOrigin = g.x.toFixed(1) + 'px ' + g.y.toFixed(1) + 'px';
-    // fold about the line through g (direction n = (-uy, ux)): along-drag size scales by k
-    var a = uy * uy + k * ux * ux, d = ux * ux + k * uy * uy, c = (k - 1) * ux * uy;
-    flap.style.transform = 'matrix(' + a.toFixed(4) + ',' + c.toFixed(4) + ',' + c.toFixed(4) + ',' + d.toFixed(4) + ',0,0)';
-    flap.classList.toggle('back', k < 0);               // folded past edge-on: the back shows
-    flap.style.filter = 'none';
+    peelState = {
+      tile: tile, canvas: canvas, src: img, axis: axis, sgn: sgn, S: S,
+      g: axis === 'x' ? g.x : g.y, ox: tile.offsetLeft, oy: tile.offsetTop,
+      W: sz.w, H: sz.h, PW: PW, PH: PH, R: Math.max(3, 0.08 * Math.min(sz.w, sz.h))
+    };
+    drawPeel(peelState);
   }
 
-  // Let go before the piece comes away: it springs back flat.
+  // Let go before the piece comes away: it goes back flat.
   function uncurl(tile) {
-    var flap = tile.querySelector('.flap');
-    if (!flap) return;
-    tile.classList.add('settle');
+    var page = tile.parentNode;
+    var canvas = page && page.querySelector('canvas.peel');
+    if (canvas) canvas.remove();
     var base = tile.querySelector('.stk');
-    base.style.clipPath = '';
-    flap.style.transform = 'none';
-    flap.style.clipPath = 'polygon(0px 0px,0px 0px,0px 0px)';
-    setTimeout(function () {
-      if (tile.parentNode) { flap.remove(); tile.classList.remove('settle'); }
-    }, 230);
+    if (base) base.style.visibility = '';
+    if (peelState && peelState.tile === tile) peelState = null;
   }
 
   // True when the point is over the empty spot this sticker came from on the sheet.
@@ -290,6 +335,7 @@
       y: r.top + r.height / 2 + (pt.y - gesture.start.y)
     });
     var item = { uid: nextUid++, stickerId: gesture.sid, x: p.x, y: p.y, rot: playfulAngle(), committed: false };
+    peelState = null;
     state.placed.push(item);
     if (state.used.indexOf(gesture.sid) === -1) state.used.push(gesture.sid);
     renderStage();
@@ -316,10 +362,12 @@
 
     if (gesture.kind === 'peel') {
       if (e.pointerId !== gesture.pid) return;
-      var d = dist(gesture.start, pt);
-      var u = d > 2 ? { x: (pt.x - gesture.start.x) / d, y: (pt.y - gesture.start.y) / d } : null;
-      curl(gesture.grab, gesture.size, u, Math.min(1, d / gesture.pull), gesture.tile);
-      if (d < gesture.pull) return;
+      var dx = pt.x - gesture.start.x, dy = pt.y - gesture.start.y;
+      var horiz = Math.abs(dx) >= Math.abs(dy);
+      var sgn = (horiz ? dx : dy) >= 0 ? 1 : -1;
+      var dd = Math.abs(horiz ? dx : dy);          // progress along the dominant drag axis
+      curl(gesture.tile, gesture.sid, gesture.grab, gesture.size, horiz ? 'x' : 'y', sgn, Math.min(dd, gesture.pull));
+      if (dd < gesture.pull) return;
       detachFromSheet(pt);
     }
 

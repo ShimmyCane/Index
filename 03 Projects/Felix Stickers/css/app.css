@@ -119,6 +119,7 @@ input, textarea { -webkit-user-select: text; user-select: text; touch-action: ma
 
 .slot.empty { visibility: hidden; }
 /* peel curl: the flap is a copy of the piece; the base is clipped to what is still stuck */
+canvas.peel { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
 .slot .flap { position: absolute; inset: 0; pointer-events: none; }
 .slot .flap .stk { width: 100%; height: 100%; padding: 0; background: none; border: 0; box-shadow: none; }
 .slot .flap .stk img.art, .slot .flap .stk svg { width: 100%; height: 100%; }
