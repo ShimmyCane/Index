@@ -145,3 +145,7 @@ Patterns that repeat often enough to become a template in `02 Refs/Templates/` o
 - **Local-first store with sync:** IndexedDB holds records and audio; `_dirty`, `_up` flags; push (audio first, then row, upsert), pull (never overwrite a dirty record); sync only when idle. _(`js/store.js`)_
 - **Clip engine:** snip, repeat, extend by tail loop with overlap-add, speed by linear resampling, reverse, fades, mix with a limiter. Pure function. _(`js/mixer.js`)_
 - Template candidates: the shared ⚙️ builder (`js/chrome.js`) and the sync store could become skills.
+
+## Headless GIF of a motion (2026-11-25)
+- Play a drag in fixed steps in headless Chromium, save a PNG per frame, and build a GIF with Pillow. Tools: `02 Refs/Skills/scripts/anim_capture.js` and `frames_to_gif.py`; skill `/anim-gif`.
+- Serve pages over http for pixel tests: file:// canvases are tainted.
