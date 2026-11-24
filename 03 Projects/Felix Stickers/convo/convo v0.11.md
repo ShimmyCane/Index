@@ -21,6 +21,6 @@
 ## Questions
 
 1. The cutouts still have the cream sticker edge from the picture. Is that the "outline" you mean, or only the shadows? If it is the edge, I can trim it from the placed stickers (the sheet keeps it, as in the reference).
-   - Answer:
+   - Answer: **Yes.** Placed stickers now use the same pictures with the cream edge trimmed (`art/placed/`). The sheet keeps the edge, as in the reference.
 2. Is the fold from the click point right, or should the fold run from a fixed edge of each sticker?
-   - Answer:
+   - Answer: **From the click point.** This is how it is built.

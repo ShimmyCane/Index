@@ -114,7 +114,7 @@
       n.style.width = 'calc(var(--pageW, 300px) * ' + (art.w / SHEET.ref.w) + ')';
       n.style.height = 'calc(var(--pageW, 300px) * ' + (art.h / SHEET.ref.w) + ')';
       n.setAttribute('aria-label', 'Sticker: ' + s.label + (item.committed ? ', stuck' : ', tap to stick'));
-      n.innerHTML = '<div class="stk">' + artFor(s) + '</div>';
+      n.innerHTML = '<div class="stk">' + artFor(s, true) + '</div>';
       placeStyle(n, item);
       host.appendChild(n);
     });
@@ -144,8 +144,9 @@
   }
 
   // Native art when provided (private/native.js, local only); otherwise the SVG in sheet.js.
-  function artFor(s) {
-    var src = window.FS_NATIVE_ART && window.FS_NATIVE_ART[s.id];
+  function artFor(s, placed) {
+    var map = placed ? window.FS_NATIVE_PLACED : window.FS_NATIVE_ART;
+    var src = map && map[s.id];
     return src ? '<img class="art" src="' + src + '" alt="" draggable="false">' : s.svg;
   }
 
