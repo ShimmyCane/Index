@@ -386,10 +386,9 @@
 
   /* ---- lift (see convo v0.15) ----
      phase 'lifting': the finger peels from the sticker's edge; the roll follows the finger.
-     phase 'held':    released; the sticker is lifted but not shown (its hole is dashed).
-     phase 'carry':   a touch on the sheet brings it back, its roll under the finger, until release.
-     phase 'placeable': released after carrying; the next touch applies it: the roll is rolled
-                      back toward the edge, and it sticks when the finger passes that edge. */
+     phase 'held':    released; the curl stays where it is, with its dashed outline.
+     phase 'apply':   a touch puts it down from its pivot, at the roll; dragging back past the
+                      edge lays it down and it sticks. Letting go early leaves it held, as it is. */
   var lift = null;
   var edgeCache = {};
   // the sticker's own outline: boundary pixels of its picture, thinned into dashes; in box fractions
@@ -491,37 +490,21 @@
   }
 
   function liftPress(e) {
-    // a touch on the sheet while a sticker is held: carry it, or apply it
+    // a touch on the sheet while a sticker is held: it is put down from its pivot, at the roll
     var pt = { x: e.clientX, y: e.clientY };
     var f = pageOf(pt);
-    if (lift.phase === 'held') {
-      var tip = { x: lift.Pv.x + lift.S * lift.u.x, y: lift.Pv.y + lift.S * lift.u.y };
-      // the curl comes up under the finger
-      gesture = { kind: 'carry', pid: e.pointerId, o: { x: 0, y: 0 }, last: f };
-      lift.phase = 'carry';
-      lift.ghost = true;
-      moveCarry(f);
-    } else if (lift.phase === 'placeable') {
-      var tipA = { x: lift.Pv.x + lift.S * lift.u.x, y: lift.Pv.y + lift.S * lift.u.y };
-      // the rolldown turns the sticker about the point it starts from: the roll itself
-      var c0 = Math.cos(lift.phi), s0 = Math.sin(lift.phi);
-      var dx0 = tipA.x - lift.Pm.x, dy0 = tipA.y - lift.Pm.y;
-      lift.Ta = { x: lift.Ta.x + c0 * dx0 + s0 * dy0, y: lift.Ta.y - s0 * dx0 + c0 * dy0 };
-      lift.Pm = { x: tipA.x, y: tipA.y };
-      gesture = { kind: 'apply', pid: e.pointerId, E: { x: lift.Pv.x, y: lift.Pv.y },
-        o: { x: f.x - tipA.x, y: f.y - tipA.y } };
-      lift.phase = 'apply';
-      lift.ghost = true;
-      liftDraw(lift);
-    }
-    pointers.set(e.pointerId, pt);
-  }
-
-  function moveCarry(f) {
-    var tip = { x: f.x - gesture.o.x, y: f.y - gesture.o.y };
-    lift.Pv = { x: tip.x - lift.S * lift.u.x, y: tip.y - lift.S * lift.u.y };
-    lift.Pm = { x: lift.Pv.x, y: lift.Pv.y };
+    var tipA = { x: lift.Pv.x + lift.S * lift.u.x, y: lift.Pv.y + lift.S * lift.u.y };
+    // the rolldown turns the sticker about the point it starts from: the roll itself
+    var c0 = Math.cos(lift.phi), s0 = Math.sin(lift.phi);
+    var dx0 = tipA.x - lift.Pm.x, dy0 = tipA.y - lift.Pm.y;
+    lift.Ta = { x: lift.Ta.x + c0 * dx0 + s0 * dy0, y: lift.Ta.y - s0 * dx0 + c0 * dy0 };
+    lift.Pm = { x: tipA.x, y: tipA.y };
+    gesture = { kind: 'apply', pid: e.pointerId, E: { x: lift.Pv.x, y: lift.Pv.y },
+      o: { x: f.x - tipA.x, y: f.y - tipA.y } };
+    lift.phase = 'apply';
+    lift.ghost = true;
     liftDraw(lift);
+    pointers.set(e.pointerId, pt);
   }
 
   function moveApply(f) {
@@ -605,7 +588,6 @@
       updatePeel(lift, f);
       return;
     }
-    if (gesture.kind === 'carry' && gesture.pid === e.pointerId) { moveCarry(pageOf(pt)); return; }
     if (gesture.kind === 'apply' && gesture.pid === e.pointerId) { moveApply(pageOf(pt)); return; }
 
     if (gesture.kind === 'move' && gesture.pids.indexOf(e.pointerId) !== -1) {
@@ -634,9 +616,10 @@
     if (gesture.kind === 'peel' && e.pointerId === gesture.pid) {
       if (lift && lift.phase === 'lifting') {
         if (lift.S >= 8) {
-          // let go: the sticker stays lifted, out of sight, until the next touch
+          // let go: the curl stays where it is, with its dashed outline; the next touch puts it down
           lift.phase = 'held';
-          liftHide(lift);
+          lift.ghost = true;
+          liftDraw(lift);
         } else {
           // only a touch: nothing was lifted
           var before = lift.before;
@@ -648,15 +631,9 @@
       gesture = null;
       return;
     }
-    if (gesture.kind === 'carry' && gesture.pid === e.pointerId) {
-      lift.phase = 'placeable';
-      lift.ghost = false;
-      liftHide(lift);
-      gesture = null;
-      return;
-    }
     if (gesture.kind === 'apply' && gesture.pid === e.pointerId) {
-      if (lift) { lift.phase = 'placeable'; lift.ghost = false; liftHide(lift); }
+      // let go before it sticks: it stays as it is, and the next touch carries on from here
+      if (lift) { lift.phase = 'held'; lift.ghost = true; liftDraw(lift); }
       gesture = null;
       return;
     }
