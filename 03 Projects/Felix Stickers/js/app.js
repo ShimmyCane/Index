@@ -320,29 +320,34 @@
         var rx = X - gx, ry = Y - gy;
         var t = rx * ux + ry * uy, a = -rx * uy + ry * ux;
         var o = (j * img.width + i) * 4;
-        var kind = 0, ts = t, shade = 1, alpha = 1;      // kind 0: picture, 1: back, 2: nothing
+        var kind = 0, ts = t, shade = 1, alpha = 1, hi = 0;   // kind 0: picture, 1: lifted (vellum), 2: nothing
         if (t < S - R) {
-          if (t >= 0) kind = 2;                          // peeled away: a hole
+          if (t >= 0) kind = 2;                              // peeled away: a hole
         } else if (t <= S + R) {
           var ph = Math.acos(Math.max(-1, Math.min(1, (S - t) / R)));
-          ts = S - R + ph / Math.PI * 2 * R;
-          shade = 0.7 + 0.3 * Math.sin(ph);
-          alpha = Math.min(1, Math.sin(ph) * 1.6);
+          ts = S - R + ph / Math.PI * 2 * R;                  // the picture curls round the roll
+          shade = 0.5 + 0.5 * Math.sin(ph);                   // darker at the sides of the curl
+          hi = 0.16 * Math.exp(-Math.pow(ph - Math.PI / 2, 2) / 0.18);   // a soft highlight on top
         } else if (t <= 2 * S) {
           kind = 1;
-          var edge = Math.min(1, (t - S - R) / Math.max(1, R));
-          alpha = smooth(edge * 1.4);
-          shade = 0.9 + 0.08 * edge;
+          ts = 2 * S - t;                                     // the lifted part, seen from its back
         }
         if (kind === 2) { out[o + 3] = 0; continue; }
+        sampleFrame(F, ts - F.tA, a - F.aA, px);
+        if (px[3] <= 0) { out[o + 3] = 0; continue; }
         if (kind === 0) {
-          sampleFrame(F, ts - F.tA, a - F.aA, px);
-          if (px[3] <= 0) { out[o + 3] = 0; continue; }
-          out[o] = px[0] * shade; out[o + 1] = px[1] * shade; out[o + 2] = px[2] * shade;
-          out[o + 3] = px[3] * alpha;
+          // the curl: opaque, shaded, with a soft highlight
+          out[o] = Math.min(255, px[0] * shade + 255 * hi);
+          out[o + 1] = Math.min(255, px[1] * shade + 255 * hi);
+          out[o + 2] = Math.min(255, px[2] * shade + 255 * hi);
+          out[o + 3] = px[3];
         } else {
-          out[o] = paper[0] * shade; out[o + 1] = paper[1] * shade; out[o + 2] = paper[2] * shade;
-          out[o + 3] = 255 * alpha;
+          // vellum: the picture shows through a paper tint, fully opaque
+          var k = 0.45;
+          out[o] = px[0] * (1 - k) + 255 * k;
+          out[o + 1] = px[1] * (1 - k) + 252 * k;
+          out[o + 2] = px[2] * (1 - k) + 244 * k;
+          out[o + 3] = 255;                                   // opaque: no see-through patches
         }
       }
     }

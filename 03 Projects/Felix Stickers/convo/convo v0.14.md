@@ -18,6 +18,10 @@
 
 - Jimmy: the roll showed artifacts (seams between strips). Fixed by rendering the peel per pixel, so nothing is drawn in strips. Peel canvas capped at 1.5x for speed.
 
+## Round 14 follow-up 2
+
+- Jimmy: still white and transparent patches. The lifted part is now opaque: the picture shows through a paper tint, like vellum peeled. The roll is opaque with a soft highlight. Jimmy: transparency is fine to drop.
+
 ## Limits (honest)
 
 - The drop animation scales about the piece's centre. It does not yet start from the exact last pick-up point; that needs the roll drawn on the placed piece.
