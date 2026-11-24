@@ -128,10 +128,12 @@ canvas.peel { position: absolute; left: 0; top: 0; width: 100%; height: 100%; po
 .slot.settle .stk, .slot.settle .flap { transition: clip-path .22s ease, transform .22s ease; }
 /* a sticker that has just been pressed down onto the sheet */
 /* applied in reverse: the piece lays back down from its folded state, the peel run backwards */
-.ps.stick { animation: unfold .3s ease-out; }
-@keyframes unfold {
-  0% { scale: 1 .2; }
-  100% { scale: 1 1; }
+.ps.stick { animation: unroll .5s ease-out; }
+/* dropping down: the peel run backwards along the pick-up direction, turning into place */
+@keyframes unroll {
+  0% { transform: translate(-50%,-50%) rotate(calc(var(--rot) + 12deg)) rotate(var(--ang)) scale(.22, 1) rotate(calc(0deg - var(--ang))); }
+  60% { transform: translate(-50%,-50%) rotate(calc(var(--rot) - 2deg)); }
+  100% { transform: translate(-50%,-50%) rotate(var(--rot)); }
 }
 
 /* Bottom bar */
