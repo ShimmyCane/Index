@@ -1,6 +1,8 @@
 # Felix Continents — brief
 
 **Updated:** 2026-11-24
+**Status (round 3, 2026-11-24):** V3 `v3.html` (peoples over time) and V4 `v4.html` (countries at milestones, tap to zoom) built and headless-tested; every page has a V1–V5 strip. Notes saved from the pages are in the Family table `fc_notes` (5 open at the time of checking). Round 2 status below.
+
 **Status (round 2, 2026-11-24):** V1 timeline reversed (Pangaea left, today right). V2 `v2.html` (drag plates, dashed today outline, saved on device) and V5 `v5.html` (seeded random worlds, drift, mountains and volcanoes, time bar) built and headless-tested. Family login (in ⚙️) and `supabase/001_fc_notes.sql` (+ test, verify) written, **not pasted**; the live check on 2026-11-24 found `fc_notes` absent and no registry rows. Shared code now in `js/engine.js` and `js/common.js`. V2.5 and V2.8/2.9 not built. Earlier status: V1 first build 0.1.0 is in `03 Projects/Felix Continents/index.html`, headless-tested in Chromium (no console errors at 1180×820 and 390×844; note save and reload persist; moment changes and tap names work). Not yet on an iPad. Nursery tile added.
 
 ## Current state

@@ -95,6 +95,16 @@ Yes. ⚙️ in the lower right holds the options and extensions. Errors appear a
 - See the questions in `convo/convo v0.1.md`.
 - Home page tile: not yet. It goes on the Nursery list in the same change as the first page that opens (step 9 of `start_project.md`).
 
+## Built so far (2026-11-24, round 3)
+
+- **V1** `index.html`: the globe with the time slider (Pangaea left, today right).
+- **V2** `v2.html`: drag the continents; snap within 3°; no dashed outline by default.
+- **V3** `v3.html`: peoples over time, year slider from 3500 BCE to 1900 CE. Shaded areas grow, then fade. Hand sketches, approximate.
+- **V4** `v4.html`: countries at milestones (500 BCE to 2000). Snap bar, play, and tap a country to zoom in and read its story. Modern milestone shows today's continents (modern countries not drawn yet).
+- **V5** `v5.html`: random worlds with drift, mountains and volcanoes.
+- Every page has a V1 to V5 strip at the top. Data in `js/data.js` and `js/history.js`; shared code in `js/engine.js` and `js/common.js`.
+- Limits: all shapes are rough sketches. The V3 and V4 shapes are not checked by historians.
+
 ## Decisions from convo v0.2 (answered 2026-11-24)
 
 - **V2:** a piece let go within 3° of its place snaps to it, with a ✓ (done). The dashed outline of today's map is off by default; ⚙️ can turn it on (done).
