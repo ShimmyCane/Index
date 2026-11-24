@@ -386,7 +386,8 @@
 
   /* ---- lift (see convo v0.15) ----
      phase 'lifting': the finger peels from the sticker's edge; the roll follows the finger.
-     phase 'held':    released; the curl stays where it is, with its dashed outline.
+     phase 'held':    released; the curl stays where it is, with its dashed outline. For a few
+                      seconds a touch slides it about (free move); after that a touch unfurls it.
      phase 'apply':   a touch puts it down from its pivot, at the roll; dragging back past the
                       edge lays it down and it sticks. Letting go early leaves it held, as it is. */
   var lift = null;
@@ -489,10 +490,22 @@
     liftDraw(L);
   }
 
+  var FREE_MOVE_MS = 3000;   // after it is let go, the curl can be slid about for this long
+
   function liftPress(e) {
-    // a touch on the sheet while a sticker is held: it is put down from its pivot, at the roll
     var pt = { x: e.clientX, y: e.clientY };
     var f = pageOf(pt);
+    if (lift.phase === 'held' && Date.now() - (lift.heldAt || 0) < FREE_MOVE_MS) {
+      // free move: the curl comes along with the finger, keeping its roll
+      var tipC = { x: lift.Pv.x + lift.S * lift.u.x, y: lift.Pv.y + lift.S * lift.u.y };
+      gesture = { kind: 'carry', pid: e.pointerId, o: { x: f.x - tipC.x, y: f.y - tipC.y } };
+      lift.phase = 'carry';
+      lift.ghost = true;
+      liftDraw(lift);
+      pointers.set(e.pointerId, pt);
+      return;
+    }
+    // after the free move: it is put down from its pivot, at the roll
     var tipA = { x: lift.Pv.x + lift.S * lift.u.x, y: lift.Pv.y + lift.S * lift.u.y };
     // the rolldown turns the sticker about the point it starts from: the roll itself
     var c0 = Math.cos(lift.phi), s0 = Math.sin(lift.phi);
@@ -505,6 +518,13 @@
     lift.ghost = true;
     liftDraw(lift);
     pointers.set(e.pointerId, pt);
+  }
+
+  function moveCarry(f) {
+    var tip = { x: f.x - gesture.o.x, y: f.y - gesture.o.y };
+    lift.Pv = { x: tip.x - lift.S * lift.u.x, y: tip.y - lift.S * lift.u.y };
+    lift.Pm = { x: lift.Pv.x, y: lift.Pv.y };
+    liftDraw(lift);
   }
 
   function moveApply(f) {
@@ -588,6 +608,7 @@
       updatePeel(lift, f);
       return;
     }
+    if (gesture.kind === 'carry' && gesture.pid === e.pointerId) { moveCarry(pageOf(pt)); return; }
     if (gesture.kind === 'apply' && gesture.pid === e.pointerId) { moveApply(pageOf(pt)); return; }
 
     if (gesture.kind === 'move' && gesture.pids.indexOf(e.pointerId) !== -1) {
@@ -618,6 +639,7 @@
         if (lift.S >= 8) {
           // let go: the curl stays where it is, with its dashed outline; the next touch puts it down
           lift.phase = 'held';
+          lift.heldAt = Date.now();
           lift.ghost = true;
           liftDraw(lift);
         } else {
@@ -631,9 +653,15 @@
       gesture = null;
       return;
     }
+    if (gesture.kind === 'carry' && gesture.pid === e.pointerId) {
+      // let go: it stays where it was put; the free-move window starts again
+      if (lift) { lift.phase = 'held'; lift.heldAt = Date.now(); lift.ghost = true; liftDraw(lift); }
+      gesture = null;
+      return;
+    }
     if (gesture.kind === 'apply' && gesture.pid === e.pointerId) {
       // let go before it sticks: it stays as it is, and the next touch carries on from here
-      if (lift) { lift.phase = 'held'; lift.ghost = true; liftDraw(lift); }
+      if (lift) { lift.phase = 'held'; lift.heldAt = Date.now(); lift.ghost = true; liftDraw(lift); }
       gesture = null;
       return;
     }
