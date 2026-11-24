@@ -250,8 +250,9 @@
   // The picture point (x, y) in its own box, mapped to the sheet: it turns by phi about the pivot.
   function mapPic(L, x, y) {
     var c = Math.cos(L.phi), sn = Math.sin(L.phi);
+    var Pm = L.Pm || L.Pv;
     var qx = L.Box0.x + x - L.Ta.x, qy = L.Box0.y + y - L.Ta.y;
-    return { x: L.Pv.x + c * qx - sn * qy, y: L.Pv.y + sn * qx + c * qy };
+    return { x: Pm.x + c * qx - sn * qy, y: Pm.y + sn * qx + c * qy };
   }
 
   // The picture is drawn once into the drag's frame (t along the drag from the pivot, a across it),
@@ -467,7 +468,7 @@
     var pp = gesture.pagePress;
     var E = { x: pp.x - ((pp.x * u.x + pp.y * u.y) - t0) * u.x, y: pp.y - ((pp.x * u.x + pp.y * u.y) - t0) * u.y };
     var L = {
-      sid: gesture.sid, src: img, W: W, H: H, Box0: { x: ox, y: oy }, Ta: E, Pv: E, phi: 0,
+      sid: gesture.sid, src: img, W: W, H: H, Box0: { x: ox, y: oy }, Ta: E, Pv: E, Pm: E, phi: 0,
       uL: u, u: u, S: 0, R: Math.max(3, 0.08 * Math.min(W, H)), phase: 'lifting',
       before: gesture.before, canvas: null, frame: null, ghost: false,
       PW: page.clientWidth, PH: page.clientHeight, dpr: Math.min(window.devicePixelRatio || 1, 1.5)
@@ -502,6 +503,11 @@
       moveCarry(f);
     } else if (lift.phase === 'placeable') {
       var tipA = { x: lift.Pv.x + lift.S * lift.u.x, y: lift.Pv.y + lift.S * lift.u.y };
+      // the rolldown turns the sticker about the point it starts from: the roll itself
+      var c0 = Math.cos(lift.phi), s0 = Math.sin(lift.phi);
+      var dx0 = tipA.x - lift.Pm.x, dy0 = tipA.y - lift.Pm.y;
+      lift.Ta = { x: lift.Ta.x + c0 * dx0 + s0 * dy0, y: lift.Ta.y - s0 * dx0 + c0 * dy0 };
+      lift.Pm = { x: tipA.x, y: tipA.y };
       gesture = { kind: 'apply', pid: e.pointerId, E: { x: lift.Pv.x, y: lift.Pv.y },
         o: { x: f.x - tipA.x, y: f.y - tipA.y } };
       lift.phase = 'apply';
@@ -514,6 +520,7 @@
   function moveCarry(f) {
     var tip = { x: f.x - gesture.o.x, y: f.y - gesture.o.y };
     lift.Pv = { x: tip.x - lift.S * lift.u.x, y: tip.y - lift.S * lift.u.y };
+    lift.Pm = { x: lift.Pv.x, y: lift.Pv.y };
     liftDraw(lift);
   }
 
