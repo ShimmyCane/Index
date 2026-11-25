@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/app.css?v=20261125c">
+  <link rel="stylesheet" href="css/app.css?v=20261125d">
 </head>
 <body>
   <header id="top">
@@ -53,6 +53,20 @@
         <div class="panelBody">
           <label class="toggle"><input id="tgUndo" type="checkbox" checked> Show the Undo button</label>
           <label class="toggle"><input id="tgErrors" type="checkbox"> Show errors at the bottom</label>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="family" data-open="false">
+        <button class="panelHead" type="button" aria-expanded="false"><span class="panelIcon">👪</span><span class="panelTitle">Family database</span><span class="panelMark">▾</span></button>
+        <div class="panelBody">
+          <p class="hint">Sign in with the family login to keep creations and notes in the family database as well as on this device.</p>
+          <p class="hint">Status: <span id="famStatus">checking</span></p>
+          <div id="famSignedOut" class="famBox">
+            <input id="famEmail" type="email" autocomplete="username" placeholder="Family email">
+            <input id="famPass" type="password" autocomplete="current-password" placeholder="Password">
+            <button id="btnFamIn" class="btn pill wide" type="button">Sign in</button>
+          </div>
+          <button id="btnFamOut" class="btn pill wide" type="button" hidden>Sign out</button>
         </div>
       </section>
 
@@ -107,9 +121,11 @@
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="errorBar" hidden role="alert" tabindex="0"></div>
 
-  <script src="js/sheet.js?v=20261125c"></script>
-  <script src="js/sheet_select.js?v=20261125c"></script>
-  <script src="js/native.js?v=20261125c"></script>
-  <script src="js/app.js?v=20261125c"></script>
+  <script src="js/sheet.js?v=20261125d"></script>
+  <script src="js/sheet_select.js?v=20261125d"></script>
+  <script src="js/native.js?v=20261125d"></script>
+  <script src="js/config.js?v=20261125d"></script>
+  <script src="js/family.js?v=20261125d"></script>
+  <script src="js/app.js?v=20261125d"></script>
 </body>
 </html>

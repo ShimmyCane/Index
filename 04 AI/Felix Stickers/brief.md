@@ -17,4 +17,5 @@ Key decisions:
 - `/make-sticker <name>` adds one sticker from a picture (`02 Refs/Skills/make_sticker.md`); cutting uses `02 Refs/Skills/scripts/sticker_cut.py`.
 - 2026-11-25: held-curl wait 1 s; two-finger turn damped (15° → 5°, 1:1 from 45°). Rotation was not driven in headless tests; check on a device.
 - 2026-11-25: bottom-bar sheet pager (◀ n / N ▶), shown when more than one sheet is loaded; top ⚙️ removed. Sticker pack page waits for more than 20 stickers.
+- 2026-11-25: family database wired (Family project, `fs_creations`, `fs_notes`). SQL written, **not pasted** (Jimmy pastes `test_001_fs`, then `001_fs_family`, then `verify_001_fs`). App tested against a mocked database only: sign-in, note sent with the family token, a failed write shows in errors, sign-out. Close Family sign-up before anyone signs in.
 Next: device test on a real iPad (peel feel, two-finger twist, edge swipe), then the ChatGPT core prompt round.

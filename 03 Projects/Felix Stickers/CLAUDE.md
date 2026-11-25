@@ -17,7 +17,7 @@ Track: A. Family play. Version 0.1.0.
 
 Project rules:
 - Public repo. Art in `art/` is AI-generated (ChatGPT), used freely per Jimmy (convo v0.9); the ⚙️ panel credits it. Do not commit other people's artwork or photos.
-- No accounts, no sound, no database in the first build.
+- Family sign-in and the family database are optional: the device copy is always kept first, and the database gets a copy only when signed in (`js/family.js`, `supabase/`). No sound yet.
 - Gestures are locked for iPad: no pinch zoom, double-tap zoom, pull-to-refresh or long-press menus (see `schematic.md`, Gesture lock).
 - Web Audio API only if sound is added later; no audio files.
 - The gear stays lower right; the ⚙️ panel holds Reset, the notes box and the error panel.
