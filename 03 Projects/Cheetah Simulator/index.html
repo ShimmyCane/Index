@@ -15,147 +15,196 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--vanilla);color:v
 #scene{position:fixed;inset:0;width:100%;height:100%;display:block}
 button,select,input{font:inherit;color:inherit}
 button{cursor:pointer;touch-action:manipulation}
-.card{background:var(--paper);border:3px solid var(--ink);border-radius:18px;box-shadow:var(--shadow);padding:10px 12px;pointer-events:auto}
 .small{font-size:13px;opacity:.75}
-.hud{position:fixed;left:12px;top:12px;width:min(300px,calc(100vw - 24px));display:flex;flex-direction:column;gap:10px;z-index:5}
-.sex{min-height:48px;border:3px solid var(--ink);border-radius:14px;background:var(--sun);box-shadow:0 3px 0 var(--ink);padding:0 12px;font-weight:700}
-.row{display:flex;gap:8px;align-items:center}
-.nameIn{flex:1;min-width:0;min-height:48px;border:3px dashed var(--ink);border-radius:14px;background:transparent;padding:0 10px;font-size:20px;font-weight:700}
-.bar{height:16px;border:3px solid var(--ink);border-radius:10px;background:var(--paper);overflow:hidden;margin:8px 0}
-.bar i{display:block;height:100%;width:0;background:var(--coral);transition:width .4s}
-.big{min-height:52px;width:100%;border:3px solid var(--ink);border-radius:16px;background:var(--mint);box-shadow:0 4px 0 var(--ink);font-weight:700;font-size:18px;padding:0 12px}
-.big:disabled{opacity:.55;box-shadow:none}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.chip{min-width:48px;min-height:48px;border:3px solid var(--ink);border-radius:14px;background:var(--peach);padding:0 10px;font-weight:700}
-.chip[aria-pressed="true"]{background:var(--sun)}
-.chip:disabled{opacity:.45}
-ul.goals{list-style:none;margin:6px 0 0;padding:0}
-ul.goals li{padding:4px 0}
-ul.goals li.ok{text-decoration:line-through;opacity:.6}
-.panel{margin-top:0}
-.panelHead{width:100%;min-height:52px;display:flex;align-items:center;gap:10px;padding:0 12px;border:3px solid var(--ink);border-radius:16px;background:var(--sun);box-shadow:0 3px 0 var(--ink);font-weight:700;text-align:left}
-.panelTitle{flex:1}
-.panelBody{padding:10px 4px 2px}
-.panel[data-collapsed="true"] .panelBody{display:none}
-.panel[data-collapsed="true"] .panelMark{transform:rotate(-90deg)}
-.panelMark{display:inline-block}
+/* the only things on the canvas: a stage pill, Next (when ready), the gear, Chirp, the joystick, toasts */
+.pill{position:fixed;left:12px;top:12px;display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--paper);border:3px solid var(--ink);border-radius:14px;box-shadow:0 3px 0 var(--ink);z-index:5;pointer-events:none}
+.pill .num{font-weight:800;font-size:18px;min-width:22px;text-align:center}
+.pill .bar{width:120px;height:12px;border:2px solid var(--ink);border-radius:8px;overflow:hidden;background:var(--paper)}
+.pill .bar i{display:block;height:100%;width:0;background:var(--coral);transition:width .4s}
+.nextBtn{position:fixed;left:50%;top:12px;transform:translateX(-50%);min-height:52px;padding:0 18px;border:3px solid var(--ink);border-radius:16px;background:var(--mint);box-shadow:0 4px 0 var(--ink);font-weight:800;z-index:5}
+.nextBtn:disabled{opacity:.55;box-shadow:none}
 .gear{position:fixed;top:12px;right:12px;width:68px;height:68px;border-radius:50%;border:3px solid var(--ink);background:var(--paper);box-shadow:0 4px 0 var(--ink);font-size:32px;z-index:10;transition:opacity .5s}
 .gear.faded{opacity:.18}
-.chirp{position:fixed;right:18px;bottom:22px;width:96px;height:96px;border-radius:50%;border:3px solid var(--ink);background:var(--coral);box-shadow:0 5px 0 var(--ink);font-weight:800;font-size:18px;z-index:4}
+.chirp{position:fixed;right:18px;bottom:22px;width:96px;height:96px;border-radius:50%;border:3px solid var(--ink);background:var(--coral);box-shadow:0 5px 0 var(--ink);font-weight:800;font-size:16px;z-index:4}
 .chirp:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
 .joy{position:fixed;left:16px;bottom:16px;border-radius:50%;border:3px solid var(--ink);background:rgba(255,253,247,.5);z-index:4}
 .joy[hidden]{display:none}
 .joyKnob{position:absolute;left:50%;top:50%;width:40%;height:40%;margin:-20% 0 0 -20%;border-radius:50%;border:3px solid var(--ink);background:var(--sun)}
-.toast{position:fixed;left:50%;top:14px;transform:translateX(-50%);max-width:min(560px,calc(100vw - 220px));background:var(--paper);border:3px solid var(--ink);border-radius:16px;padding:10px 14px;box-shadow:var(--shadow);z-index:6;text-align:center;pointer-events:none;transition:opacity .4s}
+.toast{position:fixed;left:50%;top:84px;transform:translateX(-50%);max-width:min(520px,calc(100vw - 32px));background:var(--paper);border:3px solid var(--ink);border-radius:16px;padding:8px 14px;box-shadow:var(--shadow);z-index:6;text-align:center;pointer-events:none;transition:opacity .4s}
 .toast.off{opacity:0}
 .errs{position:fixed;left:12px;right:12px;bottom:12px;max-height:30vh;overflow:auto;background:#ffe1dc;color:#5a1d12;border:3px solid #5a1d12;border-radius:14px;padding:8px 12px;z-index:7;font-size:14px}
-.drawer{position:fixed;top:0;right:0;height:100%;width:min(380px,92vw);background:var(--vanilla);border-left:3px solid var(--ink);box-shadow:-4px 0 0 var(--ink);overflow:auto;padding:88px 14px 30px;transform:translateX(105%);transition:transform .3s;z-index:9}
+/* settings drawer: every panel and all text lives here */
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(400px,94vw);background:var(--vanilla);border-left:3px solid var(--ink);box-shadow:-4px 0 0 var(--ink);overflow:auto;padding:92px 14px 30px;transform:translateX(105%);transition:transform .3s;z-index:9}
 .drawer.open{transform:none}
-.drawer h2{font-size:18px;margin:14px 0 6px}
+.card{background:var(--paper);border:3px solid var(--ink);border-radius:16px;padding:10px 12px;margin-bottom:12px}
+.row{display:flex;gap:8px;align-items:center}
+.sex{min-height:48px;border:3px solid var(--ink);border-radius:14px;background:var(--sun);box-shadow:0 3px 0 var(--ink);padding:0 12px;font-weight:700}
+.nameIn{flex:1;min-width:0;min-height:48px;border:3px dashed var(--ink);border-radius:14px;background:transparent;padding:0 10px;font-size:20px;font-weight:700}
+.bar{height:14px;border:3px solid var(--ink);border-radius:10px;background:var(--paper);overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;width:0;background:var(--coral);transition:width .4s}
+.panelHead{width:100%;min-height:52px;display:flex;align-items:center;gap:10px;padding:0 12px;border:3px solid var(--ink);border-radius:16px;background:var(--sun);box-shadow:0 3px 0 var(--ink);font-weight:700;text-align:left;margin:12px 0 6px}
+.panelTitle{flex:1}
+.panelBody{padding:4px 2px 2px}
+.panel[data-collapsed="true"] .panelBody{display:none}
+.panel[data-collapsed="true"] .panelMark{transform:rotate(-90deg)}
+.panelMark{display:inline-block}
+.skill{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:2px dashed var(--ink)}
+.skill .ic{font-size:24px;width:36px;text-align:center}
+.skill .nm{flex:1}
+.tokens{display:flex;gap:4px}
+.tok{width:18px;height:18px;border:2px solid var(--ink);border-radius:50%;background:var(--paper)}
+.tok.on{background:var(--coral)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{min-width:48px;min-height:48px;border:3px solid var(--ink);border-radius:14px;background:var(--peach);padding:0 10px;font-weight:700}
+.chip[aria-pressed="true"]{background:var(--sun)}
+.chip:disabled{opacity:.45}
+.big{min-height:52px;width:100%;border:3px solid var(--ink);border-radius:16px;background:var(--mint);box-shadow:0 4px 0 var(--ink);font-weight:700;font-size:18px;padding:0 12px;margin-top:8px}
+.big:disabled{opacity:.55;box-shadow:none}
 .opt{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:52px;padding:6px 0;border-bottom:2px dashed var(--ink)}
-.opt select{min-height:48px;border:3px solid var(--ink);border-radius:12px;background:var(--paper);padding:0 8px}
+.opt select{max-width:58%;min-height:48px;border:3px solid var(--ink);border-radius:12px;background:var(--paper);padding:0 8px}
 .opt input[type=checkbox]{width:28px;height:28px}
 .btn{min-height:52px;border:3px solid var(--ink);border-radius:14px;background:var(--peach);box-shadow:0 3px 0 var(--ink);padding:0 14px;font-weight:700;margin:6px 6px 6px 0}
 textarea{width:100%;min-height:80px;border:3px solid var(--ink);border-radius:14px;background:var(--paper);padding:8px;font-size:16px}
 .noteList{list-style:none;padding:0;margin:8px 0;font-size:14px}
 .noteList li{border:2px solid var(--ink);border-radius:12px;padding:6px 10px;margin:6px 0;background:var(--paper)}
 .dim{opacity:.6;font-size:13px}
-@media (max-width:699px){.hud{width:calc(100vw - 24px)}.toast{top:auto;bottom:130px;max-width:calc(100vw - 32px)}}
+ul.plain{margin:0;padding-left:18px}
+h2{font-size:17px;margin:14px 0 4px}
+@media (max-width:699px){.toast{top:auto;bottom:130px}}
 </style>
 </head>
 <body>
 <canvas id="scene" aria-label="Cheetah scene"></canvas>
 
-<div class="hud" id="hud">
-  <section class="card">
-    <div class="row">
-      <button id="sex" class="sex" type="button" aria-label="Change sex">♂ Male</button>
-      <input id="name" class="nameIn" maxlength="14" aria-label="Cheetah name" placeholder="Name">
-    </div>
-    <div class="row" style="justify-content:space-between;margin-top:8px">
-      <strong id="stageName"></strong><span id="clock" class="small"></span>
-    </div>
-    <div class="bar" aria-hidden="true"><i id="barFill"></i></div>
-    <button id="next" class="big" type="button" hidden>Next stage →</button>
-  </section>
-
-  <section class="card" data-panel="goals">
-    <div class="small">Goals for this stage</div>
-    <ul class="goals" id="goals"></ul>
-  </section>
-
-  <section class="panel card" data-panel="map" style="padding:0">
-    <button class="panelHead" type="button" aria-expanded="true"><span>🗺️</span><span class="panelTitle">My life (stages)</span><span class="panelMark">▾</span></button>
-    <div class="panelBody"><div class="chips" id="stages"></div><div class="dim" style="margin-top:6px">Stages 3 and 4 come in a later build.</div></div>
-  </section>
-
-  <section class="panel card" data-panel="learn" style="padding:0">
-    <button class="panelHead" type="button" aria-expanded="true"><span>💡</span><span class="panelTitle">What I learned</span><span class="panelMark">▾</span></button>
-    <div class="panelBody" id="lesson"></div>
-  </section>
-
-  <section class="panel card" data-panel="fact" style="padding:0">
-    <button class="panelHead" type="button" aria-expanded="true"><span>🔎</span><span class="panelTitle">How it really is</span><span class="panelMark">▾</span></button>
-    <div class="panelBody"><ul id="facts" style="margin:0;padding-left:18px"></ul></div>
-  </section>
-</div>
-
+<!-- on-screen: only the stage pill, Next (when ready), the gear, Chirp and the joystick -->
+<div class="pill" aria-hidden="true"><span class="num" id="pillNum">1</span></div>
+<button id="next" class="nextBtn" type="button" hidden>Next stage →</button>
 <button id="gear" class="gear" type="button" aria-label="Settings" aria-expanded="false">⚙️</button>
 <button id="chirp" class="chirp" type="button" aria-label="Chirp to call Mum">🐾 Chirp</button>
 <div id="joy" class="joy" hidden aria-label="Joystick"><div class="joyKnob" id="joyKnob"></div></div>
 <div id="toast" class="toast off" role="status"></div>
 <div id="errs" class="errs" hidden></div>
 
-<aside id="drawer" class="drawer" aria-label="Settings">
-  <h2>Settings</h2>
-  <label class="opt"><span>Gentle mode (on by default)</span><input id="gentle" type="checkbox"></label>
-  <label class="opt"><span>Look</span>
-    <select id="look"><option value="age">Match my age</option><option value="cute">Always cuddly</option></select></label>
-  <label class="opt"><span>Controls</span>
-    <select id="controls"><option value="felix">Drag from the middle (Felix)</option><option value="joy">Joystick (lower left)</option></select></label>
-  <label class="opt"><span>Sound (later)</span><input type="checkbox" disabled></label>
-  <label class="opt"><span>AI helper (under development)</span><input id="ai" type="checkbox" disabled></label>
+<aside id="drawer" class="drawer" aria-label="Settings and panels">
+  <div class="card">
+    <div class="row">
+      <button id="sex" class="sex" type="button" aria-label="Change sex">♂ Male</button>
+      <input id="name" class="nameIn" maxlength="14" aria-label="Cheetah name" placeholder="Name">
+    </div>
+    <div class="row" style="justify-content:space-between;margin-top:10px">
+      <strong id="stageName"></strong><span id="clock" class="small"></span>
+    </div>
+    <div class="bar" aria-hidden="true"><i id="barFill2"></i></div>
+  </div>
 
-  <h2>Notes for improvement</h2>
-  <textarea id="noteText" placeholder="Write a note about what to improve…"></textarea>
-  <button id="saveNote" class="btn" type="button">Save note</button>
-  <ul id="noteList" class="noteList"></ul>
-  <div class="dim">Notes stay on this device. They are sent nowhere else.</div>
+  <section class="panel" data-panel="skills">
+    <button class="panelHead" type="button" aria-expanded="true"><span>⭐</span><span class="panelTitle">Skills to master</span><span class="panelMark">▾</span></button>
+    <div class="panelBody" id="skills"></div>
+  </section>
 
-  <h2>Checks and test</h2>
-  <button id="storageCheck" class="btn" type="button">Storage check</button>
-  <span id="storageOut" class="dim"></span>
-  <label class="opt"><span>Show errors (bottom of the page)</span><input id="showErrors" type="checkbox"></label>
-  <button id="skipClock" class="btn" type="button">Test: skip the clock</button>
-  <button id="resetLife" class="btn" type="button">Start a new cheetah</button>
-  <div class="dim" style="margin-top:14px">Version <span id="ver"></span></div>
+  <section class="panel" data-panel="map">
+    <button class="panelHead" type="button" aria-expanded="true"><span>🗺️</span><span class="panelTitle">My life (stages)</span><span class="panelMark">▾</span></button>
+    <div class="panelBody"><div class="chips" id="stages"></div><div class="dim" style="margin-top:6px">Stages 3 and 4 come in a later build.</div></div>
+  </section>
+
+  <section class="panel" data-panel="learn">
+    <button class="panelHead" type="button" aria-expanded="true"><span>💡</span><span class="panelTitle">What I learned</span><span class="panelMark">▾</span></button>
+    <div class="panelBody" id="lesson"></div>
+  </section>
+
+  <section class="panel" data-panel="fact">
+    <button class="panelHead" type="button" aria-expanded="true"><span>🔎</span><span class="panelTitle">How it really is</span><span class="panelMark">▾</span></button>
+    <div class="panelBody"><ul id="facts" class="plain"></ul></div>
+  </section>
+
+  <section class="panel" data-panel="settings">
+    <button class="panelHead" type="button" aria-expanded="true"><span>⚙️</span><span class="panelTitle">Settings</span><span class="panelMark">▾</span></button>
+    <div class="panelBody">
+      <label class="opt"><span>Gentle mode (on by default)</span><input id="gentle" type="checkbox"></label>
+      <label class="opt"><span>Look</span>
+        <select id="look"><option value="age">Match my age</option><option value="cute">Always cuddly</option></select></label>
+      <label class="opt"><span>Controls</span>
+        <select id="controls"><option value="felix">Drag from the middle (Felix)</option><option value="joy">Joystick (lower left)</option></select></label>
+      <label class="opt"><span>Other games</span>
+        <select id="games" aria-label="Other games in the series">
+          <option value="" selected>V1 Cheetah Simulator (this game)</option>
+          <!-- Enable an option (remove disabled) when its page exists. -->
+          <option value="../V2%20Gibbon%20Swing/" disabled>V2 Gibbon Swing (not built yet)</option>
+          <option value="../V3%20Sea%20Turtle%20Race/" disabled>V3 Sea Turtle Race (not built yet)</option>
+          <option value="../V4%20Golden%20Eagle%20Dive/" disabled>V4 Golden Eagle Dive (not built yet)</option>
+        </select></label>
+      <label class="opt"><span>Fast-forward time (×4)</span><input id="fast" type="checkbox"></label>
+      <label class="opt"><span>Sound (later)</span><input type="checkbox" disabled></label>
+      <label class="opt"><span>AI helper (under development)</span><input id="ai" type="checkbox" disabled></label>
+      <label class="opt"><span>Show errors (bottom of the page)</span><input id="showErrors" type="checkbox"></label>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="notes">
+    <button class="panelHead" type="button" aria-expanded="true"><span>📝</span><span class="panelTitle">Notes for improvement</span><span class="panelMark">▾</span></button>
+    <div class="panelBody">
+      <textarea id="noteText" placeholder="Write a note about what to improve…"></textarea>
+      <button id="saveNote" class="btn" type="button">Save note</button>
+      <ul id="noteList" class="noteList"></ul>
+      <div class="dim">Notes stay on this device. They are sent nowhere else.</div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="checks">
+    <button class="panelHead" type="button" aria-expanded="false"><span>🧪</span><span class="panelTitle">Checks and test</span><span class="panelMark">▾</span></button>
+    <div class="panelBody">
+      <button id="storageCheck" class="btn" type="button">Storage check</button>
+      <span id="storageOut" class="dim"></span>
+      <button id="skipClock" class="btn" type="button">Test: skip the clock</button>
+      <button id="resetLife" class="btn" type="button">Start a new cheetah</button>
+      <div class="dim" style="margin-top:10px">Version <span id="ver"></span></div>
+    </div>
+  </section>
 </aside>
 
 <script>
 (function(){
 'use strict';
-var KEY='cheetahSim.v1', NKEY='cheetahSim.notes', VERSION='0.1.0';
+var KEY='cheetahSim.v1', NKEY='cheetahSim.notes', VERSION='0.2.0';
 var NAMES=['Kito','Zuri','Nia','Amari','Sana','Tembo','Imani','Ayo'];
 var TARGET_BASE=10, TARGET_STEP=5; // minutes: 10 + 5 per restart of the stage
+
+// Skills are learned from the animals by doing. [id, name, icon, how many times to master]
+var SKILLS={
+  1:[
+    {id:'move',   name:'Move',          icon:'🐾', need:4, hint:'Walk around the land. Every 250 steps is one.'},
+    {id:'hide',   name:'Stay hidden',   icon:'🌿', need:2, hint:'Stand still in the tall grass for 4 seconds.'},
+    {id:'listen', name:'Listen for Mum',icon:'👂', need:3, hint:'Chirp, then stop and listen for her answer.'},
+    {id:'follow', name:'Follow Mum',    icon:'🐆', need:2, hint:'Chirp until Mum comes to you.'},
+    {id:'nibble', name:'Nibble grass',  icon:'🌱', need:3, hint:'Stop by a grass shoot and nibble it. (Cubs do this; to check.)'}
+  ],
+  2:[
+    {id:'pounce', name:'Pounce',        icon:'🦋', need:5, hint:'Move onto the butterflies to catch them.'},
+    {id:'freeze', name:'Freeze',        icon:'🦅', need:2, hint:'When the shadow passes, stop moving.'},
+    {id:'play',   name:'Play together', icon:'🤝', need:3, hint:'Chirp while your brothers and sisters are near.'}
+  ]
+};
 var STAGES={
   1:{name:'Den',age:'0 to 8 weeks',
-     lesson:'Cubs stay hidden. Mum moves them to new hiding places. A chirp calls her, so find her and taste the grass.',
-     gentle:['Cubs are born in a hidden den.','Mum moves the cubs so that no one finds them.','A cheetah chirps to call its mother.'],
+     lesson:'Cubs learn their land. Move around, stay hidden in the grass, listen for Mum and follow her call. A cub nibbles grass too.',
+     gentle:['Cubs are born in a hidden den.','Mum moves the cubs so that no one finds them.','A cheetah chirps to call its mother.','Cubs stay hidden for about 6 to 8 weeks.'],
      full:['Cubs are born in a hidden den and stay there for about 6 to 8 weeks.','Mum moves the cubs to new hiding places, because lions and hyenas find cubs by sound and smell.','Large predators are the main cause of cub deaths in the Serengeti (Hilborn et al. 2018).']},
   2:{name:'Little explorer',age:'2 to 6 months',
-     lesson:'Play is practice. Pounce on the butterflies. When a shadow passes over, stop and stay low under the grass.',
+     lesson:'Play is practice. Pounce on the butterflies, freeze when a shadow passes, and play with your brothers and sisters.',
      gentle:['Cubs play to practise hunting moves.','Brothers and sisters often stay together for a long time.','When a shadow passes overhead, stay still under the grass.'],
      full:['Cubs learn to hunt by playing with each other and watching their mother.','Mothers start to wean cubs at about 3 to 6 months (sources vary).','Eagles and lions can take young cubs, so cubs learn to freeze and hide.']}
 };
 var LATER={3:'Watching and trying',4:'Almost grown'};
 
 var S=load();
+var skyBoostT=0; // seconds left of the sky run into the next stage
 var W=0,H=0,DPR=1,WD=null,drawerOpen=false,last=performance.now(),saveAcc=0,toastT=null,gearT=null;
 var errors=[];
 var fx=0,fy=0,jx=0,jy=0,keys={};
+var cv=el('scene'), ctx=cv.getContext('2d');
 
 function load(){
-  var d={cheetah:null,settings:{gentle:true,look:'age',controls:'felix',ai:false,showErrors:false},panels:{}};
+  var d={cheetah:null,settings:{gentle:true,look:'age',controls:'felix',ai:false,showErrors:false,fast:false},panels:{}};
   try{
     var raw=localStorage.getItem(KEY);
     if(raw){var p=JSON.parse(raw); if(p&&p.cheetah)d.cheetah=p.cheetah; if(p&&p.settings)Object.assign(d.settings,p.settings); if(p&&p.panels)d.panels=p.panels;}
@@ -174,7 +223,8 @@ function save(){
 }
 function stageState(n){
   var st=S.cheetah.stages[n];
-  if(!st){st=S.cheetah.stages[n]={played:0,restarts:0,done:false};}
+  if(!st){st=S.cheetah.stages[n]={played:0,restarts:0,done:false,skills:{}};}
+  if(!st.skills)st.skills={};
   return st;
 }
 function targetMin(){return TARGET_BASE+TARGET_STEP*stageState(S.cheetah.stage).restarts;}
@@ -184,7 +234,7 @@ function pick(a){return a[Math.floor(Math.random()*a.length)];}
 function el(id){return document.getElementById(id);}
 function say(text){
   var t=el('toast'); t.textContent=text; t.classList.remove('off');
-  clearTimeout(toastT); toastT=setTimeout(function(){t.classList.add('off');},4200);
+  clearTimeout(toastT); toastT=setTimeout(function(){t.classList.add('off');},3800);
 }
 function reportErr(msg){
   errors.push(String(msg)); if(errors.length>20)errors.shift();
@@ -198,25 +248,43 @@ function renderErrors(){
 window.addEventListener('error',function(e){reportErr(e.message||e);});
 window.addEventListener('unhandledrejection',function(e){reportErr(e.reason&&e.reason.message?e.reason.message:e.reason);});
 
+/* ---------- skills ---------- */
+function skillDef(id){
+  var list=SKILLS[S.cheetah.stage]||[];
+  for(var i=0;i<list.length;i++)if(list[i].id===id)return list[i];
+  return null;
+}
+function addSkill(id,amount){
+  var def=skillDef(id); if(!def)return;
+  var st=stageState(S.cheetah.stage);
+  var before=st.skills[id]||0;
+  if(before>=def.need)return;
+  st.skills[id]=Math.min(def.need,before+(amount||1));
+  if(st.skills[id]>=def.need&&before<def.need){say('Mastered: '+def.name+'! ' + def.icon);}
+  save(); refreshSkills();
+}
+function skillCount(id){return stageState(S.cheetah.stage).skills[id]||0;}
+
 /* ---------- world ---------- */
 function resize(){
   DPR=Math.min(2,window.devicePixelRatio||1);
   W=window.innerWidth; H=window.innerHeight;
-  var cv=el('scene'); cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR);
+  cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR);
   ctx.setTransform(DPR,0,0,DPR,0,0);
   layoutJoy();
 }
-var cv=el('scene'), ctx=cv.getContext('2d');
-
 function newBfly(){
   return {x:rn(60,W-60),y:rn(H*0.2,H*0.7),c:pick(['#ffd5b5','#c9efe3','#ffe08a','#cfe5d2']),t:rn(0,6)};
 }
 function initWorld(){
   var id=S.cheetah.stage, i;
   WD={cub:{x:W*0.5,y:H*0.5,dir:1,moving:false,t:0},
-      mum:{x:rn(60,W-60),y:rn(H*0.2,H*0.6),calling:false,alpha:0.35,found:0},
-      sniffs:0,pounces:0,freezes:0,sprigs:[],bflies:[],sibs:[],shadow:null,shadowT:14,
-      tufts:[],warned:false};
+      mum:{x:rn(60,W-60),y:rn(H*0.2,H*0.6),calling:false,alpha:0.35},
+      sprigs:[],bflies:[],sibs:[],shadow:null,shadowT:14,
+      patch:{x:rn(W*0.2,W*0.8),y:rn(H*0.4,H-200),r:110},
+      tufts:[],still:0,nibbleT:0,listening:false,listenT:0,listenFlash:0,moveAcc:0,pulse:0};
+  WD.stars=[]; for(i=0;i<36;i++)WD.stars.push({x:Math.random(),y:Math.random()*0.6,r:0.8+Math.random()*1.6});
+  WD.clouds=[]; for(i=0;i<3;i++)WD.clouds.push({x:rn(0,W),y:rn(H*0.08,H*0.3),s:0.8+Math.random()*0.7});
   for(i=0;i<70;i++)WD.tufts.push({x:Math.random()*W,y:Math.random()*H,s:0.6+Math.random()*0.8});
   if(id===1){for(i=0;i<3;i++)WD.sprigs.push({x:rn(60,W-60),y:rn(H*0.35,H-160),done:false});}
   if(id===2){
@@ -251,7 +319,7 @@ function layoutJoy(){
 var activePtr=null, joyPtr=null;
 document.addEventListener('pointerdown',function(e){
   wake();
-  if(e.target.closest('button,input,select,textarea,label,.card,.drawer,.gear,.chirp'))return;
+  if(e.target.closest('button,input,select,textarea,label,.drawer,.gear,.chirp,.nextBtn'))return;
   if(S.settings.controls==='joy'){
     if(e.target.closest('#joy')){joyPtr=e.pointerId; setJoy(e);}
     return;
@@ -276,10 +344,14 @@ function chirp(){
   if(!WD)return;
   if(S.cheetah.stage===1){
     WD.mum.calling=true;
-    say('Chirp! Mum is coming to you.');
+    WD.listening=true; WD.listenT=2.5; WD.pulse=1;
+    say('Chirp! Stop and listen for Mum.');
   }else if(S.cheetah.stage===2){
+    WD.pulse=1;
+    var near=WD.sibs.some(function(s){return Math.hypot(s.x-WD.cub.x,s.y-WD.cub.y)<160;});
     WD.sibs.forEach(function(s){s.tx=WD.cub.x+rn(-90,90);s.ty=WD.cub.y+rn(-60,60);s.t=2.5;});
-    say('Chirp! Your brothers and sisters come to play.');
+    if(near)addSkill('play');
+    else say('Chirp! Your brothers and sisters come to play.');
   }
 }
 
@@ -288,24 +360,55 @@ function update(dt){
   var c=WD.cub, v=inputVec(), speed=170;
   c.moving=Math.hypot(v.x,v.y)>0.1;
   if(Math.abs(v.x)>0.1)c.dir=v.x>0?1:-1;
+  var ox=c.x, oy=c.y;
   c.x=clamp(c.x+v.x*speed*dt,40,W-40);
   c.y=clamp(c.y+v.y*speed*dt,H*0.25,H-140);
   c.t+=dt;
+  WD.pulse=Math.max(0,WD.pulse-dt*1.5);
+  WD.clouds.forEach(function(k){k.x+=12*dt; if(k.x>W+140)k.x=-140;});
+
+  // Move: every 250 steps counts toward the skill
+  var step=Math.hypot(c.x-ox,c.y-oy);
+  if(step>0&&S.cheetah.stage===1){
+    WD.moveAcc+=step;
+    if(WD.moveAcc>=250){WD.moveAcc-=250; addSkill('move');}
+  }
 
   if(S.cheetah.stage===1){
+    // Stay hidden: still inside the tall grass patch for 4 seconds
+    var p=WD.patch, inside=Math.hypot(c.x-p.x,c.y-p.y)<p.r;
+    if(inside&&!c.moving){WD.still+=dt; if(WD.still>=4){WD.still=0; addSkill('hide');}}
+    else WD.still=0;
+
+    // Listen for Mum: after a chirp, stay still for 2.5 seconds
+    if(WD.listening){
+      if(c.moving){WD.listening=false; say('Stop moving to hear her answer.');}
+      else{
+        WD.listenT-=dt;
+        if(WD.listenT<=0){WD.listening=false; WD.listenFlash=1; addSkill('listen'); say('Mum answers: chirp, chirp!');}
+      }
+    }
+    WD.listenFlash=Math.max(0,WD.listenFlash-dt);
+
+    // Nibble grass: stop by a shoot for one second
+    var near=null;
+    WD.sprigs.forEach(function(s){if(!s.done&&Math.hypot(c.x-s.x,c.y-s.y)<45)near=s;});
+    if(near&&!c.moving){
+      WD.nibbleT+=dt;
+      if(WD.nibbleT>=1){near.done=true; WD.nibbleT=0; addSkill('nibble');}
+    }else WD.nibbleT=0;
+
+    // Mum comes to a called cub
     var m=WD.mum;
     m.alpha+=((m.calling?1:0.35)-m.alpha)*Math.min(1,dt*4);
     if(m.calling){
       var dx=c.x-m.x, dy=c.y-m.y, d=Math.hypot(dx,dy);
       if(d<90){
-        m.calling=false; m.found++; WD.mumFound=m.found;
-        say('Found Mum! She licks your ear. She will hide again — call her!');
+        m.calling=false; addSkill('follow');
+        say('Found Mum! She licks your ear. She will hide again.');
         m.x=rn(60,W-60); m.y=rn(H*0.2,H*0.6);
       }else{m.x+=dx/d*70*dt; m.y+=dy/d*70*dt;}
     }
-    WD.sprigs.forEach(function(s){
-      if(!s.done&&Math.hypot(c.x-s.x,c.y-s.y)<50){s.done=true;WD.sniffs++;say('Tastes of grass! Yum.');}
-    });
   }
 
   if(S.cheetah.stage===2){
@@ -313,8 +416,8 @@ function update(dt){
       b.t+=dt; b.x+=Math.cos(b.t*0.8)*25*dt; b.y+=Math.sin(b.t*0.6)*18*dt;
       b.x=clamp(b.x,40,W-40); b.y=clamp(b.y,H*0.2,H*0.75);
       if(c.moving&&Math.hypot(c.x-b.x,c.y-b.y)<46){
-        WD.pounces++; b.x=rn(60,W-60); b.y=rn(H*0.2,H*0.7);
-        say('Pounce! Butterfly caught.');
+        b.x=rn(60,W-60); b.y=rn(H*0.2,H*0.7);
+        addSkill('pounce');
       }
     });
     WD.sibs.forEach(function(s){
@@ -327,7 +430,7 @@ function update(dt){
       var sh=WD.shadow; sh.x+=sh.speed*dt;
       var under=Math.abs(c.x-sh.x)<70;
       if(under&&c.moving&&!sh.warned){sh.warned=true; say('Shadow! Stop and stay low.');}
-      if(under&&!c.moving&&!sh.hit){sh.hit=true; WD.freezes++; say('Good freeze! The shadow passed you by.');}
+      if(under&&!c.moving&&!sh.hit){sh.hit=true; addSkill('freeze'); say('Good freeze! The shadow passed you by.');}
       if(sh.x>W+200)WD.shadow=null;
     }else{
       WD.shadowT-=dt;
@@ -337,20 +440,71 @@ function update(dt){
 }
 
 /* ---------- drawing ---------- */
+var SKY=[
+  {t:0.00,top:[255,183,160],bot:[255,226,190]},  // dawn
+  {t:0.14,top:[201,239,227],bot:[207,229,210]},  // morning
+  {t:0.36,top:[201,239,227],bot:[230,239,196]},  // afternoon
+  {t:0.48,top:[255,155,138],bot:[255,213,181]},  // sunset
+  {t:0.58,top:[70,66,104],bot:[47,45,61]},       // dusk
+  {t:0.92,top:[30,30,58],bot:[58,56,88]},        // night
+  {t:1.00,top:[255,183,160],bot:[255,226,190]}   // dawn again
+];
+function mixC(a,b,k){return [0,1,2].map(function(i){return Math.round(a[i]+(b[i]-a[i])*k);});}
+function skyAt(c){
+  for(var i=0;i<SKY.length-1;i++){
+    var a=SKY[i],b=SKY[i+1];
+    if(c>=a.t&&c<=b.t){var k=(c-a.t)/(b.t-a.t); return {top:mixC(a.top,b.top,k),bot:mixC(a.bot,b.bot,k)};}
+  }
+  return {top:SKY[0].top,bot:SKY[0].bot};
+}
+// time shown as the sky: three "days" per stage, plus a short run into the next stage
+function skyCycle(){
+  var st=stageState(S.cheetah.stage), p=st.played/(targetMin()*60);
+  var c=(p*3)%1;
+  if(skyBoostT>0)c=(c+skyBoostT*4)%1;
+  return c;
+}
+function isNight(c){return c>0.58&&c<0.92;}
 function drawBg(){
+  var c=skyCycle(), sky=skyAt(c);
   var g=ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,'#c9efe3'); g.addColorStop(0.6,'#cfe5d2'); g.addColorStop(1,'#e6efc4');
+  g.addColorStop(0,'rgb('+sky.top.join(',')+')'); g.addColorStop(1,'rgb('+sky.bot.join(',')+')');
   ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  var night=isNight(c);
+  if(night||c>0.5){
+    ctx.fillStyle='rgba(255,255,255,'+(night?0.85:0.35)+')';
+    WD.stars.forEach(function(s){ctx.beginPath();ctx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);ctx.fill();});
+  }
+  // sun by day, moon by night
+  var u,bodyColor;
+  if(c<0.52){u=c/0.52; bodyColor='#ffe08a';}
+  else if(c>=0.56&&c<=0.96){u=(c-0.56)/0.4; bodyColor='#fff6e0';}
+  if(u!==undefined){
+    var bx=W*(0.08+0.84*u), by=H*(0.16+0.14*Math.pow(Math.abs(2*u-1),2));
+    ctx.fillStyle=bodyColor; ctx.beginPath(); ctx.arc(bx,by,Math.max(22,Math.min(W,H)*0.045),0,Math.PI*2); ctx.fill();
+  }
+  // drifting clouds (the world keeps moving)
+  WD.clouds.forEach(function(k){
+    ctx.fillStyle='rgba(255,253,247,'+(night?0.25:0.7)+')';
+    ctx.beginPath(); ctx.ellipse(k.x,k.y,k.s*60,k.s*22,0,0,Math.PI*2); ctx.ellipse(k.x+k.s*40,k.y+4,k.s*44,k.s*18,0,0,Math.PI*2); ctx.fill();
+  });
   ctx.fillStyle='rgba(47,45,61,0.06)';
   for(var x=30;x<W;x+=60)for(var y=30;y<H;y+=60){ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);ctx.fill();}
+  // tall grass patch (stay hidden here)
+  if(S.cheetah.stage===1){
+    var p=WD.patch;
+    ctx.fillStyle='rgba(95,158,110,0.22)';
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+  }
   WD.tufts.forEach(function(t){
-    ctx.strokeStyle='rgba(90,140,90,0.55)'; ctx.lineWidth=3; ctx.lineCap='round';
-    ctx.beginPath(); ctx.moveTo(t.x,t.y); ctx.lineTo(t.x-6*t.s,t.y-14*t.s);
-    ctx.moveTo(t.x,t.y); ctx.lineTo(t.x+2*t.s,t.y-18*t.s); ctx.moveTo(t.x,t.y); ctx.lineTo(t.x+8*t.s,t.y-12*t.s); ctx.stroke();
+    var sway=Math.sin(WD.cub.t*1.3+t.x*0.02)*3*t.s;
+    ctx.strokeStyle=night?'rgba(120,170,130,0.35)':'rgba(90,140,90,0.55)'; ctx.lineWidth=3; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(t.x,t.y); ctx.lineTo(t.x-6*t.s+sway,t.y-14*t.s);
+    ctx.moveTo(t.x,t.y); ctx.lineTo(t.x+2*t.s+sway,t.y-18*t.s); ctx.moveTo(t.x,t.y); ctx.lineTo(t.x+8*t.s+sway,t.y-12*t.s); ctx.stroke();
   });
 }
 function drawSprig(s){
-  ctx.save(); ctx.translate(s.x,s.y); ctx.globalAlpha=s.done?0.35:1;
+  ctx.save(); ctx.translate(s.x,s.y); ctx.globalAlpha=s.done?0.25:1;
   ctx.strokeStyle='#5f9e6e'; ctx.lineWidth=4; ctx.lineCap='round';
   ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-10,-30); ctx.moveTo(0,0); ctx.lineTo(4,-36); ctx.moveTo(0,0); ctx.lineTo(14,-26); ctx.stroke();
   ctx.restore();
@@ -372,24 +526,20 @@ function drawCat(x,y,s,dir,t,moving,o){
   var hr=(o.big?19:16)*s;
   ctx.save(); ctx.translate(x,y+bob); ctx.scale(dir,1);
   ctx.lineCap='round';
-  // legs
   ctx.strokeStyle=body; ctx.lineWidth=5*s;
   [[-22,1],[-13,-1],[15,-1],[24,1]].forEach(function(p){
     var sw=swing*p[1]*10*s;
     ctx.beginPath(); ctx.moveTo(p[0]*s,12*s); ctx.lineTo(p[0]*s+sw,34*s); ctx.stroke();
   });
-  // tail
   ctx.lineWidth=7*s;
   ctx.beginPath(); ctx.moveTo(-34*s,-4*s);
   ctx.quadraticCurveTo(-60*s,-10*s+Math.sin(t*5)*8*s,-58*s,10*s+Math.sin(t*5)*6*s); ctx.stroke();
-  // body
   ctx.fillStyle=body; ctx.beginPath(); ctx.ellipse(0,0,36*s,18*s,0,0,Math.PI*2); ctx.fill();
   ctx.fillStyle='#fff3dc'; ctx.beginPath(); ctx.ellipse(0,8*s,24*s,7*s,0,0,Math.PI*2); ctx.fill();
   ctx.fillStyle=spot;
   [[-18,-6,3.2],[-4,-9,2.8],[10,-7,3],[20,-1,2.4],[-10,4,2.4]].forEach(function(p){
     ctx.beginPath(); ctx.arc(p[0]*s,p[1]*s,p[2]*s,0,Math.PI*2); ctx.fill();
   });
-  // head, ears, face
   ctx.fillStyle=body;
   ctx.beginPath(); ctx.arc(34*s,-14*s,hr,0,Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc(28*s,-14*s-hr*0.9,hr*0.35,0,Math.PI*2); ctx.arc(40*s,-14*s-hr*0.9,hr*0.35,0,Math.PI*2); ctx.fill();
@@ -400,6 +550,10 @@ function drawCat(x,y,s,dir,t,moving,o){
   ctx.beginPath(); ctx.arc(48*s,-10*s,1.8*s,0,Math.PI*2); ctx.fill();
   if(o.chirp){ctx.fillStyle='#ff9b8a'; ctx.beginPath(); ctx.arc(48*s,-5*s,2.8*s,0,Math.PI*2); ctx.fill();}
   ctx.restore();
+}
+function ring(x,y,r,alpha){
+  ctx.save(); ctx.strokeStyle='rgba(255,155,138,'+alpha+')'; ctx.lineWidth=4;
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.stroke(); ctx.restore();
 }
 function draw(){
   drawBg();
@@ -414,10 +568,13 @@ function draw(){
   }
   if(S.cheetah.stage===1){
     ctx.globalAlpha=WD.mum.alpha;
-    drawCat(WD.mum.x,WD.mum.y,1.9,WD.mum.calling||true?(WD.cub.x>WD.mum.x?1:-1):1,WD.cub.t,WD.mum.calling,{body:'#e9a46c',big:false});
+    drawCat(WD.mum.x,WD.mum.y,1.9,WD.cub.x>WD.mum.x?1:-1,WD.cub.t,WD.mum.calling,{body:'#e9a46c'});
     ctx.globalAlpha=1;
+    if(WD.listenFlash>0)ring(WD.cub.x,WD.cub.y,60+(1-WD.listenFlash)*60,WD.listenFlash);
   }
-  drawCat(WD.cub.x,WD.cub.y,1,WD.cub.dir,WD.cub.t,WD.cub.moving,{big:true,body:S.settings.look==='cute'?'#ffc7a0':'#f2b98a',chirp:false});
+  if(WD.pulse>0)ring(WD.cub.x,WD.cub.y,30+(1-WD.pulse)*50,WD.pulse*0.6);
+  drawCat(WD.cub.x,WD.cub.y,1,WD.cub.dir,WD.cub.t,WD.cub.moving,{big:true,body:S.settings.look==='cute'?'#ffc7a0':'#f2b98a'});
+  if(isNight(skyCycle())){ctx.save(); ctx.fillStyle='rgba(255,246,224,0.9)'; ctx.font='700 22px system-ui,sans-serif'; ctx.fillText('z',WD.cub.x+46,WD.cub.y-44+Math.sin(WD.cub.t*2)*3); ctx.fillText('z',WD.cub.x+60,WD.cub.y-62+Math.sin(WD.cub.t*2+1)*3); ctx.restore();}
 }
 
 /* ---------- frame loop ---------- */
@@ -425,54 +582,62 @@ function frame(now){
   var dt=Math.min(0.05,(now-last)/1000); last=now;
   if(!document.hidden&&!drawerOpen&&WD){
     var st=stageState(S.cheetah.stage);
-    if(!st.done){st.played+=dt;}
+    if(!st.done){st.played+=dt*(S.settings.fast?4:1);}
     saveAcc+=dt; if(saveAcc>=3){saveAcc=0;save();}
   }
+  skyBoostT=Math.max(0,skyBoostT-dt);
   if(WD){update(dt);draw();}
   requestAnimationFrame(frame);
 }
 
-/* ---------- HUD ---------- */
+/* ---------- HUD (pill, Next, drawer) ---------- */
 function mmss(sec){sec=Math.floor(sec);return Math.floor(sec/60)+':'+('0'+(sec%60)).slice(-2);}
 function refresh(){
   var n=S.cheetah.stage, st=stageState(n), target=targetMin()*60;
+  var pct=Math.min(100,st.played/target*100)+'%';
+  el('pillNum').textContent=n;
+  el('barFill2').style.width=pct;
   el('sex').textContent=S.cheetah.sex==='f'?'♀ Female':'♂ Male';
-  el('name').value=S.cheetah.name||'';
+  if(document.activeElement!==el('name'))el('name').value=S.cheetah.name||'';
   el('stageName').textContent=n+'. '+STAGES[n].name+' ('+STAGES[n].age+')';
   el('clock').textContent=mmss(st.played)+' of '+mmss(target)+(st.restarts?' · restart '+st.restarts:'');
-  el('barFill').style.width=Math.min(100,st.played/target*100)+'%';
   var next=el('next');
   if(st.done){
-    next.hidden=false; next.disabled=true;
-    next.textContent=STAGES[n+1]?'Done. Pick a stage above.':'Stage 3 comes in a later build';
+    next.hidden=true;
   }else{
-    next.disabled=false;
     next.hidden=st.played<target;
+    next.disabled=false;
     next.textContent=STAGES[n+1]?'Next stage →':'Stage 3 comes in a later build';
   }
-  var g=el('goals'); g.innerHTML='';
-  var items=[];
-  if(n===1&&WD){
-    items.push(['Taste 3 bits of grass: '+WD.sniffs+'/3',WD.sniffs>=3]);
-    items.push(['Find Mum 2 times: '+(WD.mumFound||0)+'/2',(WD.mumFound||0)>=2]);
-  }else if(n===2&&WD){
-    items.push(['Pounce on 5 butterflies: '+WD.pounces+'/5',WD.pounces>=5]);
-    items.push(['Freeze under a shadow: '+WD.freezes+'/1',WD.freezes>=1]);
-  }
-  items.forEach(function(it){
-    var li=document.createElement('li'); li.textContent=it[0]; if(it[1])li.className='ok'; g.appendChild(li);
-  });
   var lessonEl=el('lesson'); lessonEl.textContent=STAGES[n].lesson;
   var f=el('facts'); f.innerHTML='';
   STAGES[n][S.settings.gentle?'gentle':'full'].forEach(function(t){var li=document.createElement('li');li.textContent=t;f.appendChild(li);});
   var chips=el('stages'); chips.innerHTML='';
   [1,2,3,4].forEach(function(k){
     var b=document.createElement('button'); b.type='button'; b.className='chip'; b.textContent=k;
-    var unlocked=k<=n||(stageState(k).done);
-    if(!STAGES[k]||!unlocked){b.disabled=true;b.title=(LATER[k]||'Locked');}
+    var unlocked=k<=n||stageState(k).done;
+    if(!STAGES[k]||!unlocked){b.disabled=true;b.title=LATER[k]||'Locked';}
     b.setAttribute('aria-pressed',String(k===n));
-    b.addEventListener('click',function(){ if(!b.disabled)chooseStage(k); });
+    b.addEventListener('click',function(){if(!b.disabled)chooseStage(k);});
     chips.appendChild(b);
+  });
+  refreshSkills();
+}
+function refreshSkills(){
+  var box=el('skills'); box.innerHTML='';
+  var list=SKILLS[S.cheetah.stage]||[];
+  list.forEach(function(def){
+    var have=skillCount(def.id);
+    var row=document.createElement('div'); row.className='skill';
+    var ic=document.createElement('span'); ic.className='ic'; ic.textContent=def.icon;
+    var nm=document.createElement('div'); nm.className='nm';
+    var t=document.createElement('div'); t.textContent=def.name+(have>=def.need?' ✓':'');
+    var h=document.createElement('div'); h.className='dim'; h.textContent=def.hint;
+    nm.appendChild(t); nm.appendChild(h);
+    var tok=document.createElement('div'); tok.className='tokens'; tok.setAttribute('aria-label',have+' of '+def.need);
+    for(var i=0;i<def.need;i++){var d=document.createElement('span'); d.className='tok'+(i<have?' on':''); tok.appendChild(d);}
+    row.appendChild(ic); row.appendChild(nm); row.appendChild(tok);
+    box.appendChild(row);
   });
 }
 function chooseStage(k){
@@ -484,7 +649,7 @@ function chooseStage(k){
 function setupPanels(){
   document.querySelectorAll('[data-panel]').forEach(function(sec){
     var key=sec.getAttribute('data-panel'); var head=sec.querySelector('.panelHead'); if(!head)return;
-    var open=(key in S.panels)?!!S.panels[key]:window.innerWidth>=700;
+    var open=(key in S.panels)?!!S.panels[key]:(key==='skills'||key==='learn');
     sec.setAttribute('data-collapsed',String(!open)); head.setAttribute('aria-expanded',String(open));
     head.addEventListener('click',function(){
       var nowOpen=sec.getAttribute('data-collapsed')==='true';
@@ -511,6 +676,7 @@ function syncSettings(){
   el('look').value=S.settings.look;
   el('controls').value=S.settings.controls;
   el('ai').checked=!!S.settings.ai;
+  el('fast').checked=!!S.settings.fast;
   el('showErrors').checked=!!S.settings.showErrors;
   el('joy').hidden=S.settings.controls!=='joy';
   renderNotes();
@@ -535,6 +701,7 @@ function wire(){
     st.done=true;
     if(STAGES[n+1]){
       say('Stage '+n+' is done. On to '+STAGES[n+1].name+'!');
+      skyBoostT=2.5;
       chooseStage(n+1);
     }else{
       say('Stage 3, '+LATER[3]+', comes in a later build. Your cheetah is safe.');
@@ -556,7 +723,8 @@ function wire(){
     fx=0;fy=0;jx=0;jy=0;
   });
   el('showErrors').addEventListener('change',function(){S.settings.showErrors=el('showErrors').checked;save();renderErrors();});
-  el('ai').addEventListener('change',function(){}); // disabled until built
+  el('fast').addEventListener('change',function(){S.settings.fast=el('fast').checked;save();});
+  el('games').addEventListener('change',function(){var v=el('games').value; if(v){window.location.href=v;}});
   el('saveNote').addEventListener('click',function(){
     var t=el('noteText').value.trim();
     if(!t){say('Write a note first.');return;}
@@ -578,7 +746,6 @@ function wire(){
     if(!confirm('Start a new cheetah? This clears this one on this device.'))return;
     S.cheetah=newCheetah(); save(); initWorld(); refresh(); setDrawer(false); say('A new cheetah is born.');
   });
-  el('sex').addEventListener('pointerdown',wake);
   el('ver').textContent=VERSION;
 }
 

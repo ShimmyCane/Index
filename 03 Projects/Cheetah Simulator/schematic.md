@@ -2,7 +2,19 @@
 
 **Track: A. Family play** (one player at a time; a family database for who is playing). Studio-level facts live in collapsed panels ("How it really is").
 
-Status (2026-11-25): **0.1 built as a first increment** (cub stages 1 and 2, cumulative clock, ⚙️ with gentle mode, notes, AI toggle, Felix and joystick controls). Decisions below come from `convo/convo v0.1.md`. Jimmy asked for the whole thing to be built incrementally, merged step by step.
+Status (2026-11-25): **0.2.0 built** (skills, canvas first; 0.1 was the first increment) (cub stages 1 and 2, cumulative clock, ⚙️ with gentle mode, notes, AI toggle, Felix and joystick controls). Decisions below come from `convo/convo v0.1.md`. Jimmy asked for the whole thing to be built incrementally, merged step by step.
+
+## Decisions (convo v0.2 round 5, 2026-11-25)
+
+- Time is shown by the sky, not a clock: three sky cycles (sunrise, day, sunset, night) per stage. The clock stays in ⚙️. Night shows the moon, stars and a sleeping cub (zz).
+- Clouds drift and grass sways all the time.
+- Fast-forward (×4) in ⚙️ speeds the stage clock and the sky. Next stage runs the sky through a short fast cycle.
+- Later: a stage can show the time remaining (for example pregnant mother to birth) across many sun cycles.
+
+## Decisions (convo v0.2 round 4, 2026-11-25)
+
+- The canvas is kept as open as possible. Only the stage pill, Next (when ready), ⚙️, Chirp, the joystick and short toasts are on screen. All panels are inside ⚙️.
+- Stages are skills learned from the animals, by doing (skill tokens in ⚙️). Cubs nibble grass (⚑ to check). Stage 1 skills: Move, Stay hidden, Listen for Mum, Follow Mum, Nibble grass. Stage 2: Pounce, Freeze, Play together. "Bees" is open (convo v0.2 R4-1).
 
 ## Decisions (convo v0.1, 2026-11-25)
 
