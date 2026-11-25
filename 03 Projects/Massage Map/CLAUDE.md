@@ -10,5 +10,5 @@ Purpose: a picture-first guide to massage. Tap a body part (foot first), zoom in
 Project rules:
 - Public repo. Use drawn figures only; no photos of real people.
 - No copyrighted video is copied or embedded. Link to it only.
-- Every page keeps the "not medical advice" line.
+- One "This is massage, not medicine" line on the front page.
 - Family data only in the family database with the publishable key. Never put an email or password in the repo.

@@ -75,6 +75,18 @@ Built with the first build (`02 Refs/Skills/feedback_notes.md`). A notes box in 
 3. **Increment 3:** family sign-in and the `mm_thumbs` table, with the rolled-back test.
 4. **Increment 4:** more body areas (hand, back, legs), a summary table of thumbs.
 
+## Revisions from convo v0.1 (2026-11-25)
+
+- **Figure:** realistic, physical look (not cartoon). Separate male and female bodies. Asian body proportions as the reference. Drawing studies come first, to show Jimmy the target look before building (`jimmy_preferences.md` §6). Front, top and sole, side, and other views as needed.
+- **Film:** 20 seconds per loop. A side-by-side view of two techniques or two hands is part of the screen.
+- **Colour:** the body map is colour-coded by technique. A separate Techniques page teaches each technique, with links and videos (well-known sources only).
+- **Rating:** 1 to 5 stars per person per technique and area. Changing the rating is allowed. Stars show a progression.
+- **Kids:** the children's figures are hidden by a settings toggle (off by default). Not part of the first build's adult view.
+- **Language:** a toggle for English and 中文. Order not decided.
+- **Safety:** one line on the front page only: "This is massage, not medicine." No per-page disclaimer.
+- **Name:** "Massage Map" for the home tile.
+- **Existing apps** (for reference, `convo/convo v0.1.md`): Sole Massage Guide, Massage Maps • Reflexology, Pressure Points Guide, Massage Techniques (Real Bodywork), Massage: Lessons & Techniques. None has animated press-direction film with pressure heat plus family ratings. Gap confirmed.
+
 ## Open questions
 
 See `convo/convo v0.1.md`.

@@ -28,4 +28,27 @@ Date: 2026-11-25. Jimmy answers inline under each question.
 
 ## Answers
 
-(Jimmy writes here.)
+1. **Figure:** create as many drawings as needed (front, top and sole, side, and the other views). Jimmy's pick of the starting view comes after the first drawing study.
+2. **Techniques:** yes to the idea of different techniques. The map is colour-coded by technique, and a separate Techniques page teaches each one, with links and videos. (The starter list is kept until Jimmy says otherwise.)
+3. **Film length:** 20 seconds per loop. Long enough to set up a side-by-side view of two techniques or two hands.
+4. **Heat:** pale to deep red is the base. Numbers (1 to 5) are wanted too. Jimmy asked whether another app already does this. See the findings below.
+5. **Rating:** a simple star rating from 1 to 5 stars. Jimmy also wants a visible progression ("one star, two stars") as more people or more sessions like it. Changing the mind is allowed.
+6. **Who signs in:** Ying and Jimmy only for now. The children are too young for massage, so their figures are hidden by a settings toggle (off by default). Thumbs on the device until sign-in is set up: fine for the first build.
+7. **Database prefix:** `mm_` is fine, as long as no other project uses it (checked before the first table is made).
+8. **Sources:** well-known sites only (university, hospital, and large massage or reflexology schools). No obscure corners.
+9. **Language:** a toggle for English and Chinese (中文). Order not decided; Jimmy is open.
+10. **Look:** more realistic (physical), not cartoon. Separate male and female bodies, because anatomy differs. Asian body proportions as the reference. Jimmy wants to see the target look before building (drawing studies first).
+11. **Safety line:** no disclaimer on every page. One line on the front page only: "This is massage, not medicine."
+12. **Home tile:** name stays "Massage Map".
+
+### Findings for question 4 (other apps)
+
+Existing apps cover parts of this, but none has the full set (map, animated press direction with pressure heat, family thumbs):
+
+- Sole Massage Guide (iOS): interactive sole maps, zones animated by condition, $1.99 at the listing. https://apps.apple.com/us/app/id316366428
+- Massage Maps • Reflexology (iOS): body-part charts with zoom; foot and head charts are paid. https://apps.apple.com/us/app/massage-maps-reflexology/id937929055
+- Pressure Points Guide (iOS): 70+ protocols with audio and visual steps; free with in-app purchases. https://apps.apple.com/us/app/pressure-points-guide/id6742253066
+- Massage Techniques (Real Bodywork, iOS): 130 techniques, each with a video demo, and a 3-D anatomy section. Some reviews report video freezing on older iOS. https://apps.apple.com/us/app/-/id589698282
+- Massage: Lessons & Techniques (iOS): video classes by skill level. https://apps.apple.com/us/app/massage-course-professional/id1619612973
+
+Gap: none of these shows an animated press-direction film with pressure heat, or family thumbs. The app listings are developer claims; health benefits are unverified.
