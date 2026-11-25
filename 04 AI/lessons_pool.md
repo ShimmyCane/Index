@@ -355,3 +355,15 @@ Full notes: `04 AI/Make-3D x Construct/model_iteration_lessons.md`.
 - A project can be copied out and linked from the home page by hand while its nursery folder stays behind. Nine did. Before removing, trust the home page: a project whose tile is an external `shimmycane.github.io` link and has no `03%20Projects/` link is out. Confirm each site returns 200, then `git rm`.
 - Check the home page against `03 Projects/` after each graduation, not only when starting a new one.
 - Before a hard reset to origin, check that nothing is ahead of it (`git rev-list --left-right --count main...origin/main`); the only things lost are uncommitted changes.
+
+## 11. Rendering and games (from Paper Airplanes x A-10 Warthog, 2026-11-25)
+
+1. **Set the drawing transform inside each overlay.** A full-screen veil drawn after a step that left the transform at 1× covered only a quarter of the picture, and the seam showed at the centre. Each overlay sets its own transform. _(Paper Airplanes x A-10 Warthog)_
+2. **Find a visual bug by removing one thing at a time.** Three one-shot renders (clear weather, shadow off, overlay off) located a seam in minutes. Keep the test shot small and repeatable. _(Paper Airplanes x A-10 Warthog)_
+3. **A coarse grid of a field shows its cell and window edges.** Fade the field to nothing over its last few hundred metres, so the edge never shows as a line. _(Paper Airplanes x A-10 Warthog)_
+4. **Tint by caching a copy, not by painting over the picture.** Multiply each sprite's layers by the light and keep one copy per light level (quantised, a small cache). Keep the sprite's own outline with a `destination-in` pass. _(Paper Airplanes x A-10 Warthog)_
+5. **Let the game clock be the real clock.** Each mission starts at its own time of day and runs in real time; no speed setting is needed. A setting for "still or fast" was removed after the user said nothing should be static. _(Paper Airplanes x A-10 Warthog)_
+6. **Check astronomy against known values before trusting it.** Solar noon, sunset and the bearing at a known place and day show a sign or time error at once. _(Paper Airplanes x A-10 Warthog)_
+7. **Put open questions next to the feedback box.** A short "Questions" group in the settings panel ties each answer to the screen it is about. _(Paper Airplanes x A-10 Warthog)_
+
+- (2026-11-25, Cheetah Simulator) A soft setting (Gentle mode) changes how a true thing is told, never the true thing itself. Keep a panel that always shows the real facts.

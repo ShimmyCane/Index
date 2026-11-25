@@ -3,7 +3,10 @@
    document.write runs only while the page is loading, before js/app.js, so the sheet is ready in time. */
 (function () {
   'use strict';
-  var TEST_SHEETS = { thanksgiving: 'private/thanksgiving/sheet.js' };
+  var TEST_SHEETS = {
+    thanksgiving: 'private/thanksgiving/sheet.js',
+    'motor-home': 'private/motor-home-decoration/sheet.js'
+  };
   var name = '';
   try { name = (new URLSearchParams(window.location.search).get('sheet') || '').toLowerCase(); } catch (e) { name = ''; }
   if (Object.prototype.hasOwnProperty.call(TEST_SHEETS, name)) {

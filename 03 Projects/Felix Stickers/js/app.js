@@ -461,8 +461,9 @@
     if (L.canvas) { L.canvas.remove(); }
   }
   function liftClear() {
-    if (lift) liftHide(lift);
+    if (lift) { clearTimeout(lift.clickTimer); liftHide(lift); }
     lift = null;
+    setDial(false);
   }
   function liftLen(L) {
     // how far the picture reaches along the drag from the pivot
@@ -514,24 +515,82 @@
     liftDraw(L);
   }
 
-  var FREE_MOVE_MS = 1000;   // after it is let go, the curl can be slid about for this long
+  var CLICK_MS = 500;   // after the circle is let go, the sticker clicks into place this long later
+
+  // The circle in the middle of the play area: the sticker turns as a finger goes round it.
+  function dialCentre() {
+    var r = $('#stage').getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  }
+  function setDial(show, rot) {
+    var d = $('#dial');
+    if (!d) return;
+    d.hidden = !show;
+    if (show) $('#dialHand').style.transform = 'rotate(' + (rot * 180 / Math.PI) + 'deg)';
+  }
+  function wrapAngle(a) {
+    while (a > Math.PI) a -= 2 * Math.PI;
+    while (a <= -Math.PI) a += 2 * Math.PI;
+    return a;
+  }
 
   function liftPress(e) {
     var pt = { x: e.clientX, y: e.clientY };
     var f = pageOf(pt);
-    if (lift.phase === 'held' && Date.now() - (lift.heldAt || 0) < FREE_MOVE_MS) {
-      // free move: the curl comes along with the finger, keeping its roll
-      var tipC = { x: lift.Pv.x + lift.S * lift.u.x, y: lift.Pv.y + lift.S * lift.u.y };
-      gesture = { kind: 'carry', pid: e.pointerId, o: { x: f.x - tipC.x, y: f.y - tipC.y } };
-      lift.phase = 'carry';
-      lift.ghost = true;
-      liftDraw(lift);
-      pointers.set(e.pointerId, pt);
-      return;
-    }
-    // after the free move: it is put down from its pivot, at the roll
+    if (!lift.moved) return startCarry(e, f, pt);     // it must be moved before anything else
+    if (!lift.locked) return startDial(e, pt);        // the circle turns it
+    return startApply(e, f, pt);                      // clicked: put it down, rolling it on
+  }
+
+  function startCarry(e, f, pt) {
+    var tipC = { x: lift.Pv.x + lift.S * lift.u.x, y: lift.Pv.y + lift.S * lift.u.y };
+    gesture = { kind: 'carry', pid: e.pointerId, o: { x: f.x - tipC.x, y: f.y - tipC.y }, start: f };
+    lift.phase = 'carry';
+    lift.ghost = true;
+    liftDraw(lift);
+    pointers.set(e.pointerId, pt);
+  }
+
+  function moveCarry(f) {
+    var tip = { x: f.x - gesture.o.x, y: f.y - gesture.o.y };
+    lift.Pv = { x: tip.x - lift.S * lift.u.x, y: tip.y - lift.S * lift.u.y };
+    lift.Pm = { x: lift.Pv.x, y: lift.Pv.y };
+    if (!lift.moved && dist(gesture.start, f) > TAP_SLOP) lift.moved = true;
+    liftDraw(lift);
+  }
+
+  function startDial(e, pt) {
+    clearTimeout(lift.clickTimer);
+    var c = dialCentre();
+    gesture = { kind: 'dial', pid: e.pointerId, c: c, a0: Math.atan2(pt.y - c.y, pt.x - c.x), base: lift.dialRot || 0 };
+    lift.phase = 'dial';
+    lift.ghost = true;
+    setDial(true, lift.dialRot || 0);
+    pointers.set(e.pointerId, pt);
+  }
+
+  function moveDial(pt) {
+    var c = gesture.c;
+    var turn = wrapAngle(Math.atan2(pt.y - c.y, pt.x - c.x) - gesture.a0) * 180 / Math.PI;
+    lift.dialRot = gesture.base + fuzzTurn(turn) * Math.PI / 180;
+    lift.phi = lift.dialRot;
+    liftDraw(lift);
+    setDial(true, lift.dialRot);
+  }
+
+  function endDial() {
+    lift.phase = 'held';
+    lift.ghost = true;
+    liftDraw(lift);
+    lift.clickTimer = setTimeout(function () {
+      if (!lift || lift.phase !== 'held') return;
+      lift.locked = true;     // click: the angle is set and the circle goes
+      setDial(false);
+    }, CLICK_MS);
+  }
+
+  function startApply(e, f, pt) {
     var tipA = { x: lift.Pv.x + lift.S * lift.u.x, y: lift.Pv.y + lift.S * lift.u.y };
-    // the rolldown turns the sticker about the point it starts from: the roll itself
     var c0 = Math.cos(lift.phi), s0 = Math.sin(lift.phi);
     var dx0 = tipA.x - lift.Pm.x, dy0 = tipA.y - lift.Pm.y;
     lift.Ta = { x: lift.Ta.x + c0 * dx0 + s0 * dy0, y: lift.Ta.y - s0 * dx0 + c0 * dy0 };
@@ -544,13 +603,6 @@
     pointers.set(e.pointerId, pt);
   }
 
-  function moveCarry(f) {
-    var tip = { x: f.x - gesture.o.x, y: f.y - gesture.o.y };
-    lift.Pv = { x: tip.x - lift.S * lift.u.x, y: tip.y - lift.S * lift.u.y };
-    lift.Pm = { x: lift.Pv.x, y: lift.Pv.y };
-    liftDraw(lift);
-  }
-
   function moveApply(f) {
     var tip = { x: f.x - gesture.o.x, y: f.y - gesture.o.y };
     var E = gesture.E;
@@ -561,7 +613,7 @@
       // past the edge: the rest of the sticker unrolls onto the sheet, then it stays
       lift.Pv = E;
       lift.u = lift.lastU || lift.uL;
-      lift.phi = lift.lastPhi || 0;
+      lift.phi = lift.dialRot || 0;
       lift.S = clamp(lift.lastS || 0, 0, lift.len || 0);
       gesture = null;
       return unrollToStick(lift);
@@ -569,10 +621,11 @@
     var uNew = r > 3 ? { x: d.x / r, y: d.y / r } : lift.uL;
     lift.Pv = E;
     lift.u = uNew;
-    lift.phi = Math.atan2(uNew.y, uNew.x) - Math.atan2(lift.uL.y, lift.uL.x);
     lift.len = liftLen(lift);
     lift.S = clamp(r, 0, lift.len);
-    lift.lastU = uNew; lift.lastPhi = lift.phi; lift.lastS = lift.S;
+    // the roll only rolls: it never turns the sticker. The angle is the one the circle set.
+    lift.phi = lift.dialRot || 0;
+    lift.lastU = uNew; lift.lastS = lift.S;
     liftDraw(lift);
   }
 
@@ -632,6 +685,7 @@
       updatePeel(lift, f);
       return;
     }
+    if (gesture.kind === 'dial' && gesture.pid === e.pointerId) { moveDial(pt); return; }
     if (gesture.kind === 'carry' && gesture.pid === e.pointerId) { moveCarry(pageOf(pt)); return; }
     if (gesture.kind === 'apply' && gesture.pid === e.pointerId) { moveApply(pageOf(pt)); return; }
 
@@ -677,9 +731,15 @@
       gesture = null;
       return;
     }
+    if (gesture.kind === 'dial' && gesture.pid === e.pointerId) {
+      // let go of the circle: half a second later the sticker clicks into place
+      gesture = null;
+      if (lift) endDial();
+      return;
+    }
     if (gesture.kind === 'carry' && gesture.pid === e.pointerId) {
-      // let go: it stays where it was put; the free-move window starts again
-      if (lift) { lift.phase = 'held'; lift.heldAt = Date.now(); lift.ghost = true; liftDraw(lift); }
+      // let go: it stays where it was put; once it has been moved, the circle comes up
+      if (lift) { lift.phase = 'held'; lift.ghost = true; liftDraw(lift); if (lift.moved) setDial(true, lift.dialRot || 0); }
       gesture = null;
       return;
     }

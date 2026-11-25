@@ -147,6 +147,18 @@ canvas.peel { position: absolute; left: 0; top: 0; width: 100%; height: 100%; po
 .famBox { display: grid; gap: 8px; margin-bottom: 8px; }
 .famBox input { width: 100%; font: inherit; padding: 10px 12px; border: 2px solid var(--ink, #2d3e50); border-radius: 12px; background: #fff; box-sizing: border-box; }
 
+/* the circle that turns a held sticker: in the middle of the play area; a finger goes round it */
+#dial {
+  position: absolute; left: 50%; top: 50%; width: 200px; height: 200px; margin: -100px 0 0 -100px;
+  border: 4px dashed #5b3b26; border-radius: 50%; background: rgba(255, 246, 233, .35);
+  pointer-events: none; z-index: 8;
+}
+#dial[hidden] { display: none; }
+#dialHand {
+  position: absolute; left: 50%; top: 50%; width: 4px; height: 92px; margin: -92px 0 0 -2px;
+  background: #5b3b26; border-radius: 2px; transform-origin: 50% 100%;
+}
+
 /* sheet pager: ◀ n / N ▶ in the bottom bar (hidden when there is only one sheet) */
 .pager { display: flex; align-items: center; gap: 8px; }
 .pager[hidden] { display: none; }

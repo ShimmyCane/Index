@@ -35,6 +35,7 @@ Shared list of open work across the nursery. Project to-do lists stay in each pr
 
 - **Athena's world, Bar Glide, Chinese Character Sudoku, Voice, What to Cook:** graduated to their own repos (`ShimmyCane/Athena-s-world`, `Bar-Glide`, `Chinese-Character-Sudoku`, `Voice`, `What-to-Cook`) and removed from the nursery on 2026-11-10. Their to-dos live there.
 - **Shimmy Specs, Adventure:** see their `todo.md` files.
+- **Paper Airplanes x A-10 Warthog (0.25, 2026-11-25): the next increment.** Done: real-time sun from each mission's own start, imagined weather per flight (clear to dust storm), objects take the sun's colour, questions in ⚙️. Next: check on an iPad (frame rate at 960×540 with the cloud and weather passes; the sky at each sun time; thunder and rain feel); stars and a moon at night; a cloud deck with thickness for the storm; a sound design for rain; wind on the smoke and dust. Answers from Jimmy go in the project's `convo/convo v0.24.md`.
 
 ## Recurring: nursery AI review (added 2026-11-22)
 
