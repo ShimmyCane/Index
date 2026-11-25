@@ -475,6 +475,22 @@
     return m;
   }
 
+  // The centroid of the picked-up sticker, as fractions of its box, from the alpha of its cut-out.
+  function massCentre(img) {
+    try {
+      var s = 64 / Math.max(img.naturalWidth, img.naturalHeight);
+      var w = Math.max(1, Math.round(img.naturalWidth * s)), h = Math.max(1, Math.round(img.naturalHeight * s));
+      var c = document.createElement('canvas'); c.width = w; c.height = h;
+      var cx = c.getContext('2d'); cx.drawImage(img, 0, 0, w, h);
+      var d = cx.getImageData(0, 0, w, h).data, sx = 0, sy = 0, n = 0;
+      for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+        if (d[(y * w + x) * 4 + 3] > 127) { sx += x + 0.5; sy += y + 0.5; n++; }
+      }
+      if (n) return { x: sx / n / w, y: sy / n / h };
+    } catch (e) { /* blocked pixel read: use the middle of the box */ }
+    return { x: 0.5, y: 0.5 };
+  }
+
   function startLift(gesture, f) {
     // called once the finger has moved a little from the tray: the edge is the sticker's back edge
     var img = cutoutImage(nat().placed && nat().placed[gesture.sid]);
@@ -499,6 +515,8 @@
       PW: page.clientWidth, PH: page.clientHeight, dpr: Math.min(window.devicePixelRatio || 1, 1.5)
     };
     L.len = liftLen(L);
+    var cm = massCentre(img);
+    L.cx = cm.x * L.W; L.cy = cm.y * L.H;   // in picture pixels: the sticker turns about this point
     L.edge = edgePoints(img);
     if (state.used.indexOf(gesture.sid) === -1) state.used.push(gesture.sid);
     renderTray();
@@ -572,8 +590,13 @@
   function moveDial(pt) {
     var c = gesture.c;
     var turn = wrapAngle(Math.atan2(pt.y - c.y, pt.x - c.x) - gesture.a0) * 180 / Math.PI;
+    var before = mapPic(lift, lift.cx, lift.cy);
     lift.dialRot = gesture.base + fuzzTurn(turn) * Math.PI / 180;
     lift.phi = lift.dialRot;
+    var after = mapPic(lift, lift.cx, lift.cy);
+    var dx = before.x - after.x, dy = before.y - after.y;   // move the pivot so the centroid stays put
+    lift.Pv = { x: lift.Pv.x + dx, y: lift.Pv.y + dy };
+    lift.Pm = { x: (lift.Pm || lift.Pv).x + dx, y: (lift.Pm || lift.Pv).y + dy };
     liftDraw(lift);
     setDial(true, lift.dialRot);
   }
@@ -644,7 +667,7 @@
 
   function stickLift() {
     var L = lift;
-    var c = mapPic(L, L.W / 2, L.H / 2);
+    var c = mapPic(L, L.cx, L.cy);
     var sheet = $('.sheetPage').getBoundingClientRect();
     var p = toPercent({ x: sheet.left + c.x, y: sheet.top + c.y });
     var item = { uid: nextUid++, stickerId: L.sid, x: p.x, y: p.y, rot: L.phi * 180 / Math.PI, committed: true };

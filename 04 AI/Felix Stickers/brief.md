@@ -15,6 +15,7 @@ Key decisions:
 - 2026-11-25: test sheet "Thanksgiving Table Test 1" (private, in `private/thanksgiving/`, opened with `?sheet=thanksgiving`). Its 12 features are above the 5–10 rule, by Jimmy's request. The sheet's art is in its own `native` block; `mainFirst` draws the body under the features.
 - Peel is blocked on file://: Chromium will not read the cut-out's pixels there. Test over HTTP (a local server).
 - `/make-sticker <name>` adds one sticker from a picture (`02 Refs/Skills/make_sticker.md`); cutting uses `02 Refs/Skills/scripts/sticker_cut.py`.
+- 2026-11-25 (round 20, centroid): the sticker turns about its centroid (from its cut-out's alpha), not a corner; the placed position is the centroid. GIF checked by eye.
 - 2026-11-25 (round 20): rotation by a circle in the middle of the play area, after the sticker has been moved; click 0.5 s after let go; the roll only rolls (old 180° flip on reverse slide fixed). Headless: turn +30° → 25°, no turn → 0°, −45° → −45°.
 - 2026-11-25: orientation by aim drag, then roll-on (two touches). Test: peel, wait 1.3 s, aim up-right (sticker turns to 36.9°), roll back: placed at rotate(36.87deg), committed. GIF checked by eye.
 - 2026-11-25: held-curl wait 1 s; two-finger turn damped (15° → 5°, 1:1 from 45°). Rotation was not driven in headless tests; check on a device.
