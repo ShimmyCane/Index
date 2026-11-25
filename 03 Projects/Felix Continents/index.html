@@ -19,7 +19,7 @@
   .name { font-size: 24px; font-weight: 800; line-height: 1.15; }
   .sentence { margin: 4px 0 0; font-size: 17px; line-height: 1.35; }
   .touch { margin: 6px 0 0; font-size: 15px; min-height: 1.2em; }
-  .legend { position: absolute; left: 8px; bottom: 8px; z-index: 5; display: flex; flex-wrap: wrap; gap: 6px; max-width: 70%; }
+  .legend { position: absolute; left: 8px; top: 8px; z-index: 5; display: flex; flex-wrap: wrap; gap: 6px; max-width: 70%; }
   .legend span { border: 2px solid var(--ink); border-radius: 12px; padding: 3px 9px; font-size: 14px; background: #fff; color: #2f2d3d; }
   .legend i { display: inline-block; width: 12px; height: 12px; border: 1px solid var(--ink); border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
   #stage { flex: 1; min-height: 0; position: relative; margin: 8px 14px; }
@@ -68,6 +68,12 @@
   .vers a { min-height: 40px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; border: 3px solid var(--ink);
     border-radius: 12px; background: #fff; color: #2f2d3d; font-weight: 800; text-decoration: none; }
   .vers a.on { background: var(--mint); }
+  /* the text card sits over the globe, bottom-left, so the globe fills the screen */
+  #stage .card { position: absolute; left: 8px; bottom: 8px; right: auto; max-width: min(640px, 72%); margin: 0; padding: 6px 12px; z-index: 6; }
+  #stage .name { font-size: 18px; }
+  #stage .when { font-size: 13px; }
+  #stage .sentence { font-size: 14px; margin-top: 2px; }
+  #stage .touch { font-size: 13px; margin-top: 2px; }
   @media print { .gear, .drawer, .errorsPanel, .timebar { display: none !important; } }
 </style>
 </head>
@@ -78,14 +84,14 @@
   </nav>
 </header>
 
-<section class="card" aria-live="polite">
+
+<main id="stage"><canvas id="globe" aria-label="Spinning globe with continents"></canvas><div class="legend" id="legend" hidden></div>  <section class="card" aria-live="polite">
   <div class="when" id="when">now</div>
   <div class="name" id="momName">Today</div>
   <p class="sentence" id="momSentence"></p>
   <p class="touch" id="touchOut">Touch a continent to see its name.</p>
 </section>
-
-<main id="stage"><canvas id="globe" aria-label="Spinning globe with continents"></canvas><div class="legend" id="legend" hidden></div></main>
+</main>
 
 <section class="timebar" id="timebar" hidden>
   <div class="tbtns">
@@ -149,7 +155,7 @@
 
   <details>
     <summary>About this page</summary>
-    <p>Version 0.3.0. The continent shapes are rough sketches drawn by hand, not checked against a published reconstruction. Dates and positions are approximate.</p>
+    <p>Version 0.4.0. Today's coastlines are Natural Earth 1:50m land (public domain), simplified. The shapes of the past are rough sketches drawn by hand, not checked against a published reconstruction. Dates and positions are approximate.</p>
     <p>The climate is a simple model: latitude, distance from the sea, and mountains that catch wet winds. It is not a weather forecast.</p>
     <p>Built with three.js 0.170.0 (MIT licence).</p>
   </details>
@@ -159,13 +165,14 @@
 <div id="errorsPanel" class="errorsPanel" hidden></div>
 
 <script src="js/data.js"></script>
+<script src="js/coast.js"></script>
 <script src="js/engine.js"></script>
 <script src="js/common.js"></script>
 <script type="module">
 import * as THREE from 'https://unpkg.com/three@0.170.0/build/three.module.js';
 
 const FC = window.FC, E = window.FCEngine;
-const PLATES = FC.plates, MOMENTS = FC.moments, FEATURES = FC.features;
+const PLATES = FCCoast.expand(FC.plates), MOMENTS = FC.moments, FEATURES = FC.features;
 const NOW = MOMENTS.length - 1;          // today is the last moment (the slider runs past to today)
 const ANIM_SECONDS = 3.2;
 const geo = E.makeGeo(PLATES);

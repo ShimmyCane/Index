@@ -41,7 +41,7 @@
     plates.forEach(function (p) {
       var sx = 0, sy = 0;
       p.poly.forEach(function (q) { sx += q[0]; sy += q[1]; });
-      cen[p.id] = [sx / p.poly.length, sy / p.poly.length];
+      cen[p.id] = p.pivot || [sx / p.poly.length, sy / p.poly.length];
     });
     function xf(id, lon, lat, off) {
       var c = cen[id], a = off[2] * Math.PI / 180, dx = lon - c[0], dy = lat - c[1];
