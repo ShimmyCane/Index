@@ -173,8 +173,10 @@ function centroid(pts) {
 function regionAt(r, y) {
   if (y < r.start || y > r.end) return null;
   let s, a;
-  if (y <= r.peak) { const t = (y - r.start) / ((r.peak - r.start) || 1); s = 0.35 + 0.65 * t; a = 0.25 + 0.5 * t; }
+  if (y <= r.peak) { const t = (y - r.start) / ((r.peak - r.start) || 1); s = 0.8 + 0.2 * t; a = 0.25 + 0.5 * t; }
   else { const t = (y - r.peak) / ((r.end - r.peak) || 1); s = 1 - 0.15 * t; a = 0.75 - 0.35 * t; }
+  // fade in over the first 60 years and out over the last 60, so nothing pops in or out
+  a *= Math.min(1, (y - r.start) / 60) * Math.min(1, (r.end - y) / 60);
   const c = centroid(r.poly);
   const pts = r.poly.map(q => [c[0] + (q[0] - c[0]) * s, c[1] + (q[1] - c[1]) * s]);
   return { pts, a, bb: E.bbox(pts) };
@@ -201,12 +203,13 @@ function paint() {
     ctx.globalAlpha = g.a;
     ctx.fillStyle = colourOf(r);
     [-360, 0, 360].forEach(k => { pathOf(g.pts, k); ctx.fill(); });
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha = Math.min(1, g.a * 1.5);
     ctx.lineWidth = 4; ctx.strokeStyle = E.INK; ctx.setLineDash([]);
     [-360, 0, 360].forEach(k => { pathOf(g.pts, k); ctx.stroke(); });
   });
   REGIONS.forEach(r => {
-    if (year < r.start || year > r.end) return;
+    const g = regionAt(r, year);
+    if (!g || g.a <= 0.02) return;
     [-360, 0, 360].forEach(k => {
       const xy = E.toPx(r.cap[0] + k, r.cap[1]);
       ctx.beginPath(); ctx.arc(xy[0], xy[1], 10, 0, Math.PI * 2);
