@@ -25,3 +25,18 @@
 - Opacity: "95% opaque" and "solid white" are different asks. Set the alpha to what is asked and say which value was set; screenshots cannot measure it.
 - When Jimmy says he cannot see something, the first check is whether the file reached him in a form he can open. Send GIFs as files (attach), and say what the GIF shows.
 - The GIF tools now live in `02 Refs/Skills/scripts/` and the skill is `/anim-gif`.
+
+## 2026-11-25, rotation, centroids and the next ideas (round 20)
+
+- Rotation must not come from the drag direction. The roll took its turn from the drag, so sliding back along the pick-up line turned the sticker 180°. Now the roll only rolls and the turn comes from a separate circle.
+- A turn about a corner feels wrong; turn about the centroid. The centroid comes from the cut-out's alpha. When the turn changes, move the pivot so the centroid stays put, and the placed position is the centroid too.
+- A rotation that starts without a move feels like a mistake. The circle appears only after the sticker has been moved, and a tap does nothing.
+- A timing window (half a second, a second) is easy to misjudge. Name the wait in the code (`CLICK_MS`) so it is easy to change after a device test.
+- Judge a turn by a GIF and a contact sheet, not by numbers alone. The first aim drag looked right in numbers and felt wrong to the hand.
+
+### Ideas for next week (not built)
+
+- **Three sheets, three pictures.** Each sheet keeps its own placed stickers, as now.
+- **A gallery behind a secret gesture.** A little hidden control near the lower middle: tapping left, left, left, right, right, right opens a repeating gallery of the sheets. Choosing one loads it; the old stickers stay remembered.
+- **Carry across sets, and the Easter egg.** A sticker picked up from one set can be dropped on another. The first time someone does it, the page says "Good job, you found an Easter egg!". Jimmy wants this encouraged: it is part of the fun, not a bug.
+- The sticker pack page (for more than 20 stickers) can be the gallery.
