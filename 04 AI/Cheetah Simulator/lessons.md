@@ -14,3 +14,9 @@
 ## 2026-11-25, series and settings
 - Put a series' navigation (Other games) in ⚙️ from the start, with the unbuilt games disabled, so the links work the day each page opens.
 - Ask which game is which version before creating folders. My own last message had the bat as V2; the A1 order said gibbon. Asking took one question and avoided a rename.
+
+## 2026-11-25, canvas first
+- Keep the play canvas open: move all text and panels into ⚙️. A panel left on the canvas hides part of the play area on desktop.
+- Make stages into skills the child learns by doing, not a checklist of goals. The skill names come from the animal's life (stay hidden, listen for Mum).
+- A drawer that covers the gear button traps the child. Keep the gear above the drawer.
+- Test the drawer with its panels open; collapsed panels hide the controls a test wants to click.

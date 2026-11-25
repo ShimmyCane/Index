@@ -109,3 +109,24 @@ Start V2, the bat echo game, as a prototype. It needs its own `/start-project` r
 - The bat echo game is not assigned to a version yet. Jimmy to say where it goes (V5 or later).
 - Settings: the cheetah ⚙️ now has an **Other games** drop-down. The V2 to V4 entries are disabled until their pages exist; enable each one when it opens.
 - The cheetah folder keeps its name, `Cheetah Simulator`, as V1. The other folders carry their version in the name.
+
+## Round 4: canvas first, skills, grass (2026-11-25)
+
+Jimmy's notes:
+- **Canvas first:** the play area stays as open as possible. Only the stage pill, Next (when ready), ⚙️, Chirp, the joystick and a short toast are on the canvas. Every panel (skills, life map, what I learned, how it really is, notes, checks) is inside ⚙️.
+- **Cubs eat grass:** kept. Shown as a skill ("Nibble grass") and flagged ⚑ to check.
+- **Stages are skills, learned by doing:** each stage has skills to master, learned from the animals and intuitively. Stage 1: move around the land, stay hidden in the tall grass, listen for Mum's answer, follow Mum, nibble grass. Stage 2: pounce, freeze under a shadow, play together.
+- **"Bees":** Jimmy wrote that "bees are things that need to be mastered at each phase." Read as "skills" (in the page: skill tokens). Question: did you mean "bees" as the name of the skill tokens, or as something else? Please tell me.
+
+Built as 0.2.0 (`index.html`). Mastery tokens and the skills list are in ⚙️. Stage completion still needs the clock; skills show progress and do not block Next.
+
+## Questions (round 4)
+
+**R4-1. "Bees":** what do you mean by "bees" (skill tokens, badges, or something else)?
+> 
+
+**R4-2. Skill counts:** are the counts right (Move 4, Stay hidden 2, Listen 3, Follow 2, Nibble 3; Pounce 5, Freeze 2, Play together 3)?
+> 
+
+**R4-3. Must the child master every skill before Next?** Now only the clock is needed.
+> 
