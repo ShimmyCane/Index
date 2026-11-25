@@ -124,3 +124,10 @@ Yes. ⚙️ in the lower right holds the options and extensions. Errors appear a
 - **Note 5, V5 (done):** Play uses the V1 method: forward to today, back, then forward again. The world's number is shown as a hex code (for example "World 41C98").
 - **Source decision (chosen by Claude, 2026-11-25):** today's coastlines will come from Natural Earth through the npm package `world-atlas` 2.0.2 (Natural Earth data, public domain; the package is ISC). Not swapped in yet: the sketches are still the outlines. Past shapes: no licence-checked reconstruction chosen yet, so Rodinia stays out.
 - **Planned, not built:** the Moon-forming impact, tectonic shifts, volcanic eruptions, and ice ages as animated events (convo v0.2, Q9).
+
+## Round 5 (2026-11-25): countries and peoples hold still
+
+- **V4 outlines and zoom:** countries have thicker outlines. Tapping a country zooms in and tilts the globe to its latitude, so the whole country is in view.
+- **V4 Play:** the globe no longer turns at each milestone. A manual pick still turns it. Each milestone's countries fade in together, while the previous ones fade out (about 0.8 s).
+- **V3 peoples:** each people fades in over its first 60 years and out over its last 60, and grows gradually, so nothing pops in or out.
+- Still open: continental deformation (note 3), the swap to Natural Earth outlines, and a reconstruction source for the past.

@@ -172,7 +172,8 @@ const isModern = i => i === MIL.length - 1;
 function activeAt(i) { const y = MIL[i].year; return COUNTRIES.filter(c => c.from <= y && y <= c.to); }
 
 /* state */
-let idx = 0, zoomed = null, anim = null, dirty = true, dragging = false, focusTarget = null, baseZ = 3.6;
+let idx = 0, zoomed = null, anim = null, dirty = true, dragging = false, focusTarget = null, tiltTarget = null, baseZ = 3.6;
+let prevIdx = null, fadeT = 1;   // fadeT runs 0 to 1 after each milestone change (about 0.8 s)
 
 /* drawing */
 const cv = document.createElement('canvas'); cv.width = 2048; cv.height = 1024;
@@ -182,24 +183,29 @@ function pathOf(pts, k) {
   pts.forEach((q, i) => { const xy = E.toPx(q[0] + k, q[1]); if (i) ctx.lineTo(xy[0], xy[1]); else ctx.moveTo(xy[0], xy[1]); });
   ctx.closePath();
 }
-function paint() {
-  ctx.fillStyle = E.OCEAN; ctx.fillRect(0, 0, 2048, 1024);
-  E.drawPlates(ctx, geo, OFF0, true);
-  if (isModern(idx)) return;
-  const act = activeAt(idx);
-  act.forEach(c => {
-    ctx.globalAlpha = 0.7; ctx.fillStyle = colourOf(c);
+/* countries with their outlines; alpha lets one set fade out while the next fades in */
+function drawSet(list, alpha) {
+  list.forEach(c => {
+    ctx.globalAlpha = 0.7 * alpha; ctx.fillStyle = colourOf(c);
     [-360, 0, 360].forEach(k => { pathOf(c.poly, k); ctx.fill(); });
-    ctx.globalAlpha = 1; ctx.lineWidth = 4; ctx.strokeStyle = E.INK;
+    ctx.globalAlpha = alpha; ctx.lineWidth = 6; ctx.strokeStyle = E.INK;
     [-360, 0, 360].forEach(k => { pathOf(c.poly, k); ctx.stroke(); });
   });
-  act.forEach(c => {
+  list.forEach(c => {
     [-360, 0, 360].forEach(k => {
       const xy = E.toPx(c.cap[0] + k, c.cap[1]);
+      ctx.globalAlpha = alpha;
       ctx.beginPath(); ctx.arc(xy[0], xy[1], 10, 0, Math.PI * 2);
       ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = E.INK; ctx.stroke();
     });
   });
+  ctx.globalAlpha = 1;
+}
+function paint() {
+  ctx.fillStyle = E.OCEAN; ctx.fillRect(0, 0, 2048, 1024);
+  E.drawPlates(ctx, geo, OFF0, true);
+  if (prevIdx !== null && fadeT < 1 && !isModern(prevIdx)) drawSet(activeAt(prevIdx), 1 - fadeT);
+  if (!isModern(idx)) drawSet(activeAt(idx), fadeT);
 }
 function setCard() {
   const m = MIL[idx];
@@ -217,6 +223,7 @@ function setCard() {
 }
 /* turn the globe to the middle of the countries shown at this milestone */
 function focusMilestone() {
+  tiltTarget = 0.25;   // back to the usual tilt
   const act = isModern(idx) ? [] : activeAt(idx);
   if (!act.length) return;
   let x = 0, y = 0;
@@ -224,10 +231,14 @@ function focusMilestone() {
   const L = Math.atan2(y, x) * 180 / Math.PI;
   focusTarget = -(L + 90) * Math.PI / 180;
 }
-function snapTo(i, animate) {
+function changeTo(i) {
+  if (i !== idx) { prevIdx = idx; fadeT = 0; }
   idx = i; zoomed = null;
-  if (!animate) anim = null;
-  focusMilestone();
+}
+/* a manual pick turns the globe to the new countries; Play does not, so the globe holds still */
+function snapTo(i, animate) {
+  changeTo(i);
+  if (!animate) { anim = null; focusMilestone(); }
   setCard(); dirty = true;
 }
 function play() {
@@ -243,7 +254,7 @@ function stepAnim(dt) {
   if (anim.wait >= 2.5) {
     anim.wait = 0; anim.i += 1;
     if (anim.i >= MIL.length) { anim = null; return; }
-    idx = anim.i; zoomed = null; focusMilestone(); setCard(); dirty = true;
+    changeTo(anim.i); setCard(); dirty = true;
   }
 }
 $('slider').addEventListener('input', e => snapTo(Number(e.target.value), false));
@@ -270,6 +281,7 @@ function countryAt(lon, lat) {
 function zoomIn(c) {
   zoomed = c;
   focusTarget = -(c.cap[0] + 90) * Math.PI / 180;
+  tiltTarget = Math.max(-60, Math.min(60, c.cap[1])) * Math.PI / 180;   // bring the country's latitude to the middle
   $('momName').textContent = c.name;
   $('momSentence').textContent = c.story + ' (' + fmtYear(MIL[idx].year) + ')';
   $('touchOut').textContent = 'Zoomed in on ' + c.name + '. Tap the ocean to zoom back out.';
@@ -277,6 +289,7 @@ function zoomIn(c) {
 }
 function zoomOut() {
   zoomed = null;
+  tiltTarget = 0.25;
   $('touchOut').textContent = 'Touch a country to zoom in.';
   setCard(); dirty = true;
 }
@@ -319,7 +332,7 @@ function initGlobe() {
     if (!pointer.down) return;
     const dx = e.clientX - pointer.x, dy = e.clientY - pointer.y;
     pointer.x = e.clientX; pointer.y = e.clientY; pointer.moved += Math.abs(dx) + Math.abs(dy);
-    if (pointer.moved > 6) { dragging = true; focusTarget = null; }
+    if (pointer.moved > 6) { dragging = true; focusTarget = null; tiltTarget = null; }
     group.rotation.y += dx * 0.005;
     group.rotation.x = Math.max(-1.2, Math.min(1.2, group.rotation.x + dy * 0.004));
   });
@@ -339,6 +352,11 @@ function frame(now) {
     group.rotation.y += diff * Math.min(1, dt * 2.5);
     if (Math.abs(diff) < 0.002) focusTarget = null;
   } else if (S.spin && !dragging && !anim) group.rotation.y += dt * 0.12;
+  if (fadeT < 1) { fadeT = Math.min(1, fadeT + dt / 0.8); dirty = true; }
+  if (tiltTarget !== null && !dragging) {
+    group.rotation.x += (tiltTarget - group.rotation.x) * Math.min(1, dt * 2.5);
+    if (Math.abs(tiltTarget - group.rotation.x) < 0.002) tiltTarget = null;
+  }
   camera.position.z += ((zoomed ? baseZ * 0.62 : baseZ) - camera.position.z) * Math.min(1, dt * 4);
   if (dirty) { paint(); tex.needsUpdate = true; dirty = false; }
   renderer.render(scene, camera);
