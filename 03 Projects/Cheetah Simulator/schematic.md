@@ -2,7 +2,21 @@
 
 **Track: A. Family play** (one player at a time; a family database for who is playing). Studio-level facts live in collapsed panels ("How it really is").
 
-Status (2026-11-25): **plan only, nothing built.** Jimmy reviews this and `convo/convo v0.1.md`, then the build is a separate step.
+Status (2026-11-25): **0.1 built as a first increment** (cub stages 1 and 2, cumulative clock, ⚙️ with gentle mode, notes, AI toggle, Felix and joystick controls). Decisions below come from `convo/convo v0.1.md`. Jimmy asked for the whole thing to be built incrementally, merged step by step.
+
+## Decisions (convo v0.1, 2026-11-25)
+
+- Cheetah's sex chosen up front; random by default. Tap the sex symbol to toggle; tap the name to rename.
+- Gentle mode on by default (⚙️). Mature mode is the other setting. Gentle: simple, no gore. Mature: accurate hunts, fights and kills, growing up with the look.
+- Stage clock is cumulative: target = 10 + 5 × restarts minutes. After the target, Next stage appears.
+- Male path is about territory, fights with other males, exploration. In mature mode a male may kill another female's cubs and mate again.
+- Meeting scene: simple in gentle mode, more graphic in mature.
+- Gentle fights: rock-paper-scissors style. Mature fights: accurate timing.
+- Threats include poaching, snares, roads and vehicles (age-appropriate wording).
+- Look: 2-D layered (option B). AI toggle in ⚙️, marked under development.
+- Controls: Felix drag and joystick. Wiggle is proposed in convo v0.2.
+- Facts per mode are age-appropriate.
+- A second animal is planned later (the engine stays generic).
 
 ## Purpose
 

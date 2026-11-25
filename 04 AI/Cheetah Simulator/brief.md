@@ -2,7 +2,7 @@
 
 **Goal.** A game where a child lives a cheetah's whole life, ten minutes a stage, learning how cheetahs really live. The look and the verbs grow up with the cheetah (cuddly cub to precise hunter). The world (place, weather, prey, rivals, people) changes each life. Track A.
 
-**State (2026-11-25): plan only.** `schematic.md`, `research/cheetah-life-cycle.md`, `convo/convo v0.1.md` (13 ideas and 14 questions) written. No page, no code, no tile on the Nursery list.
+**State (2026-11-25): 0.1.0 built.** `index.html`: stages 1 (Den) and 2 (Little explorer); cumulative stage clock (10 + 5 per restart); Felix drag and joystick; Chirp; ⚙️ with gentle mode, look, controls, AI toggle (disabled, under development), notes, storage check, opt-in errors, test skip. Home tile added. Answers to convo v0.1 are in that file; questions for v0.2 are in `convo/convo v0.2.md`.
 
 **Architecture (planned).** Plain HTML/CSS/JS, no build. Layers: data (world, life, save; no DOM) → scene description → renderer (style layer separate). Device storage first; Family project later (`ch_` tables).
 
@@ -12,4 +12,6 @@
 
 **Decisions made without asking.** Branch written per sources (corrects the brief's "females stay with Mum"); first build proposed as stages 1 and 2 in a cheap 2-D look.
 
-**Next.** Jimmy answers convo v0.1; then build 0.1.
+**Next.** Jimmy answers convo v0.2 (wiggle, mature fight, age facts, AI toggle, restart rule). Then stages 3 and 4 and the branch.
+
+**Known:** on desktop the left HUD column covers part of the play area; collapse the panels or move them in a later increment.

@@ -9,9 +9,9 @@ Track: A. Family play
 - AI notes: `04 AI/Cheetah Simulator/brief.md` and `lessons.md`
 - Shared conventions: root `CLAUDE.md` (public repo, privacy)
 
-Status: plan only (2026-11-25). Nothing is built. Jimmy reviews `schematic.md` and `convo/convo v0.1.md`, then the build is a separate step.
+Status: 0.1.0 (2026-11-25): stages 1 (Den) and 2 (Little explorer) playable; cumulative stage clock; ⚙️ with gentle mode, notes, storage check. Later stages, the wiggle control and the AI helper are in `schematic.md` and `convo/convo v0.2.md`. Jimmy reviews each merged step.
 
-How to run: no page yet. The first build will be plain HTML/CSS/JS (no build step), opened with a double-click.
+How to run: `index.html` opens with a double-click (plain HTML/CSS/JS, no build). Felix control (drag from the middle) by default; joystick in ⚙️. Keyboard arrows or WASD also work. State for checks: `localStorage` key `cheetahSim.v1`.
 
 Project rules:
 - Facts marked ⚑ in `research/` are unchecked; verify before showing a number on screen. Show ranges, not exact figures.

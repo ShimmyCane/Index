@@ -90,3 +90,30 @@ A game with a choice of how to control, and a splat approach like Mind Palace, b
 - Treated the sibling-group fact as the sources state it (females leave first; males stay together) and wrote the branch that way, flagging it above.
 - No page, so no tile on the Nursery list yet. `/start-project` adds one with the first build.
 - Planned (not built): ⚙️ with a notes box, Felix control and joystick (`game_controls`), family sign-in in a later increment.
+
+## Jimmy's answers (2026-11-25)
+
+1. **Track and name:** yes, family play. Name stays "Cheetah Simulator".
+2. **Who plays and sex:** the cheetah's sex is chosen up front. It can be random, which is the default, so a child can play without any set-up. Tapping the sex symbol toggles male and female; tapping the name renames the cheetah. The point is to teach that a lot of things have more nuance the deeper you look. Play works with no intervention, and the choices can be refined.
+3. **Look:** build option B (2-D layered) first. Keep an AI toggle in ⚙️ that is shown as under development (Jimmy wrote "ANC"; read as "AI", to confirm). Movement and control must still work, so B needs more work than a plain picture.
+4. **Gentle mode:** yes, and it should be an option in ⚙️. Gentle mode on by default. Add the lesson to the lessons log.
+5. **Ten minutes:** the play clock is cumulative per stage. It starts at 10 minutes. Each restart adds 5 minutes to the target. Three restarts means 25 minutes in total before Next stage. Ten minutes is a rough guide, and after the target the child may move on.
+6. **Males:** the male path is about territory, fights with other males, and exploration. In mature mode, a male may attack another female, kill her cubs, and mate again.
+7. **Meeting scene:** straightforward in gentle mode. More graphic in the harder (mature) modes.
+8. **Fights:** for young children, a simplified rock-paper-scissors style game. For mature audiences, a more accurate fight and kill. The look should grow up with the cheetah, matching age, speed and growth from adolescent to adult.
+9. **Threats:** yes, add poaching, trapping, cars and similar. Put them in.
+10. **Controls:** Felix mode (drag from the centre) and a joystick mode. Jimmy is not sure how wiggling works; to be proposed in v0.2.
+11. **Research:** defer to Claude. For each mode, the information shown is age-appropriate.
+12. **Build:** do it all incrementally, so Jimmy can review each merged step.
+13. **Family database:** up to Claude.
+14. **Second animal:** yes. The purpose is to artificially understand animal life cycles with a digital world and LLMs. Habitats and simulations will be added later.
+
+### Claude's reading of the answers
+- Q5 rule: target minutes = 10 + 5 × restarts in that stage.
+- Q3 "ANC": read as AI, under development. Confirm.
+- Q2 random sex is the default with no intervention.
+- Q9 threats: poaching, snares, and vehicles on roads are in the threat list, shown with age-appropriate wording.
+
+## Next round
+
+Questions for the wiggle control, the mature fight, the age-appropriate info per mode, and the AI toggle are in `convo/convo v0.2.md`.
