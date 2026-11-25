@@ -10,6 +10,9 @@
   var name = '';
   try { name = (new URLSearchParams(window.location.search).get('sheet') || '').toLowerCase(); } catch (e) { name = ''; }
   if (Object.prototype.hasOwnProperty.call(TEST_SHEETS, name)) {
-    document.write('<script src="' + TEST_SHEETS[name] + '"><\/script>');
+    // Every test sheet is loaded, so the bottom ◀ ▶ can leaf through them; app.js opens the one asked for.
+    Object.keys(TEST_SHEETS).forEach(function (key) {
+      document.write('<script src="' + TEST_SHEETS[key] + '"><\/script>');
+    });
   }
 })();
