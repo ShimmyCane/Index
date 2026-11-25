@@ -1,6 +1,6 @@
 # Massage Map: schematic
 
-**Status:** planned, no build yet · **Updated:** 2026-11-25 · **Track:** A. Family play
+**Status:** build 0.1.0 (increment 1: foot map with EN and 中文 sets, films, stars, notes) · **Updated:** 2026-11-25 · **Track:** A. Family play
 **Based on:** Jimmy's request (2026-11-25): learn about massage through pictures, videos and reading; tap a body part, zoom in, see a technique played back, and let Ying and Jimmy give thumbs up. Questions are in `convo/convo v0.1.md`.
 
 ## Concept
@@ -90,3 +90,22 @@ Built with the first build (`02 Refs/Skills/feedback_notes.md`). A notes box in 
 ## Open questions
 
 See `convo/convo v0.1.md`.
+
+## Build 0.1.0 (2026-11-25)
+
+Built: `index.html`, `css/app.css`, `js/data.js`, `js/app.js`.
+- Body map: foot views (sole, top, outer side, ankle), tap a point for where it is, zoom in and reset.
+- Two sets. EN: eight touch techniques on areas. 中文: eight Tui Na handling methods (按 揉 推 拿 捏 擦 叩 搓) on acupoints (KI1, LR3, ST44, SP6 and others), named with the WHO-style code.
+- Film: 20-second loop, press dots, direction arrows, heat by pressure 1 to 5, numbers, speed, autoplay twice then pause, time slider, compare two side by side.
+- Learn tab: each technique with its description and sources (well-known sites only).
+- Favourites: 1 to 5 stars for Ying and Jimmy, saved on this device, with a summary table.
+- ⚙️: language, speed, autoplay, heat, numbers, children's figures toggle (no figures yet), who is rating, show errors, notes for improvement, database line.
+- Front-page line: "This is massage, not medicine."
+- Home page tile in the Nursery list.
+
+Not built yet:
+- Realistic figures (male and female, Asian body reference). The current foot is a placeholder drawing. Drawing studies come first.
+- Children's figures (the toggle is in place, nothing shows yet).
+- Family sign-in and the `mm_thumbs` and `mm_notes` tables. Ratings stay on the device.
+- Sources for the EN techniques. Videos are not linked yet.
+- Verification of acupoint positions against the WHO standard. The positions are approximate and marked as such.
