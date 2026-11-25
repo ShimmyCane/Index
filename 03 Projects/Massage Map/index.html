@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Massage Map</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1 id="appTitle">Massage Map</h1>
+    <p class="tag" id="tagLine">This is massage, not medicine.</p>
+  </div>
+  <div class="langPill" role="group" aria-label="Language">
+    <button type="button" class="langBtn" data-lang="en" aria-pressed="true">EN</button>
+    <button type="button" class="langBtn" data-lang="cn" aria-pressed="false">中文</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button type="button" class="tab" data-tab="map" role="tab" aria-selected="true" id="tab-map">Body map</button>
+  <button type="button" class="tab" data-tab="learn" role="tab" aria-selected="false" id="tab-learn">Learn</button>
+  <button type="button" class="tab" data-tab="favs" role="tab" aria-selected="false" id="tab-favs">Favourites</button>
+</nav>
+
+<main>
+  <!-- MAP -->
+  <section id="page-map" class="page">
+    <div class="viewTabs" id="viewTabs" role="tablist"></div>
+
+    <div class="mapWrap">
+      <svg id="mapSvg" class="mapSvg" viewBox="0 0 200 420" role="img" aria-label="Foot map"></svg>
+      <div class="zoomRow">
+        <button type="button" class="btn small" id="zoomIn">+ Zoom in</button>
+        <button type="button" class="btn small" id="zoomOut">Reset</button>
+      </div>
+    </div>
+
+    <div class="infoCard" id="infoCard" aria-live="polite"></div>
+
+    <div class="panel" data-panel="pick">
+      <button type="button" class="panelHead" aria-expanded="true" aria-controls="pick-body">
+        <span class="panelIcon">🌿</span><span class="panelTitle" id="pickTitle">Technique</span><span class="panelMark">▾</span>
+      </button>
+      <div class="panelBody" id="pick-body">
+        <div class="chips" id="techChips"></div>
+        <label class="inline">
+          <input type="checkbox" id="colourToggle" checked> <span id="colourLabel">Colour by technique</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="film">
+      <button type="button" class="panelHead" aria-expanded="true" aria-controls="film-body">
+        <span class="panelIcon">🎞️</span><span class="panelTitle">Film</span><span class="panelMark">▾</span>
+      </button>
+      <div class="panelBody" id="film-body">
+        <div class="filmGrid" id="filmGrid">
+          <figure class="filmCell">
+            <figcaption><select id="filmSelect" class="sel"></select></figcaption>
+            <svg id="filmA" class="filmSvg" viewBox="0 0 200 420" role="img" aria-label="Technique film"></svg>
+          </figure>
+          <figure class="filmCell" id="filmBCell" hidden>
+            <figcaption><select id="filmSelectB" class="sel"></select></figcaption>
+            <svg id="filmB" class="filmSvg" viewBox="0 0 200 420" role="img" aria-label="Second technique film"></svg>
+          </figure>
+        </div>
+        <div class="controls">
+          <button type="button" class="btn" id="playBtn">▶</button>
+          <button type="button" class="btn" id="backBtn">⏮</button>
+          <input type="range" id="scrub" min="0" max="20" step="0.05" value="0" aria-label="Time">
+          <span id="timeLabel" class="mono">0.0 s</span>
+        </div>
+        <label class="inline"><input type="checkbox" id="compareToggle"> <span id="compareLabel">Compare two</span></label>
+        <p class="note" id="loopNote">The film loops every 20 seconds.</p>
+        <p class="note" id="heatKey">Pale = light, deep red = firm. Numbers: 1 light, 5 firm.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEARN -->
+  <section id="page-learn" class="page" hidden>
+    <div id="learnList"></div>
+  </section>
+
+  <!-- FAVOURITES -->
+  <section id="page-favs" class="page" hidden>
+    <p class="note" id="favNote">Ratings saved on this device.</p>
+    <div id="favList"></div>
+  </section>
+</main>
+
+<!-- Settings (gear) -->
+<button type="button" class="gear" id="gearBtn" aria-label="Settings" aria-expanded="false" aria-controls="drawer">⚙️</button>
+<aside class="drawer" id="drawer" hidden>
+  <div class="drawerHead">
+    <strong id="drawerTitle">Settings</strong>
+    <button type="button" class="btn small" id="drawerClose" aria-label="Close">✖</button>
+  </div>
+  <div class="drawerBody">
+    <p class="note">Tap a point on the map to see where it is. Ratings are yours, saved on this device.</p>
+
+    <div class="setRow"><span id="setLangLabel">Language</span>
+      <div class="seg" data-key="lang">
+        <button type="button" data-v="en">EN</button><button type="button" data-v="cn">中文</button>
+      </div></div>
+
+    <div class="setRow"><span id="setSpeedLabel">Speed</span>
+      <div class="seg" data-key="speed">
+        <button type="button" data-v="0.5">0.5×</button><button type="button" data-v="1">1×</button><button type="button" data-v="2">2×</button>
+      </div></div>
+
+    <div class="setRow"><span id="setAutoLabel">Autoplay twice, then pause</span>
+      <div class="seg" data-key="autoplay">
+        <button type="button" data-v="1">On</button><button type="button" data-v="0">Off</button>
+      </div></div>
+
+    <div class="setRow"><span id="setHeatLabel">Heat</span>
+      <div class="seg" data-key="heat">
+        <button type="button" data-v="1">On</button><button type="button" data-v="0">Off</button>
+      </div></div>
+
+    <div class="setRow"><span id="setNumLabel">Show numbers 1 to 5</span>
+      <div class="seg" data-key="numbers">
+        <button type="button" data-v="1">On</button><button type="button" data-v="0">Off</button>
+      </div></div>
+
+    <div class="setRow"><span id="setKidsLabel">Show children’s figures</span>
+      <div class="seg" data-key="kids">
+        <button type="button" data-v="1">On</button><button type="button" data-v="0">Off</button>
+      </div></div>
+    <p class="note" id="kidsNote">Not drawn yet.</p>
+
+    <div class="setRow"><span id="setWhoLabel">Who is rating</span>
+      <div class="seg" data-key="who">
+        <button type="button" data-v="Ying">Ying</button><button type="button" data-v="Jimmy">Jimmy</button>
+      </div></div>
+
+    <div class="setRow"><span id="setErrLabel">Show errors</span>
+      <div class="seg" data-key="errors">
+        <button type="button" data-v="1">On</button><button type="button" data-v="0">Off</button>
+      </div></div>
+
+    <h3 id="notesTitle">Notes for improvement</h3>
+    <div class="notesBox">
+      <textarea id="noteText" rows="3" placeholder="What would make this better?"></textarea>
+      <div class="row">
+        <button type="button" class="btn small" id="noteSave">Save note</button>
+        <button type="button" class="btn small" id="noteCopy">Copy notes</button>
+        <select id="noteFilter" class="sel"><option value="open">Open</option><option value="all">All</option></select>
+      </div>
+      <ul id="noteList" class="noteList"></ul>
+    </div>
+
+    <p class="note" id="dbLine">Family database: this device only.</p>
+  </div>
+</aside>
+
+<section class="errors" id="errors" hidden>
+  <strong>Errors</strong>
+  <ul id="errorList"></ul>
+</section>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
