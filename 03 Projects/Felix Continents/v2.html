@@ -127,7 +127,7 @@
 
   <details>
     <summary>About this page</summary>
-    <p>Version 0.3.0. The continent shapes are rough sketches drawn by hand. Today's outline is the answer to the puzzle, so it is only a guide.</p>
+    <p>Version 0.4.0. Today's coastlines are Natural Earth 1:50m land (public domain), simplified. Today's outline is the answer to the puzzle, so it is only a guide.</p>
     <p>Built with three.js 0.170.0 (MIT licence).</p>
   </details>
 
@@ -136,13 +136,14 @@
 <div id="errorsPanel" class="errorsPanel" hidden></div>
 
 <script src="js/data.js"></script>
+<script src="js/coast.js"></script>
 <script src="js/engine.js"></script>
 <script src="js/common.js"></script>
 <script type="module">
 import * as THREE from 'https://unpkg.com/three@0.170.0/build/three.module.js';
 
 const FC = window.FC, E = window.FCEngine;
-const PLATES = FC.plates, FEATURES = FC.features;
+const PLATES = FCCoast.expand(FC.plates), FEATURES = FC.features;
 const geo = E.makeGeo(PLATES);
 const $ = id => document.getElementById(id);
 const OFFKEY = 'felixContinents.v2.offsets';
@@ -166,12 +167,13 @@ try {
 function saveOff() { try { localStorage.setItem(OFFKEY, JSON.stringify(off)); } catch (e) {} }
 function placed(id) { const o = off[id]; return Math.abs(o[0]) < 3 && Math.abs(o[1]) < 3 && Math.abs(o[2]) < 3; }
 let moved = false;   // becomes true after the first drag, so the page does not praise an unmoved map
+const IDS = [...new Set(PLATES.map(p => p.id))];   // one piece per continent (a continent can have several landmasses)
 function updateCounter() {
-  const n = PLATES.filter(p => placed(p.id)).length;
-  if (n === PLATES.length) $('counter').textContent = moved
+  const n = IDS.filter(id => placed(id)).length;
+  if (n === IDS.length) $('counter').textContent = moved
     ? 'Well done: all ' + n + ' continents are back in today\'s places.'
     : 'All ' + n + ' continents are in today\'s places. Drag one away, then bring it back.';
-  else $('counter').textContent = n + ' of ' + PLATES.length + ' continents are in today\'s places.';
+  else $('counter').textContent = n + ' of ' + IDS.length + ' continents are in today\'s places.';
 }
 
 /* drawing */

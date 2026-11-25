@@ -131,3 +131,12 @@ Yes. ⚙️ in the lower right holds the options and extensions. Errors appear a
 - **V4 Play:** the globe no longer turns at each milestone. A manual pick still turns it. Each milestone's countries fade in together, while the previous ones fade out (about 0.8 s).
 - **V3 peoples:** each people fades in over its first 60 years and out over its last 60, and grows gradually, so nothing pops in or out.
 - Still open: continental deformation (note 3), the swap to Natural Earth outlines, and a reconstruction source for the past.
+
+## Round 6 (2026-11-25): detail and the top card
+
+- **Detail (today):** today's coastlines are Natural Earth 1:50m land (public domain, via the npm package `world-atlas` 2.0.2, ISC). Simplified to about 0.06°, with islands under 0.25 deg² dropped: 229 landmasses and about 13,900 points, against about 300 points before (`js/coast.js`, built by a script). Each landmass moves with the hand plate it sits on.
+- **Detail (past and historical regions):** still rough sketches. A real historical boundary set exists (`aourednik/historical-basemaps`, country and cultural-region boundaries by year), but its licence needs checking against the repo's LICENSE file: a secondary site lists GPL-3.0. Not added until Jimmy decides.
+- **Card:** on V1, V3, V4 and V5, the text card sits bottom-left over the globe, so the globe fills the screen (V2 already had this).
+- **V1 legend:** top-left of the globe when on.
+- **V2 counter:** counts continents, not landmasses.
+- **Open:** continental deformation (note 3); the past shapes (historical licence decision; Rodinia).
