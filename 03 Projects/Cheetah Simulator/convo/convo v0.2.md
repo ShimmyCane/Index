@@ -88,3 +88,17 @@ Build one small engine per family, then add animals as data (which family, which
 
 **A4. The dark bat screen with no light:** full dark with audio only (riskiest, most original), or a faint light option in ⚙️ on by default?
 > 
+
+## Jimmy's answers to A1 to A4 (2026-11-25)
+
+**A1. Families first:** yes. Order: chase and strike (the cheetah hunt), then swing and jump (gibbon), then echo in the dark (bat).
+
+**A2. Project structure:** the animal games are other games, not one project. Names are versions: the cheetah is V1, and the next games are V2, V3, V4. Jimmy expects to split them further later. Claude's reading: each is its own game with its own project folder when it starts (`/start-project`). Nothing is created yet.
+
+**A3. First list:** all five: sea turtle race, golden eagle dive, mountain goat climb, bat echo, giant anteater count.
+
+**A4. Dark bat screen:** Jimmy has no preference and wants to try it. Claude's proposal for the trial: full dark with audio as the default, with a light-on option in ⚙️ for anyone who needs it. Jimmy to confirm when the bat game is built.
+
+## Next step (not started)
+
+Start V2, the bat echo game, as a prototype. It needs its own `/start-project` round before any code. Question for the next convo round: what should the V2 folder be called? Suggested: "Bat Echo (V2)".
