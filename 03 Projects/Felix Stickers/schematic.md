@@ -102,7 +102,9 @@ Per the nursery convention, the first build includes:
 
 ## Database
 
-Not in the first build. When notes or creations must persist across devices, plan it with `02 Refs/Skills/supabase_link.md` (Family project, prefix `fs_`, RLS on, publishable key only, SQL written first and applied only when Jimmy asks).
+Round 19 (2026-11-25): the Family project gets `fs_creations` and `fs_notes` (SQL in `supabase/`: `test_001_fs`, `001_fs_family`, `verify_001_fs`, pasted by Jimmy). Signed-in saves send a copy; the device copy is always kept first. Sign-in is in the ⚙️ panel, with the family login (publishable key only, in `js/config.js`). **Before anyone signs in: close open sign-up in the Family project** (see `04 AI/Supabase/access/README.md`), because the policies let any signed-in account read and write.
+
+First build (for reference): not in the first build. When notes or creations must persist across devices, plan it with `02 Refs/Skills/supabase_link.md` (Family project, prefix `fs_`, RLS on, publishable key only, SQL written first and applied only when Jimmy asks).
 
 ## Files (planned)
 

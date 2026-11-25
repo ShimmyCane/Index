@@ -365,3 +365,5 @@ Full notes: `04 AI/Make-3D x Construct/model_iteration_lessons.md`.
 5. **Let the game clock be the real clock.** Each mission starts at its own time of day and runs in real time; no speed setting is needed. A setting for "still or fast" was removed after the user said nothing should be static. _(Paper Airplanes x A-10 Warthog)_
 6. **Check astronomy against known values before trusting it.** Solar noon, sunset and the bearing at a known place and day show a sign or time error at once. _(Paper Airplanes x A-10 Warthog)_
 7. **Put open questions next to the feedback box.** A short "Questions" group in the settings panel ties each answer to the screen it is about. _(Paper Airplanes x A-10 Warthog)_
+
+- (2026-11-25, Cheetah Simulator) A soft setting (Gentle mode) changes how a true thing is told, never the true thing itself. Keep a panel that always shows the real facts.

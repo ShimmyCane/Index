@@ -745,6 +745,14 @@
     if (store(KEYS.creations, list)) toast('Saved to My Creations');
     else toast('Could not save on this device');
     renderCreations();
+    pushFamily('Creation', function () { return FSFamily.saveCreation(c); });
+  }
+
+  // When signed in to the family, a copy also goes to the family database. The device copy is always kept first.
+  function pushFamily(what, send) {
+    if (!(window.FSFamily && FSFamily.signedIn())) return;
+    send().then(function () { toast('Also saved to the family'); },
+      function (e) { reportError(what + ' not sent to the family: ' + e.message); });
   }
 
   function openCreation(id) {
@@ -815,12 +823,49 @@
     var text = box.value.trim();
     if (!text) { toast('Write a short note first'); return; }
     var notes = load(KEYS.notes, []);
-    notes.unshift({
-      id: 'n' + Date.now(), text: text, item: lastItem, label: SHEET.name,
+    var note = {
+      id: 'n' + Date.now(), text: text, item: lastItem, label: SHEET.name, sheetId: SHEET.id,
       version: VERSION, noted_at: new Date().toISOString()
-    });
+    };
+    notes.unshift(note);
     if (store(KEYS.notes, notes)) { box.value = ''; toast('Note saved on this device'); }
     renderNotes();
+    pushFamily('Note', function () { return FSFamily.saveNote(note); });
+  }
+
+  // Family sign-in panel: sign in or out, and say what the page is connected to.
+  function updateFamilyStatus() {
+    var st = $('#famStatus');
+    if (!st) return;
+    if (!window.FSFamily) { st.textContent = 'not set up in this copy'; return; }
+    var signed = FSFamily.signedIn();
+    $('#famSignedOut').hidden = signed;
+    $('#btnFamOut').hidden = !signed;
+    st.textContent = 'checking';
+    FSFamily.check().then(function (r) {
+      st.textContent = r.text;
+      if (r.state === 'error') reportError('Family database: ' + r.text);
+    });
+  }
+  function wireFamily() {
+    if (!window.FSFamily) return;
+    $('#btnFamIn').addEventListener('click', function () {
+      var email = $('#famEmail').value.trim(), pass = $('#famPass').value;
+      if (!email || !pass) { toast('Type the family email and password'); return; }
+      FSFamily.signIn(email, pass).then(function () {
+        $('#famPass').value = '';
+        toast('Signed in to the family');
+        updateFamilyStatus();
+      }, function (e) {
+        reportError('Sign-in: ' + e.message);
+        toast('Could not sign in');
+      });
+    });
+    $('#btnFamOut').addEventListener('click', function () {
+      FSFamily.signOut();
+      toast('Signed out. Saving on this device only.');
+      updateFamilyStatus();
+    });
   }
 
   /* ---------- errors (opt-in, shown at the bottom) ---------- */
@@ -939,6 +984,7 @@
     });
 
     $('#btnNote').addEventListener('click', addNote);
+    wireFamily();
     $('#errorBar').addEventListener('click', function () { prefs.showErrors = false; store(KEYS.prefs, prefs); $('#tgErrors').checked = false; renderErrors(); });
 
     window.addEventListener('error', function (e) { reportError(e.message || 'Script error'); });
@@ -982,6 +1028,7 @@
     $('#title').textContent = 'Felix Stickers – ' + SHEET.name;
     document.title = 'Felix Stickers – ' + SHEET.name;
     updatePager();
+    updateFamilyStatus();
     $('#ver').textContent = VERSION;
     $('#storeState').textContent = storeOK ? 'working' : 'blocked (play still works)';
     setupPanels();
