@@ -85,11 +85,12 @@
 
 <section class="timebar" id="timebar">
   <div class="tbtns">
-    <button class="big" id="btnStart" type="button">⏮ 3500 BCE</button>
+    <button class="big" id="btnStart" type="button">« Past</button>
     <button class="big" id="btnPlay" type="button">▶ Play</button>
+    <button class="big" id="btnNow" type="button">Now »</button>
   </div>
-  <input type="range" id="slider" min="-3500" max="1900" step="10" value="0" aria-label="Year: from the past (left) to 1900 CE (right)">
-  <div class="ticks"><span>3500 BCE</span><span>0</span><span>1900 CE</span></div>
+  <input type="range" id="slider" min="-3500" max="2000" step="10" value="0" aria-label="Year: from the past (left) to 2000 CE (right)">
+  <div class="ticks"><span>3500 BCE</span><span>0</span><span>2000 CE</span></div>
 </section>
 
 <button class="gear" id="gear" type="button" aria-label="Settings" aria-expanded="false" aria-controls="drawer">⚙️</button>
@@ -151,7 +152,7 @@ const OFF0 = {};
 PLATES.forEach(p => { OFF0[p.id] = [0, 0, 0]; });
 const COLS = ['#ff9e8a', '#8a7cf0', '#ffb02e', '#7fb8e0', '#b9a6e8', '#8fd1c4', '#f5a3c7', '#d6a25c', '#6fb589',
   '#e8c36a', '#9fd3e6', '#c79adf', '#ffd0b5', '#a3c97a', '#e7dcc4'];
-const START = -3500, END = 1900;
+const START = -3500, END = 2000;
 const $ = id => document.getElementById(id);
 
 const app = FCCommon.init({
@@ -237,6 +238,7 @@ function stepAnim(dt) {
 }
 $('slider').addEventListener('input', e => { anim = null; year = Number(e.target.value); setCard(); dirty = true; });
 $('btnStart').addEventListener('click', () => { anim = null; year = START; setCard(); dirty = true; });
+$('btnNow').addEventListener('click', () => { anim = null; year = END; setCard(); dirty = true; });
 $('btnPlay').addEventListener('click', play);
 
 /* the globe */

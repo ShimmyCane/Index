@@ -165,6 +165,9 @@
         ctx.lineWidth = 4; ctx.strokeStyle = INK;
         if (f.kind === 'volcano') {
           ctx.beginPath(); ctx.arc(x, y, 13, 0, Math.PI * 2); ctx.fillStyle = '#ff8a65'; ctx.fill(); ctx.stroke();
+        } else if (f.kind === 'feature') {
+          ctx.beginPath(); ctx.moveTo(x, y - 16); ctx.lineTo(x + 16, y); ctx.lineTo(x, y + 16); ctx.lineTo(x - 16, y); ctx.closePath();
+          ctx.fillStyle = '#7fd6d0'; ctx.fill(); ctx.stroke();
         } else {
           ctx.beginPath(); ctx.moveTo(x, y - 24); ctx.lineTo(x + 22, y + 14); ctx.lineTo(x - 22, y + 14); ctx.closePath();
           ctx.fillStyle = '#8e7cc3'; ctx.fill(); ctx.stroke();

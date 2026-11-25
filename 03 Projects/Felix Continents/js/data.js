@@ -43,7 +43,26 @@
     { name: 'Old mountains (Variscan)', kind: 'mountain', plate: 'EU', lon: 2, lat: 46, from: 330, to: 200 },
     { name: 'Japan volcanoes', kind: 'volcano', plate: 'EU', lon: 138, lat: 36, from: 30, to: 0 },
     { name: 'Andes volcanoes', kind: 'volcano', plate: 'SA', lon: -68, lat: -22, from: 30, to: 0 },
-    { name: 'Deccan traps', kind: 'volcano', plate: 'IN', lon: 75, lat: 19, from: 67, to: 64 }
+    { name: 'Deccan traps', kind: 'volcano', plate: 'IN', lon: 75, lat: 19, from: 67, to: 64 },
+    { name: 'Atlas Mountains', kind: 'mountain', plate: 'AF', lon: -5.5, lat: 31.5, from: 35, to: 0 },
+    { name: 'Ethiopian Highlands', kind: 'mountain', plate: 'AF', lon: 39.0, lat: 9.0, from: 30, to: 0 },
+    { name: 'Mount Kilimanjaro', kind: 'volcano', plate: 'AF', lon: 37.35, lat: -3.07, from: 2.5, to: 0 },
+    { name: 'Victoria Falls', kind: 'feature', plate: 'AF', lon: 25.9, lat: -17.9, from: 0.5, to: 0 },
+    { name: 'Pyrenees', kind: 'mountain', plate: 'EU', lon: 0.5, lat: 42.8, from: 65, to: 0 },
+    { name: 'Caucasus', kind: 'mountain', plate: 'EU', lon: 44.0, lat: 42.5, from: 35, to: 0 },
+    { name: 'Ural Mountains', kind: 'mountain', plate: 'EU', lon: 59.0, lat: 56.0, from: 300, to: 0 },
+    { name: 'Tian Shan', kind: 'mountain', plate: 'EU', lon: 78.0, lat: 42.0, from: 30, to: 0 },
+    { name: 'Mount Fuji', kind: 'volcano', plate: 'EU', lon: 138.7, lat: 35.4, from: 1, to: 0 },
+    { name: 'Sierra Nevada', kind: 'mountain', plate: 'NA', lon: -119.0, lat: 37.0, from: 100, to: 0 },
+    { name: 'Denali', kind: 'mountain', plate: 'NA', lon: -151.0, lat: 63.1, from: 60, to: 0 },
+    { name: 'Niagara Falls', kind: 'feature', plate: 'NA', lon: -79.0, lat: 43.1, from: 0.02, to: 0 },
+    { name: 'Grand Canyon', kind: 'feature', plate: 'NA', lon: -112.1, lat: 36.1, from: 6, to: 0 },
+    { name: 'Angel Falls', kind: 'feature', plate: 'SA', lon: -62.5, lat: 5.97, from: 1, to: 0 },
+    { name: 'Iguazu Falls', kind: 'feature', plate: 'SA', lon: -54.4, lat: -25.7, from: 0.5, to: 0 },
+    { name: 'Great Dividing Range', kind: 'mountain', plate: 'AU', lon: 148.0, lat: -33.0, from: 400, to: 0 },
+    { name: 'Great Barrier Reef', kind: 'feature', plate: 'AU', lon: 145.8, lat: -18.3, from: 20, to: 0 },
+    { name: 'Transantarctic Mountains', kind: 'mountain', plate: 'AN', lon: 165.0, lat: -80.0, from: 180, to: 0 },
+    { name: 'Vinson Massif', kind: 'mountain', plate: 'AN', lon: -85.6, lat: -78.5, from: 180, to: 0 }
   ];
 
   window.FC = { plates: plates, moments: moments, features: features };
