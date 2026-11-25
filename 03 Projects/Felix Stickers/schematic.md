@@ -166,6 +166,7 @@ See `convo/convo v0.1.md`. Nothing is built until those are answered.
 ## Changes
 
 - 2026-11-23: schematic written from the concept. Status idea.
+- 2026-11-25: orientation is set first, then the roll. After the 1-second window, the first touch on the held curl is an aim drag: start to end sets the sticker's top (the curl turns live while you drag). The second touch rolls it on, turned to that orientation (eases from the drag's own turn to the aim as it rolls). A drag under 12 px does not aim.
 - 2026-11-25: the held curl waits 1 second (was 3) before a touch carries it on. Two-finger turns are damped for small angles: 15° turns the sticker 5°, the ramp reaches 1:1 at 45°, and it is 1:1 beyond that (`fuzzTurn` in `js/app.js`).
 - 2026-11-25: bottom bar gets ◀ n / N ▶ to leaf through the sheets (each sheet keeps its own stickers and undo; a held sticker blocks the switch with a short note). The ⚙️ button in the top bar is removed; the lower-right gear stays. A sticker pack page is planned for when there are more than 20 stickers; not built yet.
 - 2026-11-25: Thanksgiving Table Test 1 added as a private test sheet (see Test sheets). `/make-sticker` skill added. Sheet art now comes from the sheet's own data. `js/sheet_select.js` added.
