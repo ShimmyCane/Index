@@ -582,24 +582,14 @@
     var phiDrag = Math.atan2(uNew.y, uNew.x) - Math.atan2(lift.uL.y, lift.uL.x);
     lift.len = liftLen(lift);
     lift.S = clamp(r, 0, lift.len);
-    // with an orientation chosen, the turn eases from the drag's own turn to that orientation as it rolls on
-    if (lift.aimRot !== undefined) {
-      var p = lift.len ? lift.S / lift.len : 1;
-      lift.phi = phiDrag + p * wrapAngle(lift.aimRot - phiDrag);
-    } else {
-      lift.phi = phiDrag;
-    }
+    // with an orientation chosen by the aim, the roll only rolls: the angle is already set and stays put
+    lift.phi = lift.aimRot !== undefined ? lift.aimRot : phiDrag;
     lift.lastU = uNew; lift.lastPhi = lift.phi; lift.lastS = lift.S;
     liftDraw(lift);
   }
 
   // The sticker's top points along the aim drag: CSS turns clockwise, and "up" is -90° on screen.
   function aimRotOf(d) { return Math.atan2(d.y, d.x) + Math.PI / 2; }
-  function wrapAngle(a) {
-    while (a > Math.PI) a -= 2 * Math.PI;
-    while (a <= -Math.PI) a += 2 * Math.PI;
-    return a;
-  }
   function moveAim(f) {
     var d = { x: f.x - gesture.start.x, y: f.y - gesture.start.y };
     if (Math.hypot(d.x, d.y) < 12) return;   // too short to mean a direction
