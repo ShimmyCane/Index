@@ -514,7 +514,7 @@
     liftDraw(L);
   }
 
-  var FREE_MOVE_MS = 1000;   // after it is let go, the curl can be slid about for this long
+  var FREE_MOVE_MS = 500;   // after it is let go, the curl can be slid about for this long
 
   function liftPress(e) {
     var pt = { x: e.clientX, y: e.clientY };
