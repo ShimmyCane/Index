@@ -17,14 +17,19 @@
   .vers a { min-height: 40px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; border: 3px solid var(--ink);
     border-radius: 12px; background: #fff; color: #2f2d3d; font-weight: 800; text-decoration: none; }
   .vers a.on { background: var(--mint); }
-  .card { margin: 8px 14px 0; background: var(--paper); border: 3px solid var(--ink); border-radius: 18px;
-    padding: 10px 14px; box-shadow: 0 4px 0 var(--ink); }
+  .card { background: var(--paper); border: 3px solid var(--ink); border-radius: 18px; padding: 10px 14px; box-shadow: 0 4px 0 var(--ink); }
   .when { font-weight: 700; font-size: 15px; color: #6b5b95; }
   .name { font-size: 24px; font-weight: 800; line-height: 1.15; }
   .sentence { margin: 4px 0 0; font-size: 17px; line-height: 1.35; }
   .touch { margin: 6px 0 0; font-size: 15px; min-height: 1.2em; }
   #stage { flex: 1; min-height: 0; position: relative; margin: 8px 14px; }
   #globe { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+  /* the text card sits over the globe, bottom-left, so the globe fills the screen */
+  #stage .card { position: absolute; left: 8px; bottom: 8px; right: auto; max-width: min(640px, 72%); margin: 0; padding: 6px 12px; z-index: 6; }
+  #stage .name { font-size: 18px; }
+  #stage .when { font-size: 13px; }
+  #stage .sentence { font-size: 14px; margin-top: 2px; }
+  #stage .touch { font-size: 13px; margin-top: 2px; }
   .timebar { margin: 0 110px 12px 14px; background: var(--paper); border: 3px solid var(--ink); border-radius: 18px;
     padding: 8px 12px; box-shadow: 0 4px 0 var(--ink); display: flex; flex-direction: column; gap: 6px; }
   .tbtns { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -63,12 +68,6 @@
   .errorsPanel { position: fixed; left: 16px; right: 100px; bottom: 16px; max-height: 30vh; overflow: auto; z-index: 25;
     background: #fff0ee; color: #2f2d3d; border: 3px solid var(--ink); border-radius: 16px; padding: 8px 12px;
     font: 14px monospace; white-space: pre-wrap; }
-  /* the text card sits over the globe, bottom-left, so the globe fills the screen */
-  #stage .card { position: absolute; left: 8px; bottom: 8px; right: auto; max-width: min(640px, 72%); margin: 0; padding: 6px 12px; z-index: 6; }
-  #stage .name { font-size: 18px; }
-  #stage .when { font-size: 13px; }
-  #stage .sentence { font-size: 14px; margin-top: 2px; }
-  #stage .touch { font-size: 13px; margin-top: 2px; }
   @media print { .gear, .drawer, .errorsPanel, .timebar { display: none !important; } }
 </style>
 </head>
@@ -80,13 +79,13 @@
   </nav>
 </header>
 
-
-<main id="stage"><canvas id="globe" aria-label="Globe with shaded areas of peoples over time"></canvas>  <section class="card" aria-live="polite">
-  <div class="when" id="when">year 0</div>
-  <div class="name" id="momName">People over time</div>
-  <p class="sentence" id="momSentence">Shaded areas show where some peoples and empires lived, roughly. They grow, then fade. Dots are capitals.</p>
-  <p class="touch" id="touchOut">Touch a shaded area to see its name.</p>
-</section>
+<main id="stage"><canvas id="globe" aria-label="Globe with the states and peoples of each year"></canvas>
+  <section class="card" aria-live="polite">
+    <div class="when" id="when">year 1000</div>
+    <div class="name" id="momName">Peoples and states</div>
+    <p class="sentence" id="momSentence">Shaded areas show the states and peoples of the year, from the source map. Tap one to see its name.</p>
+    <p class="touch" id="touchOut">Touch a shaded area to see its name.</p>
+  </section>
 </main>
 
 <section class="timebar" id="timebar">
@@ -95,15 +94,15 @@
     <button class="big" id="btnPlay" type="button">▶ Play</button>
     <button class="big" id="btnNow" type="button">Now »</button>
   </div>
-  <input type="range" id="slider" min="-3500" max="2000" step="10" value="0" aria-label="Year: from the past (left) to 2000 CE (right)">
-  <div class="ticks"><span>3500 BCE</span><span>0</span><span>2000 CE</span></div>
+  <input type="range" id="slider" min="100" max="2000" step="1" value="1000" aria-label="Year, from 100 CE (left) to 2000 CE (right)">
+  <div class="ticks"><span>100 CE</span><span>1000 CE</span><span>2000 CE</span></div>
 </section>
 
 <button class="gear" id="gear" type="button" aria-label="Settings" aria-expanded="false" aria-controls="drawer">⚙️</button>
 
 <aside class="drawer" id="drawer" hidden>
   <div class="drawerHead"><h2 style="margin:0;font-size:20px">Settings</h2><button class="mini" id="closeDrawer" type="button" aria-label="Close">✖</button></div>
-  <p>Drag the globe to turn it. Move the year to see who lived where.</p>
+  <p>Drag the globe to turn it. Move the year to see the states and peoples of that time, from 100 CE to 2000 CE.</p>
 
   <div class="setting"><label>Spin by itself</label>
     <div class="seg" data-key="spin"><button type="button" data-v="1">On</button><button type="button" data-v="0">Off</button></div></div>
@@ -136,7 +135,8 @@
 
   <details>
     <summary>About this page</summary>
-    <p>Version 0.3.0. The shaded areas are rough hand sketches, not checked against maps by historians. Dates are approximate. Where empires overlapped in time, each is drawn on its own.</p>
+    <p>Version 0.5.0. The shaded areas are real boundaries from aourednik/historical-basemaps (GPL-3.0), simplified, one snapshot every 100 to 500 years. The source says to check its maps against other sources before academic use. Between snapshots the shapes blend, so they are not exact for the years in between.</p>
+    <p>Before 100 CE there is no source yet, so this page starts at 100 CE.</p>
     <p>Built with three.js 0.170.0 (MIT licence).</p>
   </details>
 
@@ -148,107 +148,98 @@
 <script src="js/coast.js"></script>
 <script src="js/engine.js"></script>
 <script src="js/common.js"></script>
-<script src="js/history.js"></script>
+<script src="js/history_geo.js"></script>
 <script type="module">
 import * as THREE from 'https://unpkg.com/three@0.170.0/build/three.module.js';
 
-const FC = window.FC, E = window.FCEngine, H = window.FCHistory;
-const PLATES = FCCoast.expand(FC.plates), REGIONS = H.regions;
+const FC = window.FC, E = window.FCEngine, HG = window.FCHistoryGeo;
+const PLATES = FCCoast.expand(FC.plates);
 const geo = E.makeGeo(PLATES);
 const OFF0 = {};
 PLATES.forEach(p => { OFF0[p.id] = [0, 0, 0]; });
-const COLS = ['#ff9e8a', '#8a7cf0', '#ffb02e', '#7fb8e0', '#b9a6e8', '#8fd1c4', '#f5a3c7', '#d6a25c', '#6fb589',
+const YEARS = HG.years, SNAPS = HG.snaps;
+const FIRST = YEARS[0], LAST = YEARS[YEARS.length - 1];
+const PALETTE = ['#ff9e8a', '#8a7cf0', '#ffb02e', '#7fb8e0', '#b9a6e8', '#8fd1c4', '#f5a3c7', '#d6a25c', '#6fb589',
   '#e8c36a', '#9fd3e6', '#c79adf', '#ffd0b5', '#a3c97a', '#e7dcc4'];
-const START = -3500, END = 2000;
 const $ = id => document.getElementById(id);
+const hashName = s => { let h = 0; for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h; };
+const colourOf = name => PALETTE[hashName(name) % PALETTE.length];
 
 const app = FCCommon.init({
   settingsKey: 'felixContinents.v3.settings',
   defaults: { spin: 1, showErrors: 0 },
-  startItem: 'history-1900', startLabel: 'Peoples over time (V3)',
+  startItem: 'peoples-1000', startLabel: 'Peoples and states (V3)',
   onSetting: () => { dirty = true; }
 });
 const S = app.S;
 
-function fmtYear(y) { return y === 0 ? 'year 0' : (y < 0 ? (-y) + ' BCE' : y + ' CE'); }
-function centroid(pts) {
-  let x = 0, y = 0;
-  pts.forEach(p => { x += p[0]; y += p[1]; });
-  return [x / pts.length, y / pts.length];
+const smooth = t => t * t * (3 - 2 * t);
+const fmtYear = y => y + ' CE';
+/* the two snapshots around a year, and how far between them (0 = the first, 1 = the second) */
+function blendAt(y) {
+  if (y <= FIRST) return { a: FIRST, b: FIRST, f: 0 };
+  if (y >= LAST) return { a: LAST, b: LAST, f: 0 };
+  let i = 0;
+  while (i < YEARS.length - 2 && YEARS[i + 1] <= y) i++;
+  const a = YEARS[i], b = YEARS[i + 1];
+  return { a, b, f: smooth((y - a) / (b - a)) };
 }
-/* area of a region at a year: null when not present; s = size, a = opacity */
-function regionAt(r, y) {
-  if (y < r.start || y > r.end) return null;
-  let s, a;
-  if (y <= r.peak) { const t = (y - r.start) / ((r.peak - r.start) || 1); s = 0.8 + 0.2 * t; a = 0.25 + 0.5 * t; }
-  else { const t = (y - r.peak) / ((r.end - r.peak) || 1); s = 1 - 0.15 * t; a = 0.75 - 0.35 * t; }
-  // fade in over the first 60 years and out over the last 60, so nothing pops in or out
-  a *= Math.min(1, (y - r.start) / 60) * Math.min(1, (r.end - y) / 60);
-  const c = centroid(r.poly);
-  const pts = r.poly.map(q => [c[0] + (q[0] - c[0]) * s, c[1] + (q[1] - c[1]) * s]);
-  return { pts, a, bb: E.bbox(pts) };
-}
-const colourOf = r => COLS[REGIONS.indexOf(r) % COLS.length];
 
 /* state */
-let year = 0, anim = null, dirty = true, dragging = false, focusTarget = null;
-
-/* drawing */
+let year = 1000, anim = null, dirty = true, dragging = false, focusTarget = null;
 const cv = document.createElement('canvas'); cv.width = 2048; cv.height = 1024;
 const ctx = cv.getContext('2d');
-function pathOf(pts, k) {
+function pathOf(rings, k) {
   ctx.beginPath();
-  pts.forEach((q, i) => { const xy = E.toPx(q[0] + k, q[1]); if (i) ctx.lineTo(xy[0], xy[1]); else ctx.moveTo(xy[0], xy[1]); });
-  ctx.closePath();
+  rings.forEach(ring => {
+    ring.forEach((q, i) => { const xy = E.toPx(q[0] + k, q[1]); if (i) ctx.lineTo(xy[0], xy[1]); else ctx.moveTo(xy[0], xy[1]); });
+    ctx.closePath();
+  });
+}
+function drawSnap(y2, alpha) {
+  if (alpha <= 0.01) return;
+  (SNAPS[String(y2)] || []).forEach(it => {
+    ctx.globalAlpha = 0.6 * alpha; ctx.fillStyle = colourOf(it.n);
+    [-360, 0, 360].forEach(k => { pathOf(it.r, k); ctx.fill('evenodd'); });
+    ctx.globalAlpha = Math.min(1, alpha * 1.2); ctx.lineWidth = 3; ctx.strokeStyle = E.INK;
+    [-360, 0, 360].forEach(k => { pathOf(it.r, k); ctx.stroke(); });
+  });
+  ctx.globalAlpha = 1;
 }
 function paint() {
   ctx.fillStyle = E.OCEAN; ctx.fillRect(0, 0, 2048, 1024);
   E.drawPlates(ctx, geo, OFF0, true);
-  REGIONS.forEach(r => {
-    const g = regionAt(r, year);
-    if (!g) return;
-    ctx.globalAlpha = g.a;
-    ctx.fillStyle = colourOf(r);
-    [-360, 0, 360].forEach(k => { pathOf(g.pts, k); ctx.fill(); });
-    ctx.globalAlpha = Math.min(1, g.a * 1.5);
-    ctx.lineWidth = 4; ctx.strokeStyle = E.INK; ctx.setLineDash([]);
-    [-360, 0, 360].forEach(k => { pathOf(g.pts, k); ctx.stroke(); });
-  });
-  REGIONS.forEach(r => {
-    const g = regionAt(r, year);
-    if (!g || g.a <= 0.02) return;
-    [-360, 0, 360].forEach(k => {
-      const xy = E.toPx(r.cap[0] + k, r.cap[1]);
-      ctx.beginPath(); ctx.arc(xy[0], xy[1], 10, 0, Math.PI * 2);
-      ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = E.INK; ctx.stroke();
-    });
-  });
+  const b = blendAt(year);
+  if (b.a === b.b) drawSnap(b.a, 1);
+  else { drawSnap(b.a, 1 - b.f); drawSnap(b.b, b.f); }
 }
-function shownNames() {
-  return REGIONS.filter(r => year >= r.start && year <= r.end).map(r => r.name);
+/* the names shown this year: the snapshot that is more present */
+function namesAt(y) {
+  const b = blendAt(y), src = b.f < 0.5 ? b.a : b.b;
+  return (SNAPS[String(src)] || []).map(it => it.n);
 }
 function setCard() {
   $('when').textContent = fmtYear(year);
-  const names = shownNames();
-  $('momName').textContent = names.length ? names.length + ' shaded now' : 'Nothing shaded at this year';
-  $('momSentence').textContent = names.length ? names.join(', ') + '.' : 'Pick a later year, or move the slider.';
+  const names = [...new Set(namesAt(year))];
+  $('momName').textContent = names.length + ' named areas in ' + year;
+  $('momSentence').textContent = names.slice(0, 10).join(', ') + (names.length > 10 ? ', and more.' : '.');
   app.setContext({ item: 'year-' + year, label: fmtYear(year) });
   $('slider').value = String(year);
 }
 function play() {
-  anim = { from: year, to: END, t: 0 };
+  anim = { from: year, to: LAST, t: 0 };
   dirty = true;
 }
 function stepAnim(dt) {
-  anim.t += dt / 25;
+  anim.t += dt / 22;
   const t = Math.min(1, anim.t);
-  year = Math.round((anim.from + (anim.to - anim.from) * t) / 10) * 10;
+  year = Math.round(anim.from + (anim.to - anim.from) * t);
   if (t >= 1) { year = anim.to; anim = null; }
-  setCard();
+  setCard(); dirty = true;
 }
 $('slider').addEventListener('input', e => { anim = null; year = Number(e.target.value); setCard(); dirty = true; });
-$('btnStart').addEventListener('click', () => { anim = null; year = START; setCard(); dirty = true; });
-$('btnNow').addEventListener('click', () => { anim = null; year = END; setCard(); dirty = true; });
+$('btnStart').addEventListener('click', () => { anim = null; year = FIRST; setCard(); dirty = true; });
+$('btnNow').addEventListener('click', () => { anim = null; year = LAST; setCard(); dirty = true; });
 $('btnPlay').addEventListener('click', play);
 
 /* the globe */
@@ -263,20 +254,18 @@ function resize() {
   dirty = true;
 }
 function nameAt(lon, lat) {
-  const hits = REGIONS.filter(r => year >= r.start && year <= r.end).filter(r => {
-    const g = regionAt(r, year);
-    return g && E.insidePts(lon, lat, g.pts, g.bb);
-  });
-  if (hits.length) return hits.map(r => r.name).join(' and ') + ' (' + fmtYear(year) + ')';
+  const b = blendAt(year), src = b.f < 0.5 ? b.a : b.b;
+  const hit = (SNAPS[String(src)] || []).filter(it => it.r.some(ring => E.insidePts(lon, lat, ring, E.bbox(ring))));
+  if (hit.length) return hit.map(it => it.n).join(' / ') + ' (' + fmtYear(year) + ')';
   const p = geo.plateAt(lon, lat, OFF0);
-  return p ? p.name + ' (today\'s land; no shaded people here at this year)' : 'the ocean';
+  return p ? p.name + ' (no named area here in ' + year + ')' : 'the ocean';
 }
 function tapAt(clientX, clientY) {
   const rect = canvasEl.getBoundingClientRect();
   const ndc = new THREE.Vector2(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
   raycaster.setFromCamera(ndc, camera);
   const hits = raycaster.intersectObject(sphere, false);
-  if (!hits.length) { $('touchOut').textContent = 'Touch the globe to see a name.'; return; }
+  if (!hits.length) return;
   const p = sphere.worldToLocal(hits[0].point.clone()).normalize();
   const lat = Math.asin(Math.max(-1, Math.min(1, p.y))) * 180 / Math.PI;
   let lon = Math.atan2(p.z, -p.x) * 180 / Math.PI - 180;
@@ -290,7 +279,7 @@ function initGlobe() {
   renderer.setClearColor(0xfff6e6, 1);
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
-  group = new THREE.Group(); group.rotation.x = 0.25; group.rotation.y = -(30 + 90) * Math.PI / 180; scene.add(group);   // start on Africa and Eurasia
+  group = new THREE.Group(); group.rotation.x = 0.25; group.rotation.y = -(30 + 90) * Math.PI / 180; scene.add(group);
   scene.add(new THREE.AmbientLight(0xffffff, 1.1));
   const sun = new THREE.DirectionalLight(0xffffff, 1.2); sun.position.set(3, 2, 4); scene.add(sun);
   tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
@@ -323,7 +312,7 @@ function initGlobe() {
 let last = performance.now();
 function frame(now) {
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
-  if (anim) { stepAnim(dt); dirty = true; }
+  if (anim) stepAnim(dt);
   if (focusTarget !== null && !dragging) {
     const diff = ((focusTarget - group.rotation.y + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
     group.rotation.y += diff * Math.min(1, dt * 2.5);

@@ -140,3 +140,12 @@ Yes. ⚙️ in the lower right holds the options and extensions. Errors appear a
 - **V1 legend:** top-left of the globe when on.
 - **V2 counter:** counts continents, not landmasses.
 - **Open:** continental deformation (note 3); the past shapes (historical licence decision; Rodinia).
+
+## Round 7 (2026-11-25): real historical boundaries; GPL-3.0
+
+- **Licence:** the repository is GPL-3.0 (`LICENSE`, the full text from the dataset's own copy). Third-party files keep their own licences (`THIRD-PARTY.md`).
+- **Historical boundaries:** V3 and V4 now use real boundaries from aourednik/historical-basemaps (GPL-3.0): snapshots at 100, 500, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900 and 2000 CE (`js/history_geo.js`, about 2.6 MB, simplified to about 0.05°). These replace the hand sketches.
+- **Lost:** the sketches before 100 CE (Egypt, Mesopotamia, the Indus, Chinese dynasties before 100 CE, and others) and their story cards. The source starts at 100 CE, so V3 now runs from 100 to 2000 CE. Earlier history needs another source.
+- **V3:** the year slider blends the two nearest snapshots, so shapes change smoothly. Tap a shaded area to see its name.
+- **V4:** ten milestones, one per snapshot year. Tapping a country zooms in on it. The stories are removed for now: the source names are used.
+- **Open:** continental deformation (note 3); the pre-100 CE history (another source); the V1 coastline already uses Natural Earth.

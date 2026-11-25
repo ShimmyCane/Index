@@ -17,14 +17,19 @@
   .vers a { min-height: 40px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; border: 3px solid var(--ink);
     border-radius: 12px; background: #fff; color: #2f2d3d; font-weight: 800; text-decoration: none; }
   .vers a.on { background: var(--mint); }
-  .card { margin: 8px 14px 0; background: var(--paper); border: 3px solid var(--ink); border-radius: 18px;
-    padding: 10px 14px; box-shadow: 0 4px 0 var(--ink); }
+  .card { background: var(--paper); border: 3px solid var(--ink); border-radius: 18px; padding: 10px 14px; box-shadow: 0 4px 0 var(--ink); }
   .when { font-weight: 700; font-size: 15px; color: #6b5b95; }
   .name { font-size: 24px; font-weight: 800; line-height: 1.15; }
   .sentence { margin: 4px 0 0; font-size: 17px; line-height: 1.35; }
   .touch { margin: 6px 0 0; font-size: 15px; min-height: 1.2em; }
   #stage { flex: 1; min-height: 0; position: relative; margin: 8px 14px; }
   #globe { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+  /* the text card sits over the globe, bottom-left, so the globe fills the screen */
+  #stage .card { position: absolute; left: 8px; bottom: 8px; right: auto; max-width: min(640px, 72%); margin: 0; padding: 6px 12px; z-index: 6; }
+  #stage .name { font-size: 18px; }
+  #stage .when { font-size: 13px; }
+  #stage .sentence { font-size: 14px; margin-top: 2px; }
+  #stage .touch { font-size: 13px; margin-top: 2px; }
   .timebar { margin: 0 110px 12px 14px; background: var(--paper); border: 3px solid var(--ink); border-radius: 18px;
     padding: 8px 12px; box-shadow: 0 4px 0 var(--ink); display: flex; flex-direction: column; gap: 6px; }
   .tbtns { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -63,12 +68,6 @@
   .errorsPanel { position: fixed; left: 16px; right: 100px; bottom: 16px; max-height: 30vh; overflow: auto; z-index: 25;
     background: #fff0ee; color: #2f2d3d; border: 3px solid var(--ink); border-radius: 16px; padding: 8px 12px;
     font: 14px monospace; white-space: pre-wrap; }
-  /* the text card sits over the globe, bottom-left, so the globe fills the screen */
-  #stage .card { position: absolute; left: 8px; bottom: 8px; right: auto; max-width: min(640px, 72%); margin: 0; padding: 6px 12px; z-index: 6; }
-  #stage .name { font-size: 18px; }
-  #stage .when { font-size: 13px; }
-  #stage .sentence { font-size: 14px; margin-top: 2px; }
-  #stage .touch { font-size: 13px; margin-top: 2px; }
   @media print { .gear, .drawer, .errorsPanel, .timebar { display: none !important; } }
 </style>
 </head>
@@ -80,13 +79,13 @@
   </nav>
 </header>
 
-
-<main id="stage"><canvas id="globe" aria-label="Globe with countries at each milestone"></canvas>  <section class="card" aria-live="polite">
-  <div class="when" id="when">milestone</div>
-  <div class="name" id="momName">Greek city-states</div>
-  <p class="sentence" id="momSentence">Snap to a milestone with the bar. Tap a shaded country to zoom in and read its story.</p>
-  <p class="touch" id="touchOut">Touch a country to zoom in.</p>
-</section>
+<main id="stage"><canvas id="globe" aria-label="Globe with the countries at each milestone"></canvas>
+  <section class="card" aria-live="polite">
+    <div class="when" id="when">milestone</div>
+    <div class="name" id="momName">Countries</div>
+    <p class="sentence" id="momSentence">Snap to a milestone with the bar. Tap a shaded country to zoom in.</p>
+    <p class="touch" id="touchOut">Touch a country to zoom in.</p>
+  </section>
 </main>
 
 <section class="timebar" id="timebar">
@@ -95,7 +94,7 @@
     <button class="big" id="btnPlay" type="button">▶ Play</button>
     <button class="big" id="btnNow" type="button">Now »</button>
   </div>
-  <input type="range" id="slider" min="0" max="8" step="1" value="0" aria-label="Milestone: from the oldest (left) to modern (right)">
+  <input type="range" id="slider" min="0" max="9" step="1" value="0" aria-label="Milestone: from the oldest (left) to 2000 CE (right)">
   <div class="ticks" id="ticks"></div>
 </section>
 
@@ -103,7 +102,7 @@
 
 <aside class="drawer" id="drawer" hidden>
   <div class="drawerHead"><h2 style="margin:0;font-size:20px">Settings</h2><button class="mini" id="closeDrawer" type="button" aria-label="Close">✖</button></div>
-  <p>Drag the globe to turn it. Snap to a milestone to see which countries and peoples were there.</p>
+  <p>Drag the globe to turn it. Snap to a milestone to see its countries. Tap a country to zoom in on it.</p>
 
   <div class="setting"><label>Spin by itself</label>
     <div class="seg" data-key="spin"><button type="button" data-v="1">On</button><button type="button" data-v="0">Off</button></div></div>
@@ -136,7 +135,7 @@
 
   <details>
     <summary>About this page</summary>
-    <p>Version 0.4.1. The countries are rough hand sketches, not checked against maps by historians. Dates are approximate. Modern countries are not drawn yet: the modern milestone shows today's continents instead.</p>
+    <p>Version 0.5.0. The countries are real boundaries from aourednik/historical-basemaps (GPL-3.0), simplified. The source says to check its maps against other sources before academic use. The shapes are drawn as the source has them for each milestone year, and do not show changes between those years.</p>
     <p>Built with three.js 0.170.0 (MIT licence).</p>
   </details>
 
@@ -148,19 +147,26 @@
 <script src="js/coast.js"></script>
 <script src="js/engine.js"></script>
 <script src="js/common.js"></script>
-<script src="js/history.js"></script>
+<script src="js/history_geo.js"></script>
 <script type="module">
 import * as THREE from 'https://unpkg.com/three@0.170.0/build/three.module.js';
 
-const FC = window.FC, E = window.FCEngine, H = window.FCHistory;
-const PLATES = FCCoast.expand(FC.plates), REGIONS = H.regions;
+const FC = window.FC, E = window.FCEngine, HG = window.FCHistoryGeo;
+const PLATES = FCCoast.expand(FC.plates);
 const geo = E.makeGeo(PLATES);
 const OFF0 = {};
 PLATES.forEach(p => { OFF0[p.id] = [0, 0, 0]; });
-const COLS = ['#ff9e8a', '#8a7cf0', '#ffb02e', '#7fb8e0', '#b9a6e8', '#8fd1c4', '#f5a3c7', '#d6a25c', '#6fb589',
-  '#e8c36a', '#9fd3e6', '#c79adf', '#ffd0b5', '#a3c97a', '#e7dcc4'];
-const MIL = H.milestones, COUNTRIES = H.countries;
 const $ = id => document.getElementById(id);
+const SNAPS = HG.snaps;
+/* the milestones are the snapshot years of the source */
+const MIL = [100, 500, 800, 1000, 1200, 1300, 1500, 1700, 1900, 2000];
+const isModern = i => MIL[i] === 2000;
+const PALETTE = ['#ff9e8a', '#8a7cf0', '#ffb02e', '#7fb8e0', '#b9a6e8', '#8fd1c4', '#f5a3c7', '#d6a25c', '#6fb589',
+  '#e8c36a', '#9fd3e6', '#c79adf', '#ffd0b5', '#a3c97a', '#e7dcc4'];
+const hashName = s => { let h = 0; for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h; };
+const colourOf = name => PALETTE[hashName(name) % PALETTE.length];
+const fmtYear = y => y + ' CE';
+
 const app = FCCommon.init({
   settingsKey: 'felixContinents.v4.settings',
   defaults: { spin: 1, showErrors: 0 },
@@ -168,92 +174,76 @@ const app = FCCommon.init({
   onSetting: () => { dirty = true; }
 });
 const S = app.S;
-function fmtYear(y) { return y === 0 ? 'year 0' : (y < 0 ? (-y) + ' BCE' : y + ' CE'); }
-function centroid(pts) {
-  let x = 0, y = 0;
-  pts.forEach(p => { x += p[0]; y += p[1]; });
-  return [x / pts.length, y / pts.length];
-}
-const colourOf = c => COLS[COUNTRIES.indexOf(c) % COLS.length];
-const isModern = i => i === MIL.length - 1;
-function activeAt(i) { const y = MIL[i].year; return COUNTRIES.filter(c => c.from <= y && y <= c.to); }
+
+/* the countries of a milestone: the source's snapshot for that year */
+const countriesAt = i => SNAPS[String(MIL[i])] || [];
+const smooth = t => t * t * (3 - 2 * t);
 
 /* state */
-let idx = 0, zoomed = null, anim = null, dirty = true, dragging = false, focusTarget = null, tiltTarget = null, baseZ = 3.6;
+let idx = 0, zoomed = null, anim = null, dirty = true, dragging = false, focusTarget = null, tiltTarget = null;
 let prevIdx = null, fadeT = 1;   // fadeT runs 0 to 1 after each milestone change (about 0.8 s)
+let baseZ = 3.6;
 
 /* drawing */
 const cv = document.createElement('canvas'); cv.width = 2048; cv.height = 1024;
 const ctx = cv.getContext('2d');
-function pathOf(pts, k) {
+function pathOf(rings, k) {
   ctx.beginPath();
-  pts.forEach((q, i) => { const xy = E.toPx(q[0] + k, q[1]); if (i) ctx.lineTo(xy[0], xy[1]); else ctx.moveTo(xy[0], xy[1]); });
-  ctx.closePath();
-}
-/* countries with their outlines; alpha lets one set fade out while the next fades in */
-function drawSet(list, alpha) {
-  list.forEach(c => {
-    ctx.globalAlpha = 0.7 * alpha; ctx.fillStyle = colourOf(c);
-    [-360, 0, 360].forEach(k => { pathOf(c.poly, k); ctx.fill(); });
-    ctx.globalAlpha = alpha; ctx.lineWidth = 6; ctx.strokeStyle = E.INK;
-    [-360, 0, 360].forEach(k => { pathOf(c.poly, k); ctx.stroke(); });
+  rings.forEach(ring => {
+    ring.forEach((q, i) => { const xy = E.toPx(q[0] + k, q[1]); if (i) ctx.lineTo(xy[0], xy[1]); else ctx.moveTo(xy[0], xy[1]); });
+    ctx.closePath();
   });
-  list.forEach(c => {
-    [-360, 0, 360].forEach(k => {
-      const xy = E.toPx(c.cap[0] + k, c.cap[1]);
-      ctx.globalAlpha = alpha;
-      ctx.beginPath(); ctx.arc(xy[0], xy[1], 10, 0, Math.PI * 2);
-      ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = E.INK; ctx.stroke();
-    });
+}
+function drawSet(list, alpha) {
+  if (alpha <= 0.01) return;
+  list.forEach(it => {
+    ctx.globalAlpha = 0.7 * alpha; ctx.fillStyle = colourOf(it.n);
+    [-360, 0, 360].forEach(k => { pathOf(it.r, k); ctx.fill('evenodd'); });
+    ctx.globalAlpha = alpha; ctx.lineWidth = 4; ctx.strokeStyle = E.INK;
+    [-360, 0, 360].forEach(k => { pathOf(it.r, k); ctx.stroke(); });
   });
   ctx.globalAlpha = 1;
 }
 function paint() {
   ctx.fillStyle = E.OCEAN; ctx.fillRect(0, 0, 2048, 1024);
   E.drawPlates(ctx, geo, OFF0, true);
-  if (prevIdx !== null && fadeT < 1 && !isModern(prevIdx)) drawSet(activeAt(prevIdx), 1 - fadeT);
-  if (!isModern(idx)) drawSet(activeAt(idx), fadeT);
+  if (prevIdx !== null && fadeT < 1) drawSet(countriesAt(prevIdx), 1 - fadeT);
+  drawSet(countriesAt(idx), fadeT);
 }
 function setCard() {
-  const m = MIL[idx];
-  $('when').textContent = fmtYear(m.year) + ' · milestone ' + (idx + 1) + ' of ' + MIL.length;
-  if (isModern(idx)) {
-    $('momName').textContent = 'Modern times';
-    $('momSentence').textContent = 'Modern countries are not drawn yet. Today\'s continents are shown instead.';
-  } else {
-    const act = activeAt(idx);
-    $('momName').textContent = m.label;
-    $('momSentence').textContent = act.length ? 'Shown: ' + act.map(c => c.name).join(', ') + '.' : 'Nothing drawn at this milestone yet.';
-  }
-  app.setContext({ item: 'milestone-' + idx, label: m.label + ' (' + fmtYear(m.year) + ')' });
+  const list = [...new Set(countriesAt(idx).map(it => it.n))];
+  $('when').textContent = fmtYear(MIL[idx]) + ' · milestone ' + (idx + 1) + ' of ' + MIL.length;
+  $('momName').textContent = list.length + ' named countries in ' + MIL[idx];
+  $('momSentence').textContent = list.slice(0, 12).join(', ') + (list.length > 12 ? ', and more.' : '.');
+  app.setContext({ item: 'milestone-' + idx, label: fmtYear(MIL[idx]) });
   $('slider').value = String(idx);
 }
-/* turn the globe to the middle of the countries shown at this milestone */
+/* a manual pick turns the globe to the middle of the countries shown; Play does not, so the globe holds still */
 function focusMilestone() {
-  tiltTarget = 0.25;   // back to the usual tilt
-  const act = isModern(idx) ? [] : activeAt(idx);
-  if (!act.length) return;
-  let x = 0, y = 0;
-  act.forEach(c => { const r = c.cap[0] * Math.PI / 180; x += Math.cos(r); y += Math.sin(r); });
+  tiltTarget = 0.25;
+  const list = countriesAt(idx);
+  if (!list.length) return;
+  let x = 0, y = 0, n = 0;
+  list.forEach(it => { const c = centroid(it.r[0]); const r = c[0] * Math.PI / 180; x += Math.cos(r); y += Math.sin(r); n++; });
   const L = Math.atan2(y, x) * 180 / Math.PI;
   focusTarget = -(L + 90) * Math.PI / 180;
+}
+function centroid(ring) {
+  let x = 0, y = 0;
+  ring.forEach(q => { x += q[0]; y += q[1]; });
+  return [x / ring.length, y / ring.length];
 }
 function changeTo(i) {
   if (i !== idx) { prevIdx = idx; fadeT = 0; }
   idx = i; zoomed = null;
 }
-/* a manual pick turns the globe to the new countries; Play does not, so the globe holds still */
 function snapTo(i, animate) {
   changeTo(i);
   if (!animate) { anim = null; focusMilestone(); }
   setCard(); dirty = true;
 }
 function play() {
-  // step through the milestones left to right, then stop on modern
-  let i = 0;
-  anim = { steps: [], t: 0 };
-  for (let k = 0; k < MIL.length; k++) anim.steps.push(k);
-  anim.i = 0; anim.wait = 0;
+  anim = { i: 0, wait: 0 };
   snapTo(0, true);
 }
 function stepAnim(dt) {
@@ -268,7 +258,7 @@ $('slider').addEventListener('input', e => snapTo(Number(e.target.value), false)
 $('btnStart').addEventListener('click', () => snapTo(0, false));
 $('btnNow').addEventListener('click', () => snapTo(MIL.length - 1, false));
 $('btnPlay').addEventListener('click', play);
-$('ticks').innerHTML = MIL.map(m => '<span>' + (m.year < 0 ? (-m.year) + ' BCE' : m.year) + '</span>').join('');
+$('ticks').innerHTML = MIL.map(y => '<span>' + y + '</span>').join('');
 
 /* the globe */
 let renderer, scene, camera, group, sphere, tex, stageEl, canvasEl, raycaster;
@@ -283,20 +273,20 @@ function resize() {
   dirty = true;
 }
 function countryAt(lon, lat) {
-  return activeAt(idx).find(c => E.insidePts(lon, lat, c.poly, E.bbox(c.poly))) || null;
+  return countriesAt(idx).find(it => it.r.some(ring => E.insidePts(lon, lat, ring, E.bbox(ring)))) || null;
 }
-function zoomIn(c) {
-  zoomed = c;
-  focusTarget = -(c.cap[0] + 90) * Math.PI / 180;
-  tiltTarget = Math.max(-60, Math.min(60, c.cap[1])) * Math.PI / 180;   // bring the country's latitude to the middle
-  $('momName').textContent = c.name;
-  $('momSentence').textContent = c.story + ' (' + fmtYear(MIL[idx].year) + ')';
-  $('touchOut').textContent = 'Zoomed in on ' + c.name + '. Tap the ocean to zoom back out.';
+function zoomIn(it) {
+  zoomed = it;
+  const c = centroid(it.r[0]);
+  focusTarget = -(c[0] + 90) * Math.PI / 180;
+  tiltTarget = Math.max(-60, Math.min(60, c[1])) * Math.PI / 180;
+  $('momName').textContent = it.n;
+  $('momSentence').textContent = 'A country on the source map in ' + fmtYear(MIL[idx]) + '. Tap the ocean to zoom back out.';
+  $('touchOut').textContent = 'Zoomed in on ' + it.n + '.';
   dirty = true;
 }
 function zoomOut() {
-  zoomed = null;
-  tiltTarget = 0.25;
+  zoomed = null; tiltTarget = 0.25;
   $('touchOut').textContent = 'Touch a country to zoom in.';
   setCard(); dirty = true;
 }
@@ -310,8 +300,9 @@ function tapAt(clientX, clientY) {
   const lat = Math.asin(Math.max(-1, Math.min(1, p.y))) * 180 / Math.PI;
   let lon = Math.atan2(p.z, -p.x) * 180 / Math.PI - 180;
   if (lon < -180) lon += 360;
-  const c = isModern(idx) ? null : countryAt(lon, lat);
-  if (c) zoomIn(c); else zoomOut();
+  const it = countryAt(lon, lat);
+  if (it) zoomIn(it); else if (zoomed) zoomOut();
+  else $('touchOut').textContent = 'No named country here in ' + MIL[idx] + '. Touch a shaded country.';
 }
 function initGlobe() {
   stageEl = $('stage'); canvasEl = $('globe');
@@ -320,7 +311,7 @@ function initGlobe() {
   renderer.setClearColor(0xfff6e6, 1);
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
-  group = new THREE.Group(); group.rotation.x = 0.25; group.rotation.y = -(30 + 90) * Math.PI / 180; scene.add(group);   // start on Africa and Eurasia
+  group = new THREE.Group(); group.rotation.x = 0.25; group.rotation.y = -(30 + 90) * Math.PI / 180; scene.add(group);
   scene.add(new THREE.AmbientLight(0xffffff, 1.1));
   const sun = new THREE.DirectionalLight(0xffffff, 1.2); sun.position.set(3, 2, 4); scene.add(sun);
   tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
@@ -353,13 +344,13 @@ function initGlobe() {
 let last = performance.now();
 function frame(now) {
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
-  if (anim) { stepAnim(dt); dirty = true; }
+  if (anim) stepAnim(dt);
+  if (fadeT < 1) { fadeT = Math.min(1, fadeT + dt / 0.8); dirty = true; }
   if (focusTarget !== null && !dragging) {
     const diff = ((focusTarget - group.rotation.y + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
     group.rotation.y += diff * Math.min(1, dt * 2.5);
     if (Math.abs(diff) < 0.002) focusTarget = null;
   } else if (S.spin && !dragging && !anim) group.rotation.y += dt * 0.12;
-  if (fadeT < 1) { fadeT = Math.min(1, fadeT + dt / 0.8); dirty = true; }
   if (tiltTarget !== null && !dragging) {
     group.rotation.x += (tiltTarget - group.rotation.x) * Math.min(1, dt * 2.5);
     if (Math.abs(tiltTarget - group.rotation.x) < 0.002) tiltTarget = null;
@@ -372,6 +363,7 @@ function frame(now) {
 try {
   initGlobe();
   setCard();
+  focusMilestone();
   requestAnimationFrame(frame);
 } catch (err) {
   app.logError('Could not start the globe: ' + (err && err.message ? err.message : err));

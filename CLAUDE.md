@@ -8,6 +8,10 @@ This repo is public. Anything committed here can be seen by anyone, so treat eve
 
 Its private counterpart is `ShimmyAI`, a private repo where family and personal work happens. Skills and lessons were pulled over from there. Private material stays there.
 
+## Licence
+
+This repository is GPL-3.0 (`LICENSE`). Third-party files keep their own licences, listed in `THIRD-PARTY.md`.
+
 ## Folder map
 
 | Folder | Purpose | Who edits |
