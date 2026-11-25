@@ -40,6 +40,7 @@ Projects with notes:
 - Athena's Piano Companion/ — 0.2.0 (2026-11-21): hands-free piano recording companion with home, library, browse and recycle bin, player and four-layer composer. `brief.md`, `lessons.md`. Questions in `03 Projects/Athena's Piano Companion/convo/` (`v0.1` to `v0.4`).
 - Paper Airplanes x A-10 Warthog/ — MVP 0.1.0 (2026-11-18): remix of remix.ui8.ai/fly (not reachable from the build container; not read), a 1990s floppy A-10 game (to confirm), and Paper Airplanes; TypeScript source compiled to `js/game.js`; flight-model tests in `tools/flight_test.js`; Playwright checks at three sizes. `brief.md`, `lessons.md`. Questions in `03 Projects/Paper Airplanes x A-10 Warthog/convo/convo v0.1.md`.
 
+- Massage Map/ — planned (2026-11-25): brief and lessons started; questions in `03 Projects/Massage Map/convo/convo v0.1.md`. `brief.md`, `lessons.md`.
 - Salmon Leap/ — V1 to V5 (2026-11-18): a bronze statue of a leaping Atlantic salmon, built in five versions with a test; references and lessons in `Salmon Leap/lessons.md` and `brief.md`. Questions in `03 Projects/Salmon Leap/convo/convo v0.1.md`.
 
 Notes:
