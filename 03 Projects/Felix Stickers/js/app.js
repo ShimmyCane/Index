@@ -99,6 +99,13 @@
     if (!a || !b) return 0;
     return Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
   }
+  // Two-finger turns are damped for small angles, so a light twist does not spin the sticker.
+  // Turn 0–15°: one third (15° gives 5°). 15–45°: a smooth ramp from 5° up to 45°. Past 45°: one to one.
+  function fuzzTurn(d) {
+    var a = Math.abs(d);
+    var out = a < 15 ? a / 3 : (a < 45 ? 5 + (a - 15) * (40 / 30) : a);
+    return d < 0 ? -out : out;
+  }
   function setLast(label) { lastItem = label; }
 
   /* ---------- rendering ---------- */
@@ -507,7 +514,7 @@
     liftDraw(L);
   }
 
-  var FREE_MOVE_MS = 3000;   // after it is let go, the curl can be slid about for this long
+  var FREE_MOVE_MS = 1000;   // after it is let go, the curl can be slid about for this long
 
   function liftPress(e) {
     var pt = { x: e.clientX, y: e.clientY };
@@ -640,7 +647,7 @@
       if (n) placeStyle(n, item);
     } else if (gesture.kind === 'rotate') {
       var it = findItem(gesture.uid);
-      it.rot = gesture.rot0 + (angleOf(gesture.pids) - gesture.angle0);
+      it.rot = gesture.rot0 + fuzzTurn(angleOf(gesture.pids) - gesture.angle0);
       var node = elFor(it.uid);
       if (node) placeStyle(node, it);
     }
