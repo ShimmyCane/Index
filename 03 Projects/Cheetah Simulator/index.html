@@ -198,6 +198,7 @@ var LATER={3:'Watching and trying',4:'Almost grown'};
 
 var S=load();
 var skyBoostT=0; // seconds left of the sky run into the next stage
+var ZOOM1=1.25; // seconds left of the sky run into the next stage
 var W=0,H=0,DPR=1,WD=null,drawerOpen=false,last=performance.now(),saveAcc=0,toastT=null,gearT=null;
 var errors=[];
 var fx=0,fy=0,jx=0,jy=0,keys={};
@@ -279,7 +280,7 @@ function newBfly(){
 function initWorld(){
   var id=S.cheetah.stage, i;
   WD={cub:{x:W*0.5,y:H*0.5,dir:1,moving:false,t:0},
-      mum:{x:rn(60,W-60),y:rn(H*0.2,H*0.6),calling:false,alpha:0.35},
+      mum:{x:rn(60,W-60),y:rn(H*0.2,H*0.6),state:'hidden',tx:0,ty:0,wait:0,alpha:0.35},
       sprigs:[],bflies:[],sibs:[],shadow:null,shadowT:14,
       patch:{x:rn(W*0.2,W*0.8),y:rn(H*0.4,H-200),r:110},
       tufts:[],still:0,nibbleT:0,listening:false,listenT:0,listenFlash:0,moveAcc:0,pulse:0};
@@ -343,7 +344,7 @@ window.addEventListener('keyup',function(e){keys[e.code]=false;});
 function chirp(){
   if(!WD)return;
   if(S.cheetah.stage===1){
-    WD.mum.calling=true;
+    WD.mum.state='called';
     WD.listening=true; WD.listenT=2.5; WD.pulse=1;
     say('Chirp! Stop and listen for Mum.');
   }else if(S.cheetah.stage===2){
@@ -355,14 +356,35 @@ function chirp(){
   }
 }
 
+/* ---------- Mum ---------- */
+function visibleBounds(){
+  var z=S.cheetah.stage===1?ZOOM1:1, m=40;
+  return {
+    x0:Math.max(m, W/2-(W/2)/z+m/z), x1:Math.min(W-m, W/2+(W/2)/z-m/z),
+    y0:Math.max(H*0.25, H/2-(H/2)/z+m/z), y1:Math.min(H-140, H/2+(H/2)/z-m/z)
+  };
+}
+function reunite(){
+  var m=WD.mum, c=WD.cub;
+  addSkill('follow');
+  // walk ahead to a new spot, on the screen, and wag
+  var a=rn(0,Math.PI*2), r=rn(220,300);
+  var vb=visibleBounds();
+  m.tx=clamp(c.x+Math.cos(a)*r, vb.x0, vb.x1);
+  m.ty=clamp(c.y+Math.sin(a)*r, vb.y0, vb.y1);
+  m.state='leading'; m.wait=0;
+  say('Mum wags her tail: follow me!');
+}
+
 /* ---------- update ---------- */
 function update(dt){
-  var c=WD.cub, v=inputVec(), speed=170;
+  var c=WD.cub, v=inputVec(), speed=(S.cheetah.stage===1?110:170);
   c.moving=Math.hypot(v.x,v.y)>0.1;
   if(Math.abs(v.x)>0.1)c.dir=v.x>0?1:-1;
   var ox=c.x, oy=c.y;
-  c.x=clamp(c.x+v.x*speed*dt,40,W-40);
-  c.y=clamp(c.y+v.y*speed*dt,H*0.25,H-140);
+  var vb=visibleBounds();
+  c.x=clamp(c.x+v.x*speed*dt,vb.x0,vb.x1);
+  c.y=clamp(c.y+v.y*speed*dt,vb.y0,vb.y1);
   c.t+=dt;
   WD.pulse=Math.max(0,WD.pulse-dt*1.5);
   WD.clouds.forEach(function(k){k.x+=12*dt; if(k.x>W+140)k.x=-140;});
@@ -398,16 +420,18 @@ function update(dt){
       if(WD.nibbleT>=1){near.done=true; WD.nibbleT=0; addSkill('nibble');}
     }else WD.nibbleT=0;
 
-    // Mum comes to a called cub
+    // Mum: comes when called; after the reunion she walks ahead and wags her tail (she never resets)
     var m=WD.mum;
-    m.alpha+=((m.calling?1:0.35)-m.alpha)*Math.min(1,dt*4);
-    if(m.calling){
+    m.alpha+=((m.state==='hidden'?0.35:1)-m.alpha)*Math.min(1,dt*4);
+    if(m.state==='called'){
       var dx=c.x-m.x, dy=c.y-m.y, d=Math.hypot(dx,dy);
-      if(d<90){
-        m.calling=false; addSkill('follow');
-        say('Found Mum! She licks your ear. She will hide again.');
-        m.x=rn(60,W-60); m.y=rn(H*0.2,H*0.6);
-      }else{m.x+=dx/d*70*dt; m.y+=dy/d*70*dt;}
+      if(d<90){reunite();}
+      else{m.x+=dx/d*80*dt; m.y+=dy/d*80*dt;}
+    }else if(m.state==='leading'){
+      var ex=m.tx-m.x, ey=m.ty-m.y, ed=Math.hypot(ex,ey);
+      if(ed>4){var sp=Math.min(ed,60*dt); m.x+=ex/ed*sp; m.y+=ey/ed*sp;}
+      else{m.wait+=dt;}
+      if(Math.hypot(c.x-m.x,c.y-m.y)<90){reunite();}
     }
   }
 
@@ -533,7 +557,8 @@ function drawCat(x,y,s,dir,t,moving,o){
   });
   ctx.lineWidth=7*s;
   ctx.beginPath(); ctx.moveTo(-34*s,-4*s);
-  ctx.quadraticCurveTo(-60*s,-10*s+Math.sin(t*5)*8*s,-58*s,10*s+Math.sin(t*5)*6*s); ctx.stroke();
+  var wag=o.wag?Math.sin(t*14)*14*s:0;
+  ctx.quadraticCurveTo(-60*s,-10*s+Math.sin(t*5)*8*s+wag,-58*s,10*s+Math.sin(t*5)*6*s+wag); ctx.stroke();
   ctx.fillStyle=body; ctx.beginPath(); ctx.ellipse(0,0,36*s,18*s,0,0,Math.PI*2); ctx.fill();
   ctx.fillStyle='#fff3dc'; ctx.beginPath(); ctx.ellipse(0,8*s,24*s,7*s,0,0,Math.PI*2); ctx.fill();
   ctx.fillStyle=spot;
@@ -556,6 +581,18 @@ function ring(x,y,r,alpha){
   ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.stroke(); ctx.restore();
 }
 function draw(){
+  var z=S.cheetah.stage===1?ZOOM1:1;
+  ctx.save(); ctx.translate(W/2,H/2); ctx.scale(z,z); ctx.translate(-W/2,-H/2);
+  drawScene();
+  ctx.restore();
+  if(S.cheetah.stage===1){
+    // soft blur at the edges: the vision of a young cub
+    var g=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.3,W/2,H/2,Math.max(W,H)*0.75);
+    g.addColorStop(0,'rgba(255,253,247,0)'); g.addColorStop(1,'rgba(255,253,247,0.55)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  }
+}
+function drawScene(){
   drawBg();
   if(S.cheetah.stage===1)WD.sprigs.forEach(drawSprig);
   if(S.cheetah.stage===2){
@@ -568,7 +605,8 @@ function draw(){
   }
   if(S.cheetah.stage===1){
     ctx.globalAlpha=WD.mum.alpha;
-    drawCat(WD.mum.x,WD.mum.y,1.9,WD.cub.x>WD.mum.x?1:-1,WD.cub.t,WD.mum.calling,{body:'#e9a46c'});
+    var mm=WD.mum;
+    drawCat(mm.x,mm.y,1.9,(WD.cub.x>mm.x?1:-1),WD.cub.t,mm.state!=='hidden',{body:'#e9a46c',wag:mm.state==='leading'});
     ctx.globalAlpha=1;
     if(WD.listenFlash>0)ring(WD.cub.x,WD.cub.y,60+(1-WD.listenFlash)*60,WD.listenFlash);
   }

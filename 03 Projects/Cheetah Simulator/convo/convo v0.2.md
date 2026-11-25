@@ -140,3 +140,15 @@ Built as 0.2.0 (`index.html`). Mastery tokens and the skills list are in ⚙️.
 **R4-3. Mastery before Next:** no; the clock is enough for now. The clock should sit in the background, not something children watch. Use the sky: sunrise, day, sunset, darkness, sunrise, and so on, with a sleep moment at night. A fast-forward button. Background animation (clouds, grass). Time is shown by the sky, not a real scale. Exaggerate: three "days" per stage, for example. Later: when a stage is ready, the animation shows the time remaining (for example pregnant mother to birth) through many sun cycles.
 
 Claude's build for this round: sky cycle (three days per stage), moon and stars at night, a zz at the cub's head at night, drifting clouds, a fast-forward option (×4) in ⚙️, and a short fast sky run when moving to the next stage. The clock stays in ⚙️. The pregnancy-to-birth animation is for later.
+
+## Round 6: play test (Jimmy, 2026-11-25)
+
+Jimmy is playing and likes it. Asks, to put on the to-do list (`todo.md`) and build slowly, one increment at a time:
+- New skills unlock new action buttons on the right (a trip; Mum's tail to gesture).
+- Mum should not reset after she comes to you. She walks away and wags her tail to invite you to follow. (**Done in 0.3.0.**)
+- Needs: pee and poop. Tall grass, or caves later.
+- Scary animals: a vision that slowly grows (a shadow, then the animal). When it is close you can't really move; you only chirp.
+- Stage 1 (child) looks blurry, moves slowly, and the map is quite zoomed. (**Done in 0.3.0:** zoom, soft edge blur, slower.)
+- Later: walk and run, depending on how far the joystick is pushed. Skills such as crouching, being quiet, moving, hunting and stalking.
+
+**R6-1. Baby phase:** Jimmy wrote "you're a baby, right, but the first stage for us will be child". Is the chirp-only baby a stage before the child, or is it the child's first blurry moment? (Assumed: a later optional stage, not stage 1.)
