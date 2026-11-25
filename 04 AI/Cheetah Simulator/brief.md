@@ -2,7 +2,7 @@
 
 **Goal.** A game where a child lives a cheetah's whole life, ten minutes a stage, learning how cheetahs really live. The look and the verbs grow up with the cheetah (cuddly cub to precise hunter). The world (place, weather, prey, rivals, people) changes each life. Track A.
 
-**State (2026-11-25): 0.2.0 built.** Canvas first (only the pill, Next, ⚙️, Chirp and the joystick on screen); all panels in ⚙️; stage skills with tokens; cubs nibble grass (⚑). 0.1.0 before it. `index.html`: stages 1 (Den) and 2 (Little explorer); cumulative stage clock (10 + 5 per restart); Felix drag and joystick; Chirp; ⚙️ with gentle mode, look, controls, AI toggle (disabled, under development), notes, storage check, opt-in errors, test skip. Home tile added. Answers to convo v0.1 are in that file; questions for v0.2 are in `convo/convo v0.2.md`.
+**State (2026-11-25): 0.2.0 built, sky cycle added.** Time is the sky (three cycles per stage), fast-forward ×4 in ⚙️, night with zz, drifting clouds. Canvas first (only the pill, Next, ⚙️, Chirp and the joystick on screen); all panels in ⚙️; stage skills with tokens; cubs nibble grass (⚑). 0.1.0 before it. `index.html`: stages 1 (Den) and 2 (Little explorer); cumulative stage clock (10 + 5 per restart); Felix drag and joystick; Chirp; ⚙️ with gentle mode, look, controls, AI toggle (disabled, under development), notes, storage check, opt-in errors, test skip. Home tile added. Answers to convo v0.1 are in that file; questions for v0.2 are in `convo/convo v0.2.md`.
 
 **Architecture (planned).** Plain HTML/CSS/JS, no build. Layers: data (world, life, save; no DOM) → scene description → renderer (style layer separate). Device storage first; Family project later (`ch_` tables).
 

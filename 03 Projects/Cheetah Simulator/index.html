@@ -77,7 +77,7 @@ h2{font-size:17px;margin:14px 0 4px}
 <canvas id="scene" aria-label="Cheetah scene"></canvas>
 
 <!-- on-screen: only the stage pill, Next (when ready), the gear, Chirp and the joystick -->
-<div class="pill" aria-hidden="true"><span class="num" id="pillNum">1</span><span class="bar"><i id="barFill"></i></span></div>
+<div class="pill" aria-hidden="true"><span class="num" id="pillNum">1</span></div>
 <button id="next" class="nextBtn" type="button" hidden>Next stage →</button>
 <button id="gear" class="gear" type="button" aria-label="Settings" aria-expanded="false">⚙️</button>
 <button id="chirp" class="chirp" type="button" aria-label="Chirp to call Mum">🐾 Chirp</button>
@@ -133,6 +133,7 @@ h2{font-size:17px;margin:14px 0 4px}
           <option value="../V3%20Sea%20Turtle%20Race/" disabled>V3 Sea Turtle Race (not built yet)</option>
           <option value="../V4%20Golden%20Eagle%20Dive/" disabled>V4 Golden Eagle Dive (not built yet)</option>
         </select></label>
+      <label class="opt"><span>Fast-forward time (×4)</span><input id="fast" type="checkbox"></label>
       <label class="opt"><span>Sound (later)</span><input type="checkbox" disabled></label>
       <label class="opt"><span>AI helper (under development)</span><input id="ai" type="checkbox" disabled></label>
       <label class="opt"><span>Show errors (bottom of the page)</span><input id="showErrors" type="checkbox"></label>
@@ -196,13 +197,14 @@ var STAGES={
 var LATER={3:'Watching and trying',4:'Almost grown'};
 
 var S=load();
+var skyBoostT=0; // seconds left of the sky run into the next stage
 var W=0,H=0,DPR=1,WD=null,drawerOpen=false,last=performance.now(),saveAcc=0,toastT=null,gearT=null;
 var errors=[];
 var fx=0,fy=0,jx=0,jy=0,keys={};
 var cv=el('scene'), ctx=cv.getContext('2d');
 
 function load(){
-  var d={cheetah:null,settings:{gentle:true,look:'age',controls:'felix',ai:false,showErrors:false},panels:{}};
+  var d={cheetah:null,settings:{gentle:true,look:'age',controls:'felix',ai:false,showErrors:false,fast:false},panels:{}};
   try{
     var raw=localStorage.getItem(KEY);
     if(raw){var p=JSON.parse(raw); if(p&&p.cheetah)d.cheetah=p.cheetah; if(p&&p.settings)Object.assign(d.settings,p.settings); if(p&&p.panels)d.panels=p.panels;}
@@ -281,6 +283,8 @@ function initWorld(){
       sprigs:[],bflies:[],sibs:[],shadow:null,shadowT:14,
       patch:{x:rn(W*0.2,W*0.8),y:rn(H*0.4,H-200),r:110},
       tufts:[],still:0,nibbleT:0,listening:false,listenT:0,listenFlash:0,moveAcc:0,pulse:0};
+  WD.stars=[]; for(i=0;i<36;i++)WD.stars.push({x:Math.random(),y:Math.random()*0.6,r:0.8+Math.random()*1.6});
+  WD.clouds=[]; for(i=0;i<3;i++)WD.clouds.push({x:rn(0,W),y:rn(H*0.08,H*0.3),s:0.8+Math.random()*0.7});
   for(i=0;i<70;i++)WD.tufts.push({x:Math.random()*W,y:Math.random()*H,s:0.6+Math.random()*0.8});
   if(id===1){for(i=0;i<3;i++)WD.sprigs.push({x:rn(60,W-60),y:rn(H*0.35,H-160),done:false});}
   if(id===2){
@@ -361,6 +365,7 @@ function update(dt){
   c.y=clamp(c.y+v.y*speed*dt,H*0.25,H-140);
   c.t+=dt;
   WD.pulse=Math.max(0,WD.pulse-dt*1.5);
+  WD.clouds.forEach(function(k){k.x+=12*dt; if(k.x>W+140)k.x=-140;});
 
   // Move: every 250 steps counts toward the skill
   var step=Math.hypot(c.x-ox,c.y-oy);
@@ -435,10 +440,54 @@ function update(dt){
 }
 
 /* ---------- drawing ---------- */
+var SKY=[
+  {t:0.00,top:[255,183,160],bot:[255,226,190]},  // dawn
+  {t:0.14,top:[201,239,227],bot:[207,229,210]},  // morning
+  {t:0.36,top:[201,239,227],bot:[230,239,196]},  // afternoon
+  {t:0.48,top:[255,155,138],bot:[255,213,181]},  // sunset
+  {t:0.58,top:[70,66,104],bot:[47,45,61]},       // dusk
+  {t:0.92,top:[30,30,58],bot:[58,56,88]},        // night
+  {t:1.00,top:[255,183,160],bot:[255,226,190]}   // dawn again
+];
+function mixC(a,b,k){return [0,1,2].map(function(i){return Math.round(a[i]+(b[i]-a[i])*k);});}
+function skyAt(c){
+  for(var i=0;i<SKY.length-1;i++){
+    var a=SKY[i],b=SKY[i+1];
+    if(c>=a.t&&c<=b.t){var k=(c-a.t)/(b.t-a.t); return {top:mixC(a.top,b.top,k),bot:mixC(a.bot,b.bot,k)};}
+  }
+  return {top:SKY[0].top,bot:SKY[0].bot};
+}
+// time shown as the sky: three "days" per stage, plus a short run into the next stage
+function skyCycle(){
+  var st=stageState(S.cheetah.stage), p=st.played/(targetMin()*60);
+  var c=(p*3)%1;
+  if(skyBoostT>0)c=(c+skyBoostT*4)%1;
+  return c;
+}
+function isNight(c){return c>0.58&&c<0.92;}
 function drawBg(){
+  var c=skyCycle(), sky=skyAt(c);
   var g=ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,'#c9efe3'); g.addColorStop(0.6,'#cfe5d2'); g.addColorStop(1,'#e6efc4');
+  g.addColorStop(0,'rgb('+sky.top.join(',')+')'); g.addColorStop(1,'rgb('+sky.bot.join(',')+')');
   ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  var night=isNight(c);
+  if(night||c>0.5){
+    ctx.fillStyle='rgba(255,255,255,'+(night?0.85:0.35)+')';
+    WD.stars.forEach(function(s){ctx.beginPath();ctx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);ctx.fill();});
+  }
+  // sun by day, moon by night
+  var u,bodyColor;
+  if(c<0.52){u=c/0.52; bodyColor='#ffe08a';}
+  else if(c>=0.56&&c<=0.96){u=(c-0.56)/0.4; bodyColor='#fff6e0';}
+  if(u!==undefined){
+    var bx=W*(0.08+0.84*u), by=H*(0.16+0.14*Math.pow(Math.abs(2*u-1),2));
+    ctx.fillStyle=bodyColor; ctx.beginPath(); ctx.arc(bx,by,Math.max(22,Math.min(W,H)*0.045),0,Math.PI*2); ctx.fill();
+  }
+  // drifting clouds (the world keeps moving)
+  WD.clouds.forEach(function(k){
+    ctx.fillStyle='rgba(255,253,247,'+(night?0.25:0.7)+')';
+    ctx.beginPath(); ctx.ellipse(k.x,k.y,k.s*60,k.s*22,0,0,Math.PI*2); ctx.ellipse(k.x+k.s*40,k.y+4,k.s*44,k.s*18,0,0,Math.PI*2); ctx.fill();
+  });
   ctx.fillStyle='rgba(47,45,61,0.06)';
   for(var x=30;x<W;x+=60)for(var y=30;y<H;y+=60){ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);ctx.fill();}
   // tall grass patch (stay hidden here)
@@ -448,9 +497,10 @@ function drawBg(){
     ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
   }
   WD.tufts.forEach(function(t){
-    ctx.strokeStyle='rgba(90,140,90,0.55)'; ctx.lineWidth=3; ctx.lineCap='round';
-    ctx.beginPath(); ctx.moveTo(t.x,t.y); ctx.lineTo(t.x-6*t.s,t.y-14*t.s);
-    ctx.moveTo(t.x,t.y); ctx.lineTo(t.x+2*t.s,t.y-18*t.s); ctx.moveTo(t.x,t.y); ctx.lineTo(t.x+8*t.s,t.y-12*t.s); ctx.stroke();
+    var sway=Math.sin(WD.cub.t*1.3+t.x*0.02)*3*t.s;
+    ctx.strokeStyle=night?'rgba(120,170,130,0.35)':'rgba(90,140,90,0.55)'; ctx.lineWidth=3; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(t.x,t.y); ctx.lineTo(t.x-6*t.s+sway,t.y-14*t.s);
+    ctx.moveTo(t.x,t.y); ctx.lineTo(t.x+2*t.s+sway,t.y-18*t.s); ctx.moveTo(t.x,t.y); ctx.lineTo(t.x+8*t.s+sway,t.y-12*t.s); ctx.stroke();
   });
 }
 function drawSprig(s){
@@ -524,6 +574,7 @@ function draw(){
   }
   if(WD.pulse>0)ring(WD.cub.x,WD.cub.y,30+(1-WD.pulse)*50,WD.pulse*0.6);
   drawCat(WD.cub.x,WD.cub.y,1,WD.cub.dir,WD.cub.t,WD.cub.moving,{big:true,body:S.settings.look==='cute'?'#ffc7a0':'#f2b98a'});
+  if(isNight(skyCycle())){ctx.save(); ctx.fillStyle='rgba(255,246,224,0.9)'; ctx.font='700 22px system-ui,sans-serif'; ctx.fillText('z',WD.cub.x+46,WD.cub.y-44+Math.sin(WD.cub.t*2)*3); ctx.fillText('z',WD.cub.x+60,WD.cub.y-62+Math.sin(WD.cub.t*2+1)*3); ctx.restore();}
 }
 
 /* ---------- frame loop ---------- */
@@ -531,9 +582,10 @@ function frame(now){
   var dt=Math.min(0.05,(now-last)/1000); last=now;
   if(!document.hidden&&!drawerOpen&&WD){
     var st=stageState(S.cheetah.stage);
-    if(!st.done){st.played+=dt;}
+    if(!st.done){st.played+=dt*(S.settings.fast?4:1);}
     saveAcc+=dt; if(saveAcc>=3){saveAcc=0;save();}
   }
+  skyBoostT=Math.max(0,skyBoostT-dt);
   if(WD){update(dt);draw();}
   requestAnimationFrame(frame);
 }
@@ -544,7 +596,6 @@ function refresh(){
   var n=S.cheetah.stage, st=stageState(n), target=targetMin()*60;
   var pct=Math.min(100,st.played/target*100)+'%';
   el('pillNum').textContent=n;
-  el('barFill').style.width=pct;
   el('barFill2').style.width=pct;
   el('sex').textContent=S.cheetah.sex==='f'?'♀ Female':'♂ Male';
   if(document.activeElement!==el('name'))el('name').value=S.cheetah.name||'';
@@ -625,6 +676,7 @@ function syncSettings(){
   el('look').value=S.settings.look;
   el('controls').value=S.settings.controls;
   el('ai').checked=!!S.settings.ai;
+  el('fast').checked=!!S.settings.fast;
   el('showErrors').checked=!!S.settings.showErrors;
   el('joy').hidden=S.settings.controls!=='joy';
   renderNotes();
@@ -649,6 +701,7 @@ function wire(){
     st.done=true;
     if(STAGES[n+1]){
       say('Stage '+n+' is done. On to '+STAGES[n+1].name+'!');
+      skyBoostT=2.5;
       chooseStage(n+1);
     }else{
       say('Stage 3, '+LATER[3]+', comes in a later build. Your cheetah is safe.');
@@ -670,6 +723,7 @@ function wire(){
     fx=0;fy=0;jx=0;jy=0;
   });
   el('showErrors').addEventListener('change',function(){S.settings.showErrors=el('showErrors').checked;save();renderErrors();});
+  el('fast').addEventListener('change',function(){S.settings.fast=el('fast').checked;save();});
   el('games').addEventListener('change',function(){var v=el('games').value; if(v){window.location.href=v;}});
   el('saveNote').addEventListener('click',function(){
     var t=el('noteText').value.trim();

@@ -130,3 +130,13 @@ Built as 0.2.0 (`index.html`). Mastery tokens and the skills list are in ⚙️.
 
 **R4-3. Must the child master every skill before Next?** Now only the clock is needed.
 > 
+
+## Jimmy's answers, round 4 (2026-11-25)
+
+**R4-1. "Bees":** a mis-translation from the audio. Meant: general life skills for the animal.
+
+**R4-2. Skill counts:** trial. Build the skills as they stand, see how the children play with them, then lock the ones that work or discard and move on.
+
+**R4-3. Mastery before Next:** no; the clock is enough for now. The clock should sit in the background, not something children watch. Use the sky: sunrise, day, sunset, darkness, sunrise, and so on, with a sleep moment at night. A fast-forward button. Background animation (clouds, grass). Time is shown by the sky, not a real scale. Exaggerate: three "days" per stage, for example. Later: when a stage is ready, the animation shows the time remaining (for example pregnant mother to birth) through many sun cycles.
+
+Claude's build for this round: sky cycle (three days per stage), moon and stars at night, a zz at the cub's head at night, drifting clouds, a fast-forward option (×4) in ⚙️, and a short fast sky run when moving to the next stage. The clock stays in ⚙️. The pregnancy-to-birth animation is for later.
