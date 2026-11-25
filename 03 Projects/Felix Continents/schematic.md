@@ -113,3 +113,14 @@ Yes. ⚙️ in the lower right holds the options and extensions. Errors appear a
 - **V5 random worlds:** sliders stay in ⚙️. The "made-up world" sentence stays on screen (done). Jimmy also asked for a hex code: meaning not yet confirmed.
 - **Maps and events (planned, not built):** show Rodinia once a source is chosen. Future animations: the Moon-forming impact, tectonic shifts, volcanic eruptions, and ice ages.
 - **Family login and notes:** done. `fc_notes` is live in the Family project: row-level security on, 3 policies, 1 registry row, nothing unregistered (read-only check, 2026-11-24).
+
+## Round 4 (2026-11-25): saved notes acted on
+
+- **Notes 1 and 3, features (done):** named mountains, volcanoes and natural features (waterfalls, the Grand Canyon, the Great Barrier Reef) on every continent, each shown only in its years (`js/data.js`). ⚙️ "Mountains and features" turns them on and off.
+- **Note 1, legend (done):** the legend is in ⚙️ ("Legend", off by default). When on, it sits in a line at the bottom-left of the globe, so the globe stays large.
+- **Note 2, bar (done):** V1, V3 and V4 buttons are "« Past", "▶ Play" and "Now »". V3 now runs to 2000 CE.
+- **Note 3, play (partly done):** Play moves the slider and sweeps from the oldest moment to today, one transition after another. Still open: continents that deform, rather than moving as rigid shapes. Real deformation needs reconstruction data for the in-between shapes, which we don't have yet. The overlaps you saw are rigid sketches overlapping.
+- **Note 4, V2 (done):** no top panel. The status line and Reset sit in one line at the bottom-left.
+- **Note 5, V5 (done):** Play uses the V1 method: forward to today, back, then forward again. The world's number is shown as a hex code (for example "World 41C98").
+- **Source decision (chosen by Claude, 2026-11-25):** today's coastlines will come from Natural Earth through the npm package `world-atlas` 2.0.2 (Natural Earth data, public domain; the package is ISC). Not swapped in yet: the sketches are still the outlines. Past shapes: no licence-checked reconstruction chosen yet, so Rodinia stays out.
+- **Planned, not built:** the Moon-forming impact, tectonic shifts, volcanic eruptions, and ice ages as animated events (convo v0.2, Q9).

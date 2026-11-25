@@ -19,7 +19,7 @@
   .name { font-size: 24px; font-weight: 800; line-height: 1.15; }
   .sentence { margin: 4px 0 0; font-size: 17px; line-height: 1.35; }
   .touch { margin: 6px 0 0; font-size: 15px; min-height: 1.2em; }
-  .legend { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .legend { position: absolute; left: 8px; bottom: 8px; z-index: 5; display: flex; flex-wrap: wrap; gap: 6px; max-width: 70%; }
   .legend span { border: 2px solid var(--ink); border-radius: 12px; padding: 3px 9px; font-size: 14px; background: #fff; color: #2f2d3d; }
   .legend i { display: inline-block; width: 12px; height: 12px; border: 1px solid var(--ink); border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
   #stage { flex: 1; min-height: 0; position: relative; margin: 8px 14px; }
@@ -83,15 +83,15 @@
   <div class="name" id="momName">Today</div>
   <p class="sentence" id="momSentence"></p>
   <p class="touch" id="touchOut">Touch a continent to see its name.</p>
-  <div class="legend" id="legend" hidden></div>
 </section>
 
-<main id="stage"><canvas id="globe" aria-label="Spinning globe with continents"></canvas></main>
+<main id="stage"><canvas id="globe" aria-label="Spinning globe with continents"></canvas><div class="legend" id="legend" hidden></div></main>
 
 <section class="timebar" id="timebar" hidden>
   <div class="tbtns">
-    <button class="big" id="btnNow" type="button">⏮ Today</button>
+    <button class="big" id="btnPast" type="button">« Past</button>
     <button class="big" id="btnPlay" type="button">▶ Play</button>
+    <button class="big" id="btnNow" type="button">Now »</button>
   </div>
   <input type="range" id="slider" min="0" max="4" step="1" value="4" aria-label="Time: from the past (left) to today (right)">
   <div class="ticks" id="ticks"></div>
@@ -109,6 +109,10 @@
     <div class="seg" data-key="spin"><button type="button" data-v="1">On</button><button type="button" data-v="0">Off</button></div></div>
   <div class="setting"><label>Climate colours</label>
     <div class="seg" data-key="climate"><button type="button" data-v="1">On</button><button type="button" data-v="0">Off</button></div></div>
+  <div class="setting"><label>Mountains and features</label>
+    <div class="seg" data-key="features"><button type="button" data-v="1">On</button><button type="button" data-v="0">Off</button></div></div>
+  <div class="setting"><label>Legend</label>
+    <div class="seg" data-key="legend"><button type="button" data-v="1">On</button><button type="button" data-v="0">Off</button></div></div>
 
   <details>
     <summary>🧭 Planning: other versions</summary>
@@ -145,7 +149,7 @@
 
   <details>
     <summary>About this page</summary>
-    <p>Version 0.2.0. The continent shapes are rough sketches drawn by hand, not checked against a published reconstruction. Dates and positions are approximate.</p>
+    <p>Version 0.3.0. The continent shapes are rough sketches drawn by hand, not checked against a published reconstruction. Dates and positions are approximate.</p>
     <p>The climate is a simple model: latitude, distance from the sea, and mountains that catch wet winds. It is not a weather forecast.</p>
     <p>Built with three.js 0.170.0 (MIT licence).</p>
   </details>
@@ -169,7 +173,7 @@ const $ = id => document.getElementById(id);
 
 const app = FCCommon.init({
   settingsKey: 'felixContinents.settings',
-  defaults: { time: 0, spin: 1, climate: 1, showErrors: 0 },
+  defaults: { time: 0, spin: 1, climate: 1, features: 1, legend: 0, showErrors: 0 },
   startItem: 'now', startLabel: 'Today',
   onSetting: () => applySettings()
 });
@@ -196,6 +200,7 @@ function getWorld(idx) {
 }
 
 /* drawing into the globe texture */
+const shownFeatures = () => (S.features ? FEATURES : []);
 const cv = document.createElement('canvas'); cv.width = 2048; cv.height = 1024;
 const ctx = cv.getContext('2d');
 function paint() {
@@ -203,12 +208,12 @@ function paint() {
     const off = offsetsFor(st.B);
     E.drawGrid(ctx, getWorld(st.B).codes, !!S.climate);
     E.drawPlates(ctx, geo, off, false);
-    E.drawFeatures(ctx, geo, FEATURES, MOMENTS[st.B].age, off);
+    E.drawFeatures(ctx, geo, shownFeatures(), MOMENTS[st.B].age, off);
   } else {
     const off = offsetsAt(st.s);
     ctx.fillStyle = E.OCEAN; ctx.fillRect(0, 0, 2048, 1024);
     E.drawPlates(ctx, geo, off, true);
-    E.drawFeatures(ctx, geo, FEATURES, MOMENTS[displayedIdx()].age, off);
+    E.drawFeatures(ctx, geo, shownFeatures(), MOMENTS[displayedIdx()].age, off);
   }
 }
 
@@ -219,7 +224,7 @@ function setCard(idx) {
   $('momName').textContent = m.name;
   $('momSentence').textContent = m.sentence;
   app.setContext({ item: m.id, label: m.name });
-  $('legend').hidden = !S.climate;
+  $('legend').hidden = !(S.legend && S.climate);
   $('slider').value = String(idx);
 }
 function focusOn(idx) {
@@ -241,24 +246,40 @@ function goTo(i) {
 }
 function play() {
   if (!S.time) return;
-  st.A = displayedIdx(); st.s = 0;
-  anim = { legs: [{ to: 1, t: 0, start: 0 }, { to: 0, t: 0, start: 0 }, { to: 1, t: 0, start: 0 }] };
+  // sweep from the oldest moment to today: one transition after another, forward only
+  st.A = 0; st.B = 0; st.s = 1;
+  anim = { queue: [1, 2, 3, 4], t: 0 };
+  nextLeg();
+}
+function nextLeg() {
+  st.A = st.B; st.B = anim.queue.shift(); st.s = 0; anim.t = 0;
   focusOn(st.B); setCard(st.B); dirty = true;
 }
 function stepAnim(dt) {
-  const leg = anim.legs[0];
-  leg.t += dt / ANIM_SECONDS;
-  st.s = leg.start + (leg.to - leg.start) * smooth(Math.min(1, leg.t));
-  if (leg.t >= 1) {
-    st.s = leg.to;
-    anim.legs.shift();
-    if (anim.legs.length) anim.legs[0].start = st.s;
-    else { anim = null; st.A = st.B; }
+  if (anim.queue) {
+    anim.t += dt / ANIM_SECONDS;
+    if (anim.t >= 1) {
+      if (anim.queue.length) { nextLeg(); return; }
+      anim = null; st.s = 1; st.A = st.B; return;
+    }
+    st.s = smooth(anim.t);
+  } else {
+    const leg = anim.legs[0];
+    leg.t += dt / ANIM_SECONDS;
+    st.s = leg.start + (leg.to - leg.start) * smooth(Math.min(1, leg.t));
+    if (leg.t >= 1) {
+      st.s = leg.to;
+      anim.legs.shift();
+      if (anim.legs.length) anim.legs[0].start = st.s;
+      else { anim = null; st.A = st.B; return; }
+    }
   }
+  $('slider').value = String(Math.round(st.A + (st.B - st.A) * st.s));
 }
 const ticksBox = $('ticks');
 MOMENTS.forEach(m => { const s = document.createElement('span'); s.textContent = m.short; ticksBox.appendChild(s); });
 $('slider').addEventListener('input', e => goTo(+e.target.value));
+$('btnPast').addEventListener('click', () => goTo(0));
 $('btnNow').addEventListener('click', () => goTo(NOW));
 $('btnPlay').addEventListener('click', play);
 $('legend').innerHTML = E.LEGEND.map(([c, t]) => `<span><i style="background:${E.COL[c]}"></i>${t}</span>`).join('');
@@ -266,7 +287,7 @@ $('legend').innerHTML = E.LEGEND.map(([c, t]) => `<span><i style="background:${E
 function applySettings() {
   $('timebar').hidden = !S.time;
   if (!S.time) { anim = null; st.A = NOW; st.B = NOW; st.s = 1; setCard(NOW); }
-  $('legend').hidden = !S.climate;
+  $('legend').hidden = !(S.legend && S.climate);
   if (renderer) resize();
   dirty = true;
 }
@@ -287,13 +308,13 @@ function resize() {
 function nameAt(lon, lat) {
   const idx = displayedIdx(), age = MOMENTS[idx].age, off = offsetsAt(st.s);
   let best = null, bd = 7;
-  FEATURES.forEach(f => {
+  shownFeatures().forEach(f => {
     if (!(f.to <= age && age <= f.from)) return;
     const p = geo.xf(f.plate, f.lon, f.lat, off[f.plate] || [0, 0, 0]);
     const d = Math.hypot(E.dlon(p[0], lon), p[1] - lat);
     if (d < bd) { bd = d; best = f; }
   });
-  if (best) return best.name + (best.kind === 'volcano' ? ' (volcano)' : ' (mountains)');
+  if (best) return best.name + (best.kind === 'volcano' ? ' (volcano)' : best.kind === 'feature' ? ' (natural feature)' : ' (mountains)');
   const p = geo.plateAt(lon, lat, off);
   return p ? p.name : 'the ocean';
 }

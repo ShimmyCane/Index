@@ -13,8 +13,10 @@
     font-family: system-ui, -apple-system, sans-serif; overflow: hidden; }
   h1 { font-size: 20px; margin: 0; }
   .top { padding: 12px 16px 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .card { margin: 8px 14px 0; background: var(--paper); border: 3px solid var(--ink); border-radius: 18px;
-    padding: 10px 14px; box-shadow: 0 4px 0 var(--ink); }
+  .card { position: fixed; left: 14px; right: 110px; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 20; margin: 0;
+    background: var(--paper); border: 3px solid var(--ink); border-radius: 18px; padding: 6px 12px; box-shadow: 0 4px 0 var(--ink);
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .card .big { min-height: 44px; min-width: 0; font-size: 16px; padding: 0 10px; }
   .when { font-weight: 700; font-size: 15px; color: #6b5b95; }
   .name { font-size: 24px; font-weight: 800; line-height: 1.15; }
   .sentence { margin: 4px 0 0; font-size: 17px; line-height: 1.35; }
@@ -72,14 +74,9 @@
 </header>
 
 <section class="card" aria-live="polite">
-  <div class="when">Version 2</div>
-  <div class="name">Drag the continents</div>
-  <p class="sentence">Drag a continent on the globe to move it. Drag the ocean to turn the globe. Can you fit them back into today's places?</p>
-  <div class="row">
-    <p class="touch" id="touchOut" style="margin:0">Touch a continent to pick it up.</p>
-    <button class="big" id="resetBtn" type="button">↺ Reset</button>
-  </div>
-  <p class="touch" id="counter"></p>
+  <span class="touch" id="touchOut" style="margin:0">Drag a continent to move it.</span>
+  <span class="touch" id="counter" style="margin:0"></span>
+  <button class="big" id="resetBtn" type="button">↺ Reset</button>
 </section>
 
 <main id="stage"><canvas id="globe" aria-label="Globe with continents you can drag"></canvas></main>
@@ -88,7 +85,7 @@
 
 <aside class="drawer" id="drawer" hidden>
   <div class="drawerHead"><h2 style="margin:0;font-size:20px">Settings</h2><button class="mini" id="closeDrawer" type="button" aria-label="Close">✖</button></div>
-  <p>Your moved continents are kept on this device, so you can come back to them.</p>
+  <p>Drag a continent on the globe to move it, and drag the ocean to turn the globe. Can you fit them back into today's places? Your moved continents are kept on this device.</p>
 
   <div class="setting"><label>Spin by itself</label>
     <div class="seg" data-key="spin"><button type="button" data-v="1">On</button><button type="button" data-v="0">Off</button></div></div>
@@ -130,7 +127,7 @@
 
   <details>
     <summary>About this page</summary>
-    <p>Version 0.2.0. The continent shapes are rough sketches drawn by hand. Today's outline is the answer to the puzzle, so it is only a guide.</p>
+    <p>Version 0.3.0. The continent shapes are rough sketches drawn by hand. Today's outline is the answer to the puzzle, so it is only a guide.</p>
     <p>Built with three.js 0.170.0 (MIT licence).</p>
   </details>
 

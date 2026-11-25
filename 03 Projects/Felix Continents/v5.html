@@ -90,8 +90,9 @@
 
 <section class="timebar" id="timebar">
   <div class="tbtns">
-    <button class="big" id="btnToday" type="button">⏮ Today</button>
+    <button class="big" id="btnPast" type="button">« Past</button>
     <button class="big" id="btnPlay" type="button">▶ Play</button>
+    <button class="big" id="btnToday" type="button">Now »</button>
   </div>
   <input type="range" id="slider" min="0" max="400" step="1" value="400" aria-label="Time: from the past (left) to today (right)">
   <div class="ticks"><span id="tickLeft">400 million years ago</span><span>Today</span></div>
@@ -150,7 +151,7 @@
 
   <details>
     <summary>About this page</summary>
-    <p>Version 0.2.0. The continents, mountains and volcanoes in a random world are invented. They are not a model of the real Earth. The drift is a simple straight-line move. The climate is the same simple model as V1.</p>
+    <p>Version 0.3.0. The continents, mountains and volcanoes in a random world are invented. They are not a model of the real Earth. The drift is a simple straight-line move. The climate is the same simple model as V1.</p>
     <p>Built with three.js 0.170.0 (MIT licence).</p>
   </details>
 
@@ -216,7 +217,7 @@ function makeWorld(seed, n, speed, span) {
     const p = plates[Math.floor(rnd() * n)], q = p.poly[Math.floor(rnd() * p.poly.length)];
     features.push({ name: 'Volcanoes', kind: 'volcano', plate: p.id, lon: q[0], lat: q[1], from: 150, to: 0 });
   }
-  return { seed, plates, features, geo: E.makeGeo(plates), name: 'World ' + (seed % 1000) };
+  return { seed, plates, features, geo: E.makeGeo(plates), name: 'World ' + seed.toString(16).toUpperCase() };
 }
 const offsetsAt = age => { const out = {}; world.plates.forEach(p => { out[p.id] = [-p.v[0] * age / 100, -p.v[1] * age / 100, p.v[2] * age / 100]; }); return out; };
 
@@ -261,24 +262,30 @@ function setAge(a, animate) {
   if (!animate) anim = null;
   setCard();
 }
+/* V1 method: from the current time, forward to today, back, then forward again to today */
 function play() {
   if (!world) return;
-  const start = curAge;
-  anim = { start, t: 0 };
+  const a = curAge > 0 ? curAge : Number($('span').value);   // at today, start from the far past
+  anim = { legs: [[a, 0], [0, a], [a, 0]], i: 0, t: 0 };
   setCard(); dirty = true;
 }
 function stepAnim(dt) {
-  anim.t += dt / ANIM_SECONDS;
-  const t = Math.min(1, anim.t), e = t * t * (3 - 2 * t);
-  curAge = anim.start * (1 - e);
-  if (t >= 1) { curAge = 0; anim = null; }
+  anim.t += dt / 4;
+  const [from, to] = anim.legs[anim.i], e = smooth(Math.min(1, anim.t));
+  curAge = from + (to - from) * e;
+  if (anim.t >= 1) {
+    anim.i += 1; anim.t = 0;
+    if (anim.i >= anim.legs.length) { curAge = 0; anim = null; }
+  }
   setCard();
 }
+const smooth = t => t * t * (3 - 2 * t);
 $('slider').addEventListener('input', e => {
   if (!world) return;
   setAge(Number($('span').value) - Number(e.target.value), false);
 });
 $('btnToday').addEventListener('click', () => { if (world) setAge(0, false); });
+$('btnPast').addEventListener('click', () => { if (world) setAge(Number($('span').value), false); });
 $('btnPlay').addEventListener('click', play);
 
 /* sliders in the drawer */

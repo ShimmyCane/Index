@@ -85,8 +85,9 @@
 
 <section class="timebar" id="timebar">
   <div class="tbtns">
-    <button class="big" id="btnStart" type="button">⏮ Oldest</button>
+    <button class="big" id="btnStart" type="button">« Past</button>
     <button class="big" id="btnPlay" type="button">▶ Play</button>
+    <button class="big" id="btnNow" type="button">Now »</button>
   </div>
   <input type="range" id="slider" min="0" max="8" step="1" value="0" aria-label="Milestone: from the oldest (left) to modern (right)">
   <div class="ticks" id="ticks"></div>
@@ -129,7 +130,7 @@
 
   <details>
     <summary>About this page</summary>
-    <p>Version 0.4.0. The countries are rough hand sketches, not checked against maps by historians. Dates are approximate. Modern countries are not drawn yet: the modern milestone shows today's continents instead.</p>
+    <p>Version 0.4.1. The countries are rough hand sketches, not checked against maps by historians. Dates are approximate. Modern countries are not drawn yet: the modern milestone shows today's continents instead.</p>
     <p>Built with three.js 0.170.0 (MIT licence).</p>
   </details>
 
@@ -247,6 +248,7 @@ function stepAnim(dt) {
 }
 $('slider').addEventListener('input', e => snapTo(Number(e.target.value), false));
 $('btnStart').addEventListener('click', () => snapTo(0, false));
+$('btnNow').addEventListener('click', () => snapTo(MIL.length - 1, false));
 $('btnPlay').addEventListener('click', play);
 $('ticks').innerHTML = MIL.map(m => '<span>' + (m.year < 0 ? (-m.year) + ' BCE' : m.year) + '</span>').join('');
 
