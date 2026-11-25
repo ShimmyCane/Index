@@ -9,7 +9,7 @@ Track: A. Family play
 - AI notes: `04 AI/Cheetah Simulator/brief.md` and `lessons.md`
 - Shared conventions: root `CLAUDE.md` (public repo, privacy)
 
-Status: 0.2.0 (2026-11-25): stages 1 (Den) and 2 (Little explorer) playable; skills to master per stage; cumulative stage clock; canvas first, all panels in ⚙️; Other games menu; gentle mode, notes, storage check. Later stages, the wiggle control and the AI helper are in `schematic.md` and `convo/convo v0.2.md`. Jimmy reviews each merged step.
+Status: 0.3.0 (2026-11-25): Mum walks ahead and wags after a reunion (no reset); stage 1 zoomed with edge blur and slower movement. Next items are in `todo.md`. Earlier: 0.2.0. stages 1 (Den) and 2 (Little explorer) playable; skills to master per stage; cumulative stage clock; canvas first, all panels in ⚙️; Other games menu; gentle mode, notes, storage check. Later stages, the wiggle control and the AI helper are in `schematic.md` and `convo/convo v0.2.md`. Jimmy reviews each merged step.
 
 How to run: `index.html` opens with a double-click (plain HTML/CSS/JS, no build). Felix control (drag from the middle) by default; joystick in ⚙️. Keyboard arrows or WASD also work. State for checks: `localStorage` key `cheetahSim.v1`.
 
