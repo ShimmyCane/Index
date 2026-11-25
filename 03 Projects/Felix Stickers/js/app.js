@@ -529,8 +529,18 @@
       pointers.set(e.pointerId, pt);
       return;
     }
-    // after the free move: it is put down from its pivot, at the roll
-    var tipA = { x: lift.Pv.x + lift.S * lift.u.x, y: lift.Pv.y + lift.S * lift.u.y };
+    // first touch after the free move: drag from a start point to an end point to set the orientation
+    if (lift.aimRot === undefined) {
+      lift.phiBeforeAim = lift.phi;
+      gesture = { kind: 'aim', pid: e.pointerId, start: f };
+      lift.phase = 'aim';
+      lift.ghost = true;
+      liftDraw(lift);
+      pointers.set(e.pointerId, pt);
+      return;
+    }
+    // second touch: it is put down from its pivot, at the roll, turned to the chosen orientation
+    var tipA ={ x: lift.Pv.x + lift.S * lift.u.x, y: lift.Pv.y + lift.S * lift.u.y };
     // the rolldown turns the sticker about the point it starts from: the roll itself
     var c0 = Math.cos(lift.phi), s0 = Math.sin(lift.phi);
     var dx0 = tipA.x - lift.Pm.x, dy0 = tipA.y - lift.Pm.y;
@@ -561,7 +571,7 @@
       // past the edge: the rest of the sticker unrolls onto the sheet, then it stays
       lift.Pv = E;
       lift.u = lift.lastU || lift.uL;
-      lift.phi = lift.lastPhi || 0;
+      lift.phi = lift.aimRot !== undefined ? lift.aimRot : (lift.lastPhi || 0);
       lift.S = clamp(lift.lastS || 0, 0, lift.len || 0);
       gesture = null;
       return unrollToStick(lift);
@@ -569,10 +579,32 @@
     var uNew = r > 3 ? { x: d.x / r, y: d.y / r } : lift.uL;
     lift.Pv = E;
     lift.u = uNew;
-    lift.phi = Math.atan2(uNew.y, uNew.x) - Math.atan2(lift.uL.y, lift.uL.x);
+    var phiDrag = Math.atan2(uNew.y, uNew.x) - Math.atan2(lift.uL.y, lift.uL.x);
     lift.len = liftLen(lift);
     lift.S = clamp(r, 0, lift.len);
+    // with an orientation chosen, the turn eases from the drag's own turn to that orientation as it rolls on
+    if (lift.aimRot !== undefined) {
+      var p = lift.len ? lift.S / lift.len : 1;
+      lift.phi = phiDrag + p * wrapAngle(lift.aimRot - phiDrag);
+    } else {
+      lift.phi = phiDrag;
+    }
     lift.lastU = uNew; lift.lastPhi = lift.phi; lift.lastS = lift.S;
+    liftDraw(lift);
+  }
+
+  // The sticker's top points along the aim drag: CSS turns clockwise, and "up" is -90° on screen.
+  function aimRotOf(d) { return Math.atan2(d.y, d.x) + Math.PI / 2; }
+  function wrapAngle(a) {
+    while (a > Math.PI) a -= 2 * Math.PI;
+    while (a <= -Math.PI) a += 2 * Math.PI;
+    return a;
+  }
+  function moveAim(f) {
+    var d = { x: f.x - gesture.start.x, y: f.y - gesture.start.y };
+    if (Math.hypot(d.x, d.y) < 12) return;   // too short to mean a direction
+    lift.aimRot = aimRotOf(d);
+    lift.phi = lift.aimRot;
     liftDraw(lift);
   }
 
@@ -632,6 +664,7 @@
       updatePeel(lift, f);
       return;
     }
+    if (gesture.kind === 'aim' && gesture.pid === e.pointerId) { moveAim(pageOf(pt)); return; }
     if (gesture.kind === 'carry' && gesture.pid === e.pointerId) { moveCarry(pageOf(pt)); return; }
     if (gesture.kind === 'apply' && gesture.pid === e.pointerId) { moveApply(pageOf(pt)); return; }
 
@@ -674,6 +707,20 @@
           renderTray();
         }
       }
+      gesture = null;
+      return;
+    }
+    if (gesture.kind === 'aim' && gesture.pid === e.pointerId) {
+      // let go: the drag from start to here sets the orientation; the next touch rolls it on
+      var f = pageOf(pt);
+      if (lift && Math.hypot(f.x - gesture.start.x, f.y - gesture.start.y) >= 12) {
+        lift.aimRot = aimRotOf({ x: f.x - gesture.start.x, y: f.y - gesture.start.y });
+        lift.phi = lift.aimRot;
+      } else if (lift) {
+        lift.aimRot = undefined;
+        lift.phi = lift.phiBeforeAim;
+      }
+      if (lift) { lift.phase = 'held'; lift.heldAt = 0; lift.ghost = true; liftDraw(lift); }
       gesture = null;
       return;
     }
