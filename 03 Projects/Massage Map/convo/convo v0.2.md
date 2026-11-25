@@ -43,4 +43,12 @@ Not done yet: no drawings or viewer changes in this round. The current figure st
 
 ## Answers
 
-(Jimmy writes here.)
+1. **Form:** A, flat textbook-style drawings with layers toggled on and off.
+2. **Scope:** the whole body, not only the foot.
+3. **Layers:** yes to the starting list (skin, fat and fascia, muscles, tendons and ligaments, nerves, arteries and veins, bones).
+4. **Sources:** yes, the 1918 Gray's plates as the guide, traced by eye. No BodyParts3D for now.
+5. **Peel:** yes to both: a peel button that goes layer by layer, and a toggle per layer that can be combined.
+6. **Look:** textbook is fine.
+7. **Sex:** a woman's figure first.
+
+Build plan (increment 1): a female whole-body front figure with the six layers, a peel button, per-layer toggles and tap-to-name labels, in EN and 中文. Male figure and back view later. Accuracy: approximate shapes, checked against the Gray's plates before we call any part correct.

@@ -108,7 +108,7 @@
     });
     document.querySelectorAll('.tab').forEach(function (b) {
       var k = b.getAttribute('data-tab');
-      b.textContent = ui(k === 'map' ? 'map' : k === 'learn' ? 'learn' : 'favs');
+      b.textContent = ui(k === 'map' ? 'map' : k === 'learn' ? 'learn' : k === 'anat' ? 'anat' : 'favs');
       b.setAttribute('aria-selected', String(S.tab === k));
     });
     $('pickTitle').textContent = ui('technique');
@@ -141,7 +141,7 @@
 
   function showTab(name) {
     S.tab = name;
-    ['map', 'learn', 'favs'].forEach(function (k) { $('page-' + k).hidden = (k !== name); });
+    ['map', 'learn', 'anat', 'favs'].forEach(function (k) { $('page-' + k).hidden = (k !== name); });
     renderLabels();
   }
 

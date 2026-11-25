@@ -135,7 +135,7 @@ MM.sources = {
 MM.ui = {
   en: {
     tag: 'This is massage, not medicine.',
-    map: 'Body map', learn: 'Learn', favs: 'Favourites',
+    map: 'Body map', learn: 'Learn', anat: 'Body layers', favs: 'Favourites',
     view: 'View', technique: 'Technique', pick: 'Pick a technique', none: 'Tap a point to see where it is.',
     play: 'Play', back: 'Back to start', speed: 'Speed', compare: 'Compare two', colour: 'Colour by technique',
     heat: 'Heat', numbers: 'Show numbers 1 to 5', kids: 'Show children’s figures', kidsNote: 'Not drawn yet.',
@@ -150,7 +150,7 @@ MM.ui = {
   },
   cn: {
     tag: '这是按摩，不是医疗。',
-    map: '身体图', learn: '学习', favs: '喜好',
+    map: '身体图', learn: '学习', anat: '身体层次', favs: '喜好',
     view: '部位', technique: '手法', pick: '选一种手法', none: '点一个穴位看它在哪里。',
     play: '播放', back: '回到开头', speed: '速度', compare: '对比两种', colour: '按手法上色',
     heat: '热力', numbers: '显示 1 到 5 力度', kids: '显示小朋友的图', kidsNote: '尚未画。',
