@@ -355,3 +355,5 @@ Full notes: `04 AI/Make-3D x Construct/model_iteration_lessons.md`.
 - A project can be copied out and linked from the home page by hand while its nursery folder stays behind. Nine did. Before removing, trust the home page: a project whose tile is an external `shimmycane.github.io` link and has no `03%20Projects/` link is out. Confirm each site returns 200, then `git rm`.
 - Check the home page against `03 Projects/` after each graduation, not only when starting a new one.
 - Before a hard reset to origin, check that nothing is ahead of it (`git rev-list --left-right --count main...origin/main`); the only things lost are uncommitted changes.
+
+- (2026-11-25, Cheetah Simulator) A soft setting (Gentle mode) changes how a true thing is told, never the true thing itself. Keep a panel that always shows the real facts.
