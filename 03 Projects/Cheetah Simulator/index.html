@@ -53,7 +53,7 @@ ul.goals li.ok{text-decoration:line-through;opacity:.6}
 .drawer.open{transform:none}
 .drawer h2{font-size:18px;margin:14px 0 6px}
 .opt{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:52px;padding:6px 0;border-bottom:2px dashed var(--ink)}
-.opt select{min-height:48px;border:3px solid var(--ink);border-radius:12px;background:var(--paper);padding:0 8px}
+.opt select{max-width:58%;min-height:48px;border:3px solid var(--ink);border-radius:12px;background:var(--paper);padding:0 8px}
 .opt input[type=checkbox]{width:28px;height:28px}
 .btn{min-height:52px;border:3px solid var(--ink);border-radius:14px;background:var(--peach);box-shadow:0 3px 0 var(--ink);padding:0 14px;font-weight:700;margin:6px 6px 6px 0}
 textarea{width:100%;min-height:80px;border:3px solid var(--ink);border-radius:14px;background:var(--paper);padding:8px;font-size:16px}
@@ -113,6 +113,14 @@ textarea{width:100%;min-height:80px;border:3px solid var(--ink);border-radius:14
     <select id="look"><option value="age">Match my age</option><option value="cute">Always cuddly</option></select></label>
   <label class="opt"><span>Controls</span>
     <select id="controls"><option value="felix">Drag from the middle (Felix)</option><option value="joy">Joystick (lower left)</option></select></label>
+  <label class="opt"><span>Other games</span>
+    <select id="games" aria-label="Other games in the series">
+      <option value="" selected>V1 Cheetah Simulator (this game)</option>
+      <!-- Enable an option (remove disabled) when its page exists. -->
+      <option value="../V2%20Gibbon%20Swing/" disabled>V2 Gibbon Swing (not built yet)</option>
+      <option value="../V3%20Sea%20Turtle%20Race/" disabled>V3 Sea Turtle Race (not built yet)</option>
+      <option value="../V4%20Golden%20Eagle%20Dive/" disabled>V4 Golden Eagle Dive (not built yet)</option>
+    </select></label>
   <label class="opt"><span>Sound (later)</span><input type="checkbox" disabled></label>
   <label class="opt"><span>AI helper (under development)</span><input id="ai" type="checkbox" disabled></label>
 
@@ -557,6 +565,7 @@ function wire(){
   });
   el('showErrors').addEventListener('change',function(){S.settings.showErrors=el('showErrors').checked;save();renderErrors();});
   el('ai').addEventListener('change',function(){}); // disabled until built
+  el('games').addEventListener('change',function(){var v=el('games').value; if(v){window.location.href=v;}});
   el('saveNote').addEventListener('click',function(){
     var t=el('noteText').value.trim();
     if(!t){say('Write a note first.');return;}

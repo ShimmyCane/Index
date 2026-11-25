@@ -102,3 +102,10 @@ Build one small engine per family, then add animals as data (which family, which
 ## Next step (not started)
 
 Start V2, the bat echo game, as a prototype. It needs its own `/start-project` round before any code. Question for the next convo round: what should the V2 folder be called? Suggested: "Bat Echo (V2)".
+
+## Round 3: games started, settings menu (2026-11-25)
+
+- Versions: V2 Gibbon Swing (`03 Projects/V2 Gibbon Swing/`), V3 Sea Turtle Race (`03 Projects/V3 Sea Turtle Race/`), V4 Golden Eagle Dive (`03 Projects/V4 Golden Eagle Dive/`). Each has a schematic, CLAUDE.md and convo v0.1 with questions. Nothing is built.
+- The bat echo game is not assigned to a version yet. Jimmy to say where it goes (V5 or later).
+- Settings: the cheetah ⚙️ now has an **Other games** drop-down. The V2 to V4 entries are disabled until their pages exist; enable each one when it opens.
+- The cheetah folder keeps its name, `Cheetah Simulator`, as V1. The other folders carry their version in the name.
