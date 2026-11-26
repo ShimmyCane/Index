@@ -46,37 +46,37 @@
     { layer: 2, type: 'path', d: 'M98,616 L124,616 L122,628 L100,628 Z', side: 'both', en: 'Extensor digitorum', cn: '趾长伸肌', what: 'Top of the foot. Lifts the toes.' },
 
     // Arteries and veins
-    { layer: 3, type: 'line', d: 'M136,352 C134,400 132,440 130,480', side: 'both', stroke: '#c0392b', width: 3, en: 'Femoral artery', cn: '股动脉', what: 'Main artery of the thigh. Carries blood to the leg.' },
-    { layer: 3, type: 'line', d: 'M142,352 C140,400 138,440 136,480', side: 'both', stroke: '#2e6fb0', width: 3, en: 'Femoral vein', cn: '股静脉', what: 'Vein of the thigh. Carries blood back to the heart.' },
-    { layer: 3, type: 'line', d: 'M120,502 C118,540 120,570 116,604', side: 'both', stroke: '#2e6fb0', width: 2.5, en: 'Great saphenous vein', cn: '大隐静脉', what: 'Long vein on the inside of the leg, close to the skin.' },
-    { layer: 3, type: 'line', d: 'M128,512 C124,540 126,580 122,606', side: 'both', stroke: '#c0392b', width: 2, en: 'Anterior tibial artery', cn: '胫前动脉', what: 'Artery at the front of the shin. Feeds the top of the foot.' },
-    { layer: 3, type: 'line', d: 'M84,160 C76,200 70,230 68,260', side: 'both', stroke: '#c0392b', width: 2.5, en: 'Brachial artery', cn: '肱动脉', what: 'Main artery of the upper arm.' },
+    { layer: 3, type: 'line', d: 'M136,352 C134,400 132,440 130,480', side: 'both', stroke: '#d98a7e', width: 3, en: 'Femoral artery', cn: '股动脉', what: 'Main artery of the thigh. Carries blood to the leg.' },
+    { layer: 3, type: 'line', d: 'M142,352 C140,400 138,440 136,480', side: 'both', stroke: '#7fa7c9', width: 3, en: 'Femoral vein', cn: '股静脉', what: 'Vein of the thigh. Carries blood back to the heart.' },
+    { layer: 3, type: 'line', d: 'M120,502 C118,540 120,570 116,604', side: 'both', stroke: '#7fa7c9', width: 2.5, en: 'Great saphenous vein', cn: '大隐静脉', what: 'Long vein on the inside of the leg, close to the skin.' },
+    { layer: 3, type: 'line', d: 'M128,512 C124,540 126,580 122,606', side: 'both', stroke: '#d98a7e', width: 2, en: 'Anterior tibial artery', cn: '胫前动脉', what: 'Artery at the front of the shin. Feeds the top of the foot.' },
+    { layer: 3, type: 'line', d: 'M84,160 C76,200 70,230 68,260', side: 'both', stroke: '#d98a7e', width: 2.5, en: 'Brachial artery', cn: '肱动脉', what: 'Main artery of the upper arm.' },
 
     // Nerves
-    { layer: 4, type: 'line', d: 'M120,352 C122,400 124,440 122,488', side: 'both', stroke: '#e0a800', width: 2.5, en: 'Femoral nerve', cn: '股神经', what: 'Nerve of the front of the thigh. Powers the quadriceps.' },
-    { layer: 4, type: 'line', d: 'M134,500 C130,530 126,560 124,600', side: 'both', stroke: '#e0a800', width: 2.5, en: 'Common peroneal nerve', cn: '腓总神经', what: 'Nerve running down the outside of the knee and shin.' },
-    { layer: 4, type: 'line', d: 'M122,540 C118,570 112,600 108,616', side: 'both', stroke: '#e0a800', width: 2, en: 'Superficial peroneal nerve', cn: '腓浅神经', what: 'Nerve to the top of the foot and toes.' },
-    { layer: 4, type: 'line', d: 'M84,170 C76,200 68,230 66,252', side: 'both', stroke: '#e0a800', width: 2, en: 'Radial nerve', cn: '桡神经', what: 'Nerve of the back of the upper arm and forearm.' },
-    { layer: 4, type: 'line', d: 'M68,262 C64,300 58,330 56,358', side: 'both', stroke: '#e0a800', width: 2, en: 'Median nerve', cn: '正中神经', what: 'Nerve down the front of the forearm into the hand.' },
+    { layer: 4, type: 'line', d: 'M120,352 C122,400 124,440 122,488', side: 'both', stroke: '#e6c46a', width: 2.5, en: 'Femoral nerve', cn: '股神经', what: 'Nerve of the front of the thigh. Powers the quadriceps.' },
+    { layer: 4, type: 'line', d: 'M134,500 C130,530 126,560 124,600', side: 'both', stroke: '#e6c46a', width: 2.5, en: 'Common peroneal nerve', cn: '腓总神经', what: 'Nerve running down the outside of the knee and shin.' },
+    { layer: 4, type: 'line', d: 'M122,540 C118,570 112,600 108,616', side: 'both', stroke: '#e6c46a', width: 2, en: 'Superficial peroneal nerve', cn: '腓浅神经', what: 'Nerve to the top of the foot and toes.' },
+    { layer: 4, type: 'line', d: 'M84,170 C76,200 68,230 66,252', side: 'both', stroke: '#e6c46a', width: 2, en: 'Radial nerve', cn: '桡神经', what: 'Nerve of the back of the upper arm and forearm.' },
+    { layer: 4, type: 'line', d: 'M68,262 C64,300 58,330 56,358', side: 'both', stroke: '#e6c46a', width: 2, en: 'Median nerve', cn: '正中神经', what: 'Nerve down the front of the forearm into the hand.' },
 
     // Tendons and ligaments
-    { layer: 5, type: 'line', d: 'M122,498 L122,516', side: 'both', stroke: '#6d5fa3', width: 4, en: 'Patellar tendon', cn: '髌韧带', what: 'Tendon from the kneecap to the shin. Passes the quadriceps pull to the leg.' },
-    { layer: 5, type: 'line', d: 'M104,340 C122,350 140,352 150,350', side: 'both', stroke: '#6d5fa3', width: 3, en: 'Inguinal ligament', cn: '腹股沟韧带', what: 'Band at the front of the hip, from the belly to the thigh.' },
-    { layer: 5, type: 'line', d: 'M96,604 C104,608 118,608 128,604', side: 'both', stroke: '#6d5fa3', width: 3, en: 'Extensor retinaculum', cn: '伸肌支持带', what: 'Band across the front of the ankle that holds the tendons in place.' },
-    { layer: 5, type: 'line', d: 'M110,428 C118,424 124,424 130,428', side: 'both', stroke: '#6d5fa3', width: 2, en: 'Knee joint capsule', cn: '膝关节囊', what: 'Tough band around the knee joint.' },
+    { layer: 5, type: 'line', d: 'M122,498 L122,516', side: 'both', stroke: '#a79bcc', width: 4, en: 'Patellar tendon', cn: '髌韧带', what: 'Tendon from the kneecap to the shin. Passes the quadriceps pull to the leg.' },
+    { layer: 5, type: 'line', d: 'M104,340 C122,350 140,352 150,350', side: 'both', stroke: '#a79bcc', width: 3, en: 'Inguinal ligament', cn: '腹股沟韧带', what: 'Band at the front of the hip, from the belly to the thigh.' },
+    { layer: 5, type: 'line', d: 'M96,604 C104,608 118,608 128,604', side: 'both', stroke: '#a79bcc', width: 3, en: 'Extensor retinaculum', cn: '伸肌支持带', what: 'Band across the front of the ankle that holds the tendons in place.' },
+    { layer: 5, type: 'line', d: 'M110,428 C118,424 124,424 130,428', side: 'both', stroke: '#a79bcc', width: 2, en: 'Knee joint capsule', cn: '膝关节囊', what: 'Tough band around the knee joint.' },
 
     // Bones
-    { layer: 6, type: 'ellipse', cx: 150, cy: 48, rx: 24, ry: 30, side: 'mid', fill: '#f4efe1', en: 'Skull', cn: '颅骨', what: 'Bones of the head.' },
-    { layer: 6, type: 'line', d: 'M150,96 L150,300', side: 'mid', stroke: '#8a8070', width: 6, en: 'Spine', cn: '脊柱', what: 'Column of vertebrae that carries the head and trunk.' },
-    { layer: 6, type: 'line', d: 'M150,112 L112,106', side: 'both', stroke: '#8a8070', width: 3, en: 'Clavicle', cn: '锁骨', what: 'Collar bone, joins the arm to the trunk.' },
-    { layer: 6, type: 'ellipse', cx: 150, cy: 180, rx: 32, ry: 48, side: 'mid', fill: '#f4efe1', en: 'Ribcage', cn: '胸廓', what: 'Ribs and breastbone. Protects the heart and lungs.' },
-    { layer: 6, type: 'path', d: 'M108,300 C112,330 130,340 150,342 C170,340 188,330 192,300 L184,296 C176,318 164,324 150,324 C136,324 124,318 116,296 Z', side: 'mid', fill: '#f4efe1', en: 'Pelvis', cn: '骨盆', what: 'Hip bones. Joins the legs to the trunk.' },
-    { layer: 6, type: 'line', d: 'M110,340 C112,400 114,460 116,500', side: 'both', stroke: '#f4efe1', width: 9, en: 'Femur', cn: '股骨', what: 'Thigh bone, the longest bone in the body.' },
-    { layer: 6, type: 'line', d: 'M86,122 C78,160 70,210 64,250', side: 'both', stroke: '#f4efe1', width: 7, en: 'Humerus', cn: '肱骨', what: 'Upper arm bone.' },
-    { layer: 6, type: 'line', d: 'M64,256 C60,300 58,340 56,362', side: 'both', stroke: '#f4efe1', width: 5, en: 'Radius and ulna', cn: '桡骨与尺骨', what: 'Forearm bones.' },
-    { layer: 6, type: 'line', d: 'M116,520 C114,560 112,590 110,612', side: 'both', stroke: '#f4efe1', width: 7, en: 'Tibia', cn: '胫骨', what: 'Shin bone, the weight-bearing bone of the lower leg.' },
-    { layer: 6, type: 'line', d: 'M124,520 C122,560 122,590 120,606', side: 'both', stroke: '#f4efe1', width: 3, en: 'Fibula', cn: '腓骨', what: 'Thin bone beside the shin bone.' },
-    { layer: 6, type: 'ellipse', cx: 110, cy: 626, rx: 14, ry: 8, side: 'both', fill: '#f4efe1', en: 'Foot bones', cn: '足骨', what: 'Ankle, heel and toe bones.' }
+    { layer: 6, type: 'ellipse', cx: 150, cy: 48, rx: 24, ry: 30, side: 'mid', fill: '#f6f1e4', en: 'Skull', cn: '颅骨', what: 'Bones of the head.' },
+    { layer: 6, type: 'line', d: 'M150,96 L150,300', side: 'mid', stroke: '#b7ad98', width: 6, en: 'Spine', cn: '脊柱', what: 'Column of vertebrae that carries the head and trunk.' },
+    { layer: 6, type: 'line', d: 'M150,112 L112,106', side: 'both', stroke: '#b7ad98', width: 3, en: 'Clavicle', cn: '锁骨', what: 'Collar bone, joins the arm to the trunk.' },
+    { layer: 6, type: 'ellipse', cx: 150, cy: 180, rx: 32, ry: 48, side: 'mid', fill: '#f6f1e4', en: 'Ribcage', cn: '胸廓', what: 'Ribs and breastbone. Protects the heart and lungs.' },
+    { layer: 6, type: 'path', d: 'M108,300 C112,330 130,340 150,342 C170,340 188,330 192,300 L184,296 C176,318 164,324 150,324 C136,324 124,318 116,296 Z', side: 'mid', fill: '#f6f1e4', en: 'Pelvis', cn: '骨盆', what: 'Hip bones. Joins the legs to the trunk.' },
+    { layer: 6, type: 'line', d: 'M110,340 C112,400 114,460 116,500', side: 'both', stroke: '#f6f1e4', width: 9, en: 'Femur', cn: '股骨', what: 'Thigh bone, the longest bone in the body.' },
+    { layer: 6, type: 'line', d: 'M86,122 C78,160 70,210 64,250', side: 'both', stroke: '#f6f1e4', width: 7, en: 'Humerus', cn: '肱骨', what: 'Upper arm bone.' },
+    { layer: 6, type: 'line', d: 'M64,256 C60,300 58,340 56,362', side: 'both', stroke: '#f6f1e4', width: 5, en: 'Radius and ulna', cn: '桡骨与尺骨', what: 'Forearm bones.' },
+    { layer: 6, type: 'line', d: 'M116,520 C114,560 112,590 110,612', side: 'both', stroke: '#f6f1e4', width: 7, en: 'Tibia', cn: '胫骨', what: 'Shin bone, the weight-bearing bone of the lower leg.' },
+    { layer: 6, type: 'line', d: 'M124,520 C122,560 122,590 120,606', side: 'both', stroke: '#f6f1e4', width: 3, en: 'Fibula', cn: '腓骨', what: 'Thin bone beside the shin bone.' },
+    { layer: 6, type: 'ellipse', cx: 110, cy: 626, rx: 14, ry: 8, side: 'both', fill: '#f6f1e4', en: 'Foot bones', cn: '足骨', what: 'Ankle, heel and toe bones.' }
   ];
 
 
@@ -90,18 +90,18 @@
     { layer: 2, type: 'ellipse', cx: 100, cy: 196, rx: 28, ry: 14, side: 'mid', en: 'Flexor digitorum brevis', cn: '趾短屈肌', what: 'Muscle of the front of the sole. Bends the middle toes.' },
     { layer: 2, type: 'ellipse', cx: 134, cy: 262, rx: 8, ry: 44, side: 'mid', en: 'Abductor digiti minimi', cn: '小趾展肌', what: 'Muscle of the outer sole. Moves the little toe.' },
     { layer: 2, type: 'ellipse', cx: 100, cy: 128, rx: 52, ry: 14, side: 'mid', en: 'Toe pads', cn: '趾腹', what: 'The fleshy pads under the toes.' },
-    { layer: 3, type: 'line', d: 'M98,350 C94,300 92,250 90,120', side: 'mid', stroke: '#c0392b', width: 2, en: 'Lateral plantar artery', cn: '足底外侧动脉', what: 'Artery running along the outer sole.' },
-    { layer: 4, type: 'line', d: 'M72,340 C70,290 68,230 66,100', side: 'mid', stroke: '#e0a800', width: 2.5, en: 'Medial plantar nerve', cn: '足底内侧神经', what: 'Nerve along the inner sole. Feels the big toe and the inner toes.' },
-    { layer: 4, type: 'line', d: 'M124,340 C128,290 132,230 136,120', side: 'mid', stroke: '#e0a800', width: 2.5, en: 'Lateral plantar nerve', cn: '足底外侧神经', what: 'Nerve along the outer sole. Feels the outer toes.' },
-    { layer: 5, type: 'line', d: 'M62,356 C62,300 62,200 64,70', side: 'mid', stroke: '#6d5fa3', width: 3, en: 'Tendon of flexor hallucis longus', cn: '拇长屈肌腱', what: 'Tendon that bends the big toe, running along the inner sole.' },
-    { layer: 5, type: 'line', d: 'M98,340 C98,280 96,200 90,80', side: 'mid', stroke: '#6d5fa3', width: 2.5, en: 'Tendons of flexor digitorum longus', cn: '趾长屈肌腱', what: 'Tendons that bend the toes.' },
-    { layer: 5, type: 'line', d: 'M104,340 C112,280 124,200 132,80', side: 'mid', stroke: '#6d5fa3', width: 2, en: 'Plantar fascia', cn: '足底筋膜', what: 'Tough sheet of tissue along the sole. Supports the arch.' },
-    { layer: 6, type: 'ellipse', cx: 100, cy: 356, rx: 24, ry: 26, side: 'mid', fill: '#f4efe1', en: 'Heel bone (calcaneus)', cn: '跟骨', what: 'The heel bone.' },
-    { layer: 6, type: 'line', d: 'M76,236 L68,130', side: 'mid', stroke: '#f4efe1', width: 6, en: 'First metatarsal', cn: '第一跖骨', what: 'Long bone behind the big toe.' },
-    { layer: 6, type: 'line', d: 'M92,226 L92,120', side: 'mid', stroke: '#f4efe1', width: 5, en: 'Second to fourth metatarsals', cn: '第二至第四跖骨', what: 'Long bones behind the middle toes.' },
-    { layer: 6, type: 'line', d: 'M128,226 L136,128', side: 'mid', stroke: '#f4efe1', width: 5, en: 'Fifth metatarsal', cn: '第五跖骨', what: 'Long bone behind the little toe.' },
-    { layer: 6, type: 'ellipse', cx: 68, cy: 92, rx: 7, ry: 14, side: 'mid', fill: '#f4efe1', en: 'Big toe bones', cn: '拇趾骨', what: 'Bones of the big toe.' },
-    { layer: 6, type: 'ellipse', cx: 124, cy: 98, rx: 22, ry: 6, side: 'mid', fill: '#f4efe1', en: 'Toe bones (phalanges)', cn: '趾骨', what: 'Bones of the toes.' }
+    { layer: 3, type: 'line', d: 'M98,350 C94,300 92,250 90,120', side: 'mid', stroke: '#d98a7e', width: 2, en: 'Lateral plantar artery', cn: '足底外侧动脉', what: 'Artery running along the outer sole.' },
+    { layer: 4, type: 'line', d: 'M72,340 C70,290 68,230 66,100', side: 'mid', stroke: '#e6c46a', width: 2.5, en: 'Medial plantar nerve', cn: '足底内侧神经', what: 'Nerve along the inner sole. Feels the big toe and the inner toes.' },
+    { layer: 4, type: 'line', d: 'M124,340 C128,290 132,230 136,120', side: 'mid', stroke: '#e6c46a', width: 2.5, en: 'Lateral plantar nerve', cn: '足底外侧神经', what: 'Nerve along the outer sole. Feels the outer toes.' },
+    { layer: 5, type: 'line', d: 'M62,356 C62,300 62,200 64,70', side: 'mid', stroke: '#a79bcc', width: 3, en: 'Tendon of flexor hallucis longus', cn: '拇长屈肌腱', what: 'Tendon that bends the big toe, running along the inner sole.' },
+    { layer: 5, type: 'line', d: 'M98,340 C98,280 96,200 90,80', side: 'mid', stroke: '#a79bcc', width: 2.5, en: 'Tendons of flexor digitorum longus', cn: '趾长屈肌腱', what: 'Tendons that bend the toes.' },
+    { layer: 5, type: 'line', d: 'M104,340 C112,280 124,200 132,80', side: 'mid', stroke: '#a79bcc', width: 2, en: 'Plantar fascia', cn: '足底筋膜', what: 'Tough sheet of tissue along the sole. Supports the arch.' },
+    { layer: 6, type: 'ellipse', cx: 100, cy: 356, rx: 24, ry: 26, side: 'mid', fill: '#f6f1e4', en: 'Heel bone (calcaneus)', cn: '跟骨', what: 'The heel bone.' },
+    { layer: 6, type: 'line', d: 'M76,236 L68,130', side: 'mid', stroke: '#f6f1e4', width: 6, en: 'First metatarsal', cn: '第一跖骨', what: 'Long bone behind the big toe.' },
+    { layer: 6, type: 'line', d: 'M92,226 L92,120', side: 'mid', stroke: '#f6f1e4', width: 5, en: 'Second to fourth metatarsals', cn: '第二至第四跖骨', what: 'Long bones behind the middle toes.' },
+    { layer: 6, type: 'line', d: 'M128,226 L136,128', side: 'mid', stroke: '#f6f1e4', width: 5, en: 'Fifth metatarsal', cn: '第五跖骨', what: 'Long bone behind the little toe.' },
+    { layer: 6, type: 'ellipse', cx: 68, cy: 92, rx: 7, ry: 14, side: 'mid', fill: '#f6f1e4', en: 'Big toe bones', cn: '拇趾骨', what: 'Bones of the big toe.' },
+    { layer: 6, type: 'ellipse', cx: 124, cy: 98, rx: 22, ry: 6, side: 'mid', fill: '#f6f1e4', en: 'Toe bones (phalanges)', cn: '趾骨', what: 'Bones of the toes.' }
   ];
 
   var REGION_DEFS = [
@@ -125,13 +125,13 @@
   }
 
   var COLOURS = {
-    0: { fill: '#f6d7c3', stroke: '#b98b72', w: 1.5 },
-    1: { fill: '#f9e7a0', stroke: 'none', w: 0 },
-    2: { fill: '#d86b6b', stroke: '#8e3b3b', w: 1.2 },
-    3: { fill: 'none', stroke: '#c0392b', w: 2 },
-    4: { fill: 'none', stroke: '#e0a800', w: 2 },
-    5: { fill: 'none', stroke: '#6d5fa3', w: 2 },
-    6: { fill: '#f4efe1', stroke: '#8a8070', w: 1.2 }
+    0: { fill: '#f8e6da', stroke: '#c9a492', w: 1.5 },
+    1: { fill: '#fbeed0', stroke: 'none', w: 0 },
+    2: { fill: '#e9b7ad', stroke: '#b98278', w: 1 },
+    3: { fill: 'none', stroke: '#d98a7e', w: 2 },
+    4: { fill: 'none', stroke: '#e6c46a', w: 2 },
+    5: { fill: 'none', stroke: '#a79bcc', w: 2 },
+    6: { fill: '#f6f1e4', stroke: '#b7ad98', w: 1.2 }
   };
 
   function itemNode(item, index, lang) {
@@ -145,7 +145,8 @@
     else if (item.type === 'ellipse') node = el('ellipse', { cx: item.cx, cy: item.cy, rx: item.rx, ry: item.ry, fill: fill, stroke: stroke, 'stroke-width': width });
     else node = el('path', { d: item.d, fill: 'none', stroke: stroke, 'stroke-width': width, 'stroke-linecap': 'round' });
     Object.keys(attrs).forEach(function (k) { node.setAttribute(k, attrs[k]); });
-    if (item.layer === 1) node.setAttribute('fill-opacity', '0.45');
+    if (item.layer === 1) node.setAttribute('fill-opacity', '0.5');
+    if (item.layer === 2) node.setAttribute('fill-opacity', '0.8');
     if (item.inset) node.setAttribute('transform', 'translate(150 330) scale(0.96) translate(-150 -330)');
     return node;
   }
