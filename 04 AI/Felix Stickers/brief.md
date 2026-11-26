@@ -20,6 +20,7 @@ Key decisions:
 - 2026-11-25: orientation by aim drag, then roll-on (two touches). Test: peel, wait 1.3 s, aim up-right (sticker turns to 36.9°), roll back: placed at rotate(36.87deg), committed. GIF checked by eye.
 - 2026-11-25: held-curl wait 1 s; two-finger turn damped (15° → 5°, 1:1 from 45°). Rotation was not driven in headless tests; check on a device.
 - 2026-11-25: bottom-bar sheet pager (◀ n / N ▶), shown when more than one sheet is loaded; top ⚙️ removed. Sticker pack page waits for more than 20 stickers.
+- 2026-11-26 (publish): the Thanksgiving and Motor Home sheets are public: pictures in `art/sheets/`, data in `js/sheets/`, loaded by `index.html`. Jimmy confirmed the pictures are ChatGPT-generated and free to publish.
 - 2026-11-26: settings > Sheets from this device loads a sheet's files from the device (no upload). Tested on a copy without private/: Woods, then Thanksgiving and Motor Home from the picker, pager reaches all three, no errors.
 - 2026-11-25: family database wired (Family project, `fs_creations`, `fs_notes`). SQL written, **not pasted** (Jimmy pastes `test_001_fs`, then `001_fs_family`, then `verify_001_fs`). App tested against a mocked database only: sign-in, note sent with the family token, a failed write shows in errors, sign-out. Close Family sign-up before anyone signs in.
 Next: device test on a real iPad (peel feel, two-finger twist, edge swipe), then the ChatGPT core prompt round.

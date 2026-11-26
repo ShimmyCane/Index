@@ -4,7 +4,7 @@
   'use strict';
 
   var VERSION = '0.1.0';
-  // All sheets on the page: Woods, plus any test sheets that were loaded (see js/sheet_select.js).
+  // All sheets on the page: Woods, plus the sheets in js/sheets/ (loaded by index.html).
   var SHEETS = [window.FS_SHEET].concat(window.FS_EXTRA_SHEETS || []);
   var startKey = '';
   try { startKey = (new URLSearchParams(window.location.search).get('sheet') || '').toLowerCase(); } catch (e) { startKey = ''; }
