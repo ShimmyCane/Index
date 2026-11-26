@@ -203,6 +203,37 @@ h2 {
     [data-style="geometric"] .wall li { grid-column: 1 / -1 !important; }
 }
 
+/* Bauhaus blocks tile: primary blocks on a cream field, no black. */
+.wall a.bauhaus {
+    position: relative;
+    overflow: hidden;
+    background: #f3ecdc;
+}
+.wall a.bauhaus::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(#e63b2e, #e63b2e) 0 100% / 34% 52% no-repeat,
+        linear-gradient(#2456a6, #2456a6) 100% 0 / 20% 78% no-repeat,
+        linear-gradient(#f2c230, #f2c230) 62% 100% / 30% 26% no-repeat,
+        linear-gradient(#4d7a4a, #4d7a4a) 36% 0 / 12% 20% no-repeat;
+}
+.wall a.bauhaus span {
+    position: relative;
+    background: #f3ecdc;
+    padding: 0.2em 0.5em;
+    border-radius: 6px;
+}
+
+/* The Bauhaus ships and the stone wall cut and colour every tile themselves, so this one joins in there. */
+[data-style="bauhaus"] .wall a.bauhaus::before,
+[data-style="polygonal"] .wall a.bauhaus::before { content: none; }
+[data-style="bauhaus"] .wall a.bauhaus span,
+[data-style="polygonal"] .wall a.bauhaus span { background: none; padding: 0; }
+[data-style="bauhaus"] .wall a.bauhaus,
+[data-style="polygonal"] .wall a.bauhaus { background-color: var(--tile, #f3ecdc); }
+
 /* ---------- 2. Paper Stickers ---------- */
 body[data-style="sticker"] {
     background: #fff4e6 radial-gradient(#f1d9bd 1.2px, transparent 1.2px) 0 0 / 18px 18px;
