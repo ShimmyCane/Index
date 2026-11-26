@@ -9,7 +9,7 @@ The sheet is one picture. Each sticker is a box on that picture plus a cut-out o
 
 - **Sticker name**: the label for the peel ("Acorn Cap"). The id is the same in snake_case (`acorn_cap`).
 - **Source picture**: a file path. It should show one sticker on a plain, light background (for example a ChatGPT picture). If none is given, ask for one.
-- **Sheet**: the sheet file to add to. Default: the Thanksgiving test sheet, `03 Projects/Felix Stickers/private/thanksgiving/sheet.js`.
+- **Sheet**: the sheet file to add to. Default: the Thanksgiving sheet, `03 Projects/Felix Stickers/js/sheets/thanksgiving.js` (pictures in `art/sheets/thanksgiving/`). Sheets from uploads stay in `private/` until Jimmy confirms the licence.
 - **Size on the sheet**: the longer side, in picture pixels. Default 260 (the sheet is 1536 px wide).
 - **Where it lives**:
   - Default: `private/<sheet>/` (test only, never committed; Jimmy's answer in convo v0.1 Q10 for uploaded art).

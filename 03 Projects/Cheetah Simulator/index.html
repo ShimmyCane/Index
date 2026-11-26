@@ -27,6 +27,9 @@ button{cursor:pointer;touch-action:manipulation}
 .gear.faded{opacity:.18}
 .chirp{position:fixed;right:18px;bottom:22px;width:96px;height:96px;border-radius:50%;border:3px solid var(--ink);background:var(--coral);box-shadow:0 5px 0 var(--ink);font-weight:800;font-size:16px;z-index:4}
 .chirp:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
+.actions{position:fixed;right:18px;bottom:134px;display:flex;flex-direction:column;align-items:flex-end;gap:10px;z-index:4}
+.act{min-width:112px;min-height:68px;border:3px solid var(--ink);border-radius:18px;background:var(--sun);box-shadow:0 4px 0 var(--ink);font-weight:800;font-size:16px;padding:0 12px}
+.act:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
 .joy{position:fixed;left:16px;bottom:16px;border-radius:50%;border:3px solid var(--ink);background:rgba(255,253,247,.5);z-index:4}
 .joy[hidden]{display:none}
 .joyKnob{position:absolute;left:50%;top:50%;width:40%;height:40%;margin:-20% 0 0 -20%;border-radius:50%;border:3px solid var(--ink);background:var(--sun)}
@@ -81,6 +84,7 @@ h2{font-size:17px;margin:14px 0 4px}
 <button id="next" class="nextBtn" type="button" hidden>Next stage →</button>
 <button id="gear" class="gear" type="button" aria-label="Settings" aria-expanded="false">⚙️</button>
 <button id="chirp" class="chirp" type="button" aria-label="Chirp to call Mum">🐾 Chirp</button>
+<div id="actions" class="actions" aria-label="Actions"></div>
 <div id="joy" class="joy" hidden aria-label="Joystick"><div class="joyKnob" id="joyKnob"></div></div>
 <div id="toast" class="toast off" role="status"></div>
 <div id="errs" class="errs" hidden></div>
@@ -198,7 +202,13 @@ var LATER={3:'Watching and trying',4:'Almost grown'};
 
 var S=load();
 var skyBoostT=0; // seconds left of the sky run into the next stage
-var ZOOM1=1.25; // seconds left of the sky run into the next stage
+var ZOOM1=1.25;
+// action buttons: each appears once its skill is mastered. hold = held while pressed; tap = one press
+var ACTIONS={
+  1:{hide:{label:'🌿 Hide',mode:'hold'},listen:{label:'👂 Listen',mode:'hold'},nibble:{label:'🌱 Nibble',mode:'tap'}},
+  2:{pounce:{label:'🦋 Pounce',mode:'hold'},freeze:{label:'🛑 Freeze',mode:'hold'}}
+};
+var held={}, actKey=''; // seconds left of the sky run into the next stage
 var W=0,H=0,DPR=1,WD=null,drawerOpen=false,last=performance.now(),saveAcc=0,toastT=null,gearT=null;
 var errors=[];
 var fx=0,fy=0,jx=0,jy=0,keys={};
@@ -332,6 +342,7 @@ document.addEventListener('pointermove',function(e){
   if(e.pointerId===joyPtr)setJoy(e);
 });
 function release(e){
+  held={};
   if(e.pointerId===activePtr){activePtr=null;fx=0;fy=0;}
   if(e.pointerId===joyPtr){joyPtr=null;jx=0;jy=0;el('joyKnob').style.transform='';}
 }
@@ -379,6 +390,8 @@ function reunite(){
 /* ---------- update ---------- */
 function update(dt){
   var c=WD.cub, v=inputVec(), speed=(S.cheetah.stage===1?110:170);
+  if(held.hide||held.listen||held.freeze){v={x:0,y:0};}   // held still
+  if(held.pounce&&S.cheetah.stage===2){speed*=2.2;}        // a quick dash
   c.moving=Math.hypot(v.x,v.y)>0.1;
   if(Math.abs(v.x)>0.1)c.dir=v.x>0?1:-1;
   var ox=c.x, oy=c.y;
@@ -628,6 +641,37 @@ function frame(now){
   requestAnimationFrame(frame);
 }
 
+/* ---------- actions and fast-forward ---------- */
+function allMastered(n){
+  var st=stageState(n);
+  return (SKILLS[n]||[]).every(function(d){return (st.skills[d.id]||0)>=d.need;});
+}
+function nibbleTap(){
+  if(!WD)return;
+  var near=null;
+  WD.sprigs.forEach(function(s){if(!s.done&&Math.hypot(WD.cub.x-s.x,WD.cub.y-s.y)<60)near=s;});
+  if(near){near.done=true; addSkill('nibble'); say('Nibble, nibble.');}
+  else say('Move close to a grass shoot first.');
+}
+function refreshActions(){
+  var n=S.cheetah.stage, st=stageState(n), defs=ACTIONS[n]||{}, ids=[];
+  Object.keys(defs).forEach(function(id){if((st.skills[id]||0)>=skillDef(id).need)ids.push(id);});
+  var key=n+':'+ids.join(',');
+  if(key===actKey)return;   // rebuild only when the set changes (a held press must not break)
+  actKey=key;
+  var box=el('actions'); box.innerHTML='';
+  ids.forEach(function(id){
+    var b=document.createElement('button'); b.type='button'; b.className='act'; b.textContent=defs[id].label;
+    b.setAttribute('aria-label',defs[id].label);
+    if(defs[id].mode==='hold'){
+      b.addEventListener('pointerdown',function(e){e.preventDefault(); held[id]=true;});
+    }else{
+      b.addEventListener('click',function(){ if(id==='nibble')nibbleTap(); });
+    }
+    box.appendChild(b);
+  });
+}
+
 /* ---------- HUD (pill, Next, drawer) ---------- */
 function mmss(sec){sec=Math.floor(sec);return Math.floor(sec/60)+':'+('0'+(sec%60)).slice(-2);}
 function refresh(){
@@ -639,14 +683,15 @@ function refresh(){
   if(document.activeElement!==el('name'))el('name').value=S.cheetah.name||'';
   el('stageName').textContent=n+'. '+STAGES[n].name+' ('+STAGES[n].age+')';
   el('clock').textContent=mmss(st.played)+' of '+mmss(target)+(st.restarts?' · restart '+st.restarts:'');
-  var next=el('next');
+  var next=el('next'), reached=st.played>=target, all=allMastered(n);
   if(st.done){
     next.hidden=true;
   }else{
-    next.hidden=st.played<target;
+    next.hidden=!(reached||all);
     next.disabled=false;
-    next.textContent=STAGES[n+1]?'Next stage →':'Stage 3 comes in a later build';
+    next.textContent=!STAGES[n+1]?'Stage 3 comes in a later build':(reached?'Next stage →':'⏩ Skip to next stage');
   }
+  refreshActions();
   var lessonEl=el('lesson'); lessonEl.textContent=STAGES[n].lesson;
   var f=el('facts'); f.innerHTML='';
   STAGES[n][S.settings.gentle?'gentle':'full'].forEach(function(t){var li=document.createElement('li');li.textContent=t;f.appendChild(li);});
@@ -735,7 +780,7 @@ function wire(){
   el('chirp').addEventListener('click',chirp);
   el('next').addEventListener('click',function(){
     var n=S.cheetah.stage, st=stageState(n);
-    if(st.played<targetMin()*60||st.done)return;
+    if(!(st.played>=targetMin()*60||allMastered(n))||st.done)return;
     st.done=true;
     if(STAGES[n+1]){
       say('Stage '+n+' is done. On to '+STAGES[n+1].name+'!');

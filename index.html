@@ -182,6 +182,29 @@
         [data-style="geometric"] a.dia   { --poly: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
         [data-style="geometric"] a.notch { --poly: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%); }
 
+        /* Bauhaus blocks tile: primary blocks on a cream field, no black. */
+        .wall a.bauhaus {
+            position: relative;
+            overflow: hidden;
+            background: #f3ecdc;
+        }
+        .wall a.bauhaus::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(#e63b2e, #e63b2e) 0 100% / 34% 52% no-repeat,
+                linear-gradient(#2456a6, #2456a6) 100% 0 / 20% 78% no-repeat,
+                linear-gradient(#f2c230, #f2c230) 62% 100% / 30% 26% no-repeat,
+                linear-gradient(#4d7a4a, #4d7a4a) 36% 0 / 12% 20% no-repeat;
+        }
+        .wall a.bauhaus span {
+            position: relative;
+            background: #f3ecdc;
+            padding: 0.2em 0.5em;
+            border-radius: 6px;
+        }
+
         @media (max-width: 560px) {
             [data-style="geometric"] .wall {
                 grid-template-columns: repeat(2, 1fr);
@@ -411,6 +434,8 @@
         <button type="button" data-style="stamps" aria-pressed="false">Postage Stamps</button>
         <button type="button" data-style="pixel" aria-pressed="false">Pixel Blocks</button>
         <button type="button" data-style="polygonal" aria-pressed="false">Polygonal Masonry</button>
+        <h3>Nursery</h3>
+        <button type="button" id="reorder-toggle" aria-pressed="true">Reorder &amp; favourites: on</button>
         <h3>Planning</h3>
         <a class="panel-link" href="01%20Planning/nursery_review_2026-11-22.html">Nursery review, 2026-11-22</a>
     </div>
@@ -480,6 +505,7 @@
                 <li class="w2" data-size="3x1"><a class="para" style="--c:#ffb02e" href="https://shimmycane.github.io/Proposal_Drafter/">Proposal Drafter</a></li>
                 <li class="w2" data-size="3x1"><a class="tri" style="--c:#8a7cf0" href="03%20Projects/Shimmy%20Specs/">Shimmy Specs</a></li>
                 <li class="w2 h2" data-size="3x2"><a class="hex" style="--c:#7bd389" href="https://shimmycane.github.io/Growth/">Growth</a></li>
+                <li class="w2" data-size="3x1"><a class="chev" style="--c:#d9d2bd" href="https://shimmycane.github.io/QC-keynotes/">QC keynotes</a></li>
                 <li class="h2" data-size="3x2"><a class="tri" style="--c:#3d8bff" href="https://shimmycane.github.io/Make-3D/">Make 3D</a></li>
                 <li class="w2" data-size="3x1"><a class="dia" style="--c:#ff9e8a" href="https://shimmycane.github.io/Increment-Viewer/">Increment Viewer</a></li>
                 <li class="w2" data-size="3x1"><a class="notch" style="--c:#9fd3e6" href="https://shimmycane.github.io/Critique-Detail/">Critique Detail</a></li>
@@ -495,7 +521,6 @@
                 <li class="w2" data-size="3x1" data-track="mind-palace"><a class="chev" style="--c:#b9a6e8" href="03%20Projects/Mind%20Palace/">Mind Palace</a></li>
                 <li class="w2" data-size="3x1" data-track="salmon-leap"><a class="hex" style="--c:#7fb8e0" href="03%20Projects/Salmon%20Leap/">Salmon Leap</a></li>
                 <li class="w2" data-size="3x1" data-track="athenas-piano-companion"><a class="dia" style="--c:#ffb5a3" href="03%20Projects/Athena%27s%20Piano%20Companion/">Athena's Piano Companion</a></li>
-                <li class="w2" data-size="3x1" data-track="qc-keynotes"><a class="notch" style="--c:#e7dcc4" href="03%20Projects/QC%20keynotes/">QC keynotes</a></li>
                 <li class="w2" data-size="3x1" data-track="felix-stickers"><a class="tri" style="--c:#ffd0b5" href="03%20Projects/Felix%20Stickers/">Felix Stickers</a></li>
                 <li class="w2" data-size="3x1" data-track="felix-continents"><a class="chev" style="--c:#b8e0c8" href="03%20Projects/Felix%20Continents/">Felix Continents</a></li>
                 <li class="w2" data-size="3x1" data-track="massage-map"><a class="hex" style="--c:#bfe3c8" href="03%20Projects/Massage%20Map/">Massage Map</a></li>
@@ -542,8 +567,31 @@
             var TRACK_KEY = 'nursery-clicks';
             var SHAPES = ['hex', 'tri', 'chev', 'dia', 'pent', 'notch', 'para'];
             var SIZES = ['w2 h2', 'w2', ''];
+            var REORDER_KEY = 'nursery-reorder';
             var nurseryWall = document.getElementById('nursery-wall');
             if (!nurseryWall) return;
+
+            // Remember the original order and sizes so turning reorder off can restore them.
+            var originals = Array.from(nurseryWall.querySelectorAll('li[data-track]')).map(function (li) {
+                return { li: li, cls: li.getAttribute('class') };
+            });
+            var toggle = document.getElementById('reorder-toggle');
+
+            function getReorderOn() {
+                try { return localStorage.getItem(REORDER_KEY) !== 'off'; } catch (e) { return true; }
+            }
+
+            function setReorderOn(on) {
+                try { localStorage.setItem(REORDER_KEY, on ? 'on' : 'off'); } catch (e) { /* storage blocked */ }
+            }
+
+            function restoreNursery() {
+                originals.forEach(function (o) {
+                    if (o.cls === null) o.li.removeAttribute('class');
+                    else o.li.setAttribute('class', o.cls);
+                    nurseryWall.appendChild(o.li);
+                });
+            }
 
             function getClicks(trackId) {
                 try {
@@ -576,9 +624,16 @@
                 });
             }
 
+            function applyReorder(on) {
+                toggle.setAttribute('aria-pressed', String(on));
+                toggle.textContent = 'Reorder & favourites: ' + (on ? 'on' : 'off');
+                if (on) reorganizeNursery();
+                else restoreNursery();
+            }
+
             nurseryWall.addEventListener('click', function (e) {
                 var link = e.target.closest('a[href]');
-                if (link) {
+                if (link && getReorderOn()) {
                     var li = link.closest('li[data-track]');
                     if (li) {
                         incrementClick(li.getAttribute('data-track'));
@@ -587,7 +642,13 @@
                 }
             });
 
-            reorganizeNursery();
+            toggle.addEventListener('click', function () {
+                var on = !getReorderOn();
+                setReorderOn(on);
+                applyReorder(on);
+            });
+
+            applyReorder(getReorderOn());
         })();
     </script>
 </body>

@@ -152,3 +152,11 @@ Jimmy is playing and likes it. Asks, to put on the to-do list (`todo.md`) and bu
 - Later: walk and run, depending on how far the joystick is pushed. Skills such as crouching, being quiet, moving, hunting and stalking.
 
 **R6-1. Baby phase:** Jimmy wrote "you're a baby, right, but the first stage for us will be child". Is the chirp-only baby a stage before the child, or is it the child's first blurry moment? (Assumed: a later optional stage, not stage 1.)
+
+## Round 7: action buttons and skip (Jimmy, 2026-11-26)
+
+"When all of the skills have been unlocked, there needs to be more action buttons. When they are all unlocked, let there be a fast-forward option to skip to the next stage."
+
+Built: an action button appears on the right when its skill is mastered (Hide, Listen, Nibble in stage 1; Pounce and Freeze in stage 2). When all skills in a stage are mastered, ⏩ Skip to next stage appears.
+
+Questions: are Hide, Listen and Nibble the right buttons for stage 1, and is Pounce as a dash right for stage 2?
