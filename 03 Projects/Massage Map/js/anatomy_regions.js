@@ -167,9 +167,28 @@
     { layer: 6, type: 'ellipse', cx: 400, cy: 580, rx: 26, ry: 16, side: 'mid', fill: BONE, en: 'Neck vertebrae', cn: '颈椎', what: 'Stacked vertebrae of the neck.' }
   ];
 
+  /* Head and neck (side), traced from the plate itself (see js/traced_378.js). Layers 0 to 3 are traced;
+     nerves, ligaments and bones keep the hand-drawn lines from SIDE_ITEMS until they are traced too. */
+  var T378 = (window.MM_TRACED378 && window.MM_TRACED378.paths) || null;
+  var HEAD_SIDE_ITEMS = T378 ? [
+    { layer: 0, type: 'path', d: T378._silhouette, evenodd: true, side: 'mid', fill: '#f8e6da', stroke: '#c9a492', width: 1.2, en: 'Head and neck skin (outline)', cn: '头颈皮肤轮廓', what: 'Outline of the skin of the head and neck, traced from the plate.' },
+    { layer: 2, type: 'path', d: T378.occipitofrontalis, evenodd: true, side: 'mid', en: 'Occipitofrontalis (scalp muscle)', cn: '枕额肌', what: 'Muscle over the top and front of the skull. Raises the eyebrows.' },
+    { layer: 2, type: 'path', d: T378.orbicularis_oculi, evenodd: true, side: 'mid', en: 'Orbicularis oculi', cn: '眼轮匝肌', what: 'Ring muscle around the eye. Closes the eyelids.' },
+    { layer: 2, type: 'path', d: T378.nasal, evenodd: true, side: 'mid', en: 'Nasal muscles', cn: '鼻肌', what: 'Small muscles around the nose. Widen and narrow the nostrils.' },
+    { layer: 2, type: 'path', d: T378.temporal_fascia_muscle, evenodd: true, side: 'mid', en: 'Temporalis', cn: '颞肌', what: 'Fan-shaped chewing muscle over the side of the head. Closes the jaw.' },
+    { layer: 2, type: 'path', d: T378.masseter, evenodd: true, side: 'mid', en: 'Masseter', cn: '咬肌', what: 'Chewing muscle at the jaw corner. Strongest muscle for closing the mouth.' },
+    { layer: 2, type: 'path', d: T378.zygomaticus, evenodd: true, side: 'mid', en: 'Zygomaticus', cn: '颧肌', what: 'Muscle from the cheekbone to the mouth corner. Lifts the mouth for a smile.' },
+    { layer: 2, type: 'path', d: T378.buccinator, evenodd: true, side: 'mid', en: 'Buccinator', cn: '颊肌', what: 'Cheek muscle that holds food between the teeth.' },
+    { layer: 2, type: 'path', d: T378.orbicularis_oris, evenodd: true, side: 'mid', en: 'Orbicularis oris', cn: '口轮匝肌', what: 'Ring muscle around the mouth.' },
+    { layer: 2, type: 'path', d: T378.mentalis, evenodd: true, side: 'mid', en: 'Mentalis', cn: '颏肌', what: 'Muscle of the chin. Raises and wrinkles the chin skin.' },
+    { layer: 2, type: 'path', d: T378.sternocleidomastoid, evenodd: true, side: 'mid', en: 'Neck muscles: platysma and sternocleidomastoid (traced together)', cn: '颈部肌（颈阔肌与胸锁乳突肌）', what: 'Front and side of the neck. The sternocleidomastoid turns and tilts the head; the platysma is a thin sheet over the front of the neck.' },
+    { layer: 2, type: 'path', d: T378.splenius, evenodd: true, side: 'mid', en: 'Splenius and trapezius (back of neck, traced together)', cn: '夹肌与斜方肌（颈背）', what: 'Muscles of the back of the neck and upper back. Hold the head up and turn it.' },
+    { layer: 3, type: 'path', d: T378._vein, evenodd: true, side: 'mid', fill: 'none', stroke: '#7fa7c9', width: 3, en: 'External jugular vein', cn: '颈外静脉', what: 'Vein running down the side of the neck, traced from the plate.' }
+  ].concat(SIDE_ITEMS.filter(function (it) { return it.layer >= 3 && it.layer !== 3; })) : SIDE_ITEMS;
+
   window.MM_EXTRA_REGIONS = [
     { id: 'back', en: 'Back', cn: '背部', vb: '0 0 300 650', mirrorW: 300, items: BACK_ITEMS },
-    { id: 'head-side', en: 'Head and neck (side)', cn: '头颈（侧）', vb: '0 0 627 700', mirrorW: 627, items: SIDE_ITEMS },
+    { id: 'head-side', en: 'Head and neck (side)', cn: '头颈（侧）', vb: (window.MM_TRACED378 ? '0 0 ' + window.MM_TRACED378.w + ' ' + window.MM_TRACED378.h : '0 0 627 700'), mirrorW: 627, items: HEAD_SIDE_ITEMS },
     { id: 'face', en: 'Face', cn: '面部', vb: '0 0 200 240', mirrorW: 200, items: FACE_ITEMS },
     { id: 'neck', en: 'Neck', cn: '颈部', vb: '0 0 200 260', mirrorW: 200, items: NECK_ITEMS },
     { id: 'hand', en: 'Hand (palm)', cn: '手掌', vb: '0 0 140 180', mirrorW: 140, items: HAND_ITEMS },

@@ -104,9 +104,15 @@
     { layer: 6, type: 'ellipse', cx: 124, cy: 98, rx: 22, ry: 6, side: 'mid', fill: '#f6f1e4', en: 'Toe bones (phalanges)', cn: '趾骨', what: 'Bones of the toes.' }
   ];
 
+  /* Sole: traced skin and muscle (traced_444.js) replace the hand-drawn ones; the rest stays. */
+  var T444 = (window.MM_TRACED444 && window.MM_TRACED444.paths) || null;
+  var SOLE_ITEMS = T444 ? [
+    { layer: 0, type: 'path', d: T444.skin, evenodd: true, side: 'mid', en: 'Skin of the sole', cn: '足底皮肤', what: 'Thick skin of the sole, traced from the plate.' },
+    { layer: 2, type: 'path', d: T444.muscle, evenodd: true, side: 'mid', en: 'Plantar muscles (traced together)', cn: '足底肌群（合并描绘）', what: 'The muscles of the sole, traced from the plate: abductor hallucis, flexor digitorum brevis, quadratus plantae and abductor digiti minimi.' }
+  ].concat(FOOT_ITEMS.filter(function (i) { return i.layer >= 3; })) : FOOT_ITEMS;
   var REGION_DEFS = [
     { id: 'body', en: 'Whole body', cn: '全身', vb: '0 0 300 650', mirrorW: 300, items: ITEMS },
-    { id: 'foot', en: 'Sole of foot', cn: '足底', vb: '0 0 200 420', mirrorW: 200, items: FOOT_ITEMS }
+    { id: 'foot', en: 'Sole of foot', cn: '足底', vb: '0 0 200 420', mirrorW: 200, items: SOLE_ITEMS }
   ].concat(window.MM_EXTRA_REGIONS || []);
   var REGION = 'body';
   function def() {
@@ -147,6 +153,7 @@
     Object.keys(attrs).forEach(function (k) { node.setAttribute(k, attrs[k]); });
     if (item.layer === 1) node.setAttribute('fill-opacity', '0.5');
     if (item.layer === 2) node.setAttribute('fill-opacity', '0.8');
+    if (item.evenodd) node.setAttribute('fill-rule', 'evenodd');
     if (item.inset) node.setAttribute('transform', 'translate(150 330) scale(0.96) translate(-150 -330)');
     return node;
   }
