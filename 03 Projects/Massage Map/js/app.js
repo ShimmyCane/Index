@@ -21,7 +21,7 @@
   var S = {
     lang: 'en', speed: 1, autoplay: 1, heat: 1, numbers: 1, kids: 0, who: 'Ying', errors: 0,
     view: 'sole', selMarker: null, selTech: null, selTechB: null,
-    compare: false, colour: true, zoomed: false,
+    compare: false, colour: true, zoomed: false, plate: false,
     playing: false, t: 0, loops: 0, last: 0, tab: 'map', noteFilter: 'open'
   };
 
@@ -79,7 +79,7 @@
 
   function loadSettings() {
     var saved = loadJSON(SETTINGS_KEY, {});
-    ['lang', 'speed', 'autoplay', 'heat', 'numbers', 'kids', 'who', 'errors', 'colour'].forEach(function (k) {
+    ['lang', 'speed', 'autoplay', 'heat', 'numbers', 'kids', 'who', 'errors', 'colour', 'plate'].forEach(function (k) {
       if (saved && saved[k] != null) S[k] = saved[k];
     });
     if (S.lang !== 'en' && S.lang !== 'cn') S.lang = 'en';
@@ -87,7 +87,7 @@
   }
   function saveSettings() {
     saveJSON(SETTINGS_KEY, { lang: S.lang, speed: S.speed, autoplay: S.autoplay, heat: S.heat,
-      numbers: S.numbers, kids: S.kids, who: S.who, errors: S.errors, colour: S.colour });
+      numbers: S.numbers, kids: S.kids, who: S.who, errors: S.errors, colour: S.colour, plate: S.plate });
   }
   var NUMERIC = { speed: true, autoplay: true, heat: true, numbers: true, kids: true, errors: true };
 
@@ -278,6 +278,7 @@
     var svg = $(svgId);
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     var parts = {
+      plate: svgEl('image', { href: PLATE_HREF, x: 0, y: 0, width: 330, height: 800, opacity: 0, preserveAspectRatio: 'none' }),
       outline: svgEl('path', { 'stroke-width': 3, stroke: '#2f2a3a', fill: '#fffdf8' }),
       dots: svgEl('g', {}),
       heat: svgEl('circle', { r: 0, fill: '#f08a6a', opacity: 0 }),
@@ -286,6 +287,7 @@
       hand: svgEl('circle', { r: 9, fill: '#ffd6c2', stroke: '#2f2a3a', 'stroke-width': 3 }),
       num: svgEl('text', { 'font-size': 16, 'font-weight': 700, fill: '#2f2a3a', opacity: 0 })
     };
+    svg.appendChild(parts.plate);
     svg.appendChild(parts.outline);
     svg.appendChild(parts.dots);
     svg.appendChild(parts.heat);
@@ -293,7 +295,7 @@
     svg.appendChild(parts.head);
     svg.appendChild(parts.hand);
     svg.appendChild(parts.num);
-    film[key] = { svg: svg, parts: parts, shownDots: '' };
+    film[key] = { svg: svg, parts: parts, shownDots: '', mode: false };
   }
 
   function heatColour(p) { return HEAT[p] || HEAT[3]; }
@@ -302,6 +304,13 @@
     line.setAttribute('x1', x1); line.setAttribute('y1', y1);
     line.setAttribute('x2', x2); line.setAttribute('y2', y2);
   }
+
+  // Gray's plate 444 (plantar view, heel at the top, plate 330 x 800) under the sole view.
+  // The sole view box is 200 x 420 with the toes at the top. Points map by a fixed transform.
+  var PLATE_HREF = 'plates/gray444_plantar.png';
+  function plateOn(view) { return !!S.plate && view === 'sole'; }
+  function toView(view, x, y) { return plateOn(view) ? [2.33 * x - 73, 820 - 1.97 * y] : [x, y]; }
+  function sizeOf(view) { return plateOn(view) ? 2.1 : 1; }
 
   function drawFilm(key, tech, t) {
     var f = film[key];
@@ -318,8 +327,16 @@
     var from = target;
     if (prev && prev[0] === view) from = markersFor(prev[0])[prev[1]] || target;
 
-    // Outline and dots follow the current view.
-    if (p.outline.getAttribute('data-view') !== view) {
+    // Plate or drawn foot: switch the view box and which picture is shown.
+    var on = plateOn(view), q = sizeOf(view);
+    if (f.mode !== on) {
+      f.mode = on;
+      f.svg.setAttribute('viewBox', on ? '0 0 330 800' : '0 0 200 420');
+      p.plate.setAttribute('opacity', on ? 1 : 0);
+      p.outline.setAttribute('opacity', on ? 0 : 1);
+      f.shownDots = '';
+    }
+    if (!on && p.outline.getAttribute('data-view') !== view) {
       p.outline.setAttribute('d', FOOT[view]);
       p.outline.setAttribute('data-view', view);
     }
@@ -331,7 +348,8 @@
         if (s[0] !== view) return;
         var m = ms[s[1]];
         if (!m) return;
-        p.dots.appendChild(svgEl('circle', { cx: m.x, cy: m.y, r: 4, fill: tech.color, stroke: '#2f2a3a', 'stroke-width': 1.5 }));
+        var c = toView(view, m.x, m.y);
+        p.dots.appendChild(svgEl('circle', { cx: c[0], cy: c[1], r: 4 * q, fill: tech.color, stroke: '#2f2a3a', 'stroke-width': 1.5 * q }));
       });
       f.shownDots = dotKey;
     }
@@ -351,14 +369,17 @@
     }
     var pressure = step[2];
     var showPress = u >= 0.35;
+    var hp = toView(view, hx, hy), tp = toView(view, target.x, target.y);
 
-    p.hand.setAttribute('cx', hx);
-    p.hand.setAttribute('cy', hy);
+    p.hand.setAttribute('cx', hp[0]);
+    p.hand.setAttribute('cy', hp[1]);
+    p.hand.setAttribute('r', 9 * q);
+    p.hand.setAttribute('stroke-width', 3 * q);
 
     if (S.heat && showPress) {
-      p.heat.setAttribute('cx', target.x);
-      p.heat.setAttribute('cy', target.y);
-      p.heat.setAttribute('r', 8 + 14 * press);
+      p.heat.setAttribute('cx', tp[0]);
+      p.heat.setAttribute('cy', tp[1]);
+      p.heat.setAttribute('r', (8 + 14 * press) * q);
       p.heat.setAttribute('fill', heatColour(pressure));
       p.heat.setAttribute('opacity', 0.25 + 0.55 * press);
     } else {
@@ -368,16 +389,17 @@
     if (showPress && press > 0.05) {
       var dd = step[3];
       var len = 10 + 22 * press;
-      var ex = target.x + dd[0] * len, ey = target.y + dd[1] * len;
-      setLine(p.arrow, target.x, target.y, ex, ey);
+      var ep = toView(view, target.x + dd[0] * len, target.y + dd[1] * len);
+      setLine(p.arrow, tp[0], tp[1], ep[0], ep[1]);
+      p.arrow.setAttribute('stroke-width', 3 * q);
       p.arrow.setAttribute('opacity', 0.9);
-      var ang = Math.atan2(ey - target.y, ex - target.x), hs = 7;
+      var ang = Math.atan2(ep[1] - tp[1], ep[0] - tp[0]), hs = 7 * q;
       var pts = [
-        [ex, ey],
-        [ex - hs * Math.cos(ang - 0.45), ey - hs * Math.sin(ang - 0.45)],
-        [ex - hs * Math.cos(ang + 0.45), ey - hs * Math.sin(ang + 0.45)]
+        [ep[0], ep[1]],
+        [ep[0] - hs * Math.cos(ang - 0.45), ep[1] - hs * Math.sin(ang - 0.45)],
+        [ep[0] - hs * Math.cos(ang + 0.45), ep[1] - hs * Math.sin(ang + 0.45)]
       ];
-      p.head.setAttribute('points', pts.map(function (q) { return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' '));
+      p.head.setAttribute('points', pts.map(function (r) { return r[0].toFixed(1) + ',' + r[1].toFixed(1); }).join(' '));
       p.head.setAttribute('opacity', 0.9);
     } else {
       p.arrow.setAttribute('opacity', 0);
@@ -385,8 +407,9 @@
     }
 
     if (S.numbers && showPress) {
-      p.num.setAttribute('x', target.x + 14);
-      p.num.setAttribute('y', target.y - 12);
+      p.num.setAttribute('x', tp[0] + 14 * q);
+      p.num.setAttribute('y', tp[1] - 12 * q);
+      p.num.setAttribute('font-size', 16 * q);
       p.num.textContent = String(pressure);
       p.num.setAttribute('opacity', 1);
     } else {
@@ -468,6 +491,41 @@
     r[person] = r[person] || {};
     r[person][key] = stars;
     saveJSON(RATINGS_KEY, r);
+  }
+
+  // Body-part favourites: one list per region, a heart per person. Device only for now.
+  var BODY_FLAGS_KEY = 'mm.flags.local';
+  function setBodyFlag(person, key, liked) {
+    var all = loadJSON(BODY_FLAGS_KEY, {}) || {};
+    all[person] = all[person] || {};
+    if (liked) all[person][key] = true; else delete all[person][key];
+    saveJSON(BODY_FLAGS_KEY, all);
+  }
+  function renderBodyFavs() {
+    var box = $('bodyFavList');
+    if (!box || !window.MM_ANATOMY) return;
+    box.textContent = '';
+    var flags = loadJSON(BODY_FLAGS_KEY, {}) || {};
+    var list = MM_ANATOMY.structures();
+    var lastRegion = null, card = null;
+    list.forEach(function (st) {
+      if (st.region !== lastRegion) {
+        lastRegion = st.region;
+        card = el('article', { 'class': 'card' });
+        card.appendChild(el('h2', null, S.lang === 'cn' ? st.regionCn : st.region));
+        box.appendChild(card);
+      }
+      var row = el('div', { 'class': 'starRow' });
+      row.appendChild(el('span', { 'class': 'note' }, (S.lang === 'cn' ? st.cn : st.en) + ' · ' + st.kind));
+      PEOPLE.forEach(function (person) {
+        var on = !!(flags[person] && flags[person][st.key]);
+        var b = el('button', { type: 'button', 'class': 'star' + (on ? ' on' : ''), 'aria-pressed': String(on),
+          'aria-label': person + ' ' + (on ? 'likes' : 'does not like') + ' ' + st.en }, (on ? '♥ ' : '♡ ') + person);
+        b.addEventListener('click', function () { setBodyFlag(person, st.key, !on); renderBodyFavs(); });
+        row.appendChild(b);
+      });
+      card.appendChild(row);
+    });
   }
 
   function renderFavs() {
@@ -588,10 +646,12 @@
     drawFilms();
     renderLearn();
     renderFavs();
+    renderBodyFavs();
     renderNotes();
     renderSettingsButtons();
     $('colourToggle').checked = !!S.colour;
     $('compareToggle').checked = !!S.compare;
+    $('plateToggle').checked = !!S.plate;
     $('zoomIn').disabled = !S.selMarker;
   }
 
@@ -620,6 +680,7 @@
     });
     $('colourToggle').addEventListener('change', function (e) { S.colour = e.target.checked; saveSettings(); renderAll(); });
     $('compareToggle').addEventListener('change', function (e) { S.compare = e.target.checked; renderAll(); });
+    $('plateToggle').addEventListener('change', function (e) { S.plate = e.target.checked; saveSettings(); drawFilms(); });
     $('filmSelect').addEventListener('change', function (e) { S.selTech = e.target.value; S.t = 0; S.loops = 0; renderAll(); });
     $('filmSelectB').addEventListener('change', function (e) { S.selTechB = e.target.value; S.t = 0; S.loops = 0; renderAll(); });
     $('playBtn').addEventListener('click', function () {

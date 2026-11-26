@@ -281,7 +281,28 @@
     });
   }
 
-  window.MM_ANATOMY = { render: render, wire: wire, state: state, layers: LAYERS, setRegion: setRegion };
+  // Body parts for the Favourites tab: muscles, bones, tendons, nerves and vessels, one key per region.
+  function slug(text) { return String(text).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+  function structures() {
+    var out = [];
+    REGION_DEFS.forEach(function (def) {
+      var seen = {};
+      def.items.forEach(function (item) {
+        if (item.layer < 2) return;
+        var base = def.id + '|' + slug(item.en);
+        seen[base] = (seen[base] || 0) + 1;
+        out.push({
+          key: seen[base] > 1 ? base + '#' + seen[base] : base,
+          en: item.en, cn: item.cn || item.en,
+          region: def.en, regionCn: def.cn,
+          kind: LAYERS[item.layer].en
+        });
+      });
+    });
+    return out;
+  }
+
+  window.MM_ANATOMY = {structures: structures,  render: render, wire: wire, state: state, layers: LAYERS, setRegion: setRegion };
   try { wire(); render('en'); }
   catch (err) {
     var list = document.getElementById('errorList');
