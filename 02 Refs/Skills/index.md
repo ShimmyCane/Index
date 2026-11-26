@@ -34,14 +34,12 @@ Source of truth for nursery skills. Each is wrapped in `.claude/skills/<name>/SK
 - **claude_review_project** — Bring existing project to current conventions: CLAUDE.md, convo/ folder, brief, lessons; extract reusable patterns
 - **remix** — Build nursery version of linked site/repo; combine with another repo; check license; record what was read and reused (seed: "A x B")
 
-### Project Transitions (2)
+### Project Transitions (1)
 - **graduate_project** — Move nursery project to standalone public repo with GitHub Pages: ready check, folder prep, copy/repo/Pages steps, registry pointers, home page link, remove from nursery
-- **claude_review_project** — Bring existing project to current conventions and extract reusable patterns
 
-### Data & Input (3)
+### Data & Input (2)
 - **ai_json_loop** — Let user draft structured content in any AI chat: page builds prompt, validates pasted JSON, applies with undo. No server, no browser key
 - **read_notes_and_update** — Read feedback notes from project's Supabase table; turn into to-do items & convo rounds; mark handled notes as done after user confirms
-- **privacy_check** — Scan staged files for emails, secret keys, private folders, photos, phone numbers before commit
 
 ### Story/Game-Specific (3 — Adventure project)
 - **consider_actions** — Read family notes/scenes/settings; judge past decisions; anticipate next moves; list questions. Read-only analysis

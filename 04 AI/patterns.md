@@ -149,3 +149,24 @@ Patterns that repeat often enough to become a template in `02 Refs/Templates/` o
 ## Headless GIF of a motion (2026-11-25)
 - Play a drag in fixed steps in headless Chromium, save a PNG per frame, and build a GIF with Pillow. Tools: `02 Refs/Skills/scripts/anim_capture.js` and `frames_to_gif.py`; skill `/anim-gif`.
 - Serve pages over http for pixel tests: file:// canvases are tainted.
+
+## Skill consolidation and working copies (2026-11-25)
+
+**Merge similar skills to reduce duplication:**
+- When two skills solve the same problem two ways (manual + programmatic), merge into one with both paths or choose the better one. Example: `supabase_link` (manual SQL paste) + `supabase_project` (programmatic) → `supabase_setup` (programmatic only, cleaner).
+
+**Working copy architecture for iterating skills:**
+- Frequently-improved skills live in `04 AI/Skills/` as working copies, with stubs in `02 Refs/Skills/` that point to them.
+- Structure: `.claude/skills/<name>/SKILL.md` (wrapper) → `02 Refs/Skills/<name>.md` (stub) → `04 AI/Skills/<name>.md` (working copy).
+- Current working copies (7): smoke_test, summarize_code, game_controls, settings_gear, supabase_setup, access_requests, monthly_checkup.
+- Reference skills (maintained by Jimmy) stay in `02 Refs/` only: start_project, ipad_website, project_track, privacy_check, update_lessons_learned.
+
+**Skill consolidation candidates:**
+- `update_lessons_learned` + `ai_consolidate` are almost identical (review, log, archive); could unify with two modes.
+- UI component patterns (settings_gear, game_controls, feedback_notes) + code from project_track → extract shared HTML/CSS/JS patterns into `04 AI/patterns.md` or a "iPad UI Kit" reference.
+- `read_notes_and_update` (backend) + `feedback_notes` (UI) are complementary; link them in documentation.
+- Story workflow (consider_actions, update_story, gather_story_lessons_learned) is adventure-specific but pattern could apply to future narrative projects.
+
+**Deprecation pattern:**
+- When a skill becomes obsolete, move `.md` file to `deprecated/` with a note explaining why and what replaced it. Keep for historical reference.
+- Deprecated skills this round: supabase_link, supabase_project (merged); anim_gif, simulate_decay, make_3d, make_sticker, fix_puzzles (project-specific to graduated projects).
