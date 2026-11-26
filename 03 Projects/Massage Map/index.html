@@ -21,6 +21,7 @@
 <nav class="tabs" role="tablist">
   <button type="button" class="tab" data-tab="map" role="tab" aria-selected="true" id="tab-map">Body map</button>
   <button type="button" class="tab" data-tab="learn" role="tab" aria-selected="false" id="tab-learn">Learn</button>
+  <button type="button" class="tab" data-tab="anat" role="tab" aria-selected="false" id="tab-anat">Body layers</button>
   <button type="button" class="tab" data-tab="favs" role="tab" aria-selected="false" id="tab-favs">Favourites</button>
 </nav>
 
@@ -82,6 +83,32 @@
   <!-- LEARN -->
   <section id="page-learn" class="page" hidden>
     <div id="learnList"></div>
+  </section>
+
+  <!-- BODY LAYERS -->
+  <section id="page-anat" class="page" hidden>
+    <p class="note" id="anatIntro">Peel the body layer by layer, or switch layers on and off. Tap a part to see its name.</p>
+    <div class="mapWrap">
+      <svg id="anatSvg" class="anatSvg" viewBox="0 0 300 650" role="img" aria-label="Body layers, front view"></svg>
+    </div>
+    <div class="chips" id="anatRegions" aria-label="Body region"></div>
+    <div class="controls">
+      <button type="button" class="btn" id="anatPeel">Peel one layer</button>
+      <button type="button" class="btn" id="anatReset">Put all back</button>
+    </div>
+    <p class="note" id="anatPeelLabel">All layers visible</p>
+    <div class="card" id="anatHelp">
+      <strong>How to read this</strong>
+      <p class="note">Each layer sits under the one above it. Peel removes the top layer, so you see what is underneath. Tap a part to read its name and job. The colours are soft on purpose: skin peach, fat pale yellow, muscle rose, arteries soft red, veins soft blue, nerves gold, tendons and ligaments lilac, bone cream.</p>
+      <p class="note">These are simple drawings, not a medical atlas. Positions are approximate.</p>
+    </div>
+    <div class="panel" data-panel="layers">
+      <button type="button" class="panelHead" aria-expanded="true" aria-controls="anat-layers">
+        <span class="panelIcon">🧠</span><span class="panelTitle">Layers</span><span class="panelMark">▾</span>
+      </button>
+      <div class="panelBody" id="anat-layers"><div id="anatToggles"></div></div>
+    </div>
+    <div class="infoCard" id="anatInfo" aria-live="polite"></div>
   </section>
 
   <!-- FAVOURITES -->
@@ -164,5 +191,9 @@
 
 <script src="js/data.js"></script>
 <script src="js/app.js"></script>
+<script src="js/traced_378.js"></script>
+<script src="js/traced_444.js"></script>
+<script src="js/anatomy_regions.js"></script>
+<script src="js/anatomy.js"></script>
 </body>
 </html>
