@@ -1,6 +1,6 @@
 # Drafting — schematic
 
-Status: **MVP 0.2** (increment 2, 2026-11-18): DXF blocks and inserts, line types (.LIN text and DXF table), hatch patterns (.PAT text and DXF pattern lines), ortho dimensions, separate line-type and hatch-pattern viewers. 19 Node tests pass; ezdxf audit clean (0 errors) on every sample in both versions. Not yet opened in AutoCAD or Revit. Answers: `convo/convo v0.2.md`; viewer request: `convo/convo v0.3.md`; this round: `convo/convo v0.4.md`.
+Status: **MVP 0.2** (increment 2, 2026-11-18): DXF blocks and inserts, line types (.LIN text and DXF table), hatch patterns (.PAT text and DXF pattern lines), ortho dimensions, separate line-type and hatch-pattern viewers. 19 Node tests pass (re-run 2026-11-25); ezdxf audit clean (0 errors) on every sample in both versions. Not yet opened in AutoCAD or Revit. Answers: `convo/convo v0.2.md`; viewer request: `convo/convo v0.3.md`; this round: `convo/convo v0.4.md`.
 Track: **B. Studio design** (dense, orderly panels, paper and ink palette). Architecture database, owner only. Private drawings in `private/`, never committed.
 
 ---
@@ -101,7 +101,7 @@ Question for Jimmy: is imported geometry enough for the first Revit use, or is a
 - **Read-only** from the Architecture project's `sketch_details` (name, tags, items, scale, parent). Needs an owner sign-in on the page. Use `public.platform_is_owner()` in any policy, not an email.
 - **No writes** to the library in v1. Exports are files, not rows. A later export log (`drafting_exports`, owner only) can come after Jimmy asks.
 - **Exports are downloads only** (convo v0.2, Q14). Export files stay on the device and are never saved to the repo or a database. Real drawings can be public in principle, but they are still not stored by the page. Synthetic samples are the only files in the repo.
-- **Supabase work** is not started. When it is, follow `02 Refs/Skills/supabase_link.md` (manual paste route) and `04 AI/Supabase/brief.md`.
+- **Supabase work** is not started. When it is, follow `04 AI/Skills/supabase_setup.md` and `04 AI/Supabase/brief.md`.
 
 ---
 

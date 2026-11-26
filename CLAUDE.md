@@ -10,7 +10,7 @@ Its private counterpart is `ShimmyAI`, a private repo where family and personal 
 
 ## Licence
 
-This repository is GPL-3.0 (`LICENSE`). Third-party files keep their own licences, listed in `THIRD-PARTY.md`.
+This repository is GPL-3.0 (`LICENSE`). Third-party files keep their own licences, listed in `THIRD-PARTY.md`. That list is a running record: add a row when a component comes in, and never delete one when its project graduates. The home page is a hub: this licence does not by itself cover the repos it links to.
 
 ## Folder map
 
@@ -19,11 +19,12 @@ This repository is GPL-3.0 (`LICENSE`). Third-party files keep their own licence
 | `02 Refs/` | Human-curated skills (`Skills/`) and workflow notes (`Workflow/`). Source of truth for skills. | Jimmy. Claude edits **only when asked** |
 | `03 Projects/<Project>/` | Nursery projects: code, `schematic.md` (design), `convo/` (Q&A history), `CLAUDE.md` (pointer) | Claude + Jimmy |
 | `04 AI/` | Claude's working folder: `lessons_pool.md` (consolidated lessons), `patterns.md`, preferences, tools notes, per-project `brief.md` + `lessons.md` | Claude |
+| `03 Projects/Index/` | Not a nursery seed: the styles and scripts of the home page (root `index.html`) | Same rule as `index.html` |
 | `.claude/skills/` | Thin wrappers pointing to `02 Refs/Skills/*.md`, so skills run as `/name` | Claude, when a skill is added in 02 |
 
 `readme.md` is human-only. Never edit it.
 
-`index.html` (the nursery home page) is human-only. Claude changes it only when Jimmy specifically asks for that change, and only the change he asked for. The standing exception: `/start-project` adds a new project's tile to the Nursery list with its first build (Jimmy reviews from that link).
+`index.html` (the nursery home page), with its styles and scripts in `03 Projects/Index/`, is human-only. Claude changes it only when Jimmy specifically asks for that change, and only the change he asked for. The standing exception: `/start-project` adds a new project's tile to the Nursery list with its first build (Jimmy reviews from that link).
 
 ## Before starting work on a project
 
@@ -53,11 +54,11 @@ This repository is GPL-3.0 (`LICENSE`). Third-party files keep their own licence
 
 ## Skills
 
-Run as `/name`. Each wraps `02 Refs/Skills/<name>.md`, which is the version to edit, except the nine working copies in `04 AI/Skills/` (smoke_test, summarize_code, game_controls, settings_gear, supabase_setup, access_requests, monthly_checkup, consolidate_knowledge, remix). Those are edited in `04 AI/Skills/`, and their `02 Refs` files are stubs. See `02 Refs/Skills/index.md`.
+Run as `/name`. Each wraps `02 Refs/Skills/<name>.md`, which is the version to edit, except the eight working copies in `04 AI/Skills/` (access_requests, game_controls, monthly_checkup, remix, settings_gear, smoke_test, summarize_code, supabase_setup). Those are edited in `04 AI/Skills/`, and their `02 Refs` files are stubs. See `02 Refs/Skills/index.md`; retired skills are in `02 Refs/Skills/deprecated/index.md`.
 
-`start-project` · `access-requests` · `monthly-checkup` · `remix` · `game-controls` · `ipad-website` · `settings-gear` · `summarize-code` · `simplify-code` · `consolidate-knowledge` · `claude-review-project` · `supabase-setup` · `review-notes-and-update` (renamed from `read-notes-and-update` on 2026-11-18; the old name is a deprecated stub) · `smoke-test` · `privacy-check` · `bake-cache` · `ai-json-loop` · `feedback-notes` · `graduate-project` · `consider-actions` · `update-story` · `gather-story-lessons-learned` · `pm-check`
+`start-project` · `ipad-website` · `pc-website` · `settings-gear` · `game-controls` · `research-topic` · `summarize-code` · `simplify-code` · `smoke-test` · `privacy-check` · `bake-cache` · `supabase-setup` · `access-requests` · `feedback-loop` (with `feedback-notes` to capture and `review-notes-and-update` to process) · `ai-json-loop` · `ai-consolidate` · `claude-review-project` · `remix` · `graduate-project` · `monthly-checkup` · `pm-check` (lives in Shimmy Specs)
 
-Workflow references (not runnable skills): `project-track` (family vs. architecture decision guide, in `02 Refs/Workflow/`)
+Workflow guides (not runnable skills), in `02 Refs/Workflow/`: `new project workflow.md`, `project_track.md` (decision guide), `family_project_track.md`, `architecture_project_track.md`.
 
 Supabase conventions and the app registry live in `04 AI/Supabase/`.
 

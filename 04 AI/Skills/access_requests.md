@@ -11,7 +11,7 @@ Input
 - The project (Architecture or Family), the app name, and whether it has its own sign-in screen.
 
 Steps
-1. Check the project has the request table and function. Architecture: `04 AI/Supabase/access/architecture_001_access_requests.sql`. Family roles: `family_001_roles.sql`. If not pasted yet, say so and stop.
+1. Check the project has the request table and function. Architecture: `04 AI/Supabase/access/architecture_001_access_requests.sql`. Family roles: `family_001_roles.sql`. If not applied yet (check the live project), say so and stop.
 2. Confirm sign-up is off in the dashboard (Authentication, sign-in or providers, Email, allow new users to sign up = off). This is a dashboard setting; say so if it is still on.
 3. In the app's sign-in screen:
    - Email is typed. Sign-in is tried.

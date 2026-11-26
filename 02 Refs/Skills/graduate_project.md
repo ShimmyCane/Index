@@ -24,7 +24,7 @@ Keep one section per graduation in `04 AI/graduations.md` (create it if missing)
 - [ ] 5 Turn on GitHub Pages (manual) — live at https://shimmycane.github.io/<Repo>/
 - [ ] 6 Database pointers (Claude)
 - [ ] 7 Home page link (Claude)
-- [ ] 8 Other places that point at the old folder (Claude)
+- [ ] 8 Other places that point at the old folder, and THIRD-PARTY.md (Claude)
 - [ ] 9 Remove from the nursery (Claude)
 - [ ] 10 Record (Claude)
 ```
@@ -35,7 +35,7 @@ Keep one section per graduation in `04 AI/graduations.md` (create it if missing)
 - Read the project's `schematic.md`, `CLAUDE.md`, latest convo, and `04 AI/<Project>/brief.md`. Note open questions and unapplied SQL; they travel with the project.
 - **Runtime independence:** grep the project for paths that leave its folder (`../`, `03 Projects/`, `03%20Projects`, `04 AI/`). Every file the page loads must be inside the folder. Copy shared files in (vendored libraries with their licences) rather than linking out.
 - **Privacy:** the new repo is public too. Run `02 Refs/Skills/scripts/privacy_scan.sh` and check its findings for this folder; read convo and notes files for private details. A `private/` folder never travels; say so if one exists.
-- **Smoke test** (`02 Refs/Skills/smoke_test.md`) from the project folder as if it were a site root.
+- **Smoke test** (`04 AI/Skills/smoke_test.md`) from the project folder as if it were a site root.
 - Report blockers to Jimmy before going on.
 
 ### 2. Prepare the folder (Claude, in Index, one PR)
@@ -91,6 +91,8 @@ Grep Index for the folder name (plain and URL-encoded) and fix live pointers; le
 - **Cloud environments or setup scripts** that set up the old folder: tell Jimmy.
 - **People:** iPad home-screen icons and bookmarks point at the old URL. Tell Jimmy to re-add them from the new site.
 
+- **`THIRD-PARTY.md`:** never delete a row. Change the project's rows from "In nursery" to "Moved to `ShimmyCane/<Repo>`". Check that the new repo carries the licence files for its vendored code.
+
 ### 9. Remove from the nursery (Claude)
 Only after step 5 is checked live and step 7 is merged.
 - `git rm -r "03 Projects/<Project>" "04 AI/<Project>"`.
@@ -100,7 +102,7 @@ Only after step 5 is checked live and step 7 is merged.
 
 ### 10. Record (Claude)
 - Tick the checklist in `04 AI/graduations.md` and add the date it finished.
-- Add anything learned to `04 AI/lessons_pool.md` (`/update-lessons-learned`).
+- Add anything learned to `04 AI/lessons_pool.md` (`/ai-consolidate`).
 - Tell Jimmy: the live URL, the repo, what was removed, and anything still manual.
 
 ## Rules

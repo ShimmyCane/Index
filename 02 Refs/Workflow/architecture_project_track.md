@@ -29,6 +29,7 @@ For architecture, 3-D modelling, specifications, design work, and design documen
 - `/simplify-code` — break large files into separate css/js/html, simplify logic
 - `/smoke-test` — headless test at three screen sizes, check orthographic layouts and dimensions
 - `/bake-cache` — precompute slow 3-D or complex calculations into cacheable script blocks
+- `/research-topic` - 
 
 ## Rules
 
@@ -39,4 +40,4 @@ For architecture, 3-D modelling, specifications, design work, and design documen
 
 ## Examples
 
-Make 3D, Shimmy Specs, Living Room Scene, Paper Again, Critique Detail, Salmon Leap.
+Make 3D, Shimmy Specs, Critique Detail.

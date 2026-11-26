@@ -22,7 +22,7 @@ If a source cannot be read, stop and say so in the convo. Do not guess its conte
 5. **Build a version in the nursery's style**: plain HTML, CSS and JavaScript by default, no build step. If TypeScript is asked for, keep `src/` as the source and commit the compiled script the page loads (the page itself never needs a build). Keep all files inside the project folder.
 6. **Combine** with the second source by making its ideas or code a separate module, with its own note in `schematic.md` saying where each piece came from.
 7. **Check**: a headless browser run (`smoke-test`) for errors, scroll and the ⚙️ drawer; any unit or physics tests written as `tools/*.js` that run in Node.
-8. **Nursery pointers**: a row in `03 Projects/03 projects_schematic.md`; a tile in the Nursery list of the root `index.html` (the standing exception for a first build); `04 AI/ai_schematic.md` if it indexes folders.
+8. **Nursery pointers**: a row in `03 Projects/03 projects_schematic.md`; a tile in the Nursery list of the root `index.html` (the standing exception for a first build); `04 AI/04 ai_schematic.md` if it indexes folders.
 9. **Lessons**: record what the source was, what could not be read, and what was reused, in `04 AI/<Name>/lessons.md`. Promote anything reusable to `04 AI/lessons_pool.md`.
 10. **Privacy**: run `privacy-check` before the commit. No personal details in convo or research files.
 

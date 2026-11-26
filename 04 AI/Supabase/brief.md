@@ -8,7 +8,7 @@
 
 **Updated:** 2026-10-26
 **What it is:** the nursery's convention for Supabase projects, plus a small registry that makes "which app uses which table?" answerable from inside the database.
-**Skill:** `02 Refs/Skills/supabase_project.md` (run as `/supabase-project`).
+**Skill:** `04 AI/Skills/supabase_setup.md` (run as `/supabase-setup`).
 **Template:** `supabase_registry_template.sql` (this folder).
 **Lessons:** `lessons.md` (this folder).
 
@@ -32,7 +32,7 @@ Rules:
 4. Before changing or dropping a table, check who depends on it in `app_table_registry`.
 5. Keep the SQL in the app's repo (`supabase/` folder). The database is the index; the repo is the history.
 6. For a new Supabase project, run the template once, then seed the first app.
-7. Manual runs are accepted. When the Supabase tools are unavailable, write the migration and its rollback test to the app's `supabase/` folder and hand Jimmy the paths, in the order test, migration, check. Mark the table "not verified" until he pastes back the results. Migrations stay re-runnable.
+7. Manual runs are accepted as a fallback (see below). When the Supabase tools are unavailable, write the migration and its rollback test to the app's `supabase/` folder and hand Jimmy the paths, in the order test, migration, check. Mark the table "not verified" until he pastes back the results. Migrations stay re-runnable.
 
 ## Current state
 
@@ -59,12 +59,13 @@ Rules:
 - Generate Clouds update (2026-11-18, read-only check): `gc_notes` is **live** (applied by Jimmy's paste): RLS on, one owner policy, anon no grants, in `table_index`, 0 rows. **Architecture auth: sign-ups are open** (`disable_signup` false, email provider only, confirmation required) and there are two accounts. So "any signed-in user" policies are unsafe in this project (anyone can create an account with the public publishable key); keep owner-only. `platform_owners` now has one row (Jimmy's sign-in account, added 2026-11-18 by a guarded insert at his request).
 - Private family projects live in ShimmyAI. Their project references and table state are not recorded here.
 
-## How SQL gets into a database (default: by hand)
+## How SQL gets into a database
 
-- Jimmy pastes the SQL into the dashboard's SQL editor himself. The migration tool times out or waits for a confirmation in remote sessions, so it is used only when Jimmy asks.
-- Each project's SQL lives in its `supabase/` folder as short numbered files: `000_` (owner check, once per database), `test_` (rolled-back, run first), `001_` (the real change), `verify_` (read-only, pasted back).
-- Check every file first with `python3 -I "02 Refs/Skills/scripts/sql_paste_check.py" <files>`. Fix every BLOCK.
-- Process and checklist: `02 Refs/Skills/supabase_link.md` (run as `/supabase-link`).
+**Current (2026-11-25):** `/supabase-setup` applies the migration directly with the Supabase tools, keeps the full SQL in the app's `supabase/` folder, then reads the tables back and runs the security advisors.
+
+**Fallback,** when the tools time out or wait for a confirmation (this happened in remote sessions): Jimmy pastes the SQL into the dashboard's SQL editor. Check each file first with `python3 -I "02 Refs/Skills/scripts/sql_paste_check.py" <files>`, give the paste order, and mark the table "not verified" until the results come back.
+
+_Superseded: the earlier "by hand is the default" rule and the `/supabase-link` and `/supabase-project` skills. Entries under "Current state" are dated records; their "not applied" notes may be out of date, so check the live table list. Their `03 Projects/` paths are as they were; for a graduated app the SQL is in its own repo._
 
 ## Owner-only access (no emails in the repo)
 
@@ -79,7 +80,7 @@ Rules:
 
 ## Next steps
 
-1. When a nursery project first needs data, follow `/supabase-project`.
+1. When a nursery project first needs data, follow `/supabase-setup`.
 2. Run the template once on that project and check that `app_table_unregistered` is empty.
 - QC keynotes (Architecture project, prefix `qk_`, 2026-11-20): `qk_notes` written (owner-only through `platform_is_owner()`, registered in `table_index` as project "QC keynotes"), **applied** (read-only check 2026-11-22). SQL in `03 Projects/QC keynotes/supabase/` (`test_001_qk`, `001_qk_notes`, `verify_001_qk`). The page signs in with plain fetch and the publishable key from `js/config.js`; notes stay on the device until signed in.
 - Athena's Piano Companion (Family project, prefix `pc_`, 2026-11-20): `pc_takes`, `pc_playlists`, `pc_playlist_items`, `pc_projects`, `pc_notes` and private bucket `pc-takes`, app `piano-companion`. Names and bucket were free (read-only check the same day). SQL in `03 Projects/Athena's Piano Companion/supabase/` (`test_001_pc`, `001_pc_family`, `verify_001_pc`), checked with `sql_paste_check.py`. **Not applied**: Jimmy pastes by hand. Takes cannot be deleted by the family login (no delete grant); playlists, items and pieces can.

@@ -44,7 +44,7 @@ Steps
 
 Rules
 - Add and migrate only. Don't drop tables, policies or data without asking.
-- Never put service-role keys, project refs, or personal data in the repo.
+- Never put service-role keys, passwords or personal data in the repo. (A project ref is part of the public project URL, so it may appear.)
 - Migrations must be safe to re-run: `create table if not exists`, `drop policy if exists`, `on conflict do nothing`.
 - Full SQL stays in the repo. Migration history alone is not enough.
 - Two account settings to check separately (not in the database):
@@ -62,4 +62,4 @@ What to wire after setup
 Conventions
 - See `04 AI/Supabase/brief.md` for database layout, registry schema, and naming
 - See `04 AI/Supabase/lessons.md` for common gotchas
-- See `02 Refs/Skills/settings_gear.md` for the error panel pattern
+- See `04 AI/Skills/settings_gear.md` for the error panel pattern

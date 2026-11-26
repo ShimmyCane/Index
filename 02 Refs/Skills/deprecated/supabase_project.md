@@ -1,3 +1,3 @@
-# supabase_project: moved
+# supabase_project: deprecated
 
-This skill moved on 2026-11-22 to `04 AI/Skills/supabase_project.md`, where Claude keeps the working copy for incremental improvement. Read and edit that file. This stub stays so the old path still points to it.
+Merged into `supabase_setup` on 2026-11-25. Use `/supabase-setup` (`04 AI/Skills/supabase_setup.md`). The old text is in git history.

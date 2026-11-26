@@ -2,78 +2,57 @@
 
 Source of truth for nursery skills. Each is wrapped in `.claude/skills/<name>/SKILL.md` and runs as `/name`.
 
-**Working copies** (edited in `04 AI/Skills/`) — stubs stay here:
-- `smoke_test`, `summarize_code`, `game_controls`, `settings_gear`, `access_requests`, `monthly_checkup`, `supabase_setup`, `consolidate_knowledge`, `remix`
+Updated 2026-11-25.
+
+**Working copies** (edited in `04 AI/Skills/`; a stub stays here):
+`access_requests`, `game_controls`, `monthly_checkup`, `remix`, `settings_gear`, `smoke_test`, `summarize_code`, `supabase_setup`
+
+Every other active file here is the real thing. Claude edits it only when Jimmy asks.
 
 ---
 
-## Active Skills (24 total; consolidated 2026-11-25)
+## Active skills (21)
 
-### Project Initialization & Setup (3)
-- **start_project** — Set up a new nursery project: folders, schematic, MVP, project CLAUDE.md, convo/ history
-- **ipad_website** — Design guidance for kid-friendly iPad/web apps: pastel colors, bold graphics, large touch targets, minimal menus, everything secondary in ⚙️
-- **project_track** — Classify as family play (simple, graphic) or studio design (dense, formal); set defaults and make panels collapsible *(working copy moved to 04 AI/Skills/ 2026-11-25)*
+### Start and design (6)
+- **start_project**: mechanical setup of a new seed (folders, `CLAUDE.md`, schematic scaffold, empty convo). Planning follows `02 Refs/Workflow/new project workflow.md`.
+- **ipad_website**: design guidance for family play sites on iPad (Track A).
+- **pc_website**: design guidance for formal studio and work sites on PC and iPhone (Track B).
+- **settings_gear** *(working copy)*: one ⚙️ button and drawer, opt-in errors at the bottom, database check.
+- **game_controls** *(working copy)*: centre-relative drag or lower-left joystick, action buttons lower right.
+- **research_topic**: research at a chosen depth (eli5, 101 to 501), saved in the project's research folder.
 
-### Code Quality & Testing (4)
-- **smoke_test** — Headless Chromium check at three screen sizes: zero errors, no horizontal scroll, touch/controls/settings/reload work, print layout correct
-- **privacy_check** — Scan staged files for personal emails, secret keys, private folders, photos, phone numbers before commit
-- **summarize_code** — Generate visual summary file: system architecture, table of contents with line numbers, reference table of key variables
-- **simplify_code** — Break large files into separate css/js/html and simplify logic; runs `summarize_code` after
-### Database & Infrastructure (2)
-- **supabase_setup** — Set up or update project database: inspect live schema, design tables & policies, apply migration directly (no manual paste). Merged from supabase_link + supabase_project
-- **bake_cache** — Precompute slow results into a `<script>` cache with fingerprint, so page opens from file:// and never shows stale result
+### Code and quality (5)
+- **summarize_code** *(working copy)*: `<file>_summary.html` with architecture, table of contents and tweakable variables.
+- **simplify_code**: split large files into css/js/html and simplify; then runs summarize_code.
+- **smoke_test** *(working copy)*: headless check at three screen sizes.
+- **privacy_check**: scan for private data and secrets before every commit and publish.
+- **bake_cache**: precompute slow results into a script-tag cache with a fingerprint.
 
-### UI Components & Patterns (3)
-- **settings_gear** — One consistent ⚙️ button/drawer for iPad apps: lower-right gear, segmented options, opt-in errors at bottom, database check. Used by start_project
-- **game_controls** — One control scheme for iPad games: center-relative drag (or lower-left joystick), lower-right action buttons, ⚙️ in upper right faded
-- **feedback_notes** — In-page "Notes for improvement" box in ⚙️: tied to item on screen, saved to device first, read back, copyable
+### Data, feedback and AI (4)
+- **supabase_setup** *(working copy)*: inspect the live schema, design tables and policies, apply the migration.
+- **access_requests** *(working copy)*: ask-for-access flow without open sign-up; roles.
+- **feedback_loop**: capture notes in the page, turn them into work, consolidate. Commands: `/feedback-loop`, `/feedback-notes` (capture), `/review-notes-and-update` (process).
+- **ai_json_loop**: draft structured content in any AI chat; the page builds the prompt, checks the pasted JSON and applies it with undo.
 
-### Knowledge & Consolidation (3)
-- **consolidate_knowledge** — Unified workflow: review work done, update project briefs, extract lessons learned, promote reusable patterns, preserve history *(merged from update_lessons_learned + ai_consolidate on 2026-11-25; working copy in 04 AI/Skills/)*
-- **claude_review_project** — Bring existing project to current conventions: CLAUDE.md, convo/ folder, brief, lessons; extract reusable patterns
-- **remix** — Build nursery version of linked site/repo; combine with another repo; check license; record what was read and reused (seed: "A x B") *(working copy moved to 04 AI/Skills/ 2026-11-25)*
+### Knowledge and project life (5)
+- **ai_consolidate**: take stock, update briefs and lessons, mark superseded facts, compact loose files.
+- **claude_review_project**: bring an existing project to current conventions.
+- **remix** *(working copy)*: nursery version of a linked site or repo, combined with another ("A x B").
+- **graduate_project**: move a project to its own repo, with checklist.
+- **monthly_checkup** *(working copy)*: monthly review of status, security, privacy and skills.
 
-### Project Transitions (1)
-- **graduate_project** — Move nursery project to standalone public repo with GitHub Pages: ready check, folder prep, copy/repo/Pages steps, registry pointers, home page link, remove from nursery
-
-### Data & Input (2)
-- **ai_json_loop** — Let user draft structured content in any AI chat: page builds prompt, validates pasted JSON, applies with undo. No server, no browser key
-- **read_notes_and_update** — Read feedback notes from project's Supabase table; turn into to-do items & convo rounds; mark handled notes as done after user confirms
-
-### Story/Game-Specific (3 — Adventure project)
-- **consider_actions** — Read family notes/scenes/settings; judge past decisions; anticipate next moves; list questions. Read-only analysis
-- **update_story** — Run consider_actions first; plan story line & deviations; rewrite chapter titles; write next chapter; hand to family when ready
-- **gather_story_lessons_learned** — After each run, log family pacing, plot adherence, role profiles, storyteller guesses; speed up planning
-
-### Specialist/Domain (2)
-- **pm_check** — Project Management Check: read Shimmy Specs notes; update PPD, schedule, cost, risk log, items, assumptions; store in `private/pm/`
-- **access_requests** — Let new person ask for access with email (no sign-up needed); owner invites; roles decide permissions
-
-### Workflow (1)
-- **monthly_checkup** — Monthly review: check project status, track open items, consolidate learnings (runs first of each month or on demand)
+### Lives with its project (1)
+- **pm_check**: `03 Projects/Shimmy Specs/.claude/skills/pm_check.md`; run from the root as `/pm-check`.
 
 ---
 
-## Working Copies vs. Stubs
+## Not skills
 
-These files have both a **stub in 02 Refs/** and a **working copy in 04 AI/Skills/**. Edit the 04 AI copy; the 02 Refs stub points to it.
+- Workflow guides, in `02 Refs/Workflow/`: `new project workflow.md`, `project_track.md` (decision guide and panel code), `family_project_track.md`, `architecture_project_track.md`.
+- Tools, in `scripts/`: `privacy_scan.sh` (privacy_check), `sql_paste_check.py` (for SQL pasted by hand), and `anim_capture.js`, `frames_to_gif.py`, `sticker_cut.py` (used only by retired skills; kept).
+- Retired skills: `deprecated/index.md`.
 
-| Skill | 02 Refs (stub) | 04 AI (working copy) | Note |
-|-------|---|---|---|
-| smoke_test | ✓ | ✓ | moved 2026-11-22 |
-| summarize_code | ✓ | ✓ | moved 2026-11-22 |
-| supabase_setup | ✓ | ✓ | merged 2026-11-25 |
-| game_controls | ✓ | ✓ | moved 2026-11-22 |
-| settings_gear | ✓ | ✓ | moved 2026-11-22 |
-| access_requests | ✓ | ✓ | working copy |
-| monthly_checkup | ✓ | ✓ | working copy |
-| consolidate_knowledge | ✓ | ✓ | merged 2026-11-25 |
-| remix | ✓ | ✓ | moved 2026-11-25 |
+## Adding or retiring a skill
 
----
-
-## Related Locations
-
-- **Skills architecture:** Thin wrappers in `.claude/skills/<name>/SKILL.md` → reads stub in `02 Refs/` → points to working copy in `04 AI/`
-- **Wrapper additions:** When adding a skill, also create `.claude/skills/<name>/SKILL.md`
-- **Reusable content:** Lessons in `04 AI/lessons_pool.md`; patterns in `04 AI/patterns.md`; preferences in `04 AI/Personal Preferences/jimmy_preferences.md`
+- Add: the `.md` here, a wrapper at `.claude/skills/<name>/SKILL.md`, a line above, and the list in the root `CLAUDE.md`.
+- Retire: move the `.md` to `deprecated/`, add a row to `deprecated/index.md`, make the wrapper a `[DEPRECATED]` stub (with `disable-model-invocation: true`) or remove it, and fix references.

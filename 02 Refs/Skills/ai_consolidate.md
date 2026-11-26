@@ -11,7 +11,8 @@ Purpose of this skill/ action is for you to take a beat and consolidate your kno
 5. Add project-specific implementation lessons to `04 AI/<Project Name>/lessons.md`. Only add global user preferences to `04 AI/Personal Preferences/`; place tool-specific lessons in `04 AI/Tools/`. Promote patterns that are reusable across projects to `04 AI/patterns.md`.
 6. Update `04 AI/04 ai_schematic.md` when adding or moving AI reference files, and update `04 AI/ai_task_tracker.md` when the consolidation completes or changes tracked work.
 7. Keep consolidation concise and avoid duplicating full project documentation. Do not delete or archive source notes unless the user requests it; make supersession clear in place.
+8. Sort through your loose files and compact them as you see fit.
 
 Action - run other skills
 summarize_code
-update_lessons_learned
+(update_lessons_learned is deprecated; step 5 covers it)

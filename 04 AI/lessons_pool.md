@@ -338,7 +338,7 @@ Full build rules: `02 Refs/Skills/settings_gear.md` (run as `/settings-gear`).
 - After every change: tests, then build, then the picture (whole scene plus close-ups from a readable angle), then overlaps.
 - A field the build does not copy is lost without an error. Compare one source object with its model object.
 - Browser tests find what unit tests miss: a viewer that renders once, a number input that blocks a value, a drawer whose items overlap.
-Full notes: `04 AI/Make-3D x Construct/model_iteration_lessons.md`.
+Full notes: `04 AI/Graduated/Make-3D x Construct/model_iteration_lessons.md`.
 
 ## From Athena's Piano Companion (2026-11-20)
 - Hands-free audio tools: every voice command has a touch twin; speech recognition may be missing or slow.
@@ -367,3 +367,11 @@ Full notes: `04 AI/Make-3D x Construct/model_iteration_lessons.md`.
 7. **Put open questions next to the feedback box.** A short "Questions" group in the settings panel ties each answer to the screen it is about. _(Paper Airplanes x A-10 Warthog)_
 
 - (2026-11-25, Cheetah Simulator) A soft setting (Gentle mode) changes how a true thing is told, never the true thing itself. Keep a panel that always shows the real facts.
+
+## Skill and repo housekeeping (2026-11-25)
+
+- After moving or retiring a skill, check every `.claude/skills/*/SKILL.md` path exists. Several wrappers pointed to files that had moved or gone.
+- Read `git show --stat` after a move commit. One commit meant to restore a skill deleted it, and the next deleted another.
+- When two rules disagree, name the later decision and mark the earlier one superseded (marking notes done: preferences section 10).
+- A test or build script may rewrite tracked files (Salmon Leap's version test does). Check `git status` after running tests.
+- On Windows with `core.autocrlf`, a "stale bundle" check can fail on line endings alone. Compare with `--ignore-space-at-eol` before rebuilding.

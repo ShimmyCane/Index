@@ -1,6 +1,6 @@
 # Shimmy Specs — MVP Schematic
 
-**Status:** planned (2026-10-28). Built from `convo/convo v0.2.md`.
+**Status:** built (this was the plan of 2026-10-28; current state is in `schematic.md` and `mvp tasks.md`). Built from `convo/convo v0.2.md`.
 **Build list:** `mvp tasks.md` (written so a Haiku session can pick it up and execute it).
 **Overall design:** `schematic.md`.
 

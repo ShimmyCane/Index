@@ -1,3 +1,5 @@
+> **Deprecated 2026-11-25.** Replaced by `02 Refs/Skills/ai_consolidate.md`, which Jimmy brought back.
+
 # Consolidate Knowledge (unified review and lesson logging)
 
 Purpose

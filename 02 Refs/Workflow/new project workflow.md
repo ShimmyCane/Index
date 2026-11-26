@@ -28,7 +28,7 @@ If the project does both, pick the main user's track. Record the choice in `sche
 
 If the project stores data beyond the device:
 
-- **Family projects (Track A):** link to Family Supabase project. Use `/supabase-setup` to design tables, policies, and test migrations. Reference: `03 Projects/中文笔画/supabase/001_zhbh_notes.sql`.
+- **Family projects (Track A):** link to Family Supabase project. Use `/supabase-setup` to design tables and policies and apply the migration. Reference: `supabase/001_zhbh_notes.sql` in the `ShimmyCane/Chinese-Character-Strokes` repo.
 - **Architecture projects (Track B):** link to Architecture Supabase project. Use `/supabase-setup`.
 - **No database:** storage stays on device only (localStorage, IndexedDB).
 
@@ -38,10 +38,10 @@ Record the plan in `schematic.md` and in `04 AI/<Project>/brief.md`.
 
 If the project is something the family or a user will play/interact with, plan feedback capture:
 
-- Read `02 Refs/Workflow/feedback_loop.md` (complete workflow: capture → process → consolidate).
+- Read `02 Refs/Skills/feedback_loop.md` (complete workflow: capture → process → consolidate).
 - Decide: device storage first, or database (for multi-device sync).
 - Plan what items testers can tag notes to (levels, cards, screens).
-- Add feedback notes box to ⚙️ in the first build (using `/feedback-notes` skill).
+- Add feedback notes box to ⚙️ in the first build (using `/feedback-notes`).
 - Record in `schematic.md`.
 - After testing: use `/review-notes-and-update` to process notes into work.
 
@@ -49,7 +49,7 @@ If the project is something the family or a user will play/interact with, plan f
 
 If the project has movement, steering, or aiming:
 
-- Read `02 Refs/Skills/game_controls.md`.
+- Read `04 AI/Skills/game_controls.md`.
 - Apply: drag relative to center (or joystick option), action buttons lower right, ⚙️ upper right and faded.
 - Record in `schematic.md`.
 
@@ -76,5 +76,5 @@ The project is ready when:
 - Database (if any) is planned
 - Schematic has the main pages and status set
 
-Start with the MVP: the minimum page that lets the user do the core action once. Leave everything else for later. Use `/consolidate-knowledge` after each build round to log lessons and update briefs.
+Start with the MVP: the minimum page that lets the user do the core action once. Leave everything else for later. Use `/ai-consolidate` after each build round to log lessons and update briefs.
 

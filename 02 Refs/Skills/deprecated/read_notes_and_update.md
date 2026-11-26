@@ -2,7 +2,7 @@
 
 **Status:** deprecated on 2026-11-18. Use `/review-notes-and-update` instead.
 
-**Replaced by:** `/review-notes-and-update`, the same skill under a new name. Its instructions are `02 Refs/Skills/read_notes_and_update.md`, which kept its content and name.
+**Replaced by:** `/review-notes-and-update`, the same skill under a new name. Since 2026-11-25 its instructions are section 3 of `02 Refs/Skills/feedback_loop.md`.
 
 **Why it was renamed:** the old name said "read" first, but the skill reviews the notes, turns them into project work and marks them done. "Review … and update" says what it does.
 

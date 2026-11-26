@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home page code summary</title>
+<style>
+  body { margin: 0 auto; max-width: 960px; padding: 24px 16px 60px; background: #fffdf7; color: #2f2d3d; font: 16px/1.5 system-ui, sans-serif; }
+  h1, h2, h3 { line-height: 1.2; }
+  h2 { margin-top: 36px; }
+  .map { display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch; }
+  .box { flex: 1 1 200px; border: 3px solid #2f2d3d; border-radius: 16px; padding: 12px 14px; background: #fff; box-shadow: 0 4px 0 #2f2d3d; }
+  .root { flex-basis: 100%; background: #ffe9a8; }
+  .css { background: #cfe5d2; } .js { background: #ffd5b5; } .store { background: #c9efe3; }
+  .scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { border: 1.5px solid #2f2d3d; padding: 6px 9px; text-align: left; vertical-align: top; }
+  th { background: #fff6e0; }
+  code { background: #f3f0ff; padding: 0 4px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<h1>Home page: code summary</h1>
+<p>Main file: <code>index.html</code> at the repo root. Made 2026-11-25. Line numbers are for the files as they were that day.</p>
+
+<h2>How it fits together</h2>
+<div class="map">
+  <div class="box root"><b>index.html</b><br>The content: ⚙️ panel, five sections of tiles. Loads one stylesheet in the head and two scripts at the end of the body. <code>body[data-style]</code> picks the look.</div>
+  <div class="box css"><b>css/index.css</b><br>Shared look, then one block per style. Every style rule starts with <code>[data-style="…"]</code>.</div>
+  <div class="box js"><b>js/style-switcher.js</b><br>Gear opens the panel. A style button changes <code>data-style</code>, which tile-colors watches.</div>
+  <div class="box js"><b>js/nursery-order.js</b><br>Counts Nursery clicks and moves the most opened tiles first.</div>
+  <div class="box js"><b>js/masonry.js</b><br>Builds the Cusco-style wall for the Polygonal style.</div>
+  <div class="box js"><b>js/bauhaus.js</b><br>Builds a ship of blocks per section for the Bauhaus style.</div>
+  <div class="box js"><b>js/bauhaus-edit.js</b><br>Drag and reshape the blocks; saves on the device.</div>
+  <div class="box js"><b>js/tile-colors.js</b><br>Map colouring for every style; rebuilds on changes.</div>
+  <div class="box js"><b>js/arrange.js</b><br>Drag to reorder within a category.</div>
+  <div class="box js"><b>js/favorites.js</b><br>Hearts on tiles.</div>
+  <div class="box store"><b>This device only</b><br><code>index-style</code>: chosen style.<br><code>nursery-clicks</code>: click counts.<br><code>index-ship-v1</code>: your Bauhaus arrangement.<br><code>index-order</code>: your order.<br><code>index-favs</code>: hearts.<br>No server and no database.</div>
+</div>
+
+<h2>Contents: index.html</h2>
+<div class="scroll"><table>
+<tr><th>Lines</th><th>Section</th><th>What it does</th></tr>
+<tr><td>1–8</td><td>Head</td><td>Page title, phone viewport, link to the stylesheet</td></tr>
+<tr><td>10</td><td>Gear button</td><td>Opens settings (upper right)</td></tr>
+<tr><td>12–22</td><td>Settings panel</td><td>Six style buttons and the Planning link</td></tr>
+<tr><td>25–27</td><td>Header</td><td>The ShimmyCane title</td></tr>
+<tr><td>29–48</td><td>Games</td><td>Tile list</td></tr>
+<tr><td>50–71</td><td>Learning</td><td>Tile list</td></tr>
+<tr><td>73–83</td><td>Family</td><td>Tile list</td></tr>
+<tr><td>85–99</td><td>Architecture</td><td>Tile list</td></tr>
+<tr><td>101–109</td><td>Nursery</td><td>Tiles with <code>data-track</code>, reordered by script</td></tr>
+<tr><td>112–119</td><td>Scripts</td><td>Style switcher, Nursery order, reorder, masonry, Bauhaus, tile colours, block editor, hearts</td></tr>
+</table></div>
+
+<h2>Contents: css/index.css</h2>
+<div class="scroll"><table>
+<tr><th>Starts at line</th><th>Section</th></tr>
+<tr><td>2</td><td>Colour variables, page, headings, shared tile look</td></tr>
+<tr><td>81</td><td>Settings gear and panel</td></tr>
+<tr><td>152</td><td>1. Geometric Shapes (default), with its phone rules</td></tr>
+<tr><td>206</td><td>2. Paper Stickers</td></tr>
+<tr><td>235</td><td>3. Bauhaus Blocks (wooden ship blocks; fallback grid, then the ship)</td></tr>
+<tr><td>419</td><td>4. Postage Stamps</td></tr>
+<tr><td>467</td><td>5. Pixel Blocks</td></tr>
+<tr><td>504</td><td>6. Polygonal Masonry (fallback grid, then the one wall)</td></tr>
+<tr><td>567</td><td>Hearts and Reorder</td></tr>
+<tr><td>683</td><td>Reduced motion</td></tr>
+</table></div>
+
+<h2>Contents: scripts</h2>
+<div class="scroll"><table>
+<tr><th>File and lines</th><th>Part</th><th>What it does</th></tr>
+<tr><td>style-switcher 9–15</td><td><code>setStyle</code></td><td>Applies a style, marks the pressed button, saves it</td></tr>
+<tr><td>style-switcher 17–20</td><td><code>togglePanel</code></td><td>Shows or hides the panel</td></tr>
+<tr><td>style-switcher 22–32</td><td>Start and events</td><td>Restores the saved style; clicks; Escape closes</td></tr>
+<tr><td>nursery-order 9–22</td><td><code>getClicks</code>, <code>incrementClick</code></td><td>Read and write the click counts; safe if storage is blocked</td></tr>
+<tr><td>nursery-order 24–38</td><td><code>reorganizeNursery</code></td><td>Sorts by count and sets sizes</td></tr>
+<tr><td>nursery-order 40–51</td><td>Click listener</td><td>Counts a click, reorders, and runs once on load</td></tr>
+<tr><td>arrange, from line 28</td><td><code>put</code>, <code>move</code></td><td>Apply and change your order</td></tr>
+<tr><td>masonry, from line 90</td><td><code>pack</code>, <code>cutSteps</code>, <code>cutTongues</code></td><td>Lay stones, then cut steps and tongues</td></tr>
+<tr><td>masonry, from line 228</td><td><code>countPatches</code></td><td>Keep each category in one patch</td></tr>
+<tr><td>masonry, from line 340</td><td><code>build</code></td><td>Place stones, category seams</td></tr>
+<tr><td>bauhaus, from line 11</td><td><code>SHAPES</code></td><td>The eleven shapes</td></tr>
+<tr><td>bauhaus, from line 43</td><td><code>FIGURES</code></td><td>Plans for the pictures</td></tr>
+<tr><td>bauhaus, from line 164</td><td><code>arrangeFigure</code>, <code>arrangeShip</code></td><td>Lay out a picture</td></tr>
+<tr><td>tile-colors, from line 37</td><td><code>colourWall</code>, <code>refresh</code></td><td>Map colouring and rebuilding</td></tr>
+<tr><td>bauhaus-edit, from line 51</td><td><code>save</code>, <code>change</code>, dragging</td><td>Block editor</td></tr>
+<tr><td>favorites, from line 42</td><td><code>place</code></td><td>Find the heart spot in any shape</td></tr>
+</table></div>
+
+<h2>What you can tweak</h2>
+<div class="scroll"><table>
+<tr><th>Name</th><th>Where</th><th>What it changes</th><th>How</th></tr>
+<tr><td><code>--ink</code></td><td>css <code>:root</code></td><td>Main text and pressed-button border</td><td>Any colour; keep it dark on the pale page</td></tr>
+<tr><td><code>--muted</code></td><td>css <code>:root</code></td><td>Section headings</td><td>Any colour with enough contrast</td></tr>
+<tr><td><code>--line</code></td><td>css <code>:root</code></td><td>Panel button borders</td><td>A pale colour</td></tr>
+<tr><td><code>--c</code></td><td>each tile in index.html</td><td>Fallback colour only</td><td><code>style="--c:#hex"</code></td></tr>
+<tr><td><code>--poly</code></td><td>css, shape classes</td><td>Geometric outlines</td><td>Add a class with a new <code>polygon()</code></td></tr>
+<tr><td><code>--stone</code></td><td>css, polygonal section</td><td>Four stone outlines</td><td>Edit the <code>polygon()</code> points</td></tr>
+<tr><td><code>--r</code></td><td>css, stickers and stamps</td><td>Tile tilt</td><td>Degrees, odd and even tiles</td></tr>
+<tr><td><code>560px</code></td><td>css media queries</td><td>Phone layout breakpoint</td><td>Change all three together</td></tr>
+<tr><td><code>KEY</code></td><td>style-switcher</td><td>Saved style name</td><td>Renaming it forgets saved choices</td></tr>
+<tr><td><code>TRACK_KEY</code></td><td>nursery-order</td><td>Saved click counts</td><td>Renaming it resets the order</td></tr>
+<tr><td><code>SIZES</code></td><td>nursery-order</td><td>Size of the first, second and later tiles</td><td>Classes <code>w2</code>, <code>h2</code>. An empty entry leaves a tile's size as it was.</td></tr>
+<tr><td><code>PALETTES</code></td><td>tile-colors</td><td>The colours of each style</td><td>Edit a list; keep at least six that look different</td></tr>
+<tr><td><code>REACH</code></td><td>tile-colors</td><td>How far apart two tiles still count as neighbours</td><td>Raise it for styles with wide gaps</td></tr>
+<tr><td><code>ROUND</code></td><td>masonry</td><td>Roundness of stone corners</td><td>Pixels; 0 is sharp</td></tr>
+<tr><td><code>heroCols, heroRows</code></td><td>masonry <code>build</code></td><td>Size of the twelve-angled stone</td><td>Grid cells</td></tr>
+<tr><td><code>stroke-width</code></td><td>masonry</td><td>Joint and category seam thickness</td><td>3.6 is the joint; 11 and 7 make the seam</td></tr>
+<tr><td><code>FIGURES</code>, <code>STARTS_AS</code></td><td>bauhaus</td><td>The pictures and which section starts as which</td><td>Places are left and right shares of the width</td></tr>
+<tr><td><code>HALF</code> and <code>.heart</code> size</td><td>favorites, css</td><td>Heart tap area</td><td>Change both together</td></tr>
+<tr><td><code>SHAPES (bauhaus), TOPS</code></td><td>bauhaus</td><td>Shapes, their heights, and which stand on top</td><td><code>side</code>, <code>top</code>, <code>foot</code> keep labels inside</td></tr>
+<tr><td><code>HEADROOM</code></td><td>bauhaus</td><td>Space above a ship while editing</td><td>Pixels</td></tr>
+<tr><td><code>SNAP</code></td><td>bauhaus-edit</td><td>How readily a dragged piece settles</td><td>Pixels; 0 turns it off</td></tr>
+<tr><td><code>SHAPES</code></td><td>nursery-order</td><td>Nothing: not used</td><td>Can be removed</td></tr>
+</table></div>
+
+<h2>Adding a style</h2>
+<p>Add a button with <code>data-style="name"</code> to the panel, then a block of <code>[data-style="name"]</code> rules in the stylesheet. Without a palette in <code>tile-colors.js</code>, it uses the bright one.</p>
+</body>
+</html>

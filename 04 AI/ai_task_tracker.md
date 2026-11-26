@@ -1,43 +1,38 @@
 # Nursery task tracker
 
-Shared list of open work across the nursery. Project to-do lists stay in each project (`03 Projects/<Project>/todo.md`). This file holds the cross-project items and the PRs waiting on a decision. Updated 2026-11-07.
+Open work across the nursery. Project to-do lists stay in each project (`03 Projects/<Project>/todo.md`). Updated 2026-11-25. Earlier entries are in git history.
 
-## Open PRs (to decide)
+## Waiting on Jimmy
 
-- **#107 Sync all projects to the shared standard** (version logs, track lines, notes, project-sync skill). Should be merged. Needs a check against today's `main` first, since many files have moved on.
-- **#102 Version log panel inside the settings button.** Important. Waiting for a go-ahead.
-- **#119 Nursery: add What to Cook tile.** Probably a duplicate: the What to Cook link was added to the nursery list by #123. Check, then close or merge.
+- [ ] **Home page:** review the new Polygonal Masonry, Bauhaus and map colouring; confirm QC keynotes under Architecture.
+- [ ] **Felix-Continents licence:** no `LICENSE` file answered at the live site root on 2026-11-25, and the project carries GPL-3.0 data. Check the repo.
+- [ ] **2026-11-25 graduations:** finish the records in `graduations.md` (README, stand-alone `CLAUDE.md`, AI notes in the repo, database registry).
+- [ ] **Workflow questions:** see the notes under "Workflow conflicts" below.
+- [ ] **PR #102** Version log panel inside the settings button: still open (checked 2026-11-25).
+- [ ] **Cheetah Simulator:** the page's `VERSION` constant reads 0.2.0; the notes say 0.4.0.
 
-## Merged on 2026-11-15
+## Workflow conflicts (found 2026-11-25, not changed)
 
-- **Generate Clouds:** new seed, MVP 0.1.0 (3-D sky from weather data, time lapse, 360° view, PNG exports, research notes). Merged at Jimmy's request before questions. Open: first live Open-Meteo call and an iPad run (`03 Projects/Generate Clouds/todo.md`), answers to `convo/convo v0.1.md`, and whether to add a tile to the home page.
-
-## Merged on 2026-11-09
-
-- **Bar Glide:** new seed, arcade bar game MVP 0.1.0 (⚙️, notes, scores, Family database SQL tested, not applied).
-
-## Merged on 2026-11-07
-
-- **#20 Athena's world:** decorating game MVP.
-- **#121, #122, #124 What to Cook:** tracking paste file, pantry follow-ups, and 0.7.0 (recipe book, code split, fridge life, priority ordering).
-- **#123 Nursery:** What to Cook link; `index.html` changes allowed when Jimmy asks.
-
-## Closed on 2026-11-07 (abandoned or moved)
-
-- **#108 Expansion Wars country view**, **#44 Make 3D loader**, **#25 Felix Maze level 6:** moved to their own repos. Branches kept.
-- **#98 Settings-gear skill:** already on `main`.
-- **#5 Wall tiles rise on scroll:** abandoned. Branch kept.
+- Track B says errors are always visible; the preferences and `settings_gear` say errors are opt-in.
+- Track A says show a visible error panel when offline; errors are opt-in elsewhere, and `settings_gear` says offline is not an error.
+- Track B says design for desktop first, not mobile; `pc_website` says PC and iPhone, and Track B does not mention it.
+- The `/research-topic` line in Track B has no description.
 
 ## Project items
 
-- **Our Family Compass:** seed built 2026-11-17 (PR #185); round 2 added sample pieces, family sign-in, voice notes and research. Open: answers to `convo v0.2`, apply the `ofc_*` tables (the tool timed out), device test, review of the two guards after merge. See its `todo.md`.
-- **Better Parenting:** MVP 0.1.0 built 2026-11-16. Open: apply the `bp_*` tables, real sign-in, check video links, device test, answers to `convo v0.1`. See its `todo.md`.
+- **Cheetah Simulator:** next items in its `todo.md`.
+- **Massage Map:** drawing studies for realistic figures; family tables not built.
+- **Drafting:** field test in AutoCAD and Revit.
+- **Salmon Leap:** answers to `convo v0.1`; V10 and V15 not built.
+- **Shimmy Specs:** see its `todo.md`; first real section template.
+- **Graduated projects:** their to-dos live in their own repos.
 
-- **Athena's world, Bar Glide, Chinese Character Sudoku, Voice, What to Cook:** graduated to their own repos (`ShimmyCane/Athena-s-world`, `Bar-Glide`, `Chinese-Character-Sudoku`, `Voice`, `What-to-Cook`) and removed from the nursery on 2026-11-10. Their to-dos live there.
-- **Shimmy Specs, Adventure:** see their `todo.md` files.
-- **Paper Airplanes x A-10 Warthog (0.25, 2026-11-25): the next increment.** Done: real-time sun from each mission's own start, imagined weather per flight (clear to dust storm), objects take the sun's colour, questions in ⚙️. Next: check on an iPad (frame rate at 960×540 with the cloud and weather passes; the sky at each sun time; thunder and rain feel); stars and a moon at night; a cloud deck with thickness for the storm; a sound design for rain; wind on the smoke and dust. Answers from Jimmy go in the project's `convo/convo v0.24.md`.
+## Recurring (added 2026-11-22)
 
-## Recurring: nursery AI review (added 2026-11-22)
+- [ ] **Monthly checkup** (`/monthly-checkup`). First run 2026-11-23 (`01 Planning/monthly_checkup_2026-11-23.md`). Not scheduled.
+- [ ] **Nursery AI review, monthly** (`04 AI/Reviews/nursery_review_<date>.md`, a new dated file each run, never overwrite). Not scheduled: the scheduling request was denied on 2026-11-22. Run by hand on the 1st: re-read each project's schematic, brief and lessons; check the live SQL read-only; note changes; add one line to `04 ai_schematic.md`; push a branch and open a draft PR.
 
-- [ ] **Run the monthly checkup** (`04 AI/Skills/monthly_checkup.md`, `/monthly-checkup`). First run written 2026-11-23 (`01 Planning/monthly_checkup_2026-11-23.md`). Scheduling still not set up.
-- [ ] **Re-run the nursery AI review monthly** (`04 AI/nursery_review_<date>.md`, a new dated file each run, never overwrite). Not scheduled yet: the scheduling request was denied by the permission classifier on 2026-11-22. Set it up once permission allows, or run it by hand on the 1st. Steps: re-read each project's schematic, brief and lessons; check the live SQL read-only; note what changed; add one line to `04 ai_schematic.md`; push to a branch and open a draft PR.
+## Closed
+
+- **2026-11-25:** skills and indexes brought in line; feedback loop merged into one skill; home page styles and scripts moved to `03 Projects/Index/`; `THIRD-PARTY.md` became a running record. Not committed at the time of writing.
+- PRs #107 and #119: closed without merging (checked 2026-11-25).

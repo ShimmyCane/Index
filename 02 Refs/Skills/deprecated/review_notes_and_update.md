@@ -1,3 +1,5 @@
+> **Deprecated 2026-11-25.** Merged into `02 Refs/Skills/feedback_loop.md` (section 3).
+
 # Read Notes and Update
 
 Purpose

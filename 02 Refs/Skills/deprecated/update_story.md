@@ -1,3 +1,5 @@
+> **Deprecated 2026-11-25.** Adventure story skill; the project graduated to `ShimmyCane/Adventure`. It depends on `consider_actions` and `gather_story_lessons_learned`, both in this folder; `03 Projects/Adventure/` paths now live in that repo.
+
 # Update story (Adventure storyteller)
 
 **Purpose:** plan the story that follows, then write the next pages of the chapter, and give the next page to the family for their next turn.

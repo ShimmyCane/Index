@@ -6,7 +6,7 @@ Track: A. Family play
 
 - Design: `schematic.md` · Facts: `research/` (to be written)
 - Q&A history: `convo/` (never compact; start a new version instead)
-- AI notes: `04 AI/V3 Sea Turtle Race/brief.md` and `lessons.md`
+- AI notes: `04 AI/Cheetah Simulator/V3 Sea Turtle Race/brief.md` and `lessons.md`
 - Shared conventions: root `CLAUDE.md` (public repo, privacy)
 
 Status: started (2026-11-25). Nothing is built. Clarifying questions are in `convo/convo v0.1.md`. Build waits for the answers.

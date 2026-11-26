@@ -2,7 +2,7 @@
 
 **Track: A. Family play** (one player at a time; a family database for who is playing). Studio-level facts live in collapsed panels ("How it really is").
 
-Status (2026-11-25): **0.2.0 built** (skills, canvas first; 0.1 was the first increment) (cub stages 1 and 2, cumulative clock, ⚙️ with gentle mode, notes, AI toggle, Felix and joystick controls). Decisions below come from `convo/convo v0.1.md`. Jimmy asked for the whole thing to be built incrementally, merged step by step.
+Status (2026-11-26): **0.4.0 built** (0.4.0: action buttons appear as skills are mastered, and skip to the next stage; 0.3.0: Mum leads after a reunion, softer stage 1 view; next items are in `todo.md`; the page's own `VERSION` constant still reads 0.2.0). 0.2.0: skills, canvas first; 0.1 was the first increment (cub stages 1 and 2, cumulative clock, ⚙️ with gentle mode, notes, AI toggle, Felix and joystick controls). Decisions below come from `convo/convo v0.1.md`. Jimmy asked for the whole thing to be built incrementally, merged step by step.
 
 ## Decisions (convo v0.2 round 5, 2026-11-25)
 
@@ -56,7 +56,7 @@ Source: Jimmy's concept (2026-11-25), recorded in `convo/convo v0.1.md`. Facts: 
 | Database | Family project, family sign-in; device storage first |
 | Private data | None in the repo. Player names are first names only; saves are device-first |
 
-Skills to apply at build: `ipad-website`, `settings-gear`, `game-controls`, `feedback-notes`, `smoke-test`, `project-track`.
+Skills to apply at build: `ipad-website`, `settings-gear`, `game-controls`, `feedback-notes`, `smoke-test`. Track guide: `02 Refs/Workflow/family_project_track.md`.
 
 ## The life: stages
 
@@ -177,7 +177,7 @@ The schematic keeps the **style layer separate**, so the choice can change later
 
 ## Data (first sketch)
 
-Device storage first. Family sync later (`02 Refs/Skills/supabase_link.md`; plan table prefix `ch_`; `ch_notes` as in the family reference).
+Device storage first. Family sync later (`04 AI/Skills/supabase_setup.md`; plan table prefix `ch_`; `ch_notes` as in the family reference).
 
 | Entity | Fields | Notes |
 |---|---|---|
@@ -196,7 +196,7 @@ A cub's controls are simpler: one finger to wiggle toward, a big "chirp" button.
 
 ## Feedback notes
 
-A "Notes for improvement" box in ⚙️, built from `02 Refs/Skills/feedback_notes.md`, in the first increment. Each note saves with the stage and the time. Read back in ⚙️. Family sync follows the Mind Palace and Felix Stickers pattern.
+A "Notes for improvement" box in ⚙️, built from `02 Refs/Skills/feedback_loop.md`, in the first increment. Each note saves with the stage and the time. Read back in ⚙️. Family sync follows the Mind Palace and Felix Stickers pattern.
 
 ## Increments (proposed)
 

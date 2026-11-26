@@ -1,3 +1,5 @@
+> **Deprecated 2026-11-25.** Merged into `02 Refs/Skills/feedback_loop.md` (section 2).
+
 # Feedback Notes (in-page notes for initial testing)
 
 Purpose

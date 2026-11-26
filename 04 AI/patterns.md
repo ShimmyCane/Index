@@ -150,86 +150,28 @@ Patterns that repeat often enough to become a template in `02 Refs/Templates/` o
 - Play a drag in fixed steps in headless Chromium, save a PNG per frame, and build a GIF with Pillow. Tools: `02 Refs/Skills/scripts/anim_capture.js` and `frames_to_gif.py`; skill `/anim-gif`.
 - Serve pages over http for pixel tests: file:// canvases are tainted.
 
-## iPad UI Components Library (2026-11-25, consolidated)
+## Shared UI parts (compacted 2026-11-25)
 
-Shared patterns from settings_gear, game_controls, collapsible panels, and feedback_notes:
+Build from the one source for each; don't copy its rules here.
 
-**Settings Gear (⚙️ button)**
-- Lower-right corner, faded until hovered
-- Drawer or modal with segmented options
-- Error panel behind opt-in toggle at bottom
-- Database health check
-- Uses in: Adventure, Felix Maze, Make 3D, all family apps
-- Build from: `02 Refs/Skills/settings_gear.md`
+| Part | Source |
+|---|---|
+| ⚙️ settings button and drawer | `04 AI/Skills/settings_gear.md` |
+| Game controls (including when the gear moves and fades) | `04 AI/Skills/game_controls.md` |
+| Collapsible panels | `02 Refs/Workflow/project_track.md` |
+| Feedback notes: capture and processing | `02 Refs/Skills/feedback_loop.md` |
 
-**Game Controls (iPad games)**
-- Primary: center-relative drag (player-relative coordinate)
-- Alternative: lower-left joystick (sized to width, transparent on iPad)
-- Action buttons: lower-right, large touch targets (48px+)
-- Settings gear: upper-right, faded
-- Uses in: Felix Checkers, any game with motion or aim
-- Build from: `02 Refs/Skills/game_controls.md`
+Not done: one shared template library for these parts (candidate).
 
-**Feedback Notes (⚙️ inside)**
-- In-page "Notes for improvement" box
-- Tied to item on screen (map, card, detail)
-- Saved to device first (localStorage), read back
-- Copyable to share with team
-- Workflow: app captures → `feedback_notes` UI ↔ Supabase → `/consolidate-knowledge` backend → convo & todo
-- Uses in: Felix Maze, QC apps
-- Build from: `02 Refs/Skills/feedback_notes.md`
+## Keeping skills tidy (2026-11-25)
 
-**Collapsible Panels**
-- Header: icon + name + ▸/▾ marker
-- State saved per device (localStorage, try/catch safe)
-- Default: closed on small screen (track A), open on large (track B)
-- Never hide a panel; collapsed sections keep header visible
-- Code: HTML pattern + CSS variables + vanilla JS toggle
-- Uses in: all layout-heavy projects
-- Build from: `02 Refs/Workflow/project_track.md` (shared code snippets)
+- One source per skill. A wrapper points to it; a stub is only for the eight working copies in `04 AI/Skills/`.
+- Merge two skills that cover one job into one file with sections, and keep the old command names as entry points (feedback loop).
+- Retire: move to `02 Refs/Skills/deprecated/`, add a row to its `index.md`, then fix the wrapper and references.
+- _Superseded:_ `consolidate_knowledge` (the earlier merge of `ai_consolidate` and `update_lessons_learned`). Jimmy brought `ai_consolidate` back on 2026-11-25.
 
-**Next step: Extract shared component registry** (not yet done)
-- One HTML template library for the common UI elements
-- Could become a reusable starter or separate skill
+## Rearrangeable tiles with a saved layout (2026-11-25)
 
----
-
-## Feedback Loop Workflow (2026-11-25, linked)
-
-Two-part workflow: capture → process
-
-**Capture:** `feedback_notes` skill
-- In-page UI for collecting "Notes for improvement"
-- Tied to item on screen, saved to device, copyable
-- Synced to Supabase `<app>_notes` table
-
-**Process:** `read_notes_and_update` skill
-- Reads feedback from Supabase table
-- Turns into to-do items and convo rounds
-- Marks handled notes as done after user confirms
-
-**Used by:** Felix Maze, QC projects, any project with user feedback
-**See also:** `/consolidate-knowledge` for consolidating the feedback into lessons
-
----
-
-## Skill consolidation and working copies (2026-11-25)
-
-**Merge similar skills to reduce duplication:**
-- When two skills solve the same problem two ways (manual + programmatic), merge into one with both paths or choose the better one. Example: `supabase_link` (manual SQL paste) + `supabase_project` (programmatic) → `supabase_setup` (programmatic only, cleaner).
-
-**Working copy architecture for iterating skills:**
-- Frequently-improved skills live in `04 AI/Skills/` as working copies, with stubs in `02 Refs/Skills/` that point to them.
-- Structure: `.claude/skills/<name>/SKILL.md` (wrapper) → `02 Refs/Skills/<name>.md` (stub) → `04 AI/Skills/<name>.md` (working copy).
-- Current working copies (7): smoke_test, summarize_code, game_controls, settings_gear, supabase_setup, access_requests, monthly_checkup.
-- Reference skills (maintained by Jimmy) stay in `02 Refs/` only: start_project, ipad_website, privacy_check. Workflow guides stay in `02 Refs/Workflow/`: project_track, family_project_track, architecture_project_track.
-
-**Skill consolidation candidates:**
-- `update_lessons_learned` + `ai_consolidate` are almost identical (review, log, archive); could unify with two modes.
-- UI component patterns (settings_gear, game_controls, feedback_notes, collapsible panels) → extract shared HTML/CSS/JS patterns into `04 AI/patterns.md` or a "iPad UI Kit" reference (started in iPad UI Components Library section above).
-- `read_notes_and_update` (backend) + `feedback_notes` (UI) are complementary; link them in documentation.
-- Story workflow (consider_actions, update_story, gather_story_lessons_learned) is adventure-specific but pattern could apply to future narrative projects.
-
-**Deprecation pattern:**
-- When a skill becomes obsolete, move `.md` file to `deprecated/` with a note explaining why and what replaced it. Keep for historical reference.
-- Deprecated skills this round: supabase_link, supabase_project (merged); anim_gif, simulate_decay, make_3d, make_sticker, fix_puzzles (project-specific to graduated projects).
+- An Edit button turns links into pieces; Done turns them back. Undo and Start over sit beside it.
+- Save the whole group on any change, so moving one piece never shuffles the rest. Keep x and width as shares of the container, keep one layout per screen-size class, and key pieces by their link.
+- Source: home page Bauhaus Blocks (`03 Projects/Index/js/bauhaus-edit.js`).
