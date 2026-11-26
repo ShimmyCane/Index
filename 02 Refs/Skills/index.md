@@ -7,12 +7,12 @@ Source of truth for nursery skills. Each is wrapped in `.claude/skills/<name>/SK
 
 ---
 
-## Active Skills (23 total)
+## Active Skills (24 total; consolidated 2026-11-25)
 
 ### Project Initialization & Setup (3)
 - **start_project** — Set up a new nursery project: folders, schematic, MVP, project CLAUDE.md, convo/ history
 - **ipad_website** — Design guidance for kid-friendly iPad/web apps: pastel colors, bold graphics, large touch targets, minimal menus, everything secondary in ⚙️
-- **project_track** — Classify as family play (simple, graphic) or studio design (dense, formal); set defaults and make panels collapsible
+- **project_track** — Classify as family play (simple, graphic) or studio design (dense, formal); set defaults and make panels collapsible *(working copy moved to 04 AI/Skills/ 2026-11-25)*
 
 ### Code Quality & Testing (4)
 - **smoke_test** — Headless Chromium check at three screen sizes: zero errors, no horizontal scroll, touch/controls/settings/reload work, print layout correct
@@ -28,11 +28,10 @@ Source of truth for nursery skills. Each is wrapped in `.claude/skills/<name>/SK
 - **game_controls** — One control scheme for iPad games: center-relative drag (or lower-left joystick), lower-right action buttons, ⚙️ in upper right faded
 - **feedback_notes** — In-page "Notes for improvement" box in ⚙️: tied to item on screen, saved to device first, read back, copyable
 
-### Knowledge & Consolidation (4)
-- **update_lessons_learned** — Review and log lessons learned across projects, personal preferences, and tools in dated files
-- **ai_consolidate** — Consolidate knowledge: log changes, archive outdated facts, condense information across projects
+### Knowledge & Consolidation (3)
+- **consolidate_knowledge** — Unified workflow: review work done, update project briefs, extract lessons learned, promote reusable patterns, preserve history *(merged from update_lessons_learned + ai_consolidate on 2026-11-25; working copy in 04 AI/Skills/)*
 - **claude_review_project** — Bring existing project to current conventions: CLAUDE.md, convo/ folder, brief, lessons; extract reusable patterns
-- **remix** — Build nursery version of linked site/repo; combine with another repo; check license; record what was read and reused (seed: "A x B")
+- **remix** — Build nursery version of linked site/repo; combine with another repo; check license; record what was read and reused (seed: "A x B") *(working copy moved to 04 AI/Skills/ 2026-11-25)*
 
 ### Project Transitions (1)
 - **graduate_project** — Move nursery project to standalone public repo with GitHub Pages: ready check, folder prep, copy/repo/Pages steps, registry pointers, home page link, remove from nursery
@@ -59,15 +58,18 @@ Source of truth for nursery skills. Each is wrapped in `.claude/skills/<name>/SK
 
 These files have both a **stub in 02 Refs/** and a **working copy in 04 AI/Skills/**. Edit the 04 AI copy; the 02 Refs stub points to it.
 
-| Skill | 02 Refs (stub) | 04 AI (working copy) |
-|-------|---|---|
-| smoke_test | ✓ | ✓ moved 2026-11-22 |
-| summarize_code | ✓ | ✓ moved 2026-11-22 |
-| supabase_setup | ✓ | ✓ merged 2026-11-25 |
-| game_controls | ✓ | ✓ moved 2026-11-22 |
-| settings_gear | ✓ | ✓ moved 2026-11-22 |
-| access_requests | ✓ | ✓ working copy |
-| monthly_checkup | ✓ | ✓ working copy |
+| Skill | 02 Refs (stub) | 04 AI (working copy) | Note |
+|-------|---|---|---|
+| smoke_test | ✓ | ✓ | moved 2026-11-22 |
+| summarize_code | ✓ | ✓ | moved 2026-11-22 |
+| supabase_setup | ✓ | ✓ | merged 2026-11-25 |
+| game_controls | ✓ | ✓ | moved 2026-11-22 |
+| settings_gear | ✓ | ✓ | moved 2026-11-22 |
+| access_requests | ✓ | ✓ | working copy |
+| monthly_checkup | ✓ | ✓ | working copy |
+| consolidate_knowledge | ✓ | ✓ | merged 2026-11-25 |
+| project_track | ✓ | ✓ | moved 2026-11-25 |
+| remix | ✓ | ✓ | moved 2026-11-25 |
 
 ---
 
