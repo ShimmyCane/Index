@@ -104,8 +104,16 @@
     { layer: 6, type: 'ellipse', cx: 124, cy: 98, rx: 22, ry: 6, side: 'mid', fill: '#f4efe1', en: 'Toe bones (phalanges)', cn: '趾骨', what: 'Bones of the toes.' }
   ];
 
+  var REGION_DEFS = [
+    { id: 'body', en: 'Whole body', cn: '全身', vb: '0 0 300 650', mirrorW: 300, items: ITEMS },
+    { id: 'foot', en: 'Sole of foot', cn: '足底', vb: '0 0 200 420', mirrorW: 200, items: FOOT_ITEMS }
+  ].concat(window.MM_EXTRA_REGIONS || []);
   var REGION = 'body';
-  function items() { return REGION === 'foot' ? FOOT_ITEMS : ITEMS; }
+  function def() {
+    for (var i = 0; i < REGION_DEFS.length; i++) if (REGION_DEFS[i].id === REGION) return REGION_DEFS[i];
+    return REGION_DEFS[0];
+  }
+  function items() { return def().items; }
 
   var state = { toggles: {}, peel: 0, selected: null };
   LAYERS.forEach(function (l, i) { state.toggles[i] = true; });
@@ -137,6 +145,7 @@
     else if (item.type === 'ellipse') node = el('ellipse', { cx: item.cx, cy: item.cy, rx: item.rx, ry: item.ry, fill: fill, stroke: stroke, 'stroke-width': width });
     else node = el('path', { d: item.d, fill: 'none', stroke: stroke, 'stroke-width': width, 'stroke-linecap': 'round' });
     Object.keys(attrs).forEach(function (k) { node.setAttribute(k, attrs[k]); });
+    if (item.layer === 1) node.setAttribute('fill-opacity', '0.45');
     if (item.inset) node.setAttribute('transform', 'translate(150 330) scale(0.96) translate(-150 -330)');
     return node;
   }
@@ -156,7 +165,7 @@
         g.appendChild(itemNode(item, idx, lang));
         if (item.side === 'both') {
           var mirrored = itemNode(item, idx, lang);
-          mirrored.setAttribute('transform', MIRROR + (item.inset ? ' ' + mirrored.getAttribute('transform') : ''));
+          mirrored.setAttribute('transform', 'translate(' + def().mirrorW + ' 0) scale(-1 1)' + (item.inset ? ' ' + mirrored.getAttribute('transform') : ''));
           g.appendChild(mirrored);
         }
       });
@@ -213,7 +222,8 @@
     if (lang) currentLang = lang;
     var svg = document.getElementById('anatSvg');
     if (!svg) return;
-    svg.setAttribute('viewBox', REGION === 'foot' ? '0 0 200 420' : '0 0 300 650');
+    svg.setAttribute('viewBox', def().vb);
+    buildRegionButtons(lang);
     draw(svg, currentLang);
     describe(currentLang);
     buildToggles(currentLang);
@@ -237,10 +247,6 @@
       state.peel = Math.min(LAYERS.length - 1, state.peel + 1);
       render();
     });
-    var rb0 = document.getElementById('anatRegionBody');
-    if (rb0) rb0.addEventListener('click', function () { setRegion('body'); });
-    var rf0 = document.getElementById('anatRegionFoot');
-    if (rf0) rf0.addEventListener('click', function () { setRegion('foot'); });
     var reset = document.getElementById('anatReset');
     if (reset) reset.addEventListener('click', function () {
       state.peel = 0;
@@ -250,6 +256,22 @@
   }
 
   function setRegion(r) { REGION = r; state.selected = null; render(); }
+
+  function buildRegionButtons(lang) {
+    var box = document.getElementById('anatRegions');
+    if (!box || box.getAttribute('data-built') === lang + ':' + REGION) return;
+    box.setAttribute('data-built', lang + ':' + REGION);
+    box.textContent = '';
+    REGION_DEFS.forEach(function (r) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip' + (r.id === REGION ? ' regionOn' : '');
+      b.setAttribute('aria-pressed', String(r.id === REGION));
+      b.textContent = lang === 'cn' ? r.cn : r.en;
+      b.addEventListener('click', function () { setRegion(r.id); });
+      box.appendChild(b);
+    });
+  }
 
   window.MM_ANATOMY = { render: render, wire: wire, state: state, layers: LAYERS, setRegion: setRegion };
   try { wire(); render('en'); }
