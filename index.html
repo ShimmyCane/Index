@@ -434,6 +434,8 @@
         <button type="button" data-style="stamps" aria-pressed="false">Postage Stamps</button>
         <button type="button" data-style="pixel" aria-pressed="false">Pixel Blocks</button>
         <button type="button" data-style="polygonal" aria-pressed="false">Polygonal Masonry</button>
+        <h3>Nursery</h3>
+        <button type="button" id="reorder-toggle" aria-pressed="true">Reorder &amp; favourites: on</button>
         <h3>Planning</h3>
         <a class="panel-link" href="01%20Planning/nursery_review_2026-11-22.html">Nursery review, 2026-11-22</a>
     </div>
@@ -565,8 +567,31 @@
             var TRACK_KEY = 'nursery-clicks';
             var SHAPES = ['hex', 'tri', 'chev', 'dia', 'pent', 'notch', 'para'];
             var SIZES = ['w2 h2', 'w2', ''];
+            var REORDER_KEY = 'nursery-reorder';
             var nurseryWall = document.getElementById('nursery-wall');
             if (!nurseryWall) return;
+
+            // Remember the original order and sizes so turning reorder off can restore them.
+            var originals = Array.from(nurseryWall.querySelectorAll('li[data-track]')).map(function (li) {
+                return { li: li, cls: li.getAttribute('class') };
+            });
+            var toggle = document.getElementById('reorder-toggle');
+
+            function getReorderOn() {
+                try { return localStorage.getItem(REORDER_KEY) !== 'off'; } catch (e) { return true; }
+            }
+
+            function setReorderOn(on) {
+                try { localStorage.setItem(REORDER_KEY, on ? 'on' : 'off'); } catch (e) { /* storage blocked */ }
+            }
+
+            function restoreNursery() {
+                originals.forEach(function (o) {
+                    if (o.cls === null) o.li.removeAttribute('class');
+                    else o.li.setAttribute('class', o.cls);
+                    nurseryWall.appendChild(o.li);
+                });
+            }
 
             function getClicks(trackId) {
                 try {
@@ -599,9 +624,16 @@
                 });
             }
 
+            function applyReorder(on) {
+                toggle.setAttribute('aria-pressed', String(on));
+                toggle.textContent = 'Reorder & favourites: ' + (on ? 'on' : 'off');
+                if (on) reorganizeNursery();
+                else restoreNursery();
+            }
+
             nurseryWall.addEventListener('click', function (e) {
                 var link = e.target.closest('a[href]');
-                if (link) {
+                if (link && getReorderOn()) {
                     var li = link.closest('li[data-track]');
                     if (li) {
                         incrementClick(li.getAttribute('data-track'));
@@ -610,7 +642,13 @@
                 }
             });
 
-            reorganizeNursery();
+            toggle.addEventListener('click', function () {
+                var on = !getReorderOn();
+                setReorderOn(on);
+                applyReorder(on);
+            });
+
+            applyReorder(getReorderOn());
         })();
     </script>
 </body>
