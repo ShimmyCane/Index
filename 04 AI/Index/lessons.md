@@ -17,3 +17,5 @@
 - A button over a clipped tile belongs beside the link, not inside it: the shape would clip it, and its text would change the tile's name.
 - Test that a button's invisible tap area does not cover the label, not only its drawn circle.
 - Lay out toy pictures with "gravity": give each place a left and right edge and drop the piece onto what is below.
+- Before restructuring a page, fetch `origin/main`: other sessions were editing the same file, and their changes had to be ported by hand.
+- "Merge main into my branch" is not "merge my branch into main". Check with `git log origin/main` and a file on the live site.

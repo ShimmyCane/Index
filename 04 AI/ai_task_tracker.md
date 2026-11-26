@@ -4,6 +4,7 @@ Open work across the nursery. Project to-do lists stay in each project (`03 Proj
 
 ## Waiting on Jimmy
 
+- [ ] **⚙️ label:** rename "Reorder & favourites" to "Sort Nursery by visits"? It does not control Reorder or the hearts.
 - [ ] **Home page:** review the new Polygonal Masonry, Bauhaus and map colouring; confirm QC keynotes under Architecture.
 - [ ] **Felix-Continents licence:** no `LICENSE` file answered at the live site root on 2026-11-25, and the project carries GPL-3.0 data. Check the repo.
 - [ ] **2026-11-25 graduations:** finish the records in `graduations.md` (README, stand-alone `CLAUDE.md`, AI notes in the repo, database registry).
@@ -34,5 +35,5 @@ Open work across the nursery. Project to-do lists stay in each project (`03 Proj
 
 ## Closed
 
-- **2026-11-25:** skills and indexes brought in line; feedback loop merged into one skill; home page styles and scripts moved to `03 Projects/Index/`; `THIRD-PARTY.md` became a running record. Not committed at the time of writing.
+- **2026-11-25:** skills and indexes brought in line; feedback loop merged into one skill; home page styles and scripts moved to `03 Projects/Index/`; `THIRD-PARTY.md` became a running record. Merged to `main` the same day.
 - PRs #107 and #119: closed without merging (checked 2026-11-25).
