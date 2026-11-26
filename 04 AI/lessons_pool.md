@@ -367,3 +367,10 @@ Full notes: `04 AI/Make-3D x Construct/model_iteration_lessons.md`.
 7. **Put open questions next to the feedback box.** A short "Questions" group in the settings panel ties each answer to the screen it is about. _(Paper Airplanes x A-10 Warthog)_
 
 - (2026-11-25, Cheetah Simulator) A soft setting (Gentle mode) changes how a true thing is told, never the true thing itself. Keep a panel that always shows the real facts.
+
+## Graduations moved in one pass (2026-11-26)
+- Take repo names from the GitHub repo list, not from folder names. The list shows `Athena-s-Piano-Companion` and `Make-3D-x-Construct` exactly; folder names differ in case and punctuation, and a guessed link would be silently wrong.
+- A sandbox that cannot reach GitHub Pages cannot tick "live". Say "not checked from here" in the tracker and leave the step unticked for Jimmy to confirm on the device.
+- When a project is out but its folder stays, the home page moves now and the folder removal waits for the live check. Two steps, two commits.
+- Tool-only projects with no Pages site (ShimmyCAD MCP) do not get a home-page tile; say where they are tracked instead.
+

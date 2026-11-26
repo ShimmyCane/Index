@@ -38,6 +38,23 @@ Nine projects had already been copied out and linked from the home page by hand,
 | Rhythm Sticks | `ShimmyCane/Rhythm-Sticks` | Pages link |
 | 中文笔画 | `ShimmyCane/Chinese-Character-Strokes` | Pages link |
 
+## Moved to their own repos, home page updated 2026-11-26
+
+Jimmy copied these out by hand. Repo names read from the GitHub repo list. Home-page tiles moved from Nursery to the section shown (Claude's choice, to confirm), with Pages links `https://shimmycane.github.io/<Repo>/`. Pages were **not** checked live from here (sandbox has no route to GitHub Pages), so they are unticked until Jimmy confirms on the iPad.
+
+| Project | Repo | Home page | Nursery folder | Registry | Notes |
+|---|---|---|---|---|---|
+| Felix Stickers | `ShimmyCane/Felix-Stickers` | Games | still here | not checked | |
+| Felix Continents | `ShimmyCane/Felix-Continents` | Learning | still here | not checked | |
+| Mind Palace | `ShimmyCane/Mind-Palace` | Learning | still here | not checked | |
+| Athena's Piano Companion | `ShimmyCane/Athena-s-Piano-Companion` | Family | still here | not checked | SQL 001 applied, 002 not applied (see its schematic) |
+| Make 3D x Construct | `ShimmyCane/Make-3D-x-Construct` | Architecture | still here | not checked | |
+| QC keynotes | `ShimmyCane/QC-keynotes` | Architecture | still here | not checked | `qk_notes` table not yet pasted |
+
+Still to do for each (steps 5, 6, 8, 9 of the checklist): check the Pages URL live, check the registry rows point at the new repo, fix schematic pointers, and remove the nursery folder once the live site is checked.
+
+**ShimmyCAD MCP** (`ShimmyCane/ShimmyCAD-MCP`, Python, MIT) is tracked outside Index. It has no Pages site, so it has no home-page tile and no nursery folder here. Nothing to record in this repo beyond this note.
+
 ## Next graduations
 
 (Add a checklist section here when `/graduate-project` starts one.)
