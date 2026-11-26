@@ -3,7 +3,7 @@
 Source of truth for nursery skills. Each is wrapped in `.claude/skills/<name>/SKILL.md` and runs as `/name`.
 
 **Working copies** (edited in `04 AI/Skills/`) — stubs stay here:
-- `smoke_test`, `summarize_code`, `game_controls`, `settings_gear`, `access_requests`, `monthly_checkup`, `supabase_setup`
+- `smoke_test`, `summarize_code`, `game_controls`, `settings_gear`, `access_requests`, `monthly_checkup`, `supabase_setup`, `consolidate_knowledge`, `remix`
 
 ---
 
@@ -68,7 +68,6 @@ These files have both a **stub in 02 Refs/** and a **working copy in 04 AI/Skill
 | access_requests | ✓ | ✓ | working copy |
 | monthly_checkup | ✓ | ✓ | working copy |
 | consolidate_knowledge | ✓ | ✓ | merged 2026-11-25 |
-| project_track | ✓ | ✓ | moved 2026-11-25 |
 | remix | ✓ | ✓ | moved 2026-11-25 |
 
 ---
