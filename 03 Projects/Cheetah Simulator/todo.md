@@ -9,7 +9,8 @@ Built in 0.3.0 (first increment): see the "Done" list.
 ## Next (in order, one small increment each)
 - [ ] **Stage 1 vision:** blur gets clearer as Stay hidden and Listen are mastered (the vision sharpens with skills).
 - [ ] **Scary animals:** a shape grows slowly in the grass (a shadow, then the animal). When it is close, the cub can barely move: only a chirp works. Ends with a freeze, or the animal moves on.
-- [ ] **Newer action buttons on the right:** a new button appears for each new skill (Crouch, Stalk, Run, Hunt). Starts with Crouch after Stay hidden.
+- [x] **Action buttons on the right:** a button appears when its skill is mastered. Stage 1: Hide (hold), Listen (hold), Nibble (tap). Stage 2: Pounce (hold, dash), Freeze (hold). Crouch, Stalk and Run come with later skills.
+- [x] **Skip to next stage:** once every skill in the stage is mastered, ⏩ Skip to next stage appears (no need to wait for the clock).
 - [ ] **Needs: pee and poop:** a need bar; the cub goes to tall grass (or a cave, later) to do it. Shown as a kind scene, not a meter.
 - [ ] **Caves:** a dark place to hide and rest; the cub can see only close up (a blur).
 - [ ] **Movement by push:** joystick and Felix drag speed depends on how far you push (walk when slight, run when far). Stage 1 is slow only.
