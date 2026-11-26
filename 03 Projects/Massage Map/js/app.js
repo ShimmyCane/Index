@@ -278,7 +278,7 @@
     var svg = $(svgId);
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     var parts = {
-      plate: svgEl('image', { href: PLATE_HREF, x: 0, y: 0, width: 330, height: 800, opacity: 0, preserveAspectRatio: 'none' }),
+      plate: svgEl('image', { x: 0, y: 0, width: 330, height: 800, opacity: 0, preserveAspectRatio: 'none' }),
       outline: svgEl('path', { 'stroke-width': 3, stroke: '#2f2a3a', fill: '#fffdf8' }),
       dots: svgEl('g', {}),
       heat: svgEl('circle', { r: 0, fill: '#f08a6a', opacity: 0 }),
@@ -307,10 +307,9 @@
 
   // Gray's plate 444 (plantar view, heel at the top, plate 330 x 800) under the sole view.
   // The sole view box is 200 x 420 with the toes at the top. Points map by a fixed transform.
-  var PLATE_HREF = 'plates/gray444_plantar.png';
-  function plateOn(view) { return !!S.plate && view === 'sole'; }
-  function toView(view, x, y) { return plateOn(view) ? [2.33 * x - 73, 820 - 1.97 * y] : [x, y]; }
-  function sizeOf(view) { return plateOn(view) ? 2.1 : 1; }
+  function plateOn(view) { return !!S.plate && !!MM.plates[view]; }
+  function toView(view, x, y) { return plateOn(view) ? MM.plateMap(view, x, y) : [x, y]; }
+  function sizeOf(view) { return plateOn(view) ? MM.plateScale(view) : 1; }
 
   function drawFilm(key, tech, t) {
     var f = film[key];
@@ -327,11 +326,20 @@
     var from = target;
     if (prev && prev[0] === view) from = markersFor(prev[0])[prev[1]] || target;
 
-    // Plate or drawn foot: switch the view box and which picture is shown.
+    // Plate or drawn foot: switch the view box, the picture and which outline is shown.
     var on = plateOn(view), q = sizeOf(view);
-    if (f.mode !== on) {
-      f.mode = on;
-      f.svg.setAttribute('viewBox', on ? '0 0 330 800' : '0 0 200 420');
+    var mode = on ? view : '';
+    if (f.mode !== mode) {
+      f.mode = mode;
+      if (on) {
+        var pl = MM.plates[view];
+        p.plate.setAttribute('href', pl.href);
+        p.plate.setAttribute('width', pl.w);
+        p.plate.setAttribute('height', pl.h);
+        f.svg.setAttribute('viewBox', '0 0 ' + pl.w + ' ' + pl.h);
+      } else {
+        f.svg.setAttribute('viewBox', '0 0 200 420');
+      }
       p.plate.setAttribute('opacity', on ? 1 : 0);
       p.outline.setAttribute('opacity', on ? 0 : 1);
       f.shownDots = '';

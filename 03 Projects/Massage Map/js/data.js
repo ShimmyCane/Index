@@ -169,3 +169,28 @@ MM.ui = {
     sources: '资料来源', noSources: '资料尚未整理。', hand: '手'
   }
 };
+
+/* Gray's plates. Each foot view has an affine map from the drawing box (the 200 x 420 foot used by
+   the markers) to plate pixels: X = a*x + b*y + c, Y = d*x + e*y + f. Set by eye from landmarks and
+   approximate; if a point lands off its structure, change that plate's numbers. */
+MM.plates = {
+  sole:  { href: 'plates/gray444_plantar.png',      w: 330, h: 800, a: 2.33, b: 0,     c: -73,  d: 0, e: -1.97, f: 820, region: 'foot' },
+  top:   { href: 'plates/gray446_dorsal_foot.png',  w: 291, h: 550, a: 1.7,  b: 0,     c: 40,   d: 0, e: 1.6,   f: -45, region: 'foot-top' },
+  side:  { href: 'plates/gray442_ankle_side.png',   w: 700, h: 436, a: 0,    b: 2.154, c: -112.3, d: 2.0, e: 0, f: 0, region: null },
+  ankle: { href: 'plates/gray437_leg_front.png',    w: 260, h: 1000, a: 0.8, b: 0,    c: 46,   d: 0, e: 0.8,   f: 544, region: null }
+};
+/* Pictures only (no points yet): regions that have a plate but no massage points. */
+MM.picturePlates = {
+  back:       { href: 'plates/gray409_back.png',           w: 733, h: 1156 },
+  legs:       { href: 'plates/gray437_leg_front.png',      w: 260, h: 1000 },
+  'head-side':{ href: 'plates/gray378_head_neck_side.png', w: 620, h: 700 },
+  hand:       { href: 'plates/gray415_forearm_hand.png',   w: 337, h: 1000 }
+};
+MM.plateMap = function (view, x, y) {
+  var p = MM.plates[view];
+  return p ? [p.a * x + p.b * y + p.c, p.d * x + p.e * y + p.f] : [x, y];
+};
+MM.plateScale = function (view) {
+  var p = MM.plates[view];
+  return p ? Math.max(1, Math.sqrt(Math.abs(p.a * p.e - p.b * p.d))) : 1;
+};
