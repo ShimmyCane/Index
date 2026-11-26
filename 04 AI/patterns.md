@@ -150,6 +150,69 @@ Patterns that repeat often enough to become a template in `02 Refs/Templates/` o
 - Play a drag in fixed steps in headless Chromium, save a PNG per frame, and build a GIF with Pillow. Tools: `02 Refs/Skills/scripts/anim_capture.js` and `frames_to_gif.py`; skill `/anim-gif`.
 - Serve pages over http for pixel tests: file:// canvases are tainted.
 
+## iPad UI Components Library (2026-11-25, consolidated)
+
+Shared patterns from settings_gear, game_controls, project_track, and feedback_notes:
+
+**Settings Gear (⚙️ button)**
+- Lower-right corner, faded until hovered
+- Drawer or modal with segmented options
+- Error panel behind opt-in toggle at bottom
+- Database health check
+- Uses in: Adventure, Felix Maze, Make 3D, all family apps
+- Build from: `02 Refs/Skills/settings_gear.md`
+
+**Game Controls (iPad games)**
+- Primary: center-relative drag (player-relative coordinate)
+- Alternative: lower-left joystick (sized to width, transparent on iPad)
+- Action buttons: lower-right, large touch targets (48px+)
+- Settings gear: upper-right, faded
+- Uses in: Felix Checkers, any game with motion or aim
+- Build from: `02 Refs/Skills/game_controls.md`
+
+**Feedback Notes (⚙️ inside)**
+- In-page "Notes for improvement" box
+- Tied to item on screen (map, card, detail)
+- Saved to device first (localStorage), read back
+- Copyable to share with team
+- Workflow: app captures → `feedback_notes` UI ↔ Supabase → `/consolidate-knowledge` backend → convo & todo
+- Uses in: Felix Maze, QC apps
+- Build from: `02 Refs/Skills/feedback_notes.md`
+
+**Collapsible Panels**
+- Header: icon + name + ▸/▾ marker
+- State saved per device (localStorage, try/catch safe)
+- Default: closed on small screen (track A), open on large (track B)
+- Never hide a panel; collapsed sections keep header visible
+- Code: HTML pattern + CSS variables + vanilla JS toggle
+- Uses in: all layout-heavy projects
+- Build from: `02 Refs/Skills/project_track.md` (working copy) → code snippets
+
+**Next step: Extract shared component registry** (not yet done)
+- One HTML template library for the common UI elements
+- Could become a reusable starter or separate skill
+
+---
+
+## Feedback Loop Workflow (2026-11-25, linked)
+
+Two-part workflow: capture → process
+
+**Capture:** `feedback_notes` skill
+- In-page UI for collecting "Notes for improvement"
+- Tied to item on screen, saved to device, copyable
+- Synced to Supabase `<app>_notes` table
+
+**Process:** `read_notes_and_update` skill
+- Reads feedback from Supabase table
+- Turns into to-do items and convo rounds
+- Marks handled notes as done after user confirms
+
+**Used by:** Felix Maze, QC projects, any project with user feedback
+**See also:** `/consolidate-knowledge` for consolidating the feedback into lessons
+
+---
+
 ## Skill consolidation and working copies (2026-11-25)
 
 **Merge similar skills to reduce duplication:**
