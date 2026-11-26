@@ -287,7 +287,7 @@ Full build rules: `02 Refs/Skills/settings_gear.md` (run as `/settings-gear`).
 
 - **The manual paste is the default route.** The migration tool times out or waits for a confirmation, so write short numbered files (`000_` owner check, `test_` rolled back, `001_` the change, `verify_` read-only) and let the owner paste them into the SQL editor in order. Ask for the verification output back before calling it done. _(Adventure, Supabase lessons 8; `02 Refs/Skills/supabase_link.md`)_
 - **Check paste files before the owner runs them.** The checker catches psql meta-commands, server file reads, unbalanced `$$` quotes, emails, secret keys, and a second run that would fail on a policy. Test the checker on planted bad files. _(`scripts/sql_paste_check.py`)_
-- **Set the track first.** Family play and studio design need different density, words, palettes and database owners. Deciding it at the start avoids rebuilding the screen later. _(`02 Refs/Skills/project_track.md`)_
+- **Set the track first.** Family play and studio design need different density, words, palettes and database owners. Deciding it at the start avoids rebuilding the screen later. _(`02 Refs/Workflow/project_track.md` and `family_project_track.md` / `architecture_project_track.md`)_
 - **Collapsible panels keep the screen clear.** Keep each header visible when collapsed, and remember the state per device. Test the toggle and the reload. _(project_track snippet, headless run 2026-11-04)_
 
 ## 3-D toy worlds (Athena's world V2)

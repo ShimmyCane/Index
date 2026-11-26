@@ -4,7 +4,7 @@ Reusable lessons distilled from the seed projects, so a new project can start fr
 
 ## UI for kids on iPad
 
-- **Two tracks, one set of defaults:** family play (simple, graphic, settings in ⚙️) and studio design (denser, formal, still collapsible). Set the track first; the track decides the screen density, the palette and the database. See `02 Refs/Skills/project_track.md`. _(Fishes, Expansion Wars, Make 3D, Shimmy Specs)_
+- **Two tracks, one set of defaults:** family play (simple, graphic, settings in ⚙️) and studio design (denser, formal, still collapsible). Set the track first; the track decides the screen density, the palette and the database. See `02 Refs/Workflow/project_track.md` (decision guide) and `family_project_track.md` / `architecture_project_track.md` (specific defaults). _(Fishes, Expansion Wars, Make 3D, Shimmy Specs)_
 - **Collapsible panels by default:** a header with an icon and name, a ▸/▾ marker, state remembered per device. _(Coins, project_track snippet)_
 - **One ⚙️ settings button everywhere:** lower-right gear, segmented options, opt-in errors at the bottom, database check. Build it from `02 Refs/Skills/settings_gear.md` (`/settings-gear`). _(Adventure, Felix Maze, Make 3D, Chinese Character Sudoku)_
 - **Layout and look:** follow `02 Refs/Skills/ipad_website.md` and `Personal Preferences/jimmy_preferences.md`: pastel colors, bold outlines, two-column play/reference layout, gear in the lower right, touch targets ≥ 48px.
@@ -152,7 +152,7 @@ Patterns that repeat often enough to become a template in `02 Refs/Templates/` o
 
 ## iPad UI Components Library (2026-11-25, consolidated)
 
-Shared patterns from settings_gear, game_controls, project_track, and feedback_notes:
+Shared patterns from settings_gear, game_controls, collapsible panels, and feedback_notes:
 
 **Settings Gear (⚙️ button)**
 - Lower-right corner, faded until hovered
@@ -186,7 +186,7 @@ Shared patterns from settings_gear, game_controls, project_track, and feedback_n
 - Never hide a panel; collapsed sections keep header visible
 - Code: HTML pattern + CSS variables + vanilla JS toggle
 - Uses in: all layout-heavy projects
-- Build from: `02 Refs/Skills/project_track.md` (working copy) → code snippets
+- Build from: `02 Refs/Workflow/project_track.md` (shared code snippets)
 
 **Next step: Extract shared component registry** (not yet done)
 - One HTML template library for the common UI elements
@@ -222,11 +222,11 @@ Two-part workflow: capture → process
 - Frequently-improved skills live in `04 AI/Skills/` as working copies, with stubs in `02 Refs/Skills/` that point to them.
 - Structure: `.claude/skills/<name>/SKILL.md` (wrapper) → `02 Refs/Skills/<name>.md` (stub) → `04 AI/Skills/<name>.md` (working copy).
 - Current working copies (7): smoke_test, summarize_code, game_controls, settings_gear, supabase_setup, access_requests, monthly_checkup.
-- Reference skills (maintained by Jimmy) stay in `02 Refs/` only: start_project, ipad_website, project_track, privacy_check, update_lessons_learned.
+- Reference skills (maintained by Jimmy) stay in `02 Refs/` only: start_project, ipad_website, privacy_check. Workflow guides stay in `02 Refs/Workflow/`: project_track, family_project_track, architecture_project_track.
 
 **Skill consolidation candidates:**
 - `update_lessons_learned` + `ai_consolidate` are almost identical (review, log, archive); could unify with two modes.
-- UI component patterns (settings_gear, game_controls, feedback_notes) + code from project_track → extract shared HTML/CSS/JS patterns into `04 AI/patterns.md` or a "iPad UI Kit" reference.
+- UI component patterns (settings_gear, game_controls, feedback_notes, collapsible panels) → extract shared HTML/CSS/JS patterns into `04 AI/patterns.md` or a "iPad UI Kit" reference (started in iPad UI Components Library section above).
 - `read_notes_and_update` (backend) + `feedback_notes` (UI) are complementary; link them in documentation.
 - Story workflow (consider_actions, update_story, gather_story_lessons_learned) is adventure-specific but pattern could apply to future narrative projects.
 

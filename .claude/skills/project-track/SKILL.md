@@ -1,12 +1,14 @@
 ---
 name: project-track
-description: "Classify a nursery project as family play (simple, graphic, settings hidden in ⚙️) or studio design (dense, formal, more options), set its defaults, and make every panel collapsible. Use when starting or reviewing a project, or when asked which track a project is on."
+description: "[DEPRECATED] Moved to Workflow. See 02 Refs/Workflow/project_track.md for decision guide, or family_project_track.md / architecture_project_track.md for specific track defaults."
 ---
 
-The source of truth for this skill is `02 Refs/Skills/project_track.md`, which Jimmy maintains by hand.
+**This skill is deprecated and no longer runs.**
 
-1. Read `02 Refs/Skills/project_track.md` in full.
-2. Follow it exactly, applying the conventions in the root `CLAUDE.md` and `04 AI/Personal Preferences/jimmy_preferences.md`.
-3. Arguments passed to this skill: $ARGUMENTS
+Project track guidance has moved to the Workflow folder for use in `02 Refs/Workflow/new project workflow.md`:
 
-Do not edit `02 Refs/Skills/project_track.md` unless Jimmy asks.
+- **Decision guide:** `02 Refs/Workflow/project_track.md` — choose Track A vs B, shared panel code
+- **Track A (Family play):** `02 Refs/Workflow/family_project_track.md` — UI defaults, palette, database, skills
+- **Track B (Studio design):** `02 Refs/Workflow/architecture_project_track.md` — UI defaults, palette, database, skills
+
+For history, see `02 Refs/Skills/deprecated/project_track.md`.
