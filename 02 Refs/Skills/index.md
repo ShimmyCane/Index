@@ -1,7 +1,8 @@
 Purpose
-- This folder will be skills that we work on together.
+- Source of truth for nursery skills. Each is wrapped in `.claude/skills/<name>/SKILL.md` and runs as `/name`.
+- Working copies of frequently-edited skills live in `04 AI/Skills/` and are edited there: `smoke_test`, `summarize_code`, `supabase_project`, `supabase_link`, `game_controls`, `settings_gear`, plus `access_requests`, `monthly_checkup`, `review_notes_and_update`.
 
-Skills:
+Active skills for nursery projects:
 - start_project: Initializes a new project by setting up project folders, creating a schematic, and building an MVP.
 - ipad_website: Guides the design of kid-friendly iPad web apps with light pastel colors, bold graphics, large touch targets, and minimal menus.
 - settings_gear: One consistent ⚙️ button and drawer for kids' iPad and web apps: lower-right gear, segmented options, opt-in errors at the bottom, database check, hidden in print. Used by start_project. *(working copy moved to `04 AI/Skills/settings_gear.md`, 2026-11-22)*
