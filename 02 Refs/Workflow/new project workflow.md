@@ -38,10 +38,12 @@ Record the plan in `schematic.md` and in `04 AI/<Project>/brief.md`.
 
 If the project is something the family or a user will play/interact with, plan feedback capture:
 
-- Read `02 Refs/Skills/feedback_notes.md`.
+- Read `02 Refs/Workflow/feedback_loop.md` (complete workflow: capture → process → consolidate).
 - Decide: device storage first, or database (for multi-device sync).
-- Add feedback notes box to ⚙️ in the first build.
+- Plan what items testers can tag notes to (levels, cards, screens).
+- Add feedback notes box to ⚙️ in the first build (using `/feedback-notes` skill).
 - Record in `schematic.md`.
+- After testing: use `/review-notes-and-update` to process notes into work.
 
 ## 5. Plan game controls (if it's a game)
 
