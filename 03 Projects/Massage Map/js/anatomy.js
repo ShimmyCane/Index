@@ -108,7 +108,7 @@
   var T444 = (window.MM_TRACED444 && window.MM_TRACED444.paths) || null;
   var SOLE_ITEMS = T444 ? [
     { layer: 0, type: 'path', d: T444.skin, evenodd: true, side: 'mid', en: 'Skin of the sole', cn: '足底皮肤', what: 'Thick skin of the sole, traced from the plate.' },
-    { layer: 2, type: 'path', d: T444.muscle, evenodd: true, side: 'mid', en: 'Plantar muscles (traced together)', cn: '足底肌群（合并描绘）', what: 'The muscles of the sole, traced from the plate: abductor hallucis, flexor digitorum brevis, quadratus plantae and abductor digiti minimi.' }
+    { layer: 2, type: 'path', d: T444['Plantar muscles (traced together)'], evenodd: true, side: 'mid', en: 'Plantar muscles (traced together)', cn: '足底肌群（合并描绘）', what: 'The muscles of the sole, traced from the plate as one group: quadratus plantae, flexor digitorum brevis, abductor hallucis and abductor digiti minimi.' }
   ].concat(FOOT_ITEMS.filter(function (i) { return i.layer >= 3; })) : FOOT_ITEMS;
   var REGION_DEFS = [
     { id: 'body', en: 'Whole body', cn: '全身', vb: '0 0 300 650', mirrorW: 300, items: ITEMS },

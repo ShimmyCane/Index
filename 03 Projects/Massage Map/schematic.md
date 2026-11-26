@@ -109,3 +109,10 @@ Not built yet:
 - Family sign-in and the `mm_thumbs` and `mm_notes` tables. Ratings stay on the device.
 - Sources for the EN techniques. Videos are not linked yet.
 - Verification of acupoint positions against the WHO standard. The positions are approximate and marked as such.
+
+## Family database: revision (2026-11-26)
+
+- Tables: `mm_members` (sign-in id to person, set by hand), `mm_flags` (each person's liked body structures, muscles, bones, tendons and nerves), `mm_ratings` (0 to 5 stars per technique), replacing the planned `mm_thumbs`. `mm_notes` is unchanged and not built.
+- SQL prepared in `supabase/` (test, migration, verify). Rehearsed locally; **not pasted** into the Family project. Rules and paste order: `supabase/001_mm_family.sql` header and `04 AI/Supabase/brief.md`.
+- Guests (not signed in) keep flags and stars on the device only, and the app says so. Signed-in members save their own flags and stars to the family database and read everyone's.
+- Not built yet: the sign-in block in ⚙️, the flag buttons on the body layers, and the movement and target-muscle film.
