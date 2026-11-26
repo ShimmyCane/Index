@@ -1,6 +1,6 @@
 # Shimmy Specs — Schematic
 
-**Status:** MVP built (framework; not yet device- or publish-tested). Haiku build from `mvp tasks.md`. See `mvp schematic.md` (it supersedes this file where they differ: desktop-first professional look, static MVP, Architecture Supabase, bracket options, flag levels).
+**Status:** MVP built, with accounts and cloud saving (`convo/convo v0.3.md`); not yet device-tested. On 2026-11-25 the engine tests (20) and cloud tests (16) pass. Haiku build from `mvp tasks.md`. See `mvp schematic.md` (it supersedes this file where they differ: desktop-first professional look, static MVP, Architecture Supabase, bracket options, flag levels).
 **Started:** 2026-10-28 with `/start-project`
 
 ## 1. Intent

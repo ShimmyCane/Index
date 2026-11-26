@@ -1,6 +1,6 @@
 ---
 name: ai-consolidate
-description: "Pause to consolidate project knowledge: refresh 04 AI/<Project>/brief.md, record lessons, mark superseded decisions, update the 04 AI schematic and task tracker. Use at the end of a round of work or when the user asks to consolidate."
+description: "Pause to consolidate project knowledge: refresh 04 AI/<Project>/brief.md, record lessons, mark superseded decisions, update the 04 AI schematic and task tracker, and compact loose files. Use at the end of a round of work or when the user asks to consolidate."
 argument-hint: "<project name>"
 ---
 

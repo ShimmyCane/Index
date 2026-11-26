@@ -1,33 +1,80 @@
-# Status
-Considerations still in progress. Need to confirm whether contents of this repo is just for creating webpages, or for larger hermes like process.
+# New Project Workflow
 
-# Purpose
-Map out how I'd like to work with you here with regards to various things. While I've been making a lot of websites, I'm hoping that there can be other opportunities for our interactions.
+After `/start-project` creates the folders and scaffold, follow this workflow to plan the project. Record everything in `convo/convo v0.1.md` as you go. Update `schematic.md` as decisions are made.
 
-# In general,
-- review the 02 Refs folder for relevant skills, templates, and workflows.
-- review the 04 AI folder for relevant past experiences. 
-- Ask clarifying questions and save answers inside `03 Projects/<Project>/convo/convo v#.#.md`. Do not compact file. Instead, we can create multiple versions. This will define the project context, track history, and help firm up requirements.
+## 1. Ask clarifying questions
 
-## When making a website...
-- Review the planning document, likely schematic.md within the project folder.
-- When you feel ready, prompt the user whether to proceed the MVP, with minimal testing.
-- Work with me to refine and make the site more robust, adding features methodically. Track with a todo.md log.
+Review `02 Refs/Workflow/` and `04 AI/` for relevant past projects. Ask Jimmy:
 
-## When doing an architectural project...
-- This is moved into the Proposal project itself.
-- Review contents of the planning document.
-- build out the template...
+- **Who will use this?** (the family, a child, a client, the design team)
+- **What is the core action?** (play a game, build a 3-D model, solve a puzzle, store data, review notes)
+- **Is there a data persistence need?** (device storage only, family database, client archive)
+- **Are there special interactions?** (gestures on iPad, keyboard for CAD, voice input, multiplayer)
 
-## When doing family things...
-- There is sensitive information here, proceed with caution (not to expose anything online easily), use git.ignore, qualify responses.
-- Review family background info.
-- When providing responses, always consider the following viewpoints:
-    - short, medium, and long term goals
-    - family stability
-    - personal growth
-    - try to work with the request as much as possible
-- You may start fresh as a scribe, but as you accumulate lessons learned, I expect you will pivot more into a mentor and then an elder in terms of guidance.
-- Append new facts into the family log.
+Record answers in the convo. If anything is unclear, ask a follow-up round.
 
+## 2. Choose the track
+
+Read `02 Refs/Workflow/project_track.md` (decision guide). Decide one:
+
+- **Track A. Family play** (games, activities): bold graphics, few words, main action centered, everything secondary in ⚙️, pastel palette
+  - Then read `02 Refs/Workflow/family_project_track.md` for UI defaults, palette, database, and skills
+- **Track B. Studio design** (architecture, 3-D, specs): dense information, full labels, keyboard/pointer, paper-and-ink palette
+  - Then read `02 Refs/Workflow/architecture_project_track.md` for UI defaults, palette, database, and skills
+
+If the project does both, pick the main user's track. Record the choice in `schematic.md` and the convo.
+
+## 3. Plan the database (if needed)
+
+If the project stores data beyond the device:
+
+- **Family projects (Track A):** link to Family Supabase project. Use `/supabase-setup` to design tables and policies and apply the migration. Reference: `supabase/001_zhbh_notes.sql` in the `ShimmyCane/Chinese-Character-Strokes` repo.
+- **Architecture projects (Track B):** link to Architecture Supabase project. Use `/supabase-setup`.
+- **No database:** storage stays on device only (localStorage, IndexedDB).
+
+Record the plan in `schematic.md` and in `04 AI/<Project>/brief.md`.
+
+## 4. Plan feedback notes (if page is interactive)
+
+If the project is something the family or a user will play/interact with, plan feedback capture:
+
+- Read `02 Refs/Skills/feedback_loop.md` (complete workflow: capture → process → consolidate).
+- Decide: device storage first, or database (for multi-device sync).
+- Plan what items testers can tag notes to (levels, cards, screens).
+- Add feedback notes box to ⚙️ in the first build (using `/feedback-notes`).
+- Record in `schematic.md`.
+- After testing: use `/review-notes-and-update` to process notes into work.
+
+## 5. Plan game controls (if it's a game)
+
+If the project has movement, steering, or aiming:
+
+- Read `04 AI/Skills/game_controls.md`.
+- Apply: drag relative to center (or joystick option), action buttons lower right, ⚙️ upper right and faded.
+- Record in `schematic.md`.
+
+## 6. Fill in the schematic
+
+Update `03 Projects/<Project>/schematic.md` with:
+
+- **Track:** A or B
+- **Purpose:** one sentence from the clarifying questions
+- **Status:** idea (now), MVP (after first working build), device-tested, in use, graduated
+- **Main pages:** what the user sees and does
+- **Database plan:** if any
+- **Feedback plan:** if any
+- **Controls plan:** if applicable
+- **Palette & defaults** (from track choice)
+- **Open questions:** anything still unclear
+
+## 7. Ready to build
+
+The project is ready when:
+
+- Clarifying questions are answered
+- Track is chosen
+- Database (if any) is planned
+- Schematic has the main pages and status set
+
+Start with the MVP: the minimum page that lets the user do the core action once. Leave everything else for later. Use `/ai-consolidate` after each build round to log lessons and update briefs.
 

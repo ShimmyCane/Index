@@ -1,7 +1,7 @@
 # Settings Gear (⚙️)
 
 Purpose
-One consistent ⚙️ button and drawer for every kids' iPad app and nursery web app. It holds the options, the opt-in error panel, the database check and any page links, so the main play area stays clean. Compiled from the ⚙️ work in Adventure, Felix Maze, Make 3D and Chinese Character Sudoku. Use it with `ipad_website.md` (layout and look) and `supabase_project.md` (database rules).
+One consistent ⚙️ button and drawer for every kids' iPad app and nursery web app. It holds the options, the opt-in error panel, the database check and any page links, so the main play area stays clean. Compiled from the ⚙️ work in Adventure, Felix Maze, Make 3D and Chinese Character Sudoku. Use it with `ipad_website.md` (layout and look) and `04 AI/Skills/supabase_setup.md` (database rules).
 
 When to use
 - Any app that has options, modes, or a secret or secondary control.
@@ -29,7 +29,7 @@ When to use
   1. **Quick description.** One or two plain sentences: what the thing is and how to use the panel. No header box.
   2. **Controls (toggles).** Everything that changes how the game is played or steered: the mode or game switch (hash routes such as `#v1`, `#v2`, remembered), the plane or character, difficulty, the camera view, the steering method, reload buttons with their hint, and "New …" to start again. Segmented buttons (see §3).
   3. **Other toggles.** Everything else that is switched or tuned, each as a nested group in this order where it applies: safety, display, sound (with its sliders), opponents, pages (links to the app's other pages, leaving out the current one), the **family database** (sign-in, check, sign out), and last **Show errors** (a checkbox).
-  4. **Notes.** The notes-for-improvement box (see `feedback_notes.md`), with its identifier index nested inside.
+  4. **Notes.** The notes-for-improvement box (see `02 Refs/Skills/feedback_loop.md`), with its identifier index nested inside.
   5. **Version.** The app's version, and the changelog if there is one.
   6. **Archived.** Links to earlier versions (for example V1), only when there are any.
   7. **About.** How it is built, the credits and the licence notes, last.
@@ -132,7 +132,7 @@ renderSettings();
 ## 7b. Notes for improvement (every page with a ⚙️)
 
 - A 📝 Notes for improvement group in the drawer: a text box, a Save button that attaches the current screen's identifiers, sort buttons (time, status, sub-project), status buttons (open, done, closed), an identifier index, and Copy all notes.
-- Notes are saved on the device first. They go to the family table `gen_notes` only when signed in (see `feedback_notes.md`, the general notes table).
+- Notes are saved on the device first. They go to the family table `gen_notes` only when signed in (see `02 Refs/Skills/feedback_loop.md`, the general notes table).
 - Identifiers are a short code per value (HP, TIME, ALT). Each project keeps its own list and writes the values at the time of the note.
 
 ## 8. Checks before calling it done

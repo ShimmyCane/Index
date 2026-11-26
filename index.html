@@ -4,424 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ShimmyCane</title>
-    <style>
-        :root {
-            --ink: #1f1d3a;
-            --muted: #6c6891;
-            --line: #ece6f7;
-        }
-
-        * { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            min-height: 100vh;
-            background: #fffdfa;
-            color: var(--ink);
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            line-height: 1.4;
-        }
-
-        .wrap {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 56px 16px 72px;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        h1 {
-            display: inline-block;
-            margin: 0;
-            font-size: clamp(2.4rem, 7vw, 3.8rem);
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            background: linear-gradient(100deg, #ff6b6b, #ffb02e 35%, #2ec4a0 65%, #3d8bff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        section + section { margin-top: 44px; }
-
-        h2 {
-            margin: 0 0 14px;
-            font-size: 0.85rem;
-            font-weight: 800;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-
-        .wall {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        /* Shared tile look. Each style below changes the layout and shapes. */
-        .wall a {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            padding: 10px;
-            background: var(--c);
-            color: var(--ink);
-            font-weight: 800;
-            text-align: center;
-            text-decoration: none;
-            transition: transform 0.2s ease, filter 0.2s ease;
-        }
-
-        .wall a:hover,
-        .wall a:focus-visible {
-            transform: scale(1.03);
-            filter: brightness(1.05);
-            outline: none;
-        }
-
-        /* ---------- Settings ---------- */
-        .gear {
-            position: fixed;
-            top: 16px;
-            right: 16px;
-            z-index: 10;
-            display: grid;
-            place-items: center;
-            width: 48px;
-            height: 48px;
-            border: none;
-            border-radius: 50%;
-            background: #fff;
-            color: var(--ink);
-            font-size: 1.5rem;
-            box-shadow: 0 4px 14px rgba(60, 40, 120, 0.2);
-            cursor: pointer;
-        }
-
-        .panel {
-            position: fixed;
-            top: 76px;
-            right: 16px;
-            z-index: 10;
-            display: grid;
-            gap: 8px;
-            width: min(280px, calc(100vw - 32px));
-            padding: 14px;
-            background: #fff;
-            border-radius: 18px;
-            box-shadow: 0 12px 32px rgba(60, 40, 120, 0.2);
-        }
-
-        .panel[hidden] { display: none; }
-
-        .panel h3 {
-            margin: 4px 6px 6px;
-            font-size: 0.8rem;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-
-        .panel button {
-            padding: 10px 12px;
-            border: 2px solid var(--line);
-            border-radius: 12px;
-            background: #fff;
-            color: var(--ink);
-            font: inherit;
-            font-weight: 700;
-            text-align: left;
-            cursor: pointer;
-        }
-
-        .panel button[aria-pressed="true"] {
-            border-color: var(--ink);
-            background: #f3f0ff;
-        }
-
-        .panel a.panel-link {
-            display: block;
-            padding: 10px 12px;
-            border: 2px solid var(--line);
-            border-radius: 12px;
-            background: #fff;
-            color: var(--ink);
-            font-weight: 700;
-            text-decoration: none;
-        }
-
-        /* ---------- 1. Geometric Shapes (default): masonry of cut shapes ---------- */
-        [data-style="geometric"] .wall {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-auto-rows: 84px;
-            grid-auto-flow: dense;
-            gap: 12px; /* the mortar */
-        }
-
-        [data-style="geometric"] .wall a {
-            clip-path: var(--poly, polygon(0 0, 100% 0, 100% 100%, 0 100%));
-            font-size: 1.05rem;
-        }
-
-        [data-style="geometric"] .w2 { grid-column: span 2; }
-        [data-style="geometric"] .h2 { grid-row: span 2; }
-        [data-style="geometric"] .h3 { grid-row: span 3; }
-        [data-style="geometric"] .w4 { grid-column: 1 / -1; }
-
-        [data-style="geometric"] a.tri   { --poly: polygon(50% 0, 100% 100%, 0 100%); }
-        [data-style="geometric"] a.hex   { --poly: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); }
-        [data-style="geometric"] a.pent  { --poly: polygon(50% 0, 100% 38%, 82% 100%, 18% 100%, 0 38%); }
-        [data-style="geometric"] a.para  { --poly: polygon(15% 0, 100% 0, 85% 100%, 0 100%); }
-        [data-style="geometric"] a.chev  { --poly: polygon(0 0, 82% 0, 100% 50%, 82% 100%, 0 100%, 18% 50%); }
-        [data-style="geometric"] a.dia   { --poly: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
-        [data-style="geometric"] a.notch { --poly: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%); }
-
-        /* Bauhaus blocks tile: primary blocks on a cream field, no black. */
-        .wall a.bauhaus {
-            position: relative;
-            overflow: hidden;
-            background: #f3ecdc;
-        }
-        .wall a.bauhaus::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background:
-                linear-gradient(#e63b2e, #e63b2e) 0 100% / 34% 52% no-repeat,
-                linear-gradient(#2456a6, #2456a6) 100% 0 / 20% 78% no-repeat,
-                linear-gradient(#f2c230, #f2c230) 62% 100% / 30% 26% no-repeat,
-                linear-gradient(#4d7a4a, #4d7a4a) 36% 0 / 12% 20% no-repeat;
-        }
-        .wall a.bauhaus span {
-            position: relative;
-            background: #f3ecdc;
-            padding: 0.2em 0.5em;
-            border-radius: 6px;
-        }
-
-        @media (max-width: 560px) {
-            [data-style="geometric"] .wall {
-                grid-template-columns: repeat(2, 1fr);
-                grid-auto-rows: 72px;
-            }
-            [data-style="geometric"] .wall a { font-size: 0.95rem; }
-        }
-
-        /* ---------- 2. Paper Stickers ---------- */
-        body[data-style="sticker"] {
-            background: #fff4e6 radial-gradient(#f1d9bd 1.2px, transparent 1.2px) 0 0 / 18px 18px;
-        }
-
-        [data-style="sticker"] .wall {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 26px 28px;
-        }
-
-        [data-style="sticker"] .wall a {
-            padding: 16px 22px;
-            background: #fff;
-            border: 3px solid var(--c);
-            border-radius: 18px;
-            box-shadow: 6px 6px 0 var(--c);
-            transform: rotate(var(--r, 0deg));
-        }
-
-        [data-style="sticker"] .wall li:nth-child(odd) a  { --r: -3deg; }
-        [data-style="sticker"] .wall li:nth-child(even) a { --r: 2.5deg; }
-
-        [data-style="sticker"] .wall a:hover,
-        [data-style="sticker"] .wall a:focus-visible {
-            transform: rotate(0) scale(1.06);
-        }
-
-        /* ---------- 3. Bauhaus Blocks ---------- */
-        body[data-style="bauhaus"] { background: #f5f0e6; }
-
-        [data-style="bauhaus"] h1 {
-            background: none;
-            color: #111;
-            -webkit-text-fill-color: #111;
-            text-transform: uppercase;
-            font-weight: 900;
-        }
-
-        [data-style="bauhaus"] h2 {
-            color: #111;
-            font-size: 1.4rem;
-            font-weight: 900;
-            letter-spacing: 0;
-        }
-
-        [data-style="bauhaus"] .wall {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            padding: 6px;
-            background: #111;
-        }
-
-        [data-style="bauhaus"] .wall a {
-            min-height: 150px;
-            color: #111;
-            font-size: 1.15rem;
-            font-weight: 900;
-            text-transform: uppercase;
-        }
-
-        [data-style="bauhaus"] .wall li:nth-child(3n + 2) a { border-radius: 50%; }
-        [data-style="bauhaus"] .wall li:nth-child(3n) a     { border-radius: 999px 999px 0 0; }
-
-        /* ---------- 4. Postage Stamps ---------- */
-        body[data-style="stamps"] {
-            background: #e9f4f0 radial-gradient(circle at 1px 1px, #cfe6dd 1px, transparent 0) 0 0 / 22px 22px;
-        }
-
-        [data-style="stamps"] .wall {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 28px 30px;
-        }
-
-        [data-style="stamps"] .wall a {
-            position: relative;
-            min-width: 170px;
-            min-height: 120px;
-            padding: 18px;
-            border: 10px solid #fffdf6; /* the stamp's white margin */
-            border-radius: 4px;
-            background: var(--c);
-            box-shadow: 0 0 0 2px #e4dccb, 5px 7px 0 rgba(31, 29, 58, 0.12);
-            font-size: 1.05rem;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            transform: rotate(var(--r, 0deg));
-        }
-
-        /* Postmark stamped across the top-right corner */
-        [data-style="stamps"] .wall a::after {
-            content: "";
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            width: 46px;
-            height: 46px;
-            border: 3px double rgba(31, 29, 58, 0.4);
-            border-radius: 50%;
-            transform: rotate(14deg);
-        }
-
-        [data-style="stamps"] .wall li:nth-child(odd) a  { --r: -2.5deg; }
-        [data-style="stamps"] .wall li:nth-child(even) a { --r: 2deg; }
-
-        [data-style="stamps"] .wall a:hover,
-        [data-style="stamps"] .wall a:focus-visible {
-            transform: rotate(0) scale(1.05);
-        }
-
-        /* ---------- 5. Pixel Blocks ---------- */
-        body[data-style="pixel"] {
-            background: #eef3ff linear-gradient(rgba(61, 139, 255, 0.07) 1px, transparent 1px) 0 0 / 100% 16px;
-        }
-
-        [data-style="pixel"] h2 {
-            font-family: ui-monospace, Menlo, Consolas, monospace;
-        }
-
-        [data-style="pixel"] .wall {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 8px;
-        }
-
-        /* Stepped corners, like a pixel-art sprite */
-        [data-style="pixel"] .wall a {
-            min-height: 120px;
-            font-family: ui-monospace, Menlo, Consolas, monospace;
-            font-size: 1rem;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            clip-path: polygon(
-                8px 0, calc(100% - 8px) 0, calc(100% - 8px) 8px, 100% 8px,
-                100% calc(100% - 8px), calc(100% - 8px) calc(100% - 8px),
-                calc(100% - 8px) 100%, 8px 100%, 8px calc(100% - 8px),
-                0 calc(100% - 8px), 0 8px, 8px 8px
-            );
-            box-shadow: inset 0 -8px 0 rgba(0, 0, 0, 0.18);
-        }
-
-        [data-style="pixel"] .wall a:hover,
-        [data-style="pixel"] .wall a:focus-visible {
-            transform: translate(-3px, -3px);
-            filter: none;
-        }
-
-        /* ---------- 6. Polygonal Masonry: tight, irregular stones like Inca walls ---------- */
-        body[data-style="polygonal"] { background: #fffdf6; }
-
-        [data-style="polygonal"] .wall {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            grid-auto-rows: 58px;
-            grid-auto-flow: dense;
-            gap: 3px; /* the thin joints between stones */
-        }
-
-        [data-style="polygonal"] .wall li[data-size="3x2"] { grid-column: span 3; grid-row: span 2; }
-        [data-style="polygonal"] .wall li[data-size="3x1"] { grid-column: span 3; }
-        [data-style="polygonal"] .wall li[data-size="6x2"] { grid-column: 1 / -1; grid-row: span 2; }
-        [data-style="polygonal"] .wall li[data-size="6x1"] { grid-column: 1 / -1; }
-
-        [data-style="polygonal"] .wall a {
-            clip-path: var(--stone);
-            padding: 8px;
-            font-size: 0.8rem;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-        }
-
-        /* Four irregular stone outlines, cycled so neighbors never match */
-        [data-style="polygonal"] .wall li:nth-child(4n + 1) a {
-            --stone: polygon(4% 0, 64% 7%, 100% 0, 97% 52%, 100% 100%, 36% 93%, 0 100%, 6% 48%);
-        }
-        [data-style="polygonal"] .wall li:nth-child(4n + 2) a {
-            --stone: polygon(0 14%, 28% 0, 72% 9%, 100% 0, 91% 56%, 100% 100%, 47% 90%, 9% 100%, 3% 58%);
-        }
-        [data-style="polygonal"] .wall li:nth-child(4n + 3) a {
-            --stone: polygon(12% 0, 88% 4%, 100% 40%, 82% 100%, 18% 95%, 0 58%);
-        }
-        [data-style="polygonal"] .wall li:nth-child(4n) a {
-            --stone: polygon(0 6%, 46% 0, 100% 12%, 93% 68%, 100% 100%, 54% 86%, 7% 100%, 2% 44%);
-        }
-
-        /* Phones keep the six-column course; names wrap onto two lines to stay dense. */
-        @media (max-width: 560px) {
-            [data-style="polygonal"] .wall { grid-auto-rows: 46px; gap: 2px; }
-            [data-style="polygonal"] .wall a {
-                padding: 4px;
-                font-size: 0.68rem;
-                line-height: 1.15;
-                letter-spacing: 0.02em;
-            }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .wall a { transition: none; }
-        }
-
-        @media (max-width: 560px) {
-            .wrap { padding-top: 40px; }
-            [data-style="bauhaus"] .wall { grid-template-columns: repeat(2, 1fr); }
-        }
-    </style>
+    <link rel="stylesheet" href="03%20Projects/Index/css/index.css">
 </head>
 <body data-style="geometric">
     <button class="gear" id="gear" aria-label="Settings" aria-expanded="false" aria-controls="panel">&#9881;</button>
@@ -458,10 +41,11 @@
                 <li class="w2" data-size="3x1"><a class="chev" style="--c:#ffb347" href="https://shimmycane.github.io/Bar-Glide/">Ole Bar Glide</a></li>
                 <li class="w2" data-size="3x1"><a class="pent" style="--c:#ff6b6b" href="https://shimmycane.github.io/Adventure/">Adventure</a></li>
                 <li class="w2" data-size="3x1"><a class="hex" style="--c:#8a7cf0" href="https://shimmycane.github.io/Felix-Gear-Wars/">Felix Gear Wars</a></li>
-                <li class="w2" data-size="3x1"><a class="tri" style="--c:#ff9e8a" href="https://shimmycane.github.io/Paper-Airplanes-x-A-10-Warthog/">Paper Airplanes x A-10 Warthog</a></li>
-                <li class="w4" data-size="6x2"><a class="hex" style="--c:#ff4fa3" href="https://shimmycane.github.io/StoryTime/">StoryTime</a></li>
+                <li class="w2" data-size="3x1"><a class="tri" style="--c:#ff9e8a" href="https://shimmycane.github.io/Paper-Airplanes-x-A-10-Warthog/">A-10 Warthog</a></li>
                 <li class="w2" data-size="3x1"><a class="dia" style="--c:#8fe0bd" href="https://shimmycane.github.io/Rhythm-Sticks/">Rhythm Sticks</a></li>
-                <li class="w2" data-size="3x1"><a class="hex" style="--c:#a9d6f5" href="https://shimmycane.github.io/Generate-Clouds/">Generate Clouds</a></li>
+                <li class="w2" data-size="3x1"><a class="dia" style="--c:#ffb5a3" href="https://shimmycane.github.io/Athena-s-Piano-Companion/">Athena's Piano Companion</a></li>
+                <li class="w2" data-size="3x1"><a class="tri" style="--c:#ffd0b5" href="https://shimmycane.github.io/Felix-Stickers/">Felix Stickers</a></li>
+                <li class="w2" data-size="3x1"><a class="chev" style="--c:#b8e0c8" href="https://shimmycane.github.io/Felix-Continents/">Felix Continents</a></li>
             </ul>
         </section>
 
@@ -481,7 +65,10 @@
                 <li class="w2" data-size="3x1"><a class="pent" style="--c:#8fe0bd" href="https://shimmycane.github.io/Learning-to-Draw/">Learning to Draw</a></li>
                 <li class="w2" data-size="3x1"><a class="dia" style="--c:#ffb02e" href="https://shimmycane.github.io/Learning-Kangaroo/">Learning Kangaroo</a></li>
                 <li class="w2" data-size="3x1"><a class="hex" style="--c:#c9a7ff" href="https://shimmycane.github.io/Chinese-Character-Strokes/">Chinese Character Strokes</a></li>
-               
+                <li class="w2" data-size="3x1"><a class="hex" style="--c:#a9d6f5" href="https://shimmycane.github.io/Generate-Clouds/">Generate Clouds</a></li>
+                <li class="w4" data-size="6x2"><a class="hex" style="--c:#ff4fa3" href="https://shimmycane.github.io/StoryTime/">StoryTime</a></li>
+                <li class="w2 h2" data-size="3x2"><a class="hex" style="--c:#7bd389" href="https://shimmycane.github.io/Growth/">Growth</a></li>
+                <li class="w2" data-size="3x1"><a class="chev" style="--c:#b9a6e8" href="https://shimmycane.github.io/Mind-Palace/">Mind Palace</a></li>
             </ul>
         </section>
 
@@ -504,12 +91,12 @@
                 <li class="w2" data-size="3x1"><a class="chev" style="--c:#2ec4a0" href="https://shimmycane.github.io/Quick-Detail/">Quick Detail</a></li>
                 <li class="w2" data-size="3x1"><a class="para" style="--c:#ffb02e" href="https://shimmycane.github.io/Proposal_Drafter/">Proposal Drafter</a></li>
                 <li class="w2" data-size="3x1"><a class="tri" style="--c:#8a7cf0" href="03%20Projects/Shimmy%20Specs/">Shimmy Specs</a></li>
-                <li class="w2 h2" data-size="3x2"><a class="hex" style="--c:#7bd389" href="https://shimmycane.github.io/Growth/">Growth</a></li>
-                <li class="w2" data-size="3x1"><a class="chev" style="--c:#d9d2bd" href="https://shimmycane.github.io/QC-keynotes/">QC keynotes</a></li>
                 <li class="h2" data-size="3x2"><a class="tri" style="--c:#3d8bff" href="https://shimmycane.github.io/Make-3D/">Make 3D</a></li>
                 <li class="w2" data-size="3x1"><a class="dia" style="--c:#ff9e8a" href="https://shimmycane.github.io/Increment-Viewer/">Increment Viewer</a></li>
                 <li class="w2" data-size="3x1"><a class="notch" style="--c:#9fd3e6" href="https://shimmycane.github.io/Critique-Detail/">Critique Detail</a></li>
                 <li class="w2" data-size="3x1"><a class="chev" style="--c:#f5a3c7" href="https://shimmycane.github.io/Map-Photos/">Map Photos</a></li>
+                <li class="w2" data-size="3x1"><a class="tri" style="--c:#8fd1c4" href="https://shimmycane.github.io/Make-3D-x-Construct/">Make 3D x Construct</a></li>
+                <li class="w2" data-size="3x1"><a class="tri" href="https://shimmycane.github.io/QC-keynotes/"><span>QC keynotes</span></a></li>
             </ul>
         </section>
 
@@ -517,139 +104,20 @@
             <h2>Nursery</h2>
             <ul class="wall" id="nursery-wall">
                 <li class="w2" data-size="3x1" data-track="drafting"><a class="hex" style="--c:#d9d2bd" href="03%20Projects/Drafting/">Drafting</a></li>
-                <li class="w2" data-size="3x1" data-track="make-3d-x-construct"><a class="tri" style="--c:#8fd1c4" href="03%20Projects/Make-3D%20x%20Construct/">Make 3D x Construct</a></li>
-                <li class="w2" data-size="3x1" data-track="mind-palace"><a class="chev" style="--c:#b9a6e8" href="03%20Projects/Mind%20Palace/">Mind Palace</a></li>
                 <li class="w2" data-size="3x1" data-track="salmon-leap"><a class="hex" style="--c:#7fb8e0" href="03%20Projects/Salmon%20Leap/">Salmon Leap</a></li>
-                <li class="w2" data-size="3x1" data-track="athenas-piano-companion"><a class="dia" style="--c:#ffb5a3" href="03%20Projects/Athena%27s%20Piano%20Companion/">Athena's Piano Companion</a></li>
-                <li class="w2" data-size="3x1" data-track="felix-stickers"><a class="tri" style="--c:#ffd0b5" href="03%20Projects/Felix%20Stickers/">Felix Stickers</a></li>
-                <li class="w2" data-size="3x1" data-track="felix-continents"><a class="chev" style="--c:#b8e0c8" href="03%20Projects/Felix%20Continents/">Felix Continents</a></li>
                 <li class="w2" data-size="3x1" data-track="massage-map"><a class="hex" style="--c:#bfe3c8" href="03%20Projects/Massage%20Map/">Massage Map</a></li>
                 <li class="w2" data-size="3x1" data-track="cheetah-simulator"><a class="notch" style="--c:#cfe5d2" href="03%20Projects/Cheetah%20Simulator/">Cheetah Simulator</a></li>
             </ul>
         </section>
     </main>
 
-    <script>
-        (function () {
-            var body = document.body;
-            var gear = document.getElementById('gear');
-            var panel = document.getElementById('panel');
-            var options = panel.querySelectorAll('button[data-style]');
-            var KEY = 'index-style';
-
-            function setStyle(name) {
-                body.setAttribute('data-style', name);
-                options.forEach(function (b) {
-                    b.setAttribute('aria-pressed', String(b.getAttribute('data-style') === name));
-                });
-                try { localStorage.setItem(KEY, name); } catch (e) { /* storage blocked */ }
-            }
-
-            function togglePanel(open) {
-                panel.hidden = !open;
-                gear.setAttribute('aria-expanded', String(open));
-            }
-
-            var saved = null;
-            try { saved = localStorage.getItem(KEY); } catch (e) { /* storage blocked */ }
-            setStyle(saved && panel.querySelector('[data-style="' + saved + '"]') ? saved : 'geometric');
-
-            gear.addEventListener('click', function () { togglePanel(panel.hidden); });
-            options.forEach(function (b) {
-                b.addEventListener('click', function () { setStyle(b.getAttribute('data-style')); });
-            });
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') togglePanel(false);
-            });
-        })();
-
-        (function () {
-            var TRACK_KEY = 'nursery-clicks';
-            var SHAPES = ['hex', 'tri', 'chev', 'dia', 'pent', 'notch', 'para'];
-            var SIZES = ['w2 h2', 'w2', ''];
-            var REORDER_KEY = 'nursery-reorder';
-            var nurseryWall = document.getElementById('nursery-wall');
-            if (!nurseryWall) return;
-
-            // Remember the original order and sizes so turning reorder off can restore them.
-            var originals = Array.from(nurseryWall.querySelectorAll('li[data-track]')).map(function (li) {
-                return { li: li, cls: li.getAttribute('class') };
-            });
-            var toggle = document.getElementById('reorder-toggle');
-
-            function getReorderOn() {
-                try { return localStorage.getItem(REORDER_KEY) !== 'off'; } catch (e) { return true; }
-            }
-
-            function setReorderOn(on) {
-                try { localStorage.setItem(REORDER_KEY, on ? 'on' : 'off'); } catch (e) { /* storage blocked */ }
-            }
-
-            function restoreNursery() {
-                originals.forEach(function (o) {
-                    if (o.cls === null) o.li.removeAttribute('class');
-                    else o.li.setAttribute('class', o.cls);
-                    nurseryWall.appendChild(o.li);
-                });
-            }
-
-            function getClicks(trackId) {
-                try {
-                    var data = JSON.parse(localStorage.getItem(TRACK_KEY) || '{}');
-                    return data[trackId] || 0;
-                } catch (e) { return 0; }
-            }
-
-            function incrementClick(trackId) {
-                try {
-                    var data = JSON.parse(localStorage.getItem(TRACK_KEY) || '{}');
-                    data[trackId] = (data[trackId] || 0) + 1;
-                    localStorage.setItem(TRACK_KEY, JSON.stringify(data));
-                } catch (e) { /* storage blocked */ }
-            }
-
-            function reorganizeNursery() {
-                var items = Array.from(nurseryWall.querySelectorAll('li[data-track]'));
-                items.sort(function (a, b) {
-                    return getClicks(b.getAttribute('data-track')) - getClicks(a.getAttribute('data-track'));
-                });
-
-                items.forEach(function (item, index) {
-                    var oldClasses = item.getAttribute('class') || '';
-                    var newClass = SIZES[Math.min(index, SIZES.length - 1)];
-                    if (newClass) {
-                        item.setAttribute('class', newClass + ' ' + (oldClasses.match(/data-\w+/) ? oldClasses.match(/data-\w+/)[0] : ''));
-                    }
-                    nurseryWall.appendChild(item);
-                });
-            }
-
-            function applyReorder(on) {
-                toggle.setAttribute('aria-pressed', String(on));
-                toggle.textContent = 'Reorder & favourites: ' + (on ? 'on' : 'off');
-                if (on) reorganizeNursery();
-                else restoreNursery();
-            }
-
-            nurseryWall.addEventListener('click', function (e) {
-                var link = e.target.closest('a[href]');
-                if (link && getReorderOn()) {
-                    var li = link.closest('li[data-track]');
-                    if (li) {
-                        incrementClick(li.getAttribute('data-track'));
-                        setTimeout(reorganizeNursery, 100);
-                    }
-                }
-            });
-
-            toggle.addEventListener('click', function () {
-                var on = !getReorderOn();
-                setReorderOn(on);
-                applyReorder(on);
-            });
-
-            applyReorder(getReorderOn());
-        })();
-    </script>
+    <script src="03%20Projects/Index/js/style-switcher.js"></script>
+    <script src="03%20Projects/Index/js/nursery-order.js"></script>
+    <script src="03%20Projects/Index/js/arrange.js"></script>
+    <script src="03%20Projects/Index/js/masonry.js"></script>
+    <script src="03%20Projects/Index/js/bauhaus.js"></script>
+    <script src="03%20Projects/Index/js/tile-colors.js"></script>
+    <script src="03%20Projects/Index/js/bauhaus-edit.js"></script>
+    <script src="03%20Projects/Index/js/favorites.js"></script>
 </body>
 </html>

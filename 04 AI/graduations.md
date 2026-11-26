@@ -38,6 +38,19 @@ Nine projects had already been copied out and linked from the home page by hand,
 | Rhythm Sticks | `ShimmyCane/Rhythm-Sticks` | Pages link |
 | 中文笔画 | `ShimmyCane/Chinese-Character-Strokes` | Pages link |
 
+## Left the nursery 2026-11-25
+
+Nursery folders removed in commit 8bdee36. Each Pages site answered 200 on 2026-11-25. The checklist steps were not recorded or re-checked.
+
+| Project | Repo | Home page | Still open |
+|---|---|---|---|
+| Athena's Piano Companion | `ShimmyCane/Athena-s-Piano-Companion` | Games, Pages link | records |
+| Felix Continents | `ShimmyCane/Felix-Continents` | Games, Pages link | LICENSE check, records |
+| Felix Stickers | `ShimmyCane/Felix-Stickers` | Games, Pages link | records |
+| Make-3D x Construct | `ShimmyCane/Make-3D-x-Construct` | Architecture, Pages link | records |
+| Mind Palace | `ShimmyCane/Mind-Palace` | Learning, Pages link | records |
+| QC keynotes | `ShimmyCane/QC-keynotes` | Architecture, Pages link | records |
+
 ## Next graduations
 
 (Add a checklist section here when `/graduate-project` starts one.)

@@ -38,7 +38,7 @@ Gear (⚙️, lower right): speed, autoplay on or off, heat on or off, show erro
 
 ## Family data (planned, not built)
 
-Family project database, with the prefix `mm_` (to confirm). Family login from ⚙️ follows `02 Refs/Skills/supabase_link.md` and the 中文笔画 pattern. Publishable key only.
+Family project database, with the prefix `mm_` (to confirm). Family login from ⚙️ follows `04 AI/Skills/supabase_setup.md` and the 中文笔画 pattern. Publishable key only.
 
 | Table | Columns (plan) |
 |---|---|
@@ -53,7 +53,7 @@ Rules:
 
 ## Feedback notes
 
-Built with the first build (`02 Refs/Skills/feedback_notes.md`). A notes box in ⚙️ labelled "Notes for improvement". Each note saved with the screen or technique it is about, and the time. Stored on the device first; sent to `mm_notes` only when signed in.
+Built with the first build (`02 Refs/Skills/feedback_loop.md`). A notes box in ⚙️ labelled "Notes for improvement". Each note saved with the screen or technique it is about, and the time. Stored on the device first; sent to `mm_notes` only when signed in.
 
 ## Track A defaults
 
@@ -66,7 +66,7 @@ Built with the first build (`02 Refs/Skills/feedback_notes.md`). A notes box in 
 | Palette | pastel and the family look (ink, paper, sun) |
 | Database | Family project, family sign-in |
 | Private data | none planned. Photos of family, if ever added, go in `private/` |
-| Skills | `ipad_website`, `settings_gear`, `feedback_notes`, `smoke_test`, `supabase_link` |
+| Skills | `ipad_website`, `settings_gear`, `feedback_notes`, `smoke_test`, `supabase_setup` |
 
 ## Build plan (after questions are answered)
 

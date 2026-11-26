@@ -1,11 +1,9 @@
 ---
 name: update-lessons-learned
-description: "Log lessons learned from the current conversation into 04 AI/<Project>/lessons.md, global preferences into 04 AI/Personal Preferences/jimmy_preferences.md, tool lessons into 04 AI/Tools/, and cross-project patterns into 04 AI/patterns.md."
+description: "[DEPRECATED] Covered by ai-consolidate step 5. Use /ai-consolidate instead."
+disable-model-invocation: true
 ---
 
-The source of truth for this skill is `02 Refs/Skills/update_lessons_learned.md`, which Jimmy maintains by hand.
+This skill is deprecated and does not run. Covered by ai-consolidate step 5.
 
-1. Read `02 Refs/Skills/update_lessons_learned.md` in full.
-2. Follow it exactly, applying the conventions in the root `CLAUDE.md`.
-
-Do not edit `02 Refs/Skills/update_lessons_learned.md` unless Jimmy asks.
+Use /ai-consolidate. History: `02 Refs/Skills/deprecated/index.md`.

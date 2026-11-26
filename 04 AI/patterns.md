@@ -4,7 +4,7 @@ Reusable lessons distilled from the seed projects, so a new project can start fr
 
 ## UI for kids on iPad
 
-- **Two tracks, one set of defaults:** family play (simple, graphic, settings in ⚙️) and studio design (denser, formal, still collapsible). Set the track first; the track decides the screen density, the palette and the database. See `02 Refs/Skills/project_track.md`. _(Fishes, Expansion Wars, Make 3D, Shimmy Specs)_
+- **Two tracks, one set of defaults:** family play (simple, graphic, settings in ⚙️) and studio design (denser, formal, still collapsible). Set the track first; the track decides the screen density, the palette and the database. See `02 Refs/Workflow/project_track.md` (decision guide) and `family_project_track.md` / `architecture_project_track.md` (specific defaults). _(Fishes, Expansion Wars, Make 3D, Shimmy Specs)_
 - **Collapsible panels by default:** a header with an icon and name, a ▸/▾ marker, state remembered per device. _(Coins, project_track snippet)_
 - **One ⚙️ settings button everywhere:** lower-right gear, segmented options, opt-in errors at the bottom, database check. Build it from `02 Refs/Skills/settings_gear.md` (`/settings-gear`). _(Adventure, Felix Maze, Make 3D, Chinese Character Sudoku)_
 - **Layout and look:** follow `02 Refs/Skills/ipad_website.md` and `Personal Preferences/jimmy_preferences.md`: pastel colors, bold outlines, two-column play/reference layout, gear in the lower right, touch targets ≥ 48px.
@@ -149,3 +149,29 @@ Patterns that repeat often enough to become a template in `02 Refs/Templates/` o
 ## Headless GIF of a motion (2026-11-25)
 - Play a drag in fixed steps in headless Chromium, save a PNG per frame, and build a GIF with Pillow. Tools: `02 Refs/Skills/scripts/anim_capture.js` and `frames_to_gif.py`; skill `/anim-gif`.
 - Serve pages over http for pixel tests: file:// canvases are tainted.
+
+## Shared UI parts (compacted 2026-11-25)
+
+Build from the one source for each; don't copy its rules here.
+
+| Part | Source |
+|---|---|
+| ⚙️ settings button and drawer | `04 AI/Skills/settings_gear.md` |
+| Game controls (including when the gear moves and fades) | `04 AI/Skills/game_controls.md` |
+| Collapsible panels | `02 Refs/Workflow/project_track.md` |
+| Feedback notes: capture and processing | `02 Refs/Skills/feedback_loop.md` |
+
+Not done: one shared template library for these parts (candidate).
+
+## Keeping skills tidy (2026-11-25)
+
+- One source per skill. A wrapper points to it; a stub is only for the eight working copies in `04 AI/Skills/`.
+- Merge two skills that cover one job into one file with sections, and keep the old command names as entry points (feedback loop).
+- Retire: move to `02 Refs/Skills/deprecated/`, add a row to its `index.md`, then fix the wrapper and references.
+- _Superseded:_ `consolidate_knowledge` (the earlier merge of `ai_consolidate` and `update_lessons_learned`). Jimmy brought `ai_consolidate` back on 2026-11-25.
+
+## Rearrangeable tiles with a saved layout (2026-11-25)
+
+- An Edit button turns links into pieces; Done turns them back. Undo and Start over sit beside it.
+- Save the whole group on any change, so moving one piece never shuffles the rest. Keep x and width as shares of the container, keep one layout per screen-size class, and key pieces by their link.
+- Source: home page Bauhaus Blocks (`03 Projects/Index/js/bauhaus-edit.js`).

@@ -4,7 +4,7 @@ Color scheme - light pastel
 Graphics - simple, but not too wireframe like. Use bold lines, graphically make it interesting
 Focus - minimize menus, settings, texts. Keep main item accessible. 
 Use - ipad.
-Settings - a gear on the lower right button that allows further extensions.
+Settings - a gear on the lower right button that allows further extensions. (One exception: in a game with action buttons, the gear moves to the upper right and fades. See `04 AI/Skills/game_controls.md`.)
 
 Layout (side by side where space allows - laptops and iPads in landscape):
 - Two columns, each scrolling independently; the page itself does not scroll (app fills the viewport height). They don't have to be evenly sized.

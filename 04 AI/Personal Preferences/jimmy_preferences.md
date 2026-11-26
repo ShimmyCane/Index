@@ -10,9 +10,9 @@
 * **Color Palette**: Light pastel color schemes (e.g. soft vanilla, sage, peach, mint, coral). Avoid harsh high-contrast black/white or neon tones unless specifically asked.
 * **Graphics & Styling**: Simple, bold lines (2.5px – 3.5px solid dark borders) with tactile depth (`box-shadow: 0 4px 0 ...`). Avoid stark wireframes; make it graphically rich, cute, and engaging.
 * **Focus & Simplicity**: Minimize text, nested menus, and clutter. Keep the primary activity / game board front and center.
-* **Settings & Extensions Anchor**: Place a dedicated **floating gear button (`⚙️`) in the lower-right corner** that opens a clean drawer or modal for options and extensions. Full build rules: `02 Refs/Skills/settings_gear.md`.
+* **Settings & Extensions Anchor**: Place a dedicated **floating gear button (`⚙️`) in the lower-right corner** that opens a clean drawer or modal for options and extensions. Full build rules: `04 AI/Skills/settings_gear.md`.
 * **Errors at the bottom**: Error messages should appear at the bottom of the page (not as top banners), behind a "Show errors" toggle in the gear panel. Never force errors on screen — users should opt in.
-* **Two tracks** (`02 Refs/Skills/project_track.md`): **A. Family play** is simple, graphic and short on words, with everything secondary in ⚙️. **B. Studio design** (architecture, 3-D, specifications) is denser and more formal, with more options and words, still in orderly panels.
+* **Two tracks** (`02 Refs/Workflow/project_track.md`): **A. Family play** is simple, graphic and short on words, with everything secondary in ⚙️. **B. Studio design** (architecture, 3-D, specifications) is denser and more formal, with more options and words, still in orderly panels.
 * **Collapsible by default**: every panel has a header with an icon and a name, and a ▸/▾ marker. Collapsing keeps the header visible, so the screen stays graphically clear. Track A starts closed on a small screen.
 * **Large Buttons**: Generous touch targets suited for tablet fingers (minimum 48px to 68px heights).
 * **Layout details** (two-column play/reference layout, decluttering into settings, no layout jumps): see `02 Refs/Skills/ipad_website.md`.
@@ -60,10 +60,11 @@
     1. A graphical system architecture overview.
     2. A line-by-line Table of Contents with functional descriptions.
     3. A comprehensive reference table of adjacent variables (CSS & JS) explaining what they do and how to tweak them.
-* **`update_lessons_learned`** (`/update-lessons-learned`):
-  - Review and log lessons learned in `04 AI/<Project Name>/lessons.md`.
+* **`ai_consolidate`** (`/ai-consolidate`):
+  - Update the brief, log lessons in `04 AI/<Project Name>/lessons.md`, mark superseded decisions and compact loose files.
   - Capture global preferences here in `04 AI/Personal Preferences/jimmy_preferences.md`.
   - Promote cross-project patterns to `04 AI/patterns.md`; update `04 AI/04 ai_schematic.md` and `04 AI/ai_task_tracker.md`.
+  - _Replaces `update_lessons_learned` (2026-11-25)._
 * **All skills** live in `02 Refs/Skills/` (source) and run in Claude Code as `/name` (see root `CLAUDE.md`).
 
 
@@ -116,3 +117,11 @@
 * **Small changes merge straight away.** Jimmy reviews on the GitHub Pages site, so each small change is committed, put in a PR and merged, and the live page shows it. Offline work in VS Code does not need a merge per step.
 * **Review pages are linked from the home page ⚙️ panel** under a Planning heading, so they are one click from the home page.
 
+## 12. Home page and licences (2026-11-25)
+* **The home page stays simple:** content in `index.html`; its styles, scripts and assets in `03 Projects/Index/`.
+* **`THIRD-PARTY.md` is a running list.** Keep a component listed after its project graduates.
+* **The site is a hub and spoke:** this repo's licence does not necessarily apply to the linked repos.
+* **Home page colour:** a non-repeating map layout. A stone-wall style should mesh into one chunk, like a Peruvian wall: one wall for the whole page, bright colours, no shading.
+* **Show a style with a real object:** Bauhaus means the wooden ship-building toy (Siedhoff-Buscher, 1923).
+* **Playful pages should be his to arrange:** favourites (a heart, upper right), drag to reorder, and an edit mode that saves.
+* **Less ornament:** he cut inner offset lines, numbers and small ovals; the shapes should do the work.
