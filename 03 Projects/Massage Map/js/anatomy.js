@@ -121,7 +121,7 @@
   }
   function items() { return def().items; }
 
-  var state = { toggles: {}, peel: 0, selected: null };
+  var state = { toggles: {}, peel: 0, selected: null, plate: false };
   LAYERS.forEach(function (l, i) { state.toggles[i] = true; });
 
   function el(tag, attrs) {
@@ -162,7 +162,36 @@
     return state.toggles[layer] && layer >= state.peel;
   }
 
+  // Gray's plates as the base picture. Foot regions also get the massage points, placed by the
+  // affine maps in data.js (MM.plates). Regions without points show the picture only.
+  function plateFor(regionId) {
+    var view = regionId === 'foot' ? 'sole' : regionId === 'foot-top' ? 'top' : null;
+    if (view && MM.plates[view]) return { view: view, p: MM.plates[view], overlay: true };
+    if (MM.picturePlates[regionId]) return { view: null, p: MM.picturePlates[regionId], overlay: false };
+    return null;
+  }
+  function drawPlate(svg) {
+    var info = plateFor(REGION);
+    if (!info) return false;
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    svg.setAttribute('viewBox', '0 0 ' + info.p.w + ' ' + info.p.h);
+    svg.appendChild(el('image', { href: info.p.href, x: 0, y: 0, width: info.p.w, height: info.p.h, preserveAspectRatio: 'none' }));
+    if (info.overlay) {
+      var sc = MM.plateScale(info.view);
+      var ms = MM.markers[currentLang][info.view] || {};
+      Object.keys(ms).forEach(function (id) {
+        var c = MM.plateMap(info.view, ms[id].x, ms[id].y);
+        svg.appendChild(el('circle', { cx: c[0], cy: c[1], r: 6 * sc, fill: '#fff8e8', stroke: '#2f2a3a', 'stroke-width': 1.6 * sc }));
+        var t = el('text', { x: c[0] + 9 * sc, y: c[1] + 3 * sc, 'font-size': 9 * sc, 'font-weight': 700, fill: '#2f2a3a' });
+        t.textContent = currentLang === 'cn' ? id : ms[id].en;
+        svg.appendChild(t);
+      });
+    }
+    return true;
+  }
+
   function draw(svg, lang) {
+    if (state.plate && drawPlate(svg)) return;
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     // Draw bottom layer first (bones), skin last.
     for (var layer = LAYERS.length - 1; layer >= 0; layer--) {
@@ -228,6 +257,8 @@
 
   function render(lang) {
     if (lang) currentLang = lang;
+    var pt0 = document.getElementById('anatPlateToggle');
+    if (pt0) pt0.checked = !!state.plate;
     var svg = document.getElementById('anatSvg');
     if (!svg) return;
     svg.setAttribute('viewBox', def().vb);
@@ -250,6 +281,8 @@
       state.selected = Number(t.getAttribute('data-i'));
       render();
     });
+    var pt = document.getElementById('anatPlateToggle');
+    if (pt) pt.addEventListener('change', function (e) { state.plate = e.target.checked; render(); });
     var peel = document.getElementById('anatPeel');
     if (peel) peel.addEventListener('click', function () {
       state.peel = Math.min(LAYERS.length - 1, state.peel + 1);

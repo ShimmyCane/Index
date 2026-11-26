@@ -32,6 +32,7 @@ This list covers components that passed through the nursery. It does not cover w
 | pdf-lib 1.17.1 | MIT | https://github.com/Hopding/pdf-lib | `QC keynotes/vendor` | `ShimmyCane/QC-keynotes` |
 | Natural Earth 1:50m land (via `world-atlas` 2.0.2) | Public domain (Natural Earth); `world-atlas` is ISC | https://www.naturalearthdata.com and https://github.com/topojson/world-atlas | `Felix Continents/js/coast.js` | `ShimmyCane/Felix-Continents` |
 | Historical boundaries (aourednik/historical-basemaps) | GPL-3.0 | https://github.com/aourednik/historical-basemaps | `Felix Continents/js/history_geo.js` | `ShimmyCane/Felix-Continents` |
+| Gray's Anatomy 1918 plates 378, 409, 415, 437, 442, 444 and 446 (scans, by Henry Vandyke Carter) | Public domain | https://commons.wikimedia.org/wiki/File:Gray378.png and the same pattern for the others (see `plates/CREDITS.md`) | `Massage Map/plates/` | Nursery |
 
 ## Loaded from the internet when a page runs (not stored here)
 

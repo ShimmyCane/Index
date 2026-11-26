@@ -1,0 +1,95 @@
+name: Massage Map checks
+
+on:
+  pull_request:
+    paths:
+      - '03 Projects/Massage Map/**'
+      - '.github/workflows/massage-map-check.yml'
+  push:
+    branches: [main]
+    paths:
+      - '03 Projects/Massage Map/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scripts:
+    name: Scripts and credits
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: '03 Projects/Massage Map'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Syntax check every script
+        run: |
+          for f in js/*.js tests/*.js; do node --check "$f"; done
+      - name: Every plate has a credit and a licence row
+        run: |
+          for f in plates/*.png; do
+            b=$(basename "$f")
+            grep -q "$b" plates/CREDITS.md || { echo "no credit for $b"; exit 1; }
+          done
+          for code in 378 409 415 437 442 444 446; do
+            grep -q "Gray's Anatomy 1918" ../../THIRD-PARTY.md && grep -q "$code" ../../THIRD-PARTY.md || { echo "no THIRD-PARTY row mentions plate $code"; exit 1; }
+          done
+
+  browser:
+    name: Headless browser check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: '03 Projects/Massage Map/tests'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save playwright@1.47.2
+          npx playwright install --with-deps chromium
+      - name: Run the smoke test at 390, 768 and 1280 px
+        run: node smoke.js
+
+  family-sql:
+    name: Family SQL rehearsal (local Postgres 16)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGPASSWORD: postgres
+      PSQL: psql -X -v ON_ERROR_STOP=1 -h localhost -p 5432 -U postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create the database and the Supabase stand-in
+        run: |
+          $PSQL -d postgres -c 'create database familytest'
+          $PSQL -d familytest -f "03 Projects/Massage Map/tests/mimic_supabase.sql"
+          $PSQL -d familytest -f "04 AI/Supabase/supabase_registry_template.sql"
+      - name: Rolled-back test (must pass before the migration)
+        run: $PSQL -d familytest -f "03 Projects/Massage Map/supabase/test_001_mm_family.sql" | tee test.log
+      - name: Migration, verify, and a re-run of the migration
+        run: |
+          $PSQL -d familytest -f "03 Projects/Massage Map/supabase/001_mm_family.sql"
+          $PSQL -d familytest -f "03 Projects/Massage Map/supabase/verify_001_mm_family.sql" | tee verify.log
+          $PSQL -d familytest -f "03 Projects/Massage Map/supabase/001_mm_family.sql"
+      - name: Nothing from the test is left behind
+        run: |
+          left=$($PSQL -d familytest -tAc "select count(*) from pg_tables where schemaname = 'public' and tablename like 'mm\_%' and tablename <> all (array['mm_members','mm_flags','mm_ratings'])")
+          test "$left" = "0"
