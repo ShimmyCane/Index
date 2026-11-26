@@ -1068,6 +1068,7 @@
 
     $('#btnNote').addEventListener('click', addNote);
     wireFamily();
+    wireSheetLoad();
     $('#errorBar').addEventListener('click', function () { prefs.showErrors = false; store(KEYS.prefs, prefs); $('#tgErrors').checked = false; renderErrors(); });
 
     window.addEventListener('error', function (e) { reportError(e.message || 'Script error'); });
@@ -1082,6 +1083,46 @@
   }
 
   // Leaf through the sheets. Each sheet keeps its own stickers and undo history.
+  // A sheet loaded from the device (settings > Sheets). Its files are read in this browser only.
+  function addSheet(sheet) {
+    for (var i = 0; i < SHEETS.length; i++) if (SHEETS[i].key === sheet.key) return false;
+    SHEETS.push(sheet);
+    updatePager();
+    return true;
+  }
+  function loadSheetFiles(files) {
+    var js = files.filter(function (f) { return /sheet\.js$/i.test(f.name); })[0];
+    var pngs = files.filter(function (f) { return /\.png$/i.test(f.name); });
+    if (!js || !pngs.length) { toast('Pick the sheet.js file and its .png files'); return; }
+    var urls = {};
+    pngs.forEach(function (f) { urls[f.name] = URL.createObjectURL(f); });
+    js.text().then(function (text) {
+      // the sheet's own paths (private/<sheet>/...png) point at the picked files instead
+      var fixed = text.replace(/private\/[^'"\s]*\/([^'"\/\s]+\.png)/g, function (m, name) { return urls[name] || m; });
+      var before = (window.FS_EXTRA_SHEETS || []).length;
+      var url = URL.createObjectURL(new Blob([fixed], { type: 'text/javascript' }));
+      var s = document.createElement('script');
+      s.onload = function () {
+        var list = window.FS_EXTRA_SHEETS || [];
+        if (list.length > before && addSheet(list[list.length - 1])) toast('Sheet loaded: ' + list[list.length - 1].name);
+        else toast('That sheet is already loaded, or did not load');
+        URL.revokeObjectURL(url);
+      };
+      s.onerror = function () { toast('That sheet did not load'); URL.revokeObjectURL(url); };
+      s.src = url;
+      document.head.appendChild(s);
+    }, function () { toast('Could not read that file'); });
+  }
+  function wireSheetLoad() {
+    var input = $('#sheetFile');
+    if (!input) return;
+    input.addEventListener('change', function () {
+      var files = Array.prototype.slice.call(input.files || []);
+      input.value = '';
+      loadSheetFiles(files);
+    });
+  }
+
   function updatePager() {
     var pager = $('#pager');
     pager.hidden = SHEETS.length < 2;
