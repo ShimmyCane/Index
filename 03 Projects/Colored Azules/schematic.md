@@ -1,18 +1,46 @@
 # Colored Azules
 
-Track: (to confirm in convo v0.1, likely A. Family play)
+Track: B. Studio design (formal look, dense panels, full labels, keyboard and pointer). Chosen in convo v0.1, answer 2.
 
 Purpose: A swipe-through palette builder for shades of blue, where each blue has its official name and a real-life photo, and the keepers collect into a personal palette.
 
 Status: idea
 
-## Idea (from first request)
+## Plan (from convo v0.1)
 
-- Show a set of blues with their names, either 16 or 64 at a time, from an official-name list (Wikipedia colour lists, Crayola names or similar open sources).
-- Go through them one by one, Tinder style: swipe right to keep, left to pass.
-- Each blue shows a corner photo of a real object in that colour, zoomed in, so the colour can be seen in real life.
-- Kept blues build up into a palette the user can review.
+- **Users:** for myself (answer 1).
+- **Name list:** a mix of traditions: cultures, pastels, oils, digital, Japanese, Spanish, French (answer 4).
+- **Rounds:** show 16 blues at a time. Select a few from each 16. A batch of 64 is the batch size. A tournament-style round then picks the winners (answer 3).
+- **Photos:** fetched online and from Instagram, with credit shown. Linked, not copied into the repo, unless the licence allows it (answer 5).
+- **Keepers:** saved on local devices for now (answer 6). The architecture database is the planned home later.
+- **Desktop:** arrow keys and buttons work as well as swipe and drag (answer 7).
+- **Output:** swatches with names and hex codes. Holding an image down auto-copies the hex (answer 8).
 
-## Open items
+## Main pages
 
-See `convo/convo v0.1.md`.
+- Round view: 16 blues in a grid, with names. Select a few.
+- Swipe view: one card at a time, with name, corner photo and hex.
+- Batch and tournament: the 64 batch and the winners.
+- Palette: kept blues as swatches with names and hex codes.
+
+## Database plan
+
+None in the first build (local device storage). Architecture Supabase project later, via `/supabase-setup`.
+
+## Feedback plan
+
+None yet. Add `/feedback-notes` once the first page works.
+
+## Controls plan
+
+Not a game. Swipe, drag and arrow keys.
+
+## Palette & defaults
+
+Track B: paper-and-ink palette, toned-down colours, simple outlines, menus, pc-website rules. The blues themselves are the content.
+
+## Open questions
+
+- Project name: "Colored Azules" (folder) or "Colores Azules" (your message). See convo v0.1.
+- Photo licences: which sources to start with (Wikimedia Commons, Unsplash, Instagram accounts).
+- Tournament rules: how many winners per batch.
