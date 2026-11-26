@@ -116,3 +116,7 @@ Not built yet:
 - SQL prepared in `supabase/` (test, migration, verify). Rehearsed locally; **not pasted** into the Family project. Rules and paste order: `supabase/001_mm_family.sql` header and `04 AI/Supabase/brief.md`.
 - Guests (not signed in) keep flags and stars on the device only, and the app says so. Signed-in members save their own flags and stars to the family database and read everyone's.
 - Not built yet: the sign-in block in ⚙️, the flag buttons on the body layers, and the movement and target-muscle film.
+
+## Plates (2026-11-26)
+
+- Gray's Anatomy 1918 plates in `plates/` (public domain; credits in `plates/CREDITS.md`, rows in `THIRD-PARTY.md`): 444 (sole, used under the sole film), 409 (back) and 437 (front of the leg), added for the back and leg regions. Not yet overlaid: points and motion on the back and leg need their calibration first.
