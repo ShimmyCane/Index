@@ -15,70 +15,35 @@
   --panel: #fffdf8;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #151a24; --ink: #eef1f7; --line: #eef1f7; --muted: #a7b0c2; --panel: #1d2433;
-  }
+  :root:not([data-theme="light"]) { --paper: #151a24; --ink: #eef1f7; --line: #eef1f7; --muted: #a7b0c2; --panel: #1d2433; }
 }
-:root[data-theme="dark"] {
-  --paper: #151a24; --ink: #eef1f7; --line: #eef1f7; --muted: #a7b0c2; --panel: #1d2433;
-}
+:root[data-theme="dark"] { --paper: #151a24; --ink: #eef1f7; --line: #eef1f7; --muted: #a7b0c2; --panel: #1d2433; }
 * { box-sizing: border-box; }
-body {
-  margin: 0; background: var(--paper); color: var(--ink);
-  font-family: Georgia, "Times New Roman", serif; min-height: 100vh;
-  padding: 16px; overflow-x: hidden;
-}
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: Georgia, "Times New Roman", serif; min-height: 100vh; padding: 16px; overflow-x: hidden; }
 header { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; justify-content: space-between; border-bottom: 2px solid var(--line); padding-bottom: 8px; }
 h1 { font-size: 1.5rem; margin: 0; }
 .meta { color: var(--muted); font-size: 0.95rem; }
 nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
-button {
-  font: inherit; color: var(--ink); background: var(--panel);
-  border: 2px solid var(--line); border-radius: 6px; padding: 10px 14px;
-  min-height: 48px; cursor: pointer;
-}
+button { font: inherit; color: var(--ink); background: var(--panel); border: 2px solid var(--line); border-radius: 6px; padding: 10px 14px; min-height: 48px; cursor: pointer; }
 button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 button:disabled { opacity: 0.4; cursor: default; }
 .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 @media (max-width: 600px) { .grid { grid-template-columns: repeat(2, 1fr); } }
-.sw {
-  position: relative; border: 2px solid var(--line); border-radius: 6px; overflow: hidden;
-  background: var(--panel); cursor: pointer; user-select: none; -webkit-user-select: none;
-}
-.sw .chip { height: 92px; }
-.sw .label { padding: 6px 8px; font-size: 0.85rem; line-height: 1.2; }
-.sw .label b { display: block; font-size: 0.95rem; }
-.sw .hex { color: var(--muted); font-family: ui-monospace, Menlo, monospace; }
-.sw.kept::after {
-  content: "✓"; position: absolute; top: 6px; right: 6px; background: var(--keep); color: #fff;
-  border: 2px solid var(--line); border-radius: 50%; width: 30px; height: 30px; text-align: center; line-height: 26px; font-weight: bold;
-}
+.sw { position: relative; height: 120px; border: 2px solid var(--line); border-radius: 6px; cursor: pointer; user-select: none; -webkit-user-select: none; display: flex; align-items: flex-end; padding: 8px; font-weight: bold; font-size: 1rem; line-height: 1.15; }
+.sw.kept::after { content: "✓"; position: absolute; top: 6px; right: 6px; background: var(--keep); color: #fff; border: 2px solid var(--line); border-radius: 50%; width: 28px; height: 28px; text-align: center; line-height: 24px; }
 .sw.picked { outline: 4px solid var(--ink); outline-offset: 2px; }
-#count { font-weight: bold; }
-.card-wrap { display: flex; justify-content: center; }
-.card {
-  width: min(360px, 100%); background: var(--panel); border: 2px solid var(--line); border-radius: 10px;
-  overflow: hidden; touch-action: pan-y; box-shadow: 0 4px 0 var(--line);
-}
-.card .big { height: 300px; position: relative; }
-.card .photo {
-  position: absolute; right: 10px; bottom: 10px; width: 110px; height: 110px; border: 2px solid var(--line);
-  border-radius: 6px; background: var(--paper); display: flex; align-items: center; justify-content: center;
-  text-align: center; font-size: 0.75rem; padding: 6px;
-}
-.card .info { padding: 12px 14px; }
-.card .info h2 { margin: 0 0 4px; font-size: 1.3rem; }
-.card .sources { color: var(--muted); font-size: 0.85rem; }
-.actions { display: flex; gap: 12px; justify-content: center; margin: 14px 0; }
+.sw.tall { height: min(70vh, 560px); font-size: 1.6rem; }
+.hint { color: var(--muted); font-size: 0.9rem; text-align: center; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 14px 0; }
 .actions button { min-width: 120px; }
 .keep-btn { background: var(--keep) !important; color: #fff !important; }
 .pass-btn { background: var(--pass) !important; color: #fff !important; }
-.hint { color: var(--muted); font-size: 0.9rem; text-align: center; }
+.duel { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.duel .sw { height: min(60vh, 460px); font-size: 1.4rem; }
 #palette { margin-top: 16px; background: var(--panel); border: 2px solid var(--line); border-radius: 8px; padding: 12px; }
 #palette h2 { margin: 0 0 8px; font-size: 1.1rem; }
-#palette ul { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
-#palette li { display: flex; gap: 8px; align-items: center; border: 1px solid var(--line); border-radius: 6px; padding: 6px; background: var(--paper); }
-#palette .dot { width: 36px; height: 36px; border: 2px solid var(--line); border-radius: 6px; flex: none; }
+#palette .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+#palette .sw { height: 80px; font-size: 0.95rem; }
 #toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 10px 14px; border-radius: 6px; opacity: 0; transition: opacity .2s; pointer-events: none; }
 #toast.show { opacity: 1; }
 .hidden { display: none !important; }
@@ -88,20 +53,23 @@ button:disabled { opacity: 0.4; cursor: default; }
 <header>
   <div>
     <h1>Colores Azules</h1>
-    <div class="meta">Shades of blue, with names and a real-life photo.</div>
+    <div class="meta">Shades of blue, by name.</div>
   </div>
   <div class="meta">Kept: <span id="count">0</span></div>
 </header>
 
 <nav>
   <button id="modeGrid" aria-pressed="true">Grid of 16</button>
-  <button id="modeSwipe" aria-pressed="false">Swipe one by one</button>
-  <button id="nextBatch">Next 16 ▸</button>
+  <button id="modeSwipe" aria-pressed="false">One by one</button>
+  <button id="modeTour" aria-pressed="false">Tournament</button>
+  <button id="modeNeigh" aria-pressed="false">Neighbours</button>
+  <button id="nextPage">Next 16 ▸</button>
   <button id="showPalette" aria-pressed="false">My palette ▾</button>
 </nav>
+<div class="hint" id="batchInfo"></div>
 
 <section id="gridView">
-  <p class="hint">Tap blues to select the ones you like. Press and hold a blue to copy its hex.</p>
+  <p class="hint">Tap blues to select them. Then keep them. A batch of 64 is four pages of 16.</p>
   <div class="grid" id="grid"></div>
   <div class="actions">
     <button id="keepPicked" class="keep-btn">Keep selected</button>
@@ -111,165 +79,183 @@ button:disabled { opacity: 0.4; cursor: default; }
 
 <section id="swipeView" class="hidden">
   <p class="hint">Swipe right to keep, left to pass. Arrow keys work too.</p>
-  <div class="card-wrap">
-    <div class="card" id="card">
-      <div class="big" id="cardBig"></div>
-      <div class="info">
-        <h2 id="cardName"></h2>
-        <div class="hex" id="cardHex"></div>
-        <div class="sources" id="cardSource"></div>
-      </div>
-    </div>
-  </div>
+  <div class="grid" style="grid-template-columns:1fr;max-width:420px;margin:0 auto"><div class="sw tall" id="card"></div></div>
   <div class="actions">
     <button class="pass-btn" id="passBtn">◂ Pass</button>
     <button class="keep-btn" id="keepBtn">Keep ▸</button>
   </div>
 </section>
 
+<section id="tourView" class="hidden">
+  <p class="hint" id="tourInfo"></p>
+  <div class="duel" id="duel"></div>
+</section>
+
+<section id="neighView" class="hidden">
+  <p class="hint" id="neighInfo">Select one blue in the grid first. Its nearest neighbours appear here.</p>
+  <div class="grid" id="neighGrid"></div>
+</section>
+
 <section id="palette" class="hidden">
   <h2>My palette</h2>
-  <div class="actions" style="margin:8px 0">
-    <button id="copyAll">Copy all hex codes</button>
-    <button id="clearKept">Clear palette</button>
-  </div>
-  <ul id="keptList"></ul>
+  <div class="actions" style="margin:8px 0"><button id="clearKept">Clear palette</button></div>
+  <div class="grid" id="keptGrid"></div>
   <p class="hint" id="emptyNote">Nothing kept yet.</p>
 </section>
 
 <div id="toast"></div>
 
 <script>
-// Blues with names from several traditions. Hex values are approximate,
-// taken from each named source as remembered; check them before publishing.
+// Blues with names from several traditions. Hex values are approximate from
+// memory of each named source; they are used only to draw the squares.
 const BLUES = [
-  ["Midnight Blue","#191970","CSS / English"],["Navy","#000080","CSS / English"],["Oxford Blue","#002147","English"],
-  ["Prussian Blue","#003153","Painters / German"],["Persian Blue","#1C39BB","Pigment"],["Egyptian Blue","#1034A6","Ancient Egypt"],
-  ["Ultramarine","#120A8F","Pigment / oils"],["Digital Ultramarine","#3F00FF","Digital"],["Cobalt Blue","#0047AB","Oils"],
-  ["Sapphire","#0F52BA","Gemstone"],["Lapis Lazuli","#26619C","Gemstone / oils"],["Yale Blue","#0F4D92","Yale"],
-  ["Royal Blue","#4169E1","CSS / English"],["Dodger Blue","#1E90FF","CSS / English"],["Azure","#007FFF","Digital"],
-  ["Cerulean","#007BA7","Pigment"],["Steel Blue","#4682B4","CSS / English"],["Cadet Blue","#5F9EA0","CSS / English"],
-  ["Air Force Blue","#5D8AA8","Military"],["Payne's Grey","#536878","Painters / English"],["Cornflower Blue","#6495ED","CSS / English"],
-  ["Light Steel Blue","#B0C4DE","CSS / English"],["Powder Blue","#B0E0E6","CSS / English"],["Baby Blue","#89CFF0","Pastel"],
-  ["Alice Blue","#F0F8FF","CSS / English"],["Tiffany Blue","#0ABAB5","Brand (colour name)"],["Ice Blue","#99FFFF","Digital"],
-  ["Bleu de France","#0055A4","French"],["Bleu Klein (IKB)","#002FA7","French / artists"],["Bleu nuit","#1A2A6C","French"],
+  ["Midnight Blue","#191970","CSS"],["Navy","#000080","CSS"],["Oxford Blue","#002147","English"],
+  ["Prussian Blue","#003153","Painters"],["Persian Blue","#1C39BB","Pigment"],["Egyptian Blue","#1034A6","Ancient Egypt"],
+  ["Ultramarine","#120A8F","Pigment"],["Digital Ultramarine","#3F00FF","Digital"],["Cobalt Blue","#0047AB","Oils"],
+  ["Sapphire","#0F52BA","Gemstone"],["Lapis Lazuli","#26619C","Gemstone"],["Yale Blue","#0F4D92","Yale"],
+  ["Royal Blue","#4169E1","CSS"],["Dodger Blue","#1E90FF","CSS"],["Azure","#007FFF","Digital"],
+  ["Cerulean","#007BA7","Pigment"],["Steel Blue","#4682B4","CSS"],["Cadet Blue","#5F9EA0","CSS"],
+  ["Air Force Blue","#5D8AA8","Military"],["Payne's Grey","#536878","Painters"],["Cornflower Blue","#6495ED","CSS"],
+  ["Light Steel Blue","#B0C4DE","CSS"],["Powder Blue","#B0E0E6","CSS"],["Baby Blue","#89CFF0","Pastel"],
+  ["Alice Blue","#F0F8FF","CSS"],["Tiffany Blue","#0ABAB5","Brand"],["Ice Blue","#99FFFF","Digital"],
+  ["Bleu de France","#0055A4","French"],["Bleu Klein","#002FA7","French"],["Bleu nuit","#1A2A6C","French"],
   ["Bleu ciel","#87CEEB","French"],["Bleu lavande","#7B8CDE","French"],["Bleu de Chine","#1C3F7A","French"],
-  ["Azul de Prusia","#003153","Spanish"],["Azul Ultramar","#120A8F","Spanish"],["Azul cobalto","#0047AB","Spanish"],
-  ["Azul celeste","#8FC1E3","Spanish"],["Azul talavera","#2E5E9A","Spanish (tile)"],["Azul marino","#0B2545","Spanish"],
-  ["Ai-iro (indigo)","#165E83","Japanese"],["Kon-iro (deep blue)","#192F60","Japanese"],["Ruri-iro (lapis)","#1E50A2","Japanese"],
-  ["Asagi-iro (pale blue-green)","#33A6B8","Japanese"],["Mizu-iro (water blue)","#A4DDED","Japanese"],["Tetsu-kon (iron blue)","#27419E","Japanese"],
-  ["Gunjō (ultramarine)","#3B5BA9","Japanese"],["Sora-iro (sky blue)","#9DD3E8","Japanese"],["Hanada-iro (flower blue)","#2C4CA7","Japanese"],
-  ["Konpeki (dark blue)","#2B3A67","Japanese"],["Tsuyukusa (dayflower)","#3B4BA0","Japanese"],["Hanaasagi (dayflower light)","#3C7CBC","Japanese"],
-  ["Periwinkle","#C3CDE6","Crayola"],["Cornflower (Crayola)","#9ACEEB","Crayola"],["Blue Bell","#A2A2D0","Crayola"],
+  ["Azul celeste","#8FC1E3","Spanish"],["Azul talavera","#2E5E9A","Spanish"],["Azul marino","#0B2545","Spanish"],
+  ["Ai-iro","#165E83","Japanese"],["Kon-iro","#192F60","Japanese"],["Ruri-iro","#1E50A2","Japanese"],
+  ["Asagi-iro","#33A6B8","Japanese"],["Mizu-iro","#A4DDED","Japanese"],["Tetsu-kon","#27419E","Japanese"],
+  ["Gunjō","#3B5BA9","Japanese"],["Sora-iro","#9DD3E8","Japanese"],["Hanada-iro","#2C4CA7","Japanese"],
+  ["Konpeki","#2B3A67","Japanese"],["Tsuyukusa","#3B4BA0","Japanese"],["Hanaasagi","#3C7CBC","Japanese"],
+  ["Periwinkle","#C3CDE6","Crayola"],["Cornflower","#9ACEEB","Crayola"],["Blue Bell","#A2A2D0","Crayola"],
   ["Blue Green","#0D98BA","Crayola"],["Blue Violet","#7366BD","Crayola"],["Sky Blue","#76D7EA","Crayola"],
-  ["Denim","#1560BD","Crayola"],["Midnight Blue (Crayola)","#003366","Crayola"],["Pastel Blue Dream","#A7C7E7","Pastel"],
+  ["Denim","#1560BD","Crayola"],["Midnight","#003366","Crayola"],["Pastel Blue Dream","#A7C7E7","Pastel"],
   ["Duck Egg Blue","#A7D0CB","Pastel"],["Dusty Blue","#8DA9C4","Pastel"],["Sea Mist","#B2D8D8","Pastel"],
   ["Morning Blue","#A1B8C9","Pastel"],["Heaven Blue","#A7D8F0","Pastel"],["Frost","#DCEBF5","Pastel"],
-  ["Cyan Cobalt","#2DA7DB","Digital"],["Electric Blue","#7DF9FF","Digital"],["Process Cyan","#00B7EB","Digital (print)"],
+  ["Cyan Cobalt","#2DA7DB","Digital"],["Electric Blue","#7DF9FF","Digital"],["Process Cyan","#00B7EB","Print"],
   ["Indigo Dye","#00416A","Pigment"],["Blue Slate","#4F6D8C","Oils"],["Atlantic Blue","#1C5B7E","Oils"]
 ];
 
 const KEY = "colores-azules-kept-v1";
 const $ = id => document.getElementById(id);
 const toast = msg => { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 1400); };
+const store = {
+  get() { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { return []; } },
+  set(v) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {} }
+};
 
-function loadKept() { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { return []; } }
-function saveKept(list) { try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {} }
+// colour maths for neighbours (CIE Lab distance)
+function hexToLab(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  const lin = c => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+  const r = lin((n >> 16) & 255), g = lin((n >> 8) & 255), b = lin(n & 255);
+  let X = (r * 0.4124 + g * 0.3576 + b * 0.1805) / 0.95047;
+  let Y = (r * 0.2126 + g * 0.7152 + b * 0.0722);
+  let Z = (r * 0.0193 + g * 0.1192 + b * 0.9505) / 1.08883;
+  const f = t => t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116;
+  X = f(X); Y = f(Y); Z = f(Z);
+  return [116 * Y - 16, 500 * (X - Y), 200 * (Y - Z)];
+}
+const LAB = BLUES.map(b => hexToLab(b[1]));
+function nearest(i, count) {
+  const a = LAB[i];
+  return BLUES.map((_, j) => j).filter(j => j !== i)
+    .map(j => ({ j, d: Math.hypot(...LAB[j].map((v, k) => v - a[k])) }))
+    .sort((x, y) => x.d - y.d).slice(0, count).map(o => o.j);
+}
+function ink(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  const l = (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255));
+  return l > 150 ? "#1d2433" : "#ffffff";
+}
 
-let kept = loadKept();
-let order = BLUES.map((_, i) => i);
-for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
-let pos = 0;          // start of current batch in order[]
-let picked = new Set();
-let cardIndex = 0;
-
+let kept = store.get();
+const nameIndex = name => BLUES.findIndex(b => b[0] === name);
 const isKept = name => kept.some(k => k.name === name);
-const batch = () => order.slice(pos, pos + 16);
-const colourOf = i => BLUES[i];
+const updateCount = () => { $("count").textContent = kept.length; };
 
-function photoLink(name) {
-  const q = encodeURIComponent(name.replace(/\(.*?\)/g, "").trim() + " colour");
-  return "https://commons.wikimedia.org/w/index.php?search=" + q + "&title=Special:MediaSearch&type=image";
+// batches of 64, shown as pages of 16
+let order = [];
+function reshuffle() {
+  order = BLUES.map((_, i) => i);
+  for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+}
+reshuffle();
+let batchStart = 0, page = 0;      // page 0..3 within the 64 batch
+let picked = new Set();            // indexes into BLUES
+let cardPos = 0;
+
+function pageIds() {
+  const start = batchStart + page * 16;
+  return order.slice(start, Math.min(start + 16, batchStart + 64, order.length));
+}
+function updateBatchInfo() {
+  const pages = Math.ceil(Math.min(64, order.length - batchStart) / 16);
+  $("batchInfo").textContent = "Batch " + (Math.floor(batchStart / 64) + 1) + " · page " + (page + 1) + " of " + pages + " · " + order.length + " blues in all";
+}
+
+function tile(i, opts = {}) {
+  const [name, hex] = BLUES[i];
+  const el = document.createElement("div");
+  el.className = "sw" + (opts.tall ? " tall" : "") + (isKept(name) ? " kept" : "") + (picked.has(i) ? " picked" : "");
+  el.style.background = hex;
+  el.style.color = ink(hex);
+  el.textContent = name;
+  return el;
 }
 
 function renderGrid() {
   const g = $("grid"); g.innerHTML = "";
-  batch().forEach(i => {
-    const [name, hex, src] = colourOf(i);
-    const el = document.createElement("div");
-    el.className = "sw" + (isKept(name) ? " kept" : "") + (picked.has(i) ? " picked" : "");
-    el.innerHTML = '<div class="chip"></div><div class="label"><b></b><span class="hex"></span><br><span></span></div>';
-    el.querySelector(".chip").style.background = hex;
-    el.querySelector("b").textContent = name;
-    el.querySelector(".hex").textContent = hex;
-    el.querySelector(".label span:last-child").textContent = src;
-    let timer = null, longPressed = false;
-    el.addEventListener("pointerdown", () => {
-      longPressed = false;
-      timer = setTimeout(() => { longPressed = true; copy(hex); }, 600);
-    });
-    ["pointerup", "pointerleave", "pointercancel"].forEach(ev => el.addEventListener(ev, () => clearTimeout(timer)));
-    el.addEventListener("click", () => {
-      if (longPressed) return;
-      picked.has(i) ? picked.delete(i) : picked.add(i);
-      renderGrid(); updateCount();
-    });
+  pageIds().forEach(i => {
+    const el = tile(i);
+    el.onclick = () => { picked.has(i) ? picked.delete(i) : picked.add(i); renderGrid(); };
     g.appendChild(el);
   });
+  updateBatchInfo();
 }
 
-function copy(text) {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(() => toast("Copied " + text), () => toast(text));
-  } else toast(text);
-}
-
-function updateCount() { $("count").textContent = kept.length; }
-
-function keepIndex(i) {
-  const [name, hex, src] = colourOf(i);
-  if (!isKept(name)) kept.push({ name, hex, src });
-  saveKept(kept); updateCount();
+function keepIndexes(ids) {
+  ids.forEach(i => {
+    const name = BLUES[i][0];
+    if (!isKept(name)) kept.push({ name, hex: BLUES[i][1] });
+  });
+  store.set(kept); updateCount();
 }
 
 $("keepPicked").onclick = () => {
   const n = picked.size;
-  picked.forEach(keepIndex);
-  picked.clear();
-  renderGrid(); renderPalette();
+  keepIndexes([...picked]);
+  picked.clear(); renderGrid();
   toast(n ? "Kept " + n : "Nothing selected");
 };
 $("clearPicked").onclick = () => { picked.clear(); renderGrid(); };
 
-$("nextBatch").onclick = () => {
+$("nextPage").onclick = () => {
   picked.clear();
-  pos += 16;
-  if (pos >= order.length) { pos = 0; toast("Back to the start"); }
+  const remaining = Math.min(64, order.length - batchStart);
+  if (page * 16 + 16 < remaining) page++;
+  else {
+    batchStart += 64;
+    if (batchStart >= order.length) { reshuffle(); batchStart = 0; toast("Shuffled, starting again"); }
+    page = 0;
+  }
   renderGrid();
 };
 
+// one by one
 function showCard() {
-  const i = order[cardIndex % order.length];
-  const [name, hex, src] = colourOf(i);
-  $("cardBig").style.background = hex;
-  $("cardBig").innerHTML = "";
-  const p = document.createElement("a");
-  p.className = "photo"; p.href = photoLink(name); p.target = "_blank"; p.rel = "noopener";
-  p.textContent = "Find a real photo ↗";
-  $("cardBig").appendChild(p);
-  $("cardName").textContent = name;
-  $("cardHex").textContent = hex;
-  $("cardSource").textContent = src + (isKept(name) ? " · kept" : "");
-  $("cardBig").oncontextmenu = e => e.preventDefault();
+  const i = order[(batchStart + cardPos) % order.length];
+  const el = tile(i, { tall: true });
+  el.id = "card";
+  el.onclick = null;
+  const c = $("card");
+  c.replaceWith(el);
+  bindSwipe(el);
+  el.style.transform = "";
 }
-
 function decide(keep) {
-  const i = order[cardIndex % order.length];
-  if (keep) keepIndex(i);
-  cardIndex++;
-  card.style.transform = "";
+  const i = order[(batchStart + cardPos) % order.length];
+  if (keep) keepIndexes([i]);
+  cardPos++;
   showCard();
-  renderPalette();
 }
 $("keepBtn").onclick = () => decide(true);
 $("passBtn").onclick = () => decide(false);
@@ -278,48 +264,82 @@ document.addEventListener("keydown", e => {
   if (e.key === "ArrowRight") decide(true);
   if (e.key === "ArrowLeft") decide(false);
 });
-
-// swipe with pointer
-const card = $("card");
 let startX = null;
-card.addEventListener("pointerdown", e => { startX = e.clientX; card.setPointerCapture(e.pointerId); });
-card.addEventListener("pointermove", e => {
-  if (startX === null) return;
-  card.style.transform = "translateX(" + (e.clientX - startX) + "px) rotate(" + (e.clientX - startX) / 30 + "deg)";
-});
-card.addEventListener("pointerup", e => {
-  if (startX === null) return;
-  const dx = e.clientX - startX; startX = null;
-  if (dx > 90) decide(true);
-  else if (dx < -90) decide(false);
-  else card.style.transform = "";
-});
-
-function setMode(swipe) {
-  $("gridView").classList.toggle("hidden", swipe);
-  $("swipeView").classList.toggle("hidden", !swipe);
-  $("modeGrid").setAttribute("aria-pressed", String(!swipe));
-  $("modeSwipe").setAttribute("aria-pressed", String(swipe));
-  if (swipe) showCard();
+function bindSwipe(el) {
+  el.addEventListener("pointerdown", e => { startX = e.clientX; el.setPointerCapture(e.pointerId); });
+  el.addEventListener("pointermove", e => {
+    if (startX === null) return;
+    const dx = e.clientX - startX;
+    el.style.transform = "translateX(" + dx + "px) rotate(" + dx / 30 + "deg)";
+  });
+  el.addEventListener("pointerup", e => {
+    if (startX === null) return;
+    const dx = e.clientX - startX; startX = null;
+    if (dx > 90) decide(true);
+    else if (dx < -90) decide(false);
+    else el.style.transform = "";
+  });
 }
-$("modeGrid").onclick = () => setMode(false);
-$("modeSwipe").onclick = () => setMode(true);
+
+// tournament: kept blues duel head to head until one wins
+let entrants = [], round = [], nextRound = [], eliminated = [];
+function startTournament() {
+  if (kept.length < 2) { $("tourInfo").textContent = "Keep at least two blues first, then run the tournament."; $("duel").innerHTML = ""; return; }
+  entrants = kept.map(k => nameIndex(k.name)).filter(i => i >= 0);
+  round = [...entrants].sort(() => Math.random() - 0.5);
+  nextRound = []; eliminated = [];
+  duel();
+}
+function duel() {
+  const d = $("duel"); d.innerHTML = "";
+  if (round.length === 0) {
+    if (nextRound.length === 0) { $("tourInfo").textContent = "Tournament done."; return; }
+    round = nextRound; nextRound = [];
+  }
+  if (round.length === 1 && nextRound.length === 0) {
+    $("tourInfo").textContent = "Winner: " + BLUES[round[0]][0] + ". Tap Tournament to run again.";
+    const w = tile(round[0], { tall: true }); d.appendChild(w);
+    return;
+  }
+  if (round.length === 1) { nextRound.push(round.shift()); return duel(); }
+  const a = round.shift(), b = round.shift();
+  $("tourInfo").textContent = "Round: " + (round.length + nextRound.length + 2) + " blues left. Tap the one you prefer.";
+  [a, b].forEach(i => {
+    const el = tile(i, { tall: true });
+    el.onclick = () => { nextRound.push(i); eliminated.push(i === a ? b : a); duel(); };
+    d.appendChild(el);
+  });
+}
+
+// neighbours of the first selected blue (or the first kept blue)
+function renderNeighbours() {
+  const seed = picked.size ? [...picked][0] : (kept.length ? nameIndex(kept[0].name) : -1);
+  const g = $("neighGrid"); g.innerHTML = "";
+  if (seed < 0) { $("neighInfo").textContent = "Select one blue in the grid first. Its nearest neighbours appear here."; return; }
+  $("neighInfo").textContent = "Nearest to " + BLUES[seed][0] + " (shown first, outlined). Distances are visual, in Lab space.";
+  const first = tile(seed); first.classList.add("picked"); g.appendChild(first);
+  nearest(seed, 15).forEach(i => g.appendChild(tile(i)));
+}
+
+function setMode(mode) {
+  const views = { grid: "gridView", swipe: "swipeView", tour: "tourView", neigh: "neighView" };
+  Object.entries(views).forEach(([k, id]) => $(id).classList.toggle("hidden", k !== mode));
+  ["modeGrid", "modeSwipe", "modeTour", "modeNeigh"].forEach(id => $(id).setAttribute("aria-pressed", String(id === "mode" + mode[0].toUpperCase() + mode.slice(1))));
+  $("nextPage").classList.toggle("hidden", mode !== "grid");
+  $("batchInfo").classList.toggle("hidden", mode !== "grid");
+  if (mode === "grid") renderGrid();
+  if (mode === "swipe") showCard();
+  if (mode === "tour") startTournament();
+  if (mode === "neigh") renderNeighbours();
+}
+$("modeGrid").onclick = () => setMode("grid");
+$("modeSwipe").onclick = () => setMode("swipe");
+$("modeTour").onclick = () => setMode("tour");
+$("modeNeigh").onclick = () => setMode("neigh");
 
 function renderPalette() {
-  const list = $("keptList"); list.innerHTML = "";
-  kept.forEach(k => {
-    const li = document.createElement("li");
-    li.innerHTML = '<span class="dot"></span><span><b></b><br><span class="hex"></span></span>';
-    li.querySelector(".dot").style.background = k.hex;
-    li.querySelector("b").textContent = k.name;
-    li.querySelector(".hex").textContent = k.hex;
-    li.style.cursor = "pointer";
-    li.title = "Press and hold to copy";
-    let t = null;
-    li.addEventListener("pointerdown", () => { t = setTimeout(() => copy(k.hex), 600); });
-    ["pointerup", "pointerleave", "pointercancel"].forEach(ev => li.addEventListener(ev, () => clearTimeout(t)));
-    list.appendChild(li);
-  });
+  const g = $("keptGrid"); g.innerHTML = "";
+  kept.forEach(k => { const i = nameIndex(k.name); if (i >= 0) g.appendChild(tile(i)); });
   $("emptyNote").classList.toggle("hidden", kept.length > 0);
   updateCount();
 }
@@ -328,8 +348,7 @@ $("showPalette").onclick = () => {
   $("showPalette").setAttribute("aria-pressed", String(open));
   if (open) renderPalette();
 };
-$("copyAll").onclick = () => copy(kept.map(k => k.hex).join("\n") || "(empty)");
-$("clearKept").onclick = () => { if (confirm("Clear your palette?")) { kept = []; saveKept(kept); renderPalette(); renderGrid(); } };
+$("clearKept").onclick = () => { if (confirm("Clear your palette?")) { kept = []; store.set(kept); renderPalette(); renderGrid(); } };
 
 renderGrid();
 renderPalette();
