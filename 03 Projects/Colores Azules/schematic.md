@@ -1,10 +1,10 @@
-# Colored Azules
+# Colores Azules
 
 Track: B. Studio design (formal look, dense panels, full labels, keyboard and pointer). Chosen in convo v0.1, answer 2.
 
 Purpose: A swipe-through palette builder for shades of blue, where each blue has its official name and a real-life photo, and the keepers collect into a personal palette.
 
-Status: idea
+Status: MVP 0.1 (2026-11-26; grid of 16, swipe, palette, hex copy; photo search links only, tournament not built)
 
 ## Plan (from convo v0.1)
 
@@ -41,6 +41,6 @@ Track B: paper-and-ink palette, toned-down colours, simple outlines, menus, pc-w
 
 ## Open questions
 
-- Project name: "Colored Azules" (folder) or "Colores Azules" (your message). See convo v0.1.
+- Photos: real photos are linked (Wikimedia search), not yet shown inline. Pick sources before adding images.
 - Photo licences: which sources to start with (Wikimedia Commons, Unsplash, Instagram accounts).
 - Tournament rules: how many winners per batch.

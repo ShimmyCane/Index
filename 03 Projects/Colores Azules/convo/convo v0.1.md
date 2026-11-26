@@ -1,4 +1,4 @@
-# Colored Azules: convo v0.1
+# Colores Azules: convo v0.1
 
 Round 1: clarifying questions. Jimmy answers inline under each question (write after the arrow).
 
@@ -39,6 +39,6 @@ A Tinder-style swipe through shades of blue. Each blue shows its official name, 
 ## Notes for Jimmy
 
 - Track B (studio) is chosen from answer 2. The architecture database is the planned home for kept palettes later. Answer 1 says it is for you, and the first build keeps palettes on this device, so the database link waits for the next round.
-- Open question: the folder is named "Colored Azules", but your message wrote "Colores Azules". Which name should the project keep? Renaming is a small change, so say which one.
+- Name confirmed by Jimmy: Colores Azules (2026-11-26).
 - No controls for a game (it's a swipe, not a moving game).
 - No feedback box yet; we can add `/feedback-notes` once the first page works.
