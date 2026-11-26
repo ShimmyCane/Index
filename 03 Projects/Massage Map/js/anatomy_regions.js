@@ -143,8 +143,33 @@
     { layer: 6, type: 'ellipse', cx: 124, cy: 98, rx: 22, ry: 6, side: 'mid', fill: BONE, en: 'Toe bones (phalanges)', cn: '趾骨', what: 'Bones of the toes.' }
   ];
 
+  /* Head and neck in side profile, in the coordinates of Gray's plate 378 (public domain, 1918).
+     viewBox 0 0 627 700 so the traced points can be used as drawn. Traced by eye; approximate. */
+  var SIDE_ITEMS = [
+    { layer: 0, type: 'path', d: 'M330,14 C420,14 500,70 520,170 C530,230 522,260 500,300 C480,340 440,370 430,400 C420,430 430,460 470,500 C520,540 540,570 560,600 L600,700 L240,700 C235,640 230,600 228,560 C228,500 222,460 210,430 C195,400 180,380 170,355 C160,340 158,320 160,300 C150,290 140,270 140,250 C130,240 128,230 130,220 C120,200 130,190 140,180 C150,150 160,120 170,100 C200,50 250,14 330,14 Z', side: 'mid', en: 'Head and neck skin (side)', cn: '头颈皮肤（侧）', what: 'Skin of the side of the head and neck.' },
+    { layer: 2, type: 'ellipse', cx: 330, cy: 170, rx: 70, ry: 100, side: 'mid', en: 'Temporalis', cn: '颞肌', what: 'Fan-shaped chewing muscle over the side of the head. Closes the jaw.' },
+    { layer: 2, type: 'ellipse', cx: 280, cy: 290, rx: 42, ry: 32, side: 'mid', en: 'Masseter', cn: '咬肌', what: 'Chewing muscle at the jaw corner. Strongest muscle for closing the mouth.' },
+    { layer: 2, type: 'ellipse', cx: 160, cy: 292, rx: 20, ry: 10, side: 'mid', en: 'Orbicularis oris', cn: '口轮匝肌', what: 'Ring muscle around the mouth.' },
+    { layer: 2, type: 'ellipse', cx: 200, cy: 300, rx: 26, ry: 20, side: 'mid', en: 'Buccinator', cn: '颊肌', what: 'Cheek muscle that holds food between the teeth.' },
+    { layer: 2, type: 'line', d: 'M190,240 C180,262 176,276 170,288', side: 'mid', stroke: '#d86b6b', width: 6, en: 'Zygomaticus', cn: '颧肌', what: 'Muscle from the cheekbone to the mouth corner. Lifts the mouth for a smile.' },
+    { layer: 2, type: 'line', d: 'M380,280 C340,360 300,440 262,540', side: 'mid', stroke: '#d86b6b', width: 34, en: 'Sternocleidomastoid', cn: '胸锁乳突肌', what: 'Strap muscle of the neck, from behind the ear to the collarbone. Turns and tilts the head.' },
+    { layer: 2, type: 'path', d: 'M240,420 C300,470 330,560 320,700 L230,700 C220,600 226,480 240,420 Z', side: 'mid', en: 'Platysma', cn: '颈阔肌', what: 'Thin sheet of muscle over the front and side of the neck.' },
+    { layer: 2, type: 'line', d: 'M520,300 C540,400 550,500 560,600', side: 'mid', stroke: '#d86b6b', width: 30, en: 'Trapezius (side)', cn: '斜方肌（侧）', what: 'Large muscle of the back of the neck and shoulder.' },
+    { layer: 3, type: 'line', d: 'M360,320 C350,400 350,470 340,560', side: 'mid', stroke: '#2e6fb0', width: 8, en: 'External jugular vein', cn: '颈外静脉', what: 'Vein running down the side of the neck. Visible under the skin.' },
+    { layer: 3, type: 'line', d: 'M170,300 C180,270 200,250 220,240', side: 'mid', stroke: '#c0392b', width: 3, en: 'Facial artery', cn: '面动脉', what: 'Artery of the lower face.' },
+    { layer: 4, type: 'line', d: 'M180,240 C230,260 250,280 280,300', side: 'mid', stroke: '#e0a800', width: 3, en: 'Facial nerve branches', cn: '面神经分支', what: 'Nerves that move the face.' },
+    { layer: 4, type: 'line', d: 'M170,200 C200,220 220,230 240,240', side: 'mid', stroke: '#e0a800', width: 2, en: 'Infraorbital nerve', cn: '眶下神经', what: 'Sensory nerve under the eye.' },
+    { layer: 5, type: 'line', d: 'M320,260 L342,250', side: 'mid', stroke: '#6d5fa3', width: 4, en: 'Jaw joint ligament', cn: '颞下颌韧带', what: 'Ligament of the jaw joint, just in front of the ear.' },
+    { layer: 6, type: 'path', d: 'M300,40 C400,30 490,100 500,190 C505,240 495,260 470,280 L330,280 C300,260 280,240 260,220 C240,190 240,120 300,40 Z', side: 'mid', fill: BONE, en: 'Skull (side)', cn: '颅骨（侧）', what: 'Bones of the head seen from the side.' },
+    { layer: 6, type: 'line', d: 'M170,350 C200,384 240,380 280,330', side: 'mid', stroke: BONE, width: 14, en: 'Jaw bone (mandible)', cn: '下颌骨', what: 'Lower jaw bone.' },
+    { layer: 6, type: 'line', d: 'M220,220 C260,210 300,220 340,240', side: 'mid', stroke: BONE, width: 10, en: 'Cheekbone arch (zygomatic)', cn: '颧弓', what: 'Bony arch of the cheek, a landmark for the temple.' },
+    { layer: 6, type: 'ellipse', cx: 380, cy: 520, rx: 26, ry: 16, side: 'mid', fill: BONE, en: 'Neck vertebrae', cn: '颈椎', what: 'Stacked vertebrae of the neck.' },
+    { layer: 6, type: 'ellipse', cx: 400, cy: 580, rx: 26, ry: 16, side: 'mid', fill: BONE, en: 'Neck vertebrae', cn: '颈椎', what: 'Stacked vertebrae of the neck.' }
+  ];
+
   window.MM_EXTRA_REGIONS = [
     { id: 'back', en: 'Back', cn: '背部', vb: '0 0 300 650', mirrorW: 300, items: BACK_ITEMS },
+    { id: 'head-side', en: 'Head and neck (side)', cn: '头颈（侧）', vb: '0 0 627 700', mirrorW: 627, items: SIDE_ITEMS },
     { id: 'face', en: 'Face', cn: '面部', vb: '0 0 200 240', mirrorW: 200, items: FACE_ITEMS },
     { id: 'neck', en: 'Neck', cn: '颈部', vb: '0 0 200 260', mirrorW: 200, items: NECK_ITEMS },
     { id: 'hand', en: 'Hand (palm)', cn: '手掌', vb: '0 0 140 180', mirrorW: 140, items: HAND_ITEMS },
