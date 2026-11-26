@@ -108,7 +108,8 @@ button:disabled { opacity: 0.4; cursor: default; }
 <script>
 // Blues with names from several traditions. Hex values are approximate from
 // memory of each named source; they are used only to draw the squares.
-const BLUES = [
+// Named list kept for reference only; the page uses the generated blues below.
+const NAMED = [
   ["Midnight Blue","#191970","CSS"],["Navy","#000080","CSS"],["Oxford Blue","#002147","English"],
   ["Prussian Blue","#003153","Painters"],["Persian Blue","#1C39BB","Pigment"],["Egyptian Blue","#1034A6","Ancient Egypt"],
   ["Ultramarine","#120A8F","Pigment"],["Digital Ultramarine","#3F00FF","Digital"],["Cobalt Blue","#0047AB","Oils"],
@@ -134,7 +135,27 @@ const BLUES = [
   ["Indigo Dye","#00416A","Pigment"],["Blue Slate","#4F6D8C","Oils"],["Atlantic Blue","#1C5B7E","Oils"]
 ];
 
-const KEY = "colores-azules-kept-v1";
+// Generated blues: hue 170 to 270 degrees (cyan to violet), six saturations,
+// fourteen lightnesses. Every blue is labelled by its hex code.
+const BLUES = (() => {
+  const hslToHex = (h, s, l) => {
+    s /= 100; l /= 100;
+    const k = n => (n + h / 30) % 12;
+    const a = s * Math.min(l, 1 - l);
+    const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+    return "#" + [f(0), f(8), f(4)].map(v => Math.round(v * 255).toString(16).padStart(2, "0")).join("").toUpperCase();
+  };
+  const seen = new Set(), out = [];
+  for (let h = 170; h <= 270; h++)
+    for (const s of [20, 36, 52, 68, 84, 100])
+      for (let n = 0; n < 14; n++) {
+        const hex = hslToHex(h, s, 6 + n * 6.5);
+        if (!seen.has(hex)) { seen.add(hex); out.push([hex, hex, "generated"]); }
+      }
+  return out;
+})();
+
+const KEY = "colores-azules-kept-v2";
 const $ = id => document.getElementById(id);
 const toast = msg => { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 1400); };
 const store = {
