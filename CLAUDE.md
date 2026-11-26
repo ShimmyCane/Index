@@ -55,7 +55,9 @@ This repository is GPL-3.0 (`LICENSE`). Third-party files keep their own licence
 
 Run as `/name`. Each wraps `02 Refs/Skills/<name>.md`, which is the version to edit, except the nine working copies in `04 AI/Skills/` (smoke_test, summarize_code, game_controls, settings_gear, supabase_setup, access_requests, monthly_checkup, consolidate_knowledge, remix). Those are edited in `04 AI/Skills/`, and their `02 Refs` files are stubs. See `02 Refs/Skills/index.md`.
 
-`start-project` · `access-requests` · `monthly-checkup` · `remix` · `game-controls` · `ipad-website` · `settings-gear` · `summarize-code` · `simplify-code` · `consolidate-knowledge` · `claude-review-project` · `supabase-setup` · `review-notes-and-update` (renamed from `read-notes-and-update` on 2026-11-18; the old name is a deprecated stub) · `smoke-test` · `privacy-check` · `bake-cache` · `ai-json-loop` · `feedback-notes` · `project-track` · `graduate-project` · `consider-actions` · `update-story` · `gather-story-lessons-learned` · `pm-check`
+`start-project` · `access-requests` · `monthly-checkup` · `remix` · `game-controls` · `ipad-website` · `settings-gear` · `summarize-code` · `simplify-code` · `consolidate-knowledge` · `claude-review-project` · `supabase-setup` · `review-notes-and-update` (renamed from `read-notes-and-update` on 2026-11-18; the old name is a deprecated stub) · `smoke-test` · `privacy-check` · `bake-cache` · `ai-json-loop` · `feedback-notes` · `graduate-project` · `consider-actions` · `update-story` · `gather-story-lessons-learned` · `pm-check`
+
+Workflow references (not runnable skills): `project-track` (family vs. architecture decision guide, in `02 Refs/Workflow/`)
 
 Supabase conventions and the app registry live in `04 AI/Supabase/`.
 

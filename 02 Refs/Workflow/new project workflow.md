@@ -15,10 +15,12 @@ Record answers in the convo. If anything is unclear, ask a follow-up round.
 
 ## 2. Choose the track
 
-Read `02 Refs/Skills/project_track.md`. Decide one:
+Read `02 Refs/Workflow/project_track.md` (decision guide). Decide one:
 
 - **Track A. Family play** (games, activities): bold graphics, few words, main action centered, everything secondary in ⚙️, pastel palette
+  - Then read `02 Refs/Workflow/family_project_track.md` for UI defaults, palette, database, and skills
 - **Track B. Studio design** (architecture, 3-D, specs): dense information, full labels, keyboard/pointer, paper-and-ink palette
+  - Then read `02 Refs/Workflow/architecture_project_track.md` for UI defaults, palette, database, and skills
 
 If the project does both, pick the main user's track. Record the choice in `schematic.md` and the convo.
 
