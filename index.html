@@ -182,6 +182,29 @@
         [data-style="geometric"] a.dia   { --poly: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
         [data-style="geometric"] a.notch { --poly: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%); }
 
+        /* Bauhaus blocks tile: primary blocks on a cream field, no black. */
+        .wall a.bauhaus {
+            position: relative;
+            overflow: hidden;
+            background: #f3ecdc;
+        }
+        .wall a.bauhaus::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(#e63b2e, #e63b2e) 0 100% / 34% 52% no-repeat,
+                linear-gradient(#2456a6, #2456a6) 100% 0 / 20% 78% no-repeat,
+                linear-gradient(#f2c230, #f2c230) 62% 100% / 30% 26% no-repeat,
+                linear-gradient(#4d7a4a, #4d7a4a) 36% 0 / 12% 20% no-repeat;
+        }
+        .wall a.bauhaus span {
+            position: relative;
+            background: #f3ecdc;
+            padding: 0.2em 0.5em;
+            border-radius: 6px;
+        }
+
         @media (max-width: 560px) {
             [data-style="geometric"] .wall {
                 grid-template-columns: repeat(2, 1fr);
@@ -480,6 +503,7 @@
                 <li class="w2" data-size="3x1"><a class="para" style="--c:#ffb02e" href="https://shimmycane.github.io/Proposal_Drafter/">Proposal Drafter</a></li>
                 <li class="w2" data-size="3x1"><a class="tri" style="--c:#8a7cf0" href="03%20Projects/Shimmy%20Specs/">Shimmy Specs</a></li>
                 <li class="w2 h2" data-size="3x2"><a class="hex" style="--c:#7bd389" href="https://shimmycane.github.io/Growth/">Growth</a></li>
+                <li class="w2" data-size="3x1"><a class="bauhaus" href="https://shimmycane.github.io/QC-keynotes/"><span>QC keynotes</span></a></li>
                 <li class="h2" data-size="3x2"><a class="tri" style="--c:#3d8bff" href="https://shimmycane.github.io/Make-3D/">Make 3D</a></li>
                 <li class="w2" data-size="3x1"><a class="dia" style="--c:#ff9e8a" href="https://shimmycane.github.io/Increment-Viewer/">Increment Viewer</a></li>
                 <li class="w2" data-size="3x1"><a class="notch" style="--c:#9fd3e6" href="https://shimmycane.github.io/Critique-Detail/">Critique Detail</a></li>
@@ -495,7 +519,6 @@
                 <li class="w2" data-size="3x1" data-track="mind-palace"><a class="chev" style="--c:#b9a6e8" href="03%20Projects/Mind%20Palace/">Mind Palace</a></li>
                 <li class="w2" data-size="3x1" data-track="salmon-leap"><a class="hex" style="--c:#7fb8e0" href="03%20Projects/Salmon%20Leap/">Salmon Leap</a></li>
                 <li class="w2" data-size="3x1" data-track="athenas-piano-companion"><a class="dia" style="--c:#ffb5a3" href="03%20Projects/Athena%27s%20Piano%20Companion/">Athena's Piano Companion</a></li>
-                <li class="w2" data-size="3x1" data-track="qc-keynotes"><a class="notch" style="--c:#e7dcc4" href="03%20Projects/QC%20keynotes/">QC keynotes</a></li>
                 <li class="w2" data-size="3x1" data-track="felix-stickers"><a class="tri" style="--c:#ffd0b5" href="03%20Projects/Felix%20Stickers/">Felix Stickers</a></li>
                 <li class="w2" data-size="3x1" data-track="felix-continents"><a class="chev" style="--c:#b8e0c8" href="03%20Projects/Felix%20Continents/">Felix Continents</a></li>
                 <li class="w2" data-size="3x1" data-track="massage-map"><a class="hex" style="--c:#bfe3c8" href="03%20Projects/Massage%20Map/">Massage Map</a></li>
