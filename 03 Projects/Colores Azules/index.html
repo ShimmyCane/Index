@@ -71,8 +71,8 @@ button:disabled { opacity: 0.4; cursor: default; }
 <section id="setsView">
   <div class="hint" id="setInfo"></div>
   <div id="gridWrap" class="hidden">
-    <div class="grid" id="setGrid" style="grid-template-columns:repeat(4,1fr);max-width:640px;margin:0 auto"></div>
-    <div class="actions"><button id="gridNext" class="keep-btn">Next set ▸</button></div>
+    <div class="grid" id="setGrid" style="grid-template-columns:repeat(2,1fr);max-width:560px;margin:0 auto"></div>
+    <div class="actions"><button id="gridNext" class="keep-btn">Next palette ▸</button></div>
   </div>
   <div class="dots" id="dots"></div>
   <div id="swipeWrap"><div class="grid" style="grid-template-columns:1fr;max-width:420px;margin:0 auto"><div class="sw tall" id="card"></div></div></div>
@@ -81,7 +81,7 @@ button:disabled { opacity: 0.4; cursor: default; }
     <button class="keep-btn" id="keepBtn">Keep ▸</button>
   </div>
   <div class="actions" id="nextWrap">
-    <button id="nextSet">Next set ▸</button>
+    <button id="nextSet">Next palette ▸</button>
   </div>
   <p class="hint">Swipe right to keep, left to pass. Move on once you have swiped at least one. The 64 blues are eight sets of eight.</p>
   <div class="actions hidden" id="doneActions">
@@ -228,7 +228,7 @@ function weightedPick(list) {
 // ---------- the batch: 64 blues in eight sets of eight ----------
 const $ = id => document.getElementById(id);
 let batch = [], lastBatch = new Set();
-let setSize = 8, gridPicked = new Set();   // 16 on iPad (4 x 4 grid, tap), 8 on phone (swipe)
+let setSize = 8, gridPicked = new Set();   // every palette is 8 squares; iPad taps a 2 x 4 grid, phone swipes
 let setNo = 0, cardNo = 0, setDecided = 0, batchKeeps = [], batchDone = false;
 
 function buildBatch() {
@@ -244,10 +244,11 @@ function buildBatch() {
   // shuffle so each set is a mix of the whole range
   for (let k = picks.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [picks[k], picks[j]] = [picks[j], picks[k]]; }
   batch = picks; lastBatch = new Set(batch);
-  setSize = window.innerWidth >= 700 ? 16 : 8; gridPicked = new Set();
+  setSize = 8; gridPicked = new Set();
   setNo = 0; cardNo = 0; setDecided = 0; batchKeeps = []; batchDone = false;
 }
 const SETS = () => 64 / setSize;
+const useGrid = () => window.innerWidth >= 700;   // iPad and wider: tap grid; phone: swipe cards
 const setOf = () => batch.slice(setNo * setSize, setNo * setSize + setSize);
 const current = () => batch[setNo * setSize + cardNo];
 const isKept = hex => kept.includes(hex);
@@ -283,7 +284,7 @@ function tile(i, opts = {}) {
 // ---------- sets of eight: swipe cards ----------
 // Chooses the layout: a 4 x 4 grid of tap-to-select on iPad, swipe cards on phone.
 function renderSets() {
-  const grid = !batchDone && setSize === 16;
+  const grid = !batchDone && useGrid();
   $("gridWrap").classList.toggle("hidden", !grid);
   $("swipeWrap").classList.toggle("hidden", grid);
   $("swipeActions").classList.toggle("hidden", grid);
@@ -296,6 +297,7 @@ function renderGridSet() {
   const g = $("setGrid"); g.innerHTML = "";
   setOf().forEach(i => {
     const el = tile(i);
+    el.style.height = "150px";
     if (gridPicked.has(i)) el.classList.add("picked");
     el.onclick = () => { gridPicked.has(i) ? gridPicked.delete(i) : gridPicked.add(i); renderGridSet(); };
     g.appendChild(el);
@@ -368,7 +370,7 @@ $("keepBtn").onclick = () => decide(true);
 $("passBtn").onclick = () => decide(false);
 $("nextSet").onclick = nextSet;
 document.addEventListener("keydown", e => {
-  if ($("setsView").classList.contains("hidden") || setSize === 16) return;
+  if ($("setsView").classList.contains("hidden") || useGrid()) return;
   if (e.key === "ArrowRight") decide(true);
   if (e.key === "ArrowLeft") decide(false);
 });
@@ -434,7 +436,7 @@ function duel() {
 // ---------- neighbours of the card on screen (or the last kept blue) ----------
 function renderNeighbours() {
   const g = $("neighGrid"); g.innerHTML = "";
-  let seed = batchDone ? -1 : (setSize === 16 ? (gridPicked.size ? [...gridPicked][0] : setOf()[0]) : current());
+  let seed = batchDone ? -1 : (useGrid() ? (gridPicked.size ? [...gridPicked][0] : setOf()[0]) : current());
   if (seed === undefined || seed < 0) seed = kept.length ? BLUES.findIndex(b => b.hex === kept[kept.length - 1]) : -1;
   if (seed < 0) { $("neighInfo").textContent = "Swipe a colour first. Its nearest neighbours appear here."; return; }
   $("neighInfo").textContent = "Nearest to " + BLUES[seed].hex + ", by visual distance (CIE Lab).";
