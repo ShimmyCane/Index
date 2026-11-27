@@ -5,15 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Colores Azules</title>
 <style>
-/* Neutral grey so the blues are the only colour on screen. No black lines. */
+/* Cream by default; the background can be changed in the settings gear.
+   No black lines, so the blues are the only strong colour on screen. */
 :root {
-  --paper: #c9cbce; --ink: #3c3f44; --line: rgba(60, 63, 68, 0.18); --muted: #6a6e76;
-  --keep: #c9cbce; --pass: #c9cbce; --panel: #d6d8db;
+  --paper: #f6f3ec; --ink: #3c3f44; --line: rgba(60, 63, 68, 0.18); --muted: #6a6e76;
+  --keep: #f6f3ec; --pass: #f6f3ec; --panel: #fffdf8;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --paper: #4a4d52; --ink: #e4e6ea; --line: rgba(228, 230, 234, 0.18); --muted: #b3b7bf; --panel: #55585e; }
-}
-:root[data-theme="dark"] { --paper: #4a4d52; --ink: #e4e6ea; --line: rgba(228, 230, 234, 0.18); --muted: #b3b7bf; --panel: #55585e; }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--paper); color: var(--ink); font-family: Georgia, "Times New Roman", serif; min-height: 100vh; padding: 16px; overflow-x: hidden; }
 header { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
@@ -38,6 +35,13 @@ button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 .panel .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 .panel .sw { height: 80px; }
 .readout { font-size: 1rem; line-height: 1.5; }
+/* settings gear (lower right) and drawer */
+#gear { position: fixed; right: 16px; bottom: 16px; width: 56px; height: 56px; min-height: 56px; border-radius: 50%; padding: 0; font-size: 1.5rem; line-height: 56px; text-align: center; z-index: 20; }
+#drawer { position: fixed; right: 16px; bottom: 84px; width: min(340px, calc(100vw - 32px)); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px; z-index: 20; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+#drawer h2 { margin-bottom: 8px; }
+.swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.swatches button { min-height: 48px; padding: 0; border-radius: 4px; }
+.swatches button[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 2px; background-clip: padding-box; }
 #toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 10px 14px; border-radius: 6px; opacity: 0; transition: opacity .2s; pointer-events: none; }
 #toast.show { opacity: 1; }
 .hidden { display: none !important; }
@@ -115,6 +119,13 @@ button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
     <p class="hint" id="emptyNote">Nothing kept yet.</p>
   </div>
 </section>
+
+<div id="drawer" class="hidden" role="dialog" aria-label="Settings">
+  <h2>Background</h2>
+  <div class="swatches" id="swatches"></div>
+  <p class="hint" style="margin:10px 0 0">Cream is the default. Your choice stays on this device.</p>
+</div>
+<button id="gear" aria-label="Settings" aria-expanded="false">⚙️</button>
 
 <div id="toast"></div>
 
@@ -405,6 +416,42 @@ buildBatch();
 renderGrid();
 updateCounts();
 renderPalette();
+
+// ---------- settings gear: background from cream to deeper cream ----------
+const BACKGROUNDS = [
+  { name: "Ivory",    paper: "#fffdf6", panel: "#ffffff" },
+  { name: "Milk",     paper: "#fbf7ee", panel: "#fffdf8" },
+  { name: "Cream",    paper: "#f6f3ec", panel: "#fffdf8" },
+  { name: "Parchment",paper: "#f2ead8", panel: "#faf5ea" },
+  { name: "Vanilla",  paper: "#ebe2c9", panel: "#f6f0e0" },
+  { name: "Biscuit",  paper: "#e3d7b8", panel: "#eee6d0" },
+  { name: "Sand",     paper: "#d9cba6", panel: "#e4dac0" },
+  { name: "Wheat",    paper: "#c9bb93", panel: "#d6cba9" }
+];
+function applyBackground(idx) {
+  const bg = BACKGROUNDS[idx];
+  document.documentElement.style.setProperty("--paper", bg.paper);
+  document.documentElement.style.setProperty("--keep", bg.paper);
+  document.documentElement.style.setProperty("--pass", bg.paper);
+  document.documentElement.style.setProperty("--panel", bg.panel);
+  document.querySelectorAll("#swatches button").forEach((b, k) => b.setAttribute("aria-pressed", String(k === idx)));
+  try { localStorage.setItem("colores-azules-bg-v1", String(idx)); } catch (e) {}
+}
+const sw = $("swatches");
+BACKGROUNDS.forEach((bg, k) => {
+  const b = document.createElement("button");
+  b.title = bg.name; b.setAttribute("aria-label", bg.name);
+  b.style.background = bg.paper;
+  b.onclick = () => applyBackground(k);
+  sw.appendChild(b);
+});
+let savedBg = 2;
+try { const v = parseInt(localStorage.getItem("colores-azules-bg-v1"), 10); if (v >= 0 && v < BACKGROUNDS.length) savedBg = v; } catch (e) {}
+applyBackground(savedBg);
+$("gear").onclick = () => {
+  const d = $("drawer"); const open = d.classList.toggle("hidden") === false;
+  $("gear").setAttribute("aria-expanded", String(open));
+};
 </script>
 </body>
 </html>
