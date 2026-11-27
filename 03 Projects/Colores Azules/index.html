@@ -22,10 +22,10 @@ button { font: inherit; color: var(--ink); background: var(--panel); border: 1px
 button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 @media (max-width: 600px) { .grid { grid-template-columns: repeat(2, 1fr); } }
-.sw { position: relative; height: 110px; border: none; border-radius: 2px; cursor: pointer; user-select: none; -webkit-user-select: none; display: flex; align-items: flex-end; padding: 8px; font-family: ui-monospace, Menlo, monospace; font-weight: bold; font-size: 0.95rem; }
+.sw { position: relative; height: 110px; border: none; border-radius: 2px; cursor: pointer; user-select: none; -webkit-user-select: none; display: flex; align-items: flex-end; padding: 8px; font-family: system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; font-weight: 200; font-size: 0.8rem; letter-spacing: 0.04em; }
 .sw.kept::after { content: "✓"; position: absolute; top: 6px; right: 6px; background: var(--panel); color: var(--ink); border-radius: 50%; width: 26px; height: 26px; text-align: center; line-height: 26px; font-size: 0.85rem; }
 .sw.picked { box-shadow: inset 0 0 0 4px var(--panel); }
-.sw.tall { height: min(70vh, 560px); font-size: 1.4rem; }
+.sw.tall { height: min(70vh, 560px); font-size: 0.95rem; }
 .hint { color: var(--muted); font-size: 0.9rem; text-align: center; }
 .actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 14px 0; }
 .keep-btn, .pass-btn { background: var(--panel) !important; color: var(--ink) !important; }
@@ -124,6 +124,9 @@ button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
   <h2>Background</h2>
   <div class="swatches" id="swatches"></div>
   <p class="hint" style="margin:10px 0 0">Cream is the default. Your choice stays on this device.</p>
+  <h2 style="margin-top:14px">Show each square as</h2>
+  <div class="swatches" id="fmts"></div>
+  <p class="hint" style="margin:10px 0 0">HSL = hue, saturation, lightness. HSB = hue, saturation, brightness. RGB = red, green, blue (0 to 255).</p>
 </div>
 <button id="gear" aria-label="Settings" aria-expanded="false">⚙️</button>
 
@@ -238,13 +241,13 @@ const $ = id => document.getElementById(id);
 function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 1400); }
 function ink(hex) {
   const n = parseInt(hex.slice(1), 16);
-  return (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) > 150 ? "#2b2b2b" : "#ffffff";
+  return (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) > 150 ? "rgba(30,30,30,0.7)" : "rgba(255,255,255,0.85)";
 }
 function tile(i, opts = {}) {
   const b = BLUES[i];
   const el = document.createElement("div");
   el.className = "sw" + (opts.tall ? " tall" : "") + (isKept(b.hex) ? " kept" : "") + (selected.has(i) ? " picked" : "");
-  el.style.background = b.hex; el.style.color = ink(b.hex); el.textContent = b.hex;
+  el.style.background = b.hex; el.style.color = ink(b.hex); el.textContent = label(b);
   return el;
 }
 
@@ -448,6 +451,36 @@ BACKGROUNDS.forEach((bg, k) => {
 let savedBg = 2;
 try { const v = parseInt(localStorage.getItem("colores-azules-bg-v1"), 10); if (v >= 0 && v < BACKGROUNDS.length) savedBg = v; } catch (e) {}
 applyBackground(savedBg);
+// ---------- how each square is labelled: HEX, RGB, HSL or HSB ----------
+const FORMAT_KEY = "colores-azules-fmt-v1";
+function currentFmt() { try { return localStorage.getItem("colores-azules-fmt-v1") || "hex"; } catch (e) { return "hex"; } }
+function rgbOf(hex) { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function label(b) {
+  const f = currentFmt();
+  if (f === "rgb") return rgbOf(b.hex).join(" · ");
+  if (f === "hsl") return b.h + "° · " + b.s + "% · " + Math.round(b.l) + "%";
+  if (f === "hsb") {
+    const [r, g, c] = rgbOf(b.hex).map(v => v / 255);
+    const mx = Math.max(r, g, c), mn = Math.min(r, g, c);
+    const sat = mx === 0 ? 0 : (mx - mn) / mx;
+    return b.h + "° · " + Math.round(sat * 100) + "% · " + Math.round(mx * 100) + "%";
+  }
+  return b.hex;
+}
+function setFmt(f) {
+  try { localStorage.setItem(FORMAT_KEY, f); } catch (e) {}
+  document.querySelectorAll("#fmts button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.f === f)));
+  renderGrid(); renderPalette();
+}
+const fmts = $("fmts");
+["hex", "rgb", "hsl", "hsb"].forEach(f => {
+  const b = document.createElement("button");
+  b.dataset.f = f; b.textContent = f.toUpperCase();
+  b.onclick = () => setFmt(f);
+  fmts.appendChild(b);
+});
+setFmt(currentFmt());
+
 $("gear").onclick = () => {
   const d = $("drawer"); const open = d.classList.toggle("hidden") === false;
   $("gear").setAttribute("aria-expanded", String(open));
