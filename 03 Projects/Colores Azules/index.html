@@ -53,7 +53,7 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
 <header>
   <div>
     <h1>Colores Azules</h1>
-    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 7</span></div>
+    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 8</span></div>
   </div>
   <div class="meta">Kept: <span id="count">0</span> · Synced: <span id="synced">0</span>/<span id="events">0</span></div>
 </header>
@@ -112,7 +112,11 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
   <div class="panel">
     <h2>My palette</h2>
     <div class="actions" style="margin:6px 0"><button id="clearKept">Clear palette</button></div>
+    <div class="actions" id="sortBar"><button data-s="hue">Hue</button><button data-s="sat">Saturation</button><button data-s="light">Lightness</button></div>
     <div class="grid" id="keptGrid"></div>
+    <h2 style="margin-top:12px">Where my favourites sit</h2>
+    <p class="hint">Across: hue, from green-cyan to violet. Up: lightness, from dark to bright. Each small dot is one blue. Rings are your favourites. Warm circles show where you keep choosing: bigger and stronger means more.</p>
+    <svg id="heat" viewBox="0 0 600 360" style="width:100%;height:auto;background:var(--paper);border-radius:4px;margin-top:8px"></svg>
     <p class="hint" id="emptyNote">Nothing kept yet.</p>
     <div class="actions"><button id="reviewOpen">Review one at a time</button></div>
     <div id="review" class="hidden">
@@ -129,7 +133,10 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
   <p class="hint" style="margin:8px 0 0">Cream is the default.</p>
   <h2 style="margin-top:12px">Show each square as</h2>
   <div class="swatches" id="fmts"></div>
-  <p class="hint" style="margin:8px 0 0">HSL = hue, saturation, lightness. HSB = hue, saturation, brightness. RGB = red, green, blue (0 to 255).</p>
+  <p class="hint" style="margin:8px 0 0">HSL: hue, saturation, lightness. HSB: hue, saturation, brightness.</p>
+  <h2 style="margin-top:12px">Heat map</h2>
+  <label class="meta" style="display:flex;gap:8px;align-items:center;justify-content:flex-start"><input id="heatOn" type="checkbox" style="min-height:auto;flex:none;width:20px;height:20px;padding:0"> Show heat in My palette</label>
+  <label class="meta" style="display:block;margin-top:8px">Heat strength <input id="heatOpacity" type="range" min="0" max="100" value="60" style="display:block;width:100%;min-height:auto;flex:none;padding:0;border:none;background:none"></label>
 </div>
 <button id="gear" aria-label="Settings" aria-expanded="false">⚙️</button>
 
@@ -541,11 +548,50 @@ $("exportData").onclick = () => {
 $("resetData").onclick = () => { if (confirm("Reset what the page has learned? Kept blues stay.")) { prefs = blankPrefs(); save(KEY.prefs, prefs); renderTaste(); } };
 
 // ---------- palette and review of favourites ----------
+const SORTS = { hue: i => BLUES[i].h, sat: i => BLUES[i].s, light: i => BLUES[i].l };
+let sortKey = "hue";
 function renderPalette() {
   const g = $("keptGrid"); g.innerHTML = "";
-  kept.forEach(hex => { const i = BY_HEX.get(hex); if (i !== undefined) g.appendChild(tile(i)); });
+  kept.map(hex => BY_HEX.get(hex)).filter(i => i !== undefined)
+    .sort((a, b) => SORTS[sortKey](a) - SORTS[sortKey](b))
+    .forEach(i => g.appendChild(tile(i)));
   $("emptyNote").classList.toggle("hidden", kept.length > 0);
+  document.querySelectorAll("#sortBar button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.s === sortKey)));
+  renderHeat();
 }
+// heat map: every blue as a small dot, favourites ringed, warm circles where keeps and wins cluster
+const SVG_NS = "http://www.w3.org/2000/svg";
+function renderHeat() {
+  const svg = $("heat"); if (!svg) return;
+  const x0 = 40, x1 = 580, y0 = 330, y1 = 30;
+  const X = h => x0 + (h - 170) / 100 * (x1 - x0), Y = l => y0 - l / 100 * (y0 - y1);
+  svg.innerHTML = "";
+  const add = (tag, attrs) => { const el = document.createElementNS(SVG_NS, tag); for (const k in attrs) el.setAttribute(k, attrs[k]); svg.appendChild(el); return el; };
+  const label = (x, y, text, anchor) => { const el = add("text", { x, y, "text-anchor": anchor || "middle", fill: "var(--muted)", "font-size": 14, "font-family": "system-ui, sans-serif" }); el.textContent = text; };
+  label(x0, 352, "green", "start"); label(X(220), 352, "sky"); label(x1, 352, "violet", "end");
+  label(30, y0, "dark", "end"); label(30, y1 + 12, "bright", "end");
+  BLUES.forEach(b => add("circle", { cx: X(b.h), cy: Y(b.l), r: 2.2, fill: b.hex, opacity: 0.45 }));
+  if (heat.on) {
+    const counts = new Map(); let max = 0;
+    events.forEach(e => {
+      if (e.type !== "keep" && e.type !== "duel") return;
+      const i = BY_HEX.get(e.hex); if (i === undefined) return;
+      const b = BLUES[i], key = Math.min(9, Math.floor((b.h - 170) / 10)) + ":" + Math.min(9, Math.floor(b.l / 10));
+      const c = (counts.get(key) || 0) + 1; counts.set(key, c); if (c > max) max = c;
+    });
+    counts.forEach((c, key) => {
+      const [hb, lb] = key.split(":").map(Number);
+      add("circle", { cx: X(170 + hb * 10 + 5), cy: Y(lb * 10 + 5), r: 10 + 16 * c / max, fill: "#e0703f", opacity: (heat.op / 100) * (0.25 + 0.75 * c / max) });
+    });
+  }
+  kept.forEach(hex => { const i = BY_HEX.get(hex); if (i === undefined) return; const b = BLUES[i]; add("circle", { cx: X(b.h), cy: Y(b.l), r: 6, fill: hex, stroke: "#3c3f44", "stroke-width": 1.5 }); });
+}
+document.querySelectorAll("#sortBar button").forEach(b => b.onclick = () => { sortKey = b.dataset.s; renderPalette(); });
+const HEAT_KEY = "colores-azules-heat-v1";
+let heat = load(HEAT_KEY, { on: false, op: 60 });
+$("heatOn").checked = !!heat.on; $("heatOpacity").value = heat.op;
+function saveHeat() { heat = { on: $("heatOn").checked, op: +$("heatOpacity").value }; save(HEAT_KEY, heat); renderHeat(); }
+$("heatOn").onchange = saveHeat; $("heatOpacity").oninput = saveHeat;
 $("clearKept").onclick = () => { if (confirm("Clear your palette?")) { kept = []; save(KEY.kept, kept); renderPalette(); updateCounts(); renderSets(); } };
 let reviewPos = 0;
 function showReview() {
