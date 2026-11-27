@@ -53,7 +53,7 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
 <header>
   <div>
     <h1>Colores Azules</h1>
-    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 12</span></div>
+    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 13</span></div>
   </div>
   <div class="meta">Kept: <span id="count">0</span> · Synced: <span id="synced">0</span>/<span id="events">0</span></div>
 </header>
@@ -689,7 +689,35 @@ $("modeNeigh").onclick = () => setMode("neigh");
 $("modeTaste").onclick = () => setMode("taste");
 $("modePalette").onclick = () => setMode("palette");
 $("modeHistory").onclick = () => setMode("history");
-// tournament history: winner on top, the batch's 64 blues small below
+// tournament history: winner on top; the other 63 blues in a squarified treemap, largest at the left
+function squarify(weights, x, y, w, h) {
+  // port of tools/treemap_layout.py: one rectangle per weight, in order, sized by weight
+  const total = weights.reduce((a, b) => a + b, 0);
+  if (total <= 0 || w <= 0 || h <= 0) return weights.map(() => [x, y, 0, 0]);
+  const scale = w * h / total, areas = weights.map(v => v * scale), out = [];
+  const worst = (row, side) => { const s = row.reduce((a, b) => a + b, 0); return Math.max(...row.map(r => Math.max(side * side * r / (s * s), (s * s) / (side * side * r)))); };
+  let i = 0;
+  while (i < areas.length) {
+    const side = Math.min(w, h);
+    const row = [areas[i++]];
+    while (i < areas.length && worst(row.concat([areas[i]]), side) <= worst(row, side)) row.push(areas[i++]);
+    const s = row.reduce((a, b) => a + b, 0);
+    if (w >= h) {
+      const cw = s / h; let yy = y;
+      row.forEach(a => { const rh = a / cw; out.push([x, yy, cw, rh]); yy += rh; });
+      x += cw; w -= cw;
+    } else {
+      const rh = s / w; let xx = x;
+      row.forEach(a => { const cw = a / rh; out.push([xx, y, cw, rh]); xx += cw; });
+      y += rh; h -= rh;
+    }
+  }
+  return out;
+}
+function weekdayTime(h) {
+  const d = new Date(h.date + "T00:00:00");
+  return d.toLocaleDateString("en-GB", { weekday: "short" }) + " " + h.time.slice(0, 5);
+}
 function renderHistory() {
   const box = $("history"); box.innerHTML = "";
   const hist = load(KEY.history, []);
@@ -701,24 +729,40 @@ function renderHistory() {
     const top = wi !== undefined ? tile(wi, {}) : document.createElement("div");
     top.style.height = "auto"; top.style.flex = "2 1 0"; top.style.minHeight = "0"; top.style.margin = "0";
     card.appendChild(top);
-    const cap = document.createElement("div"); cap.className = "meta"; cap.style.cssText = "margin:0;font-size:0.72rem;line-height:1.1;flex:0 0 auto";
-    cap.textContent = h.date + " " + h.time.slice(0, 5) + " · kept " + h.kept;
+    const cap = document.createElement("div"); cap.className = "meta";
+    cap.style.cssText = "margin:0;font-size:0.72rem;line-height:1.1;flex:0 0 auto";
+    cap.textContent = weekdayTime(h);
     card.appendChild(cap);
-    // compressed: the more a blue won, the bigger its square; never-picked blues are tiny
-    const mini = document.createElement("div");
-    mini.style.cssText = "display:flex;flex-wrap:wrap;gap:1px;align-items:center;align-content:center;justify-content:center;flex:1 1 0;min-height:0;overflow:hidden";
+    const area = document.createElement("div");
+    area.style.cssText = "position:relative;flex:1 1 0;min-height:0;overflow:hidden";
     const scores = h.scores || h.hexes.map(() => 0);
-    const max = Math.max(1, ...scores);
-    (h.hexes || []).forEach((hex, k) => {
-      const s = scores[k] / max;
-      const size = scores[k] ? Math.round(4 + 26 * Math.sqrt(s)) : 2;
+    // the other 63 blues; floor so a never-picked blue still has a visible square
+    const others = (h.hexes || []).map((hex, k) => ({ hex, score: scores[k] || 0 })).filter(o => o.hex !== h.winner);
+    others.sort((a, b) => b.score - a.score);
+    const W = 224, H = 100;   // card inner size; the layout is recomputed once the card is in the page
+    const rects = squarify(others.map(o => o.score + 0.15), 0, 0, W, H);
+    others.forEach((o, k) => {
+      const [x, y, w, hh] = rects[k];
       const c = document.createElement("div");
-      c.style.cssText = "flex:0 0 auto;width:" + size + "px;height:" + size + "px;border-radius:2px;background:" + hex + (hex === h.winner ? ";outline:2px solid var(--ink);outline-offset:1px" : "");
-      c.title = scores[k] ? "score " + scores[k] : "not picked";
-      mini.appendChild(c);
+      c.dataset.hex = o.hex;
+      c.style.cssText = "position:absolute;left:" + x + "px;top:" + y + "px;width:" + w + "px;height:" + hh + "px;background:" + o.hex + ";box-shadow:inset 0 0 0 0.5px rgba(0,0,0,0.08)";
+      c.title = o.score ? "score " + o.score : "not picked";
+      area.appendChild(c);
     });
-    card.appendChild(mini);
+    card.appendChild(area);
     box.appendChild(card);
+  });
+  // fit each treemap to the real size of its area on screen
+  box.querySelectorAll(":scope > div").forEach((card, n) => {
+    const area = card.children[2], h = hist[n];
+    const scores = h.scores || h.hexes.map(() => 0);
+    const others = (h.hexes || []).map((hex, k) => ({ hex, score: scores[k] || 0 })).filter(o => o.hex !== h.winner).sort((a, b) => b.score - a.score);
+    const W = area.clientWidth, H = area.clientHeight;
+    const rects = squarify(others.map(o => o.score + 0.15), 0, 0, W, H);
+    [...area.children].forEach((c, k) => {
+      const [x, y, w, hh] = rects[k];
+      c.style.left = x + "px"; c.style.top = y + "px"; c.style.width = w + "px"; c.style.height = hh + "px";
+    });
   });
 }
 
