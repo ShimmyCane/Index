@@ -53,7 +53,7 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
 <header>
   <div>
     <h1>Colores Azules</h1>
-    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 13</span></div>
+    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 14</span></div>
   </div>
   <div class="meta">Kept: <span id="count">0</span> · Synced: <span id="synced">0</span>/<span id="events">0</span></div>
 </header>
@@ -689,34 +689,89 @@ $("modeNeigh").onclick = () => setMode("neigh");
 $("modeTaste").onclick = () => setMode("taste");
 $("modePalette").onclick = () => setMode("palette");
 $("modeHistory").onclick = () => setMode("history");
-// tournament history: winner on top; the other 63 blues in a squarified treemap, largest at the left
-function squarify(weights, x, y, w, h) {
-  // port of tools/treemap_layout.py: one rectangle per weight, in order, sized by weight
-  const total = weights.reduce((a, b) => a + b, 0);
-  if (total <= 0 || w <= 0 || h <= 0) return weights.map(() => [x, y, 0, 0]);
-  const scale = w * h / total, areas = weights.map(v => v * scale), out = [];
-  const worst = (row, side) => { const s = row.reduce((a, b) => a + b, 0); return Math.max(...row.map(r => Math.max(side * side * r / (s * s), (s * s) / (side * side * r)))); };
-  let i = 0;
-  while (i < areas.length) {
-    const side = Math.min(w, h);
-    const row = [areas[i++]];
-    while (i < areas.length && worst(row.concat([areas[i]]), side) <= worst(row, side)) row.push(areas[i++]);
-    const s = row.reduce((a, b) => a + b, 0);
-    if (w >= h) {
-      const cw = s / h; let yy = y;
-      row.forEach(a => { const rh = a / cw; out.push([x, yy, cw, rh]); yy += rh; });
-      x += cw; w -= cw;
-    } else {
-      const rh = s / w; let xx = x;
-      row.forEach(a => { const cw = a / rh; out.push([xx, y, cw, rh]); xx += cw; });
-      y += rh; h -= rh;
+// tournament history: winner on top; the other 63 blues in a weighted Voronoi layout
+// Picked blues (score above 0) sit on the left and take about 45% of the area; the long tail of
+// never-picked blues sits on the right and takes about 55%. Each group has at most six rows.
+const TAIL_SHARE = 0.55, ROWS = 6, VSTEP = 2;
+function voronoiLayout(items, W, H, iters = 30) {
+  const head = items.filter(o => o.score > 0), tail = items.filter(o => o.score <= 0);
+  const splitX = head.length && tail.length ? W * (1 - TAIL_SHARE) : (head.length ? W : 0);
+  const headTotal = head.reduce((a, o) => a + o.score, 0);
+  const tailTotal = head.length ? headTotal * TAIL_SHARE / (1 - TAIL_SHARE) : 1;
+  const sites = [];
+  const place = (list, g, x0, x1, weight) => {
+    const cols = Math.max(1, Math.ceil(list.length / ROWS));
+    list.forEach((o, k) => {
+      const col = Math.floor(k / ROWS), row = k % ROWS;
+      sites.push({ hex: o.hex, score: o.score, g, row, x0, x1, w: weight(o),
+                   x: x0 + (col + 0.5) * (x1 - x0) / cols, y: (row + 0.5) * H / ROWS });
+    });
+  };
+  place(head, 0, 0, splitX || W, o => o.score);
+  place(tail, 1, splitX, W, () => tail.length ? tailTotal / tail.length : 1);
+  const SW = Math.ceil(W / VSTEP), SH = Math.ceil(H / VSTEP);
+  let owner = new Int16Array(SW * SH);
+  const assign = () => {
+    for (let py = 0; py < SH; py++) for (let px = 0; px < SW; px++) {
+      const x = px * VSTEP + VSTEP / 2, y = py * VSTEP + VSTEP / 2;
+      let best = 0, bd = Infinity;
+      for (let s = 0; s < sites.length; s++) {
+        const st = sites[s], dx = x - st.x, dy = y - st.y;
+        const d = (dx * dx + dy * dy) / Math.max(st.w, 1e-6);   // weighted: bigger weight, bigger cell
+        if (d < bd) { bd = d; best = s; }
+      }
+      owner[py * SW + px] = best;
     }
+  };
+  for (let it = 0; it < iters; it++) {
+    assign();
+    const sx = new Float64Array(sites.length), sy = new Float64Array(sites.length), n = new Float64Array(sites.length);
+    for (let py = 0; py < SH; py++) for (let px = 0; px < SW; px++) {
+      const s = owner[py * SW + px];
+      sx[s] += px * VSTEP + VSTEP / 2; sy[s] += py * VSTEP + VSTEP / 2; n[s]++;
+    }
+    sites.forEach((st, s) => {
+      if (!n[s]) return;
+      st.x = Math.min(st.x1 - 1, Math.max(st.x0 + 1, sx[s] / n[s]));           // stay in its group
+      st.y = Math.min((st.row + 1) * H / ROWS - 1, Math.max(st.row * H / ROWS + 1, sy[s] / n[s]));  // stay in its row
+    });
   }
-  return out;
+  assign();
+  return { sites, owner, SW, SH };
+}
+function drawVoronoi(canvas, layout, paper) {
+  const { sites, owner, SW, SH } = layout;
+  canvas.width = SW; canvas.height = SH;
+  const ctx = canvas.getContext("2d"), img = ctx.createImageData(SW, SH), d = img.data;
+  const pr = [255, 253, 248];   // cream lines between cells
+  for (let py = 0; py < SH; py++) for (let px = 0; px < SW; px++) {
+    const k = py * SW + px, s = owner[k], o = (px + 1 < SW && owner[k + 1] !== s) || (py + 1 < SH && owner[k + SW] !== s);
+    const [r, g, b] = o ? pr : rgbOf(sites[s].hex);
+    d[k * 4] = r; d[k * 4 + 1] = g; d[k * 4 + 2] = b; d[k * 4 + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+}
+function voronoiStats(layout) {
+  // share of area in the tail, and the shape of each cell (bounding box width to height)
+  const { sites, owner, SW, SH } = layout;
+  const box = sites.map(() => ({ x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity, n: 0 }));
+  let tail = 0;
+  for (let py = 0; py < SH; py++) for (let px = 0; px < SW; px++) {
+    const s = owner[py * SW + px], b = box[s];
+    b.n++; b.x0 = Math.min(b.x0, px); b.y0 = Math.min(b.y0, py); b.x1 = Math.max(b.x1, px); b.y1 = Math.max(b.y1, py);
+    if (sites[s].g === 1) tail++;
+  }
+  const aspects = box.filter(b => b.n).map(b => Math.max((b.x1 - b.x0 + 1) / (b.y1 - b.y0 + 1), (b.y1 - b.y0 + 1) / (b.x1 - b.x0 + 1)));
+  aspects.sort((a, b) => a - b);
+  return { tailShare: tail / (SW * SH), cells: aspects.length, medianAspect: aspects[aspects.length >> 1], worstAspect: aspects[aspects.length - 1] };
 }
 function weekdayTime(h) {
   const d = new Date(h.date + "T00:00:00");
   return d.toLocaleDateString("en-GB", { weekday: "short" }) + " " + h.time.slice(0, 5);
+}
+function historyItems(h) {
+  const scores = h.scores || h.hexes.map(() => 0);
+  return (h.hexes || []).map((hex, k) => ({ hex, score: scores[k] || 0 })).filter(o => o.hex !== h.winner).sort((a, b) => b.score - a.score);
 }
 function renderHistory() {
   const box = $("history"); box.innerHTML = "";
@@ -733,36 +788,13 @@ function renderHistory() {
     cap.style.cssText = "margin:0;font-size:0.72rem;line-height:1.1;flex:0 0 auto";
     cap.textContent = weekdayTime(h);
     card.appendChild(cap);
-    const area = document.createElement("div");
-    area.style.cssText = "position:relative;flex:1 1 0;min-height:0;overflow:hidden";
-    const scores = h.scores || h.hexes.map(() => 0);
-    // the other 63 blues; floor so a never-picked blue still has a visible square
-    const others = (h.hexes || []).map((hex, k) => ({ hex, score: scores[k] || 0 })).filter(o => o.hex !== h.winner);
-    others.sort((a, b) => b.score - a.score);
-    const W = 224, H = 100;   // card inner size; the layout is recomputed once the card is in the page
-    const rects = squarify(others.map(o => o.score + 0.15), 0, 0, W, H);
-    others.forEach((o, k) => {
-      const [x, y, w, hh] = rects[k];
-      const c = document.createElement("div");
-      c.dataset.hex = o.hex;
-      c.style.cssText = "position:absolute;left:" + x + "px;top:" + y + "px;width:" + w + "px;height:" + hh + "px;background:" + o.hex + ";box-shadow:inset 0 0 0 0.5px rgba(0,0,0,0.08)";
-      c.title = o.score ? "score " + o.score : "not picked";
-      area.appendChild(c);
-    });
-    card.appendChild(area);
+    const canvas = document.createElement("canvas");
+    canvas.style.cssText = "width:100%;height:100%;flex:1 1 0;min-height:0;display:block;image-rendering:auto";
+    card.appendChild(canvas);
     box.appendChild(card);
-  });
-  // fit each treemap to the real size of its area on screen
-  box.querySelectorAll(":scope > div").forEach((card, n) => {
-    const area = card.children[2], h = hist[n];
-    const scores = h.scores || h.hexes.map(() => 0);
-    const others = (h.hexes || []).map((hex, k) => ({ hex, score: scores[k] || 0 })).filter(o => o.hex !== h.winner).sort((a, b) => b.score - a.score);
-    const W = area.clientWidth, H = area.clientHeight;
-    const rects = squarify(others.map(o => o.score + 0.15), 0, 0, W, H);
-    [...area.children].forEach((c, k) => {
-      const [x, y, w, hh] = rects[k];
-      c.style.left = x + "px"; c.style.top = y + "px"; c.style.width = w + "px"; c.style.height = hh + "px";
-    });
+    const layout = voronoiLayout(historyItems(h), 224, 96);
+    drawVoronoi(canvas, layout, null);
+    canvas.dataset.stats = JSON.stringify(voronoiStats(layout));
   });
 }
 
