@@ -5,44 +5,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Colores Azules</title>
 <style>
-/* Cream by default; the background can be changed in the settings gear.
-   No black lines, so the blues are the only strong colour on screen. */
+/* Cream by default (set in settings). No black lines: the blues are the strong colour. */
 :root {
   --paper: #f6f3ec; --ink: #3c3f44; --line: rgba(60, 63, 68, 0.18); --muted: #6a6e76;
   --keep: #f6f3ec; --pass: #f6f3ec; --panel: #fffdf8;
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--paper); color: var(--ink); font-family: Georgia, "Times New Roman", serif; min-height: 100vh; padding: 16px; overflow-x: hidden; }
-header { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
-h1 { font-size: 1.5rem; margin: 0; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: Georgia, "Times New Roman", serif; min-height: 100vh; padding: 14px 16px 90px; overflow-x: hidden; }
+header { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+h1 { font-size: 1.4rem; margin: 0; }
 h2 { font-size: 1.05rem; margin: 0 0 6px; }
-.meta { color: var(--muted); font-size: 0.95rem; }
-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.meta { color: var(--muted); font-size: 0.9rem; }
+nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
 button { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 10px 14px; min-height: 48px; cursor: pointer; }
 button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
-.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-@media (max-width: 600px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+button:disabled { opacity: 0.4; cursor: default; }
 .sw { position: relative; height: 110px; border: none; border-radius: 2px; cursor: pointer; user-select: none; -webkit-user-select: none; display: flex; align-items: flex-end; padding: 8px; font-family: system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; font-weight: 200; font-size: 0.8rem; letter-spacing: 0.04em; }
 .sw.kept::after { content: "✓"; position: absolute; top: 6px; right: 6px; background: var(--panel); color: var(--ink); border-radius: 50%; width: 26px; height: 26px; text-align: center; line-height: 26px; font-size: 0.85rem; }
-.sw.picked { box-shadow: inset 0 0 0 4px var(--panel); }
-.sw.tall { height: min(70vh, 560px); font-size: 0.95rem; }
+.sw.tall { height: min(62vh, 520px); font-size: 0.95rem; touch-action: pan-y; }
+.sw.picked { box-shadow: inset 0 0 0 5px var(--panel); }
+.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+@media (min-width: 700px) { .grid { grid-template-columns: repeat(4, 1fr); } }
 .hint { color: var(--muted); font-size: 0.9rem; text-align: center; }
-.actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 14px 0; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 12px 0; }
+.actions button { flex: 1 1 110px; max-width: 220px; }
 .keep-btn, .pass-btn { background: var(--panel) !important; color: var(--ink) !important; }
-.duel { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.duel .sw { height: min(60vh, 460px); font-size: 1.2rem; }
-.panel { margin-top: 16px; background: var(--panel); border: none; border-radius: 4px; padding: 12px; }
-.panel .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-.panel .sw { height: 80px; }
+.dots { display: flex; gap: 6px; justify-content: center; margin: 8px 0; }
+.dots span { width: 22px; height: 22px; border-radius: 2px; position: relative; }
+.dots span.now { box-shadow: 0 0 0 2px var(--ink); }
+.dots span.kept::after { content: "✓"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #fff; text-shadow: 0 0 2px rgba(0,0,0,0.4); }
+.duel { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.duel .sw { height: min(58vh, 460px); font-size: 0.95rem; }
+.panel { margin-top: 14px; background: var(--panel); border-radius: 4px; padding: 12px; }
+.panel .grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+.panel .sw { height: 76px; }
 .readout { font-size: 1rem; line-height: 1.5; }
-/* settings gear (lower right) and drawer */
-#gear { position: fixed; right: 16px; bottom: 16px; width: 56px; height: 56px; min-height: 56px; border-radius: 50%; padding: 0; font-size: 1.5rem; line-height: 56px; text-align: center; z-index: 20; }
-#drawer { position: fixed; right: 16px; bottom: 84px; width: min(340px, calc(100vw - 32px)); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px; z-index: 20; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
-#drawer h2 { margin-bottom: 8px; }
+#gear { position: fixed; right: 14px; bottom: 14px; width: 54px; height: 54px; min-height: 54px; border-radius: 50%; padding: 0; font-size: 1.4rem; line-height: 52px; text-align: center; z-index: 20; }
+#drawer { position: fixed; right: 14px; bottom: 80px; width: min(340px, calc(100vw - 28px)); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px; z-index: 20; max-height: 70vh; overflow: auto; }
+#drawer h2 { margin: 0 0 8px; }
 .swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.swatches button { min-height: 48px; padding: 0; border-radius: 4px; }
-.swatches button[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 2px; background-clip: padding-box; }
-#toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 10px 14px; border-radius: 6px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.swatches button { min-height: 44px; padding: 0; border-radius: 4px; font-size: 0.85rem; }
+.swatches button[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 2px; }
+#toast { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 10px 14px; border-radius: 4px; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: 90vw; text-align: center; }
 #toast.show { opacity: 1; }
 .hidden { display: none !important; }
 </style>
@@ -51,52 +55,49 @@ button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 <header>
   <div>
     <h1>Colores Azules</h1>
-    <div class="meta">Shades of blue, labelled by hex code.</div>
+    <div class="meta">Shades of blue, labelled by your choice.</div>
   </div>
-  <div class="meta">Kept: <span id="count">0</span> · Picks saved: <span id="events">0</span></div>
+  <div class="meta">Kept: <span id="count">0</span> · Synced: <span id="synced">0</span>/<span id="events">0</span></div>
 </header>
 
 <nav>
-  <button id="modeGrid" aria-pressed="true">Batch of 64</button>
-  <button id="modeSwipe" aria-pressed="false">One by one</button>
+  <button id="modeSets" aria-pressed="true">Sets of 8</button>
   <button id="modeTour" aria-pressed="false">Tournament</button>
   <button id="modeNeigh" aria-pressed="false">Neighbours</button>
   <button id="modeTaste" aria-pressed="false">What I like</button>
   <button id="modePalette" aria-pressed="false">My palette</button>
 </nav>
 
-<section id="gridView">
-  <div class="hint" id="batchInfo"></div>
-  <div class="actions">
-    <button id="prevPage">◂ Prev 16</button>
-    <button id="nextPage">Next 16 ▸</button>
-    <button id="newBatch">New batch of 64 ↻</button>
+<section id="setsView">
+  <div class="hint" id="setInfo"></div>
+  <div id="gridWrap" class="hidden">
+    <div class="grid" id="setGrid" style="grid-template-columns:repeat(4,1fr);max-width:640px;margin:0 auto"></div>
+    <div class="actions"><button id="gridNext" class="keep-btn">Next set ▸</button></div>
   </div>
-  <div class="grid" id="grid"></div>
-  <div class="actions">
-    <button id="keepPicked" class="keep-btn">Keep selected</button>
-    <button id="runTour">Tournament from selected ▸</button>
-    <button id="clearPicked">Clear selection</button>
-  </div>
-  <p class="hint">Tap squares to select them. Selections carry across the four pages. "New batch" saves your picks and passes.</p>
-</section>
-
-<section id="swipeView" class="hidden">
-  <p class="hint">Swipe right to keep, left to pass. Arrow keys work too.</p>
-  <div class="grid" style="grid-template-columns:1fr;max-width:420px;margin:0 auto"><div class="sw tall" id="card"></div></div>
-  <div class="actions">
+  <div class="dots" id="dots"></div>
+  <div id="swipeWrap"><div class="grid" style="grid-template-columns:1fr;max-width:420px;margin:0 auto"><div class="sw tall" id="card"></div></div></div>
+  <div class="actions" id="swipeActions">
     <button class="pass-btn" id="passBtn">◂ Pass</button>
     <button class="keep-btn" id="keepBtn">Keep ▸</button>
+  </div>
+  <div class="actions" id="nextWrap">
+    <button id="nextSet">Next set ▸</button>
+  </div>
+  <p class="hint">Swipe right to keep, left to pass. Move on once you have swiped at least one. The 64 blues are eight sets of eight.</p>
+  <div class="actions hidden" id="doneActions">
+    <button id="startTour" class="keep-btn">Start the tournament ▸</button>
+    <button id="newBatch">New batch of 64 ↻</button>
   </div>
 </section>
 
 <section id="tourView" class="hidden">
   <p class="hint" id="tourInfo"></p>
   <div class="duel" id="duel"></div>
+  <div class="actions" id="tourActions"></div>
 </section>
 
 <section id="neighView" class="hidden">
-  <p class="hint" id="neighInfo">Select one blue in the batch first. Its nearest neighbours appear here.</p>
+  <p class="hint" id="neighInfo"></p>
   <div class="grid" id="neighGrid"></div>
 </section>
 
@@ -104,7 +105,16 @@ button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
   <div class="panel">
     <h2>What I like so far</h2>
     <div class="readout" id="tasteText"></div>
+    <div class="actions" style="justify-content:flex-start;margin:10px 0 0">
+      <input id="email" type="email" placeholder="Email" autocomplete="username" style="font:inherit;padding:10px;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);min-height:44px;flex:1 1 180px">
+      <input id="pw" type="password" placeholder="Password" autocomplete="current-password" style="font:inherit;padding:10px;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);min-height:44px;flex:1 1 180px">
+      <button id="signIn">Sign in</button>
+      <button id="signOut" class="hidden">Sign out</button>
+    </div>
+    <p class="meta" id="authText"></p>
+    <p class="meta" id="syncText" style="margin-top:10px"></p>
     <div class="actions">
+      <button id="syncNow">Sync to database</button>
       <button id="exportData">Export my data (JSON)</button>
       <button id="resetData">Reset learning</button>
     </div>
@@ -114,7 +124,7 @@ button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 <section id="palette" class="hidden">
   <div class="panel">
     <h2>My palette</h2>
-    <div class="actions" style="margin:8px 0"><button id="clearKept">Clear palette</button></div>
+    <div class="actions" style="margin:6px 0"><button id="clearKept">Clear palette</button></div>
     <div class="grid" id="keptGrid"></div>
     <p class="hint" id="emptyNote">Nothing kept yet.</p>
   </div>
@@ -123,18 +133,17 @@ button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 <div id="drawer" class="hidden" role="dialog" aria-label="Settings">
   <h2>Background</h2>
   <div class="swatches" id="swatches"></div>
-  <p class="hint" style="margin:10px 0 0">Cream is the default. Your choice stays on this device.</p>
-  <h2 style="margin-top:14px">Show each square as</h2>
+  <p class="hint" style="margin:8px 0 0">Cream is the default.</p>
+  <h2 style="margin-top:12px">Show each square as</h2>
   <div class="swatches" id="fmts"></div>
-  <p class="hint" style="margin:10px 0 0">HSL = hue, saturation, lightness. HSB = hue, saturation, brightness. RGB = red, green, blue (0 to 255).</p>
+  <p class="hint" style="margin:8px 0 0">HSL = hue, saturation, lightness. HSB = hue, saturation, brightness. RGB = red, green, blue (0 to 255).</p>
 </div>
 <button id="gear" aria-label="Settings" aria-expanded="false">⚙️</button>
 
 <div id="toast"></div>
 
 <script>
-// ---------- the colour range ----------
-// Generated blues: hue 170 to 270 degrees, six saturations, fourteen lightnesses.
+// ---------- the colour range: hue 170 to 270, six saturations, fourteen lightnesses ----------
 const BLUES = (() => {
   const hslToHex = (h, s, l) => {
     s /= 100; l /= 100;
@@ -155,11 +164,11 @@ const BLUES = (() => {
 })();
 const N = BLUES.length;
 
-// CIE Lab for neighbours
+function rgbOf(hex) { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
 function hexToLab(hex) {
-  const n = parseInt(hex.slice(1), 16);
+  const [R, G, B] = rgbOf(hex);
   const lin = c => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
-  const r = lin((n >> 16) & 255), g = lin((n >> 8) & 255), b = lin(n & 255);
+  const r = lin(R), g = lin(G), b = lin(B);
   const f = t => t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116;
   const X = f((r * 0.4124 + g * 0.3576 + b * 0.1805) / 0.95047);
   const Y = f(r * 0.2126 + g * 0.7152 + b * 0.0722);
@@ -174,7 +183,7 @@ function nearest(i, count) {
     .sort((x, y) => x.d - y.d).slice(0, count).map(o => o.j);
 }
 
-// bins for the three axes: 6 hue bands, 3 saturation, 3 lightness, so 54 cells
+// axes: 6 hue bands, 3 saturation, 3 lightness = 54 cells
 const HUE_NAMES = ["green-cyan", "turquoise", "sky", "cornflower", "ultramarine", "violet-indigo"];
 const SAT_NAMES = ["desaturated", "mid-saturated", "saturated"];
 const LIGHT_NAMES = ["dark", "mid-tone", "bright"];
@@ -183,26 +192,26 @@ const satBin = s => s < 35 ? 0 : s < 70 ? 1 : 2;
 const lightBin = l => l < 35 ? 0 : l < 65 ? 1 : 2;
 BLUES.forEach(b => { b.hb = hueBin(b.h); b.sb = satBin(b.s); b.lb = lightBin(b.l); b.cell = b.hb * 9 + b.sb * 3 + b.lb; });
 
-// ---------- storage (local for now; database later) ----------
-const KEY_KEPT = "colores-azules-kept-v3", KEY_PREFS = "colores-azules-prefs-v3", KEY_EVENTS = "colores-azules-events-v3";
+// ---------- storage: on this device now, synced to the database when it is set up ----------
+const KEY = { kept: "colores-azules-kept-v3", prefs: "colores-azules-prefs-v3", events: "colores-azules-events-v3", synced: "colores-azules-synced-v1", bg: "colores-azules-bg-v1", fmt: "colores-azules-fmt-v1" };
 const load = (k, fallback) => { try { const v = JSON.parse(localStorage.getItem(k)); return v === null ? fallback : v; } catch (e) { return fallback; } };
 const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 const blankPrefs = () => ({ hue: [0, 0, 0, 0, 0, 0], sat: [0, 0, 0], light: [0, 0, 0], boost: {} });
-let kept = load(KEY_KEPT, []);
-let prefs = load(KEY_PREFS, blankPrefs());
-let events = load(KEY_EVENTS, []);
+let kept = load(KEY.kept, []);
+let prefs = load(KEY.prefs, blankPrefs());
+let events = load(KEY.events, []);
+let syncedUpTo = load(KEY.synced, 0);
 
 function logEvent(type, hex, detail) {
   events.push({ t: new Date().toISOString(), type, hex, ...(detail || {}) });
-  if (events.length > 2000) events = events.slice(-2000);
-  save(KEY_EVENTS, events);
+  if (events.length > 5000) { events = events.slice(-5000); syncedUpTo = Math.max(0, syncedUpTo - 1000); }
+  save(KEY.events, events); save(KEY.synced, syncedUpTo);
 }
-// How much a signal moves each axis; boost spreads to Lab neighbours.
 function learn(i, amount, boostAmount) {
   const b = BLUES[i];
   prefs.hue[b.hb] += amount; prefs.sat[b.sb] += amount; prefs.light[b.lb] += amount;
   if (boostAmount) nearest(i, 12).forEach(j => { prefs.boost[BLUES[j].hex] = (prefs.boost[BLUES[j].hex] || 0) + boostAmount; });
-  save(KEY_PREFS, prefs);
+  save(KEY.prefs, prefs);
 }
 const score = i => {
   const b = BLUES[i];
@@ -216,8 +225,12 @@ function weightedPick(list) {
   return list[list.length - 1];
 }
 
-// ---------- the batch of 64: one per cell first, then the most liked extras ----------
-let batch = [], lastBatch = new Set(), selected = new Set(), page = 0, cardPos = 0;
+// ---------- the batch: 64 blues in eight sets of eight ----------
+const $ = id => document.getElementById(id);
+let batch = [], lastBatch = new Set();
+let setSize = 8, gridPicked = new Set();   // 16 on iPad (4 x 4 grid, tap), 8 on phone (swipe)
+let setNo = 0, cardNo = 0, setDecided = 0, batchKeeps = [], batchDone = false;
+
 function buildBatch() {
   const cells = Array.from({ length: 54 }, () => []);
   for (let i = 0; i < N; i++) if (!lastBatch.has(i)) cells[BLUES[i].cell].push(i);
@@ -228,233 +241,25 @@ function buildBatch() {
     for (let i = 0; i < N; i++) if (!lastBatch.has(i) && !picks.includes(i)) pool.push(i);
     picks.push(weightedPick(pool));
   }
-  batch = picks.sort((a, b) => BLUES[a].h - BLUES[b].h || BLUES[a].l - BLUES[b].l);
-  lastBatch = new Set(batch);
-  selected = new Set(); page = 0;
+  // shuffle so each set is a mix of the whole range
+  for (let k = picks.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [picks[k], picks[j]] = [picks[j], picks[k]]; }
+  batch = picks; lastBatch = new Set(batch);
+  setSize = window.innerWidth >= 700 ? 16 : 8; gridPicked = new Set();
+  setNo = 0; cardNo = 0; setDecided = 0; batchKeeps = []; batchDone = false;
 }
-function pageIds() { return batch.slice(page * 16, page * 16 + 16); }
+const SETS = () => 64 / setSize;
+const setOf = () => batch.slice(setNo * setSize, setNo * setSize + setSize);
+const current = () => batch[setNo * setSize + cardNo];
 const isKept = hex => kept.includes(hex);
-const updateCounts = () => { $("count").textContent = kept.length; $("events").textContent = events.length; };
 
-// ---------- helpers ----------
-const $ = id => document.getElementById(id);
-function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 1400); }
 function ink(hex) {
-  const n = parseInt(hex.slice(1), 16);
-  return (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) > 150 ? "rgba(30,30,30,0.7)" : "rgba(255,255,255,0.85)";
+  const [r, g, b] = rgbOf(hex);
+  return (0.299 * r + 0.587 * g + 0.114 * b) > 150 ? "rgba(30,30,30,0.7)" : "rgba(255,255,255,0.85)";
 }
-function tile(i, opts = {}) {
-  const b = BLUES[i];
-  const el = document.createElement("div");
-  el.className = "sw" + (opts.tall ? " tall" : "") + (isKept(b.hex) ? " kept" : "") + (selected.has(i) ? " picked" : "");
-  el.style.background = b.hex; el.style.color = ink(b.hex); el.textContent = label(b);
-  return el;
-}
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 1600); }
 
-// ---------- grid ----------
-function renderGrid() {
-  const g = $("grid"); g.innerHTML = "";
-  pageIds().forEach(i => {
-    const el = tile(i);
-    el.onclick = () => { selected.has(i) ? selected.delete(i) : selected.add(i); renderGrid(); };
-    g.appendChild(el);
-  });
-  $("batchInfo").textContent = "Batch of 64 · page " + (page + 1) + " of 4 · " + selected.size + " selected · " + N.toLocaleString() + " blues in the range";
-  $("prevPage").disabled = page === 0;
-  $("nextPage").disabled = page === 3;
-}
-$("prevPage").onclick = () => { if (page > 0) { page--; renderGrid(); } };
-$("nextPage").onclick = () => { if (page < 3) { page++; renderGrid(); } };
-$("clearPicked").onclick = () => { selected.clear(); renderGrid(); };
-$("keepPicked").onclick = () => {
-  const ids = [...selected];
-  ids.forEach(i => { const hex = BLUES[i].hex; if (!isKept(hex)) kept.push(hex); logEvent("keep", hex); });
-  save(KEY_KEPT, kept); updateCounts(); toast(ids.length ? "Kept " + ids.length : "Nothing selected");
-  renderGrid();
-};
-$("newBatch").onclick = () => {
-  // selected = pick (learns strongly), the rest = pass (learns a little)
-  batch.forEach(i => {
-    if (selected.has(i)) { learn(i, 1, 0.5); logEvent("pick", BLUES[i].hex, { batch: 1 }); }
-    else { learn(i, -0.2, 0); logEvent("pass", BLUES[i].hex, { batch: 1 }); }
-  });
-  buildBatch(); updateCounts(); renderGrid();
-  toast("New batch: tuned to your picks");
-};
-
-// ---------- tournament ----------
-let round = [], nxt = [], roundSize = 0;
-$("runTour").onclick = () => setMode("tour");
-function startTournament() {
-  const picks = [...selected];
-  if (picks.length < 2) { $("tourInfo").textContent = "Select at least two squares in the batch, then open the tournament."; $("duel").innerHTML = ""; return; }
-  let size = 8; while (size < picks.length) size *= 2;
-  const rest = batch.filter(i => !selected.has(i)).sort((a, b) => score(b) - score(a));
-  const entrants = picks.concat(rest.slice(0, size - picks.length));
-  round = entrants.sort(() => Math.random() - 0.5); nxt = [];
-  roundSize = size;
-  if (size > picks.length) toast("Padded to " + size + " with your highest-scoring extras");
-  duel();
-}
-function roundName(n) { return n === 2 ? "Final" : n === 4 ? "Semifinal" : n === 8 ? "Quarterfinal" : "Round of " + n; }
-function duel() {
-  const d = $("duel"); d.innerHTML = "";
-  if (round.length === 0) { round = nxt; nxt = []; }
-  if (round.length === 1) {
-    const champ = round[0];
-    $("tourInfo").textContent = "Winner: " + BLUES[champ].hex + ". Added to your palette.";
-    if (!isKept(BLUES[champ].hex)) { kept.push(BLUES[champ].hex); save(KEY_KEPT, kept); }
-    logEvent("champion", BLUES[champ].hex, { size: roundSize });
-    learn(champ, 1, 0.3); updateCounts();
-    d.appendChild(tile(champ, { tall: true }));
-    return;
-  }
-  const n = round.length;
-  const a = round.shift(), b = round.shift();
-  $("tourInfo").textContent = roundName(n) + " · " + (n / 2) + " duel" + (n > 2 ? "s" : "") + " left in this round. Tap the one you prefer.";
-  [a, b].forEach((i, k) => {
-    const el = tile(i, { tall: true });
-    el.onclick = () => {
-      const other = k === 0 ? b : a;
-      nxt.push(i);
-      learn(i, 1, 0.3); learn(other, -0.3, 0);
-      logEvent("win", BLUES[i].hex, { round: roundName(n) });
-      logEvent("lose", BLUES[other].hex, { round: roundName(n) });
-      duel();
-    };
-    d.appendChild(el);
-  });
-}
-
-// ---------- one by one ----------
-function showCard() {
-  const i = batch[cardPos % 64];
-  const el = tile(i, { tall: true }); el.id = "card";
-  $("card").replaceWith(el); bindSwipe(el);
-}
-function decide(keep) {
-  const i = batch[cardPos % 64], hex = BLUES[i].hex;
-  if (keep) { if (!isKept(hex)) kept.push(hex); save(KEY_KEPT, kept); learn(i, 1, 0.5); logEvent("keep", hex); }
-  else { learn(i, -0.2, 0); logEvent("pass", hex); }
-  updateCounts(); cardPos++; showCard();
-}
-$("keepBtn").onclick = () => decide(true);
-$("passBtn").onclick = () => decide(false);
-document.addEventListener("keydown", e => {
-  if ($("swipeView").classList.contains("hidden")) return;
-  if (e.key === "ArrowRight") decide(true);
-  if (e.key === "ArrowLeft") decide(false);
-});
-let startX = null;
-function bindSwipe(el) {
-  el.addEventListener("pointerdown", e => { startX = e.clientX; el.setPointerCapture(e.pointerId); });
-  el.addEventListener("pointermove", e => { if (startX !== null) { const dx = e.clientX - startX; el.style.transform = "translateX(" + dx + "px) rotate(" + dx / 30 + "deg)"; } });
-  el.addEventListener("pointerup", e => {
-    if (startX === null) return;
-    const dx = e.clientX - startX; startX = null;
-    if (dx > 90) decide(true); else if (dx < -90) decide(false); else el.style.transform = "";
-  });
-}
-
-// ---------- neighbours ----------
-function renderNeighbours() {
-  const seed = selected.size ? [...selected][0] : -1;
-  const g = $("neighGrid"); g.innerHTML = "";
-  if (seed < 0) { $("neighInfo").textContent = "Select one blue in the batch first. Its nearest neighbours appear here."; return; }
-  $("neighInfo").textContent = "Nearest to " + BLUES[seed].hex + " (outlined first). Distances are visual, in CIE Lab.";
-  const first = tile(seed); first.classList.add("picked"); g.appendChild(first);
-  nearest(seed, 15).forEach(i => g.appendChild(tile(i)));
-}
-
-// ---------- what I like ----------
-function renderTaste() {
-  const top = arr => arr.indexOf(Math.max(...arr));
-  const total = prefs.hue.reduce((a, b) => a + b, 0) + prefs.sat.reduce((a, b) => a + b, 0) + prefs.light.reduce((a, b) => a + b, 0);
-  const picks = events.filter(e => e.type === "pick" || e.type === "keep" || e.type === "win").length;
-  const passes = events.filter(e => e.type === "pass" || e.type === "lose").length;
-  if (picks === 0 && total === 0) { $("tasteText").textContent = "No picks yet. Select squares in a batch and press New batch, or run a tournament."; return; }
-  const h = HUE_NAMES[top(prefs.hue)], s = SAT_NAMES[top(prefs.sat)], l = LIGHT_NAMES[top(prefs.light)];
-  $("tasteText").innerHTML = "So far you lean towards <b>" + h + "</b> blues, <b>" + s + "</b>, and <b>" + l + "</b>.<br>" +
-    "Picks and keeps: " + picks + ". Passes and losses: " + passes + ". Batches shown: " + events.filter(e => e.type === "pick" || e.type === "pass").length / 64 + ".";
-}
-$("exportData").onclick = () => {
-  const data = { version: 3, exported: new Date().toISOString(), prefs, kept, events };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "colores-azules-data.json"; a.click();
-};
-$("resetData").onclick = () => { if (confirm("Reset what the page has learned? Kept blues stay.")) { prefs = blankPrefs(); events = []; save(KEY_PREFS, prefs); save(KEY_EVENTS, events); renderTaste(); updateCounts(); } };
-
-// ---------- palette ----------
-function renderPalette() {
-  const g = $("keptGrid"); g.innerHTML = "";
-  kept.forEach(hex => {
-    const i = BLUES.findIndex(b => b.hex === hex);
-    if (i >= 0) g.appendChild(tile(i));
-  });
-  $("emptyNote").classList.toggle("hidden", kept.length > 0);
-}
-$("clearKept").onclick = () => { if (confirm("Clear your palette?")) { kept = []; save(KEY_KEPT, kept); renderPalette(); updateCounts(); renderGrid(); } };
-
-// ---------- modes ----------
-function setMode(mode) {
-  const views = { grid: "gridView", swipe: "swipeView", tour: "tourView", neigh: "neighView", taste: "tasteView", palette: "palette" };
-  Object.entries(views).forEach(([k, id]) => $(id).classList.toggle("hidden", k !== mode));
-  const ids = { grid: "modeGrid", swipe: "modeSwipe", tour: "modeTour", neigh: "modeNeigh", taste: "modeTaste", palette: "modePalette" };
-  Object.entries(ids).forEach(([k, id]) => $(id).setAttribute("aria-pressed", String(k === mode)));
-  if (mode === "grid") renderGrid();
-  if (mode === "swipe") showCard();
-  if (mode === "tour") startTournament();
-  if (mode === "neigh") renderNeighbours();
-  if (mode === "taste") renderTaste();
-  renderPalette();
-}
-$("modeGrid").onclick = () => setMode("grid");
-$("modeSwipe").onclick = () => setMode("swipe");
-$("modeTour").onclick = () => setMode("tour");
-$("modeNeigh").onclick = () => setMode("neigh");
-$("modeTaste").onclick = () => setMode("taste");
-$("modePalette").onclick = () => setMode("palette");
-
-buildBatch();
-renderGrid();
-updateCounts();
-renderPalette();
-
-// ---------- settings gear: background from cream to deeper cream ----------
-const BACKGROUNDS = [
-  { name: "Ivory",    paper: "#fffdf6", panel: "#ffffff" },
-  { name: "Milk",     paper: "#fbf7ee", panel: "#fffdf8" },
-  { name: "Cream",    paper: "#f6f3ec", panel: "#fffdf8" },
-  { name: "Parchment",paper: "#f2ead8", panel: "#faf5ea" },
-  { name: "Vanilla",  paper: "#ebe2c9", panel: "#f6f0e0" },
-  { name: "Biscuit",  paper: "#e3d7b8", panel: "#eee6d0" },
-  { name: "Sand",     paper: "#d9cba6", panel: "#e4dac0" },
-  { name: "Wheat",    paper: "#c9bb93", panel: "#d6cba9" }
-];
-function applyBackground(idx) {
-  const bg = BACKGROUNDS[idx];
-  document.documentElement.style.setProperty("--paper", bg.paper);
-  document.documentElement.style.setProperty("--keep", bg.paper);
-  document.documentElement.style.setProperty("--pass", bg.paper);
-  document.documentElement.style.setProperty("--panel", bg.panel);
-  document.querySelectorAll("#swatches button").forEach((b, k) => b.setAttribute("aria-pressed", String(k === idx)));
-  try { localStorage.setItem("colores-azules-bg-v1", String(idx)); } catch (e) {}
-}
-const sw = $("swatches");
-BACKGROUNDS.forEach((bg, k) => {
-  const b = document.createElement("button");
-  b.title = bg.name; b.setAttribute("aria-label", bg.name);
-  b.style.background = bg.paper;
-  b.onclick = () => applyBackground(k);
-  sw.appendChild(b);
-});
-let savedBg = 2;
-try { const v = parseInt(localStorage.getItem("colores-azules-bg-v1"), 10); if (v >= 0 && v < BACKGROUNDS.length) savedBg = v; } catch (e) {}
-applyBackground(savedBg);
-// ---------- how each square is labelled: HEX, RGB, HSL or HSB ----------
-const FORMAT_KEY = "colores-azules-fmt-v1";
+// ---------- how each square is labelled ----------
 function currentFmt() { try { return localStorage.getItem("colores-azules-fmt-v1") || "hex"; } catch (e) { return "hex"; } }
-function rgbOf(hex) { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
 function label(b) {
   const f = currentFmt();
   if (f === "rgb") return rgbOf(b.hex).join(" · ");
@@ -467,24 +272,334 @@ function label(b) {
   }
   return b.hex;
 }
-function setFmt(f) {
-  try { localStorage.setItem(FORMAT_KEY, f); } catch (e) {}
-  document.querySelectorAll("#fmts button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.f === f)));
-  renderGrid(); renderPalette();
+function tile(i, opts = {}) {
+  const b = BLUES[i];
+  const el = document.createElement("div");
+  el.className = "sw" + (opts.tall ? " tall" : "") + (isKept(b.hex) ? " kept" : "");
+  el.style.background = b.hex; el.style.color = ink(b.hex); el.textContent = label(b);
+  return el;
 }
-const fmts = $("fmts");
+
+// ---------- sets of eight: swipe cards ----------
+// Chooses the layout: a 4 x 4 grid of tap-to-select on iPad, swipe cards on phone.
+function renderSets() {
+  const grid = !batchDone && setSize === 16;
+  $("gridWrap").classList.toggle("hidden", !grid);
+  $("swipeWrap").classList.toggle("hidden", grid);
+  $("swipeActions").classList.toggle("hidden", grid);
+  $("nextWrap").classList.toggle("hidden", grid);
+  $("dots").classList.toggle("hidden", grid);
+  if (grid) renderGridSet(); else renderSwipeSets();
+}
+function renderGridSet() {
+  $("setInfo").textContent = "Set " + (setNo + 1) + " of " + SETS() + " · tap the squares you like · " + gridPicked.size + " selected · kept " + batchKeeps.length + " so far";
+  const g = $("setGrid"); g.innerHTML = "";
+  setOf().forEach(i => {
+    const el = tile(i);
+    if (gridPicked.has(i)) el.classList.add("picked");
+    el.onclick = () => { gridPicked.has(i) ? gridPicked.delete(i) : gridPicked.add(i); renderGridSet(); };
+    g.appendChild(el);
+  });
+  $("gridNext").disabled = gridPicked.size === 0;
+}
+$("gridNext").onclick = () => {
+  setOf().forEach(i => {
+    const hex = BLUES[i].hex;
+    if (gridPicked.has(i)) {
+      if (!isKept(hex)) kept.push(hex);
+      save(KEY.kept, kept);
+      if (!batchKeeps.includes(i)) batchKeeps.push(i);
+      learn(i, 1, 0.5); logEvent("keep", hex);
+    } else { learn(i, -0.2, 0); logEvent("pass", hex); }
+  });
+  gridPicked.clear();
+  advance(); updateCounts();
+};
+function advance() {
+  if (setNo < SETS() - 1) { setNo++; cardNo = 0; setDecided = 0; renderSets(); }
+  else { batchDone = true; renderSets(); syncNow(true); }
+}
+function renderSwipeSets() {
+  if (batchDone) {
+    $("card").replaceWith(Object.assign(document.createElement("div"), { id: "card", className: "sw tall", style: "background:var(--panel);color:var(--ink);align-items:center;justify-content:center;text-align:center;font-weight:200;font-size:1rem" }));
+    $("card").textContent = "All sets done. " + batchKeeps.length + " kept.";
+    $("setInfo").textContent = "Batch complete";
+    $("dots").innerHTML = "";
+    $("nextSet").classList.add("hidden");
+    $("keepBtn").classList.add("hidden"); $("passBtn").classList.add("hidden");
+    $("doneActions").classList.remove("hidden");
+    return;
+  }
+  $("keepBtn").classList.remove("hidden"); $("passBtn").classList.remove("hidden");
+  $("nextSet").classList.remove("hidden");
+  $("doneActions").classList.add("hidden");
+  $("setInfo").textContent = "Set " + (setNo + 1) + " of " + SETS() + " · card " + Math.min(cardNo + 1, setSize) + " of " + setSize + " · kept " + batchKeeps.length + " so far";
+  const dots = $("dots"); dots.innerHTML = "";
+  setOf().forEach((i, k) => {
+    const d = document.createElement("span");
+    d.style.background = BLUES[i].hex;
+    if (k === cardNo) d.className = "now";
+    if (batchKeeps.includes(i)) d.className += " kept";
+    dots.appendChild(d);
+  });
+  const el = tile(current(), { tall: true }); el.id = "card";
+  $("card").replaceWith(el); bindSwipe(el);
+  $("nextSet").disabled = setDecided === 0 && cardNo === 0;
+}
+function decide(keep) {
+  if (batchDone) return;
+  const i = current(), hex = BLUES[i].hex;
+  if (keep) {
+    if (!isKept(hex)) kept.push(hex);
+    save(KEY.kept, kept);
+    if (!batchKeeps.includes(i)) batchKeeps.push(i);
+    learn(i, 1, 0.5); logEvent("keep", hex);
+  } else { learn(i, -0.2, 0); logEvent("pass", hex); }
+  setDecided++; cardNo++;
+  if (cardNo === setSize) nextSet();
+  else renderSets();
+  updateCounts();
+}
+function nextSet() {
+  if (setDecided === 0 && cardNo < setSize) { toast("Swipe at least one colour first"); return; }
+  advance();
+}
+$("keepBtn").onclick = () => decide(true);
+$("passBtn").onclick = () => decide(false);
+$("nextSet").onclick = nextSet;
+document.addEventListener("keydown", e => {
+  if ($("setsView").classList.contains("hidden") || setSize === 16) return;
+  if (e.key === "ArrowRight") decide(true);
+  if (e.key === "ArrowLeft") decide(false);
+});
+let startX = null;
+function bindSwipe(el) {
+  el.addEventListener("pointerdown", e => { startX = e.clientX; el.setPointerCapture(e.pointerId); });
+  el.addEventListener("pointermove", e => { if (startX !== null) { const dx = e.clientX - startX; el.style.transform = "translateX(" + dx + "px) rotate(" + dx / 30 + "deg)"; } });
+  el.addEventListener("pointerup", e => {
+    if (startX === null) return;
+    const dx = e.clientX - startX; startX = null;
+    if (dx > 80) decide(true); else if (dx < -80) decide(false); else el.style.transform = "";
+  });
+}
+$("startTour").onclick = () => setMode("tour");
+$("newBatch").onclick = () => { buildBatch(); renderSets(); updateCounts(); toast("New batch of 64"); };
+
+// ---------- tournament: head to head over the kept blues of this batch ----------
+let round = [], nxt = [], roundSize = 0;
+function startTournament() {
+  if (!batchDone) { $("tourInfo").textContent = "Finish all the sets first (set " + (setNo + 1) + " of " + SETS() + ").";$("duel").innerHTML = ""; $("tourActions").innerHTML = ""; return; }
+  const picks = batchKeeps.slice();
+  if (picks.length < 2) { $("tourInfo").textContent = "Keep at least two blues in this batch, then run the tournament."; $("duel").innerHTML = ""; $("tourActions").innerHTML = ""; return; }
+  let size = 8; while (size < picks.length) size *= 2;
+  const rest = batch.filter(i => !picks.includes(i)).sort((a, b) => score(b) - score(a));
+  const entrants = picks.concat(rest.slice(0, size - picks.length));
+  round = entrants.sort(() => Math.random() - 0.5); nxt = []; roundSize = size;
+  if (size > picks.length) toast("Padded to " + size + " with your highest-scoring extras");
+  duel();
+}
+function roundName(n) { return n === 2 ? "Final" : n === 4 ? "Semifinal" : n === 8 ? "Quarterfinal" : "Round of " + n; }
+function duel() {
+  const d = $("duel"); d.innerHTML = ""; $("tourActions").innerHTML = "";
+  if (round.length === 0) round = nxt, nxt = [];
+  if (round.length === 1) {
+    const champ = round[0], hex = BLUES[champ].hex;
+    $("tourInfo").textContent = "Winner: " + label(BLUES[champ]) + ". Added to your palette.";
+    if (!isKept(hex)) { kept.push(hex); save(KEY.kept, kept); }
+    logEvent("champion", hex, { size: roundSize });
+    learn(champ, 1, 0.3); updateCounts();
+    d.appendChild(tile(champ, { tall: true }));
+    const again = document.createElement("button"); again.textContent = "New batch of 64 ↻";
+    again.onclick = () => { buildBatch(); setMode("sets"); toast("New batch of 64"); };
+    $("tourActions").appendChild(again);
+    syncNow(true);
+    return;
+  }
+  const n = round.length;
+  const a = round.shift(), b = round.shift();
+  $("tourInfo").textContent = roundName(n) + " · " + (n / 2) + " duel" + (n > 2 ? "s" : "") + " left in this round. Tap the one you prefer.";
+  [a, b].forEach((i, k) => {
+    const el = tile(i, { tall: true });
+    el.onclick = () => {
+      const other = k === 0 ? b : a;
+      nxt.push(i);
+      learn(i, 1, 0.3); learn(other, -0.3, 0);
+      logEvent("duel", BLUES[i].hex, { loser: BLUES[other].hex, round: roundName(n) });
+      duel();
+    };
+    d.appendChild(el);
+  });
+}
+
+// ---------- neighbours of the card on screen (or the last kept blue) ----------
+function renderNeighbours() {
+  const g = $("neighGrid"); g.innerHTML = "";
+  let seed = batchDone ? -1 : (setSize === 16 ? (gridPicked.size ? [...gridPicked][0] : setOf()[0]) : current());
+  if (seed === undefined || seed < 0) seed = kept.length ? BLUES.findIndex(b => b.hex === kept[kept.length - 1]) : -1;
+  if (seed < 0) { $("neighInfo").textContent = "Swipe a colour first. Its nearest neighbours appear here."; return; }
+  $("neighInfo").textContent = "Nearest to " + BLUES[seed].hex + ", by visual distance (CIE Lab).";
+  const first = tile(seed); first.style.outline = "2px solid var(--ink)"; first.style.outlineOffset = "2px"; g.appendChild(first);
+  nearest(seed, 15).forEach(i => g.appendChild(tile(i)));
+}
+
+// ---------- what I like, and sync ----------
+const counts = () => ({
+  picks: events.filter(e => e.type === "keep" || e.type === "duel").length,
+  passes: events.filter(e => e.type === "pass").length
+});
+function renderTaste() {
+  const top = arr => arr.indexOf(Math.max(...arr));
+  const c = counts();
+  if (c.picks === 0 && c.passes === 0) { $("tasteText").textContent = "No choices yet. Swipe the sets to start."; }
+  else $("tasteText").innerHTML = "So far you lean towards <b>" + HUE_NAMES[top(prefs.hue)] + "</b> blues, <b>" + SAT_NAMES[top(prefs.sat)] + "</b>, and <b>" + LIGHT_NAMES[top(prefs.light)] + "</b>.<br>Keeps and wins: " + c.picks + ". Passes and losses: " + c.passes + ".";
+  updateSyncText();
+}
+// ---------- database: architecture project, owner only (sign in required) ----------
+const SYNC = { url: "https://xabgankckrcuhcgdolrg.supabase.co", key: "sb_publishable_kncKodoYJZ6ByexwWM_TtQ_OpW68M5f" };
+const SESSION_KEY = "colores-azules-session-v1";
+const BY_HEX = new Map(BLUES.map(b => [b.hex, b]));
+const getSession = () => load(SESSION_KEY, null);
+function setSession(s) {
+  if (s) save(SESSION_KEY, s);
+  else { try { localStorage.removeItem(SESSION_KEY); } catch (e) {} }
+  updateSyncText();
+}
+function updateSyncText() {
+  const s = getSession();
+  $("authText").textContent = s ? "Signed in. Only you can read or write this data." : "Signed out. Choices stay on this device until you sign in.";
+  $("signOut").classList.toggle("hidden", !s);
+  $("signIn").classList.toggle("hidden", !!s);
+  $("syncText").textContent = "Synced " + syncedUpTo + " of " + events.length + " choices to the database.";
+}
+async function signIn() {
+  const r = await fetch(SYNC.url + "/auth/v1/token?grant_type=password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SYNC.key },
+    body: JSON.stringify({ email: $("email").value, password: $("pw").value })
+  });
+  if (!r.ok) throw new Error("sign-in");
+  const j = await r.json();
+  $("pw").value = ""; $("email").value = "";
+  setSession({ token: j.access_token, uid: j.user.id, exp: Date.now() + j.expires_in * 1000 });
+}
+$("signIn").onclick = () => signIn().then(() => { toast("Signed in"); syncNow(false); }).catch(() => toast("Sign-in failed"));
+$("signOut").onclick = () => { setSession(null); toast("Signed out"); };
+async function post(table, rows, prefer, token) {
+  const r = await fetch(SYNC.url + "/rest/v1/" + table, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SYNC.key, Authorization: "Bearer " + token, Prefer: prefer || "return=minimal" },
+    body: JSON.stringify(rows)
+  });
+  if (!r.ok) throw new Error(table + " " + r.status);
+}
+async function syncNow(auto) {
+  const s = getSession();
+  if (!s || Date.now() > s.exp) {
+    if (s) setSession(null);
+    if (!auto) toast("Sign in to sync. Saved on this device.");
+    updateSyncText(); return;
+  }
+  const rows = events.slice(syncedUpTo);
+  if (!rows.length) { updateSyncText(); return; }
+  const choices = rows.filter(e => e.type === "keep" || e.type === "pass").map(e => {
+    const b = BY_HEX.get(e.hex);
+    return { kind: e.type, hex: e.hex, hue: b.h, sat: b.s, light: Math.round(b.l), client_time: e.t };
+  });
+  const duels = rows.filter(e => e.type === "duel").map(e => ({ round: e.round, winner_hex: e.hex, loser_hex: e.loser, client_time: e.t }));
+  try {
+    if (choices.length) await post("ca_choices", choices, null, s.token);
+    if (duels.length) await post("ca_duels", duels, null, s.token);
+    await post("ca_taste", [{ owner_id: s.uid, prefs, updated_at: new Date().toISOString() }], "resolution=merge-duplicates,return=minimal", s.token);
+    syncedUpTo = events.length; save(KEY.synced, syncedUpTo);
+    updateCounts();
+    if (!auto) toast("Synced " + rows.length);
+  } catch (e) {
+    if (!auto) toast("Sync failed. Still saved on this device.");
+  }
+  updateSyncText();
+}
+$("syncNow").onclick = () => syncNow(false);
+$("exportData").onclick = () => {
+  const data = { version: 3, exported: new Date().toISOString(), prefs, kept, events };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "colores-azules-data.json"; a.click();
+};
+$("resetData").onclick = () => { if (confirm("Reset what the page has learned? Kept blues stay.")) { prefs = blankPrefs(); save(KEY.prefs, prefs); renderTaste(); } };
+
+// ---------- palette ----------
+function renderPalette() {
+  const g = $("keptGrid"); g.innerHTML = "";
+  kept.forEach(hex => { const i = BLUES.findIndex(b => b.hex === hex); if (i >= 0) g.appendChild(tile(i)); });
+  $("emptyNote").classList.toggle("hidden", kept.length > 0);
+}
+$("clearKept").onclick = () => { if (confirm("Clear your palette?")) { kept = []; save(KEY.kept, kept); renderPalette(); updateCounts(); renderSets(); } };
+
+// ---------- modes ----------
+function updateCounts() {
+  $("count").textContent = kept.length; $("events").textContent = events.length; $("synced").textContent = syncedUpTo;
+}
+function setMode(mode) {
+  const views = { sets: "setsView", tour: "tourView", neigh: "neighView", taste: "tasteView", palette: "palette" };
+  Object.entries(views).forEach(([k, id]) => $(id).classList.toggle("hidden", k !== mode));
+  const ids = { sets: "modeSets", tour: "modeTour", neigh: "modeNeigh", taste: "modeTaste", palette: "modePalette" };
+  Object.entries(ids).forEach(([k, id]) => $(id).setAttribute("aria-pressed", String(k === mode)));
+  if (mode === "sets") renderSets();
+  if (mode === "tour") startTournament();
+  if (mode === "neigh") renderNeighbours();
+  if (mode === "taste") renderTaste();
+  if (mode === "palette") renderPalette();
+}
+$("modeSets").onclick = () => setMode("sets");
+$("modeTour").onclick = () => setMode("tour");
+$("modeNeigh").onclick = () => setMode("neigh");
+$("modeTaste").onclick = () => setMode("taste");
+$("modePalette").onclick = () => setMode("palette");
+
+// ---------- settings gear: background and label format ----------
+const BACKGROUNDS = [
+  { name: "Ivory", paper: "#fffdf6", panel: "#ffffff" },
+  { name: "Milk", paper: "#fbf7ee", panel: "#fffdf8" },
+  { name: "Cream", paper: "#f6f3ec", panel: "#fffdf8" },
+  { name: "Parchment", paper: "#f2ead8", panel: "#faf5ea" },
+  { name: "Vanilla", paper: "#ebe2c9", panel: "#f6f0e0" },
+  { name: "Biscuit", paper: "#e3d7b8", panel: "#eee6d0" },
+  { name: "Sand", paper: "#d9cba6", panel: "#e4dac0" },
+  { name: "Wheat", paper: "#c9bb93", panel: "#d6cba9" }
+];
+function applyBackground(idx) {
+  const bg = BACKGROUNDS[idx], root = document.documentElement.style;
+  root.setProperty("--paper", bg.paper); root.setProperty("--keep", bg.paper); root.setProperty("--pass", bg.paper); root.setProperty("--panel", bg.panel);
+  document.querySelectorAll("#swatches button").forEach((b, k) => b.setAttribute("aria-pressed", String(k === idx)));
+  try { localStorage.setItem(KEY.bg, String(idx)); } catch (e) {}
+}
+BACKGROUNDS.forEach((bg, k) => {
+  const b = document.createElement("button");
+  b.title = bg.name; b.setAttribute("aria-label", bg.name); b.style.background = bg.paper;
+  b.onclick = () => applyBackground(k);
+  $("swatches").appendChild(b);
+});
+let savedBg = 2;
+try { const v = parseInt(localStorage.getItem(KEY.bg), 10); if (v >= 0 && v < BACKGROUNDS.length) savedBg = v; } catch (e) {}
+applyBackground(savedBg);
+
+function setFmt(f) {
+  try { localStorage.setItem(KEY.fmt, f); } catch (e) {}
+  document.querySelectorAll("#fmts button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.f === f)));
+  renderSets(); renderPalette();
+}
 ["hex", "rgb", "hsl", "hsb"].forEach(f => {
   const b = document.createElement("button");
-  b.dataset.f = f; b.textContent = f.toUpperCase();
-  b.onclick = () => setFmt(f);
-  fmts.appendChild(b);
+  b.dataset.f = f; b.textContent = f.toUpperCase(); b.onclick = () => setFmt(f);
+  $("fmts").appendChild(b);
 });
-setFmt(currentFmt());
+$("gear").onclick = () => { const open = $("drawer").classList.toggle("hidden") === false; $("gear").setAttribute("aria-expanded", String(open)); };
 
-$("gear").onclick = () => {
-  const d = $("drawer"); const open = d.classList.toggle("hidden") === false;
-  $("gear").setAttribute("aria-expanded", String(open));
-};
+// ---------- start ----------
+buildBatch();
+setFmt(currentFmt());
+updateCounts();
+renderPalette();
+setMode("sets");
 </script>
 </body>
 </html>
