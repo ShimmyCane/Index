@@ -22,20 +22,16 @@ nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
 button { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 10px 14px; min-height: 48px; cursor: pointer; }
 button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 button:disabled { opacity: 0.4; cursor: default; }
+input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--paper); color: var(--ink); min-height: 44px; flex: 1 1 180px; }
 .sw { position: relative; height: 110px; border: none; border-radius: 2px; cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; display: flex; align-items: flex-end; padding: 8px; font-family: system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; font-weight: 200; font-size: 0.8rem; letter-spacing: 0.04em; }
 .sw.kept::after { content: "✓"; position: absolute; top: 6px; right: 6px; background: var(--panel); color: var(--ink); border-radius: 50%; width: 26px; height: 26px; text-align: center; line-height: 26px; font-size: 0.85rem; }
-.sw.tall { height: min(62vh, 520px); font-size: 0.95rem; touch-action: pan-y; }
 .sw.picked { box-shadow: inset 0 0 0 5px var(--panel); }
-.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-@media (min-width: 700px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+.sw.tall { height: min(62vh, 520px); font-size: 0.95rem; }
+.grid { display: grid; gap: 10px; }
 .hint { color: var(--muted); font-size: 0.9rem; text-align: center; }
 .actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 12px 0; }
 .actions button { flex: 1 1 110px; max-width: 220px; }
 .keep-btn, .pass-btn { background: var(--panel) !important; color: var(--ink) !important; }
-.dots { display: flex; gap: 6px; justify-content: center; margin: 8px 0; }
-.dots span { width: 22px; height: 22px; border-radius: 2px; position: relative; }
-.dots span.now { box-shadow: 0 0 0 2px var(--ink); }
-.dots span.kept::after { content: "✓"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #fff; text-shadow: 0 0 2px rgba(0,0,0,0.4); }
 .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .duel .sw { height: min(58vh, 460px); font-size: 0.95rem; }
 .panel { margin-top: 14px; background: var(--panel); border-radius: 4px; padding: 12px; }
@@ -50,7 +46,6 @@ button:disabled { opacity: 0.4; cursor: default; }
 .swatches button[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 2px; }
 #toast { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 10px 14px; border-radius: 4px; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: 90vw; text-align: center; }
 #toast.show { opacity: 1; }
-input { font-size: 16px; }   /* stops iOS zooming in when a field is focused */
 .hidden { display: none !important; }
 </style>
 </head>
@@ -58,7 +53,7 @@ input { font-size: 16px; }   /* stops iOS zooming in when a field is focused */
 <header>
   <div>
     <h1>Colores Azules</h1>
-    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 6</span></div>
+    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 7</span></div>
   </div>
   <div class="meta">Kept: <span id="count">0</span> · Synced: <span id="synced">0</span>/<span id="events">0</span></div>
 </header>
@@ -73,19 +68,8 @@ input { font-size: 16px; }   /* stops iOS zooming in when a field is focused */
 
 <section id="setsView">
   <div class="hint" id="setInfo"></div>
-  <div id="gridWrap" class="hidden">
-    <div class="grid" id="setGrid" style="grid-template-columns:repeat(2,1fr);max-width:560px;margin:0 auto"></div>
-    <div class="actions"><button id="gridNext" class="keep-btn">Next palette ▸</button></div>
-  </div>
-  <div class="dots" id="dots"></div>
-  <div id="swipeWrap"><div class="grid" style="grid-template-columns:1fr;max-width:420px;margin:0 auto"><div class="sw tall" id="card"></div></div></div>
-  <div class="actions" id="swipeActions">
-    <button class="pass-btn" id="passBtn">◂ Pass</button>
-    <button class="keep-btn" id="keepBtn">Keep ▸</button>
-  </div>
-  <div class="actions" id="nextWrap">
-    <button id="nextSet">Next palette ▸</button>
-  </div>
+  <div class="grid" id="setGrid" style="grid-template-columns:repeat(2,1fr);max-width:560px;margin:0 auto"></div>
+  <div class="actions"><button id="gridNext" class="keep-btn">Next palette ▸</button></div>
   <p class="hint">Tap the squares you like, then Next palette. The 64 blues are in palettes: 16 at a time on iPad, 8 on iPhone.</p>
   <div class="actions hidden" id="doneActions">
     <button id="startTour" class="keep-btn">Start the tournament ▸</button>
@@ -109,8 +93,8 @@ input { font-size: 16px; }   /* stops iOS zooming in when a field is focused */
     <h2>What I like so far</h2>
     <div class="readout" id="tasteText"></div>
     <div class="actions" style="justify-content:flex-start;margin:10px 0 0">
-      <input id="email" type="email" placeholder="Email" autocomplete="username" style="font:inherit;padding:10px;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);min-height:44px;flex:1 1 180px">
-      <input id="pw" type="password" placeholder="Password" autocomplete="current-password" style="font:inherit;padding:10px;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);min-height:44px;flex:1 1 180px">
+      <input id="email" type="email" placeholder="Email" autocomplete="username">
+      <input id="pw" type="password" placeholder="Password" autocomplete="current-password">
       <button id="signIn">Sign in</button>
       <button id="signOut" class="hidden">Sign out</button>
     </div>
@@ -185,6 +169,7 @@ function hexToLab(hex) {
   return [116 * Y - 16, 500 * (X - Y), 200 * (Y - Z)];
 }
 BLUES.forEach(b => { b.lab = hexToLab(b.hex); });
+const BY_HEX = new Map(BLUES.map((b, i) => [b.hex, i]));
 function nearest(i, count) {
   const a = BLUES[i].lab;
   return BLUES.map((_, j) => j).filter(j => j !== i)
@@ -201,30 +186,48 @@ const satBin = s => s < 35 ? 0 : s < 70 ? 1 : 2;
 const lightBin = l => l < 35 ? 0 : l < 65 ? 1 : 2;
 BLUES.forEach(b => { b.hb = hueBin(b.h); b.sb = satBin(b.s); b.lb = lightBin(b.l); b.cell = b.hb * 9 + b.sb * 3 + b.lb; });
 
-// ---------- storage: on this device now, synced to the database when it is set up ----------
-const KEY = { kept: "colores-azules-kept-v3", prefs: "colores-azules-prefs-v3", events: "colores-azules-events-v3", synced: "colores-azules-synced-v1", bg: "colores-azules-bg-v1", fmt: "colores-azules-fmt-v1" };
+// ---------- storage: on this device, synced to the database when signed in ----------
+const KEY = { kept: "colores-azules-kept-v3", prefs: "colores-azules-prefs-v3", events: "colores-azules-events-v3", state: "colores-azules-state-v3", synced: "colores-azules-synced-v1", session: "colores-azules-session-v1", bg: "colores-azules-bg-v1", fmt: "colores-azules-fmt-v1" };
 const load = (k, fallback) => { try { const v = JSON.parse(localStorage.getItem(k)); return v === null ? fallback : v; } catch (e) { return fallback; } };
 const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
-const blankPrefs = () => ({ hue: [0, 0, 0, 0, 0, 0], sat: [0, 0, 0], light: [0, 0, 0], boost: {} });
+const blankAxes = () => ({ hue: [0, 0, 0, 0, 0, 0], sat: [0, 0, 0], light: [0, 0, 0] });
+const BANDS = ["morning", "afternoon", "evening", "night"];
+const blankPrefs = () => ({ ...blankAxes(), boost: {}, bands: Object.fromEntries(BANDS.map(b => [b, blankAxes()])) });
 let kept = load(KEY.kept, []);
 let prefs = load(KEY.prefs, blankPrefs());
+if (!prefs.bands) prefs.bands = Object.fromEntries(BANDS.map(b => [b, blankAxes()]));
 let events = load(KEY.events, []);
 let syncedUpTo = load(KEY.synced, 0);
 
-function logEvent(type, hex, detail) {
-  events.push({ t: new Date().toISOString(), type, hex, ...(detail || {}) });
+// local time, rounded to the nearest 30 minutes, with its time band
+const pad = n => String(n).padStart(2, "0");
+function stamp(d = new Date()) {
+  const r = new Date(d); r.setMinutes(Math.round(d.getMinutes() / 30) * 30, 0, 0);
+  const h = r.getHours();
+  const band = h >= 6 && h < 12 ? "morning" : h >= 12 && h < 17 ? "afternoon" : h >= 17 && h < 21 ? "evening" : "night";
+  return { date: r.getFullYear() + "-" + pad(r.getMonth() + 1) + "-" + pad(r.getDate()), time: pad(h) + ":" + pad(r.getMinutes()) + ":00", band };
+}
+const currentBand = () => stamp().band;
+
+function logEvent(type, hex, extra) {
+  const s = stamp();
+  events.push({ t: new Date().toISOString(), type, hex, date: s.date, time: s.time, band: s.band, ...(extra || {}) });
   if (events.length > 5000) { events = events.slice(-5000); syncedUpTo = Math.max(0, syncedUpTo - 1000); }
   save(KEY.events, events); save(KEY.synced, syncedUpTo);
 }
+// learn: overall weights, this time of day's weights, and a boost for neighbours
 function learn(i, amount, boostAmount) {
-  const b = BLUES[i];
+  const b = BLUES[i], band = prefs.bands[currentBand()];
   prefs.hue[b.hb] += amount; prefs.sat[b.sb] += amount; prefs.light[b.lb] += amount;
+  band.hue[b.hb] += amount; band.sat[b.sb] += amount; band.light[b.lb] += amount;
   if (boostAmount) nearest(i, 12).forEach(j => { prefs.boost[BLUES[j].hex] = (prefs.boost[BLUES[j].hex] || 0) + boostAmount; });
   save(KEY.prefs, prefs);
 }
 const score = i => {
-  const b = BLUES[i];
-  const s = 0.2 * (prefs.hue[b.hb] + prefs.sat[b.sb] + prefs.light[b.lb]) + (prefs.boost[b.hex] || 0);
+  const b = BLUES[i], band = prefs.bands[currentBand()];
+  const s = 0.2 * (prefs.hue[b.hb] + prefs.sat[b.sb] + prefs.light[b.lb])
+          + 0.2 * (band.hue[b.hb] + band.sat[b.sb] + band.light[b.lb])
+          + (prefs.boost[b.hex] || 0);
   return Math.max(-3, Math.min(3, s));
 };
 function weightedPick(list) {
@@ -234,34 +237,56 @@ function weightedPick(list) {
   return list[list.length - 1];
 }
 
-// ---------- the batch: 64 blues in eight sets of eight ----------
+// ---------- the batch: 64 blues; each palette shuffled; repeats from earlier batches ----------
 const $ = id => document.getElementById(id);
-let batch = [], lastBatch = new Set();
-let setSize = 8, gridPicked = new Set();   // every palette is 8 squares; iPad taps a 2 x 4 grid, phone swipes
-let setNo = 0, cardNo = 0, setDecided = 0, batchKeeps = [], batchDone = false;
+const wide = () => window.innerWidth >= 700;   // iPad: palettes of 16; iPhone: palettes of 8
+let batch = [], lastBatch = new Set(), batchRepeats = new Set(), shown = [];
+let setSize = 8, setNo = 0, gridPicked = new Set(), batchKeeps = [], batchDone = false, batchKey = "", batchPosted = false, tour = null;
+const SETS = () => 64 / setSize;
+const isKept = hex => kept.includes(hex);
+const setOf = () => batch.slice(setNo * setSize, setNo * setSize + setSize);
 
+function makeKey() {
+  return new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14) + "-" + Math.random().toString(36).slice(2, 6);
+}
 function buildBatch() {
+  setSize = wide() ? 16 : 8;
   const cells = Array.from({ length: 54 }, () => []);
   for (let i = 0; i < N; i++) if (!lastBatch.has(i)) cells[BLUES[i].cell].push(i);
   const picks = [];
   cells.forEach(c => { if (c.length) picks.push(weightedPick(c)); });
-  while (picks.length < 64) {
-    const pool = [];
-    for (let i = 0; i < N; i++) if (!lastBatch.has(i) && !picks.includes(i)) pool.push(i);
-    picks.push(weightedPick(pool));
+  // 8 repeats of blues shown in earlier batches, once there is history
+  const repeats = [];
+  const pool = [...new Set(shown)].filter(i => !lastBatch.has(i) && !picks.includes(i));
+  if (pool.length >= 16) while (repeats.length < 8) repeats.push(weightedPick(pool.filter(i => !repeats.includes(i))));
+  const all = picks.concat(repeats);
+  while (all.length < 64) {
+    const extra = [];
+    for (let i = 0; i < N; i++) if (!lastBatch.has(i) && !all.includes(i)) extra.push(i);
+    all.push(weightedPick(extra));
   }
-  // shuffle so each set is a mix of the whole range
-  for (let k = picks.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [picks[k], picks[j]] = [picks[j], picks[k]]; }
-  batch = picks; lastBatch = new Set(batch);
-  setSize = wide() ? 16 : 8; gridPicked = new Set();
-  setNo = 0; cardNo = 0; setDecided = 0; batchKeeps = []; batchDone = false;
+  for (let k = all.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [all[k], all[j]] = [all[j], all[k]]; }
+  batch = all; lastBatch = new Set(batch); batchRepeats = new Set(repeats);
+  shown = shown.concat(batch).slice(-2000);
+  setNo = 0; gridPicked = new Set(); batchKeeps = []; batchDone = false;
+  batchKey = makeKey(); batchPosted = false; tour = null;
+  saveState();
 }
-const SETS = () => 64 / setSize;
-const useGrid = () => true;   // every palette is a tap grid; swipe is only for reviewing favourites
-const wide = () => window.innerWidth >= 700;   // iPad: 4 x 4 palettes of 16; iPhone (portrait): 2 x 4 palettes of 8
-const setOf = () => batch.slice(setNo * setSize, setNo * setSize + setSize);
-const current = () => batch[setNo * setSize + cardNo];
-const isKept = hex => kept.includes(hex);
+function saveState() {
+  save(KEY.state, {
+    batch, lastBatch: [...lastBatch], batchRepeats: [...batchRepeats], shown, setSize, setNo,
+    gridPicked: [...gridPicked], batchKeeps, batchDone, batchKey, batchPosted, tour
+  });
+}
+function restoreState() {
+  const s = load(KEY.state, null);
+  if (!s || !s.batch || s.batch.length !== 64) return false;
+  batch = s.batch; lastBatch = new Set(s.lastBatch); batchRepeats = new Set(s.batchRepeats);
+  shown = s.shown || []; setSize = s.setSize || 8; setNo = s.setNo || 0;
+  gridPicked = new Set(s.gridPicked || []); batchKeeps = s.batchKeeps || []; batchDone = !!s.batchDone;
+  batchKey = s.batchKey; batchPosted = !!s.batchPosted; tour = s.tour || null;
+  return true;
+}
 
 function ink(hex) {
   const [r, g, b] = rgbOf(hex);
@@ -270,7 +295,7 @@ function ink(hex) {
 function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 1600); }
 
 // ---------- how each square is labelled ----------
-function currentFmt() { try { return localStorage.getItem("colores-azules-fmt-v1") || "hex"; } catch (e) { return "hex"; } }
+function currentFmt() { try { return localStorage.getItem(KEY.fmt) || "hex"; } catch (e) { return "hex"; } }
 function label(b) {
   const f = currentFmt();
   if (f === "rgb") return rgbOf(b.hex).join(" · ");
@@ -291,193 +316,158 @@ function tile(i, opts = {}) {
   return el;
 }
 
-// ---------- sets of eight: swipe cards ----------
-// Chooses the layout: a 4 x 4 grid of tap-to-select on iPad, swipe cards on phone.
+// ---------- palettes: tap to select, then Next palette ----------
 function renderSets() {
-  const grid = !batchDone && useGrid();
-  $("gridWrap").classList.toggle("hidden", !grid);
-  $("swipeWrap").classList.toggle("hidden", grid);
-  $("swipeActions").classList.toggle("hidden", grid);
-  $("nextWrap").classList.toggle("hidden", grid);
-  $("dots").classList.toggle("hidden", grid);
-  if (grid) renderGridSet(); else renderSwipeSets();
-}
-function renderGridSet() {
-  $("setInfo").textContent = "Set " + (setNo + 1) + " of " + SETS() + " · tap the squares you like · " + gridPicked.size + " selected · kept " + batchKeeps.length + " so far";
+  if (batchDone) {
+    $("setInfo").textContent = "Batch complete · " + batchKeeps.length + " kept";
+    $("setGrid").innerHTML = "";
+    $("gridNext").classList.add("hidden");
+    $("doneActions").classList.remove("hidden");
+    return;
+  }
+  $("gridNext").classList.remove("hidden");
+  $("doneActions").classList.add("hidden");
+  $("setInfo").textContent = "Palette " + (setNo + 1) + " of " + SETS() + " · tap the squares you like · " + gridPicked.size + " selected · kept " + batchKeeps.length + " so far";
   const g = $("setGrid"); g.innerHTML = "";
-  g.style.gridTemplateColumns = wide() ? "repeat(4,1fr)" : "repeat(2,1fr)";
+  g.style.gridTemplateColumns = setSize === 16 ? "repeat(4,1fr)" : "repeat(2,1fr)";
+  g.style.maxWidth = setSize === 16 ? "640px" : "420px";
   setOf().forEach(i => {
     const el = tile(i);
-    el.style.height = wide() ? "110px" : "130px";
+    el.style.height = setSize === 16 ? "110px" : "130px";
     if (gridPicked.has(i)) el.classList.add("picked");
-    el.onclick = () => { gridPicked.has(i) ? gridPicked.delete(i) : gridPicked.add(i); renderGridSet(); };
+    el.onclick = () => { gridPicked.has(i) ? gridPicked.delete(i) : gridPicked.add(i); saveState(); renderSets(); };
     g.appendChild(el);
   });
   $("gridNext").disabled = gridPicked.size === 0;
 }
 $("gridNext").onclick = () => {
-  setOf().forEach(i => {
+  setOf().forEach((i, pos) => {
     const hex = BLUES[i].hex;
+    const extra = { batch_key: batchKey, set_no: setNo, position: pos, is_repeat: batchRepeats.has(i) };
     if (gridPicked.has(i)) {
       if (!isKept(hex)) kept.push(hex);
-      save(KEY.kept, kept);
       if (!batchKeeps.includes(i)) batchKeeps.push(i);
-      learn(i, 1, 0.5); logEvent("keep", hex);
-    } else { learn(i, -0.2, 0); logEvent("pass", hex); }
+      learn(i, 1, 0.5); logEvent("keep", hex, extra);
+    } else { learn(i, -0.2, 0); logEvent("pass", hex, extra); }
   });
-  gridPicked.clear();
+  save(KEY.kept, kept);
+  gridPicked = new Set();
   advance(); updateCounts();
 };
 function advance() {
-  if (setNo < SETS() - 1) { setNo++; cardNo = 0; setDecided = 0; renderSets(); }
-  else { batchDone = true; renderSets(); syncNow(true); }
+  if (setNo < SETS() - 1) setNo++;
+  else batchDone = true;
+  saveState();
+  renderSets();
+  if (batchDone) syncNow(true);
 }
-function renderSwipeSets() {
-  if (batchDone) {
-    $("card").replaceWith(Object.assign(document.createElement("div"), { id: "card", className: "sw tall", style: "background:var(--panel);color:var(--ink);align-items:center;justify-content:center;text-align:center;font-weight:200;font-size:1rem" }));
-    $("card").textContent = "All sets done. " + batchKeeps.length + " kept.";
-    $("setInfo").textContent = "Batch complete";
-    $("dots").innerHTML = "";
-    $("nextSet").classList.add("hidden");
-    $("keepBtn").classList.add("hidden"); $("passBtn").classList.add("hidden");
-    $("doneActions").classList.remove("hidden");
-    return;
-  }
-  $("keepBtn").classList.remove("hidden"); $("passBtn").classList.remove("hidden");
-  $("nextSet").classList.remove("hidden");
-  $("doneActions").classList.add("hidden");
-  $("setInfo").textContent = "Set " + (setNo + 1) + " of " + SETS() + " · card " + Math.min(cardNo + 1, setSize) + " of " + setSize + " · kept " + batchKeeps.length + " so far";
-  const dots = $("dots"); dots.innerHTML = "";
-  setOf().forEach((i, k) => {
-    const d = document.createElement("span");
-    d.style.background = BLUES[i].hex;
-    if (k === cardNo) d.className = "now";
-    if (batchKeeps.includes(i)) d.className += " kept";
-    dots.appendChild(d);
-  });
-  const el = tile(current(), { tall: true }); el.id = "card";
-  $("card").replaceWith(el); bindSwipe(el);
-  $("nextSet").disabled = setDecided === 0 && cardNo === 0;
-}
-function decide(keep) {
-  if (batchDone) return;
-  const i = current(), hex = BLUES[i].hex;
-  if (keep) {
-    if (!isKept(hex)) kept.push(hex);
-    save(KEY.kept, kept);
-    if (!batchKeeps.includes(i)) batchKeeps.push(i);
-    learn(i, 1, 0.5); logEvent("keep", hex);
-  } else { learn(i, -0.2, 0); logEvent("pass", hex); }
-  setDecided++; cardNo++;
-  if (cardNo === setSize) nextSet();
-  else renderSets();
-  updateCounts();
-}
-function nextSet() {
-  if (setDecided === 0 && cardNo < setSize) { toast("Swipe at least one colour first"); return; }
-  advance();
-}
-$("keepBtn").onclick = () => decide(true);
-$("passBtn").onclick = () => decide(false);
-$("nextSet").onclick = nextSet;
-document.addEventListener("keydown", e => {
-  if ($("setsView").classList.contains("hidden") || useGrid()) return;
-  if (e.key === "ArrowRight") decide(true);
-  if (e.key === "ArrowLeft") decide(false);
-});
-// no pinch or page zoom on the page; the card keeps its horizontal drags for itself
-["gesturestart", "gesturechange", "gestureend"].forEach(ev => document.addEventListener(ev, e => e.preventDefault(), { passive: false }));
-let startX = null;
-function bindSwipe(el) {
-  el.addEventListener("touchmove", e => e.preventDefault(), { passive: false });
-  el.addEventListener("pointerdown", e => { startX = e.clientX; el.setPointerCapture(e.pointerId); });
-  el.addEventListener("pointermove", e => { if (startX !== null) { const dx = e.clientX - startX; el.style.transform = "translateX(" + dx + "px) rotate(" + dx / 30 + "deg)"; } });
-  el.addEventListener("pointerup", e => {
-    if (startX === null) return;
-    const dx = e.clientX - startX; startX = null;
-    if (dx > 80) decide(true); else if (dx < -80) decide(false); else el.style.transform = "";
-  });
-}
-$("startTour").onclick = () => setMode("tour");
 $("newBatch").onclick = () => { buildBatch(); renderSets(); updateCounts(); toast("New batch of 64"); };
+$("startTour").onclick = () => setMode("tour");
 
-// ---------- tournament: head to head over the kept blues of this batch ----------
-let round = [], nxt = [], roundSize = 0;
+// ---------- tournament: head to head, March style, saved as it goes ----------
+function roundName(n) { return n === 2 ? "Final" : n === 4 ? "Semifinal" : n === 8 ? "Quarterfinal" : "Round of " + n; }
 function startTournament() {
-  if (!batchDone) { $("tourInfo").textContent = "Finish all the sets first (set " + (setNo + 1) + " of " + SETS() + ").";$("duel").innerHTML = ""; $("tourActions").innerHTML = ""; return; }
-  const picks = batchKeeps.slice();
-  if (picks.length < 2) { $("tourInfo").textContent = "Keep at least two blues in this batch, then run the tournament."; $("duel").innerHTML = ""; $("tourActions").innerHTML = ""; return; }
-  let size = 8; while (size < picks.length) size *= 2;
-  const rest = batch.filter(i => !picks.includes(i)).sort((a, b) => score(b) - score(a));
-  const entrants = picks.concat(rest.slice(0, size - picks.length));
-  round = entrants.sort(() => Math.random() - 0.5); nxt = []; roundSize = size;
-  if (size > picks.length) toast("Padded to " + size + " with your highest-scoring extras");
+  if (!batchDone) { $("tourInfo").textContent = "Finish all the palettes first (palette " + (setNo + 1) + " of " + SETS() + ")."; $("duel").innerHTML = ""; $("tourActions").innerHTML = ""; return; }
+  if (!tour) {
+    const picks = batchKeeps.slice();
+    if (picks.length < 2) { $("tourInfo").textContent = "Keep at least two blues in this batch, then run the tournament."; $("duel").innerHTML = ""; $("tourActions").innerHTML = ""; return; }
+    let size = 8; while (size < picks.length) size *= 2;
+    const rest = batch.filter(i => !picks.includes(i)).sort((a, b) => score(b) - score(a));
+    const entrants = picks.concat(rest.slice(0, size - picks.length));
+    tour = { round: entrants.sort(() => Math.random() - 0.5), nxt: [], size, done: false, champ: null };
+    if (size > picks.length) toast("Padded to " + size + " with your highest-scoring extras");
+    saveState();
+  }
   duel();
 }
-function roundName(n) { return n === 2 ? "Final" : n === 4 ? "Semifinal" : n === 8 ? "Quarterfinal" : "Round of " + n; }
 function duel() {
   const d = $("duel"); d.innerHTML = ""; $("tourActions").innerHTML = "";
-  if (round.length === 0) round = nxt, nxt = [];
-  if (round.length === 1) {
-    const champ = round[0], hex = BLUES[champ].hex;
-    $("tourInfo").textContent = "Winner: " + label(BLUES[champ]) + ". Added to your palette.";
-    if (!isKept(hex)) { kept.push(hex); save(KEY.kept, kept); }
-    logEvent("champion", hex, { size: roundSize });
-    learn(champ, 1, 0.3); updateCounts();
-    d.appendChild(tile(champ, { tall: true }));
+  if (tour.done) {
+    $("tourInfo").textContent = "Winner: " + BLUES[tour.champ].hex + ". Added to your palette.";
+    d.appendChild(tile(tour.champ, { tall: true }));
     const again = document.createElement("button"); again.textContent = "New batch of 64 ↻";
     again.onclick = () => { buildBatch(); setMode("sets"); toast("New batch of 64"); };
     $("tourActions").appendChild(again);
-    syncNow(true);
     return;
   }
-  const n = round.length;
-  const a = round.shift(), b = round.shift();
-  $("tourInfo").textContent = roundName(n) + " · " + (n / 2) + " duel" + (n > 2 ? "s" : "") + " left in this round. Tap the one you prefer.";
+  if (tour.round.length === 0) {
+    if (tour.nxt.length === 1) return champion(tour.nxt[0]);
+    tour.round = tour.nxt; tour.nxt = [];
+  }
+  const n = tour.round.length, a = tour.round[0], b = tour.round[1];
+  $("tourInfo").textContent = roundName(n) + " · " + (n / 2) + " match" + (n > 2 ? "es" : "") + " left in this round. Tap the one you prefer.";
   [a, b].forEach((i, k) => {
     const el = tile(i, { tall: true });
     el.onclick = () => {
-      const other = k === 0 ? b : a;
-      nxt.push(i);
-      learn(i, 1, 0.3); learn(other, -0.3, 0);
-      logEvent("duel", BLUES[i].hex, { loser: BLUES[other].hex, round: roundName(n) });
-      duel();
+      const w = i, l = k === 0 ? b : a, side = k === 0 ? "left" : "right";
+      tour.round.splice(0, 2); tour.nxt.push(w);
+      learn(w, 1, 0.3); learn(l, -0.3, 0);
+      logEvent("duel", BLUES[w].hex, { loser: BLUES[l].hex, round: roundName(n), batch_key: batchKey, side });
+      saveState(); duel();
     };
     d.appendChild(el);
   });
 }
+function champion(i) {
+  const hex = BLUES[i].hex;
+  tour.done = true; tour.champ = i;
+  if (!isKept(hex)) { kept.push(hex); save(KEY.kept, kept); }
+  logEvent("champion", hex, { batch_key: batchKey, size: tour.size });
+  learn(i, 1, 0.3); saveState(); updateCounts();
+  syncNow(true);
+  duel();
+}
 
-// ---------- neighbours of the card on screen (or the last kept blue) ----------
+// ---------- neighbours of the palette on screen (or the last kept blue) ----------
 function renderNeighbours() {
   const g = $("neighGrid"); g.innerHTML = "";
-  let seed = batchDone ? -1 : (useGrid() ? (gridPicked.size ? [...gridPicked][0] : setOf()[0]) : current());
-  if (seed === undefined || seed < 0) seed = kept.length ? BLUES.findIndex(b => b.hex === kept[kept.length - 1]) : -1;
-  if (seed < 0) { $("neighInfo").textContent = "Swipe a colour first. Its nearest neighbours appear here."; return; }
+  let seed = batchDone ? -1 : (gridPicked.size ? [...gridPicked][0] : setOf()[0]);
+  if (seed === undefined || seed < 0) seed = kept.length ? BY_HEX.get(kept[kept.length - 1]) : -1;
+  if (seed === undefined || seed < 0) { $("neighInfo").textContent = "Select a palette first. Its nearest neighbours appear here."; return; }
   $("neighInfo").textContent = "Nearest to " + BLUES[seed].hex + ", by visual distance (CIE Lab).";
   const first = tile(seed); first.style.outline = "2px solid var(--ink)"; first.style.outlineOffset = "2px"; g.appendChild(first);
   nearest(seed, 15).forEach(i => g.appendChild(tile(i)));
 }
 
-// ---------- what I like, and sync ----------
-const counts = () => ({
-  picks: events.filter(e => e.type === "keep" || e.type === "duel").length,
-  passes: events.filter(e => e.type === "pass").length
-});
-function renderTaste() {
+// ---------- what I like: overall, this time of day, side, repeats ----------
+function topAxes(axes) {
   const top = arr => arr.indexOf(Math.max(...arr));
-  const c = counts();
-  if (c.picks === 0 && c.passes === 0) { $("tasteText").textContent = "No choices yet. Swipe the sets to start."; }
-  else $("tasteText").innerHTML = "So far you lean towards <b>" + HUE_NAMES[top(prefs.hue)] + "</b> blues, <b>" + SAT_NAMES[top(prefs.sat)] + "</b>, and <b>" + LIGHT_NAMES[top(prefs.light)] + "</b>.<br>Keeps and wins: " + c.picks + ". Passes and losses: " + c.passes + ".";
+  return "<b>" + HUE_NAMES[top(axes.hue)] + "</b> blues, <b>" + SAT_NAMES[top(axes.sat)] + "</b>, and <b>" + LIGHT_NAMES[top(axes.light)] + "</b>";
+}
+function repeatCheck() {
+  let total = 0, agree = 0;
+  events.forEach((e, k) => {
+    if (!e.is_repeat || (e.type !== "keep" && e.type !== "pass")) return;
+    for (let j = k - 1; j >= 0; j--) {
+      const p = events[j];
+      if (p.hex === e.hex && (p.type === "keep" || p.type === "pass")) { total++; if (p.type === e.type) agree++; break; }
+    }
+  });
+  return { total, agree };
+}
+function renderTaste() {
+  const picks = events.filter(e => e.type === "keep" || e.type === "duel").length;
+  const passes = events.filter(e => e.type === "pass").length;
+  if (picks === 0 && passes === 0) { $("tasteText").textContent = "No choices yet. Pick palettes to start."; updateSyncText(); return; }
+  const band = currentBand();
+  const duels = events.filter(e => e.type === "duel");
+  const left = duels.filter(e => e.side === "left").length, right = duels.filter(e => e.side === "right").length;
+  const rc = repeatCheck();
+  $("tasteText").innerHTML =
+    "Overall you lean towards " + topAxes(prefs) + ".<br>" +
+    "In the " + band + " you lean towards " + topAxes(prefs.bands[band]) + ".<br>" +
+    "Keeps and wins: " + picks + ". Passes and losses: " + passes + ".<br>" +
+    "Side check: left won " + left + ", right won " + right + " duels.<br>" +
+    "Repeat check: agreed on " + rc.agree + " of " + rc.total + " blues shown again.";
   updateSyncText();
 }
-// ---------- database: architecture project, owner only (sign in required) ----------
+
+// ---------- sign-in and sync: owner only, to the architecture project ----------
 const SYNC = { url: "https://xabgankckrcuhcgdolrg.supabase.co", key: "sb_publishable_kncKodoYJZ6ByexwWM_TtQ_OpW68M5f" };
-const SESSION_KEY = "colores-azules-session-v1";
-const BY_HEX = new Map(BLUES.map(b => [b.hex, b]));
-const getSession = () => load(SESSION_KEY, null);
+const getSession = () => load(KEY.session, null);
 function setSession(s) {
-  if (s) save(SESSION_KEY, s);
-  else { try { localStorage.removeItem(SESSION_KEY); } catch (e) {} }
+  if (s) save(KEY.session, s);
+  else { try { localStorage.removeItem(KEY.session); } catch (e) {} }
   updateSyncText();
 }
 function updateSyncText() {
@@ -489,8 +479,7 @@ function updateSyncText() {
 }
 async function signIn() {
   const r = await fetch(SYNC.url + "/auth/v1/token?grant_type=password", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", apikey: SYNC.key },
+    method: "POST", headers: { "Content-Type": "application/json", apikey: SYNC.key },
     body: JSON.stringify({ email: $("email").value, password: $("pw").value })
   });
   if (!r.ok) throw new Error("sign-in");
@@ -515,14 +504,23 @@ async function syncNow(auto) {
     if (!auto) toast("Sign in to sync. Saved on this device.");
     updateSyncText(); return;
   }
-  const rows = events.slice(syncedUpTo);
-  if (!rows.length) { updateSyncText(); return; }
-  const choices = rows.filter(e => e.type === "keep" || e.type === "pass").map(e => {
-    const b = BY_HEX.get(e.hex);
-    return { kind: e.type, hex: e.hex, hue: b.h, sat: b.s, light: Math.round(b.l), client_time: e.t };
-  });
-  const duels = rows.filter(e => e.type === "duel").map(e => ({ round: e.round, winner_hex: e.hex, loser_hex: e.loser, client_time: e.t }));
   try {
+    if (!batchPosted) {
+      const st = stamp();
+      await post("ca_batches", [{ batch_key: batchKey, layout: setSize, hexes: batch.map(i => BLUES[i].hex), local_date: st.date, local_time: st.time }], "resolution=ignore-duplicates,return=minimal", s.token);
+      batchPosted = true; saveState();
+    }
+    const rows = events.slice(syncedUpTo);
+    const choices = rows.filter(e => e.type === "keep" || e.type === "pass").map(e => {
+      const b = BLUES[BY_HEX.get(e.hex)];
+      return { kind: e.type, hex: e.hex, hue: b.h, sat: b.s, light: Math.round(b.l), client_time: e.t,
+               batch_key: e.batch_key || null, set_no: e.set_no ?? null, position: e.position ?? null,
+               is_repeat: !!e.is_repeat, local_date: e.date, local_time: e.time, band: e.band };
+    });
+    const duels = rows.filter(e => e.type === "duel").map(e => ({
+      round: e.round, winner_hex: e.hex, loser_hex: e.loser, client_time: e.t,
+      batch_key: e.batch_key || null, side: e.side || null, local_date: e.date, local_time: e.time, band: e.band
+    }));
     if (choices.length) await post("ca_choices", choices, null, s.token);
     if (duels.length) await post("ca_duels", duels, null, s.token);
     await post("ca_taste", [{ owner_id: s.uid, prefs, updated_at: new Date().toISOString() }], "resolution=merge-duplicates,return=minimal", s.token);
@@ -536,21 +534,34 @@ async function syncNow(auto) {
 }
 $("syncNow").onclick = () => syncNow(false);
 $("exportData").onclick = () => {
-  const data = { version: 3, exported: new Date().toISOString(), prefs, kept, events };
+  const data = { version: 4, exported: new Date().toISOString(), prefs, kept, events };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "colores-azules-data.json"; a.click();
 };
 $("resetData").onclick = () => { if (confirm("Reset what the page has learned? Kept blues stay.")) { prefs = blankPrefs(); save(KEY.prefs, prefs); renderTaste(); } };
 
-// ---------- palette ----------
+// ---------- palette and review of favourites ----------
 function renderPalette() {
   const g = $("keptGrid"); g.innerHTML = "";
-  kept.forEach(hex => { const i = BLUES.findIndex(b => b.hex === hex); if (i >= 0) g.appendChild(tile(i)); });
+  kept.forEach(hex => { const i = BY_HEX.get(hex); if (i !== undefined) g.appendChild(tile(i)); });
   $("emptyNote").classList.toggle("hidden", kept.length > 0);
 }
 $("clearKept").onclick = () => { if (confirm("Clear your palette?")) { kept = []; save(KEY.kept, kept); renderPalette(); updateCounts(); renderSets(); } };
+let reviewPos = 0;
+function showReview() {
+  const n = kept.length;
+  if (!n) { $("revInfo").textContent = "Nothing kept yet."; return; }
+  reviewPos = (reviewPos % n + n) % n;
+  const t = tile(BY_HEX.get(kept[reviewPos]), { tall: true }); t.id = "reviewCard";
+  $("reviewCard").replaceWith(t);
+  $("revInfo").textContent = (reviewPos + 1) + " of " + n;
+}
+$("reviewOpen").onclick = () => { $("review").classList.remove("hidden"); reviewPos = 0; showReview(); };
+$("revNext").onclick = () => { reviewPos++; showReview(); };
+$("revPrev").onclick = () => { reviewPos--; showReview(); };
+$("revClose").onclick = () => $("review").classList.add("hidden");
 
-// ---------- modes ----------
+// ---------- modes and counts ----------
 function updateCounts() {
   $("count").textContent = kept.length; $("events").textContent = events.length; $("synced").textContent = syncedUpTo;
 }
@@ -566,21 +577,6 @@ function setMode(mode) {
   if (mode === "palette") renderPalette();
 }
 $("modeSets").onclick = () => setMode("sets");
-// review favourites one at a time (the only place a single colour is shown)
-let reviewPos = 0;
-function showReview() {
-  const n = kept.length;
-  if (!n) { $("revInfo").textContent = "Nothing kept yet."; return; }
-  reviewPos = (reviewPos % n + n) % n;
-  const i = BLUES.findIndex(b => b.hex === kept[reviewPos]);
-  const t = tile(i, { tall: true }); t.id = "reviewCard";
-  $("reviewCard").replaceWith(t);
-  $("revInfo").textContent = (reviewPos + 1) + " of " + n;
-}
-$("reviewOpen").onclick = () => { $("review").classList.remove("hidden"); reviewPos = 0; showReview(); };
-$("revNext").onclick = () => { reviewPos++; showReview(); };
-$("revPrev").onclick = () => { reviewPos--; showReview(); };
-$("revClose").onclick = () => $("review").classList.add("hidden");
 $("modeTour").onclick = () => setMode("tour");
 $("modeNeigh").onclick = () => setMode("neigh");
 $("modeTaste").onclick = () => setMode("taste");
@@ -612,7 +608,6 @@ BACKGROUNDS.forEach((bg, k) => {
 let savedBg = 2;
 try { const v = parseInt(localStorage.getItem(KEY.bg), 10); if (v >= 0 && v < BACKGROUNDS.length) savedBg = v; } catch (e) {}
 applyBackground(savedBg);
-
 function setFmt(f) {
   try { localStorage.setItem(KEY.fmt, f); } catch (e) {}
   document.querySelectorAll("#fmts button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.f === f)));
@@ -625,8 +620,8 @@ function setFmt(f) {
 });
 $("gear").onclick = () => { const open = $("drawer").classList.toggle("hidden") === false; $("gear").setAttribute("aria-expanded", String(open)); };
 
-// ---------- start ----------
-buildBatch();
+// ---------- start: resume the saved batch and tournament, or build a new one ----------
+if (!restoreState()) buildBatch();
 setFmt(currentFmt());
 updateCounts();
 renderPalette();

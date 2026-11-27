@@ -57,3 +57,15 @@ Questions for Jimmy (added):
 7. **Both:** should "Both" also count as a win for each blue in the bracket, or only as a keeper with no bracket effect?
 8. **Pairs:** how often should the page ask a pair question, for example one per palette, or only in a separate "Pairs" mode?
 9. **Steps:** should the page suggest a next blue that makes a good step from the last one kept, or only report the steps you already like?
+
+## Decisions (Jimmy's answers, 2026-11-27)
+
+- **Place:** dropped. No location is stored.
+- **Time bands:** the local time rounded to the nearest 30 minutes is stored, with its band (morning, afternoon, evening, night). The band splits follow the proposal.
+- **Repeats:** kept, over time. Each batch now carries 8 blues from earlier batches, from the third batch on.
+- **Batch replay:** each batch is stored with its 64 hex codes under its batch key. Replay reads that stored list, so it stays exact even though the taste weights change.
+- **Shuffle:** on. Each palette is shuffled, so position cannot match taste.
+- **Storage:** the new tags are added as columns on the same tables. The existing rows are kept (133 choices, 15 duels), not wiped, because they are real synced choices.
+- **Results:** the tournament result is viewable after each tournament. Progress is saved on the device, so the batch and the bracket resume after a refresh.
+
+Still open (not answered yet): "Both" in duels (questions 7 and 9 above), and pair checks (question 8).
