@@ -53,7 +53,7 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
 <header>
   <div>
     <h1>Colores Azules</h1>
-    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 14</span></div>
+    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 15</span></div>
   </div>
   <div class="meta">Kept: <span id="count">0</span> · Synced: <span id="synced">0</span>/<span id="events">0</span></div>
 </header>
@@ -143,6 +143,15 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
   <h2 style="margin-top:12px">Blues I have judged</h2>
   <div class="swatches" id="hideModes" style="grid-template-columns:1fr 1fr 1fr"></div>
   <p class="hint" style="margin:6px 0 0">Applies to the next new batch. Hidden blues do not come back.</p>
+  <h2 style="margin-top:12px">Tournament card layout</h2>
+  <div class="swatches" id="hlayouts" style="grid-template-columns:1fr 1fr"></div>
+  <p class="hint" style="margin:6px 0 0">Voronoi: cells fill the card. Square grid: squares with white space.</p>
+  <h2 style="margin-top:12px">About</h2>
+  <div style="font-size:0.85rem;line-height:1.45;text-align:left;color:var(--ink)">
+    <p style="margin:0 0 8px">I've always liked blue. It reminds me of the sky. When I was little, I watched Toy Story and saw Andy's room, with its blue wallpaper. The colour looked like a sky I had never seen before, and I was so excited by it.</p>
+    <p style="margin:0 0 8px">The sky only has that exact shade once in a while, a day or a week in the year. I still get excited when I see it in real life, which is why I keep coming back to blues.</p>
+    <p style="margin:0">I've just learned about the colour gamut: the range of colours our eyes can see, and what lies beyond it. It helps explain why some blues feel so vivid to me.</p>
+  </div>
   <h2 style="margin-top:12px">Heat map</h2>
   <label class="meta" style="display:flex;gap:8px;align-items:center;justify-content:flex-start"><input id="heatOn" type="checkbox" style="min-height:auto;flex:none;width:20px;height:20px;padding:0"> Show heat in My palette</label>
   <label class="meta" style="display:block;margin-top:8px">Heat strength <input id="heatOpacity" type="range" min="0" max="100" value="60" style="display:block;width:100%;min-height:auto;flex:none;padding:0;border:none;background:none"></label>
@@ -203,7 +212,7 @@ const lightBin = l => l < 35 ? 0 : l < 65 ? 1 : 2;
 BLUES.forEach(b => { b.hb = hueBin(b.h); b.sb = satBin(b.s); b.lb = lightBin(b.l); b.cell = b.hb * 9 + b.sb * 3 + b.lb; });
 
 // ---------- storage: on this device, synced to the database when signed in ----------
-const KEY = { kept: "colores-azules-kept-v3", prefs: "colores-azules-prefs-v3", events: "colores-azules-events-v3", state: "colores-azules-state-v3", synced: "colores-azules-synced-v1", session: "colores-azules-session-v1", history: "colores-azules-history-v1", bg: "colores-azules-bg-v1", fmt: "colores-azules-fmt-v1" };
+const KEY = { kept: "colores-azules-kept-v3", prefs: "colores-azules-prefs-v3", events: "colores-azules-events-v3", state: "colores-azules-state-v3", synced: "colores-azules-synced-v1", session: "colores-azules-session-v1", history: "colores-azules-history-v1", hlayout: "colores-azules-hlayout-v1", bg: "colores-azules-bg-v1", fmt: "colores-azules-fmt-v1" };
 const load = (k, fallback) => { try { const v = JSON.parse(localStorage.getItem(k)); return v === null ? fallback : v; } catch (e) { return fallback; } };
 const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 const blankAxes = () => ({ hue: [0, 0, 0, 0, 0, 0], sat: [0, 0, 0], light: [0, 0, 0] });
@@ -689,6 +698,21 @@ $("modeNeigh").onclick = () => setMode("neigh");
 $("modeTaste").onclick = () => setMode("taste");
 $("modePalette").onclick = () => setMode("palette");
 $("modeHistory").onclick = () => setMode("history");
+// tournament card layout: "voronoi" (cells fill the card) or "grid" (squares with white space)
+const hlayoutMode = () => { try { return localStorage.getItem("colores-azules-hlayout-v1") || "voronoi"; } catch (e) { return "voronoi"; } };
+function squareGrid(items) {
+  const wrap = document.createElement("div");
+  wrap.style.cssText = "flex:1 1 0;min-height:0;display:flex;flex-wrap:wrap;gap:2px;align-items:center;align-content:center;justify-content:center;overflow:hidden";
+  const max = Math.max(1, ...items.map(o => o.score));
+  items.forEach(o => {
+    const c = document.createElement("div");
+    const size = o.score ? Math.round(4 + 26 * Math.sqrt(o.score / max)) : 2;
+    c.style.cssText = "flex:0 0 auto;width:" + size + "px;height:" + size + "px;border-radius:2px;background:" + o.hex;
+    c.title = o.score ? "score " + o.score : "not picked";
+    wrap.appendChild(c);
+  });
+  return wrap;
+}
 // tournament history: winner on top; the other 63 blues in a weighted Voronoi layout
 // Picked blues (score above 0) sit on the left and take about 45% of the area; the long tail of
 // never-picked blues sits on the right and takes about 55%. Each group has at most six rows.
@@ -788,6 +812,7 @@ function renderHistory() {
     cap.style.cssText = "margin:0;font-size:0.72rem;line-height:1.1;flex:0 0 auto";
     cap.textContent = weekdayTime(h);
     card.appendChild(cap);
+    if (hlayoutMode() === "grid") { card.appendChild(squareGrid(historyItems(h))); box.appendChild(card); return; }
     const canvas = document.createElement("canvas");
     canvas.style.cssText = "width:100%;height:100%;flex:1 1 0;min-height:0;display:block;image-rendering:auto";
     card.appendChild(canvas);
@@ -846,6 +871,19 @@ $("gear").onclick = () => { const open = $("drawer").classList.toggle("hidden") 
     document.querySelectorAll("#hideModes button").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.h === m)));
   };
   $("hideModes").appendChild(b);
+});
+
+// tournament card layout buttons
+[["voronoi", "Voronoi"], ["grid", "Square grid"]].forEach(([m, text]) => {
+  const b = document.createElement("button");
+  b.dataset.l = m; b.textContent = text; b.style.fontSize = "0.8rem"; b.style.minHeight = "44px";
+  b.setAttribute("aria-pressed", String(hlayoutMode() === m));
+  b.onclick = () => {
+    try { localStorage.setItem("colores-azules-hlayout-v1", m); } catch (e) {}
+    document.querySelectorAll("#hlayouts button").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.l === m)));
+    renderHistory();
+  };
+  $("hlayouts").appendChild(b);
 });
 
 // ---------- start: resume the saved batch and tournament, or build a new one ----------
