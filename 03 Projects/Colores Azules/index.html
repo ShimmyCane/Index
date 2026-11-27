@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>Colores Azules</title>
 <style>
 /* Cream by default (set in settings). No black lines: the blues are the strong colour. */
@@ -11,6 +12,7 @@
   --keep: #f6f3ec; --pass: #f6f3ec; --panel: #fffdf8;
 }
 * { box-sizing: border-box; }
+html, body { touch-action: manipulation; overscroll-behavior: none; }
 body { margin: 0; background: var(--paper); color: var(--ink); font-family: Georgia, "Times New Roman", serif; min-height: 100vh; padding: 14px 16px 90px; overflow-x: hidden; }
 header { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
 h1 { font-size: 1.4rem; margin: 0; }
@@ -20,7 +22,7 @@ nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
 button { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 10px 14px; min-height: 48px; cursor: pointer; }
 button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 button:disabled { opacity: 0.4; cursor: default; }
-.sw { position: relative; height: 110px; border: none; border-radius: 2px; cursor: pointer; user-select: none; -webkit-user-select: none; display: flex; align-items: flex-end; padding: 8px; font-family: system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; font-weight: 200; font-size: 0.8rem; letter-spacing: 0.04em; }
+.sw { position: relative; height: 110px; border: none; border-radius: 2px; cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; display: flex; align-items: flex-end; padding: 8px; font-family: system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; font-weight: 200; font-size: 0.8rem; letter-spacing: 0.04em; }
 .sw.kept::after { content: "✓"; position: absolute; top: 6px; right: 6px; background: var(--panel); color: var(--ink); border-radius: 50%; width: 26px; height: 26px; text-align: center; line-height: 26px; font-size: 0.85rem; }
 .sw.tall { height: min(62vh, 520px); font-size: 0.95rem; touch-action: pan-y; }
 .sw.picked { box-shadow: inset 0 0 0 5px var(--panel); }
@@ -48,6 +50,7 @@ button:disabled { opacity: 0.4; cursor: default; }
 .swatches button[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 2px; }
 #toast { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 10px 14px; border-radius: 4px; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: 90vw; text-align: center; }
 #toast.show { opacity: 1; }
+input { font-size: 16px; }   /* stops iOS zooming in when a field is focused */
 .hidden { display: none !important; }
 </style>
 </head>
@@ -374,8 +377,11 @@ document.addEventListener("keydown", e => {
   if (e.key === "ArrowRight") decide(true);
   if (e.key === "ArrowLeft") decide(false);
 });
+// no pinch or page zoom on the page; the card keeps its horizontal drags for itself
+["gesturestart", "gesturechange", "gestureend"].forEach(ev => document.addEventListener(ev, e => e.preventDefault(), { passive: false }));
 let startX = null;
 function bindSwipe(el) {
+  el.addEventListener("touchmove", e => e.preventDefault(), { passive: false });
   el.addEventListener("pointerdown", e => { startX = e.clientX; el.setPointerCapture(e.pointerId); });
   el.addEventListener("pointermove", e => { if (startX !== null) { const dx = e.clientX - startX; el.style.transform = "translateX(" + dx + "px) rotate(" + dx / 30 + "deg)"; } });
   el.addEventListener("pointerup", e => {
