@@ -58,13 +58,13 @@ input { font-size: 16px; }   /* stops iOS zooming in when a field is focused */
 <header>
   <div>
     <h1>Colores Azules</h1>
-    <div class="meta">Shades of blue, labelled by your choice.</div>
+    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 5</span></div>
   </div>
   <div class="meta">Kept: <span id="count">0</span> · Synced: <span id="synced">0</span>/<span id="events">0</span></div>
 </header>
 
 <nav>
-  <button id="modeSets" aria-pressed="true">Sets of 8</button>
+  <button id="modeSets" aria-pressed="true">Palettes of 8</button>
   <button id="modeTour" aria-pressed="false">Tournament</button>
   <button id="modeNeigh" aria-pressed="false">Neighbours</button>
   <button id="modeTaste" aria-pressed="false">What I like</button>
@@ -86,7 +86,7 @@ input { font-size: 16px; }   /* stops iOS zooming in when a field is focused */
   <div class="actions" id="nextWrap">
     <button id="nextSet">Next palette ▸</button>
   </div>
-  <p class="hint">Swipe right to keep, left to pass. Move on once you have swiped at least one. The 64 blues are eight sets of eight.</p>
+  <p class="hint">Tap the squares you like, then Next palette. The 64 blues are eight palettes of eight.</p>
   <div class="actions hidden" id="doneActions">
     <button id="startTour" class="keep-btn">Start the tournament ▸</button>
     <button id="newBatch">New batch of 64 ↻</button>
@@ -130,6 +130,12 @@ input { font-size: 16px; }   /* stops iOS zooming in when a field is focused */
     <div class="actions" style="margin:6px 0"><button id="clearKept">Clear palette</button></div>
     <div class="grid" id="keptGrid"></div>
     <p class="hint" id="emptyNote">Nothing kept yet.</p>
+    <div class="actions"><button id="reviewOpen">Review one at a time</button></div>
+    <div id="review" class="hidden">
+      <div class="grid" style="grid-template-columns:1fr;max-width:420px;margin:0 auto"><div class="sw tall" id="reviewCard"></div></div>
+      <div class="actions"><button id="revPrev">◂ Previous</button><button id="revNext">Next ▸</button><button id="revClose">Close</button></div>
+      <p class="hint" id="revInfo"></p>
+    </div>
   </div>
 </section>
 
@@ -251,7 +257,7 @@ function buildBatch() {
   setNo = 0; cardNo = 0; setDecided = 0; batchKeeps = []; batchDone = false;
 }
 const SETS = () => 64 / setSize;
-const useGrid = () => window.innerWidth >= 700;   // iPad and wider: tap grid; phone: swipe cards
+const useGrid = () => true;   // every palette is a grid of eight (phone: 4 x 2, iPad: 2 x 4); swipe is only for reviewing favourites
 const setOf = () => batch.slice(setNo * setSize, setNo * setSize + setSize);
 const current = () => batch[setNo * setSize + cardNo];
 const isKept = hex => kept.includes(hex);
@@ -298,9 +304,10 @@ function renderSets() {
 function renderGridSet() {
   $("setInfo").textContent = "Set " + (setNo + 1) + " of " + SETS() + " · tap the squares you like · " + gridPicked.size + " selected · kept " + batchKeeps.length + " so far";
   const g = $("setGrid"); g.innerHTML = "";
+  g.style.gridTemplateColumns = window.innerWidth >= 700 ? "repeat(2,1fr)" : "repeat(4,1fr)";
   setOf().forEach(i => {
     const el = tile(i);
-    el.style.height = "150px";
+    el.style.height = window.innerWidth >= 700 ? "150px" : "92px";
     if (gridPicked.has(i)) el.classList.add("picked");
     el.onclick = () => { gridPicked.has(i) ? gridPicked.delete(i) : gridPicked.add(i); renderGridSet(); };
     g.appendChild(el);
@@ -558,6 +565,21 @@ function setMode(mode) {
   if (mode === "palette") renderPalette();
 }
 $("modeSets").onclick = () => setMode("sets");
+// review favourites one at a time (the only place a single colour is shown)
+let reviewPos = 0;
+function showReview() {
+  const n = kept.length;
+  if (!n) { $("revInfo").textContent = "Nothing kept yet."; return; }
+  reviewPos = (reviewPos % n + n) % n;
+  const i = BLUES.findIndex(b => b.hex === kept[reviewPos]);
+  const t = tile(i, { tall: true }); t.id = "reviewCard";
+  $("reviewCard").replaceWith(t);
+  $("revInfo").textContent = (reviewPos + 1) + " of " + n;
+}
+$("reviewOpen").onclick = () => { $("review").classList.remove("hidden"); reviewPos = 0; showReview(); };
+$("revNext").onclick = () => { reviewPos++; showReview(); };
+$("revPrev").onclick = () => { reviewPos--; showReview(); };
+$("revClose").onclick = () => $("review").classList.add("hidden");
 $("modeTour").onclick = () => setMode("tour");
 $("modeNeigh").onclick = () => setMode("neigh");
 $("modeTaste").onclick = () => setMode("taste");
