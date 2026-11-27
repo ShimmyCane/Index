@@ -53,7 +53,7 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
 <header>
   <div>
     <h1>Colores Azules</h1>
-    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 16</span></div>
+    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 18</span></div>
   </div>
   <div class="meta">Kept: <span id="count">0</span> · Synced: <span id="synced">0</span>/<span id="events">0</span></div>
 </header>
@@ -752,9 +752,9 @@ function powerCells(sites, r, W, H) {
 function powerVoronoi(items, W, H) {
   const head = items.filter(o => o.score > 0), tail = items.filter(o => o.score <= 0);
   const splitX = head.length && tail.length ? W * (1 - TAIL_SHARE) : (head.length ? W : 0);
-  const headTotal = head.reduce((a, o) => a + o.score, 0);
+  const headTotal = head.reduce((a, o) => a + o.score * o.score + 2, 0);
   const tailTotal = head.length ? headTotal * TAIL_SHARE / (1 - TAIL_SHARE) : 1;
-  const all = head.concat(tail), sites = [], group = [];
+  const sites = [], group = [];
   const place = (list, g, x0, x1, weight) => {
     const cols = Math.max(1, Math.ceil(list.length / ROWS));
     list.forEach((o, k) => {
@@ -763,17 +763,17 @@ function powerVoronoi(items, W, H) {
       group.push({ hex: o.hex, score: o.score, g, w: weight(o) });
     });
   };
-  place(head, 0, 0, splitX || W, o => o.score);
+  place(head, 0, 0, splitX || W, o => o.score * o.score + 2);
   place(tail, 1, splitX, W, () => tail.length ? tailTotal / tail.length : 1);
   const wsum = group.reduce((a, o) => a + o.w, 0), total = W * H, N = sites.length;
   const target = group.map(o => total * o.w / wsum);
   const r = sites.map(() => 0);
   let cells = powerCells(sites, r, W, H);
-  for (let it = 0; it < 60; it++) {
+  for (let it = 0; it < 150; it++) {
     const spacing = Math.sqrt(total / N);
     cells.forEach((c, i) => {                                   // grow or shrink each cell toward its target area, gently
       const rel = (target[i] - c.area) / target[i];
-      r[i] = Math.max(-2 * spacing * spacing, Math.min(2 * spacing * spacing, r[i] + 0.2 * spacing * spacing * rel));
+      r[i] = Math.max(-60 * spacing * spacing, Math.min(60 * spacing * spacing, r[i] + 0.2 * spacing * spacing * rel));
     });
     sites.forEach((s, i) => {                                   // centroid step, kept in its group and row
       const c = cells[i];
@@ -782,7 +782,35 @@ function powerVoronoi(items, W, H) {
     });
     cells = powerCells(sites, r, W, H);
   }
-  return cells.map((c, i) => ({ hex: group[i].hex, score: group[i].score, g: group[i].g, poly: c.poly, area: c.area }));
+  // any cell that lost most of its area: raise its radius by bisection until it has room again
+  for (let i = 0; i < N; i++) {
+    if (cells[i].area >= 0.3 * target[i]) continue;
+    const spacing = Math.sqrt(total / N);
+    let lo = r[i], hi = r[i] + 40 * spacing * spacing;
+    for (let k = 0; k < 30; k++) {
+      const mid = (lo + hi) / 2, saved = r[i];
+      r[i] = mid;
+      const a = powerCells(sites, r, W, H)[i].area;
+      r[i] = saved;
+      if (a < target[i]) lo = mid; else hi = mid;
+    }
+    r[i] = hi;
+    cells = powerCells(sites, r, W, H);
+  }
+  return cells.map((c, i) => ({ hex: group[i].hex, score: group[i].score, g: group[i].g, poly: c.poly, area: c.area, x: sites[i].x, y: sites[i].y }));
+}
+function polyCentroid(poly) {
+  let A = 0, cx = 0, cy = 0;
+  for (let k = 0; k < poly.length; k++) {
+    const P = poly[k], Q = poly[(k + 1) % poly.length], cr = P[0] * Q[1] - Q[0] * P[1];
+    A += cr; cx += (P[0] + Q[0]) * cr; cy += (P[1] + Q[1]) * cr;
+  }
+  A /= 2;
+  return A ? [cx / (6 * A), cy / (6 * A)] : [poly[0][0], poly[0][1]];
+}
+function insetPoly(poly, f) {                 // shrink toward the centre by factor f
+  const [cx, cy] = polyCentroid(poly);
+  return poly.map(q => [cx + (q[0] - cx) * f, cy + (q[1] - cy) * f]);
 }
 function svgVoronoi(cells, W, H) {
   const NS = "http://www.w3.org/2000/svg";
@@ -791,9 +819,16 @@ function svgVoronoi(cells, W, H) {
   svg.setAttribute("preserveAspectRatio", "none");
   svg.style.cssText = "width:100%;height:100%;flex:1 1 0;min-height:0;display:block";
   cells.forEach(c => {
-    if (c.poly.length < 3 || c.area < 0.01) return;
+    if (c.poly.length < 3 || c.area < 0.01) {                     // a cell the solver could not open: a dot at its site
+      const dot = document.createElementNS(NS, "circle");
+      dot.setAttribute("cx", c.x.toFixed(2)); dot.setAttribute("cy", c.y.toFixed(2)); dot.setAttribute("r", "2.5");
+      dot.setAttribute("fill", c.hex); dot.setAttribute("stroke", "#fffdf8"); dot.setAttribute("stroke-width", "0.8");
+      svg.appendChild(dot);
+      return;
+    }
     const p = document.createElementNS(NS, "path");
-    p.setAttribute("d", "M" + c.poly.map(q => q[0].toFixed(2) + " " + q[1].toFixed(2)).join("L") + "Z");
+    const pts = insetPoly(c.poly, 0.84);
+    p.setAttribute("d", "M" + pts.map(q => q[0].toFixed(2) + " " + q[1].toFixed(2)).join("L") + "Z");
     p.setAttribute("fill", c.hex);
     p.setAttribute("stroke", "#fffdf8"); p.setAttribute("stroke-width", "1");
     const title = document.createElementNS(NS, "title"); title.textContent = c.score ? "score " + c.score : "not picked";
@@ -820,14 +855,29 @@ function historyItems(h) {
   const scores = h.scores || h.hexes.map(() => 0);
   return (h.hexes || []).map((hex, k) => ({ hex, score: scores[k] || 0 })).filter(o => o.hex !== h.winner).sort((a, b) => b.score - a.score);
 }
-// tight rectangle: squares packed edge to edge in a treemap, largest at the left
+// square shelves: largest first, left to right, each row a shelf; white space between squares
+function shelfPack(items, W, H, gap) {
+  const max = Math.max(1, ...items.map(o => o.score));
+  for (let base = 30; base >= 3; base -= 0.5) {
+    const sizes = items.map(o => Math.max(3, Math.round(base * Math.sqrt(o.score / max + 0.04))));
+    const out = []; let x = 0, y = 0, rowH = 0, ok = true;
+    sizes.forEach((s, k) => {
+      if (x + s > W) { x = 0; y += rowH + gap; rowH = 0; }
+      if (y + s > H) ok = false;
+      out.push([x, y, s]);
+      x += s + gap; rowH = Math.max(rowH, s);
+    });
+    if (ok) return out;
+  }
+  return items.map(() => [0, 0, 3]);
+}
 function tightRectangle(items) {
   const wrap = document.createElement("div");
   wrap.style.cssText = "position:relative;flex:1 1 0;min-height:0;overflow:hidden";
-  const rects = squarify(items.map(o => o.score + 0.15), 0, 0, CARD_W, CARD_H);
+  const rects = shelfPack(items, CARD_W, CARD_H, 4);
   items.forEach((o, k) => {
-    const [x, y, w, h] = rects[k], c = document.createElement("div");
-    c.style.cssText = "position:absolute;left:" + x + "px;top:" + y + "px;width:" + w + "px;height:" + h + "px;background:" + o.hex + ";box-shadow:inset 0 0 0 0.5px #fffdf8";
+    const [x, y, s] = rects[k], c = document.createElement("div");
+    c.style.cssText = "position:absolute;left:" + x + "px;top:" + y + "px;width:" + s + "px;height:" + s + "px;border-radius:2px;background:" + o.hex;
     c.title = o.score ? "score " + o.score : "not picked";
     wrap.appendChild(c);
   });
