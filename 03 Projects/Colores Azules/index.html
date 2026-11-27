@@ -53,7 +53,7 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
 <header>
   <div>
     <h1>Colores Azules</h1>
-    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 8</span></div>
+    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 20</span></div>
   </div>
   <div class="meta">Kept: <span id="count">0</span> · Synced: <span id="synced">0</span>/<span id="events">0</span></div>
 </header>
@@ -64,6 +64,7 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
   <button id="modeNeigh" aria-pressed="false">Neighbours</button>
   <button id="modeTaste" aria-pressed="false">What I like</button>
   <button id="modePalette" aria-pressed="false">My palette</button>
+  <button id="modeHistory" aria-pressed="false">Tournaments</button>
 </nav>
 
 <section id="setsView">
@@ -115,7 +116,7 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
     <div class="actions" id="sortBar"><button data-s="hue">Hue</button><button data-s="sat">Saturation</button><button data-s="light">Lightness</button></div>
     <div class="grid" id="keptGrid"></div>
     <h2 style="margin-top:12px">Where my favourites sit</h2>
-    <p class="hint">Across: hue, from green-cyan to violet. Up: lightness, from dark to bright. Each small dot is one blue. Rings are your favourites. Warm circles show where you keep choosing: bigger and stronger means more.</p>
+    <p class="hint">Across: hue, from green-cyan to violet. Up: lightness, from dark to bright. Each small dot is one blue. Rings are your favourites. Warm circles show where you keep choosing. Later tournament rounds count for more, and a champion counts most.</p>
     <svg id="heat" viewBox="0 0 600 360" style="width:100%;height:auto;background:var(--paper);border-radius:4px;margin-top:8px"></svg>
     <p class="hint" id="emptyNote">Nothing kept yet.</p>
     <div class="actions"><button id="reviewOpen">Review one at a time</button></div>
@@ -127,6 +128,11 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
   </div>
 </section>
 
+<section id="historyView" class="hidden">
+  <p class="hint">Each card is a tournament winner, with the 64 blues of its batch below. The blues that won more are bigger; the ones never picked are tiny. Swipe sideways to go back in time.</p>
+  <div id="history" style="display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 4px 16px;touch-action:pan-x"></div>
+</section>
+
 <div id="drawer" class="hidden" role="dialog" aria-label="Settings">
   <h2>Background</h2>
   <div class="swatches" id="swatches"></div>
@@ -134,6 +140,18 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
   <h2 style="margin-top:12px">Show each square as</h2>
   <div class="swatches" id="fmts"></div>
   <p class="hint" style="margin:8px 0 0">HSL: hue, saturation, lightness. HSB: hue, saturation, brightness.</p>
+  <h2 style="margin-top:12px">Blues I have judged</h2>
+  <div class="swatches" id="hideModes" style="grid-template-columns:1fr 1fr 1fr"></div>
+  <p class="hint" style="margin:6px 0 0">Applies to the next new batch. Hidden blues do not come back.</p>
+  <h2 style="margin-top:12px">Tournament card layout</h2>
+  <div class="swatches" id="hlayouts" style="grid-template-columns:1fr 1fr"></div>
+  <p class="hint" style="margin:6px 0 0">Voronoi: cells a pixel or two apart. Tight squares: squares packed with a 1 pixel gap.</p>
+  <h2 style="margin-top:12px">About</h2>
+  <div style="font-size:0.85rem;line-height:1.45;text-align:left;color:var(--ink)">
+    <p style="margin:0 0 8px">I've always liked blue. It reminds me of the sky. When I was little, I watched Toy Story and saw Andy's room, with its blue wallpaper. The colour looked like a sky I had never seen before, and I was so excited by it.</p>
+    <p style="margin:0 0 8px">The sky only has that exact shade once in a while, a day or a week in the year. I still get excited when I see it in real life, which is why I keep coming back to blues.</p>
+    <p style="margin:0">I've just learned about the colour gamut: the range of colours our eyes can see, and what lies beyond it. It helps explain why some blues feel so vivid to me.</p>
+  </div>
   <h2 style="margin-top:12px">Heat map</h2>
   <label class="meta" style="display:flex;gap:8px;align-items:center;justify-content:flex-start"><input id="heatOn" type="checkbox" style="min-height:auto;flex:none;width:20px;height:20px;padding:0"> Show heat in My palette</label>
   <label class="meta" style="display:block;margin-top:8px">Heat strength <input id="heatOpacity" type="range" min="0" max="100" value="60" style="display:block;width:100%;min-height:auto;flex:none;padding:0;border:none;background:none"></label>
@@ -194,7 +212,7 @@ const lightBin = l => l < 35 ? 0 : l < 65 ? 1 : 2;
 BLUES.forEach(b => { b.hb = hueBin(b.h); b.sb = satBin(b.s); b.lb = lightBin(b.l); b.cell = b.hb * 9 + b.sb * 3 + b.lb; });
 
 // ---------- storage: on this device, synced to the database when signed in ----------
-const KEY = { kept: "colores-azules-kept-v3", prefs: "colores-azules-prefs-v3", events: "colores-azules-events-v3", state: "colores-azules-state-v3", synced: "colores-azules-synced-v1", session: "colores-azules-session-v1", bg: "colores-azules-bg-v1", fmt: "colores-azules-fmt-v1" };
+const KEY = { kept: "colores-azules-kept-v3", prefs: "colores-azules-prefs-v3", events: "colores-azules-events-v3", state: "colores-azules-state-v3", synced: "colores-azules-synced-v1", session: "colores-azules-session-v1", history: "colores-azules-history-v1", hlayout: "colores-azules-hlayout-v1", bg: "colores-azules-bg-v1", fmt: "colores-azules-fmt-v1" };
 const load = (k, fallback) => { try { const v = JSON.parse(localStorage.getItem(k)); return v === null ? fallback : v; } catch (e) { return fallback; } };
 const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 const blankAxes = () => ({ hue: [0, 0, 0, 0, 0, 0], sat: [0, 0, 0], light: [0, 0, 0] });
@@ -253,23 +271,35 @@ const SETS = () => 64 / setSize;
 const isKept = hex => kept.includes(hex);
 const setOf = () => batch.slice(setNo * setSize, setNo * setSize + setSize);
 
+// previously judged blues, hidden from new batches as the settings say
+const HIDE_KEY = "colores-azules-hide-v1";
+const hideMode = () => { try { return localStorage.getItem(HIDE_KEY) || "show"; } catch (e) { return "show"; } };
+function hiddenSet() {
+  const m = hideMode(), s = new Set();
+  if (m === "show") return s;
+  kept.forEach(hex => { const i = BY_HEX.get(hex); if (i !== undefined) s.add(i); });
+  if (m === "all") events.forEach(e => { if (e.type === "pass") { const i = BY_HEX.get(e.hex); if (i !== undefined) s.add(i); } });
+  return s;
+}
 function makeKey() {
   return new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14) + "-" + Math.random().toString(36).slice(2, 6);
 }
 function buildBatch() {
   setSize = wide() ? 16 : 8;
   const cells = Array.from({ length: 54 }, () => []);
-  for (let i = 0; i < N; i++) if (!lastBatch.has(i)) cells[BLUES[i].cell].push(i);
+  const hidden = hiddenSet();
+  for (let i = 0; i < N; i++) if (!lastBatch.has(i) && !hidden.has(i)) cells[BLUES[i].cell].push(i);
   const picks = [];
   cells.forEach(c => { if (c.length) picks.push(weightedPick(c)); });
   // 8 repeats of blues shown in earlier batches, once there is history
   const repeats = [];
-  const pool = [...new Set(shown)].filter(i => !lastBatch.has(i) && !picks.includes(i));
+  const pool = [...new Set(shown)].filter(i => !lastBatch.has(i) && !hidden.has(i) && !picks.includes(i));
   if (pool.length >= 16) while (repeats.length < 8) repeats.push(weightedPick(pool.filter(i => !repeats.includes(i))));
   const all = picks.concat(repeats);
   while (all.length < 64) {
     const extra = [];
-    for (let i = 0; i < N; i++) if (!lastBatch.has(i) && !all.includes(i)) extra.push(i);
+    for (let i = 0; i < N; i++) if (!lastBatch.has(i) && !hidden.has(i) && !all.includes(i)) extra.push(i);
+    if (!extra.length) break;
     all.push(weightedPick(extra));
   }
   for (let k = all.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [all[k], all[j]] = [all[j], all[k]]; }
@@ -372,7 +402,7 @@ $("newBatch").onclick = () => { buildBatch(); renderSets(); updateCounts(); toas
 $("startTour").onclick = () => setMode("tour");
 
 // ---------- tournament: head to head, March style, saved as it goes ----------
-function roundName(n) { return n === 2 ? "Final" : n === 4 ? "Semifinal" : n === 8 ? "Quarterfinal" : "Round of " + n; }
+function roundName(n) { return n <= 2 ? "Final" : n <= 4 ? "Semifinal" : n <= 8 ? "Quarterfinal" : "Round of " + (n <= 16 ? 16 : n <= 32 ? 32 : n); }
 function startTournament() {
   if (!batchDone) { $("tourInfo").textContent = "Finish all the palettes first (palette " + (setNo + 1) + " of " + SETS() + ")."; $("duel").innerHTML = ""; $("tourActions").innerHTML = ""; return; }
   if (!tour) {
@@ -401,8 +431,19 @@ function duel() {
     if (tour.nxt.length === 1) return champion(tour.nxt[0]);
     tour.round = tour.nxt; tour.nxt = [];
   }
+  if (tour.round.length === 1) { tour.nxt.push(tour.round.shift()); saveState(); return duel(); }
   const n = tour.round.length, a = tour.round[0], b = tour.round[1];
-  $("tourInfo").textContent = roundName(n) + " · " + (n / 2) + " match" + (n > 2 ? "es" : "") + " left in this round. Tap the one you prefer.";
+  $("tourInfo").textContent = roundName(n) + " · " + (n / 2) + " match" + (n > 2 ? "es" : "") + " left in this round. Tap the one you prefer, or keep both.";
+  const both = document.createElement("button");
+  both.className = "keep-btn"; both.textContent = "Keep both (+1 each)";
+  both.onclick = () => {
+    tour.round.splice(0, 2); tour.nxt.push(a, b);
+    [a, b].forEach(i => { const hex = BLUES[i].hex; if (!isKept(hex)) kept.push(hex); learn(i, 1, 0.3); });
+    save(KEY.kept, kept);
+    logEvent("both", BLUES[a].hex, { other: BLUES[b].hex, round: roundName(n), batch_key: batchKey, side: "both" });
+    saveState(); updateCounts(); duel();
+  };
+  $("tourActions").appendChild(both);
   [a, b].forEach((i, k) => {
     const el = tile(i, { tall: true });
     el.onclick = () => {
@@ -419,7 +460,21 @@ function champion(i) {
   const hex = BLUES[i].hex;
   tour.done = true; tour.champ = i;
   if (!isKept(hex)) { kept.push(hex); save(KEY.kept, kept); }
-  logEvent("champion", hex, { batch_key: batchKey, size: tour.size });
+  logEvent("champion", hex, { batch_key: batchKey, size: tour.size, round: "Champion", kept: batchKeeps.length });
+  const hist = load(KEY.history, []);
+  const st = stamp();
+  // how much each blue of this batch mattered: keeps count 1, later round wins count more, the champion 5
+  const sc = {}, add = (h, v) => { sc[h] = (sc[h] || 0) + v; };
+  events.forEach(e => {
+    if (e.batch_key !== batchKey) return;
+    if (e.type === "keep") add(e.hex, 1);
+    else if (e.type === "duel") add(e.hex, weightOf(e));
+    else if (e.type === "both") { add(e.hex, 1); add(e.other, 1); }
+    else if (e.type === "champion") add(e.hex, 5);
+  });
+  hist.unshift({ key: batchKey, date: st.date, time: st.time, winner: hex, kept: batchKeeps.length,
+                 hexes: batch.map(i => BLUES[i].hex), scores: batch.map(i => sc[BLUES[i].hex] || 0) });
+  save(KEY.history, hist.slice(0, 200));
   learn(i, 1, 0.3); saveState(); updateCounts();
   syncNow(true);
   duel();
@@ -453,7 +508,7 @@ function repeatCheck() {
   return { total, agree };
 }
 function renderTaste() {
-  const picks = events.filter(e => e.type === "keep" || e.type === "duel").length;
+  const picks = events.filter(e => e.type === "keep" || e.type === "duel" || e.type === "both").length;
   const passes = events.filter(e => e.type === "pass").length;
   if (picks === 0 && passes === 0) { $("tasteText").textContent = "No choices yet. Pick palettes to start."; updateSyncText(); return; }
   const band = currentBand();
@@ -524,10 +579,17 @@ async function syncNow(auto) {
                batch_key: e.batch_key || null, set_no: e.set_no ?? null, position: e.position ?? null,
                is_repeat: !!e.is_repeat, local_date: e.date, local_time: e.time, band: e.band };
     });
-    const duels = rows.filter(e => e.type === "duel").map(e => ({
-      round: e.round, winner_hex: e.hex, loser_hex: e.loser, client_time: e.t,
+    const duels = rows.filter(e => e.type === "duel" || e.type === "both").map(e => ({
+      round: e.round, winner_hex: e.hex, loser_hex: e.loser || e.other, client_time: e.t,
       batch_key: e.batch_key || null, side: e.side || null, local_date: e.date, local_time: e.time, band: e.band
     }));
+    for (const e of rows.filter(e => e.type === "champion")) {
+      const r = await fetch(SYNC.url + "/rest/v1/ca_batches?batch_key=eq." + encodeURIComponent(e.batch_key), {
+        method: "PATCH", headers: { "Content-Type": "application/json", apikey: SYNC.key, Authorization: "Bearer " + s.token, Prefer: "return=minimal" },
+        body: JSON.stringify({ finished: true, winner_hex: e.hex, winner_round: e.round, kept_count: e.kept ?? 0 })
+      });
+      if (!r.ok) throw new Error("ca_batches " + r.status);
+    }
     if (choices.length) await post("ca_choices", choices, null, s.token);
     if (duels.length) await post("ca_duels", duels, null, s.token);
     await post("ca_taste", [{ owner_id: s.uid, prefs, updated_at: new Date().toISOString() }], "resolution=merge-duplicates,return=minimal", s.token);
@@ -559,6 +621,13 @@ function renderPalette() {
   document.querySelectorAll("#sortBar button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.s === sortKey)));
   renderHeat();
 }
+// a blue that keeps winning matters more: later rounds weigh more, the champion most
+const ROUND_WEIGHT = { "Round of 16": 1, "Round of 32": 1, "Quarterfinal": 2, "Semifinal": 3, "Final": 4 };
+function weightOf(e) {
+  if (e.type === "champion") return 5;
+  if (e.type === "duel" || e.type === "both") return ROUND_WEIGHT[e.round] || 1;
+  return 1;
+}
 // heat map: every blue as a small dot, favourites ringed, warm circles where keeps and wins cluster
 const SVG_NS = "http://www.w3.org/2000/svg";
 function renderHeat() {
@@ -574,10 +643,10 @@ function renderHeat() {
   if (heat.on) {
     const counts = new Map(); let max = 0;
     events.forEach(e => {
-      if (e.type !== "keep" && e.type !== "duel") return;
+      if (e.type !== "keep" && e.type !== "duel" && e.type !== "both" && e.type !== "champion") return;
       const i = BY_HEX.get(e.hex); if (i === undefined) return;
       const b = BLUES[i], key = Math.min(9, Math.floor((b.h - 170) / 10)) + ":" + Math.min(9, Math.floor(b.l / 10));
-      const c = (counts.get(key) || 0) + 1; counts.set(key, c); if (c > max) max = c;
+      const c = (counts.get(key) || 0) + weightOf(e); counts.set(key, c); if (c > max) max = c;
     });
     counts.forEach((c, key) => {
       const [hb, lb] = key.split(":").map(Number);
@@ -612,21 +681,242 @@ function updateCounts() {
   $("count").textContent = kept.length; $("events").textContent = events.length; $("synced").textContent = syncedUpTo;
 }
 function setMode(mode) {
-  const views = { sets: "setsView", tour: "tourView", neigh: "neighView", taste: "tasteView", palette: "palette" };
+  const views = { sets: "setsView", tour: "tourView", neigh: "neighView", taste: "tasteView", palette: "palette", history: "historyView" };
   Object.entries(views).forEach(([k, id]) => $(id).classList.toggle("hidden", k !== mode));
-  const ids = { sets: "modeSets", tour: "modeTour", neigh: "modeNeigh", taste: "modeTaste", palette: "modePalette" };
+  const ids = { sets: "modeSets", tour: "modeTour", neigh: "modeNeigh", taste: "modeTaste", palette: "modePalette", history: "modeHistory" };
   Object.entries(ids).forEach(([k, id]) => $(id).setAttribute("aria-pressed", String(k === mode)));
   if (mode === "sets") renderSets();
   if (mode === "tour") startTournament();
   if (mode === "neigh") renderNeighbours();
   if (mode === "taste") renderTaste();
   if (mode === "palette") renderPalette();
+  if (mode === "history") renderHistory();
 }
 $("modeSets").onclick = () => setMode("sets");
 $("modeTour").onclick = () => setMode("tour");
 $("modeNeigh").onclick = () => setMode("neigh");
 $("modeTaste").onclick = () => setMode("taste");
 $("modePalette").onclick = () => setMode("palette");
+$("modeHistory").onclick = () => setMode("history");
+// tournament card layout: "voronoi" (vector cells, weighted power diagram) or "grid" (tight rectangle)
+const hlayoutMode = () => { try { return localStorage.getItem("colores-azules-hlayout-v1") || "voronoi"; } catch (e) { return "voronoi"; } };
+const TAIL_SHARE = 0.55, ROWS = 6, CARD_W = 224, CARD_H = 96;
+
+// weighted Voronoi as a power diagram: every cell is a straight-edged polygon, drawn as SVG paths
+function clipPoly(poly, a, b, c) {       // keep the part where a*x + b*y <= c
+  const out = [];
+  for (let k = 0; k < poly.length; k++) {
+    const P = poly[k], Q = poly[(k + 1) % poly.length];
+    const fp = a * P[0] + b * P[1] - c, fq = a * Q[0] + b * Q[1] - c;
+    if (fp <= 0) out.push(P);
+    if ((fp < 0 && fq > 0) || (fp > 0 && fq < 0)) { const t = fp / (fp - fq); out.push([P[0] + t * (Q[0] - P[0]), P[1] + t * (Q[1] - P[1])]); }
+  }
+  return out;
+}
+function powerCells(sites, r, W, H) {
+  return sites.map((si, i) => {
+    let poly = [[0, 0], [W, 0], [W, H], [0, H]];
+    for (let j = 0; j < sites.length && poly.length; j++) {
+      if (j === i) continue;
+      const sj = sites[j];
+      const a = 2 * (sj.x - si.x), b = 2 * (sj.y - si.y);
+      const c = (sj.x * sj.x + sj.y * sj.y - r[j]) - (si.x * si.x + si.y * si.y - r[i]);
+      poly = clipPoly(poly, a, b, c);
+    }
+    let A = 0, cx = 0, cy = 0;
+    for (let k = 0; k < poly.length; k++) {
+      const P = poly[k], Q = poly[(k + 1) % poly.length], cr = P[0] * Q[1] - Q[0] * P[1];
+      A += cr; cx += (P[0] + Q[0]) * cr; cy += (P[1] + Q[1]) * cr;
+    }
+    A /= 2;
+    return { poly, area: Math.abs(A), cx: A ? cx / (6 * A) : si.x, cy: A ? cy / (6 * A) : si.y };
+  });
+}
+function powerVoronoi(items, W, H) {
+  const head = items.filter(o => o.score > 0), tail = items.filter(o => o.score <= 0);
+  const splitX = head.length && tail.length ? W * (1 - TAIL_SHARE) : (head.length ? W : 0);
+  const headTotal = head.reduce((a, o) => a + o.score * o.score + 2, 0);
+  const tailTotal = head.length ? headTotal * TAIL_SHARE / (1 - TAIL_SHARE) : 1;
+  const sites = [], group = [];
+  const place = (list, g, x0, x1, weight) => {
+    const cols = Math.max(1, Math.ceil(list.length / ROWS));
+    list.forEach((o, k) => {
+      const col = Math.floor(k / ROWS), row = k % ROWS;
+      sites.push({ x: x0 + (col + 0.5) * (x1 - x0) / cols, y: (row + 0.5) * H / ROWS, row, x0, x1 });
+      group.push({ hex: o.hex, score: o.score, g, w: weight(o) });
+    });
+  };
+  place(head, 0, 0, splitX || W, o => o.score * o.score + 2);
+  place(tail, 1, splitX, W, () => tail.length ? tailTotal / tail.length : 1);
+  const wsum = group.reduce((a, o) => a + o.w, 0), total = W * H, N = sites.length;
+  const target = group.map(o => total * o.w / wsum);
+  const r = sites.map(() => 0);
+  let cells = powerCells(sites, r, W, H);
+  for (let it = 0; it < 150; it++) {
+    const spacing = Math.sqrt(total / N);
+    cells.forEach((c, i) => {                                   // grow or shrink each cell toward its target area, gently
+      const rel = (target[i] - c.area) / target[i];
+      r[i] = Math.max(-60 * spacing * spacing, Math.min(60 * spacing * spacing, r[i] + 0.2 * spacing * spacing * rel));
+    });
+    sites.forEach((s, i) => {                                   // centroid step, kept in its group and row
+      const c = cells[i];
+      s.x = Math.min(s.x1 - 1, Math.max(s.x0 + 1, c.cx));
+      s.y = Math.min((s.row + 1) * H / ROWS - 1, Math.max(s.row * H / ROWS + 1, c.cy));
+    });
+    cells = powerCells(sites, r, W, H);
+  }
+  // any cell that lost most of its area: raise its radius by bisection until it has room again
+  for (let i = 0; i < N; i++) {
+    if (cells[i].area >= 0.3 * target[i]) continue;
+    const spacing = Math.sqrt(total / N);
+    let lo = r[i], hi = r[i] + 40 * spacing * spacing;
+    for (let k = 0; k < 30; k++) {
+      const mid = (lo + hi) / 2, saved = r[i];
+      r[i] = mid;
+      const a = powerCells(sites, r, W, H)[i].area;
+      r[i] = saved;
+      if (a < target[i]) lo = mid; else hi = mid;
+    }
+    r[i] = hi;
+    cells = powerCells(sites, r, W, H);
+  }
+  return cells.map((c, i) => ({ hex: group[i].hex, score: group[i].score, g: group[i].g, poly: c.poly, area: c.area, x: sites[i].x, y: sites[i].y }));
+}
+function polyCentroid(poly) {
+  let A = 0, cx = 0, cy = 0;
+  for (let k = 0; k < poly.length; k++) {
+    const P = poly[k], Q = poly[(k + 1) % poly.length], cr = P[0] * Q[1] - Q[0] * P[1];
+    A += cr; cx += (P[0] + Q[0]) * cr; cy += (P[1] + Q[1]) * cr;
+  }
+  A /= 2;
+  return A ? [cx / (6 * A), cy / (6 * A)] : [poly[0][0], poly[0][1]];
+}
+function insetPoly(poly, f) {                 // shrink toward the centre by factor f
+  const [cx, cy] = polyCentroid(poly);
+  return poly.map(q => [cx + (q[0] - cx) * f, cy + (q[1] - cy) * f]);
+}
+// the chosen look: tight Voronoi cells, a few pixels apart; picked blues outlined, the rest muted
+function svgVoronoi(cells, W, H) {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+  svg.setAttribute("preserveAspectRatio", "none");
+  svg.style.cssText = "width:100%;height:100%;flex:1 1 0;min-height:0;display:block";
+  cells.forEach(c => {
+    const picked = c.score > 0;
+    if (c.poly.length < 3 || c.area < 0.01) {                     // a cell the solver could not open: a dot at its site
+      const dot = document.createElementNS(NS, "circle");
+      dot.setAttribute("cx", c.x.toFixed(2)); dot.setAttribute("cy", c.y.toFixed(2)); dot.setAttribute("r", "2.5");
+      dot.setAttribute("fill", c.hex); if (!picked) dot.setAttribute("fill-opacity", "0.55");
+      svg.appendChild(dot);
+      return;
+    }
+    const pts = insetPoly(c.poly, 0.975);
+    const p = document.createElementNS(NS, "path");
+    p.setAttribute("d", "M" + pts.map(q => q[0].toFixed(2) + " " + q[1].toFixed(2)).join("L") + "Z");
+    p.setAttribute("fill", c.hex);
+    if (picked) { p.setAttribute("stroke", "#2b2b2b"); p.setAttribute("stroke-width", "0.9"); p.setAttribute("stroke-opacity", "0.55"); }
+    else p.setAttribute("fill-opacity", "0.55");
+    const title = document.createElementNS(NS, "title"); title.textContent = picked ? "score " + c.score : "not picked";
+    p.appendChild(title);
+    svg.appendChild(p);
+  });
+  return svg;
+}
+function voronoiStats(cells, W, H) {
+  const total = cells.reduce((a, c) => a + c.area, 0);
+  const tail = cells.filter(c => c.g === 1).reduce((a, c) => a + c.area, 0);
+  const aspects = cells.filter(c => c.area > 0.01).map(c => {
+    const xs = c.poly.map(q => q[0]), ys = c.poly.map(q => q[1]);
+    const w = Math.max(...xs) - Math.min(...xs) || 0.01, h = Math.max(...ys) - Math.min(...ys) || 0.01;
+    return Math.max(w / h, h / w);
+  }).sort((a, b) => a - b);
+  return { tailShare: +(tail / total).toFixed(3), totalShare: +(total / (W * H)).toFixed(3), cells: aspects.length, medianAspect: +aspects[aspects.length >> 1].toFixed(2), worstAspect: +aspects[aspects.length - 1].toFixed(2) };
+}
+function weekdayTime(h) {
+  const d = new Date(h.date + "T00:00:00");
+  return d.toLocaleDateString("en-GB", { weekday: "short" }) + " " + h.time.slice(0, 5);
+}
+function historyItems(h) {
+  const scores = h.scores || h.hexes.map(() => 0);
+  return (h.hexes || []).map((hex, k) => ({ hex, score: scores[k] || 0 })).filter(o => o.hex !== h.winner).sort((a, b) => b.score - a.score);
+}
+// tight squares: rows of similar squares, each row stretched to the full width and the rows to the full height,
+// with a 1 pixel white gap between squares
+function tightSquares(items, gap) {
+  const max = Math.max(1, ...items.map(o => o.score));
+  let best = null;
+  for (let base = 80; base >= 6; base -= 0.5) {
+    const sizes = items.map(o => Math.max(2, base * Math.sqrt(o.score / max + 0.04)));
+    const rows = []; let cur = [], curW = 0;
+    sizes.forEach((s, k) => {
+      if (cur.length && curW + s + gap > CARD_W) { rows.push(cur); cur = []; curW = 0; }
+      cur.push(k); curW += s + gap;
+    });
+    if (cur.length) rows.push(cur);
+    const rowH = rows.map(r => Math.max(...r.map(k => sizes[k])));
+    const sumH = rowH.reduce((x, y) => x + y, 0) + gap * (rows.length - 1);
+    if (sumH > CARD_H) continue;
+    best = { sizes, rows, rowH };
+    break;
+  }
+  if (!best) return [];
+  const { sizes, rows, rowH } = best, out = [];
+  const gv = (CARD_H - gap * (rows.length - 1)) / rowH.reduce((x, y) => x + y, 0);
+  let y = 0;
+  rows.forEach((r, ri) => {
+    const h = rowH[ri] * gv, sum = r.reduce((x, k) => x + sizes[k], 0);
+    const fw = (CARD_W - gap * (r.length - 1)) / sum;
+    let x = 0;
+    r.forEach(k => { const w = sizes[k] * fw; out.push({ k, x, y, w, h }); x += w + gap; });
+    y += h + gap;
+  });
+  return out;
+}
+function tightSquaresSvg(items, gap) {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 " + CARD_W + " " + CARD_H);
+  svg.setAttribute("preserveAspectRatio", "none");
+  svg.style.cssText = "width:100%;height:100%;flex:1 1 0;min-height:0;display:block";
+  tightSquares(items, gap).forEach(p => {
+    const o = items[p.k], r = document.createElementNS(NS, "rect");
+    r.setAttribute("x", p.x.toFixed(2)); r.setAttribute("y", p.y.toFixed(2)); r.setAttribute("width", p.w.toFixed(2)); r.setAttribute("height", p.h.toFixed(2));
+    r.setAttribute("fill", o.hex);
+    if (o.score > 0) { r.setAttribute("stroke", "#2b2b2b"); r.setAttribute("stroke-width", "0.7"); r.setAttribute("stroke-opacity", "0.5"); }
+    else r.setAttribute("fill-opacity", "0.55");
+    const title = document.createElementNS(NS, "title"); title.textContent = o.score ? "score " + o.score : "not picked";
+    r.appendChild(title);
+    svg.appendChild(r);
+  });
+  return svg;
+}
+function renderHistory() {
+  const box = $("history"); box.innerHTML = "";
+  const hist = load(KEY.history, []);
+  if (!hist.length) { box.innerHTML = '<p class="hint" style="width:100%">No tournaments yet. Finish a batch and run the tournament.</p>'; return; }
+  hist.forEach(h => {
+    const card = document.createElement("div");
+    card.style.cssText = "flex:0 0 auto;width:240px;height:340px;display:flex;flex-direction:column;gap:4px;scroll-snap-align:start;background:var(--panel);border-radius:4px;padding:8px;overflow:hidden";
+    const wi = BY_HEX.get(h.winner);
+    const top = wi !== undefined ? tile(wi, {}) : document.createElement("div");
+    top.style.height = "auto"; top.style.flex = "2 1 0"; top.style.minHeight = "0"; top.style.margin = "0";
+    card.appendChild(top);
+    const cap = document.createElement("div"); cap.className = "meta";
+    cap.style.cssText = "margin:0;font-size:0.72rem;line-height:1.1;flex:0 0 auto";
+    cap.textContent = weekdayTime(h);
+    card.appendChild(cap);
+    const items = historyItems(h);
+    if (hlayoutMode() === "grid") {
+      card.appendChild(tightSquaresSvg(items, 1));
+    } else {
+      const cells = powerVoronoi(items, CARD_W, CARD_H);
+      card.appendChild(svgVoronoi(cells, CARD_W, CARD_H));
+      card.dataset.stats = JSON.stringify(voronoiStats(cells, CARD_W, CARD_H));
+    }
+    box.appendChild(card);
+  });
+}
 
 // ---------- settings gear: background and label format ----------
 const BACKGROUNDS = [
@@ -665,6 +955,31 @@ function setFmt(f) {
   $("fmts").appendChild(b);
 });
 $("gear").onclick = () => { const open = $("drawer").classList.toggle("hidden") === false; $("gear").setAttribute("aria-expanded", String(open)); };
+
+// hide mode buttons
+[["show", "Show all"], ["kept", "Hide kept"], ["all", "Hide kept and passed"]].forEach(([m, text]) => {
+  const b = document.createElement("button");
+  b.dataset.h = m; b.textContent = text; b.style.fontSize = "0.8rem"; b.style.minHeight = "44px";
+  b.setAttribute("aria-pressed", String(hideMode() === m));
+  b.onclick = () => {
+    try { localStorage.setItem(HIDE_KEY, m); } catch (e) {}
+    document.querySelectorAll("#hideModes button").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.h === m)));
+  };
+  $("hideModes").appendChild(b);
+});
+
+// tournament card layout buttons
+[["voronoi", "Voronoi"], ["grid", "Tight squares"]].forEach(([m, text]) => {
+  const b = document.createElement("button");
+  b.dataset.l = m; b.textContent = text; b.style.fontSize = "0.8rem"; b.style.minHeight = "44px";
+  b.setAttribute("aria-pressed", String(hlayoutMode() === m));
+  b.onclick = () => {
+    try { localStorage.setItem("colores-azules-hlayout-v1", m); } catch (e) {}
+    document.querySelectorAll("#hlayouts button").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.l === m)));
+    renderHistory();
+  };
+  $("hlayouts").appendChild(b);
+});
 
 // ---------- start: resume the saved batch and tournament, or build a new one ----------
 if (!restoreState()) buildBatch();
