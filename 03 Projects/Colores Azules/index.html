@@ -53,7 +53,7 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
 <header>
   <div>
     <h1>Colores Azules</h1>
-    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 8</span></div>
+    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 9</span></div>
   </div>
   <div class="meta">Kept: <span id="count">0</span> · Synced: <span id="synced">0</span>/<span id="events">0</span></div>
 </header>
@@ -134,6 +134,9 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
   <h2 style="margin-top:12px">Show each square as</h2>
   <div class="swatches" id="fmts"></div>
   <p class="hint" style="margin:8px 0 0">HSL: hue, saturation, lightness. HSB: hue, saturation, brightness.</p>
+  <h2 style="margin-top:12px">Blues I have judged</h2>
+  <div class="swatches" id="hideModes" style="grid-template-columns:1fr 1fr 1fr"></div>
+  <p class="hint" style="margin:6px 0 0">Applies to the next new batch. Hidden blues do not come back.</p>
   <h2 style="margin-top:12px">Heat map</h2>
   <label class="meta" style="display:flex;gap:8px;align-items:center;justify-content:flex-start"><input id="heatOn" type="checkbox" style="min-height:auto;flex:none;width:20px;height:20px;padding:0"> Show heat in My palette</label>
   <label class="meta" style="display:block;margin-top:8px">Heat strength <input id="heatOpacity" type="range" min="0" max="100" value="60" style="display:block;width:100%;min-height:auto;flex:none;padding:0;border:none;background:none"></label>
@@ -253,23 +256,35 @@ const SETS = () => 64 / setSize;
 const isKept = hex => kept.includes(hex);
 const setOf = () => batch.slice(setNo * setSize, setNo * setSize + setSize);
 
+// previously judged blues, hidden from new batches as the settings say
+const HIDE_KEY = "colores-azules-hide-v1";
+const hideMode = () => { try { return localStorage.getItem(HIDE_KEY) || "show"; } catch (e) { return "show"; } };
+function hiddenSet() {
+  const m = hideMode(), s = new Set();
+  if (m === "show") return s;
+  kept.forEach(hex => { const i = BY_HEX.get(hex); if (i !== undefined) s.add(i); });
+  if (m === "all") events.forEach(e => { if (e.type === "pass") { const i = BY_HEX.get(e.hex); if (i !== undefined) s.add(i); } });
+  return s;
+}
 function makeKey() {
   return new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14) + "-" + Math.random().toString(36).slice(2, 6);
 }
 function buildBatch() {
   setSize = wide() ? 16 : 8;
   const cells = Array.from({ length: 54 }, () => []);
-  for (let i = 0; i < N; i++) if (!lastBatch.has(i)) cells[BLUES[i].cell].push(i);
+  const hidden = hiddenSet();
+  for (let i = 0; i < N; i++) if (!lastBatch.has(i) && !hidden.has(i)) cells[BLUES[i].cell].push(i);
   const picks = [];
   cells.forEach(c => { if (c.length) picks.push(weightedPick(c)); });
   // 8 repeats of blues shown in earlier batches, once there is history
   const repeats = [];
-  const pool = [...new Set(shown)].filter(i => !lastBatch.has(i) && !picks.includes(i));
+  const pool = [...new Set(shown)].filter(i => !lastBatch.has(i) && !hidden.has(i) && !picks.includes(i));
   if (pool.length >= 16) while (repeats.length < 8) repeats.push(weightedPick(pool.filter(i => !repeats.includes(i))));
   const all = picks.concat(repeats);
   while (all.length < 64) {
     const extra = [];
-    for (let i = 0; i < N; i++) if (!lastBatch.has(i) && !all.includes(i)) extra.push(i);
+    for (let i = 0; i < N; i++) if (!lastBatch.has(i) && !hidden.has(i) && !all.includes(i)) extra.push(i);
+    if (!extra.length) break;
     all.push(weightedPick(extra));
   }
   for (let k = all.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [all[k], all[j]] = [all[j], all[k]]; }
@@ -372,7 +387,7 @@ $("newBatch").onclick = () => { buildBatch(); renderSets(); updateCounts(); toas
 $("startTour").onclick = () => setMode("tour");
 
 // ---------- tournament: head to head, March style, saved as it goes ----------
-function roundName(n) { return n === 2 ? "Final" : n === 4 ? "Semifinal" : n === 8 ? "Quarterfinal" : "Round of " + n; }
+function roundName(n) { return n <= 2 ? "Final" : n <= 4 ? "Semifinal" : n <= 8 ? "Quarterfinal" : "Round of " + (n <= 16 ? 16 : n <= 32 ? 32 : n); }
 function startTournament() {
   if (!batchDone) { $("tourInfo").textContent = "Finish all the palettes first (palette " + (setNo + 1) + " of " + SETS() + ")."; $("duel").innerHTML = ""; $("tourActions").innerHTML = ""; return; }
   if (!tour) {
@@ -401,8 +416,19 @@ function duel() {
     if (tour.nxt.length === 1) return champion(tour.nxt[0]);
     tour.round = tour.nxt; tour.nxt = [];
   }
+  if (tour.round.length === 1) { tour.nxt.push(tour.round.shift()); saveState(); return duel(); }
   const n = tour.round.length, a = tour.round[0], b = tour.round[1];
-  $("tourInfo").textContent = roundName(n) + " · " + (n / 2) + " match" + (n > 2 ? "es" : "") + " left in this round. Tap the one you prefer.";
+  $("tourInfo").textContent = roundName(n) + " · " + (n / 2) + " match" + (n > 2 ? "es" : "") + " left in this round. Tap the one you prefer, or keep both.";
+  const both = document.createElement("button");
+  both.className = "keep-btn"; both.textContent = "Keep both (+1 each)";
+  both.onclick = () => {
+    tour.round.splice(0, 2); tour.nxt.push(a, b);
+    [a, b].forEach(i => { const hex = BLUES[i].hex; if (!isKept(hex)) kept.push(hex); learn(i, 1, 0.3); });
+    save(KEY.kept, kept);
+    logEvent("both", BLUES[a].hex, { other: BLUES[b].hex, round: roundName(n), batch_key: batchKey, side: "both" });
+    saveState(); updateCounts(); duel();
+  };
+  $("tourActions").appendChild(both);
   [a, b].forEach((i, k) => {
     const el = tile(i, { tall: true });
     el.onclick = () => {
@@ -453,7 +479,7 @@ function repeatCheck() {
   return { total, agree };
 }
 function renderTaste() {
-  const picks = events.filter(e => e.type === "keep" || e.type === "duel").length;
+  const picks = events.filter(e => e.type === "keep" || e.type === "duel" || e.type === "both").length;
   const passes = events.filter(e => e.type === "pass").length;
   if (picks === 0 && passes === 0) { $("tasteText").textContent = "No choices yet. Pick palettes to start."; updateSyncText(); return; }
   const band = currentBand();
@@ -524,8 +550,8 @@ async function syncNow(auto) {
                batch_key: e.batch_key || null, set_no: e.set_no ?? null, position: e.position ?? null,
                is_repeat: !!e.is_repeat, local_date: e.date, local_time: e.time, band: e.band };
     });
-    const duels = rows.filter(e => e.type === "duel").map(e => ({
-      round: e.round, winner_hex: e.hex, loser_hex: e.loser, client_time: e.t,
+    const duels = rows.filter(e => e.type === "duel" || e.type === "both").map(e => ({
+      round: e.round, winner_hex: e.hex, loser_hex: e.loser || e.other, client_time: e.t,
       batch_key: e.batch_key || null, side: e.side || null, local_date: e.date, local_time: e.time, band: e.band
     }));
     if (choices.length) await post("ca_choices", choices, null, s.token);
@@ -574,7 +600,7 @@ function renderHeat() {
   if (heat.on) {
     const counts = new Map(); let max = 0;
     events.forEach(e => {
-      if (e.type !== "keep" && e.type !== "duel") return;
+      if (e.type !== "keep" && e.type !== "duel" && e.type !== "both") return;
       const i = BY_HEX.get(e.hex); if (i === undefined) return;
       const b = BLUES[i], key = Math.min(9, Math.floor((b.h - 170) / 10)) + ":" + Math.min(9, Math.floor(b.l / 10));
       const c = (counts.get(key) || 0) + 1; counts.set(key, c); if (c > max) max = c;
@@ -665,6 +691,18 @@ function setFmt(f) {
   $("fmts").appendChild(b);
 });
 $("gear").onclick = () => { const open = $("drawer").classList.toggle("hidden") === false; $("gear").setAttribute("aria-expanded", String(open)); };
+
+// hide mode buttons
+[["show", "Show all"], ["kept", "Hide kept"], ["all", "Hide kept and passed"]].forEach(([m, text]) => {
+  const b = document.createElement("button");
+  b.dataset.h = m; b.textContent = text; b.style.fontSize = "0.8rem"; b.style.minHeight = "44px";
+  b.setAttribute("aria-pressed", String(hideMode() === m));
+  b.onclick = () => {
+    try { localStorage.setItem(HIDE_KEY, m); } catch (e) {}
+    document.querySelectorAll("#hideModes button").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.h === m)));
+  };
+  $("hideModes").appendChild(b);
+});
 
 // ---------- start: resume the saved batch and tournament, or build a new one ----------
 if (!restoreState()) buildBatch();
