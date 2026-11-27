@@ -25,7 +25,7 @@ Status: MVP 0.1 (2026-11-26; grid of 16, swipe, palette, hex copy; photo search 
 
 ## Database plan
 
-None in the first build (local device storage). Architecture Supabase project later, via `/supabase-setup`.
+Architecture Supabase project, prefix `ca_`, owner only (sign-in with the owner's login; `platform_is_owner()`). Tables: `ca_batches`, `ca_choices`, `ca_duels`, `ca_taste`. Migration in `supabase/001_ca_tables.sql`, live. The page saves on the device first and syncs when signed in.
 
 ## Feedback plan
 

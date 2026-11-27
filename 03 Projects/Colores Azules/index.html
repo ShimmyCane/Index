@@ -105,6 +105,13 @@ button:disabled { opacity: 0.4; cursor: default; }
   <div class="panel">
     <h2>What I like so far</h2>
     <div class="readout" id="tasteText"></div>
+    <div class="actions" style="justify-content:flex-start;margin:10px 0 0">
+      <input id="email" type="email" placeholder="Email" autocomplete="username" style="font:inherit;padding:10px;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);min-height:44px;flex:1 1 180px">
+      <input id="pw" type="password" placeholder="Password" autocomplete="current-password" style="font:inherit;padding:10px;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);min-height:44px;flex:1 1 180px">
+      <button id="signIn">Sign in</button>
+      <button id="signOut" class="hidden">Sign out</button>
+    </div>
+    <p class="meta" id="authText"></p>
     <p class="meta" id="syncText" style="margin-top:10px"></p>
     <div class="actions">
       <button id="syncNow">Sync to database</button>
@@ -417,8 +424,7 @@ function duel() {
       const other = k === 0 ? b : a;
       nxt.push(i);
       learn(i, 1, 0.3); learn(other, -0.3, 0);
-      logEvent("win", BLUES[i].hex, { round: roundName(n) });
-      logEvent("lose", BLUES[other].hex, { round: roundName(n) });
+      logEvent("duel", BLUES[i].hex, { loser: BLUES[other].hex, round: roundName(n) });
       duel();
     };
     d.appendChild(el);
@@ -438,8 +444,8 @@ function renderNeighbours() {
 
 // ---------- what I like, and sync ----------
 const counts = () => ({
-  picks: events.filter(e => e.type === "keep" || e.type === "win").length,
-  passes: events.filter(e => e.type === "pass" || e.type === "lose").length
+  picks: events.filter(e => e.type === "keep" || e.type === "duel").length,
+  passes: events.filter(e => e.type === "pass").length
 });
 function renderTaste() {
   const top = arr => arr.indexOf(Math.max(...arr));
@@ -448,19 +454,69 @@ function renderTaste() {
   else $("tasteText").innerHTML = "So far you lean towards <b>" + HUE_NAMES[top(prefs.hue)] + "</b> blues, <b>" + SAT_NAMES[top(prefs.sat)] + "</b>, and <b>" + LIGHT_NAMES[top(prefs.light)] + "</b>.<br>Keeps and wins: " + c.picks + ". Passes and losses: " + c.passes + ".";
   updateSyncText();
 }
-const SYNC = { url: "", key: "" };   // filled in once the architecture database is set up
-function updateSyncText() {
-  $("syncText").textContent = SYNC.url
-    ? "Synced " + syncedUpTo + " of " + events.length + " choices to the database."
-    : "Saved on this device: " + events.length + " choices. Database sync is not set up yet, so nothing has left this device.";
+// ---------- database: architecture project, owner only (sign in required) ----------
+const SYNC = { url: "https://xabgankckrcuhcgdolrg.supabase.co", key: "sb_publishable_kncKodoYJZ6ByexwWM_TtQ_OpW68M5f" };
+const SESSION_KEY = "colores-azules-session-v1";
+const BY_HEX = new Map(BLUES.map(b => [b.hex, b]));
+const getSession = () => load(SESSION_KEY, null);
+function setSession(s) {
+  if (s) save(SESSION_KEY, s);
+  else { try { localStorage.removeItem(SESSION_KEY); } catch (e) {} }
+  updateSyncText();
 }
-function syncNow(auto) {
-  if (!SYNC.url) { if (!auto) toast("Not set up yet. Saved on this device."); updateSyncText(); return; }
+function updateSyncText() {
+  const s = getSession();
+  $("authText").textContent = s ? "Signed in. Only you can read or write this data." : "Signed out. Choices stay on this device until you sign in.";
+  $("signOut").classList.toggle("hidden", !s);
+  $("signIn").classList.toggle("hidden", !!s);
+  $("syncText").textContent = "Synced " + syncedUpTo + " of " + events.length + " choices to the database.";
+}
+async function signIn() {
+  const r = await fetch(SYNC.url + "/auth/v1/token?grant_type=password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SYNC.key },
+    body: JSON.stringify({ email: $("email").value, password: $("pw").value })
+  });
+  if (!r.ok) throw new Error("sign-in");
+  const j = await r.json();
+  $("pw").value = ""; $("email").value = "";
+  setSession({ token: j.access_token, uid: j.user.id, exp: Date.now() + j.expires_in * 1000 });
+}
+$("signIn").onclick = () => signIn().then(() => { toast("Signed in"); syncNow(false); }).catch(() => toast("Sign-in failed"));
+$("signOut").onclick = () => { setSession(null); toast("Signed out"); };
+async function post(table, rows, prefer, token) {
+  const r = await fetch(SYNC.url + "/rest/v1/" + table, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SYNC.key, Authorization: "Bearer " + token, Prefer: prefer || "return=minimal" },
+    body: JSON.stringify(rows)
+  });
+  if (!r.ok) throw new Error(table + " " + r.status);
+}
+async function syncNow(auto) {
+  const s = getSession();
+  if (!s || Date.now() > s.exp) {
+    if (s) setSession(null);
+    if (!auto) toast("Sign in to sync. Saved on this device.");
+    updateSyncText(); return;
+  }
   const rows = events.slice(syncedUpTo);
-  if (!rows.length) return;
-  fetch(SYNC.url, { method: "POST", headers: { "Content-Type": "application/json", apikey: SYNC.key, Authorization: "Bearer " + SYNC.key, Prefer: "return=minimal" }, body: JSON.stringify(rows) })
-    .then(r => { if (!r.ok) throw new Error(r.status); syncedUpTo = events.length; save(KEY.synced, syncedUpTo); updateCounts(); updateSyncText(); })
-    .catch(() => { if (!auto) toast("Sync failed. Still saved on this device."); updateSyncText(); });
+  if (!rows.length) { updateSyncText(); return; }
+  const choices = rows.filter(e => e.type === "keep" || e.type === "pass").map(e => {
+    const b = BY_HEX.get(e.hex);
+    return { kind: e.type, hex: e.hex, hue: b.h, sat: b.s, light: Math.round(b.l), client_time: e.t };
+  });
+  const duels = rows.filter(e => e.type === "duel").map(e => ({ round: e.round, winner_hex: e.hex, loser_hex: e.loser, client_time: e.t }));
+  try {
+    if (choices.length) await post("ca_choices", choices, null, s.token);
+    if (duels.length) await post("ca_duels", duels, null, s.token);
+    await post("ca_taste", [{ owner_id: s.uid, prefs, updated_at: new Date().toISOString() }], "resolution=merge-duplicates,return=minimal", s.token);
+    syncedUpTo = events.length; save(KEY.synced, syncedUpTo);
+    updateCounts();
+    if (!auto) toast("Synced " + rows.length);
+  } catch (e) {
+    if (!auto) toast("Sync failed. Still saved on this device.");
+  }
+  updateSyncText();
 }
 $("syncNow").onclick = () => syncNow(false);
 $("exportData").onclick = () => {
