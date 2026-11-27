@@ -53,7 +53,7 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
 <header>
   <div>
     <h1>Colores Azules</h1>
-    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 19</span></div>
+    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 20</span></div>
   </div>
   <div class="meta">Kept: <span id="count">0</span> · Synced: <span id="synced">0</span>/<span id="events">0</span></div>
 </header>
@@ -145,7 +145,7 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
   <p class="hint" style="margin:6px 0 0">Applies to the next new batch. Hidden blues do not come back.</p>
   <h2 style="margin-top:12px">Tournament card layout</h2>
   <div class="swatches" id="hlayouts" style="grid-template-columns:1fr 1fr"></div>
-  <p class="hint" style="margin:6px 0 0">Voronoi: cells fill the card. Tight rectangle: squares packed edge to edge.</p>
+  <p class="hint" style="margin:6px 0 0">Voronoi: cells a pixel or two apart. Tight squares: squares packed with a 1 pixel gap.</p>
   <h2 style="margin-top:12px">About</h2>
   <div style="font-size:0.85rem;line-height:1.45;text-align:left;color:var(--ink)">
     <p style="margin:0 0 8px">I've always liked blue. It reminds me of the sky. When I was little, I watched Toy Story and saw Andy's room, with its blue wallpaper. The colour looked like a sky I had never seen before, and I was so excited by it.</p>
@@ -702,23 +702,6 @@ $("modeHistory").onclick = () => setMode("history");
 const hlayoutMode = () => { try { return localStorage.getItem("colores-azules-hlayout-v1") || "voronoi"; } catch (e) { return "voronoi"; } };
 const TAIL_SHARE = 0.55, ROWS = 6, CARD_W = 224, CARD_H = 96;
 
-// squarified treemap: a tight rectangle, largest first from the left (the "tight rectangle")
-function squarify(weights, x, y, w, h) {
-  const total = weights.reduce((a, b) => a + b, 0);
-  if (total <= 0 || w <= 0 || h <= 0) return weights.map(() => [x, y, 0, 0]);
-  const scale = w * h / total, areas = weights.map(v => v * scale), out = [];
-  const worst = (row, side) => { const s = row.reduce((a, b) => a + b, 0); return Math.max(...row.map(r => Math.max(side * side * r / (s * s), (s * s) / (side * side * r)))); };
-  let i = 0;
-  while (i < areas.length) {
-    const side = Math.min(w, h), row = [areas[i++]];
-    while (i < areas.length && worst(row.concat([areas[i]]), side) <= worst(row, side)) row.push(areas[i++]);
-    const s = row.reduce((a, b) => a + b, 0);
-    if (w >= h) { const cw = s / h; let yy = y; row.forEach(a => { const rh = a / cw; out.push([x, yy, cw, rh]); yy += rh; }); x += cw; w -= cw; }
-    else { const rh = s / w; let xx = x; row.forEach(a => { const cw = a / rh; out.push([xx, y, cw, rh]); xx += cw; }); y += rh; h -= rh; }
-  }
-  return out;
-}
-
 // weighted Voronoi as a power diagram: every cell is a straight-edged polygon, drawn as SVG paths
 function clipPoly(poly, a, b, c) {       // keep the part where a*x + b*y <= c
   const out = [];
@@ -858,33 +841,55 @@ function historyItems(h) {
   const scores = h.scores || h.hexes.map(() => 0);
   return (h.hexes || []).map((hex, k) => ({ hex, score: scores[k] || 0 })).filter(o => o.hex !== h.winner).sort((a, b) => b.score - a.score);
 }
-// square shelves: largest first, left to right, each row a shelf; white space between squares
-function shelfPack(items, W, H, gap) {
+// tight squares: rows of similar squares, each row stretched to the full width and the rows to the full height,
+// with a 1 pixel white gap between squares
+function tightSquares(items, gap) {
   const max = Math.max(1, ...items.map(o => o.score));
-  for (let base = 30; base >= 3; base -= 0.5) {
-    const sizes = items.map(o => Math.max(3, Math.round(base * Math.sqrt(o.score / max + 0.04))));
-    const out = []; let x = 0, y = 0, rowH = 0, ok = true;
+  let best = null;
+  for (let base = 80; base >= 6; base -= 0.5) {
+    const sizes = items.map(o => Math.max(2, base * Math.sqrt(o.score / max + 0.04)));
+    const rows = []; let cur = [], curW = 0;
     sizes.forEach((s, k) => {
-      if (x + s > W) { x = 0; y += rowH + gap; rowH = 0; }
-      if (y + s > H) ok = false;
-      out.push([x, y, s]);
-      x += s + gap; rowH = Math.max(rowH, s);
+      if (cur.length && curW + s + gap > CARD_W) { rows.push(cur); cur = []; curW = 0; }
+      cur.push(k); curW += s + gap;
     });
-    if (ok) return out;
+    if (cur.length) rows.push(cur);
+    const rowH = rows.map(r => Math.max(...r.map(k => sizes[k])));
+    const sumH = rowH.reduce((x, y) => x + y, 0) + gap * (rows.length - 1);
+    if (sumH > CARD_H) continue;
+    best = { sizes, rows, rowH };
+    break;
   }
-  return items.map(() => [0, 0, 3]);
-}
-function tightRectangle(items) {
-  const wrap = document.createElement("div");
-  wrap.style.cssText = "position:relative;flex:1 1 0;min-height:0;overflow:hidden";
-  const rects = shelfPack(items, CARD_W, CARD_H, 4);
-  items.forEach((o, k) => {
-    const [x, y, s] = rects[k], c = document.createElement("div");
-    c.style.cssText = "position:absolute;left:" + x + "px;top:" + y + "px;width:" + s + "px;height:" + s + "px;border-radius:2px;background:" + o.hex;
-    c.title = o.score ? "score " + o.score : "not picked";
-    wrap.appendChild(c);
+  if (!best) return [];
+  const { sizes, rows, rowH } = best, out = [];
+  const gv = (CARD_H - gap * (rows.length - 1)) / rowH.reduce((x, y) => x + y, 0);
+  let y = 0;
+  rows.forEach((r, ri) => {
+    const h = rowH[ri] * gv, sum = r.reduce((x, k) => x + sizes[k], 0);
+    const fw = (CARD_W - gap * (r.length - 1)) / sum;
+    let x = 0;
+    r.forEach(k => { const w = sizes[k] * fw; out.push({ k, x, y, w, h }); x += w + gap; });
+    y += h + gap;
   });
-  return wrap;
+  return out;
+}
+function tightSquaresSvg(items, gap) {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 " + CARD_W + " " + CARD_H);
+  svg.setAttribute("preserveAspectRatio", "none");
+  svg.style.cssText = "width:100%;height:100%;flex:1 1 0;min-height:0;display:block";
+  tightSquares(items, gap).forEach(p => {
+    const o = items[p.k], r = document.createElementNS(NS, "rect");
+    r.setAttribute("x", p.x.toFixed(2)); r.setAttribute("y", p.y.toFixed(2)); r.setAttribute("width", p.w.toFixed(2)); r.setAttribute("height", p.h.toFixed(2));
+    r.setAttribute("fill", o.hex);
+    if (o.score > 0) { r.setAttribute("stroke", "#2b2b2b"); r.setAttribute("stroke-width", "0.7"); r.setAttribute("stroke-opacity", "0.5"); }
+    else r.setAttribute("fill-opacity", "0.55");
+    const title = document.createElementNS(NS, "title"); title.textContent = o.score ? "score " + o.score : "not picked";
+    r.appendChild(title);
+    svg.appendChild(r);
+  });
+  return svg;
 }
 function renderHistory() {
   const box = $("history"); box.innerHTML = "";
@@ -903,7 +908,7 @@ function renderHistory() {
     card.appendChild(cap);
     const items = historyItems(h);
     if (hlayoutMode() === "grid") {
-      card.appendChild(tightRectangle(items));
+      card.appendChild(tightSquaresSvg(items, 1));
     } else {
       const cells = powerVoronoi(items, CARD_W, CARD_H);
       card.appendChild(svgVoronoi(cells, CARD_W, CARD_H));
@@ -964,7 +969,7 @@ $("gear").onclick = () => { const open = $("drawer").classList.toggle("hidden") 
 });
 
 // tournament card layout buttons
-[["voronoi", "Voronoi"], ["grid", "Tight rectangle"]].forEach(([m, text]) => {
+[["voronoi", "Voronoi"], ["grid", "Tight squares"]].forEach(([m, text]) => {
   const b = document.createElement("button");
   b.dataset.l = m; b.textContent = text; b.style.fontSize = "0.8rem"; b.style.minHeight = "44px";
   b.setAttribute("aria-pressed", String(hlayoutMode() === m));
