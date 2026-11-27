@@ -43,3 +43,17 @@ Round 2: planning the next layer (position bias, repeats, time of day, place). N
 
 - No new PR yet. The current work is merged as PR #289, and nothing else is pending on the branch.
 - Testing place and time needs the real device. The headless browser can fake the clock, but not GPS.
+
+## Added: both, and pairs (5 and 6)
+
+5. **Tournament: a "both" option.** In a head-to-head duel, add a third button, "Both". Some pairs are good enough that you would keep either. "Both" marks each blue as a keeper and records that the two stand together, which can serve as a reference point. The winner-only rule stays as the default.
+
+6. **Juxtaposition.** Colours are judged next to each other, so the page should learn from pairs and steps, not only single squares.
+   - **Pair checks:** show two blues side by side (from the palette or a duel) and record "go together", "clash", or "both fine". Each pair is stored as two blues plus the verdict.
+   - **Steps:** record how far apart two neighbouring blues in a palette are, in lightness, saturation and hue. Over time the page can say which steps you like (for example a small lightness step with a larger hue jump).
+   - **Bias check:** the order of a pair (which blue is first or on the left) is recorded too, so a left-first habit does not look like taste.
+
+Questions for Jimmy (added):
+7. **Both:** should "Both" also count as a win for each blue in the bracket, or only as a keeper with no bracket effect?
+8. **Pairs:** how often should the page ask a pair question, for example one per palette, or only in a separate "Pairs" mode?
+9. **Steps:** should the page suggest a next blue that makes a good step from the last one kept, or only report the steps you already like?
