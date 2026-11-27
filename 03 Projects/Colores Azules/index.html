@@ -53,7 +53,7 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
 <header>
   <div>
     <h1>Colores Azules</h1>
-    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 11</span></div>
+    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 12</span></div>
   </div>
   <div class="meta">Kept: <span id="count">0</span> · Synced: <span id="synced">0</span>/<span id="events">0</span></div>
 </header>
@@ -696,22 +696,22 @@ function renderHistory() {
   if (!hist.length) { box.innerHTML = '<p class="hint" style="width:100%">No tournaments yet. Finish a batch and run the tournament.</p>'; return; }
   hist.forEach(h => {
     const card = document.createElement("div");
-    card.style.cssText = "flex:0 0 auto;width:240px;scroll-snap-align:start;background:var(--panel);border-radius:4px;padding:10px";
+    card.style.cssText = "flex:0 0 auto;width:240px;height:340px;display:flex;flex-direction:column;gap:4px;scroll-snap-align:start;background:var(--panel);border-radius:4px;padding:8px;overflow:hidden";
     const wi = BY_HEX.get(h.winner);
     const top = wi !== undefined ? tile(wi, {}) : document.createElement("div");
-    top.style.height = "120px";
+    top.style.height = "auto"; top.style.flex = "2 1 0"; top.style.minHeight = "0"; top.style.margin = "0";
     card.appendChild(top);
-    const cap = document.createElement("div"); cap.className = "meta"; cap.style.margin = "6px 0";
+    const cap = document.createElement("div"); cap.className = "meta"; cap.style.cssText = "margin:0;font-size:0.72rem;line-height:1.1;flex:0 0 auto";
     cap.textContent = h.date + " " + h.time.slice(0, 5) + " · kept " + h.kept;
     card.appendChild(cap);
     // compressed: the more a blue won, the bigger its square; never-picked blues are tiny
     const mini = document.createElement("div");
-    mini.style.cssText = "display:flex;flex-wrap:wrap;gap:2px;align-items:center;justify-content:center;min-height:150px";
+    mini.style.cssText = "display:flex;flex-wrap:wrap;gap:1px;align-items:center;align-content:center;justify-content:center;flex:1 1 0;min-height:0;overflow:hidden";
     const scores = h.scores || h.hexes.map(() => 0);
     const max = Math.max(1, ...scores);
     (h.hexes || []).forEach((hex, k) => {
       const s = scores[k] / max;
-      const size = scores[k] ? Math.round(6 + 40 * Math.sqrt(s)) : 3;
+      const size = scores[k] ? Math.round(4 + 26 * Math.sqrt(s)) : 2;
       const c = document.createElement("div");
       c.style.cssText = "flex:0 0 auto;width:" + size + "px;height:" + size + "px;border-radius:2px;background:" + hex + (hex === h.winner ? ";outline:2px solid var(--ink);outline-offset:1px" : "");
       c.title = scores[k] ? "score " + scores[k] : "not picked";
