@@ -53,7 +53,7 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
 <header>
   <div>
     <h1>Colores Azules</h1>
-    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 9</span></div>
+    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 10</span></div>
   </div>
   <div class="meta">Kept: <span id="count">0</span> · Synced: <span id="synced">0</span>/<span id="events">0</span></div>
 </header>
@@ -64,6 +64,7 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
   <button id="modeNeigh" aria-pressed="false">Neighbours</button>
   <button id="modeTaste" aria-pressed="false">What I like</button>
   <button id="modePalette" aria-pressed="false">My palette</button>
+  <button id="modeHistory" aria-pressed="false">Tournaments</button>
 </nav>
 
 <section id="setsView">
@@ -115,7 +116,7 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
     <div class="actions" id="sortBar"><button data-s="hue">Hue</button><button data-s="sat">Saturation</button><button data-s="light">Lightness</button></div>
     <div class="grid" id="keptGrid"></div>
     <h2 style="margin-top:12px">Where my favourites sit</h2>
-    <p class="hint">Across: hue, from green-cyan to violet. Up: lightness, from dark to bright. Each small dot is one blue. Rings are your favourites. Warm circles show where you keep choosing: bigger and stronger means more.</p>
+    <p class="hint">Across: hue, from green-cyan to violet. Up: lightness, from dark to bright. Each small dot is one blue. Rings are your favourites. Warm circles show where you keep choosing. Later tournament rounds count for more, and a champion counts most.</p>
     <svg id="heat" viewBox="0 0 600 360" style="width:100%;height:auto;background:var(--paper);border-radius:4px;margin-top:8px"></svg>
     <p class="hint" id="emptyNote">Nothing kept yet.</p>
     <div class="actions"><button id="reviewOpen">Review one at a time</button></div>
@@ -125,6 +126,11 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
       <p class="hint" id="revInfo"></p>
     </div>
   </div>
+</section>
+
+<section id="historyView" class="hidden">
+  <p class="hint">Each card is a tournament winner, with the 64 blues of its batch below it. Swipe sideways to go back in time.</p>
+  <div id="history" style="display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 4px 16px;touch-action:pan-x"></div>
 </section>
 
 <div id="drawer" class="hidden" role="dialog" aria-label="Settings">
@@ -197,7 +203,7 @@ const lightBin = l => l < 35 ? 0 : l < 65 ? 1 : 2;
 BLUES.forEach(b => { b.hb = hueBin(b.h); b.sb = satBin(b.s); b.lb = lightBin(b.l); b.cell = b.hb * 9 + b.sb * 3 + b.lb; });
 
 // ---------- storage: on this device, synced to the database when signed in ----------
-const KEY = { kept: "colores-azules-kept-v3", prefs: "colores-azules-prefs-v3", events: "colores-azules-events-v3", state: "colores-azules-state-v3", synced: "colores-azules-synced-v1", session: "colores-azules-session-v1", bg: "colores-azules-bg-v1", fmt: "colores-azules-fmt-v1" };
+const KEY = { kept: "colores-azules-kept-v3", prefs: "colores-azules-prefs-v3", events: "colores-azules-events-v3", state: "colores-azules-state-v3", synced: "colores-azules-synced-v1", session: "colores-azules-session-v1", history: "colores-azules-history-v1", bg: "colores-azules-bg-v1", fmt: "colores-azules-fmt-v1" };
 const load = (k, fallback) => { try { const v = JSON.parse(localStorage.getItem(k)); return v === null ? fallback : v; } catch (e) { return fallback; } };
 const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 const blankAxes = () => ({ hue: [0, 0, 0, 0, 0, 0], sat: [0, 0, 0], light: [0, 0, 0] });
@@ -445,7 +451,11 @@ function champion(i) {
   const hex = BLUES[i].hex;
   tour.done = true; tour.champ = i;
   if (!isKept(hex)) { kept.push(hex); save(KEY.kept, kept); }
-  logEvent("champion", hex, { batch_key: batchKey, size: tour.size });
+  logEvent("champion", hex, { batch_key: batchKey, size: tour.size, round: "Champion", kept: batchKeeps.length });
+  const hist = load(KEY.history, []);
+  const st = stamp();
+  hist.unshift({ key: batchKey, date: st.date, time: st.time, winner: hex, kept: batchKeeps.length, hexes: batch.map(i => BLUES[i].hex) });
+  save(KEY.history, hist.slice(0, 200));
   learn(i, 1, 0.3); saveState(); updateCounts();
   syncNow(true);
   duel();
@@ -554,6 +564,13 @@ async function syncNow(auto) {
       round: e.round, winner_hex: e.hex, loser_hex: e.loser || e.other, client_time: e.t,
       batch_key: e.batch_key || null, side: e.side || null, local_date: e.date, local_time: e.time, band: e.band
     }));
+    for (const e of rows.filter(e => e.type === "champion")) {
+      const r = await fetch(SYNC.url + "/rest/v1/ca_batches?batch_key=eq." + encodeURIComponent(e.batch_key), {
+        method: "PATCH", headers: { "Content-Type": "application/json", apikey: SYNC.key, Authorization: "Bearer " + s.token, Prefer: "return=minimal" },
+        body: JSON.stringify({ finished: true, winner_hex: e.hex, winner_round: e.round, kept_count: e.kept ?? 0 })
+      });
+      if (!r.ok) throw new Error("ca_batches " + r.status);
+    }
     if (choices.length) await post("ca_choices", choices, null, s.token);
     if (duels.length) await post("ca_duels", duels, null, s.token);
     await post("ca_taste", [{ owner_id: s.uid, prefs, updated_at: new Date().toISOString() }], "resolution=merge-duplicates,return=minimal", s.token);
@@ -585,6 +602,13 @@ function renderPalette() {
   document.querySelectorAll("#sortBar button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.s === sortKey)));
   renderHeat();
 }
+// a blue that keeps winning matters more: later rounds weigh more, the champion most
+const ROUND_WEIGHT = { "Round of 16": 1, "Round of 32": 1, "Quarterfinal": 2, "Semifinal": 3, "Final": 4 };
+function weightOf(e) {
+  if (e.type === "champion") return 5;
+  if (e.type === "duel" || e.type === "both") return ROUND_WEIGHT[e.round] || 1;
+  return 1;
+}
 // heat map: every blue as a small dot, favourites ringed, warm circles where keeps and wins cluster
 const SVG_NS = "http://www.w3.org/2000/svg";
 function renderHeat() {
@@ -600,10 +624,10 @@ function renderHeat() {
   if (heat.on) {
     const counts = new Map(); let max = 0;
     events.forEach(e => {
-      if (e.type !== "keep" && e.type !== "duel" && e.type !== "both") return;
+      if (e.type !== "keep" && e.type !== "duel" && e.type !== "both" && e.type !== "champion") return;
       const i = BY_HEX.get(e.hex); if (i === undefined) return;
       const b = BLUES[i], key = Math.min(9, Math.floor((b.h - 170) / 10)) + ":" + Math.min(9, Math.floor(b.l / 10));
-      const c = (counts.get(key) || 0) + 1; counts.set(key, c); if (c > max) max = c;
+      const c = (counts.get(key) || 0) + weightOf(e); counts.set(key, c); if (c > max) max = c;
     });
     counts.forEach((c, key) => {
       const [hb, lb] = key.split(":").map(Number);
@@ -638,21 +662,49 @@ function updateCounts() {
   $("count").textContent = kept.length; $("events").textContent = events.length; $("synced").textContent = syncedUpTo;
 }
 function setMode(mode) {
-  const views = { sets: "setsView", tour: "tourView", neigh: "neighView", taste: "tasteView", palette: "palette" };
+  const views = { sets: "setsView", tour: "tourView", neigh: "neighView", taste: "tasteView", palette: "palette", history: "historyView" };
   Object.entries(views).forEach(([k, id]) => $(id).classList.toggle("hidden", k !== mode));
-  const ids = { sets: "modeSets", tour: "modeTour", neigh: "modeNeigh", taste: "modeTaste", palette: "modePalette" };
+  const ids = { sets: "modeSets", tour: "modeTour", neigh: "modeNeigh", taste: "modeTaste", palette: "modePalette", history: "modeHistory" };
   Object.entries(ids).forEach(([k, id]) => $(id).setAttribute("aria-pressed", String(k === mode)));
   if (mode === "sets") renderSets();
   if (mode === "tour") startTournament();
   if (mode === "neigh") renderNeighbours();
   if (mode === "taste") renderTaste();
   if (mode === "palette") renderPalette();
+  if (mode === "history") renderHistory();
 }
 $("modeSets").onclick = () => setMode("sets");
 $("modeTour").onclick = () => setMode("tour");
 $("modeNeigh").onclick = () => setMode("neigh");
 $("modeTaste").onclick = () => setMode("taste");
 $("modePalette").onclick = () => setMode("palette");
+$("modeHistory").onclick = () => setMode("history");
+// tournament history: winner on top, the batch's 64 blues small below
+function renderHistory() {
+  const box = $("history"); box.innerHTML = "";
+  const hist = load(KEY.history, []);
+  if (!hist.length) { box.innerHTML = '<p class="hint" style="width:100%">No tournaments yet. Finish a batch and run the tournament.</p>'; return; }
+  hist.forEach(h => {
+    const card = document.createElement("div");
+    card.style.cssText = "flex:0 0 auto;width:240px;scroll-snap-align:start;background:var(--panel);border-radius:4px;padding:10px";
+    const wi = BY_HEX.get(h.winner);
+    const top = wi !== undefined ? tile(wi, {}) : document.createElement("div");
+    top.style.height = "120px";
+    card.appendChild(top);
+    const cap = document.createElement("div"); cap.className = "meta"; cap.style.margin = "6px 0";
+    cap.textContent = h.date + " " + h.time.slice(0, 5) + " · kept " + h.kept;
+    card.appendChild(cap);
+    const mini = document.createElement("div");
+    mini.style.cssText = "display:grid;grid-template-columns:repeat(8,1fr);gap:3px";
+    (h.hexes || []).forEach(hex => {
+      const c = document.createElement("div");
+      c.style.cssText = "aspect-ratio:1;border-radius:1px;background:" + hex + (hex === h.winner ? ";outline:2px solid var(--ink)" : "");
+      mini.appendChild(c);
+    });
+    card.appendChild(mini);
+    box.appendChild(card);
+  });
+}
 
 // ---------- settings gear: background and label format ----------
 const BACKGROUNDS = [
