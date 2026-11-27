@@ -58,13 +58,13 @@ input { font-size: 16px; }   /* stops iOS zooming in when a field is focused */
 <header>
   <div>
     <h1>Colores Azules</h1>
-    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 5</span></div>
+    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 6</span></div>
   </div>
   <div class="meta">Kept: <span id="count">0</span> · Synced: <span id="synced">0</span>/<span id="events">0</span></div>
 </header>
 
 <nav>
-  <button id="modeSets" aria-pressed="true">Palettes of 8</button>
+  <button id="modeSets" aria-pressed="true">Palettes</button>
   <button id="modeTour" aria-pressed="false">Tournament</button>
   <button id="modeNeigh" aria-pressed="false">Neighbours</button>
   <button id="modeTaste" aria-pressed="false">What I like</button>
@@ -86,7 +86,7 @@ input { font-size: 16px; }   /* stops iOS zooming in when a field is focused */
   <div class="actions" id="nextWrap">
     <button id="nextSet">Next palette ▸</button>
   </div>
-  <p class="hint">Tap the squares you like, then Next palette. The 64 blues are eight palettes of eight.</p>
+  <p class="hint">Tap the squares you like, then Next palette. The 64 blues are in palettes: 16 at a time on iPad, 8 on iPhone.</p>
   <div class="actions hidden" id="doneActions">
     <button id="startTour" class="keep-btn">Start the tournament ▸</button>
     <button id="newBatch">New batch of 64 ↻</button>
@@ -253,11 +253,12 @@ function buildBatch() {
   // shuffle so each set is a mix of the whole range
   for (let k = picks.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [picks[k], picks[j]] = [picks[j], picks[k]]; }
   batch = picks; lastBatch = new Set(batch);
-  setSize = 8; gridPicked = new Set();
+  setSize = wide() ? 16 : 8; gridPicked = new Set();
   setNo = 0; cardNo = 0; setDecided = 0; batchKeeps = []; batchDone = false;
 }
 const SETS = () => 64 / setSize;
-const useGrid = () => true;   // every palette is a grid of eight (phone: 4 x 2, iPad: 2 x 4); swipe is only for reviewing favourites
+const useGrid = () => true;   // every palette is a tap grid; swipe is only for reviewing favourites
+const wide = () => window.innerWidth >= 700;   // iPad: 4 x 4 palettes of 16; iPhone (portrait): 2 x 4 palettes of 8
 const setOf = () => batch.slice(setNo * setSize, setNo * setSize + setSize);
 const current = () => batch[setNo * setSize + cardNo];
 const isKept = hex => kept.includes(hex);
@@ -304,10 +305,10 @@ function renderSets() {
 function renderGridSet() {
   $("setInfo").textContent = "Set " + (setNo + 1) + " of " + SETS() + " · tap the squares you like · " + gridPicked.size + " selected · kept " + batchKeeps.length + " so far";
   const g = $("setGrid"); g.innerHTML = "";
-  g.style.gridTemplateColumns = window.innerWidth >= 700 ? "repeat(2,1fr)" : "repeat(4,1fr)";
+  g.style.gridTemplateColumns = wide() ? "repeat(4,1fr)" : "repeat(2,1fr)";
   setOf().forEach(i => {
     const el = tile(i);
-    el.style.height = window.innerWidth >= 700 ? "150px" : "92px";
+    el.style.height = wide() ? "110px" : "130px";
     if (gridPicked.has(i)) el.classList.add("picked");
     el.onclick = () => { gridPicked.has(i) ? gridPicked.delete(i) : gridPicked.add(i); renderGridSet(); };
     g.appendChild(el);
