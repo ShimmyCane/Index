@@ -53,7 +53,7 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
 <header>
   <div>
     <h1>Colores Azules</h1>
-    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 10</span></div>
+    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 11</span></div>
   </div>
   <div class="meta">Kept: <span id="count">0</span> · Synced: <span id="synced">0</span>/<span id="events">0</span></div>
 </header>
@@ -129,7 +129,7 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
 </section>
 
 <section id="historyView" class="hidden">
-  <p class="hint">Each card is a tournament winner, with the 64 blues of its batch below it. Swipe sideways to go back in time.</p>
+  <p class="hint">Each card is a tournament winner, with the 64 blues of its batch below. The blues that won more are bigger; the ones never picked are tiny. Swipe sideways to go back in time.</p>
   <div id="history" style="display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 4px 16px;touch-action:pan-x"></div>
 </section>
 
@@ -454,7 +454,17 @@ function champion(i) {
   logEvent("champion", hex, { batch_key: batchKey, size: tour.size, round: "Champion", kept: batchKeeps.length });
   const hist = load(KEY.history, []);
   const st = stamp();
-  hist.unshift({ key: batchKey, date: st.date, time: st.time, winner: hex, kept: batchKeeps.length, hexes: batch.map(i => BLUES[i].hex) });
+  // how much each blue of this batch mattered: keeps count 1, later round wins count more, the champion 5
+  const sc = {}, add = (h, v) => { sc[h] = (sc[h] || 0) + v; };
+  events.forEach(e => {
+    if (e.batch_key !== batchKey) return;
+    if (e.type === "keep") add(e.hex, 1);
+    else if (e.type === "duel") add(e.hex, weightOf(e));
+    else if (e.type === "both") { add(e.hex, 1); add(e.other, 1); }
+    else if (e.type === "champion") add(e.hex, 5);
+  });
+  hist.unshift({ key: batchKey, date: st.date, time: st.time, winner: hex, kept: batchKeeps.length,
+                 hexes: batch.map(i => BLUES[i].hex), scores: batch.map(i => sc[BLUES[i].hex] || 0) });
   save(KEY.history, hist.slice(0, 200));
   learn(i, 1, 0.3); saveState(); updateCounts();
   syncNow(true);
@@ -694,11 +704,17 @@ function renderHistory() {
     const cap = document.createElement("div"); cap.className = "meta"; cap.style.margin = "6px 0";
     cap.textContent = h.date + " " + h.time.slice(0, 5) + " · kept " + h.kept;
     card.appendChild(cap);
+    // compressed: the more a blue won, the bigger its square; never-picked blues are tiny
     const mini = document.createElement("div");
-    mini.style.cssText = "display:grid;grid-template-columns:repeat(8,1fr);gap:3px";
-    (h.hexes || []).forEach(hex => {
+    mini.style.cssText = "display:flex;flex-wrap:wrap;gap:2px;align-items:center;justify-content:center;min-height:150px";
+    const scores = h.scores || h.hexes.map(() => 0);
+    const max = Math.max(1, ...scores);
+    (h.hexes || []).forEach((hex, k) => {
+      const s = scores[k] / max;
+      const size = scores[k] ? Math.round(6 + 40 * Math.sqrt(s)) : 3;
       const c = document.createElement("div");
-      c.style.cssText = "aspect-ratio:1;border-radius:1px;background:" + hex + (hex === h.winner ? ";outline:2px solid var(--ink)" : "");
+      c.style.cssText = "flex:0 0 auto;width:" + size + "px;height:" + size + "px;border-radius:2px;background:" + hex + (hex === h.winner ? ";outline:2px solid var(--ink);outline-offset:1px" : "");
+      c.title = scores[k] ? "score " + scores[k] : "not picked";
       mini.appendChild(c);
     });
     card.appendChild(mini);
