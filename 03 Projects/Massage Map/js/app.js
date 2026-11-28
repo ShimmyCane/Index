@@ -21,7 +21,7 @@
   var S = {
     lang: 'en', speed: 1, autoplay: 1, heat: 1, numbers: 1, kids: 0, who: 'Ying', errors: 0,
     view: 'sole', selMarker: null, selTech: null, selTechB: null,
-    compare: false, colour: true, zoomed: false, plate: false,
+    compare: false, colour: true, zoomed: false, plate: false, logWho: 'Ying', logKind: 'massage',
     playing: false, t: 0, loops: 0, last: 0, tab: 'map', noteFilter: 'open'
   };
 
@@ -501,6 +501,66 @@
     saveJSON(RATINGS_KEY, r);
   }
 
+  // Log: one row per massage or touch-up, kept on this device until family sign-in is built.
+  var LOG_KEY = 'mm.log';
+  var AREA_NAMES = { sole: ['Sole', 'Sole'], top: ['Top of foot', 'Top of foot'], side: ['Outer side', 'Outer side'], ankle: ['Ankle', 'Ankle'] };
+  function loadLog() { var v = loadJSON(LOG_KEY, []); return Array.isArray(v) ? v : []; }
+  function saveLogEntry() {
+    var log = loadLog();
+    var tech = filmTech('A');
+    log.push({ id: 'l-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6), at: new Date().toISOString(),
+      person: S.logWho, kind: S.logKind, area: S.view, technique: tech.id });
+    saveJSON(LOG_KEY, log);
+    renderAll();
+  }
+  function renderLogPanel() {
+    document.querySelectorAll('.logSeg').forEach(function (seg) {
+      var key = seg.getAttribute('data-key');
+      seg.querySelectorAll('button').forEach(function (b) {
+        b.setAttribute('aria-pressed', String(String(S[key]) === b.getAttribute('data-v')));
+        b.onclick = function () { S[key] = b.getAttribute('data-v'); renderLogPanel(); };
+      });
+    });
+    var where = $('logWhere');
+    if (where) where.textContent = 'Area: ' + (AREA_NAMES[S.view] ? AREA_NAMES[S.view][0] : S.view) + '. Technique: ' + filmTech('A').en + '.';
+    var list = $('logList');
+    if (!list) return;
+    list.textContent = '';
+    loadLog().slice(-5).reverse().forEach(function (e) {
+      var li = el('li', null, e.person + ' · ' + (e.kind === 'massage' ? 'massage' : 'touch-up') + ' · ' +
+        (AREA_NAMES[e.area] ? AREA_NAMES[e.area][0] : e.area) + ' · ' + e.technique + ' · ' + e.at.slice(0, 10));
+      list.appendChild(li);
+    });
+  }
+  function renderAreaSummary() {
+    var box = $('areaSummary');
+    if (!box) return;
+    box.textContent = '';
+    var log = loadLog();
+    var table = el('table', { 'class': 'fav' });
+    var head = el('tr');
+    ['Area', 'Ying massages', 'Ying touch-ups', 'Jimmy massages', 'Jimmy touch-ups'].forEach(function (h) { head.appendChild(el('th', null, h)); });
+    table.appendChild(head);
+    Object.keys(AREA_NAMES).forEach(function (view) {
+      var tr = el('tr');
+      tr.appendChild(el('td', null, AREA_NAMES[view][0]));
+      PEOPLE.forEach(function (person) {
+        ['massage', 'touch-up'].forEach(function (kind) {
+          var n = log.filter(function (e) { return e.person === person && e.area === view && e.kind === kind; }).length;
+          tr.appendChild(el('td', null, String(n)));
+        });
+      });
+      table.appendChild(tr);
+    });
+    box.appendChild(table);
+    PEOPLE.forEach(function (person) {
+      var counts = {};
+      log.forEach(function (e) { if (e.person === person) counts[e.area] = (counts[e.area] || 0) + 1; });
+      var best = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; })[0];
+      box.appendChild(el('p', { 'class': 'note' }, person + ' most often: ' + (best ? AREA_NAMES[best][0] + ' (' + counts[best] + ')' : 'nothing logged yet')));
+    });
+  }
+
   // Body-part favourites: one list per region, a heart per person. Device only for now.
   var BODY_FLAGS_KEY = 'mm.flags.local';
   function setBodyFlag(person, key, liked) {
@@ -654,6 +714,8 @@
     drawFilms();
     renderLearn();
     renderFavs();
+    renderAreaSummary();
+    renderLogPanel();
     renderBodyFavs();
     renderNotes();
     renderSettingsButtons();
@@ -710,6 +772,7 @@
       $('drawer').hidden = true; $('gearBtn').setAttribute('aria-expanded', 'false');
     });
     $('noteSave').addEventListener('click', saveNote);
+    $('logSave').addEventListener('click', saveLogEntry);
     $('noteCopy').addEventListener('click', copyNotes);
     $('noteFilter').addEventListener('change', function (e) { S.noteFilter = e.target.value; renderNotes(); });
     window.addEventListener('error', function (e) { logError(e.message || 'error'); });
