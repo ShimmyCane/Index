@@ -53,7 +53,7 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
 <header>
   <div>
     <h1>Colores Azules</h1>
-    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 20</span></div>
+    <div class="meta">Shades of blue, labelled by your choice. <span id="ver">build 21</span></div>
   </div>
   <div class="meta">Kept: <span id="count">0</span> · Synced: <span id="synced">0</span>/<span id="events">0</span></div>
 </header>
@@ -65,6 +65,7 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
   <button id="modeTaste" aria-pressed="false">What I like</button>
   <button id="modePalette" aria-pressed="false">My palette</button>
   <button id="modeHistory" aria-pressed="false">Tournaments</button>
+  <button id="modeOthers" aria-pressed="false" class="hidden">Other colours</button>
 </nav>
 
 <section id="setsView">
@@ -128,6 +129,14 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
   </div>
 </section>
 
+<section id="othersView" class="hidden">
+  <div class="actions" id="othSub"></div>
+  <div class="hint" id="othInfo"></div>
+  <div class="grid" id="othGrid" style="margin:8px auto"></div>
+  <div class="actions"><button id="othKeepBtn" class="keep-btn">Keep selected, next page ▸</button></div>
+  <div class="panel"><h2>Kept so far</h2><div id="othKept" style="display:flex;flex-wrap:wrap;gap:6px"></div></div>
+</section>
+
 <section id="historyView" class="hidden">
   <p class="hint">Each card is a tournament winner, with the 64 blues of its batch below. The blues that won more are bigger; the ones never picked are tiny. Swipe sideways to go back in time.</p>
   <div id="history" style="display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 4px 16px;touch-action:pan-x"></div>
@@ -140,6 +149,11 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
   <h2 style="margin-top:12px">Show each square as</h2>
   <div class="swatches" id="fmts"></div>
   <p class="hint" style="margin:8px 0 0">HSL: hue, saturation, lightness. HSB: hue, saturation, brightness.</p>
+  <h2 style="margin-top:12px">Other colours</h2>
+  <label class="meta" style="display:flex;gap:8px;align-items:center"><input id="oth-pure" type="checkbox" style="min-height:auto;flex:none;width:20px;height:20px;padding:0"> Pure colours (12 hues)</label>
+  <label class="meta" style="display:flex;gap:8px;align-items:center;margin-top:6px"><input id="oth-mixed" type="checkbox" style="min-height:auto;flex:none;width:20px;height:20px;padding:0"> Mixed colours (blends)</label>
+  <label class="meta" style="display:flex;gap:8px;align-items:center;margin-top:6px"><input id="oth-palettes" type="checkbox" style="min-height:auto;flex:none;width:20px;height:20px;padding:0"> Palettes of five (recommended first)</label>
+  <p class="hint" style="margin:6px 0 0">Shown in the Other colours tab. Tracked the same way as blues. Built by a script, not an AI.</p>
   <h2 style="margin-top:12px">Blues I have judged</h2>
   <div class="swatches" id="hideModes" style="grid-template-columns:1fr 1fr 1fr"></div>
   <p class="hint" style="margin:6px 0 0">Applies to the next new batch. Hidden blues do not come back.</p>
@@ -160,6 +174,7 @@ input { font-size: 16px; font-family: inherit; padding: 10px; border: 1px solid 
 
 <div id="toast"></div>
 
+<script src="data/colour_modes.js"></script>
 <script>
 // ---------- the colour range: hue 170 to 270, six saturations, fourteen lightnesses ----------
 const BLUES = (() => {
@@ -508,8 +523,9 @@ function repeatCheck() {
   return { total, agree };
 }
 function renderTaste() {
-  const picks = events.filter(e => e.type === "keep" || e.type === "duel" || e.type === "both").length;
-  const passes = events.filter(e => e.type === "pass").length;
+  const blue = events.filter(e => !e.family || e.family === "blue");
+  const picks = blue.filter(e => e.type === "keep" || e.type === "duel" || e.type === "both").length;
+  const passes = blue.filter(e => e.type === "pass").length;
   if (picks === 0 && passes === 0) { $("tasteText").textContent = "No choices yet. Pick palettes to start."; updateSyncText(); return; }
   const band = currentBand();
   const duels = events.filter(e => e.type === "duel");
@@ -573,11 +589,17 @@ async function syncNow(auto) {
       batchPosted = true; saveState();
     }
     const rows = events.slice(syncedUpTo);
-    const choices = rows.filter(e => e.type === "keep" || e.type === "pass").map(e => {
-      const b = BLUES[BY_HEX.get(e.hex)];
-      return { kind: e.type, hex: e.hex, hue: b.h, sat: b.s, light: Math.round(b.l), client_time: e.t,
-               batch_key: e.batch_key || null, set_no: e.set_no ?? null, position: e.position ?? null,
-               is_repeat: !!e.is_repeat, local_date: e.date, local_time: e.time, band: e.band };
+    const choiceRow = (e, hex, pos, pid) => {
+      const hs = hslOf(hex);
+      return { kind: e.type, hex, hue: hs.h, sat: hs.s, light: hs.l, client_time: e.t,
+               batch_key: e.batch_key || null, set_no: e.set_no ?? null, position: pos,
+               is_repeat: !!e.is_repeat, local_date: e.date, local_time: e.time, band: e.band,
+               family: e.family || "blue", palette_id: pid || null };
+    };
+    const choices = [];
+    rows.filter(e => e.type === "keep" || e.type === "pass").forEach(e => {
+      if (e.family === "palette") (e.palette || [e.hex]).forEach((hex, i) => choices.push(choiceRow(e, hex, i, e.pid)));
+      else choices.push(choiceRow(e, e.hex, e.position ?? null, e.pid));
     });
     const duels = rows.filter(e => e.type === "duel" || e.type === "both").map(e => ({
       round: e.round, winner_hex: e.hex, loser_hex: e.loser || e.other, client_time: e.t,
@@ -681,9 +703,9 @@ function updateCounts() {
   $("count").textContent = kept.length; $("events").textContent = events.length; $("synced").textContent = syncedUpTo;
 }
 function setMode(mode) {
-  const views = { sets: "setsView", tour: "tourView", neigh: "neighView", taste: "tasteView", palette: "palette", history: "historyView" };
+  const views = { sets: "setsView", tour: "tourView", neigh: "neighView", taste: "tasteView", palette: "palette", history: "historyView", others: "othersView" };
   Object.entries(views).forEach(([k, id]) => $(id).classList.toggle("hidden", k !== mode));
-  const ids = { sets: "modeSets", tour: "modeTour", neigh: "modeNeigh", taste: "modeTaste", palette: "modePalette", history: "modeHistory" };
+  const ids = { sets: "modeSets", tour: "modeTour", neigh: "modeNeigh", taste: "modeTaste", palette: "modePalette", history: "modeHistory", others: "modeOthers" };
   Object.entries(ids).forEach(([k, id]) => $(id).setAttribute("aria-pressed", String(k === mode)));
   if (mode === "sets") renderSets();
   if (mode === "tour") startTournament();
@@ -691,6 +713,7 @@ function setMode(mode) {
   if (mode === "taste") renderTaste();
   if (mode === "palette") renderPalette();
   if (mode === "history") renderHistory();
+  if (mode === "others") renderOthers();
 }
 $("modeSets").onclick = () => setMode("sets");
 $("modeTour").onclick = () => setMode("tour");
@@ -981,11 +1004,111 @@ $("gear").onclick = () => { const open = $("drawer").classList.toggle("hidden") 
   $("hlayouts").appendChild(b);
 });
 
+// ---------- colour of any hex, as hue, saturation and lightness (whole numbers) ----------
+function hslOf(hex) {
+  const [r, g, b] = rgbOf(hex).map(v => v / 255);
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2;
+  let h = 0, s = 0;
+  if (mx !== mn) {
+    const d = mx - mn;
+    s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+    if (mx === r) h = (g - b) / d + (g < b ? 6 : 0);
+    else if (mx === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h *= 60;
+  }
+  return { h: Math.round(h) % 360, s: Math.round(s * 100), l: Math.round(l * 100) };
+}
+
+// ---------- other colours: pure, mixed and palettes of five (made by tools/colour_modes.py) ----------
+const OTHERS_KEY = "colores-azules-others-v1", KEPT_OTH_KEY = "colores-azules-kept-other-v1";
+let others = load(OTHERS_KEY, { pure: false, mixed: false, palettes: false });
+let keptOther = load(KEPT_OTH_KEY, []);
+const FAM_NAME = { pure: "Pure colours", mixed: "Mixed colours", palettes: "Palettes of five" };
+const FAM_PAGE = { pure: 12, mixed: 12, palettes: 8 };
+let othFam = null, othPage = 0, othSel = new Set();
+function famItems(f) {
+  const D = window.COLOUR_MODES || { pure: [], mixed: [], palettes: [] };
+  if (f === "palettes") {
+    return D.palettes.slice().sort((a, b) => (b.recommended - a.recommended) || (b.score - a.score))
+      .map(p => ({ id: p.id, family: "palette", hexes: p.hexes, hex: p.hexes[0], rec: p.recommended }));
+  }
+  return D[f].map(c => ({ id: c.id, family: f, hex: c.hex }));
+}
+const famPages = f => Math.max(1, Math.ceil(famItems(f).length / FAM_PAGE[f]));
+const onFams = () => Object.keys(FAM_NAME).filter(f => others[f]);
+function syncOthersNav() {
+  $("modeOthers").classList.toggle("hidden", onFams().length === 0);
+  Object.keys(FAM_NAME).forEach(f => { $("oth-" + f).checked = !!others[f]; });
+  if (!othFam || !others[othFam]) othFam = onFams()[0] || null;
+}
+function renderOthers() {
+  syncOthersNav();
+  const sub = $("othSub"); sub.innerHTML = "";
+  onFams().forEach(f => {
+    const b = document.createElement("button");
+    b.textContent = FAM_NAME[f]; b.setAttribute("aria-pressed", String(f === othFam));
+    b.onclick = () => { othFam = f; othPage = 0; othSel = new Set(); renderOthers(); };
+    sub.appendChild(b);
+  });
+  const grid = $("othGrid"); grid.innerHTML = "";
+  if (!othFam) { $("othInfo").textContent = "Turn a colour set on in settings (the gear) to explore it here."; $("othKept").innerHTML = ""; return; }
+  const per = FAM_PAGE[othFam], slice = famItems(othFam).slice(othPage * per, othPage * per + per);
+  $("othInfo").textContent = FAM_NAME[othFam] + " · page " + (othPage + 1) + " of " + famPages(othFam) + " · " + othSel.size + " selected";
+  grid.style.gridTemplateColumns = othFam === "palettes" ? "repeat(2,1fr)" : "repeat(3,1fr)";
+  grid.style.maxWidth = othFam === "palettes" ? "520px" : "420px";
+  slice.forEach(it => {
+    const el = document.createElement("div");
+    el.className = "sw";
+    if (it.family === "palette") {
+      el.style.cssText = "height:110px;padding:0;flex-direction:row;overflow:hidden";
+      it.hexes.forEach(h => { const s = document.createElement("div"); s.style.cssText = "flex:1 1 0;background:" + h; el.appendChild(s); });
+      if (it.rec) { const tag = document.createElement("span"); tag.textContent = "recommended"; tag.style.cssText = "position:absolute;left:6px;bottom:4px;font-size:0.65rem;color:#fff;text-shadow:0 0 2px rgba(0,0,0,0.6)"; el.appendChild(tag); }
+    } else {
+      const hs = hslOf(it.hex);
+      el.style.background = it.hex; el.style.color = ink(it.hex); el.textContent = label({ hex: it.hex, h: hs.h, s: hs.s, l: hs.l });
+    }
+    if (othSel.has(it.id)) el.classList.add("picked");
+    el.onclick = () => { othSel.has(it.id) ? othSel.delete(it.id) : othSel.add(it.id); renderOthers(); };
+    grid.appendChild(el);
+  });
+  const k = $("othKept"); k.innerHTML = "";
+  keptOther.filter(x => x.family === othFam).forEach(x => {
+    const d = document.createElement("div");
+    d.style.cssText = "width:22px;height:22px;border-radius:2px;display:flex;overflow:hidden";
+    (x.hexes || [x.hex]).forEach(h => { const s = document.createElement("div"); s.style.cssText = "flex:1 1 0;background:" + h; d.appendChild(s); });
+    k.appendChild(d);
+  });
+}
+function keepOth() {
+  const per = FAM_PAGE[othFam];
+  famItems(othFam).slice(othPage * per, othPage * per + per).forEach(it => {
+    const yes = othSel.has(it.id), detail = { family: it.family, pid: it.id };
+    if (it.family === "palette") detail.palette = it.hexes;
+    logEvent(yes ? "keep" : "pass", it.hex, detail);
+    if (yes) keptOther.push(Object.assign({ id: it.id, family: it.family, hex: it.hex }, it.family === "palette" ? { hexes: it.hexes } : {}));
+  });
+  save(KEPT_OTH_KEY, keptOther);
+  othSel = new Set();
+  othPage = othPage + 1 < famPages(othFam) ? othPage + 1 : 0;
+  updateCounts(); renderOthers();
+}
+$("othKeepBtn").onclick = keepOth;
+$("modeOthers").onclick = () => setMode("others");
+Object.keys(FAM_NAME).forEach(f => {
+  $("oth-" + f).onchange = () => {
+    others[f] = $("oth-" + f).checked; save(OTHERS_KEY, others);
+    if (!others[f] && othFam === f) othFam = null;
+    renderOthers();
+  };
+});
+
 // ---------- start: resume the saved batch and tournament, or build a new one ----------
 if (!restoreState()) buildBatch();
 setFmt(currentFmt());
 updateCounts();
 renderPalette();
+syncOthersNav();
 setMode("sets");
 </script>
 </body>
