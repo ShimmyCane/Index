@@ -81,6 +81,20 @@
     </div>
   </section>
 
+  <!-- LOG: who had a massage or touch-up, where -->
+  <section class="panel" data-panel="log" style="margin:0 0 14px">
+    <button type="button" class="panelHead" aria-expanded="true" aria-controls="log-body">
+      <span class="panelIcon">📝</span><span class="panelTitle">Log a massage or touch-up</span><span class="panelMark">▾</span>
+    </button>
+    <div class="panelBody" id="log-body">
+      <div class="seg logSeg" data-key="logWho"><button type="button" data-v="Ying">Ying</button><button type="button" data-v="Jimmy">Jimmy</button></div>
+      <div class="seg logSeg" data-key="logKind"><button type="button" data-v="massage">Massage</button><button type="button" data-v="touch-up">Touch-up</button></div>
+      <p class="note" id="logWhere">Area: the one on the map. Technique: the one in the film.</p>
+      <div class="row"><button type="button" class="btn" id="logSave">Save log</button></div>
+      <ul class="noteList" id="logList"></ul>
+    </div>
+  </section>
+
   <!-- LEARN -->
   <section id="page-learn" class="page" hidden>
     <div id="learnList"></div>
@@ -115,6 +129,9 @@
 
   <!-- FAVOURITES -->
   <section id="page-favs" class="page" hidden>
+    <h2 class="sectionHead">Who enjoys which area</h2>
+    <p class="note">Counts from the log on this device. Massages and touch-ups for each area.</p>
+    <div id="areaSummary"></div>
     <h2 class="sectionHead" id="bodyFavTitle">Body parts</h2>
     <p class="note" id="bodyFavNote">Tap ♡ to say which body parts each person likes. Saved on this device until family sign-in is set up.</p>
     <div id="bodyFavList"></div>
